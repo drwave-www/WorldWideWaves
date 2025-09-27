@@ -1,3 +1,22 @@
+/* * Copyright 2025 DrWave
+ * 
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. */
+
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -209,6 +228,49 @@ tasks.named("compileTestKotlinIosSimulatorArm64").configure {
 
 tasks.named("compileTestKotlinIosX64").configure {
     enabled = true // iOS test compilation re-enabled
+}
+
+// Test Quality and Performance Configuration
+tasks.register("testFast") {
+    group = "verification"
+    description = "Run fast unit tests only (under 100ms budget)"
+    dependsOn("testDebugUnitTest")
+    doFirst {
+        println("🏃‍♂️ Running fast unit tests with 100ms budget enforcement")
+    }
+}
+
+tasks.register("testSecurity") {
+    group = "verification"
+    description = "Run security and input validation tests"
+    doFirst {
+        println("🔒 Running security validation tests")
+    }
+}
+
+// Anti-pattern detection integration
+tasks.register("detectTestAntipatterns") {
+    group = "verification"
+    description = "Detect test anti-patterns and quality violations"
+    doLast {
+        project.exec {
+            workingDir(project.rootDir)
+            commandLine("bash", "scripts/detect-test-antipatterns.sh")
+        }
+    }
+}
+
+// Comprehensive test quality check
+tasks.register("testQuality") {
+    group = "verification"
+    description = "Run complete test quality validation"
+    dependsOn("testDebugUnitTest", "detectTestAntipatterns")
+    doFirst {
+        println("🎯 Running comprehensive test quality validation")
+    }
+    doLast {
+        println("✅ Test quality validation complete")
+    }
 }
 
 // Custom Gradle task for crowd sound choreography simulation

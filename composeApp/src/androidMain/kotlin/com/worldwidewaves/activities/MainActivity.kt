@@ -27,83 +27,20 @@ import android.view.View
 import android.view.WindowInsets
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
-import com.worldwidewaves.compose.tabs.AboutScreen
-import com.worldwidewaves.compose.tabs.DebugScreen
-import com.worldwidewaves.compose.tabs.EventsListScreen
-import com.worldwidewaves.shared.WWWPlatform
-import com.worldwidewaves.shared.events.WWWEvents
-import com.worldwidewaves.shared.ui.TabManager
-import com.worldwidewaves.shared.ui.components.SimulationModeChip
-import com.worldwidewaves.shared.ui.components.SplashScreen
-import com.worldwidewaves.shared.ui.components.navigation.ConfigurableTabBarItem
-import com.worldwidewaves.shared.ui.theme.WorldWideWavesTheme
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
+import com.worldwidewaves.shared.ui.activities.WWWMainActivity
+import com.worldwidewaves.utils.AndroidPlatformEnabler
 import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
 
 // ----------------------------
 
 open class MainActivity : AppCompatActivity() {
-    private val eventsListScreen: EventsListScreen by inject()
-    private val aboutScreen: AboutScreen by inject()
-    private val debugScreen: DebugScreen? by inject()
-    private val events: WWWEvents by inject()
-    private val platform: WWWPlatform by inject()
-
-    /** Flag updated when `events.loadEvents()` finishes. */
-    @Volatile
-    private var isDataLoaded: Boolean = false
-
-    /** Flow observed by Compose to know when we can display main content. */
-    private val isSplashFinished = MutableStateFlow(false)
-
     /** Controls how long the *official* (system) splash stays on-screen (~10 ms). */
     private var isOfficialSplashDismissed = false
-
-    protected val tabManager by lazy {
-        val screens =
-            mutableListOf(
-                eventsListScreen,
-                aboutScreen,
-            )
-        // Debug screen removed from tab bar - will be accessed via floating icon
-
-        TabManager(
-            screens.toList(),
-        ) { isSelected, tabIndex, contentDescription ->
-            ConfigurableTabBarItem(isSelected, tabIndex, contentDescription, screens.size)
-        }
-    }
 
     // ----------------------------
 
@@ -118,9 +55,6 @@ open class MainActivity : AppCompatActivity() {
          * ------------------------------------------------------------------- */
         val splashScreen = installSplashScreen()
 
-        // Record start time to enforce minimum duration
-        val startTime = System.currentTimeMillis()
-
         /* ------------------------------------------------------------------
          * Keep the *official* splash for some time so it can show our theme
          * colours/logo, then dismiss it and let the programmatic splash take
@@ -129,7 +63,7 @@ open class MainActivity : AppCompatActivity() {
         splashScreen.setKeepOnScreenCondition {
             if (!isOfficialSplashDismissed) {
                 lifecycleScope.launch {
-                    kotlinx.coroutines.delay(com.worldwidewaves.constants.AndroidUIConstants.Timing.SPLASH_MIN_DURATION_MS)
+                    kotlinx.coroutines.delay(com.worldwidewaves.shared.WWWGlobals.Timing.SYSTEM_SPLASH_DURATION.inWholeMilliseconds)
                     isOfficialSplashDismissed = true
                 }
                 true // keep the official splash right now
@@ -161,103 +95,7 @@ open class MainActivity : AppCompatActivity() {
         }
 
         setContent {
-            WorldWideWavesTheme {
-                Surface(
-                    modifier = Modifier.background(MaterialTheme.colorScheme.background),
-                    color = MaterialTheme.colorScheme.background,
-                ) {
-                    // Box to stack main content and simulation-mode overlay
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        var showDebugScreen by remember { mutableStateOf(false) }
-
-                        val ready by isSplashFinished.collectAsState()
-                        if (ready) {
-                            if (showDebugScreen) {
-                                debugScreen?.Screen(Modifier.fillMaxSize()) ?: run {
-                                    // Fallback debug screen if injection failed
-                                    com.worldwidewaves.shared.ui.screens.SharedDebugScreen(
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                }
-                            } else {
-                                tabManager.TabView()
-                            }
-                        } else {
-                            ProgrammaticSplashScreen()
-                        }
-
-                        // -----------------------------------------------------------------
-                        //  Global Simulation-Mode chip shown whenever the mode is enabled
-                        // -----------------------------------------------------------------
-                        SimulationModeChip(platform)
-
-                        // -----------------------------------------------------------------
-                        //  Floating Debug Icon (green) - bottom right corner
-                        // -----------------------------------------------------------------
-                        // Debug logging to investigate visibility issue
-                        com.worldwidewaves.shared.utils.Log.d("MainActivity", "Debug screen status: debugScreen=${debugScreen != null}, ready=$ready")
-                        // Show debug button in debug builds even if debugScreen is null
-                        if (ready && (debugScreen != null || com.worldwidewaves.BuildConfig.DEBUG)) {
-                            // Calculate position at 15% from bottom
-                            val windowInfo = LocalWindowInfo.current
-                            val density = LocalDensity.current
-                            val screenHeight = with(density) { windowInfo.containerSize.height.toDp() }
-                            val bottomOffset = screenHeight * 0.15f
-
-                            FloatingActionButton(
-                                onClick = { showDebugScreen = !showDebugScreen },
-                                modifier =
-                                    Modifier
-                                        .align(Alignment.BottomEnd)
-                                        .padding(end = 16.dp, bottom = bottomOffset),
-                                containerColor = Color(0xFF4CAF50), // Green color
-                                shape = CircleShape,
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.BugReport,
-                                    contentDescription = "Debug Screen",
-                                    tint = Color.White,
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+            WWWMainActivity(AndroidPlatformEnabler(this)).Draw()
         }
-
-        // Begin loading events – when done, flag so splash can disappear
-        events.loadEvents(onTermination = {
-            isDataLoaded = true
-            checkSplashFinished(startTime)
-        })
-
-        // Also enforce minimum duration
-        lifecycleScope.launch {
-            kotlinx.coroutines.delay(
-                com.worldwidewaves.constants.AndroidUIConstants.Timing.SPLASH_MAX_DURATION_MS
-            ) // Timing.SPLASH_MIN_DURATION
-            checkSplashFinished(startTime)
-        }
-    }
-
-    /** Updates [isSplashFinished] once both data and min duration requirements are met. */
-    private fun checkSplashFinished(startTime: Long) {
-        val elapsed = System.currentTimeMillis() - startTime
-        if (isDataLoaded &&
-            elapsed >= com.worldwidewaves.constants.AndroidUIConstants.Timing.SPLASH_CHECK_INTERVAL_MS
-        ) { // Timing.SPLASH_MIN_DURATION.inWholeMilliseconds
-            isSplashFinished.update { true }
-        }
-    }
-
-    // ----------------------------
-
-    // -------------------------------------------------
-    // Programmatic Splash UI (mirrors previous design)
-    // -------------------------------------------------
-
-    @Composable
-    private fun ProgrammaticSplashScreen() {
-        SplashScreen()
     }
 }

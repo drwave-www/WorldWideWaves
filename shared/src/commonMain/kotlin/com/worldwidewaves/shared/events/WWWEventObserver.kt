@@ -357,7 +357,6 @@ class WWWEventObserver(
 
     fun stopObservation() {
         coroutineScopeProvider.launchDefault {
-            Log.v("stopObservation", "Stopping unified observation for event $event.id")
             try {
                 unifiedObservationJob?.cancelAndJoin()
             } catch (_: CancellationException) {

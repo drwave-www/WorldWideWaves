@@ -22,14 +22,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.ui.components.ButtonWave
-import com.worldwidewaves.shared.ui.components.SharedMapActions
-import com.worldwidewaves.shared.ui.components.WaveNavigator
+import com.worldwidewaves.shared.ui.components.MapActions
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -40,18 +36,12 @@ import kotlin.time.Instant
  */
 @OptIn(ExperimentalTime::class)
 @Composable
-fun <T> FullMapScreen(
+fun FullMapScreen(
     event: IWWWEvent,
-    eventMap: AbstractEventMap<T>,
+    eventMap: AbstractEventMap<*>?,
     modifier: Modifier = Modifier,
     onNavigateToWave: (String) -> Unit = {},
-    mapContent: @Composable (Modifier) -> Unit,
 ) {
-    val clockComponent =
-        object : KoinComponent {
-            val clock: IClock by inject()
-        }
-    val clock = clockComponent.clock
     val scope = rememberCoroutineScope()
 
     val eventStatus by event.observer.eventStatus.collectAsState()
@@ -63,31 +53,31 @@ fun <T> FullMapScreen(
 
     // Screen composition
     Box(modifier = modifier.fillMaxSize()) {
-        mapContent(Modifier.fillMaxSize())
+        eventMap?.Draw(
+            autoMapDownload = true,
+            modifier = Modifier.fillMaxSize(),
+        )
 
         ButtonWave(
             event.id,
             eventStatus,
             endDateTime,
             isInArea,
-            onNavigateToWave =
-                WaveNavigator { eventId ->
-                    onNavigateToWave(eventId)
-                },
+            onNavigateToWave = { eventId -> onNavigateToWave(eventId) },
             Modifier.align(Alignment.TopCenter).padding(top = 40.dp),
         )
 
-        SharedMapActions(
+        MapActions(
             event = event,
             modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
             onTargetWave = {
                 scope.launch {
-                    eventMap.targetUserAndWave()
+                    eventMap?.targetUserAndWave()
                 }
             },
             onCenterWave = {
                 scope.launch {
-                    eventMap.targetWave()
+                    eventMap?.targetWave()
                 }
             },
         )

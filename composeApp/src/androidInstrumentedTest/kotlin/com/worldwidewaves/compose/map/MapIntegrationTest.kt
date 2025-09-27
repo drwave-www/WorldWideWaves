@@ -36,7 +36,7 @@ import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.testing.PerformanceMonitor
 import com.worldwidewaves.testing.UITestFactory
 import com.worldwidewaves.utils.AndroidWWWLocationProvider
-import com.worldwidewaves.viewmodels.MapViewModel
+import com.worldwidewaves.viewmodels.AndroidMapViewModel
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.delay
@@ -86,7 +86,7 @@ class MapIntegrationTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private lateinit var mockMapViewModel: MapViewModel
+    private lateinit var mockMapViewModel: AndroidMapViewModel
     private lateinit var mockAndroidMapLibreAdapter: AndroidMapLibreAdapter
     private lateinit var mockLocationProvider: AndroidWWWLocationProvider
     private lateinit var mockEvent: IWWWEvent
@@ -102,7 +102,7 @@ class MapIntegrationTest {
     }
 
     private fun setupMockMapViewModel() {
-        mockMapViewModel = mockk<MapViewModel>(relaxed = true)
+        mockMapViewModel = mockk<AndroidMapViewModel>(relaxed = true)
 
         val mockStateFlow = MutableStateFlow<MapFeatureState>(MapFeatureState.NotChecked)
         every { mockMapViewModel.featureState } returns mockStateFlow
@@ -831,7 +831,9 @@ private fun TestWaveVisualization(
     onPerformanceMeasured: (Duration) -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(wavePolygons) {
-        val startMark = kotlin.time.TimeSource.Monotonic.markNow()
+        val startMark =
+            kotlin.time.TimeSource.Monotonic
+                .markNow()
         delay(50.milliseconds) // Simulate rendering time
         val renderTime = startMark.elapsedNow()
 
@@ -851,7 +853,9 @@ private fun TestWaveProgressionUpdates(
 ) {
     androidx.compose.runtime.LaunchedEffect(progressionUpdates) {
         progressionUpdates.forEach { _ ->
-            val startMark = kotlin.time.TimeSource.Monotonic.markNow()
+            val startMark =
+                kotlin.time.TimeSource.Monotonic
+                    .markNow()
             delay(10.milliseconds) // Simulate update processing
             val updateTime = startMark.elapsedNow()
             onUpdateReceived(updateTime)

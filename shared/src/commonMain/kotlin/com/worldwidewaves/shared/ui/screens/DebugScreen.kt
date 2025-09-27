@@ -47,7 +47,7 @@ import com.worldwidewaves.shared.WWWGlobals.Dimensions
  * Only visible in debug builds.
  */
 @Composable
-fun SharedDebugScreen(
+fun DebugScreen(
     modifier: Modifier = Modifier,
     @Suppress("UNUSED_PARAMETER") onPerformanceClick: () -> Unit = {},
 ) {

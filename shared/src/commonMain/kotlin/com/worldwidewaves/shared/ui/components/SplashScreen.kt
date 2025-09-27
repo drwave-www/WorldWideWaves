@@ -64,10 +64,9 @@ fun SplashScreen(modifier: Modifier = Modifier) {
             contentDescription = stringResource(MokoRes.strings.logo_description),
             modifier =
                 Modifier
-                    .width(250.dp) // Historical size
-                    .align(Alignment.BottomCenter) // Historical positioning
+                    .width(250.dp)
+                    .align(Alignment.BottomCenter)
                     .padding(bottom = Dimensions.DEFAULT_INT_PADDING.dp),
-            // Historical bottom padding
         )
     }
 }

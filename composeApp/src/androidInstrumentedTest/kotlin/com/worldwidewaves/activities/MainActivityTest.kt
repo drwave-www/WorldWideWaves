@@ -63,7 +63,9 @@ class MainActivityTest {
             // Test that splash screen is displayed for at least minimum duration
 
             // Measure start time with deterministic source
-            val startMark = kotlin.time.TimeSource.Monotonic.markNow()
+            val startMark =
+                kotlin.time.TimeSource.Monotonic
+                    .markNow()
 
             // Try to wait for splash screen to be visible, but don't fail if it's not found
             // The splash screen might finish too quickly or use a different implementation
