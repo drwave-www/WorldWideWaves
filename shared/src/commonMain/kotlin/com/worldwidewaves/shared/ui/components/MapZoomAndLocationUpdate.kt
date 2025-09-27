@@ -38,7 +38,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MapZoomAndLocationUpdate(
     event: IWWWEvent,
-    eventMap: AbstractEventMap<*>,
+    eventMap: AbstractEventMap<*>?,
 ) {
     val scope = rememberCoroutineScope()
     val progression by event.observer.progression.collectAsState()
@@ -47,7 +47,7 @@ fun MapZoomAndLocationUpdate(
     LaunchedEffect(progression, isInArea) {
         if (isInArea) {
             scope.launch {
-                eventMap.targetUserAndWave()
+                eventMap?.targetUserAndWave()
             }
         }
     }

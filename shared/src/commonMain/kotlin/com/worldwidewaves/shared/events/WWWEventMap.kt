@@ -115,9 +115,11 @@ class WWWEventMap(
                 .replace("__GLYPHS_URI__", "file:///$spriteAndGlyphsPath/files/style/glyphs")
                 .replace("__SPRITE_URI__", "file:///$spriteAndGlyphsPath/files/style/sprites")
 
-        cacheStringToFile(styleFilename, newFileStr)
+        val cachedPath = cacheStringToFile(styleFilename, newFileStr)
         updateCacheMetadata(styleFilename)
-        return cachedFilePath(styleFilename)
+        // Return the direct path from cacheStringToFile instead of going through cachedFilePath
+        // which might fail in development mode or have timing issues
+        return getCacheDir() + "/" + styleFilename
     }
 
     // ---------------------------

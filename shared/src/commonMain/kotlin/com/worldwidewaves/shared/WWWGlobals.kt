@@ -223,11 +223,17 @@ object WWWGlobals {
      * UI Timing Constants
      */
     object Timing {
-        /** Minimum duration for splash screen display */
-        val SPLASH_MIN_DURATION = 2000.milliseconds
+        /** System splash screen duration (Android 12+ splash API) - short handoff */
+        val SYSTEM_SPLASH_DURATION = 500.milliseconds
 
-        /** Maximum duration for splash screen display */
-        val SPLASH_MAX_DURATION = 2000.milliseconds
+        /** Programmatic splash minimum duration - ensures proper user experience */
+        val SPLASH_MIN_DURATION = 3000.milliseconds
+
+        /** Maximum duration for splash screen display - fallback timeout */
+        val SPLASH_MAX_DURATION = 5000.milliseconds
+
+        /** Splash screen check interval for status validation */
+        const val SPLASH_CHECK_INTERVAL_MS = 100L
 
         /** Camera animation duration for map transitions (milliseconds) */
         const val MAP_CAMERA_ANIMATION_DURATION_MS = 500

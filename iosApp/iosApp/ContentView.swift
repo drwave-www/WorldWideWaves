@@ -27,15 +27,30 @@ struct ContentView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewController {
         NSLog("📱 ContentView: makeUIViewController called")
 
-        // Initialize Koin DI (now includes Napier logging initialization)
-        HelperKt.doInitKoin()
-        NSLog("📱 ContentView: doInitKoin completed")
+        do {
+            // Initialize Koin DI with error handling
+            NSLog("📱 ContentView: About to initialize Koin DI")
+            HelperKt.doInitKoin()
+            NSLog("📱 ContentView: doInitKoin completed successfully")
 
-        // Return Compose UI - Same as Android for perfect UI parity
-        NSLog("📱 ContentView: About to call MainViewController")
-        let controller = MainViewControllerKt.MainViewController()
-        NSLog("📱 ContentView: MainViewController created successfully")
-        return controller
+            // Return Compose UI - Same as Android for perfect UI parity
+            NSLog("📱 ContentView: About to call MainViewController")
+            let controller = MainViewControllerKt.MainViewController()
+            NSLog("📱 ContentView: MainViewController created successfully")
+            return controller
+        } catch {
+            NSLog("📱 ContentView: Error during initialization: \(error)")
+            // Return a fallback UIViewController
+            let fallbackController = UIViewController()
+            fallbackController.view.backgroundColor = UIColor.red
+            let label = UILabel()
+            label.text = "iOS App Initialization Error"
+            label.textColor = UIColor.white
+            label.textAlignment = .center
+            label.frame = fallbackController.view.bounds
+            fallbackController.view.addSubview(label)
+            return fallbackController
+        }
     }
 
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {

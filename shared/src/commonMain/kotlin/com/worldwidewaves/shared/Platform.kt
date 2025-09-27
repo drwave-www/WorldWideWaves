@@ -21,6 +21,7 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
+import androidx.compose.runtime.Composable
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.position.PositionManager
 import com.worldwidewaves.shared.utils.Log
@@ -137,3 +138,14 @@ expect fun clearEventCache(eventId: String)
 expect fun isCachedFileStale(fileName: String): Boolean
 
 expect fun updateCacheMetadata(fileName: String)
+
+interface PlatformEnabler {
+    // Open an event activity / screen
+    fun openEventActivity(eventId: String)
+
+    fun openWaveActivity(eventId: String)
+
+    fun toast(message: String)
+
+    @Composable fun OpenUrl(url: String)
+}

@@ -22,53 +22,26 @@ package com.worldwidewaves.di
  */
 
 import com.worldwidewaves.BuildConfig
-import com.worldwidewaves.compose.tabs.AboutScreen
-import com.worldwidewaves.compose.tabs.DebugScreen
-import com.worldwidewaves.compose.tabs.EventsListScreen
-import com.worldwidewaves.compose.tabs.about.AboutFaqScreen
-import com.worldwidewaves.compose.tabs.about.AboutInfoScreen
-import com.worldwidewaves.shared.domain.repository.EventsRepository
-import com.worldwidewaves.shared.domain.repository.EventsRepositoryImpl
-import com.worldwidewaves.shared.domain.usecases.CheckEventFavoritesUseCase
-import com.worldwidewaves.shared.domain.usecases.FilterEventsUseCase
-import com.worldwidewaves.shared.domain.usecases.GetSortedEventsUseCase
+import com.worldwidewaves.shared.PlatformEnabler
+import com.worldwidewaves.shared.domain.usecases.IMapAvailabilityChecker
+import com.worldwidewaves.shared.ui.DebugTabScreen
 import com.worldwidewaves.shared.utils.CloseableCoroutineScope
-import com.worldwidewaves.shared.viewmodels.EventsViewModel
-import com.worldwidewaves.utils.AndroidWWWLocationProvider
 import com.worldwidewaves.shared.utils.Log
+import com.worldwidewaves.shared.viewmodels.EventsViewModel
+import com.worldwidewaves.utils.AndroidPlatformEnabler
+import com.worldwidewaves.utils.AndroidWWWLocationProvider
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.WWWSimulationEnabledLocationEngine
+import com.worldwidewaves.viewmodels.AndroidMapViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
-import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker as IMapAvailabilityChecker
 
 val applicationModule =
     module {
-        single { EventsListScreen(viewModel = get(), mapChecker = get(), setEventFavorite = get()) }
 
-        // Repository layer
-        single<EventsRepository> { EventsRepositoryImpl(get()) }
-
-        // Use cases layer
-        single { GetSortedEventsUseCase(get()) }
-        single { FilterEventsUseCase(get()) }
-        single { CheckEventFavoritesUseCase() }
-
-        viewModel {
-            EventsViewModel(
-                eventsRepository = get(),
-                getSortedEventsUseCase = get(),
-                filterEventsUseCase = get(),
-                checkEventFavoritesUseCase = get(),
-                platform = get(),
-            )
-        }
-
-        single { AboutScreen(get()) }
-        single { AboutInfoScreen() }
-        // Inject the shared WWWPlatform instance into AboutFaqScreen
-        single { AboutFaqScreen(get()) }
+        single<PlatformEnabler> { AndroidPlatformEnabler() }
+        single<IMapAvailabilityChecker> { get<MapAvailabilityChecker>() }
 
         // Map availability checker as a singleton
         single {
@@ -80,22 +53,28 @@ val applicationModule =
             }
         }
 
-        // Bind the interface to the implementation
-        single<IMapAvailabilityChecker> { get<MapAvailabilityChecker>() }
+        viewModel {
+            EventsViewModel(
+                eventsRepository = get(),
+                getSortedEventsUseCase = get(),
+                filterEventsUseCase = get(),
+                checkEventFavoritesUseCase = get(),
+                platform = get(),
+            )
+        }
 
-        // A closeable coroutine scope for cleanup
-        single { CloseableCoroutineScope() }
+        viewModel { AndroidMapViewModel(get()) }
 
         // Location engine and provider for Android
         single { WWWSimulationEnabledLocationEngine(get()) }
         factory { AndroidWWWLocationProvider() }
 
         // Debug screen - only in debug builds
-        single<DebugScreen?> {
+        single<DebugTabScreen?> {
             val isDebug = BuildConfig.DEBUG
             Log.d("ApplicationModule", "Debug screen injection: BuildConfig.DEBUG=$isDebug")
             if (isDebug) {
-                DebugScreen()
+                DebugTabScreen()
             } else {
                 null
             }

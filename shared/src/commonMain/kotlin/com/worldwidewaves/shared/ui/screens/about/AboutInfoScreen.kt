@@ -58,7 +58,7 @@ import dev.icerock.moko.resources.compose.stringResource
  * Works identically on both Android and iOS platforms.
  */
 @Composable
-fun SharedAboutInfoScreen(
+fun AboutInfoScreen(
     modifier: Modifier = Modifier,
     onUrlOpen: (String) -> Unit = { url ->
         Log.i("AboutInfoScreen", "URL click: $url")

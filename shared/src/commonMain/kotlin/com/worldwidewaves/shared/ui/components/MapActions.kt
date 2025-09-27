@@ -59,7 +59,7 @@ import kotlin.time.ExperimentalTime
  */
 @OptIn(ExperimentalTime::class)
 @Composable
-fun SharedMapActions(
+fun MapActions(
     event: IWWWEvent,
     modifier: Modifier = Modifier,
     onTargetWave: () -> Unit = {},

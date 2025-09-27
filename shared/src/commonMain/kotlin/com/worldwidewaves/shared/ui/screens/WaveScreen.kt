@@ -59,9 +59,8 @@ private const val MAP_HEIGHT_DP = 300
 @Composable
 fun WaveScreen(
     event: IWWWEvent,
-    eventMap: AbstractEventMap<*>,
+    eventMap: AbstractEventMap<*>?,
     modifier: Modifier = Modifier,
-    mapContent: @Composable (Modifier) -> Unit,
 ) {
     val clockComponent =
         object : KoinComponent {
@@ -93,7 +92,6 @@ fun WaveScreen(
         }
     }
 
-    // EXACT historical screen composition that was working
     Box(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -102,10 +100,12 @@ fun WaveScreen(
         ) {
             UserWaveStatusText(event)
 
-            mapContent(
-                Modifier
-                    .fillMaxWidth()
-                    .height(calculatedHeight),
+            eventMap?.Draw(
+                autoMapDownload = true,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(calculatedHeight),
             )
 
             WaveProgressionBar(event)

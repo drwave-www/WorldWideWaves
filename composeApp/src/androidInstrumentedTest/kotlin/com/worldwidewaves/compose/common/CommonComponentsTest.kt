@@ -48,7 +48,6 @@ import kotlin.time.ExperimentalTime
  */
 @RunWith(AndroidJUnit4::class)
 class CommonComponentsTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -62,10 +61,11 @@ class CommonComponentsTest {
         var navigationTriggered = false
         var navigatedEventId = ""
 
-        val navigator = WaveNavigator { eventId ->
-            navigationTriggered = true
-            navigatedEventId = eventId
-        }
+        val navigator =
+            WaveNavigator { eventId ->
+                navigationTriggered = true
+                navigatedEventId = eventId
+            }
 
         composeTestRule.setContent {
             WorldWideWavesTheme {
@@ -75,7 +75,7 @@ class CommonComponentsTest {
                     endDateTime = null,
                     isInArea = true,
                     onNavigateToWave = navigator,
-                    modifier = Modifier.testTag("real-button-wave")
+                    modifier = Modifier.testTag("real-button-wave"),
                 )
             }
         }
@@ -105,7 +105,7 @@ class CommonComponentsTest {
                     endDateTime = null,
                     isInArea = false, // User not in area
                     onNavigateToWave = navigator,
-                    modifier = Modifier.testTag("button-wave-not-in-area")
+                    modifier = Modifier.testTag("button-wave-not-in-area"),
                 )
             }
         }
@@ -130,7 +130,7 @@ class CommonComponentsTest {
                     endDateTime = recentEndTime,
                     isInArea = true,
                     onNavigateToWave = navigator,
-                    modifier = Modifier.testTag("button-wave-recent-ended")
+                    modifier = Modifier.testTag("button-wave-recent-ended"),
                 )
             }
         }
@@ -155,7 +155,7 @@ class CommonComponentsTest {
                     endDateTime = oldEndTime,
                     isInArea = true,
                     onNavigateToWave = navigator,
-                    modifier = Modifier.testTag("button-wave-old-ended")
+                    modifier = Modifier.testTag("button-wave-old-ended"),
                 )
             }
         }

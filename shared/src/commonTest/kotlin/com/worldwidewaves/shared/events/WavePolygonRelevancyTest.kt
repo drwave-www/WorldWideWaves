@@ -382,7 +382,9 @@ class WavePolygonRelevancyTest {
                 val performanceMeasurements = mutableListOf<Long>()
 
                 repeat(iterations) {
-                    val startTime = kotlin.time.TimeSource.Monotonic.markNow()
+                    val startTime =
+                        kotlin.time.TimeSource.Monotonic
+                            .markNow()
 
                     // Test splitting performance (most complex operation)
                     val cutLongitude =

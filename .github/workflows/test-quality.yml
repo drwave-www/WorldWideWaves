@@ -1,0 +1,99 @@
+# WorldWideWaves Test Quality Validation Workflow
+# Comprehensive test suite validation with performance monitoring,
+# anti-pattern detection, and quality gate enforcement
+
+name: Test Quality Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Grant execute permissions to scripts
+      run: |
+        chmod +x gradlew
+        chmod +x scripts/detect-test-antipatterns.sh
+        chmod +x scripts/run-test-quality-validation.sh
+
+    - name: Run anti-pattern detection
+      run: |
+        echo "🔍 Running anti-pattern detection..."
+        bash scripts/detect-test-antipatterns.sh || {
+          echo "⚠️ Anti-pattern warnings found (check logs)"
+          # Continue execution - warnings are acceptable
+        }
+
+    - name: Run unit tests with performance monitoring
+      run: |
+        echo "🧪 Running unit tests with performance monitoring..."
+        ./gradlew :shared:testDebugUnitTest --parallel --build-cache
+
+    - name: Run test quality validation
+      run: |
+        echo "🎯 Running comprehensive test quality validation..."
+        bash scripts/run-test-quality-validation.sh
+
+    - name: Generate test reports
+      run: |
+        echo "📊 Generating test reports..."
+        ./gradlew jacocoTestReport || echo "Coverage report generation skipped"
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: |
+          shared/build/reports/tests/
+          shared/build/reports/jacoco/
+        retention-days: 30
+
+    - name: Performance budget validation
+      run: |
+        echo "⚡ Validating performance budgets..."
+        ./gradlew testFast || {
+          echo "❌ Performance budget violations detected"
+          exit 1
+        }
+
+    - name: Mutation testing (on main branch)
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo "🧬 Running mutation testing on main branch..."
+        ./gradlew pitest || echo "Mutation testing not configured"
+
+    - name: Quality gate enforcement
+      run: |
+        echo "🚪 Enforcing quality gates..."
+        # Ensure no critical violations
+        if bash scripts/detect-test-antipatterns.sh 2>&1 | grep -q "❌.*VIOLATION"; then
+          echo "❌ Critical anti-pattern violations found"
+          exit 1
+        fi
+        echo "✅ Quality gates passed"

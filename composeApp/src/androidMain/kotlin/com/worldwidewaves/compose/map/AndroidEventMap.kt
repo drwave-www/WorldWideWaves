@@ -74,6 +74,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.R
+import com.worldwidewaves.activities.event.EventFullMapActivity
 import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Timing
@@ -92,7 +93,7 @@ import com.worldwidewaves.utils.AndroidWWWLocationProvider
 import com.worldwidewaves.utils.CheckGPSEnable
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.requestLocationPermission
-import com.worldwidewaves.viewmodels.MapViewModel
+import com.worldwidewaves.viewmodels.AndroidMapViewModel
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -139,7 +140,6 @@ class AndroidEventMap(
     private val context: AppCompatActivity, // MANDATORY - required for wave layer UI thread operations
     private val onMapLoaded: () -> Unit = {},
     onLocationUpdate: (Position) -> Unit = {},
-    private val onMapClick: (() -> Unit)? = null,
     mapConfig: EventMapConfig = EventMapConfig(),
 ) : AbstractEventMap<MapLibreMap>(event, mapConfig, onLocationUpdate),
     KoinComponent {
@@ -172,8 +172,8 @@ class AndroidEventMap(
      * The Compose UI for the map
      */
     @Composable
-    fun Screen(
-        autoMapDownload: Boolean = false,
+    override fun Draw(
+        autoMapDownload: Boolean,
         modifier: Modifier,
     ) {
         Log.i(TAG, "Screen composable entered: eventId=${event.id}, autoMapDownload=$autoMapDownload")
@@ -196,7 +196,7 @@ class AndroidEventMap(
         val mapLibreView: MapView =
             rememberMapLibreViewWithLifecycle(key = "${event.id}-$isMapAvailable")
 
-        val mapViewModel: MapViewModel = viewModel()
+        val mapViewModel: AndroidMapViewModel = viewModel()
         val mapFeatureState by mapViewModel.featureState.collectAsState()
 
         // Check if map is downloaded
@@ -505,22 +505,31 @@ class AndroidEventMap(
         scope.launch {
             withContext(Dispatchers.IO) {
                 // IO actions
+                Log.e(TAG, "🔥 STARTING STYLE RESOLUTION RETRY LOOP for event: ${event.id}")
                 var stylePath: String? = null
                 var attempts = 0
+                var styleResolved = false
+
                 repeat(MAX_STYLE_RESOLUTION_ATTEMPTS) { attempt ->
+                    if (styleResolved) return@repeat // Skip if already resolved
+
                     attempts = attempt + 1
                     val candidate = event.map.getStyleUri()
-                    if (candidate != null && File(candidate).exists()) {
+                    val fileExists = candidate?.let { File(it).exists() } ?: false
+
+                    Log.d(TAG, "Style resolution attempt $attempts: candidate='$candidate', exists=$fileExists")
+
+                    if (candidate != null && fileExists) {
                         Log.i(TAG, "Style URI resolved: $candidate")
                         stylePath = candidate
+                        styleResolved = true // Set flag to stop processing
                         return@repeat
                     }
 
-                    if (attempt == MAX_STYLE_RESOLUTION_ATTEMPTS - 1) { // Log warning only on last attempts
+                    if (attempt == MAX_STYLE_RESOLUTION_ATTEMPTS - 1) {
                         Log.w(TAG, "Style URI resolution attempts: $attempts, retrying...")
                     }
 
-                    // Give Play-Core/asset manager time to expose freshly installed split assets
                     delay(STYLE_RESOLUTION_DELAY_MS)
                 }
 
@@ -557,7 +566,11 @@ class AndroidEventMap(
                                     onMapLoaded()
                                 },
                                 onMapClick = { _, _ ->
-                                    onMapClick?.invoke()
+                                    context.startActivity(
+                                        Intent(context, EventFullMapActivity::class.java).apply {
+                                            putExtra("eventId", event.id)
+                                        },
+                                    )
                                 },
                             )
                         }

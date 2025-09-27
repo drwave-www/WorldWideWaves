@@ -135,7 +135,9 @@ class PerformanceMemoryTest : BaseIntegrationTest() {
             val performanceMonitor = mockPerformanceMonitor
             val taskManager = createMockTaskManager()
 
-            val startMark = kotlin.time.TimeSource.Monotonic.markNow()
+            val startMark =
+                kotlin.time.TimeSource.Monotonic
+                    .markNow()
 
             val task1 = taskManager.executeAsync("data-fetch", 1000)
             val task2 = taskManager.executeAsync("image-processing", 800)
@@ -274,7 +276,9 @@ class PerformanceMemoryTest : BaseIntegrationTest() {
         onRenderComplete: (Long) -> Unit,
     ) {
         LaunchedEffect(locations) {
-            val startMark = kotlin.time.TimeSource.Monotonic.markNow()
+            val startMark =
+                kotlin.time.TimeSource.Monotonic
+                    .markNow()
             delay(100)
             val renderTime = startMark.elapsedNow().inWholeMilliseconds
             onRenderComplete(renderTime)

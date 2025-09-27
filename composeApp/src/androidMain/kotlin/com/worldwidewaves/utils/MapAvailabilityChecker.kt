@@ -28,12 +28,13 @@ import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
 import com.worldwidewaves.shared.clearEventCache
+import com.worldwidewaves.shared.clearUnavailableGeoJsonCache
+import com.worldwidewaves.shared.domain.usecases.IMapAvailabilityChecker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.resume
-import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker as IMapAvailabilityChecker
 
 /**
  * A utility class for checking and monitoring the availability of map feature modules.
@@ -54,7 +55,7 @@ class MapAvailabilityChecker(
     private val _mapStates = MutableStateFlow<Map<String, Boolean>>(emptyMap())
 
     // Public state flow that can be observed
-    val mapStates: StateFlow<Map<String, Boolean>> = _mapStates
+    override val mapStates: StateFlow<Map<String, Boolean>> = _mapStates
 
     // Cache of queried map IDs to avoid unnecessary checks
     private val queriedMaps = ConcurrentHashMap.newKeySet<String>()
@@ -87,6 +88,8 @@ class MapAvailabilityChecker(
                         // visible again without requiring an app restart.
                         state.moduleNames()?.forEach { id ->
                             forcedUnavailable.remove(id)
+                            // Clear the session cache for newly installed maps
+                            clearUnavailableGeoJsonCache(id)
                         }
                         refreshAvailability()
                     }
@@ -151,7 +154,7 @@ class MapAvailabilityChecker(
     /**
      * Track multiple map IDs at once.
      */
-    fun trackMaps(mapIds: Collection<String>) {
+    override fun trackMaps(mapIds: Collection<String>) {
         queriedMaps.addAll(mapIds)
         // Don't refresh here - caller should call refreshAvailability() if needed
         Log.d(TAG, "trackMaps added=${mapIds.joinToString()} totalTracked=${queriedMaps.size}")
