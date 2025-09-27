@@ -161,9 +161,13 @@ class DefaultCoroutineScopeProvider(
 
     override fun scopeDefault(): CoroutineScope = defaultScope
 
-    override suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T): T = withContext(ioDispatcher) { block() }
+    override suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T): T =
+        withContext(ioDispatcher + exceptionHandler) { block() }
 
-    override suspend fun <T> withDefaultContext(block: suspend CoroutineScope.() -> T): T = withContext(defaultDispatcher) { block() }
+    override suspend fun <T> withDefaultContext(block: suspend CoroutineScope.() -> T): T =
+        withContext(defaultDispatcher + exceptionHandler) {
+            block()
+        }
 
     override fun cancelAllCoroutines() {
         supervisorJob.cancel()
