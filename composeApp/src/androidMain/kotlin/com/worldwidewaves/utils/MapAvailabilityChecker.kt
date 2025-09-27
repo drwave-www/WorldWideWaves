@@ -28,6 +28,7 @@ import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
 import com.worldwidewaves.shared.clearEventCache
+import com.worldwidewaves.shared.clearUnavailableGeoJsonCache
 import com.worldwidewaves.shared.domain.usecases.IMapAvailabilityChecker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -87,6 +88,8 @@ class MapAvailabilityChecker(
                         // visible again without requiring an app restart.
                         state.moduleNames()?.forEach { id ->
                             forcedUnavailable.remove(id)
+                            // Clear the session cache for newly installed maps
+                            clearUnavailableGeoJsonCache(id)
                         }
                         refreshAvailability()
                     }

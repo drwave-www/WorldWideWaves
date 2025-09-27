@@ -42,6 +42,14 @@ import java.util.concurrent.ConcurrentHashMap
 // Session cache to remember unavailable geojson within the same app session
 private val unavailableGeoJsonCache = ConcurrentHashMap.newKeySet<String>()
 
+/**
+ * Clear the unavailable cache for a specific event when a map is downloaded
+ */
+fun clearUnavailableGeoJsonCache(eventId: String) {
+    unavailableGeoJsonCache.remove(eventId)
+    Log.d("clearUnavailableGeoJsonCache", "Cleared cache for event $eventId")
+}
+
 actual suspend fun readGeoJson(eventId: String): String? {
     // Quick session cache check to avoid repeated calls for known unavailable maps
     if (unavailableGeoJsonCache.contains(eventId)) {
