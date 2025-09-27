@@ -24,6 +24,7 @@ package com.worldwidewaves.shared.ui.components.event
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.ui.components.WWWSocialNetworks
 
 /**
  * Shared WWWEventSocialNetworks component - EXACT replica of original Android implementation.

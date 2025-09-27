@@ -116,6 +116,8 @@ object WWWGlobals {
         /** Standard sample rate for audio generation (Hz) */
         const val STANDARD_SAMPLE_RATE = 44100
 
+        const val BITS_PER_SAMPLE_8BIT = 8
+
         /** Default bits per sample for audio */
         const val DEFAULT_BITS_PER_SAMPLE = 16
 

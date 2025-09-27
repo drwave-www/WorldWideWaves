@@ -50,8 +50,8 @@ import com.worldwidewaves.shared.ui.AboutTabScreen
 import com.worldwidewaves.shared.ui.DebugTabScreen
 import com.worldwidewaves.shared.ui.EventsListScreen
 import com.worldwidewaves.shared.ui.TabManager
-import com.worldwidewaves.shared.ui.components.SimulationModeChip
-import com.worldwidewaves.shared.ui.components.SplashScreen
+import com.worldwidewaves.shared.ui.components.global.SimulationModeChip
+import com.worldwidewaves.shared.ui.components.global.SplashScreen
 import com.worldwidewaves.shared.ui.components.navigation.ConfigurableTabBarItem
 import com.worldwidewaves.shared.ui.screens.DebugScreen
 import com.worldwidewaves.shared.ui.theme.WorldWideWavesTheme

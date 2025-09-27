@@ -71,8 +71,8 @@ import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.downloaded_icon
 import com.worldwidewaves.shared.generated.resources.favorite_off
 import com.worldwidewaves.shared.generated.resources.favorite_on
-import com.worldwidewaves.shared.ui.components.EventOverlayDone
-import com.worldwidewaves.shared.ui.components.EventOverlaySoonOrRunning
+import com.worldwidewaves.shared.ui.components.event.EventOverlayDone
+import com.worldwidewaves.shared.ui.components.event.EventOverlaySoonOrRunning
 import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedExtendedLight
 import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredBoldTextStyle
@@ -110,7 +110,7 @@ data class EventsFilterCallbacks(
 )
 
 @Composable
-fun EventsListScreen(
+fun EventsScreen(
     events: List<IWWWEvent>,
     mapStates: Map<String, Boolean> = emptyMap(),
     onEventClick: (String) -> Unit = {},
@@ -394,6 +394,7 @@ private fun EventOverlay(
         }
 
         EventOverlayCountryAndCommunityFlags(event, heightModifier)
+
         EventOverlaySoonOrRunning(eventStatus)
         EventOverlayDone(eventStatus)
         EventOverlayMapDownloaded(event.id, isMapInstalled)

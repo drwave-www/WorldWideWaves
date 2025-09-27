@@ -26,6 +26,13 @@ import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.map.MapFeatureState
+import com.worldwidewaves.shared.ui.components.event.EventNumbers
+import com.worldwidewaves.shared.ui.components.event.EventOverlay
+import com.worldwidewaves.shared.ui.components.event.NotifyAreaUserPosition
+import com.worldwidewaves.shared.ui.components.event.WWWEventSocialNetworks
+import com.worldwidewaves.shared.ui.components.shared.ButtonWave
+import com.worldwidewaves.shared.ui.components.shared.SimulationButton
+import com.worldwidewaves.shared.ui.components.shared.WaveNavigator
 import com.worldwidewaves.shared.ui.utils.rememberEventState
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject

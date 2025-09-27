@@ -58,9 +58,9 @@ import com.worldwidewaves.shared.WWWGlobals.FAQ
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.faq_contents
 import com.worldwidewaves.shared.rules_hierarchy
-import com.worldwidewaves.shared.ui.components.AboutDividerLine
-import com.worldwidewaves.shared.ui.components.AboutWWWLogo
-import com.worldwidewaves.shared.ui.components.AboutWWWSocialNetworks
+import com.worldwidewaves.shared.ui.components.about.AboutDividerLine
+import com.worldwidewaves.shared.ui.components.about.AboutWWWLogo
+import com.worldwidewaves.shared.ui.components.about.AboutWWWSocialNetworks
 import com.worldwidewaves.shared.ui.theme.sharedCommonBoldStyle
 import com.worldwidewaves.shared.ui.theme.sharedCommonJustifiedTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
