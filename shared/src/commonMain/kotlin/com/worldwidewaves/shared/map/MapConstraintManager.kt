@@ -101,10 +101,8 @@ class MapConstraintManager(
 
             // Apply bounds & min-zoom to the map – no immediate camera move
             mapLibreAdapter.setBoundsForCameraTarget(paddedBounds)
-
-            // Set minimum zoom to current zoom level to prevent zooming out beyond constrained view
-            val currentZoom = mapLibreAdapter.currentZoom.value
-            mapLibreAdapter.setMinZoomPreference(currentZoom)
+            val minZoom = mapLibreAdapter.getMinZoomLevel()
+            mapLibreAdapter.setMinZoomPreference(minZoom)
         } catch (e: Exception) {
             Napier.e("Error applying constraints: ${e.message}")
         }
