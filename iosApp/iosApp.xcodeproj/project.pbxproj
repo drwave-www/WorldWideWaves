@@ -214,7 +214,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "echo \"Building Kotlin framework for iOS...\"\ncd ..\n./gradlew :shared:linkDebugFrameworkIosSimulatorArm64\n./gradlew :shared:linkDebugFrameworkIosArm64\n";
+			shellScript = "echo \"Building Kotlin framework for iOS...\"\ncd ..\n./gradlew :shared:copyResourcesDebugFrameworkIosSimulatorArm64\n./gradlew :shared:copyResourcesDebugFrameworkIosArm64\n./gradlew :shared:linkDebugFrameworkIosSimulatorArm64\n./gradlew :shared:linkDebugFrameworkIosArm64\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

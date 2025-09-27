@@ -48,6 +48,7 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.ic_arrow_back
+import com.worldwidewaves.shared.sound.GlobalSoundChoreographyManager
 import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
 import dev.icerock.moko.resources.compose.stringResource
@@ -72,6 +73,7 @@ abstract class WWWAbstractEventBackActivity(
     protected open val isScrollable: Boolean = true
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val wwwEvents: WWWEvents by inject()
+    private val globalSoundChoreography: GlobalSoundChoreographyManager by inject()
     private var selectedEvent by mutableStateOf<IWWWEvent?>(null)
     private var onFinish by mutableStateOf<(() -> Unit)?>(null)
     private val waitingHandlers: MutableList<(IWWWEvent) -> Unit> = mutableListOf()
@@ -117,11 +119,35 @@ abstract class WWWAbstractEventBackActivity(
             false // Back press was not handled
         }
 
+    /**
+     * Handle app going to background - should be called from activity's onPause()
+     */
+    open fun onPause() {
+        globalSoundChoreography.pause()
+    }
+
+    /**
+     * Handle app coming to foreground - should be called from activity's onResume()
+     */
+    open fun onResume() {
+        globalSoundChoreography.resume()
+    }
+
+    /**
+     * Handle activity destruction - should be called from activity's onDestroy()
+     */
+    open fun onDestroy() {
+        globalSoundChoreography.stopObserving()
+    }
+
     private fun setEvent(event: IWWWEvent?) {
         if (event != null) {
             selectedEvent = event
             waitingHandlers.forEach { it(event) }
             waitingHandlers.clear() // Clear the handlers after calling them
+
+            // Start global sound choreography observation for this event
+            globalSoundChoreography.startObserving(event)
         }
     }
 

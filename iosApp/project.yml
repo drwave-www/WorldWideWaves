@@ -34,6 +34,8 @@ targets:
         script: |
           echo "Building Kotlin framework for iOS..."
           cd ..
+          ./gradlew :shared:copyResourcesDebugFrameworkIosSimulatorArm64
+          ./gradlew :shared:copyResourcesDebugFrameworkIosArm64
           ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
           ./gradlew :shared:linkDebugFrameworkIosArm64
         embed: false
