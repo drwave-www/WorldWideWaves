@@ -148,13 +148,17 @@ object MidiParser {
     /**
      * Parse a MIDI file into a MidiTrack
      */
-    suspend fun parseMidiFile(midiResourcePath: String): MidiTrack =
+    suspend fun parseMidiFile(midiResourcePath: String): MidiTrack? =
         try {
+            Log.d("MidiParser", "Loading MIDI file: $midiResourcePath")
             val midiBytes = MidiResources.readMidiFile(midiResourcePath)
-            parseMidiBytes(midiBytes)
+            val track = parseMidiBytes(midiBytes)
+            Log.d("MidiParser", "Successfully parsed MIDI file: $midiResourcePath")
+            track
         } catch (e: Exception) {
-            Log.e("MidiParser", "Failed to parse MIDI file: ${e.message}")
-            throw e
+            Log.e("MidiParser", "Failed to parse MIDI file $midiResourcePath: ${e.message}")
+            // Return null instead of crashing to allow graceful degradation
+            null
         }
 
     // ------------------------------------------------------------------------

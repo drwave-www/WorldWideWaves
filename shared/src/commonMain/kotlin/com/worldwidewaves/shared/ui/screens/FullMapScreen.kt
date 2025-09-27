@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.map.AbstractEventMap
-import com.worldwidewaves.shared.ui.components.ButtonWave
-import com.worldwidewaves.shared.ui.components.MapActions
+import com.worldwidewaves.shared.ui.components.shared.ButtonWave
+import com.worldwidewaves.shared.ui.components.shared.MapActions
 import kotlinx.coroutines.launch
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -72,12 +72,14 @@ fun FullMapScreen(
             modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
             onTargetWave = {
                 scope.launch {
-                    eventMap?.targetUserAndWave()
+                    eventMap?.markUserInteracted()
+                    eventMap?.targetWave()
                 }
             },
-            onCenterWave = {
+            onTargetUser = {
                 scope.launch {
-                    eventMap?.targetWave()
+                    eventMap?.markUserInteracted()
+                    eventMap?.targetUser()
                 }
             },
         )

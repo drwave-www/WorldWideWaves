@@ -27,14 +27,12 @@ import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.EventsConfigurationProvider
 import com.worldwidewaves.shared.events.utils.EventsDecoder
 import com.worldwidewaves.shared.utils.Log
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.jvm.JvmOverloads
@@ -115,35 +113,74 @@ class WWWEvents : KoinComponent {
     private fun loadEventsJob() =
         coroutineScopeProvider.launchIO {
             try {
-                val eventsJsonString = eventsConfigurationProvider.geoEventsConfiguration()
-                val events = eventsDecoder.decodeFromJson(eventsJsonString)
-                val validatedEvents = confValidationErrors(events)
+                Log.i("WWWEvents.loadEventsJob", "=== STARTING loadEventsJob() ===")
+                Log.i("WWWEvents.loadEventsJob", "Calling eventsConfigurationProvider.geoEventsConfiguration()...")
+
+                val eventsJsonString: String = eventsConfigurationProvider.geoEventsConfiguration()
+                Log.i("WWWEvents.loadEventsJob", "Received JSON string: ${eventsJsonString.length} characters")
+                Log.i("WWWEvents.loadEventsJob", "JSON preview: ${eventsJsonString.take(200)}")
+
+                Log.i("WWWEvents.loadEventsJob", "Decoding JSON to events...")
+                val events: List<IWWWEvent> = eventsDecoder.decodeFromJson(eventsJsonString)
+                Log.i("WWWEvents.loadEventsJob", "Successfully decoded ${events.size} events")
+                Log.i("WWWEvents.loadEventsJob", "Running validation on decoded events...")
+
+                // Restore proper validation but with error handling
+                val validatedEvents =
+                    try {
+                        confValidationErrors(events)
+                    } catch (e: Exception) {
+                        Log.e("WWWEvents.loadEventsJob", "Error during validation: ${e.message}")
+                        // Fall back to no validation if validation itself crashes
+                        events.associateWith { null }
+                    }
 
                 validatedEvents
                     .filterValues { it?.isNotEmpty() == true } // Log validation errors
                     .forEach { (event, errors) ->
-                        Log.e(::WWWEvents.name, "Validation Errors for Event ID: ${event.id}")
+                        Log.e("WWWEvents.loadEventsJob", "Validation Errors for Event ID: ${event.id}")
                         errors?.forEach { errorMessage ->
-                            Log.e(::WWWEvents.name, errorMessage)
+                            Log.e("WWWEvents.loadEventsJob", errorMessage)
                         }
                         validationErrors.add(event to errors!!)
                     }
 
-                // Filter out invalid events
+                // Filter out invalid events and initialize favorites
                 val validEvents =
                     validatedEvents
                         .filterValues { it.isNullOrEmpty() }
                         .keys
-                        .onEach { initFavoriteEvent.call(it) } // Initialize favorite status
-                        .toList()
+                        .onEach {
+                            try {
+                                initFavoriteEvent.call(it)
+                                Log.d("WWWEvents.loadEventsJob", "Initialized favorite for event: ${it.id}")
+                            } catch (e: Exception) {
+                                Log.e("WWWEvents.loadEventsJob", "Error initializing favorite for event ${it.id}: ${e.message}")
+                            }
+                        }.toList()
 
-                // Update the _eventsFlow in the main dispatcher to ensure thread safety
-                withContext(Dispatchers.Main) {
+                Log.i("WWWEvents.loadEventsJob", "After validation: ${validEvents.size} valid events out of ${events.size} total")
+
+                Log.i("WWWEvents.loadEventsJob", "About to update events flow with ${validEvents.size} events")
+
+                // Update the _eventsFlow directly (StateFlow is thread-safe)
+                try {
                     _eventsFlow.value = validEvents
+                    Log.i("WWWEvents.loadEventsJob", "Successfully updated events flow")
+                } catch (e: Exception) {
+                    Log.e("WWWEvents.loadEventsJob", "Error updating events flow: ${e.message}")
+                    throw e
                 }
 
+                Log.i("WWWEvents.loadEventsJob", "About to call onEventsLoaded()")
                 // The events have been loaded, so we can now call any pending callbacks
-                onEventsLoaded()
+                try {
+                    onEventsLoaded()
+                    Log.i("WWWEvents.loadEventsJob", "Successfully called onEventsLoaded()")
+                } catch (e: Exception) {
+                    Log.e("WWWEvents.loadEventsJob", "Error in onEventsLoaded(): ${e.message}")
+                    throw e
+                }
             } catch (e: Exception) {
                 Log.e(::WWWEvents.name, "Unexpected error loading events: ${e.message}", e)
                 onLoadingError(e)
@@ -171,8 +208,17 @@ class WWWEvents : KoinComponent {
 
     @VisibleForTesting
     fun onEventsLoaded() {
+        Log.i(::WWWEvents.name, "Events loaded successfully. Calling ${pendingLoadedCallbacks.size} pending callbacks")
         eventsLoaded = true
-        pendingLoadedCallbacks.onEach { callback -> callback.invoke() }.clear()
+        pendingLoadedCallbacks
+            .onEach { callback ->
+                try {
+                    callback.invoke()
+                    Log.d(::WWWEvents.name, "Successfully called events loaded callback")
+                } catch (e: Exception) {
+                    Log.e(::WWWEvents.name, "Error calling events loaded callback: ${e.message}", e)
+                }
+            }.clear()
     }
 
     @VisibleForTesting
@@ -219,7 +265,6 @@ class WWWEvents : KoinComponent {
         coroutineScopeProvider.launchDefault {
             list().forEach { event ->
                 try {
-                    Log.d("WWWEvents", "Simulation change - Restarting observer for event ${event.id}")
                     event.observer.stopObservation()
                     event.observer.startObservation()
                 } catch (e: Exception) {

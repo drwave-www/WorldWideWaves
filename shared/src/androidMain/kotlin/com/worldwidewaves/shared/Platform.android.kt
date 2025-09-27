@@ -47,6 +47,17 @@ private val unavailableGeoJsonCache = ConcurrentHashMap.newKeySet<String>()
  */
 fun clearUnavailableGeoJsonCache(eventId: String) {
     unavailableGeoJsonCache.remove(eventId)
+
+    // Also invalidate GeoJSON cache in memory to force fresh load
+    try {
+        val geoJsonProvider: com.worldwidewaves.shared.events.utils.GeoJsonDataProvider by inject(
+            com.worldwidewaves.shared.events.utils.GeoJsonDataProvider::class.java,
+        )
+        geoJsonProvider.invalidateCache(eventId)
+    } catch (e: Exception) {
+        Log.w("clearUnavailableGeoJsonCache", "Failed to invalidate GeoJSON cache for $eventId: ${e.message}")
+    }
+
     Log.d("clearUnavailableGeoJsonCache", "Cleared cache for event $eventId")
 }
 
@@ -344,6 +355,16 @@ actual fun getCacheDir(): String {
 actual fun clearEventCache(eventId: String) {
     val context: Context by inject(Context::class.java)
     val cacheDir = context.cacheDir
+
+    // Also invalidate GeoJSON cache in memory
+    try {
+        val geoJsonProvider: com.worldwidewaves.shared.events.utils.GeoJsonDataProvider by inject(
+            com.worldwidewaves.shared.events.utils.GeoJsonDataProvider::class.java,
+        )
+        geoJsonProvider.invalidateCache(eventId)
+    } catch (e: Exception) {
+        Log.w(::clearEventCache.name, "Failed to invalidate GeoJSON cache for $eventId: ${e.message}")
+    }
 
     val targets =
         listOf(

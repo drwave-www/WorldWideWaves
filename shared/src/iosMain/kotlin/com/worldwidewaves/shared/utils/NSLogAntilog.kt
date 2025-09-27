@@ -33,7 +33,11 @@ internal class OSLogAntilog : Antilog() {
     ) {
         val lvl = priority.name
         val tagOr = tag ?: "LOG"
+        val msg = message ?: "no message"
         val err = throwable?.let { " | ${it::class.simpleName}: ${it.message}" } ?: ""
-        platform.Foundation.NSLog("%@ %@: %@%@", lvl, tagOr, message ?: "no message", err)
+
+        // Safe NSLog call - avoid format string issues by using %s for all string content
+        val logMessage = "$lvl $tagOr: $msg$err"
+        platform.Foundation.NSLog("%s", logMessage)
     }
 }

@@ -25,10 +25,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.map.AbstractEventMap
-import kotlinx.coroutines.launch
 
 /**
  * Shared map zoom and location update component.
@@ -40,15 +38,12 @@ fun MapZoomAndLocationUpdate(
     event: IWWWEvent,
     eventMap: AbstractEventMap<*>?,
 ) {
-    val scope = rememberCoroutineScope()
     val progression by event.observer.progression.collectAsState()
     val isInArea by event.observer.userIsInArea.collectAsState()
 
     LaunchedEffect(progression, isInArea) {
         if (isInArea) {
-            scope.launch {
-                eventMap?.targetUserAndWave()
-            }
+            eventMap?.targetUserAndWave()
         }
     }
 }

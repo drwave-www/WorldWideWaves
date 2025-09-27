@@ -33,7 +33,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.domain.usecases.IMapAvailabilityChecker
-import com.worldwidewaves.shared.ui.screens.EventsListScreen
+import com.worldwidewaves.shared.ui.screens.EventsScreen
 import com.worldwidewaves.shared.viewmodels.EventsViewModel
 import org.koin.core.component.KoinComponent
 
@@ -81,7 +81,7 @@ class EventsListScreen(
         }
 
         // Use shared EventsListScreen for perfect UI parity
-        EventsListScreen(
+        EventsScreen(
             events = events,
             mapStates = mapStates,
             onEventClick = { eventId -> platformEnabler.openEventActivity(eventId) },

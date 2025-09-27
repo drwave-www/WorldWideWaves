@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared.ui.components
+package com.worldwidewaves.shared.ui.components.about
 
 /*
  * Copyright 2025 DrWave
@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.www_logo_transparent
+import com.worldwidewaves.shared.ui.components.WWWSocialNetworks
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 import org.jetbrains.compose.resources.painterResource

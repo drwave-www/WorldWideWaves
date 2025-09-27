@@ -259,10 +259,6 @@ class WWWEventObserver(
 
     // ---------------------------
 
-    init {
-        startObservation()
-    }
-
     /**
      * Starts observing the wave event if not already started.
      *
@@ -299,32 +295,54 @@ class WWWEventObserver(
                             .catch { e ->
                                 Log.e("WWWEventObserver", "Error in unified observation flow for event ${event.id}: $e")
                             }.onEach { observation ->
-                                updateStates(observation.progression, observation.status)
+                                try {
+                                    updateStates(observation.progression, observation.status)
+                                } catch (e: Exception) {
+                                    Log.e("WWWEventObserver", "Error updating states for event ${event.id}: $e")
+                                }
                             }.launchIn(coroutineScopeProvider.scopeDefault())
 
                     // Use the dedicated position observer to handle position changes and area detection
                     val positionObserverJob =
                         positionObserver
                             .observePositionForEvent(event)
-                            .onEach { observation ->
-                                _userIsInArea.updateIfChanged(observation.isInArea)
+                            .catch { e ->
+                                Log.e("WWWEventObserver", "Error in position observation for event ${event.id}: $e")
+                            }.onEach { observation ->
+                                try {
+                                    _userIsInArea.updateIfChanged(observation.isInArea)
+                                } catch (e: Exception) {
+                                    Log.e("WWWEventObserver", "Error updating user area status for event ${event.id}: $e")
+                                }
                             }.launchIn(coroutineScopeProvider.scopeDefault())
 
                     // Add immediate position change observer for backward compatibility and immediate response
                     val directPositionObserverJob =
                         positionManager.position
-                            .onEach { _ ->
-                                Log.v("WWWEventObserver", "Direct position changed, updating area detection for event ${event.id}")
-                                updateAreaDetection()
+                            .catch { e ->
+                                Log.e("WWWEventObserver", "Error in direct position observation for event ${event.id}: $e")
+                            }.onEach { _ ->
+                                try {
+                                    Log.v("WWWEventObserver", "Direct position changed, updating area detection for event ${event.id}")
+                                    updateAreaDetection()
+                                } catch (e: Exception) {
+                                    Log.e("WWWEventObserver", "Error in updateAreaDetection for event ${event.id}: $e")
+                                }
                             }.launchIn(coroutineScopeProvider.scopeDefault())
 
                     // Add polygon loading observer to trigger area detection when polygon data becomes available
                     val polygonLoadingJob =
                         event.area.polygonsLoaded
-                            .onEach { isLoaded ->
-                                if (isLoaded) {
-                                    Log.v("WWWEventObserver", "Polygons loaded, updating area detection for event ${event.id}")
-                                    updateAreaDetection()
+                            .catch { e ->
+                                Log.e("WWWEventObserver", "Error in polygon loading observation for event ${event.id}: $e")
+                            }.onEach { isLoaded ->
+                                try {
+                                    if (isLoaded) {
+                                        Log.v("WWWEventObserver", "Polygons loaded, updating area detection for event ${event.id}")
+                                        updateAreaDetection()
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e("WWWEventObserver", "Error in polygon loading handler for event ${event.id}: $e")
                                 }
                             }.launchIn(coroutineScopeProvider.scopeDefault())
 
@@ -350,8 +368,6 @@ class WWWEventObserver(
                     }
                 }
             }
-        } else {
-            Log.v("WWWEventObserver", "Unified observation already running for event ${event.id}")
         }
     }
 
@@ -384,7 +400,11 @@ class WWWEventObserver(
             periodicObservation
         }.onEach { _ ->
             // Ensure area detection is called on every unified observation update for immediate response
-            updateAreaDetection()
+            try {
+                updateAreaDetection()
+            } catch (e: Exception) {
+                Log.e("WWWEventObserver", "Error in area detection from unified flow for event ${event.id}: $e")
+            }
         }
 
     /**
@@ -407,7 +427,13 @@ class WWWEventObserver(
                             0.0
                         }
 
-                    val status = event.getStatus()
+                    val status =
+                        try {
+                            event.getStatus()
+                        } catch (e: Exception) {
+                            Log.e("WWWEventObserver", "Error getting event status for event ${event.id}: $e")
+                            Status.UNDEFINED
+                        }
                     val eventObservation = EventObservation(progression, status)
                     send(eventObservation)
                 }
@@ -509,14 +535,6 @@ class WWWEventObserver(
             updatePositionRatioIfSignificant(calculatedState.userPositionRatio)
             updateTimeBeforeHitIfSignificant(calculatedState.timeBeforeHit)
             _hitDateTime.updateIfChanged(calculatedState.hitDateTime)
-
-            // Log debug information for choreo debugging
-            if (calculatedState.userIsGoingToBeHit) {
-                Log.v(
-                    "WWWEventObserver",
-                    "[CHOREO_DEBUG] Setting userIsGoingToBeHit=true for event ${event.id}, timeBeforeHit=${calculatedState.timeBeforeHit}",
-                )
-            }
         } catch (e: Exception) {
             Log.e("WWWEventObserver", "Error calculating event state: $e")
             // Fall back to basic state updates for safety

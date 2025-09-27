@@ -76,7 +76,6 @@ class DefaultWaveProgressionTracker(
             val polygons = waveArea.getPolygons()
 
             if (polygons.isEmpty()) {
-                Log.v("WaveProgressionTracker", "No polygons available for area detection")
                 return false
             }
 

@@ -29,23 +29,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.ui.components.MapZoomAndLocationUpdate
-import com.worldwidewaves.shared.ui.components.choreographies.WorkingWaveChoreographies
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import com.worldwidewaves.shared.ui.components.wave.UserWaveStatusText
+import com.worldwidewaves.shared.ui.components.wave.WaveHitCounter
+import com.worldwidewaves.shared.ui.components.wave.WaveProgressionBar
+import com.worldwidewaves.shared.ui.components.wave.choreographies.WaveChoreographies
 import kotlin.time.ExperimentalTime
 
 // Constants
@@ -62,35 +56,11 @@ fun WaveScreen(
     eventMap: AbstractEventMap<*>?,
     modifier: Modifier = Modifier,
 ) {
-    val clockComponent =
-        object : KoinComponent {
-            val clock: IClock by inject()
-        }
-    val clock = clockComponent.clock
-
     // Start event/map coordination and map zoom/location updates
     MapZoomAndLocationUpdate(event, eventMap)
 
-    // States for sound coordination
-    var hasPlayedHitSound by remember { mutableStateOf(false) }
-
     // Calculate height based on aspect ratio and available width (exact working implementation)
     val calculatedHeight = MAP_HEIGHT_DP.dp
-
-    // Get choreography-related states
-    val isWarmingInProgress by event.observer.isUserWarmingInProgress.collectAsState(false)
-    val hitDateTime by event.observer.hitDateTime.collectAsState()
-    val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState(false)
-    val hasBeenHit by event.observer.userHasBeenHit.collectAsState(false)
-
-    // Play the hit sound when the user has been hit (exact working implementation)
-    LaunchedEffect(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
-        val secondsSinceHit = (clock.now() - hitDateTime).inWholeSeconds
-        if (hasBeenHit && secondsSinceHit in 0..1 && !hasPlayedHitSound) {
-            event.warming.playCurrentSoundChoreographyTone()
-            hasPlayedHitSound = true
-        }
-    }
 
     Box(modifier = modifier.fillMaxSize()) {
         Column(
@@ -117,7 +87,8 @@ fun WaveScreen(
         }
 
         // Working choreographies with proper z-index
-        WorkingWaveChoreographies(
+
+        WaveChoreographies(
             event = event,
             modifier = Modifier.zIndex(10f),
         )

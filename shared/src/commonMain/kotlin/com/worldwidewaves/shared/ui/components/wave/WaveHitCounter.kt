@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-package com.worldwidewaves.shared.ui.screens
+package com.worldwidewaves.shared.ui.components.wave
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box

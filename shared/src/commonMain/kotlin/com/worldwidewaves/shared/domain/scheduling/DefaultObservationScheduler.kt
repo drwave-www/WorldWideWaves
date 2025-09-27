@@ -80,18 +80,11 @@ class DefaultObservationScheduler(
 
     override suspend fun shouldObserveContinuously(event: IWWWEvent): Boolean {
         val shouldObserve = event.isRunning() || (event.isSoon() && event.isNearTime())
-        Log.v(
-            "DefaultObservationScheduler",
-            "Should observe continuously: $shouldObserve " +
-                "(running=${event.isRunning()}, soon=${event.isSoon()}, nearTime=${event.isNearTime()})",
-        )
         return shouldObserve
     }
 
     override fun createObservationFlow(event: IWWWEvent): Flow<Unit> =
         callbackFlow {
-            Log.v("DefaultObservationScheduler", "Creating observation flow for event ${event.id}")
-
             try {
                 if (shouldObserveContinuously(event)) {
                     Log.v("DefaultObservationScheduler", "Starting continuous observation for event ${event.id}")
@@ -117,7 +110,6 @@ class DefaultObservationScheduler(
                     send(Unit)
                 } else {
                     // For events not ready for continuous observation, emit once
-                    Log.v("DefaultObservationScheduler", "Event ${event.id} not ready for continuous observation, emitting once")
                     send(Unit)
                 }
             } catch (e: Exception) {

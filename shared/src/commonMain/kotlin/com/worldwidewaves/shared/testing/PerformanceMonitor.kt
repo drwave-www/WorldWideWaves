@@ -355,18 +355,23 @@ open class PerformanceMonitor : IPerformanceMonitor {
     @OptIn(ExperimentalTime::class)
     private fun updateMetrics() {
         scope.launch {
-            val current = _performanceMetrics.value
-            _performanceMetrics.value =
-                current.copy(
-                    averageWaveTimingAccuracy = metrics["wave_timing_accuracy"]?.average() ?: 0.0,
-                    waveParticipationRate = metrics["wave_participation"]?.average() ?: 0.0,
-                    averageScreenLoadTime = getAverageScreenLoadTime(),
-                    averageNetworkLatency = getAverageNetworkLatency(),
-                    memoryUsagePercent = metrics["memory_usage_percent"]?.lastOrNull() ?: 0.0,
-                    locationAccuracy = metrics["location_accuracy"]?.lastOrNull()?.toFloat() ?: 0.0f,
-                    totalEvents = events.size.toLong(),
-                    lastUpdated = Clock.System.now().toEpochMilliseconds(),
-                )
+            try {
+                val current = _performanceMetrics.value
+                _performanceMetrics.value =
+                    current.copy(
+                        averageWaveTimingAccuracy = metrics["wave_timing_accuracy"]?.average() ?: 0.0,
+                        waveParticipationRate = metrics["wave_participation"]?.average() ?: 0.0,
+                        averageScreenLoadTime = getAverageScreenLoadTime(),
+                        averageNetworkLatency = getAverageNetworkLatency(),
+                        memoryUsagePercent = metrics["memory_usage_percent"]?.lastOrNull() ?: 0.0,
+                        locationAccuracy = metrics["location_accuracy"]?.lastOrNull()?.toFloat() ?: 0.0f,
+                        totalEvents = events.size.toLong(),
+                        lastUpdated = Clock.System.now().toEpochMilliseconds(),
+                    )
+            } catch (e: Exception) {
+                // Log error but don't crash performance monitoring
+                println("PerformanceMonitor: Error updating metrics: ${e.message}")
+            }
         }
     }
 
