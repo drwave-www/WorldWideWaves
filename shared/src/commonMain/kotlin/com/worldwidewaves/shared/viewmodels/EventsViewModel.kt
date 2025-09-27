@@ -84,15 +84,15 @@ class EventsViewModel(
         }
 
     // ---------------------------
-    // iOS FIX: Removed init{} block to prevent Dispatchers.Main deadlock
-    // Events loading now must be triggered from @Composable LaunchedEffect
+
+    // ---------------------------
+    // iOS FIX: No init{} block to prevent deadlocks
+    // Events loading triggered from LaunchedEffect in EventsListScreen
     // ---------------------------
 
     /**
      * Load events from the data source through repository and use cases
-     *
-     * ⚠️ iOS CRITICAL: This must be called from @Composable LaunchedEffect,
-     * never from init{} or constructor to prevent runBlocking deadlocks
+     * ⚠️ Called from LaunchedEffect for iOS safety
      */
     suspend fun loadEvents() {
         try {

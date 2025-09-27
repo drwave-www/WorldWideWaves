@@ -21,9 +21,13 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.ComposeUIViewController
-import com.worldwidewaves.shared.ui.activities.WWWMainActivity
-import com.worldwidewaves.shared.utils.IOSPlatformEnabler
 import com.worldwidewaves.shared.utils.Log
 import platform.UIKit.UIViewController
 
@@ -35,6 +39,33 @@ import platform.UIKit.UIViewController
 fun MainViewController(): UIViewController {
     Log.i("MainViewController", "Creating iOS main view controller")
     return ComposeUIViewController {
-        WWWMainActivity(IOSPlatformEnabler(), showSplash = true).Draw()
+        // Start with the exact working pattern from a0dc587: simple text display
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                "WorldWideWaves iOS",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
     }
+}
+
+/**
+ * HelloComposeViewController following iOS integration guidance
+ * This is the proper way to call Composables from iOS - NO KOIN, NO DI
+ */
+fun HelloComposeViewController(): UIViewController =
+    ComposeUIViewController {
+        AppUI()
+    }
+
+/**
+ * Creates a simple ComposeUIViewController to test basic Composable calling
+ */
+fun createSimpleComposeView(): UIViewController {
+    Log.i("MainViewController", "Creating simple Compose view for testing")
+    return HelloComposeViewController()
 }

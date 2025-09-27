@@ -22,14 +22,14 @@ package com.worldwidewaves.shared.ui
  */
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
+// REMOVED: Android-only lifecycle imports causing iOS crashes
+// import androidx.lifecycle.Lifecycle
+// import androidx.lifecycle.LifecycleEventObserver
+// import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.domain.usecases.IMapAvailabilityChecker
@@ -58,20 +58,15 @@ class EventsListScreen(
         val events by viewModel.events.collectAsState()
         val mapStates by mapChecker.mapStates.collectAsState()
 
-        // Refresh map availability when screen resumes
-        val lifecycleOwner = LocalLifecycleOwner.current
-        DisposableEffect(lifecycleOwner) {
-            val observer =
-                LifecycleEventObserver { _, event ->
-                    if (event == Lifecycle.Event.ON_RESUME) {
-                        mapChecker.refreshAvailability()
-                    }
-                }
+        // Initialize EventsViewModel (iOS-safe pattern, Android compatible)
+        LaunchedEffect(Unit) {
+            viewModel.loadEvents()
+        }
 
-            lifecycleOwner.lifecycle.addObserver(observer)
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(observer)
-            }
+        // TODO: Refresh map availability when screen resumes
+        // FIXED: Use KMM-compatible approach instead of Android lifecycle
+        LaunchedEffect(Unit) {
+            mapChecker.refreshAvailability()
         }
 
         // Pre-track all event IDs

@@ -57,14 +57,13 @@ import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableS
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
+import com.worldwidewaves.shared.ui.utils.getIOSSafeClock
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import kotlin.math.min
 import kotlin.time.ExperimentalTime
 
@@ -85,12 +84,10 @@ private object WorkingChoreographyConstants {
 fun WaveChoreographies(
     event: IWWWEvent,
     modifier: Modifier = Modifier,
+    // iOS FIX: Clock dependency passed as parameter to prevent deadlock
+    clock: IClock = getIOSSafeClock(),
 ) {
-    val clockComponent =
-        object : KoinComponent {
-            val clock: IClock by inject()
-        }
-    val clock = clockComponent.clock
+    // iOS FIX: Removed dangerous object : KoinComponent pattern
     val isWarmingInProgress by event.observer.isUserWarmingInProgress.collectAsState()
     val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState()
     val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
@@ -216,14 +213,12 @@ fun TimedSequenceDisplay(
 fun ChoreographyDisplay(
     sequence: DisplayableSequence<DrawableResource>?,
     modifier: Modifier = Modifier,
+    // iOS FIX: Clock dependency passed as parameter to prevent deadlock
+    clock: IClock = getIOSSafeClock(),
 ) {
     if (sequence == null || sequence.image == null) return
 
-    val clockComponent =
-        object : KoinComponent {
-            val clock: IClock by inject()
-        }
-    val clock = clockComponent.clock
+    // iOS FIX: Removed dangerous object : KoinComponent pattern
 
     var currentImageIndex by remember { mutableIntStateOf(0) }
     val remainingTime by remember(sequence) { mutableStateOf(sequence.remainingDuration) }

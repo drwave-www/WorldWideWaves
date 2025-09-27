@@ -1,16 +1,16 @@
 /* * Copyright 2025 DrWave
- * 
+ *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -70,16 +70,15 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.coroutines.core)
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.material3)
             implementation(compose.materialIconsExtended)
-            implementation(compose.components.resources)
-            implementation(libs.androidx.annotation)
+            implementation(libs.compose.components.resources)
             implementation(libs.datastore.preferences)
             implementation(libs.kotlinx.atomic)
             implementation(libs.koin.core)
-            implementation(compose.ui)
+            implementation(libs.compose.ui)
             implementation(libs.napier)
         }
         commonTest.dependencies {
@@ -96,6 +95,7 @@ kotlin {
         }
         androidMain.dependencies {
             implementation(libs.androidx.ui.text.google.fonts)
+            implementation(libs.androidx.annotation)
         }
 
         /*
@@ -202,14 +202,26 @@ compose.resources {
 }
 
 dependencies {
-    implementation(libs.places)
-    implementation(libs.androidx.ui.graphics.android)
-    implementation(libs.androidx.annotation.jvm)
-    implementation(libs.feature.delivery.ktx)
     // MockK is only needed for unit tests; keep it out of the runtime classpath.
     commonMainApi(libs.icerock.moko.resources)
     commonMainApi(libs.icerock.moko.resources.compose)
     testImplementation(libs.mockk.android.v1120)
+}
+
+// Clean dependency exclusions for iOS stability
+configurations.configureEach {
+    if (name.contains("commonMain", ignoreCase = true) || name.contains("ios", ignoreCase = true)) {
+        exclude(group = "org.jetbrains.androidx.lifecycle", module = "lifecycle-runtime-compose")
+    }
+}
+
+android {
+    dependencies {
+        implementation(libs.places)
+        implementation(libs.androidx.ui.graphics.android)
+        implementation(libs.androidx.annotation.jvm)
+        implementation(libs.feature.delivery.ktx)
+    }
 }
 
 multiplatformResources {

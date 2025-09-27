@@ -100,7 +100,7 @@ class WWWEvents : KoinComponent {
                     // Double-check if events are already loaded after acquiring the lock
                     if (!eventsLoaded && loadingError == null) {
                         currentLoadJob = loadEventsJob()
-                        currentLoadJob?.join() // Wait for the loading job to complete
+                        // Don't join here - let the job run asynchronously to prevent deadlock
                     }
                 }
             }

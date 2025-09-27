@@ -84,23 +84,29 @@ class SystemClock :
     KoinComponent {
     private var platform: WWWPlatform? = null
 
-    init {
-        try {
-            platform = get()
-        } catch (_: Exception) {
-            Napier.w("${SystemClock::class.simpleName}: Platform not found, simulation disabled")
+    // iOS FIX: Removed init{} block that calls DI get() to prevent potential deadlocks
+    // Platform is now resolved lazily on first access
+
+    private fun getPlatformSafely(): WWWPlatform? {
+        if (platform == null) {
+            try {
+                platform = get()
+            } catch (_: Exception) {
+                Napier.w("${SystemClock::class.simpleName}: Platform not found, simulation disabled")
+            }
         }
+        return platform
     }
 
     override fun now(): Instant =
-        if (platform?.isOnSimulation() == true) {
+        if (getPlatformSafely()?.isOnSimulation() == true) {
             platform!!.getSimulation()!!.now()
         } else {
             Clock.System.now()
         }
 
     override suspend fun delay(duration: Duration) {
-        val simulation = platform?.takeIf { it.isOnSimulation() }?.getSimulation()
+        val simulation = getPlatformSafely()?.takeIf { it.isOnSimulation() }?.getSimulation()
 
         if (simulation != null) {
             val speed =

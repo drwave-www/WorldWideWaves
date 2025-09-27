@@ -72,8 +72,9 @@ open class WWWMainActivity(
     showSplash: Boolean = true,
 ) : KoinComponent {
     private val platform: WWWPlatform by inject()
-    private val events: WWWEvents by inject()
+    protected val events: WWWEvents by inject()
     private val globalSoundChoreography: GlobalSoundChoreographyManager by inject()
+    private val soundChoreographyManager: com.worldwidewaves.shared.choreographies.SoundChoreographyManager by inject()
 
     private val eventsListScreen: EventsListScreen by inject()
     private val aboutTabScreen: AboutTabScreen by inject()
@@ -98,11 +99,15 @@ open class WWWMainActivity(
     suspend fun initialize() {
         Log.i("WWWMainActivity", "Initializing WWWMainActivity")
 
+        // iOS FIX: Initialize sound choreography manager since init{} was removed
+        soundChoreographyManager.initialize()
+
         // Begin loading events – when done, flag so splash can disappear
         events.loadEvents(onTermination = {
             Log.i("WWWMainActivity", "Events loading completed")
             isDataLoaded = true
             checkSplashFinished(startTime)
+
             // Start global sound choreography observation for all events
             startGlobalSoundChoreographyForAllEvents()
         })
@@ -130,6 +135,7 @@ open class WWWMainActivity(
         LaunchedEffect(Unit) {
             delay(WWWGlobals.Timing.SPLASH_MIN_DURATION)
             checkSplashFinished(startTime)
+            initialize()
         }
 
         WorldWideWavesTheme {

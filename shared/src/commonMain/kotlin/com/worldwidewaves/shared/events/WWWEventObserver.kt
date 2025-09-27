@@ -347,13 +347,12 @@ class WWWEventObserver(
                             }.launchIn(coroutineScopeProvider.scopeDefault())
 
                     // Create a parent job that manages all child jobs
+                    // Fix for iOS: Avoid .join() calls which cause deadlocks
                     unifiedObservationJob =
                         coroutineScopeProvider.launchDefault {
-                            try {
-                                // Wait for the main observation job to complete
-                                mainObservationJob.join()
-                            } finally {
-                                // Cancel all observer jobs when done
+                            // Use invokeOnCompletion instead of blocking join
+                            mainObservationJob.invokeOnCompletion {
+                                // Cancel all observer jobs when main job completes
                                 positionObserverJob.cancel()
                                 directPositionObserverJob.cancel()
                                 polygonLoadingJob.cancel()
