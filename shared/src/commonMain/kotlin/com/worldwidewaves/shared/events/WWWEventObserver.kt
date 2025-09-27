@@ -535,14 +535,6 @@ class WWWEventObserver(
             updatePositionRatioIfSignificant(calculatedState.userPositionRatio)
             updateTimeBeforeHitIfSignificant(calculatedState.timeBeforeHit)
             _hitDateTime.updateIfChanged(calculatedState.hitDateTime)
-
-            // Log debug information for choreo debugging
-            if (calculatedState.userIsGoingToBeHit) {
-                Log.v(
-                    "WWWEventObserver",
-                    "[CHOREO_DEBUG] Setting userIsGoingToBeHit=true for event ${event.id}, timeBeforeHit=${calculatedState.timeBeforeHit}",
-                )
-            }
         } catch (e: Exception) {
             Log.e("WWWEventObserver", "Error calculating event state: $e")
             // Fall back to basic state updates for safety

@@ -38,7 +38,6 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.TimeZone
 import kotlinx.serialization.json.Json
@@ -251,7 +250,6 @@ class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
     override suspend fun getGeoJsonData(eventId: String): JsonObject? {
         // Check cache first
         if (cache.containsKey(eventId)) {
-            Log.d(::getGeoJsonData.name, "Using cached geojson data for event $eventId")
             return cache[eventId]
         }
 
