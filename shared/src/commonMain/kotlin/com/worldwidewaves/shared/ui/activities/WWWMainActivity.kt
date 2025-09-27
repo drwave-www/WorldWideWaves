@@ -58,9 +58,6 @@ import com.worldwidewaves.shared.ui.components.navigation.ConfigurableTabBarItem
 import com.worldwidewaves.shared.ui.screens.DebugScreen
 import com.worldwidewaves.shared.ui.theme.WorldWideWavesTheme
 import com.worldwidewaves.shared.utils.Log
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -74,15 +71,9 @@ open class WWWMainActivity(
     val platformEnabler: PlatformEnabler,
     showSplash: Boolean = true,
 ) : KoinComponent {
-    companion object {
-        private var instanceCount = 0
-    }
-
     private val platform: WWWPlatform by inject()
     private val events: WWWEvents by inject()
     private val globalSoundChoreography: GlobalSoundChoreographyManager by inject()
-
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private val eventsListScreen: EventsListScreen by inject()
     private val aboutTabScreen: AboutTabScreen by inject()
@@ -91,12 +82,6 @@ open class WWWMainActivity(
     /** Flag updated when `events.loadEvents()` finishes. */
     private var isDataLoaded: Boolean = false
 
-    /** Flag to ensure sound choreography is only started once per instance. */
-    private var soundChoreographyStarted: Boolean = false
-
-    /** Flag to ensure callback is only registered once per instance. */
-    private var callbackRegistered: Boolean = false
-
     /** Flow observed by Compose to know when we can display main content. */
     private val isSplashFinished = MutableStateFlow(!showSplash)
 
@@ -104,44 +89,16 @@ open class WWWMainActivity(
     val startTime = Clock.System.now().toEpochMilliseconds()
 
     init {
-        instanceCount++
-        Log.i("WWWMainActivity", "Initializing WWWMainActivity instance #$instanceCount (hashCode: ${this.hashCode()})")
+        Log.i("WWWMainActivity", "Initializing WWWMainActivity")
 
-        // Always try to register callback once, regardless of current loading state
-        registerEventLoadingCallback()
-    }
-
-    private fun registerEventLoadingCallback() {
-        if (callbackRegistered) {
-            Log.d("WWWMainActivity", "Callback already registered for instance #$instanceCount, skipping")
-            return
-        }
-
-        callbackRegistered = true
-        Log.d("WWWMainActivity", "Registering event loading callback for instance #$instanceCount")
-
-        // Check if events are already loaded
-        if (events.list().isNotEmpty()) {
-            Log.i("WWWMainActivity", "Events already loaded, starting sound choreography immediately")
-            handleEventsLoaded()
-        } else {
-            // Begin loading events – when done, handle completion
-            events.loadEvents(onTermination = {
-                Log.i("WWWMainActivity", "Events loading completed for instance #$instanceCount (hashCode: ${this.hashCode()})")
-                handleEventsLoaded()
-            })
-        }
-    }
-
-    private fun handleEventsLoaded() {
-        if (isDataLoaded) {
-            Log.d("WWWMainActivity", "Events already handled for instance #$instanceCount, skipping")
-            return
-        }
-
-        isDataLoaded = true
-        checkSplashFinished(startTime)
-        startGlobalSoundChoreographyForAllEvents()
+        // Begin loading events – when done, flag so splash can disappear
+        events.loadEvents(onTermination = {
+            Log.i("WWWMainActivity", "Events loading completed")
+            isDataLoaded = true
+            checkSplashFinished(startTime)
+            // Start global sound choreography observation for all events
+            startGlobalSoundChoreographyForAllEvents()
+        })
     }
 
     protected val tabManager by lazy {
@@ -239,29 +196,14 @@ open class WWWMainActivity(
      * This enables sound to play throughout the app when user is in any event area.
      */
     private fun startGlobalSoundChoreographyForAllEvents() {
-        Log.d(
-            "WWWMainActivity",
-            "startGlobalSoundChoreographyForAllEvents() called - soundChoreographyStarted=$soundChoreographyStarted (instance #$instanceCount, hashCode: ${this.hashCode()})",
-        )
-
-        if (soundChoreographyStarted) {
-            Log.d(
-                "WWWMainActivity",
-                "Sound choreography already started for instance #$instanceCount (hashCode: ${this.hashCode()}), skipping",
-            )
-            return
+        try {
+            Log.d("WWWMainActivity", "Starting global sound choreography for all events")
+            globalSoundChoreography.startObservingAllEvents()
+            Log.d("WWWMainActivity", "Successfully started global sound choreography")
+        } catch (e: Exception) {
+            Log.e("WWWMainActivity", "Error starting global sound choreography: ${e.message}")
+            // Don't crash the app if sound choreography fails
         }
-
-        Log.d(
-            "WWWMainActivity",
-            "Starting global sound choreography for all events (instance #$instanceCount, hashCode: ${this.hashCode()})",
-        )
-        soundChoreographyStarted = true
-        Log.d(
-            "WWWMainActivity",
-            "Set soundChoreographyStarted=true, calling globalSoundChoreography.startObservingAllEvents()",
-        )
-        globalSoundChoreography.startObservingAllEvents()
     }
 
     /**

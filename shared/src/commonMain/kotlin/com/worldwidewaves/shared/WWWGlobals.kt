@@ -21,8 +21,6 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
-import io.github.aakira.napier.DebugAntilog
-import io.github.aakira.napier.Napier
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
@@ -30,7 +28,8 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 fun debugBuild() {
-    Napier.base(DebugAntilog())
+    // Napier initialization is handled by initNapier() in platform-specific code
+    // This function can be used for other debug-specific initialization if needed
 }
 
 /**

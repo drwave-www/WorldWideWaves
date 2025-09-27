@@ -123,18 +123,43 @@ class WWWEvents : KoinComponent {
                 Log.i("WWWEvents.loadEventsJob", "Decoding JSON to events...")
                 val events: List<IWWWEvent> = eventsDecoder.decodeFromJson(eventsJsonString)
                 Log.i("WWWEvents.loadEventsJob", "Successfully decoded ${events.size} events")
-                Log.i("WWWEvents.loadEventsJob", "Temporarily skipping validation to debug crash...")
+                Log.i("WWWEvents.loadEventsJob", "Running validation on decoded events...")
 
-                // TEMPORARY: Skip validation to debug crash
-                val validEvents =
-                    events.onEach {
-                        try {
-                            initFavoriteEvent.call(it)
-                            Log.d("WWWEvents.loadEventsJob", "Initialized favorite for event: ${it.id}")
-                        } catch (e: Exception) {
-                            Log.e("WWWEvents.loadEventsJob", "Error initializing favorite for event ${it.id}: ${e.message}")
-                        }
+                // Restore proper validation but with error handling
+                val validatedEvents =
+                    try {
+                        confValidationErrors(events)
+                    } catch (e: Exception) {
+                        Log.e("WWWEvents.loadEventsJob", "Error during validation: ${e.message}")
+                        // Fall back to no validation if validation itself crashes
+                        events.associateWith { null }
                     }
+
+                validatedEvents
+                    .filterValues { it?.isNotEmpty() == true } // Log validation errors
+                    .forEach { (event, errors) ->
+                        Log.e("WWWEvents.loadEventsJob", "Validation Errors for Event ID: ${event.id}")
+                        errors?.forEach { errorMessage ->
+                            Log.e("WWWEvents.loadEventsJob", errorMessage)
+                        }
+                        validationErrors.add(event to errors!!)
+                    }
+
+                // Filter out invalid events and initialize favorites
+                val validEvents =
+                    validatedEvents
+                        .filterValues { it.isNullOrEmpty() }
+                        .keys
+                        .onEach {
+                            try {
+                                initFavoriteEvent.call(it)
+                                Log.d("WWWEvents.loadEventsJob", "Initialized favorite for event: ${it.id}")
+                            } catch (e: Exception) {
+                                Log.e("WWWEvents.loadEventsJob", "Error initializing favorite for event ${it.id}: ${e.message}")
+                            }
+                        }.toList()
+
+                Log.i("WWWEvents.loadEventsJob", "After validation: ${validEvents.size} valid events out of ${events.size} total")
 
                 Log.i("WWWEvents.loadEventsJob", "About to update events flow with ${validEvents.size} events")
 
