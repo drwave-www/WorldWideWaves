@@ -72,12 +72,14 @@ fun FullMapScreen(
             modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
             onTargetWave = {
                 scope.launch {
-                    eventMap?.targetUserAndWave()
+                    eventMap?.markUserInteracted()
+                    eventMap?.targetWave()
                 }
             },
-            onCenterWave = {
+            onTargetUser = {
                 scope.launch {
-                    eventMap?.targetWave()
+                    eventMap?.markUserInteracted()
+                    eventMap?.targetUserAndWave()
                 }
             },
         )

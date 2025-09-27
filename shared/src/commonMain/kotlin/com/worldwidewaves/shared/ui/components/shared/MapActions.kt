@@ -43,6 +43,8 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.generated.resources.Res
+import com.worldwidewaves.shared.generated.resources.target_me_active
+import com.worldwidewaves.shared.generated.resources.target_me_inactive
 import com.worldwidewaves.shared.generated.resources.target_wave_active
 import com.worldwidewaves.shared.generated.resources.target_wave_inactive
 import dev.icerock.moko.resources.compose.stringResource
@@ -63,17 +65,17 @@ fun MapActions(
     event: IWWWEvent,
     modifier: Modifier = Modifier,
     onTargetWave: () -> Unit = {},
-    onCenterWave: () -> Unit = {},
+    onTargetUser: () -> Unit = {},
 ) {
+    val scope = rememberCoroutineScope()
+    val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
+    val isInArea by event.observer.userIsInArea.collectAsState()
+
     val clockComponent =
         object : KoinComponent {
             val clock: IClock by inject()
         }
     val clock = clockComponent.clock
-
-    val scope = rememberCoroutineScope()
-    val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
-    // isInArea removed - was unused
 
     val isRunning = eventStatus == Status.RUNNING
 
@@ -88,7 +90,6 @@ fun MapActions(
         contentAlignment = Alignment.BottomEnd,
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(Dimensions.DEFAULT_INT_PADDING.dp)) {
-            // Target wave button
             Image(
                 modifier =
                     Modifier
@@ -100,28 +101,28 @@ fun MapActions(
                                 }
                             }
                         },
-                painter =
-                    painterResource(
-                        if (isRunning) Res.drawable.target_wave_active else Res.drawable.target_wave_inactive,
-                    ),
+                painter = painterResource(if (isRunning) Res.drawable.target_wave_active else Res.drawable.target_wave_inactive),
                 contentDescription =
                     stringResource(
                         if (isRunning) MokoRes.strings.event_target_wave_on else MokoRes.strings.event_target_wave_off,
                     ),
             )
-
-            // Center wave button
             Image(
                 modifier =
                     Modifier
-                        .size(Event.TARGET_WAVE_IMAGE_SIZE.dp)
+                        .size(Event.TARGET_ME_IMAGE_SIZE.dp)
                         .clickable {
-                            scope.launch {
-                                onCenterWave()
+                            if (isInArea) {
+                                scope.launch {
+                                    onTargetUser()
+                                }
                             }
                         },
-                painter = painterResource(Res.drawable.target_wave_inactive),
-                contentDescription = stringResource(MokoRes.strings.map_cancel_download),
+                painter = painterResource(if (isInArea) Res.drawable.target_me_active else Res.drawable.target_me_inactive),
+                contentDescription =
+                    stringResource(
+                        if (isInArea) MokoRes.strings.event_target_me_on else MokoRes.strings.event_target_me_off,
+                    ),
             )
         }
     }
