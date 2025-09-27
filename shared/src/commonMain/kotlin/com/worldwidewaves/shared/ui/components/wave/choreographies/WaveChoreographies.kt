@@ -82,7 +82,7 @@ private object WorkingChoreographyConstants {
  */
 @OptIn(ExperimentalTime::class)
 @Composable
-fun WorkingWaveChoreographies(
+fun WaveChoreographies(
     event: IWWWEvent,
     modifier: Modifier = Modifier,
 ) {

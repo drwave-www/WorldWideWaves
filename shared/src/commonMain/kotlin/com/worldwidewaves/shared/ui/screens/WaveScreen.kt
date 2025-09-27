@@ -43,7 +43,7 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.ui.components.MapZoomAndLocationUpdate
-import com.worldwidewaves.shared.ui.components.choreographies.WorkingWaveChoreographies
+import com.worldwidewaves.shared.ui.components.choreographies.WaveChoreographies
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.ExperimentalTime
@@ -117,7 +117,7 @@ fun WaveScreen(
         }
 
         // Working choreographies with proper z-index
-        WorkingWaveChoreographies(
+        WaveChoreographies(
             event = event,
             modifier = Modifier.zIndex(10f),
         )

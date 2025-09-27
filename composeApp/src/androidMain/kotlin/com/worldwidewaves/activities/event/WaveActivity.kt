@@ -33,7 +33,7 @@ import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 class WaveActivity : AppCompatActivity() {
-    private var waveActivity: WWWWaveActivity? = null
+    private var waveActivityImplImpl: WWWWaveActivity? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,29 +45,29 @@ class WaveActivity : AppCompatActivity() {
 
         if (eventId != null) {
             val platformEnabler = AndroidPlatformEnabler(this)
-            waveActivity = WWWWaveActivity(eventId, platformEnabler)
-            waveActivity?.onEventLoaded { event ->
+            waveActivityImpl = WWWWaveActivity(eventId, platformEnabler)
+            waveActivityImpl?.onEventLoaded { event ->
                 // Construct the event map
                 val eventMap = AndroidEventMap(event, context = this as AppCompatActivity)
                 setContent {
-                    waveActivity!!.Draw(event, eventMap = eventMap, onFinish = { finish() })
+                    waveActivityImpl!!.Draw(event, eventMap = eventMap, onFinish = { finish() })
                 }
             }
         }
     }
 
     override fun onDestroy() {
-        waveActivity?.onDestroy()
+        waveActivityImpl?.onDestroy()
         super.onDestroy()
     }
 
     override fun onResume() {
         super.onResume()
-        waveActivity?.onResume()
+        waveActivityImpl?.onResume()
     }
 
     override fun onPause() {
-        waveActivity?.onPause()
+        waveActivityImpl?.onPause()
         super.onPause()
     }
 }
