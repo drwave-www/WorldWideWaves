@@ -26,6 +26,7 @@ struct ContentView: View {
     @State private var mokoInitialized = false
     @State private var mainActivityCreated = false
     @State private var initError: String?
+    @State private var mainActivityInstance: WWWMainActivity?
 
     init() {
         print("🔧 iOS: Starting ContentView initialization...")
@@ -41,18 +42,10 @@ struct ContentView: View {
                 Text("❌ Init Error: \(error)")
                     .font(.caption)
                     .foregroundColor(.red)
-            } else if mainActivityCreated {
-                VStack(spacing: 8) {
-                    Text("✅ Koin DI Working!")
-                        .font(.title2)
-                        .foregroundColor(.green)
-                    Text("✅ MokoRes Working!")
-                        .font(.title2)
-                        .foregroundColor(.green)
-                    Text("✅ MainActivity Created!")
-                        .font(.title2)
-                        .foregroundColor(.blue)
-                }
+            } else if mainActivityCreated, let mainActivity = mainActivityInstance {
+                // 🧪 iOS: MINIMAL TEST - Using minimal version to isolate crash
+                MinimalMainActivityTestView(mainActivity: mainActivity)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if koinInitialized && mokoInitialized {
                 VStack(spacing: 8) {
                     Text("✅ Koin DI Working!")
@@ -123,19 +116,15 @@ struct ContentView: View {
     }
 
     private func createMainActivity() {
-        print("🔧 iOS: Attempting to create WWWMainActivity instance...")
+        print("🔧 iOS: Creating WWWMainActivity for full UI...")
         do {
-            // iOS DEADLOCK FIX: Create instance without triggering async work in init
+            // iOS SAFE: Create instance following Android MainActivity pattern
             let platformEnabler = IOSPlatformEnabler()
-            let mainActivity = WWWMainActivity(platformEnabler: platformEnabler, showSplash: false)
-
-            // ⚠️ CRITICAL: Do NOT call mainActivity.initialize() here!
-            // This would cause Dispatchers.Main deadlock on iOS
-            // Initialize should be called from @Composable LaunchedEffect only
+            self.mainActivityInstance = WWWMainActivity(platformEnabler: platformEnabler, showSplash: false)
 
             DispatchQueue.main.async {
                 self.mainActivityCreated = true
-                print("✅ iOS: WWWMainActivity instance created successfully (async init required)")
+                print("✅ iOS: WWWMainActivity created - ready to call Draw()")
             }
         } catch {
             DispatchQueue.main.async {
@@ -143,6 +132,39 @@ struct ContentView: View {
                 print("❌ iOS: WWWMainActivity creation failed: \(error)")
             }
         }
+    }
+}
+
+// MainActivityHostView - iOS equivalent of Android MainActivity setContent
+struct MainActivityHostView: UIViewControllerRepresentable {
+    let mainActivity: WWWMainActivity
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        print("🎯 iOS: Creating WWWMainActivity ComposeUIViewController...")
+
+        // Following Android MainActivity pattern via Kotlin function:
+        // mainActivityImpl!!.Draw() → createMainActivityViewController(mainActivity)
+        return MainViewControllerKt.createMainActivityViewController(mainActivity: mainActivity)
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+        // No updates needed for stable content
+    }
+}
+
+// MinimalMainActivityTestView - iOS crash isolation test
+struct MinimalMainActivityTestView: UIViewControllerRepresentable {
+    let mainActivity: WWWMainActivity
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        print("🧪 iOS: Creating MINIMAL WWWMainActivity test...")
+
+        // Minimal test to isolate crash - no complex Draw() logic
+        return MainViewControllerKt.createMinimalMainActivityTest(mainActivity: mainActivity)
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+        // No updates needed for static test
     }
 }
 
