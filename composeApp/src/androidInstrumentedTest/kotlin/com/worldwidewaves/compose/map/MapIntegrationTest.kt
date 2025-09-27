@@ -831,7 +831,9 @@ private fun TestWaveVisualization(
     onPerformanceMeasured: (Duration) -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(wavePolygons) {
-        val startMark = kotlin.time.TimeSource.Monotonic.markNow()
+        val startMark =
+            kotlin.time.TimeSource.Monotonic
+                .markNow()
         delay(50.milliseconds) // Simulate rendering time
         val renderTime = startMark.elapsedNow()
 
@@ -851,7 +853,9 @@ private fun TestWaveProgressionUpdates(
 ) {
     androidx.compose.runtime.LaunchedEffect(progressionUpdates) {
         progressionUpdates.forEach { _ ->
-            val startMark = kotlin.time.TimeSource.Monotonic.markNow()
+            val startMark =
+                kotlin.time.TimeSource.Monotonic
+                    .markNow()
             delay(10.milliseconds) // Simulate update processing
             val updateTime = startMark.elapsedNow()
             onUpdateReceived(updateTime)

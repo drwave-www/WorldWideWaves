@@ -21,24 +21,22 @@
 
 package com.worldwidewaves.shared.testing
 
-import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.events.utils.Position
 import io.mockk.every
 import io.mockk.mockk
 import kotlin.random.Random
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Clock
-
-@OptIn(kotlin.time.ExperimentalTime::class)
 
 /**
  * Test data builders for consistent, reusable test fixtures.
  * Provides builder pattern for creating test data with sensible defaults
  * and deterministic randomization using fixed seeds.
  */
+@OptIn(kotlin.time.ExperimentalTime::class)
 object TestDataBuilders {
-
     // Fixed constants for deterministic testing
     const val FIXED_SEED = 42L
     const val BASE_TIMESTAMP = 1643723400000L // 2022-02-01 12:00:00 UTC
@@ -51,22 +49,43 @@ object TestDataBuilders {
         private var lng: Double = -73.9712
         private var source: String = "GPS"
 
-        fun lat(latitude: Double) = apply {
-            require(latitude in -90.0..90.0) { "Invalid latitude: $latitude" }
-            this.lat = latitude
-        }
+        fun lat(latitude: Double) =
+            apply {
+                require(latitude in -90.0..90.0) { "Invalid latitude: $latitude" }
+                this.lat = latitude
+            }
 
-        fun lng(longitude: Double) = apply {
-            require(longitude in -180.0..180.0) { "Invalid longitude: $longitude" }
-            this.lng = longitude
-        }
+        fun lng(longitude: Double) =
+            apply {
+                require(longitude in -180.0..180.0) { "Invalid longitude: $longitude" }
+                this.lng = longitude
+            }
 
         fun source(positionSource: String) = apply { this.source = positionSource }
 
-        fun centralPark() = apply { lat = 40.7831; lng = -73.9712 }
-        fun timesSquare() = apply { lat = 40.7589; lng = -73.9851 }
-        fun london() = apply { lat = 51.5074; lng = -0.1278 }
-        fun paris() = apply { lat = 48.8566; lng = 2.3522 }
+        fun centralPark() =
+            apply {
+                lat = 40.7831
+                lng = -73.9712
+            }
+
+        fun timesSquare() =
+            apply {
+                lat = 40.7589
+                lng = -73.9851
+            }
+
+        fun london() =
+            apply {
+                lat = 51.5074
+                lng = -0.1278
+            }
+
+        fun paris() =
+            apply {
+                lat = 48.8566
+                lng = 2.3522
+            }
 
         fun build(): Position = Position(lat = lat, lng = lng)
     }
@@ -81,33 +100,40 @@ object TestDataBuilders {
         private var vertices: Int = 6
         private var seed: Long = FIXED_SEED
 
-        fun center(lat: Double, lng: Double) = apply {
+        fun center(
+            lat: Double,
+            lng: Double,
+        ) = apply {
             this.centerLat = lat
             this.centerLng = lng
         }
 
-        fun radius(km: Double) = apply {
-            require(km > 0) { "Radius must be positive: $km" }
-            this.radiusKm = km
-        }
+        fun radius(km: Double) =
+            apply {
+                require(km > 0) { "Radius must be positive: $km" }
+                this.radiusKm = km
+            }
 
-        fun vertices(count: Int) = apply {
-            require(count >= 3) { "Need at least 3 vertices: $count" }
-            this.vertices = count
-        }
+        fun vertices(count: Int) =
+            apply {
+                require(count >= 3) { "Need at least 3 vertices: $count" }
+                this.vertices = count
+            }
 
         fun seed(randomSeed: Long) = apply { this.seed = randomSeed }
 
-        fun centralPark() = apply {
-            center(40.7829, -73.9654)
-            radius(1.5)
-        }
+        fun centralPark() =
+            apply {
+                center(40.7829, -73.9654)
+                radius(1.5)
+            }
 
-        fun manhattan() = apply {
-            center(40.7831, -73.9712)
-            radius(5.0)
-            vertices(8)
-        }
+        fun manhattan() =
+            apply {
+                center(40.7831, -73.9712)
+                radius(5.0)
+                vertices(8)
+            }
 
         fun build(): List<Position> {
             val random = Random(seed)
@@ -118,12 +144,15 @@ object TestDataBuilders {
                 val r = radiusDegrees * (0.8 + random.nextDouble() * 0.4) // Slight variation
                 Position(
                     lat = centerLat + r * kotlin.math.cos(angle),
-                    lng = centerLng + r * kotlin.math.sin(angle)
+                    lng = centerLng + r * kotlin.math.sin(angle),
                 )
-            } + listOf(Position(
-                lat = centerLat + radiusDegrees * kotlin.math.cos(0.0),
-                lng = centerLng + radiusDegrees * kotlin.math.sin(0.0)
-            )) // Close polygon
+            } +
+                listOf(
+                    Position(
+                        lat = centerLat + radiusDegrees * kotlin.math.cos(0.0),
+                        lng = centerLng + radiusDegrees * kotlin.math.sin(0.0),
+                    ),
+                ) // Close polygon
         }
     }
 
@@ -136,14 +165,18 @@ object TestDataBuilders {
         private var advanceStep: kotlin.time.Duration = 1.minutes
 
         fun baseTime(time: kotlinx.datetime.Instant) = apply { this.baseTime = time }
-        fun baseTime(epochMillis: Long) = apply {
-            this.baseTime = kotlinx.datetime.Instant.fromEpochMilliseconds(epochMillis)
-        }
+
+        fun baseTime(epochMillis: Long) =
+            apply {
+                this.baseTime = kotlinx.datetime.Instant.fromEpochMilliseconds(epochMillis)
+            }
 
         fun autoAdvance(enabled: Boolean = true) = apply { this.autoAdvance = enabled }
+
         fun advanceStep(step: kotlin.time.Duration) = apply { this.advanceStep = step }
 
         fun fixedAt2022() = apply { baseTime(BASE_TIMESTAMP) }
+
         fun fixedAtNow() = apply { baseTime(Clock.System.now()) }
 
         fun build(): IClock {
@@ -176,50 +209,62 @@ object TestDataBuilders {
         private var clock: IClock = ClockBuilder().fixedAt2022().build()
 
         fun id(eventId: String) = apply { this.id = eventId }
+
         fun name(eventName: String) = apply { this.name = eventName }
+
         fun polygon(coords: List<Position>) = apply { this.polygon = coords }
+
         fun startTime(time: kotlinx.datetime.Instant) = apply { this.startTime = time }
-        fun waveSpeed(kmh: Double) = apply {
-            require(kmh > 0) { "Wave speed must be positive: $kmh" }
-            this.waveSpeedKmh = kmh
-        }
+
+        fun waveSpeed(kmh: Double) =
+            apply {
+                require(kmh > 0) { "Wave speed must be positive: $kmh" }
+                this.waveSpeedKmh = kmh
+            }
+
         fun clock(testClock: IClock) = apply { this.clock = testClock }
 
-        fun centralParkEvent() = apply {
-            id("central_park_wave")
-            name("Central Park Wave")
-            polygon(PolygonBuilder().centralPark().build())
-        }
+        fun centralParkEvent() =
+            apply {
+                id("central_park_wave")
+                name("Central Park Wave")
+                polygon(PolygonBuilder().centralPark().build())
+            }
 
-        fun runningEvent() = apply {
-            startTime(kotlinx.datetime.Instant.fromEpochMilliseconds(BASE_TIMESTAMP - 30.minutes.inWholeMilliseconds))
-        }
+        fun runningEvent() =
+            apply {
+                startTime(kotlinx.datetime.Instant.fromEpochMilliseconds(BASE_TIMESTAMP - 30.minutes.inWholeMilliseconds))
+            }
 
-        fun futureEvent() = apply {
-            startTime(kotlinx.datetime.Instant.fromEpochMilliseconds(BASE_TIMESTAMP + 2.hours.inWholeMilliseconds))
-        }
+        fun futureEvent() =
+            apply {
+                startTime(kotlinx.datetime.Instant.fromEpochMilliseconds(BASE_TIMESTAMP + 2.hours.inWholeMilliseconds))
+            }
 
-        fun soonEvent() = apply {
-            startTime(kotlinx.datetime.Instant.fromEpochMilliseconds(BASE_TIMESTAMP + 10.minutes.inWholeMilliseconds))
-        }
+        fun soonEvent() =
+            apply {
+                startTime(kotlinx.datetime.Instant.fromEpochMilliseconds(BASE_TIMESTAMP + 10.minutes.inWholeMilliseconds))
+            }
 
         // Note: Actual build() would need to use real WWWEvent API
-        fun buildData(): EventTestData {
-            return EventTestData(
+        fun buildData(): EventTestData =
+            EventTestData(
                 id = id,
                 name = name,
                 polygon = polygon,
                 startTime = startTime,
                 waveSpeedKmh = waveSpeedKmh,
-                clock = clock
+                clock = clock,
             )
-        }
     }
 
     // Factory methods for common test scenarios
     fun position(): PositionBuilder = PositionBuilder()
+
     fun polygon(): PolygonBuilder = PolygonBuilder()
+
     fun clock(): ClockBuilder = ClockBuilder()
+
     fun event(): EventBuilder = EventBuilder()
 
     // Quick access to common positions
@@ -241,22 +286,28 @@ object TestDataBuilders {
 
     // Deterministic random generators
     object RandomGenerators {
-        fun positions(count: Int, seed: Long = FIXED_SEED): List<Position> {
+        fun positions(
+            count: Int,
+            seed: Long = FIXED_SEED,
+        ): List<Position> {
             val random = Random(seed)
             return (1..count).map {
                 Position(
                     lat = random.nextDouble() * 180.0 - 90.0,
-                    lng = random.nextDouble() * 360.0 - 180.0
+                    lng = random.nextDouble() * 360.0 - 180.0,
                 )
             }
         }
 
-        fun nycAreaPositions(count: Int, seed: Long = FIXED_SEED): List<Position> {
+        fun nycAreaPositions(
+            count: Int,
+            seed: Long = FIXED_SEED,
+        ): List<Position> {
             val random = Random(seed)
             return (1..count).map {
                 Position(
                     lat = 40.7 + random.nextDouble() * 0.2,
-                    lng = -74.1 + random.nextDouble() * 0.2
+                    lng = -74.1 + random.nextDouble() * 0.2,
                 )
             }
         }
@@ -269,7 +320,7 @@ object TestDataBuilders {
         val polygon: List<Position>,
         val startTime: kotlinx.datetime.Instant,
         val waveSpeedKmh: Double,
-        val clock: IClock
+        val clock: IClock,
     )
 }
 
@@ -280,6 +331,7 @@ fun Position.distanceTo(other: Position): Double {
     return kotlin.math.sqrt(latDiff * latDiff + lngDiff * lngDiff) * 111.0 // Approximate km
 }
 
-fun Position.isNear(other: Position, toleranceKm: Double = 1.0): Boolean {
-    return this.distanceTo(other) <= toleranceKm
-}
+fun Position.isNear(
+    other: Position,
+    toleranceKm: Double = 1.0,
+): Boolean = this.distanceTo(other) <= toleranceKm

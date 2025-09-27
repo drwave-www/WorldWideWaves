@@ -1,24 +1,23 @@
 package com.worldwidewaves.shared.ui.activities
 
 /* * Copyright 2025 DrWave
- * 
+ *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License. */
-
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -69,10 +68,11 @@ import org.koin.core.component.inject
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
-
 @OptIn(ExperimentalTime::class)
-open class WWWMainActivity(val platformEnabler: PlatformEnabler, showSplash: Boolean = true) : KoinComponent {
-
+open class WWWMainActivity(
+    val platformEnabler: PlatformEnabler,
+    showSplash: Boolean = true,
+) : KoinComponent {
     private val platform: WWWPlatform by inject()
     private val events: WWWEvents by inject()
 
@@ -107,7 +107,9 @@ open class WWWMainActivity(val platformEnabler: PlatformEnabler, showSplash: Boo
             )
         // Debug screen removed from tab bar - will be accessed via floating icon
 
-        TabManager(platformEnabler, screens.toList(),
+        TabManager(
+            platformEnabler,
+            screens.toList(),
         ) { isSelected, tabIndex, contentDescription ->
             ConfigurableTabBarItem(isSelected, tabIndex, contentDescription, screens.size)
         }
@@ -115,7 +117,6 @@ open class WWWMainActivity(val platformEnabler: PlatformEnabler, showSplash: Boo
 
     @Composable
     open fun Draw() {
-
         // Also enforce minimum duration
         scope.launch {
             delay(WWWGlobals.Timing.SPLASH_MAX_DURATION)
@@ -137,7 +138,7 @@ open class WWWMainActivity(val platformEnabler: PlatformEnabler, showSplash: Boo
                             debugTabScreen?.Screen(platformEnabler, Modifier.fillMaxSize()) ?: run {
                                 // Fallback debug screen if injection failed
                                 DebugScreen(
-                                    modifier = Modifier.fillMaxSize()
+                                    modifier = Modifier.fillMaxSize(),
                                 )
                             }
                         } else {
@@ -158,7 +159,7 @@ open class WWWMainActivity(val platformEnabler: PlatformEnabler, showSplash: Boo
                     // Debug logging to investigate visibility issue
                     Log.d(
                         "MainActivity",
-                        "Debug screen status: debugScreen=${debugTabScreen != null}, ready=$ready"
+                        "Debug screen status: debugScreen=${debugTabScreen != null}, ready=$ready",
                     )
                     // Show debug button in debug builds even if debugScreen is null
                     if (ready && debugTabScreen != null) {
@@ -198,8 +199,8 @@ open class WWWMainActivity(val platformEnabler: PlatformEnabler, showSplash: Boo
     private fun checkSplashFinished(startTime: Long) {
         val elapsed = Clock.System.now().toEpochMilliseconds() - startTime
         if (isDataLoaded &&
-            elapsed >= WWWGlobals.Timing.SPLASH_CHECK_INTERVAL_MS
-        ) { // Timing.SPLASH_MIN_DURATION.inWholeMilliseconds
+            elapsed >= WWWGlobals.Timing.SPLASH_MIN_DURATION.inWholeMilliseconds
+        ) {
             isSplashFinished.update { true }
         }
     }

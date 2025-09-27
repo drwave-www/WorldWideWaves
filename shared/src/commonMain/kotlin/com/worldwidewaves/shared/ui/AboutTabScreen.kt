@@ -28,7 +28,10 @@ class AboutTabScreen(
     override val name = "Info"
 
     @Composable
-    override fun Screen(platformEnabler: PlatformEnabler, modifier: Modifier) {
+    override fun Screen(
+        platformEnabler: PlatformEnabler,
+        modifier: Modifier,
+    ) {
         val uriHandler = LocalUriHandler.current
 
         AboutScreen(

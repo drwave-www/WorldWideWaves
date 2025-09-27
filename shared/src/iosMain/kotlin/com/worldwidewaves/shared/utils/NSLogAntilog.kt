@@ -20,13 +20,16 @@ import io.github.aakira.napier.LogLevel
  * - xcrun simctl spawn <UDID> log show --style compact --last 2m --debug --info --predicate 'processImagePath CONTAINS[c] "WorldWideWaves"'
  */
 internal class OSLogAntilog : Antilog() {
-    override fun isEnable(priority: LogLevel, tag: String?) = true
+    override fun isEnable(
+        priority: LogLevel,
+        tag: String?,
+    ) = true
 
     override fun performLog(
         priority: LogLevel,
         tag: String?,
         throwable: Throwable?,
-        message: String?
+        message: String?,
     ) {
         val lvl = priority.name
         val tagOr = tag ?: "LOG"

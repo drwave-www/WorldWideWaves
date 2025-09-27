@@ -23,7 +23,10 @@ class DebugTabScreen : TabScreen {
     override val name = "Debug"
 
     @Composable
-    override fun Screen(platformEnabler: PlatformEnabler, modifier: Modifier) {
+    override fun Screen(
+        platformEnabler: PlatformEnabler,
+        modifier: Modifier,
+    ) {
         DebugScreen(
             modifier = modifier,
             onPerformanceClick = {

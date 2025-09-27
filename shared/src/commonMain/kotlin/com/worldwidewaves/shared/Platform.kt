@@ -93,7 +93,6 @@ class WWWPlatform(
     fun getSimulation(): WWWSimulation? = _simulation
 
     fun isOnSimulation(): Boolean = _simulation != null
-
 }
 
 class WWWShutdownHandler(
@@ -143,7 +142,10 @@ expect fun updateCacheMetadata(fileName: String)
 interface PlatformEnabler {
     // Open an event activity / screen
     fun openEventActivity(eventId: String)
+
     fun openWaveActivity(eventId: String)
+
     fun toast(message: String)
+
     @Composable fun OpenUrl(url: String)
 }

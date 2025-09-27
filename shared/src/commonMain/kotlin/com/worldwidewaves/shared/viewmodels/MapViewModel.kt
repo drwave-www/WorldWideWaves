@@ -25,7 +25,6 @@ import com.worldwidewaves.shared.map.MapFeatureState
 import kotlinx.coroutines.flow.StateFlow
 
 interface MapViewModel {
-
     fun checkIfMapIsAvailable(
         mapId: String,
         autoDownload: Boolean = false,

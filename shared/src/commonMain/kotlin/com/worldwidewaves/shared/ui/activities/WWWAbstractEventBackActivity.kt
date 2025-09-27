@@ -104,14 +104,13 @@ abstract class WWWAbstractEventBackActivity(
     /**
      * Handle back button press - should be called from Android activity's onBackPressed()
      */
-    fun handleBackPress(): Boolean {
-        return if (onFinish != null) {
+    fun handleBackPress(): Boolean =
+        if (onFinish != null) {
             onFinish?.invoke()
             true // Back press was handled
         } else {
             false // Back press was not handled
         }
-    }
 
     private fun setEvent(event: IWWWEvent?) {
         if (event != null) {

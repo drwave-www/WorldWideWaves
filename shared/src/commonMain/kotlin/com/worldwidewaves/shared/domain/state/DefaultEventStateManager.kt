@@ -174,8 +174,9 @@ class DefaultEventStateManager(
             issues.add(
                 StateValidationIssue(
                     field = "progression",
-                    issue = "Progression went backwards: ${previousState.progression} -> " +
-                        "${newState.progression} (status: ${newState.status})",
+                    issue =
+                        "Progression went backwards: ${previousState.progression} -> " +
+                            "${newState.progression} (status: ${newState.status})",
                     severity = StateValidationIssue.Severity.WARNING,
                 ),
             )

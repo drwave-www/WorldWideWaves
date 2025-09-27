@@ -62,9 +62,10 @@ import platform.UIKit.UIViewController
  * iOS Main View Controller that mimics MainActivity structure.
  * Creates TabManager with iOS TabScreen implementations and handles splash screen logic.
  */
-fun MainViewController(): UIViewController = ComposeUIViewController {
-    IOSMainScreen()
-}
+fun MainViewController(): UIViewController =
+    ComposeUIViewController {
+        IOSMainScreen()
+    }
 
 @Composable
 private fun IOSMainScreen() {
@@ -124,9 +125,11 @@ private fun IOSMainScreen() {
                 if (isSplashFinished) {
                     FloatingActionButton(
                         onClick = { showDebugScreen = !showDebugScreen },
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(end = 16.dp, bottom = 120.dp), // Approximate position
+                        modifier =
+                            Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(end = 16.dp, bottom = 120.dp),
+                        // Approximate position
                         containerColor = Color(0xFF4CAF50),
                         shape = CircleShape,
                     ) {
@@ -162,10 +165,11 @@ private class IOSMainComponent : KoinComponent {
     val debugScreen = DebugScreen()
 
     val tabManager by lazy {
-        val screens = mutableListOf(
-            eventsListScreen,
-            aboutScreen,
-        )
+        val screens =
+            mutableListOf(
+                eventsListScreen,
+                aboutScreen,
+            )
         // Debug screen removed from tab bar - accessed via floating icon
 
         TabManager(

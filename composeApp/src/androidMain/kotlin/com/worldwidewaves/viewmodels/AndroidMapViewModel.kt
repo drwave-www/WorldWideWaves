@@ -51,7 +51,8 @@ import kotlinx.coroutines.launch
  */
 class AndroidMapViewModel(
     application: Application,
-) : AndroidViewModel(application), MapViewModel {
+) : AndroidViewModel(application),
+    MapViewModel {
     // Composition over inheritance - use shared logic
     private val sharedLogic =
         object : BaseMapDownloadViewModel() {
@@ -181,7 +182,7 @@ class AndroidMapViewModel(
 
     override fun downloadMap(
         mapId: String,
-        onMapDownloaded: (() -> Unit)?
+        onMapDownloaded: (() -> Unit)?,
     ) {
         viewModelScope.launch {
             sharedLogic.downloadMap(mapId, onMapDownloaded)

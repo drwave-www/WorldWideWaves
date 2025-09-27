@@ -32,14 +32,15 @@ import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.utils.Log
 import org.koin.mp.KoinPlatform
 
-class AndroidPlatformEnabler(val context: Context? = null) : PlatformEnabler {
-
+class AndroidPlatformEnabler(
+    val context: Context? = null,
+) : PlatformEnabler {
     override fun openEventActivity(eventId: String) {
         val context: Context = context ?: KoinPlatform.getKoin().get()
         context.startActivity(
             Intent(context, EventActivity::class.java).apply {
                 putExtra("eventId", eventId)
-            }
+            },
         )
     }
 
@@ -48,7 +49,7 @@ class AndroidPlatformEnabler(val context: Context? = null) : PlatformEnabler {
         context.startActivity(
             Intent(context, WaveActivity::class.java).apply {
                 putExtra("eventId", eventId)
-            }
+            },
         )
     }
 
@@ -66,5 +67,4 @@ class AndroidPlatformEnabler(val context: Context? = null) : PlatformEnabler {
             Log.e("AboutScreen", "Failed to open URL: $url", throwable = e)
         }
     }
-
 }

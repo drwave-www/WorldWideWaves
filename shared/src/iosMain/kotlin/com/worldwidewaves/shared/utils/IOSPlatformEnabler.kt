@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 import com.worldwidewaves.shared.PlatformEnabler
 
 class IOSPlatformEnabler : PlatformEnabler {
-
     override fun openEventActivity(eventId: String) {
         TODO()
     }

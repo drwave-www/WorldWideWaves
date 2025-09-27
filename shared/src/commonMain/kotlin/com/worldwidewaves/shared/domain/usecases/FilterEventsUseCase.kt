@@ -109,8 +109,12 @@ data class EventFilterCriteria(
  */
 interface IMapAvailabilityChecker {
     val mapStates: StateFlow<Map<String, Boolean>>
+
     fun refreshAvailability()
+
     fun isMapDownloaded(eventId: String): Boolean
+
     fun getDownloadedMaps(): List<String>
+
     fun trackMaps(mapIds: Collection<String>)
 }
