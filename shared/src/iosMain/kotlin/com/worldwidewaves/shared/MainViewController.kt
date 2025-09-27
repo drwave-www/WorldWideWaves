@@ -24,13 +24,17 @@ package com.worldwidewaves.shared
 import androidx.compose.ui.window.ComposeUIViewController
 import com.worldwidewaves.shared.ui.activities.WWWMainActivity
 import com.worldwidewaves.shared.utils.IOSPlatformEnabler
+import com.worldwidewaves.shared.utils.Log
 import platform.UIKit.UIViewController
 
 /**
  * iOS Main View Controller that uses shared WWWMainActivity.
  * Uses the exact same UI as Android for perfect parity.
+ * Enhanced with exception logging for debugging.
  */
-fun MainViewController(): UIViewController =
-    ComposeUIViewController {
+fun MainViewController(): UIViewController {
+    Log.i("MainViewController", "Creating iOS main view controller")
+    return ComposeUIViewController {
         WWWMainActivity(IOSPlatformEnabler()).Draw()
     }
+}
