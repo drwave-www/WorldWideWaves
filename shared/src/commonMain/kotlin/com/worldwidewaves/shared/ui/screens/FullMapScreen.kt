@@ -11,7 +11,9 @@ package com.worldwidewaves.shared.ui.screens
  */
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -24,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.ui.components.ButtonWave
-import com.worldwidewaves.shared.ui.components.SharedMapActions
+import com.worldwidewaves.shared.ui.components.MapActions
 import kotlinx.coroutines.launch
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -53,7 +55,10 @@ fun FullMapScreen(
 
     // Screen composition
     Box(modifier = modifier.fillMaxSize()) {
-        eventMap?.Screen(autoMapDownload = true, modifier = Modifier.fillMaxSize())
+        eventMap?.Screen(
+            autoMapDownload = true,
+            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+        )
 
         ButtonWave(
             event.id,
@@ -64,7 +69,7 @@ fun FullMapScreen(
             Modifier.align(Alignment.TopCenter).padding(top = 40.dp),
         )
 
-        SharedMapActions(
+        MapActions(
             event = event,
             modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
             onTargetWave = {
