@@ -21,6 +21,8 @@ package com.worldwidewaves.shared.map
  * limitations under the License.
  */
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.worldwidewaves.shared.WWWGlobals.MapDisplay
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.BoundingBox
@@ -405,4 +407,7 @@ abstract class AbstractEventMap<T>(
         wavePolygons: List<Polygon>,
         clearPolygons: Boolean,
     )
+
+    @Composable
+    abstract fun Screen(autoMapDownload: Boolean = false, modifier: Modifier)
 }

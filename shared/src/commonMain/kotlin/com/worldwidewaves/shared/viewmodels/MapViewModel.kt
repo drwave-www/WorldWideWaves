@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared.utils
+package com.worldwidewaves.shared.viewmodels
 
 /*
  * Copyright 2025 DrWave
@@ -21,25 +21,22 @@ package com.worldwidewaves.shared.utils
  * limitations under the License.
  */
 
-import androidx.compose.runtime.Composable
-import com.worldwidewaves.shared.PlatformEnabler
+import com.worldwidewaves.shared.map.MapFeatureState
+import kotlinx.coroutines.flow.StateFlow
 
-class IOSPlatformEnabler : PlatformEnabler {
+interface MapViewModel {
 
-    override fun openEventActivity(eventId: String) {
-        TODO()
-    }
+    fun checkIfMapIsAvailable(
+        mapId: String,
+        autoDownload: Boolean = false,
+    )
 
-    override fun openWaveActivity(eventId: String) {
-        TODO("Not yet implemented")
-    }
+    fun downloadMap(
+        mapId: String,
+        onMapDownloaded: (() -> Unit)? = null,
+    )
 
-    override fun toast(message: String) {
-        TODO("Not yet implemented")
-    }
+    fun cancelDownload()
 
-    @Composable
-    override fun OpenUrl(url: String) {
-        TODO("Not yet implemented")
-    }
+    val featureState: StateFlow<MapFeatureState>
 }

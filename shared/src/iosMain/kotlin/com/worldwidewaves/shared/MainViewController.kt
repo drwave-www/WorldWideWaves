@@ -109,7 +109,7 @@ private fun IOSMainScreen() {
 
                 if (isSplashFinished) {
                     if (showDebugScreen) {
-                        iosMainComponent.debugScreen.Screen(Modifier.fillMaxSize())
+                        iosMainComponent.debugScreen.Screen(platformEnabler, Modifier.fillMaxSize())
                     } else {
                         iosMainComponent.tabManager.TabView()
                     }

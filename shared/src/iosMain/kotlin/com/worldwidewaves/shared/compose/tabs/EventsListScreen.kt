@@ -22,10 +22,10 @@ package com.worldwidewaves.shared.compose.tabs
  */
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.ui.TabScreen
 import com.worldwidewaves.shared.ui.screens.SharedEventsListScreen
 import com.worldwidewaves.shared.viewmodels.EventsViewModel
@@ -42,7 +42,7 @@ class EventsListScreen(
     override val name = "Events"
 
     @Composable
-    override fun Screen(modifier: Modifier) {
+    override fun Screen(platformEnabler: PlatformEnabler, modifier: Modifier) {
         val events by viewModel.events.collectAsState()
 
         // Use shared EventsListScreen for perfect UI parity

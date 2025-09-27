@@ -36,7 +36,7 @@ import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.testing.PerformanceMonitor
 import com.worldwidewaves.testing.UITestFactory
 import com.worldwidewaves.utils.AndroidWWWLocationProvider
-import com.worldwidewaves.viewmodels.MapViewModel
+import com.worldwidewaves.viewmodels.AndroidMapViewModel
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.delay
@@ -86,7 +86,7 @@ class MapIntegrationTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private lateinit var mockMapViewModel: MapViewModel
+    private lateinit var mockMapViewModel: AndroidMapViewModel
     private lateinit var mockAndroidMapLibreAdapter: AndroidMapLibreAdapter
     private lateinit var mockLocationProvider: AndroidWWWLocationProvider
     private lateinit var mockEvent: IWWWEvent
@@ -102,7 +102,7 @@ class MapIntegrationTest {
     }
 
     private fun setupMockMapViewModel() {
-        mockMapViewModel = mockk<MapViewModel>(relaxed = true)
+        mockMapViewModel = mockk<AndroidMapViewModel>(relaxed = true)
 
         val mockStateFlow = MutableStateFlow<MapFeatureState>(MapFeatureState.NotChecked)
         every { mockMapViewModel.featureState } returns mockStateFlow

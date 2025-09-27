@@ -67,7 +67,7 @@ import kotlin.time.ExperimentalTime
 
 
 @OptIn(ExperimentalTime::class)
-class WorldWideWaves : KoinComponent {
+open class WWWActivity(val platformEnabler: PlatformEnabler, showSplash: Boolean = true) : KoinComponent {
 
     private val platform: WWWPlatform by inject()
     private val events: WWWEvents by inject()
@@ -82,12 +82,20 @@ class WorldWideWaves : KoinComponent {
     private var isDataLoaded: Boolean = false
 
     /** Flow observed by Compose to know when we can display main content. */
-    private val isSplashFinished = MutableStateFlow(false)
+    private val isSplashFinished = MutableStateFlow(!showSplash)
 
     // Record start time to enforce minimum duration
     val startTime = Clock.System.now().toEpochMilliseconds()
 
-    private val tabManager by lazy {
+    init {
+        // Begin loading events – when done, flag so splash can disappear
+        events.loadEvents(onTermination = {
+            isDataLoaded = true
+            checkSplashFinished(startTime)
+        })
+    }
+
+    protected val tabManager by lazy {
         val screens =
             mutableListOf(
                 eventsListScreen,
@@ -95,15 +103,21 @@ class WorldWideWaves : KoinComponent {
             )
         // Debug screen removed from tab bar - will be accessed via floating icon
 
-        TabManager(
-            screens.toList(),
+        TabManager(platformEnabler, screens.toList(),
         ) { isSelected, tabIndex, contentDescription ->
             ConfigurableTabBarItem(isSelected, tabIndex, contentDescription, screens.size)
         }
     }
 
     @Composable
-    fun Screen() {
+    open fun Draw() {
+
+        // Also enforce minimum duration
+        scope.launch {
+            delay(WWWGlobals.Timing.SPLASH_MAX_DURATION)
+            checkSplashFinished(startTime)
+        }
+
         WorldWideWavesTheme {
             Surface(
                 modifier = Modifier.background(MaterialTheme.colorScheme.background),
@@ -116,14 +130,14 @@ class WorldWideWaves : KoinComponent {
                     val ready by isSplashFinished.collectAsState()
                     if (ready) {
                         if (showDebugScreen) {
-                            debugScreen?.Screen(Modifier.fillMaxSize()) ?: run {
+                            debugScreen?.Screen(platformEnabler, Modifier.fillMaxSize()) ?: run {
                                 // Fallback debug screen if injection failed
                                 com.worldwidewaves.shared.ui.screens.SharedDebugScreen(
                                     modifier = Modifier.fillMaxSize()
                                 )
                             }
                         } else {
-                            tabManager.TabView()
+                            Screen()
                         }
                     } else {
                         SplashScreen()
@@ -169,19 +183,11 @@ class WorldWideWaves : KoinComponent {
                 }
             }
         }
+    }
 
-        // Begin loading events – when done, flag so splash can disappear
-        events.loadEvents(onTermination = {
-            isDataLoaded = true
-            checkSplashFinished(startTime)
-        })
-
-        // Also enforce minimum duration
-        scope.launch {
-            delay(WWWGlobals.Timing.SPLASH_MAX_DURATION)
-            checkSplashFinished(startTime)
-        }
-
+    @Composable
+    protected open fun Screen() {
+        tabManager.TabView()
     }
 
     /** Updates [isSplashFinished] once both data and min duration requirements are met. */
@@ -193,5 +199,4 @@ class WorldWideWaves : KoinComponent {
             isSplashFinished.update { true }
         }
     }
-
 }

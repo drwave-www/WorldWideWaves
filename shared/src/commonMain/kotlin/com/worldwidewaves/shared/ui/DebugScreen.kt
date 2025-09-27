@@ -12,6 +12,7 @@ package com.worldwidewaves.shared.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.ui.screens.SharedDebugScreen
 
 /**
@@ -22,7 +23,7 @@ class DebugScreen : TabScreen {
     override val name = "Debug"
 
     @Composable
-    override fun Screen(modifier: Modifier) {
+    override fun Screen(platformEnabler: PlatformEnabler, modifier: Modifier) {
         SharedDebugScreen(
             modifier = modifier,
             onPerformanceClick = {

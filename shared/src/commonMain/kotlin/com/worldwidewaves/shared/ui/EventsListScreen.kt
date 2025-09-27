@@ -36,7 +36,6 @@ import com.worldwidewaves.shared.domain.usecases.IMapAvailabilityChecker
 import com.worldwidewaves.shared.ui.screens.SharedEventsListScreen
 import com.worldwidewaves.shared.viewmodels.EventsViewModel
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
 /**
  * Android wrapper for SharedEventsListScreen.
@@ -49,11 +48,10 @@ class EventsListScreen(
     private val setEventFavorite: SetEventFavorite,
 ) : TabScreen, KoinComponent {
 
-    private val platformEnabler: PlatformEnabler by inject()
     override val name = "Events"
 
     @Composable
-    override fun Screen(modifier: Modifier) {
+    override fun Screen(platformEnabler: PlatformEnabler, modifier: Modifier) {
         val events by viewModel.events.collectAsState()
         val mapStates by mapChecker.mapStates.collectAsState()
 

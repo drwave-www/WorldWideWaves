@@ -23,7 +23,6 @@ package com.worldwidewaves.di
 
 import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.shared.PlatformEnabler
-import com.worldwidewaves.shared.WorldWideWaves
 import com.worldwidewaves.shared.domain.usecases.IMapAvailabilityChecker
 import com.worldwidewaves.shared.ui.DebugScreen
 import com.worldwidewaves.shared.utils.CloseableCoroutineScope
@@ -33,6 +32,7 @@ import com.worldwidewaves.utils.AndroidPlatformEnabler
 import com.worldwidewaves.utils.AndroidWWWLocationProvider
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.WWWSimulationEnabledLocationEngine
+import com.worldwidewaves.viewmodels.AndroidMapViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -40,7 +40,6 @@ import org.koin.dsl.module
 val applicationModule =
     module {
 
-        single { WorldWideWaves() }
         single<PlatformEnabler> { AndroidPlatformEnabler() }
         single<IMapAvailabilityChecker> { get<MapAvailabilityChecker>() }
 
@@ -63,6 +62,8 @@ val applicationModule =
                 platform = get(),
             )
         }
+
+        viewModel { AndroidMapViewModel(get()) }
 
         // Location engine and provider for Android
         single { WWWSimulationEnabledLocationEngine(get()) }

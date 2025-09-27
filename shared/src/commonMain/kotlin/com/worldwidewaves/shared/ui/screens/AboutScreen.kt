@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
+import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.TabBar
 import com.worldwidewaves.shared.WWWPlatform
@@ -65,6 +66,7 @@ private val tabInfo =
 @Composable
 fun SharedAboutScreen(
     platform: WWWPlatform,
+    platformEnabler: PlatformEnabler,
     modifier: Modifier = Modifier,
     onUrlOpen: (String) -> Unit = { url ->
         Log.i("AboutScreen", "URL click: $url")
@@ -73,13 +75,14 @@ fun SharedAboutScreen(
     // Create tab manager with shared sub-screens
     val tabManager =
         TabManager(
+            platformEnabler,
             screens =
                 listOf(
                     object : TabScreen {
                         override val name = "Infos"
 
                         @Composable
-                        override fun Screen(modifier: Modifier) {
+                        override fun Screen(platformEnabler: PlatformEnabler, modifier: Modifier) {
                             SharedAboutInfoScreen(modifier = modifier, onUrlOpen = onUrlOpen)
                         }
                     },
@@ -87,7 +90,7 @@ fun SharedAboutScreen(
                         override val name = "FAQ"
 
                         @Composable
-                        override fun Screen(modifier: Modifier) {
+                        override fun Screen(platformEnabler: PlatformEnabler, modifier: Modifier) {
                             SharedAboutFaqScreen(
                                 platform = platform,
                                 modifier = modifier,

@@ -22,7 +22,6 @@
 
 package com.worldwidewaves.activities.event
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -47,14 +46,7 @@ class WaveActivity : AbstractEventWaveActivity() {
             remember(event.id) {
                 AndroidEventMap(
                     event,
-                    context = this@WaveActivity as AppCompatActivity,
-                    onMapClick = {
-                        context.startActivity(
-                            Intent(context, EventFullMapActivity::class.java).apply {
-                                putExtra("eventId", event.id)
-                            },
-                        )
-                    },
+                    context = this@WaveActivity as AppCompatActivity
                 )
             }
 

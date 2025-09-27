@@ -39,6 +39,7 @@ import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.viewmodels.BaseMapDownloadViewModel
 import com.worldwidewaves.shared.viewmodels.MapDownloadUtils
+import com.worldwidewaves.shared.viewmodels.MapViewModel
 import dev.icerock.moko.resources.desc.Resource
 import dev.icerock.moko.resources.desc.ResourceFormatted
 import dev.icerock.moko.resources.desc.StringDesc
@@ -48,9 +49,9 @@ import kotlinx.coroutines.launch
  * Android implementation of map download ViewModel using shared base logic.
  * Preserves all original MapViewModel functionality while delegating common logic to shared base.
  */
-class MapViewModel(
+class AndroidMapViewModel(
     application: Application,
-) : AndroidViewModel(application) {
+) : AndroidViewModel(application), MapViewModel {
     // Composition over inheritance - use shared logic
     private val sharedLogic =
         object : BaseMapDownloadViewModel() {
@@ -154,9 +155,9 @@ class MapViewModel(
     private var installStateListener: SplitInstallStateUpdatedListener? = null
 
     // Delegate public interface to shared logic
-    val featureState = sharedLogic.featureState
+    override val featureState = sharedLogic.featureState
 
-    private companion object {
+    private companion object Companion {
         private const val TAG = "MapViewModel"
         private const val PLAY_STORE_AUTH_ERROR_CODE = -100
     }
@@ -169,25 +170,25 @@ class MapViewModel(
     // Public API (delegates to shared logic)
     // ------------------------------------------------------------------------
 
-    fun checkIfMapIsAvailable(
+    override fun checkIfMapIsAvailable(
         mapId: String,
-        autoDownload: Boolean = false,
+        autoDownload: Boolean,
     ) {
         viewModelScope.launch {
             sharedLogic.checkIfMapIsAvailable(mapId, autoDownload)
         }
     }
 
-    fun downloadMap(
+    override fun downloadMap(
         mapId: String,
-        onMapDownloaded: (() -> Unit)? = null,
+        onMapDownloaded: (() -> Unit)?
     ) {
         viewModelScope.launch {
             sharedLogic.downloadMap(mapId, onMapDownloaded)
         }
     }
 
-    fun cancelDownload() {
+    override fun cancelDownload() {
         viewModelScope.launch {
             sharedLogic.cancelDownload()
         }

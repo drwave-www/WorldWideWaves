@@ -12,6 +12,7 @@ package com.worldwidewaves.shared.compose.tabs
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.ui.TabScreen
 import com.worldwidewaves.shared.ui.screens.SharedAboutScreen
@@ -29,7 +30,7 @@ class AboutScreen(
     override val name = "Info"
 
     @Composable
-    override fun Screen(modifier: Modifier) {
+    override fun Screen(platformEnabler: PlatformEnabler, modifier: Modifier) {
         SharedAboutScreen(
             platform = platform,
             modifier = modifier,

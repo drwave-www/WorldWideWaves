@@ -32,15 +32,13 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
-import com.worldwidewaves.shared.WorldWideWaves
+import com.worldwidewaves.shared.WWWActivity
+import com.worldwidewaves.utils.AndroidPlatformEnabler
 import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
 
 // ----------------------------
 
 open class MainActivity : AppCompatActivity() {
-
-    private val worldWideWaves: WorldWideWaves by inject()
 
     /** Controls how long the *official* (system) splash stays on-screen (~10 ms). */
     private var isOfficialSplashDismissed = false
@@ -98,7 +96,7 @@ open class MainActivity : AppCompatActivity() {
         }
 
         setContent {
-            worldWideWaves.Screen()
+            WWWActivity(AndroidPlatformEnabler(this)).Draw()
         }
 
     }

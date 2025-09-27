@@ -29,15 +29,13 @@ import androidx.compose.ui.Modifier
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
 import com.worldwidewaves.shared.ui.screens.FullMapScreen
-import org.koin.android.ext.android.inject
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
-class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = false) {
+class EventFullMapActivity : AbstractEventWaveActivity() {
     // Dependencies injected as needed
 
     // Ensure dynamic-feature splits are available without restarting the app

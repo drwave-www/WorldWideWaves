@@ -13,6 +13,7 @@ package com.worldwidewaves.shared.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.ui.screens.SharedAboutScreen
 import com.worldwidewaves.shared.utils.Log
@@ -27,11 +28,12 @@ class AboutScreen(
     override val name = "Info"
 
     @Composable
-    override fun Screen(modifier: Modifier) {
+    override fun Screen(platformEnabler: PlatformEnabler, modifier: Modifier) {
         val uriHandler = LocalUriHandler.current
 
         SharedAboutScreen(
             platform = platform,
+            platformEnabler = platformEnabler,
             modifier = modifier,
             onUrlOpen = { url ->
                 try {

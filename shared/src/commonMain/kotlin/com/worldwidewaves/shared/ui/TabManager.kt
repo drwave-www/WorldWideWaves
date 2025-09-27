@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWGlobals.TabBar
 
 // ----------------------------
@@ -55,7 +56,7 @@ import com.worldwidewaves.shared.WWWGlobals.TabBar
  *   analytics.
  */
 interface TabScreen {
-    @Composable fun Screen(modifier: Modifier)
+    @Composable fun Screen(platformEnabler: PlatformEnabler, modifier: Modifier)
     val name: String
 }
 
@@ -72,6 +73,7 @@ interface TabScreen {
  *    current selection.
  */
 class TabManager(
+    private val platformEnabler: PlatformEnabler,
     private val screens: List<TabScreen>, // List of tab screens
     val tabBarItem: @Composable ( // How to draw a tab item
         isSelected: Boolean,
@@ -102,7 +104,7 @@ class TabManager(
         ) {
             // Display the selected tab screen
             Surface(modifier = Modifier.weight(1f).fillMaxSize()) {
-                originalScreen?.invoke(Modifier) ?: screens[currentTab].Screen(Modifier)
+                originalScreen?.invoke(Modifier) ?: screens[currentTab].Screen(platformEnabler, Modifier)
             }
 
             // Tab bar
