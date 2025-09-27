@@ -74,6 +74,10 @@ open class WWWMainActivity(
     val platformEnabler: PlatformEnabler,
     showSplash: Boolean = true,
 ) : KoinComponent {
+    companion object {
+        private var instanceCount = 0
+    }
+
     private val platform: WWWPlatform by inject()
     private val events: WWWEvents by inject()
     private val globalSoundChoreography: GlobalSoundChoreographyManager by inject()
@@ -94,16 +98,25 @@ open class WWWMainActivity(
     val startTime = Clock.System.now().toEpochMilliseconds()
 
     init {
-        Log.i("WWWMainActivity", "Initializing WWWMainActivity")
+        instanceCount++
+        Log.i("WWWMainActivity", "Initializing WWWMainActivity instance #$instanceCount (hashCode: ${this.hashCode()})")
 
-        // Begin loading events – when done, flag so splash can disappear
-        events.loadEvents(onTermination = {
-            Log.i("WWWMainActivity", "Events loading completed")
+        // Check if events are already loaded to avoid duplicate listeners
+        if (events.list().isNotEmpty()) {
+            Log.i("WWWMainActivity", "Events already loaded, starting sound choreography immediately")
             isDataLoaded = true
             checkSplashFinished(startTime)
-            // Start global sound choreography observation for all events
             startGlobalSoundChoreographyForAllEvents()
-        })
+        } else {
+            // Begin loading events – when done, flag so splash can disappear
+            events.loadEvents(onTermination = {
+                Log.i("WWWMainActivity", "Events loading completed for instance #$instanceCount (hashCode: ${this.hashCode()})")
+                isDataLoaded = true
+                checkSplashFinished(startTime)
+                // Start global sound choreography observation for all events
+                startGlobalSoundChoreographyForAllEvents()
+            })
+        }
     }
 
     protected val tabManager by lazy {
@@ -201,7 +214,10 @@ open class WWWMainActivity(
      * This enables sound to play throughout the app when user is in any event area.
      */
     private fun startGlobalSoundChoreographyForAllEvents() {
-        Log.d("WWWMainActivity", "Starting global sound choreography for all events")
+        Log.d(
+            "WWWMainActivity",
+            "Starting global sound choreography for all events (instance #$instanceCount, hashCode: ${this.hashCode()})",
+        )
         globalSoundChoreography.startObservingAllEvents()
     }
 

@@ -138,13 +138,28 @@ class WWWEvents : KoinComponent {
                         }
                     }
 
+                Log.i("WWWEvents.loadEventsJob", "About to update events flow with ${validEvents.size} events")
+
                 // Update the _eventsFlow in the main dispatcher to ensure thread safety
                 withContext(Dispatchers.Main) {
-                    _eventsFlow.value = validEvents
+                    try {
+                        _eventsFlow.value = validEvents
+                        Log.i("WWWEvents.loadEventsJob", "Successfully updated events flow")
+                    } catch (e: Exception) {
+                        Log.e("WWWEvents.loadEventsJob", "Error updating events flow: ${e.message}")
+                        throw e
+                    }
                 }
 
+                Log.i("WWWEvents.loadEventsJob", "About to call onEventsLoaded()")
                 // The events have been loaded, so we can now call any pending callbacks
-                onEventsLoaded()
+                try {
+                    onEventsLoaded()
+                    Log.i("WWWEvents.loadEventsJob", "Successfully called onEventsLoaded()")
+                } catch (e: Exception) {
+                    Log.e("WWWEvents.loadEventsJob", "Error in onEventsLoaded(): ${e.message}")
+                    throw e
+                }
             } catch (e: Exception) {
                 Log.e(::WWWEvents.name, "Unexpected error loading events: ${e.message}", e)
                 onLoadingError(e)
