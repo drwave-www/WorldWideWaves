@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWGlobals.BackNav
+import com.worldwidewaves.shared.ui.activities.UIProperties
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.ic_arrow_back
@@ -102,11 +103,11 @@ abstract class WWWAbstractEventBackActivity(
     @Composable
     fun Draw(onFinish: (() -> Unit)? = null) {
         this.onFinish = onFinish
-        super.Draw()
+        super.Draw(uiProperties = null)
     }
 
     @Composable
-    override fun Draw() {
+    override fun Draw(uiProperties: UIProperties?) {
         Draw(onFinish = null)
     }
 

@@ -44,7 +44,8 @@ kotlin {
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "Shared"
-            isStatic = false // Change to dynamic framework for better bundle loading
+            isStatic = true
+            linkerOpts("-ObjC")
         }
     }
 
@@ -70,16 +71,19 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.coroutines.core)
+            // Use JetBrains Compose 1.9.0 from libs
             implementation(libs.compose.runtime)
+            implementation(libs.compose.ui)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
-            implementation(compose.materialIconsExtended)
             implementation(libs.compose.components.resources)
+            implementation(compose.materialIconsExtended)
             implementation(libs.datastore.preferences)
             implementation(libs.kotlinx.atomic)
             implementation(libs.koin.core)
-            implementation(libs.compose.ui)
             implementation(libs.napier)
+            // REQUIRED so IOSLifecycleOwner can link:
+            implementation("org.jetbrains.androidx.lifecycle:lifecycle-common:2.8.4")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -93,9 +97,17 @@ kotlin {
             implementation(libs.koin.test)
             implementation(libs.mockk.android.v1120)
         }
+        iosMain.dependencies {
+            implementation("org.jetbrains.compose.ui:ui-uikit:1.8.2")
+        }
+
         androidMain.dependencies {
             implementation(libs.androidx.ui.text.google.fonts)
             implementation(libs.androidx.annotation)
+            // Add back lifecycle for Android ONLY
+            implementation(libs.androidx.lifecycle.viewmodel.ktx)
+            implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.4")
+            // Use JetBrains Compose, not AndroidX Compose
         }
 
         /*
@@ -208,10 +220,21 @@ dependencies {
     testImplementation(libs.mockk.android.v1120)
 }
 
-// Clean dependency exclusions for iOS stability
+// Module-specific excludes: allow lifecycle-common; block Android-only bits
 configurations.configureEach {
-    if (name.contains("commonMain", ignoreCase = true) || name.contains("ios", ignoreCase = true)) {
+    val n = name.lowercase()
+    if (n.contains("commonmain") || n.contains("ios")) {
+        // allow lifecycle-common; block Android-only bits
+        exclude(group = "androidx.lifecycle", module = "lifecycle-runtime-compose")
         exclude(group = "org.jetbrains.androidx.lifecycle", module = "lifecycle-runtime-compose")
+        exclude(group = "androidx.lifecycle", module = "lifecycle-viewmodel-compose")
+        exclude(group = "androidx.lifecycle", module = "lifecycle-runtime-ktx")
+        exclude(group = "androidx.lifecycle", module = "lifecycle-viewmodel-ktx")
+        exclude(group = "androidx.activity") // activity/fragment are Android-only
+        exclude(group = "androidx.fragment")
+        exclude(group = "androidx.compose.ui", module = "ui-tooling")
+        exclude(group = "androidx.compose.material") // old M2
+        exclude(group = "androidx.compose.material3") // AndroidX variant
     }
 }
 
