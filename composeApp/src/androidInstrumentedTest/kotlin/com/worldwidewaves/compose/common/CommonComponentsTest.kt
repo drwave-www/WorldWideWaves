@@ -32,8 +32,8 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.SystemClock
-import com.worldwidewaves.shared.ui.components.ButtonWave
-import com.worldwidewaves.shared.ui.components.WaveNavigator
+import com.worldwidewaves.shared.ui.components.shared.ButtonWave
+import com.worldwidewaves.shared.ui.components.shared.WaveNavigator
 import com.worldwidewaves.shared.ui.theme.WorldWideWavesTheme
 import org.junit.Rule
 import org.junit.Test

@@ -201,7 +201,7 @@ object WWWGlobals {
         const val TARGET_USER_ZOOM = 16.0
 
         /** Target zoom level for wave display */
-        const val TARGET_WAVE_ZOOM = 10.0
+        const val TARGET_WAVE_ZOOM = 13.0
 
         /** Percentage thresholds for map constraint calculations */
         const val CONSTRAINT_SMALL_THRESHOLD = 0.1

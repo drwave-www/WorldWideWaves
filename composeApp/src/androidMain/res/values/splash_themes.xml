@@ -13,11 +13,11 @@
         <!-- Set the splash screen background to match your current background -->
         <item name="windowSplashScreenBackground">#011026</item>
 
-        <!-- Use the vector logo as the splash screen icon -->
-        <item name="windowSplashScreenAnimatedIcon">@drawable/www_simple_logo_vector</item>
+        <!-- Use the logo as the splash screen icon -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/www_simple_logo_transparent</item>
 
         <!-- Configure animation duration (aligned with SYSTEM_SPLASH_DURATION) -->
-        <item name="windowSplashScreenAnimationDuration">500</item>
+        <item name="windowSplashScreenAnimationDuration">50</item>
 
         <!-- Set the theme used after splash screen appears -->
         <item name="postSplashScreenTheme">@style/Theme.WorldWideWaves</item>

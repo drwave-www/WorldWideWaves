@@ -259,10 +259,6 @@ class WWWEventObserver(
 
     // ---------------------------
 
-    init {
-        startObservation()
-    }
-
     /**
      * Starts observing the wave event if not already started.
      *

@@ -79,7 +79,7 @@ fun FullMapScreen(
             onTargetUser = {
                 scope.launch {
                     eventMap?.markUserInteracted()
-                    eventMap?.targetUserAndWave()
+                    eventMap?.targetUser()
                 }
             },
         )
