@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared.ui.components
+package com.worldwidewaves.shared.ui.components.about
 
 /*
  * Copyright 2025 DrWave

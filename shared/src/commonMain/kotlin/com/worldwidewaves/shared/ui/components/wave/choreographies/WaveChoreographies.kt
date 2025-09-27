@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-package com.worldwidewaves.shared.ui.components.choreographies
+package com.worldwidewaves.shared.ui.components.wave.choreographies
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
