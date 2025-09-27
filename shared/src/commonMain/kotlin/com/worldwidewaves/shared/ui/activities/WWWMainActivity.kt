@@ -66,8 +66,17 @@ import org.koin.core.component.inject
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
+/**
+ * iOS-safe UI properties structure using basic types
+ */
+data class UIProperties(
+    val densityScale: Float = 1.0f,
+    val containerHeightPx: Int = 800,
+    val containerWidthPx: Int = 400
+)
+
 @OptIn(ExperimentalTime::class)
-open class WWWMainActivity(
+open class WWWMainActivity @Throws(Throwable::class) constructor(
     val platformEnabler: PlatformEnabler,
     showSplash: Boolean = true,
 ) : KoinComponent {
@@ -130,7 +139,10 @@ open class WWWMainActivity(
     }
 
     @Composable
-    open fun Draw() {
+    @Throws(Throwable::class)
+    open fun Draw(
+        uiProperties: UIProperties? = null
+    ) {
         // Enforce minimum duration for programmatic splash
         LaunchedEffect(Unit) {
             delay(WWWGlobals.Timing.SPLASH_MIN_DURATION)
@@ -173,10 +185,18 @@ open class WWWMainActivity(
                     // -----------------------------------------------------------------
                     if (ready && debugTabScreen != null) {
                         // Calculate position at 15% from bottom
-                        val windowInfo = LocalWindowInfo.current
-                        val density = LocalDensity.current
-                        val screenHeight = with(density) { windowInfo.containerSize.height.toDp() }
-                        val bottomOffset = screenHeight * 0.15f
+                        // iOS-safe approach: Use provided basic properties or convert from Android APIs
+                        val effectiveUIProps = uiProperties ?: run {
+                            val windowInfo = LocalWindowInfo.current
+                            val density = LocalDensity.current
+                            UIProperties(
+                                densityScale = density.density,
+                                containerHeightPx = windowInfo.containerSize.height,
+                                containerWidthPx = windowInfo.containerSize.width
+                            )
+                        }
+                        val screenHeightDp = (effectiveUIProps.containerHeightPx / effectiveUIProps.densityScale).dp
+                        val bottomOffset = screenHeightDp * 0.15f
 
                         FloatingActionButton(
                             onClick = { showDebugScreen = !showDebugScreen },

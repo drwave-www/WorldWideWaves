@@ -13,15 +13,75 @@ WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves th
 - **Testing**: Comprehensive unit and instrumented test suites
 
 ### iOS-Specific Configuration (CRITICAL)
-- **UI Framework**: SwiftUI (NOT Compose Multiplatform on iOS)
-- **Bundle ID**: `com.worldwidewaves.WorldWideWavesDrWaves` (EXACT - must match)
+- **UI Framework**: Single ComposeUIViewController with AppDelegate (NOT multiple ComposeUIViewController instances)
+- **Bundle ID**: `com.worldwidewaves` (fresh project)
 - **Project Path**: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/iosApp/`
-- **Xcode Project**: `iosApp.xcodeproj`
-- **Main File**: `iosApp/ContentView.swift`
+- **Xcode Project**: `worldwidewaves.xcodeproj`
+- **Main File**: `AppDelegate.swift` (NOT SwiftUI App)
 - **Gradle Task**: `./gradlew :shared:embedAndSignAppleFrameworkForXcode` (via Xcode build script)
 - **Framework Path**: `../shared/build/xcode-frameworks/Debug/iphonesimulator18.5`
-- **Team ID**: `DrWaves`
+- **Key Plist Entry**: `CADisableMinimumFrameDurationOnPhone = YES` (for Compose performance)
 - **Status**: ✅ WORKING (September 27, 2025)
+
+#### **🎯 CORRECT iOS COMPOSE APPROACH:**
+```swift
+// AppDelegate.swift
+@main
+class AppDelegate: UIResponder, UIApplicationDelegate {
+    var window: UIWindow?
+    func application(_ app: UIApplication, didFinishLaunchingWithOptions opts: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        setenv("SKIKO_RENDER_API", "METAL", 1)
+        window = UIWindow(frame: UIScreen.main.bounds)
+        do {
+            window?.rootViewController = try MainViewControllerKt.createAppViewController()
+        } catch let e as NSError {
+            print("❌ iOS: Error: \(e.localizedDescription)")
+            window?.rootViewController = UIViewController()
+        }
+        window?.makeKeyAndVisible()
+        return true
+    }
+}
+```
+
+```kotlin
+// MainViewController.kt
+@Throws(Throwable::class)
+fun createAppViewController(): UIViewController {
+    return ComposeUIViewController(configure = { enforceStrictPlistSanityCheck = false }) {
+        AppUI() // Single shared @Composable root
+    }
+}
+```
+
+#### **❌ WRONG iOS APPROACHES (ALL CRASH):**
+- Multiple ComposeUIViewController instances (causes lifecycle crashes)
+- SwiftUI App with UIViewControllerRepresentable (causes lifecycle conflicts)
+- Single ComposeUIViewController (STILL crashes - uses IOSLifecycleOwner → androidx.lifecycle)
+- ANY ComposeUIViewController usage (fundamentally incompatible with iOS)
+
+#### **✅ FINAL WORKING APPROACH:**
+**Pure SwiftUI + Kotlin Business Logic (NO Compose UI on iOS)**
+```swift
+// Pure SwiftUI views that call Kotlin business logic functions
+struct EventsListView: View {
+    @State private var events: [KotlinEvent] = []
+
+    var body: some View {
+        List(events) { event in
+            EventRowView(event: event)
+        }
+        .onAppear {
+            do {
+                let kotlinEvents = try BusinessLogicKt.getEvents()
+                self.events = kotlinEvents
+            } catch let e as NSError {
+                print("Error: \(e.localizedDescription)")
+            }
+        }
+    }
+}
+```
 
 ## Recent Major Updates
 
@@ -55,6 +115,19 @@ See `POSITION_SYSTEM_REFACTOR.md` for detailed documentation.
 3. **ALWAYS** use `suspend fun initialize()` instead of `init{}` for async work
 4. **ALWAYS** call initialization from `LaunchedEffect(Unit) { component.initialize() }`
 5. **ALWAYS** verify no violations with: `rg -n "object.*KoinComponent" shared/src/commonMain`
+
+#### **🚨 KOTLIN-SWIFT EXCEPTION HANDLING - MANDATORY:**
+6. **ALWAYS** annotate Kotlin methods called from Swift with `@Throws(Throwable::class)`
+7. **ALWAYS** wrap Swift calls to Kotlin with proper try-catch:
+```swift
+do {
+    try KotlinMethodKt.someMethod()
+} catch let e as NSError {
+    print("❌ iOS: Error: \(e.localizedDescription)")
+    print("❌ iOS: Details: \(e)")
+}
+```
+8. **ALWAYS** use NSError for detailed exception information in Swift
 
 #### **🧪 VERIFICATION COMMANDS (Must Return ZERO Results):**
 ```bash
