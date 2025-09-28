@@ -410,11 +410,11 @@ class WavePolygonRelevancyTest {
                 // Relaxed performance assertions for testing
                 assertTrue(
                     averageTime <= POLYGON_PERFORMANCE_THRESHOLD_MS * 2, // More lenient threshold
-                    "$size polygon operations average time (${String.format("%.2f", averageTime)}ms) exceeds relaxed threshold",
+                    "$size polygon operations average time (${averageTime.toString().take(5)}ms) exceeds relaxed threshold",
                 )
 
                 println("✅ $size polygon performance verified:")
-                println("   Vertices: ${polygon.size}, Average: ${String.format("%.2f", averageTime)}ms, Max: ${maxTime}ms")
+                println("   Vertices: ${polygon.size}, Average: ${averageTime.toString().take(5)}ms, Max: ${maxTime}ms")
             }
 
             println("✅ Polygon performance and scalability test completed")

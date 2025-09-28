@@ -33,16 +33,7 @@ import kotlin.random.Random
 
 // ----------------------------
 
-/**
- * Exception thrown when DataStore operations fail.
- *
- * This exception provides clear error information for storage-related failures,
- * enabling proper error handling and fallback mechanisms in the application.
- */
-class DataStoreException(
-    message: String,
-    cause: Throwable? = null,
-) : Exception(message, cause)
+// DataStoreException moved to common module
 
 // ----------------------------
 

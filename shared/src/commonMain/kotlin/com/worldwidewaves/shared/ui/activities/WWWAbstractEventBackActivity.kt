@@ -48,7 +48,6 @@ import com.worldwidewaves.shared.WWWGlobals.BackNav
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.ic_arrow_back
-import com.worldwidewaves.shared.ui.activities.UIProperties
 import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
 import dev.icerock.moko.resources.compose.stringResource
@@ -103,11 +102,11 @@ abstract class WWWAbstractEventBackActivity(
     @Composable
     fun Draw(onFinish: (() -> Unit)? = null) {
         this.onFinish = onFinish
-        super.Draw(uiProperties = null)
+        super.Draw()
     }
 
     @Composable
-    override fun Draw(uiProperties: UIProperties?) {
+    override fun Draw() {
         Draw(onFinish = null)
     }
 

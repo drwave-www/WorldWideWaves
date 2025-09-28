@@ -29,6 +29,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -641,17 +642,18 @@ class MidiParserTest {
         }
 
     @Test
-    fun `should propagate exception when resource loading fails`() =
+    fun `should return null when resource loading fails`() =
         runTest {
             // GIVEN: Mocked MidiResources that throws exception
             mockkObject(MidiResources)
             try {
                 coEvery { MidiResources.readMidiFile(any()) } throws Exception("Resource not found")
 
-                // WHEN/THEN: Should propagate exception from resource loading
-                assertFailsWith<Exception>("Should propagate resource loading exception") {
-                    MidiParser.parseMidiFile("nonexistent.mid")
-                }
+                // WHEN: Resource loading fails
+                val result = MidiParser.parseMidiFile("nonexistent.mid")
+
+                // THEN: Should return null for graceful degradation
+                assertNull(result, "Should return null when resource loading fails")
             } finally {
                 unmockkObject(MidiResources)
             }
