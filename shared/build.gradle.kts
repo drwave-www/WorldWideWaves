@@ -91,7 +91,6 @@ kotlin {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.koin.test)
-            implementation(libs.mockk.common.v1120)
         }
         androidUnitTest.dependencies {
             implementation(libs.kotlin.test)
@@ -105,7 +104,6 @@ kotlin {
                 exclude(group = "org.jetbrains.androidx.lifecycle")
             }
         }
-
         androidMain.dependencies {
             implementation(libs.androidx.ui.text.google.fonts)
             implementation(libs.androidx.annotation)
@@ -114,7 +112,6 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.maplibre.android)
             implementation(libs.androidx.datastore.preferences)
-            implementation(libs.datastore.preferences)
 
             implementation("androidx.compose.material:material-icons-extended")
 

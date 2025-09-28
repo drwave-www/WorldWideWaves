@@ -112,4 +112,3 @@ class TestDataStoreFactory : DataStoreFactory {
     ReplaceWith("TestDataStoreFactory().create(producePath)"),
 )
 fun createDataStore(producePath: () -> String): DataStore<Preferences> = TestDataStoreFactory().create(producePath)
-
