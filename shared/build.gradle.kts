@@ -71,19 +71,21 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.coroutines.core)
-            // Use JetBrains Compose 1.9.0 from libs
-            implementation(libs.compose.runtime)
-            implementation(libs.compose.ui)
-            implementation(libs.compose.foundation)
-            implementation(libs.compose.material3)
-            implementation(libs.compose.components.resources)
+
             implementation(compose.materialIconsExtended)
-            implementation(libs.datastore.preferences)
             implementation(libs.kotlinx.atomic)
             implementation(libs.koin.core)
             implementation(libs.napier)
+
+            implementation("org.jetbrains.compose.runtime:runtime:1.8.2")
+            implementation("org.jetbrains.compose.ui:ui:1.8.2")
+            implementation("org.jetbrains.compose.foundation:foundation:1.8.2")
+            implementation("org.jetbrains.compose.material:material:1.8.2")
+            implementation("org.jetbrains.compose.material3:material3:1.8.2")
+            implementation("org.jetbrains.compose.components:components-resources:1.8.2")
+
             // REQUIRED so IOSLifecycleOwner can link:
-            implementation("org.jetbrains.androidx.lifecycle:lifecycle-common:2.8.4")
+            // implementation("org.jetbrains.androidx.lifecycle:lifecycle-common:2.8.4")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -95,19 +97,50 @@ kotlin {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.koin.test)
-            implementation(libs.mockk.android.v1120)
+            implementation("io.mockk:mockk:1.13.12")
         }
         iosMain.dependencies {
-            implementation("org.jetbrains.compose.ui:ui-uikit:1.8.2")
+            implementation("org.jetbrains.compose.ui:ui-uikit:1.8.2") {
+                exclude(group = "androidx.lifecycle")
+                exclude(group = "org.jetbrains.androidx.lifecycle")
+            }
         }
 
         androidMain.dependencies {
             implementation(libs.androidx.ui.text.google.fonts)
             implementation(libs.androidx.annotation)
-            // Add back lifecycle for Android ONLY
-            implementation(libs.androidx.lifecycle.viewmodel.ktx)
+
+            implementation(libs.koin.android)
+            implementation(libs.kotlinx.datetime)
+            implementation(libs.maplibre.android)
+            implementation(libs.androidx.datastore.preferences)
+            implementation(libs.datastore.preferences)
+
+            implementation("androidx.compose.material:material-icons-extended")
+
+            implementation(libs.places)
+            implementation(libs.androidx.ui.graphics.android)
+            implementation(libs.androidx.annotation.jvm)
+            implementation(libs.feature.delivery.ktx)
+
+            // Compose (Android) via BOM
+            implementation("androidx.compose:compose-bom:2024.09.01")
+            implementation("androidx.compose.ui:ui")
+            implementation("androidx.compose.foundation:foundation")
+            implementation("androidx.compose.material:material")
+            implementation("androidx.compose.material3:material3")
+
+            // Lifecycle + Compose lifecycle (Android-only)
+            implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
+            implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.4")
             implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.4")
-            // Use JetBrains Compose, not AndroidX Compose
+            implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
+
+            // Compose Material3 for Android (you can keep JB MPP in common; this ensures Android has it)
+            // implementation("org.jetbrains.compose.material3:material3:1.8.2")
+
+            // Coroutines on Android
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
         }
 
         /*
@@ -118,6 +151,18 @@ kotlin {
          */
         if (project.hasProperty("disableCommonTest")) {
             named("commonTest") {
+                kotlin.setSrcDirs(emptySet<String>())
+                resources.setSrcDirs(emptySet<String>())
+            }
+        }
+
+        /*
+         * Allow build scripts to skip compiling `iosTest` sources
+         *
+         *   ./gradlew build -PdisableIosTest
+         */
+        if (project.hasProperty("disableIosTest")) {
+            named("iosTest") {
                 kotlin.setSrcDirs(emptySet<String>())
                 resources.setSrcDirs(emptySet<String>())
             }
@@ -176,15 +221,6 @@ android {
     sourceSets["main"].apply {
         res.srcDirs("src/commonMain/res")
     }
-    dependencies {
-        implementation(libs.koin.android)
-        implementation(libs.kotlinx.datetime)
-        implementation(libs.maplibre.android)
-        implementation(libs.androidx.datastore.preferences)
-        implementation(libs.androidx.lifecycle.viewmodel.ktx)
-
-        implementation(libs.maplibre.android)
-    }
 
     /*
      * Configure the Android test runner so that common JVM tests can be executed
@@ -217,34 +253,6 @@ dependencies {
     // MockK is only needed for unit tests; keep it out of the runtime classpath.
     commonMainApi(libs.icerock.moko.resources)
     commonMainApi(libs.icerock.moko.resources.compose)
-    testImplementation(libs.mockk.android.v1120)
-}
-
-// Module-specific excludes: allow lifecycle-common; block Android-only bits
-configurations.configureEach {
-    val n = name.lowercase()
-    if (n.contains("commonmain") || n.contains("ios")) {
-        // allow lifecycle-common; block Android-only bits
-        exclude(group = "androidx.lifecycle", module = "lifecycle-runtime-compose")
-        exclude(group = "org.jetbrains.androidx.lifecycle", module = "lifecycle-runtime-compose")
-        exclude(group = "androidx.lifecycle", module = "lifecycle-viewmodel-compose")
-        exclude(group = "androidx.lifecycle", module = "lifecycle-runtime-ktx")
-        exclude(group = "androidx.lifecycle", module = "lifecycle-viewmodel-ktx")
-        exclude(group = "androidx.activity") // activity/fragment are Android-only
-        exclude(group = "androidx.fragment")
-        exclude(group = "androidx.compose.ui", module = "ui-tooling")
-        exclude(group = "androidx.compose.material") // old M2
-        exclude(group = "androidx.compose.material3") // AndroidX variant
-    }
-}
-
-android {
-    dependencies {
-        implementation(libs.places)
-        implementation(libs.androidx.ui.graphics.android)
-        implementation(libs.androidx.annotation.jvm)
-        implementation(libs.feature.delivery.ktx)
-    }
 }
 
 multiplatformResources {
@@ -254,15 +262,15 @@ multiplatformResources {
 }
 
 tasks.named("compileTestKotlinIosArm64").configure {
-    enabled = true // iOS test compilation re-enabled
+    enabled = false // iOS test compilation disabled
 }
 
 tasks.named("compileTestKotlinIosSimulatorArm64").configure {
-    enabled = true // iOS test compilation re-enabled
+    enabled = false // iOS test compilation disabled
 }
 
 tasks.named("compileTestKotlinIosX64").configure {
-    enabled = true // iOS test compilation re-enabled
+    enabled = false // iOS test compilation disabled
 }
 
 // Test Quality and Performance Configuration

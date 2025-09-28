@@ -140,7 +140,7 @@ class AndroidMapViewModel(
                     _featureState.value = MapFeatureState.Retrying(retryCount, MapDownloadUtils.RetryManager.MAX_RETRIES)
 
                     Handler(Looper.getMainLooper()).postDelayed({
-                        viewModelScope.launch {
+                        scope.launch {
                             downloadMap(mapId, onMapDownloaded)
                         }
                     }, delay)

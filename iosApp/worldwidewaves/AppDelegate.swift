@@ -1,107 +1,15 @@
-// AppDelegate.swift
 import UIKit
-import Shared
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    var window: UIWindow?
-    private var composeVC: UIViewController?  // Keep Compose VC alive
-
-    func application(_ app: UIApplication,
-                     didFinishLaunchingWithOptions opts: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        NSLog("🎯 iOS: AppDelegate - DIRECT window management (bypassing SceneDelegate)")
-        print("🎯 iOS: AppDelegate - DIRECT window management (bypassing SceneDelegate)")
-
-        // Try SOFTWARE rendering first (simulator sanity check)
-        setenv("SKIKO_RENDER_API", "SOFTWARE", 1)
-        NSLog("🎯 iOS: Using SOFTWARE renderer for debugging")
-        print("🎯 iOS: Using SOFTWARE renderer for debugging")
-
-        // Initialize Koin/Napier first for logging
-        NSLog("🎯 iOS: Initializing Koin/Napier...")
-        print("🎯 iOS: Initializing Koin/Napier...")
-        do {
-            try HelperKt.doInitKoin()
-            NSLog("✅ iOS: Koin/Napier initialized")
-            print("✅ iOS: Koin/Napier initialized")
-        } catch let e as NSError {
-            NSLog("❌ iOS: Koin/Napier failed: \(e.localizedDescription)")
-            print("❌ iOS: Koin/Napier failed: \(e.localizedDescription)")
-        }
-
-        // Install K/N exception hook
-        NSLog("🎯 iOS: Installing K/N hook...")
-        print("🎯 iOS: Installing K/N hook...")
-        KnHookKt.installKNHook()
-        NSLog("✅ iOS: K/N hook installed")
-        print("✅ iOS: K/N hook installed")
-
-        // Create window directly in AppDelegate
-        window = UIWindow(frame: UIScreen.main.bounds)
-
-        // Create our Compose controller with PROPER UIKit lifecycle
-        NSLog("🎯 iOS: Creating RootController...")
-        print("🎯 iOS: Creating RootController...")
-        do {
-            // Create host container to force UIKit lifecycle
-            let host = UIViewController()
-            let vc = try RootControllerKt.MakeMainViewController()
-
-            NSLog("✅ iOS: Root VC type = \(NSStringFromClass(type(of: vc)))")
-            print("✅ iOS: Root VC type = \(NSStringFromClass(type(of: vc)))")
-
-            // CRITICAL: Add as child VC to force UIKit lifecycle
-            NSLog("🎯 iOS: Setting up child VC to force UIKit lifecycle...")
-            print("🎯 iOS: Setting up child VC to force UIKit lifecycle...")
-
-            host.addChild(vc)
-            host.view.addSubview(vc.view)
-            vc.view.frame = host.view.bounds
-            vc.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-            vc.didMove(toParent: host)
-
-            // Force view loading to trigger Compose
-            NSLog("🎯 iOS: Force loading view to trigger Compose...")
-            print("🎯 iOS: Force loading view to trigger Compose...")
-            _ = vc.view // forces loadView/viewDidLoad
-            vc.view.setNeedsLayout()
-            vc.view.layoutIfNeeded()
-
-            // Keep strong reference
-            self.composeVC = vc
-            window?.rootViewController = host
-
-            NSLog("✅ iOS: AppDelegate setup complete")
-            print("✅ iOS: AppDelegate setup complete")
-
-            // FORCE additional composition triggers
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                NSLog("🎯 iOS: Additional layout trigger #1...")
-                print("🎯 iOS: Additional layout trigger #1...")
-                vc.view.setNeedsLayout()
-                vc.view.layoutIfNeeded()
-                host.view.setNeedsLayout()
-                host.view.layoutIfNeeded()
-            }
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                NSLog("🎯 iOS: Additional layout trigger #2...")
-                print("🎯 iOS: Additional layout trigger #2...")
-                vc.view.setNeedsDisplay()
-                host.view.setNeedsDisplay()
-            }
-
-        } catch let e as NSError {
-            NSLog("❌ iOS: RootController failed: \(e.localizedDescription)")
-            print("❌ iOS: RootController failed: \(e.localizedDescription)")
-            // Fallback
-            window?.rootViewController = UIViewController()
-        }
-
-        window?.makeKeyAndVisible()
-        NSLog("✅ iOS: AppDelegate window made visible")
-        print("✅ iOS: AppDelegate window made visible")
-
-        return true
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        true
+    }
+    
+    func application(_ application: UIApplication,
+                     configurationForConnecting session: UISceneSession,
+                     options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        UISceneConfiguration(name: "Default Configuration", sessionRole: session.role)
     }
 }

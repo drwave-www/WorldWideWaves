@@ -61,7 +61,7 @@ expect abstract class BaseViewModel() {
      * Coroutine scope tied to the ViewModel lifecycle.
      * Automatically canceled when the ViewModel is cleared.
      */
-    val viewModelScope: CoroutineScope
+    protected val scope: CoroutineScope
 
     /**
      * Called when the ViewModel is being cleared.

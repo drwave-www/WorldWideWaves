@@ -29,6 +29,7 @@ import com.worldwidewaves.shared.utils.Log
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 import okio.Path.Companion.toPath
+import kotlin.random.Random
 
 // ----------------------------
 
@@ -44,8 +45,6 @@ class DataStoreException(
 ) : Exception(message, cause)
 
 // ----------------------------
-
-internal const val DATA_STORE_FILE_NAME = "wwwaves.preferences_pb"
 
 /**
  * DataStore factory interface that provides testable DataStore creation.
@@ -91,7 +90,7 @@ class DefaultDataStoreFactory : DataStoreFactory {
 class TestDataStoreFactory : DataStoreFactory {
     override fun create(producePath: () -> String): DataStore<Preferences> {
         try {
-            val testPath = "/tmp/test_datastore_${kotlin.random.Random.nextInt()}_${kotlin.random.Random.nextInt()}.preferences_pb"
+            val testPath = "/tmp/test_datastore_${Random.nextInt()}_${Random.nextInt()}.preferences_pb"
             Log.v("DataStore", "Creating test DataStore for path: ${producePath()}, actual test path: $testPath")
             return PreferenceDataStoreFactory.createWithPath { testPath.toPath() }
         } catch (e: Exception) {
@@ -114,5 +113,3 @@ class TestDataStoreFactory : DataStoreFactory {
 )
 fun createDataStore(producePath: () -> String): DataStore<Preferences> = TestDataStoreFactory().create(producePath)
 
-/** Returns the platform-specific absolute path used to store the preferences DataStore file. */
-expect fun keyValueStorePath(): String
