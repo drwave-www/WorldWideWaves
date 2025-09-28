@@ -143,6 +143,11 @@ rg -n -A 5 "init\s*\{" shared/src/commonMain --type kotlin | rg "launch|get\(\)"
 
 ## Mandatory Development Requirements
 
+### Build System Restrictions
+- **NEVER modify gradle.build.kt files**: Always ask before making changes to build configuration files
+- **Dependency changes**: Coordinate any dependency updates or additions
+- **Build script modifications**: Require explicit approval before altering build logic
+
 ### Security Patterns
 - **NO credential exposure**: Never log, store, or transmit API keys, tokens, or secrets
 - **Input validation**: All user inputs must be validated and sanitized

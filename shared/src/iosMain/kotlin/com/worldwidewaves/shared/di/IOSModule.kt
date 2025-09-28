@@ -22,8 +22,11 @@ package com.worldwidewaves.shared.di
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.choreographies.ChoreographyManager
+import com.worldwidewaves.shared.data.FavoriteEventsStore
+import com.worldwidewaves.shared.data.IOSFavoriteEventsStore
 import com.worldwidewaves.shared.debugBuild
 import com.worldwidewaves.shared.domain.usecases.IMapAvailabilityChecker
+import com.worldwidewaves.shared.domain.usecases.IOSMapAvailabilityChecker
 import com.worldwidewaves.shared.map.IOSMapLibreAdapter
 import com.worldwidewaves.shared.map.IOSPlatformMapManager
 import com.worldwidewaves.shared.map.IOSWWWLocationProvider
@@ -37,8 +40,7 @@ import com.worldwidewaves.shared.ui.DebugTabScreen
 import com.worldwidewaves.shared.utils.IOSImageResolver
 import com.worldwidewaves.shared.utils.IOSPlatformEnabler
 import com.worldwidewaves.shared.utils.ImageResolver
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import com.worldwidewaves.shared.viewmodels.EventsViewModel
 import org.koin.dsl.module
 import platform.UIKit.UIDevice
 import platform.UIKit.UIImage
@@ -58,31 +60,27 @@ val IOSModule =
             WWWPlatform("iOS ${device.systemVersion}", get())
         }
 
+        single {
+            EventsViewModel(
+                eventsRepository = get(),
+                getSortedEventsUseCase = get(),
+                filterEventsUseCase = get(),
+                checkEventFavoritesUseCase = get(),
+                platform = get(),
+            )
+        }
+
         // ChoreographyManager for iOS
         single(createdAtStart = true) { ChoreographyManager<UIImage>() }
 
-        // iOS Map Availability Checker (simplified for iOS)
-        single<IMapAvailabilityChecker> {
-            object : IMapAvailabilityChecker {
-                override val mapStates: StateFlow<Map<String, Boolean>> =
-                    MutableStateFlow(emptyMap())
-
-                override fun refreshAvailability() {
-                    // iOS: Maps are bundled, always available
-                }
-
-                override fun isMapDownloaded(eventId: String): Boolean = true
-
-                override fun getDownloadedMaps(): List<String> = emptyList()
-
-                override fun trackMaps(mapIds: Collection<String>) {
-                    // iOS: No-op, maps are bundled
-                }
-            }
-        }
+        // iOS Map Availability Checker (production-grade iOS implementation)
+        single<IMapAvailabilityChecker> { IOSMapAvailabilityChecker() }
 
         // Debug screen - iOS implementation
         single<DebugTabScreen?> { DebugTabScreen() }
+
+        // Data persistence
+        single<FavoriteEventsStore> { IOSFavoriteEventsStore() }
 
         // Map services
         single<PlatformMapManager> { IOSPlatformMapManager() }

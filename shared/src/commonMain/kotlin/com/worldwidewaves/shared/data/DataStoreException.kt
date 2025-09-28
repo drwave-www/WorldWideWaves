@@ -1,6 +1,7 @@
-package com.worldwidewaves.shared.ios
+package com.worldwidewaves.shared.data
 
-/* * Copyright 2025 DrWave
+/*
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries. The project aims to transcend physical and cultural
@@ -17,26 +18,16 @@ package com.worldwidewaves.shared.ios
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. */
+ * limitations under the License.
+ */
 
-
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.window.ComposeUIViewController
-import com.worldwidewaves.shared.ui.activities.WWWMainActivity
-import com.worldwidewaves.shared.utils.IOSPlatformEnabler
-import platform.Foundation.NSLog
-import platform.UIKit.UIViewController
-
-@Composable
-fun AppUI() {
-    NSLog(">>> AppUI ENTER")
-    Text("Hello from Compose on iOS")
-}
-
-fun MakeMainViewController(): UIViewController =
-    ComposeUIViewController(configure = { enforceStrictPlistSanityCheck = false }) {
-        NSLog(">>> COMPOSE CONTENT LAMBDA ENTER - 2")
-        val mainActivity = WWWMainActivity(IOSPlatformEnabler())
-        mainActivity.Draw()
-    }
+/**
+ * Exception thrown when DataStore operations fail.
+ *
+ * This exception provides clear error information for storage-related failures,
+ * enabling proper error handling and fallback mechanisms in the application.
+ */
+class DataStoreException(
+    message: String,
+    cause: Throwable? = null,
+) : Exception(message, cause)
