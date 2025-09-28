@@ -27,13 +27,7 @@
 
 /* Begin PBXFileReference section */
 		C17B3C762E886C610097A3A5 /* worldwidewaves.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = worldwidewaves.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C17B463C2E8886600097A3A5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		C17B463D2E8886600097A3A5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		C17B463E2E8886600097A3A5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		C17B463F2E8886600097A3A5 /* worldwidewavesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = worldwidewavesApp.swift; sourceTree = "<group>"; };
-		C17B46552E8995F80097A3A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		C17B46592E8999FF0097A3A5 /* Shared.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Shared.framework; path = "../shared/build/xcode-frameworks/Debug/iphonesimulator18.5/Shared.framework"; sourceTree = "<group>"; };
-		C17B46602E899E1D0097A3A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -72,7 +66,6 @@
 		C17B3C6D2E886C610097A3A5 = {
 			isa = PBXGroup;
 			children = (
-				C17B46402E8886600097A3A5 /* worldwidewaves */,
 				C17B3C782E886C610097A3A5 /* worldwidewaves */,
 				C17B46582E89981D0097A3A5 /* Frameworks */,
 				C17B3C772E886C610097A3A5 /* Products */,
@@ -85,19 +78,6 @@
 				C17B3C762E886C610097A3A5 /* worldwidewaves.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		C17B46402E8886600097A3A5 /* worldwidewaves */ = {
-			isa = PBXGroup;
-			children = (
-				C17B46602E899E1D0097A3A5 /* Info.plist */,
-				C17B46552E8995F80097A3A5 /* Info.plist */,
-				C17B463C2E8886600097A3A5 /* AppDelegate.swift */,
-				C17B463D2E8886600097A3A5 /* Assets.xcassets */,
-				C17B463E2E8886600097A3A5 /* ContentView.swift */,
-				C17B463F2E8886600097A3A5 /* worldwidewavesApp.swift */,
-			);
-			path = worldwidewaves;
 			sourceTree = "<group>";
 		};
 		C17B46582E89981D0097A3A5 /* Frameworks */ = {
