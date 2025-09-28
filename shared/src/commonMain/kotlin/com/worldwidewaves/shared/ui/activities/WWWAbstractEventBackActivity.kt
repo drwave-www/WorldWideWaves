@@ -45,10 +45,10 @@ import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWGlobals.BackNav
-import com.worldwidewaves.shared.ui.activities.UIProperties
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.ic_arrow_back
+import com.worldwidewaves.shared.ui.activities.UIProperties
 import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
 import dev.icerock.moko.resources.compose.stringResource

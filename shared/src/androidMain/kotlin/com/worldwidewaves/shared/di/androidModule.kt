@@ -24,6 +24,11 @@ package com.worldwidewaves.shared.di
 import android.os.Build
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.choreographies.ChoreographyManager
+import com.worldwidewaves.shared.data.AndroidFavoriteEventsStore
+import com.worldwidewaves.shared.data.DataStoreFactory
+import com.worldwidewaves.shared.data.DefaultDataStoreFactory
+import com.worldwidewaves.shared.data.FavoriteEventsStore
+import com.worldwidewaves.shared.data.keyValueStorePath
 import com.worldwidewaves.shared.debugBuild
 import com.worldwidewaves.shared.sound.AndroidSoundPlayer
 import com.worldwidewaves.shared.sound.SoundPlayer
@@ -42,4 +47,8 @@ val androidModule =
         single(createdAtStart = true) { ChoreographyManager<DrawableResource>() }
 
         single<SoundPlayer> { AndroidSoundPlayer(get()) }
+
+        single<DataStoreFactory> { DefaultDataStoreFactory() }
+        single { get<DataStoreFactory>().create { keyValueStorePath() } }
+        single<FavoriteEventsStore> { AndroidFavoriteEventsStore(get()) }
     }

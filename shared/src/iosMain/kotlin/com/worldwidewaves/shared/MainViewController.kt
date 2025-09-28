@@ -26,11 +26,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.ComposeUIViewController
-import com.worldwidewaves.shared.ui.activities.UIProperties
 import com.worldwidewaves.shared.ui.activities.WWWMainActivity
 import com.worldwidewaves.shared.utils.Log
 import platform.UIKit.UIViewController
@@ -74,12 +72,12 @@ fun HelloComposeViewController(): UIViewController =
 fun AppUI() {
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             "🎯 iOS Compose UI Working!",
             style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
         )
     }
 }
@@ -96,6 +94,7 @@ fun createSimpleComposeView(): UIViewController {
  * Creates UIViewController with WWWMainActivity.Draw() - iOS equivalent of Android MainActivity
  * This replicates: setContent { mainActivityImpl!!.Draw() }
  */
+
 /**
  * iOS-SAFE: Initialize MainActivity business logic WITHOUT ComposeUIViewController
  * This avoids the lifecycle dependency issue entirely

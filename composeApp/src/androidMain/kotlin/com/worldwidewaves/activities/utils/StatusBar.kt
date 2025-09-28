@@ -40,6 +40,7 @@ import androidx.core.view.WindowCompat
 fun setStatusBarColor(window: Window) {
     // Make the status bar transparent
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        @Suppress("DEPRECATION")
         window.setDecorFitsSystemWindows(false)
     } else {
         @Suppress("DEPRECATION")

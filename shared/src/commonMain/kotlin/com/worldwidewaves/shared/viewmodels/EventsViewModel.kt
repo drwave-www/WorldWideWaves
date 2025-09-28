@@ -106,7 +106,7 @@ class EventsViewModel(
             eventsRepository
                 .isLoading()
                 .onEach { isLoading -> _isLoading.value = isLoading }
-                .launchIn(viewModelScope)
+                .launchIn(scope)
 
             // Observe errors from repository
             eventsRepository
@@ -116,7 +116,7 @@ class EventsViewModel(
                     error?.let {
                         WWWLogger.e("EventsViewModel", "Repository error: ${it.message}", it)
                     }
-                }.launchIn(viewModelScope)
+                }.launchIn(scope)
 
             // Get sorted events through use case and process them
             getSortedEventsUseCase
@@ -124,7 +124,7 @@ class EventsViewModel(
                 .onEach { sortedEvents: List<IWWWEvent> ->
                     processEventsList(sortedEvents)
                 }.flowOn(Dispatchers.Default)
-                .launchIn(viewModelScope)
+                .launchIn(scope)
         } catch (e: Exception) {
             WWWLogger.e("EventsViewModel", "Error in loadEvents", e)
             _loadingError.value = true
@@ -162,7 +162,7 @@ class EventsViewModel(
         var backupSimulationSpeed = 1
 
         // Handle warming started - using viewModelScope for automatic cleanup
-        viewModelScope.launch {
+        scope.launch {
             event.observer.isUserWarmingInProgress.collect { isWarmingStarted ->
                 if (isWarmingStarted) {
                     backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
@@ -172,7 +172,7 @@ class EventsViewModel(
         }
 
         // Handle user has been hit - using viewModelScope for automatic cleanup
-        viewModelScope.launch {
+        scope.launch {
             event.observer.userHasBeenHit.collect { hasBeenHit ->
                 if (hasBeenHit) {
                     // Restore simulation speed after a delay
@@ -194,7 +194,7 @@ class EventsViewModel(
         onlyFavorites: Boolean = false,
         onlyDownloaded: Boolean = false,
     ) {
-        viewModelScope.launch {
+        scope.launch {
             try {
                 // Get all events from the use case first
                 getSortedEventsUseCase
@@ -212,7 +212,7 @@ class EventsViewModel(
 
                         val filteredEvents = filterEventsUseCase.invoke(allEvents, filterCriteria)
                         _events.value = filteredEvents
-                    }.launchIn(viewModelScope)
+                    }.launchIn(scope)
             } catch (e: Exception) {
                 WWWLogger.e("EventsViewModel", "Error filtering events", e)
                 _loadingError.value = true
