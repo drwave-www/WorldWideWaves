@@ -25,6 +25,7 @@ import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.map.AbstractEventMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
@@ -82,6 +83,7 @@ class WaveProgressionObserver(
     /**
      * Start collecting progression to update polygons on the map with a small rate-limit.
      */
+    @OptIn(FlowPreview::class)
     private fun startPolygonsObservation(
         event: IWWWEvent,
         eventMap: AbstractEventMap<*>?,

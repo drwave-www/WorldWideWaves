@@ -28,3 +28,5 @@ fun <T> MutableStateFlow<T>.updateIfChanged(newValue: T) {
         value = newValue
     }
 }
+
+expect fun getEnvironmentVariable(name: String): String?

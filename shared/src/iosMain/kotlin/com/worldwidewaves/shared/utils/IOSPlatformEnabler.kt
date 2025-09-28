@@ -31,55 +31,57 @@ import platform.UIKit.UIAlertController
 import platform.UIKit.UIAlertControllerStyleAlert
 import platform.UIKit.UIApplication
 
-class IOSPlatformEnabler @Throws(Throwable::class) constructor() : PlatformEnabler {
-    override fun openEventActivity(eventId: String) {
-        Log.i("IOSPlatformEnabler", "Opening Event for eventId: $eventId")
-        toast("Event details: $eventId")
-    }
+class IOSPlatformEnabler
+    @Throws(Throwable::class)
+    constructor() : PlatformEnabler {
+        override fun openEventActivity(eventId: String) {
+            Log.i("IOSPlatformEnabler", "Opening Event for eventId: $eventId")
+            toast("Event details: $eventId")
+        }
 
-    override fun openWaveActivity(eventId: String) {
-        Log.i("IOSPlatformEnabler", "Opening Wave for eventId: $eventId")
-        toast("Wave activity: $eventId")
-    }
+        override fun openWaveActivity(eventId: String) {
+            Log.i("IOSPlatformEnabler", "Opening Wave for eventId: $eventId")
+            toast("Wave activity: $eventId")
+        }
 
-    override fun toast(message: String) {
-        val alert =
-            UIAlertController.alertControllerWithTitle(
-                title = "WorldWideWaves",
-                message = message,
-                preferredStyle = UIAlertControllerStyleAlert,
+        override fun toast(message: String) {
+            val alert =
+                UIAlertController.alertControllerWithTitle(
+                    title = "WorldWideWaves",
+                    message = message,
+                    preferredStyle = UIAlertControllerStyleAlert,
+                )
+
+            alert.addAction(
+                UIAlertAction.actionWithTitle(
+                    title = "OK",
+                    style = UIAlertActionStyleDefault,
+                    handler = null,
+                ),
             )
 
-        alert.addAction(
-            UIAlertAction.actionWithTitle(
-                title = "OK",
-                style = UIAlertActionStyleDefault,
-                handler = null,
-            ),
-        )
+            UIApplication.sharedApplication.keyWindow?.rootViewController?.presentViewController(
+                alert,
+                animated = true,
+                completion = null,
+            )
+        }
 
-        UIApplication.sharedApplication.keyWindow?.rootViewController?.presentViewController(
-            alert,
-            animated = true,
-            completion = null,
-        )
-    }
+        @Composable
+        override fun OpenUrl(url: String) {
+            openUrl(url)
+        }
 
-    @Composable
-    override fun OpenUrl(url: String) {
-        openUrl(url)
-    }
-
-    override fun openUrl(url: String) {
-        try {
-            val nsUrl = NSURL.URLWithString(url)
-            if (nsUrl != null && UIApplication.sharedApplication.canOpenURL(nsUrl)) {
-                UIApplication.sharedApplication.openURL(nsUrl)
-            } else {
-                Log.e("IOSPlatformEnabler", "Cannot open URL: $url")
+        override fun openUrl(url: String) {
+            try {
+                val nsUrl = NSURL.URLWithString(url)
+                if (nsUrl != null && UIApplication.sharedApplication.canOpenURL(nsUrl)) {
+                    UIApplication.sharedApplication.openURL(nsUrl)
+                } else {
+                    Log.e("IOSPlatformEnabler", "Cannot open URL: $url")
+                }
+            } catch (e: Exception) {
+                Log.e("IOSPlatformEnabler", "Failed to open URL: $url", throwable = e)
             }
-        } catch (e: Exception) {
-            Log.e("IOSPlatformEnabler", "Failed to open URL: $url", throwable = e)
         }
     }
-}

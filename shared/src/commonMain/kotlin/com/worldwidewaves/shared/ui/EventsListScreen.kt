@@ -26,10 +26,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-// REMOVED: Android-only lifecycle imports causing iOS crashes
-// import androidx.lifecycle.Lifecycle
-// import androidx.lifecycle.LifecycleEventObserver
-// import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.domain.usecases.IMapAvailabilityChecker

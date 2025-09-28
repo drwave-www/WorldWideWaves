@@ -319,9 +319,7 @@ class WWWEventObserver(
                     // Add immediate position change observer for backward compatibility and immediate response
                     val directPositionObserverJob =
                         positionManager.position
-                            .catch { e ->
-                                Log.e("WWWEventObserver", "Error in direct position observation for event ${event.id}: $e")
-                            }.onEach { _ ->
+                            .onEach { _ ->
                                 try {
                                     Log.v("WWWEventObserver", "Direct position changed, updating area detection for event ${event.id}")
                                     updateAreaDetection()
@@ -333,9 +331,7 @@ class WWWEventObserver(
                     // Add polygon loading observer to trigger area detection when polygon data becomes available
                     val polygonLoadingJob =
                         event.area.polygonsLoaded
-                            .catch { e ->
-                                Log.e("WWWEventObserver", "Error in polygon loading observation for event ${event.id}: $e")
-                            }.onEach { isLoaded ->
+                            .onEach { isLoaded ->
                                 try {
                                     if (isLoaded) {
                                         Log.v("WWWEventObserver", "Polygons loaded, updating area detection for event ${event.id}")

@@ -90,6 +90,7 @@ open class MainActivity : AppCompatActivity() {
             }
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            @Suppress("DEPRECATION")
             window.setDecorFitsSystemWindows(false)
         } else {
             @Suppress("DEPRECATION")

@@ -32,4 +32,5 @@ object IOSSafeDI : KoinComponent {
  * These resolve dependencies outside of the composition phase.
  */
 fun getIOSSafePlatform(): WWWPlatform = IOSSafeDI.platform
+
 fun getIOSSafeClock(): IClock = IOSSafeDI.clock
