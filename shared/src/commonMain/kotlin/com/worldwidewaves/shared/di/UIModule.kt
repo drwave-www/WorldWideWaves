@@ -40,14 +40,6 @@ import org.koin.dsl.module
  */
 val uiModule =
     module {
-        // Repository layer
-        single<EventsRepository> { EventsRepositoryImpl(get()) }
-
-        // Use cases layer - only the ones without platform dependencies
-        single { GetSortedEventsUseCase(get()) }
-        single { FilterEventsUseCase(get()) }
-        single { CheckEventFavoritesUseCase() }
-
         single { AboutTabScreen(get()) }
         single { EventsListScreen(viewModel = get(), mapChecker = get(), setEventFavorite = get()) }
 

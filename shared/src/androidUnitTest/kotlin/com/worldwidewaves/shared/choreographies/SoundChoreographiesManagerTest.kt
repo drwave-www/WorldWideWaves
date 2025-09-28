@@ -106,11 +106,28 @@ class SoundChoreographyManagerTest : KoinTest {
     @Test
     fun `test SoundChoreographyManager initialize triggers MIDI preload`() =
         runTest {
-            // iOS FIX: Test now verifies explicit initialize() call instead of init{} block
-            manager.initialize()
+            // Mock MidiParser to track calls
+            mockkObject(MidiParser)
 
-            // Verify that the MIDI file was preloaded
-            coVerify { MidiParser.parseMidiFile(FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE) }
+            try {
+                // Setup mock return value
+                val mockedTrack = MidiTrack(
+                    name = "Test Track",
+                    notes = listOf(
+                        MidiNote(60, 80, 0.milliseconds, 300.milliseconds)
+                    ),
+                    totalDuration = 300.milliseconds
+                )
+                coEvery { MidiParser.parseMidiFile(any()) } returns mockedTrack
+
+                // iOS FIX: Test now verifies explicit initialize() call instead of init{} block
+                manager.initialize()
+
+                // Verify that the MIDI file was preloaded
+                coVerify { MidiParser.parseMidiFile(FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE) }
+            } finally {
+                unmockkObject(MidiParser)
+            }
         }
 
     @Test

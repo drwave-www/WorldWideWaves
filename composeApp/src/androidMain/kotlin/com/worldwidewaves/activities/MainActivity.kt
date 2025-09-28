@@ -101,6 +101,7 @@ open class MainActivity : AppCompatActivity() {
             if (mainActivityImpl == null) {
                 mainActivityImpl = WWWMainActivity(AndroidPlatformEnabler(this))
             }
+
             mainActivityImpl!!.Draw()
         }
     }

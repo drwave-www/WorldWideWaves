@@ -69,12 +69,6 @@ import kotlin.time.ExperimentalTime
 /**
  * iOS-safe UI properties structure using basic types
  */
-data class UIProperties(
-    val densityScale: Float = 1.0f,
-    val containerHeightPx: Int = 800,
-    val containerWidthPx: Int = 400,
-)
-
 @OptIn(ExperimentalTime::class)
 open class WWWMainActivity
     @Throws(Throwable::class)
@@ -142,7 +136,7 @@ open class WWWMainActivity
 
         @Composable
         @Throws(Throwable::class)
-        open fun Draw(uiProperties: UIProperties? = null) {
+        open fun Draw() {
             // Enforce minimum duration for programmatic splash
             LaunchedEffect(Unit) {
                 delay(WWWGlobals.Timing.SPLASH_MIN_DURATION)
@@ -184,19 +178,11 @@ open class WWWMainActivity
                         //  Floating Debug Icon (green) - bottom right corner
                         // -----------------------------------------------------------------
                         if (ready && debugTabScreen != null) {
-                            // Calculate position at 15% from bottom
-                            // iOS-safe approach: Use provided basic properties or convert from Android APIs
-                            val effectiveUIProps =
-                                uiProperties ?: run {
-                                    val windowInfo = LocalWindowInfo.current
-                                    val density = LocalDensity.current
-                                    UIProperties(
-                                        densityScale = density.density,
-                                        containerHeightPx = windowInfo.containerSize.height,
-                                        containerWidthPx = windowInfo.containerSize.width,
-                                    )
-                                }
-                            val screenHeightDp = (effectiveUIProps.containerHeightPx / effectiveUIProps.densityScale).dp
+                            val windowInfo = LocalWindowInfo.current
+                            val density = LocalDensity.current
+                            val densityScale = density.density
+                            val containerHeightPx = windowInfo.containerSize.height
+                            val screenHeightDp = (containerHeightPx / densityScale).dp
                             val bottomOffset = screenHeightDp * 0.15f
 
                             FloatingActionButton(

@@ -56,9 +56,11 @@ kotlin {
      */
     targets.configureEach {
         compilations.configureEach {
-            // NB: `compilerOptions.configure {}` works for Kotlin 1.9.x-2.0
-            compilerOptions.configure {
-                freeCompilerArgs.add("-Xexpect-actual-classes")
+            // Updated for Kotlin 2.0+ compatibility
+            compileTaskProvider.configure {
+                compilerOptions {
+                    freeCompilerArgs.add("-Xexpect-actual-classes")
+                }
             }
         }
     }
@@ -259,15 +261,15 @@ multiplatformResources {
 }
 
 tasks.named("compileTestKotlinIosArm64").configure {
-    enabled = false // iOS test compilation disabled
+    enabled = true // iOS test compilation enabled (MockK tests moved to androidInstrumentedTest)
 }
 
 tasks.named("compileTestKotlinIosSimulatorArm64").configure {
-    enabled = false // iOS test compilation disabled
+    enabled = true // iOS test compilation enabled (MockK tests moved to androidInstrumentedTest)
 }
 
 tasks.named("compileTestKotlinIosX64").configure {
-    enabled = false // iOS test compilation disabled
+    enabled = true // iOS test compilation enabled (MockK tests moved to androidInstrumentedTest)
 }
 
 // Test Quality and Performance Configuration
@@ -293,7 +295,7 @@ tasks.register("detectTestAntipatterns") {
     group = "verification"
     description = "Detect test anti-patterns and quality violations"
     doLast {
-        project.exec {
+        project.providers.exec {
             workingDir(project.rootDir)
             commandLine("bash", "scripts/detect-test-antipatterns.sh")
         }
