@@ -22,7 +22,6 @@ package com.worldwidewaves.di
  */
 
 import com.worldwidewaves.BuildConfig
-import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker
 import com.worldwidewaves.shared.ui.DebugTabScreen
@@ -43,9 +42,6 @@ val applicationModule =
 
         single<PlatformEnabler> { AndroidPlatformEnabler() }
         single<MapAvailabilityChecker> { get<AndroidMapAvailabilityChecker>() }
-
-        // AndroidMapLibreAdapter as singleton to ensure single instance across all maps
-        single { AndroidMapLibreAdapter() }
 
         // Map availability checker as a singleton
         single {
