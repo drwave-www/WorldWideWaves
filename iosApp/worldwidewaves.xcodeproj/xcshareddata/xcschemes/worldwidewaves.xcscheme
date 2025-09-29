@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
    LastUpgradeVersion = "1430"
-   version = "1.7">
+   version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
-      buildImplicitDependencies = "YES"
-      runPostActionsOnFailure = "NO">
+      buildImplicitDependencies = "YES">
       <BuildActionEntries>
          <BuildActionEntry
             buildForTesting = "YES"
@@ -15,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "B6FB086D2F766C75A831742D"
+               BlueprintIdentifier = "C17B3C752E886C610097A3A5"
                BuildableName = "worldwidewaves.app"
                BlueprintName = "worldwidewaves"
                ReferencedContainer = "container:worldwidewaves.xcodeproj">
@@ -27,12 +26,11 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      shouldUseLaunchSchemeArgsEnv = "YES"
-      onlyGenerateCoverageForSpecifiedTargets = "NO">
+      shouldUseLaunchSchemeArgsEnv = "YES">
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "B6FB086D2F766C75A831742D"
+            BlueprintIdentifier = "C17B3C752E886C610097A3A5"
             BuildableName = "worldwidewaves.app"
             BlueprintName = "worldwidewaves"
             ReferencedContainer = "container:worldwidewaves.xcodeproj">
@@ -55,14 +53,12 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "B6FB086D2F766C75A831742D"
+            BlueprintIdentifier = "C17B3C752E886C610097A3A5"
             BuildableName = "worldwidewaves.app"
             BlueprintName = "worldwidewaves"
             ReferencedContainer = "container:worldwidewaves.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <CommandLineArguments>
-      </CommandLineArguments>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -74,7 +70,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "B6FB086D2F766C75A831742D"
+            BlueprintIdentifier = "C17B3C752E886C610097A3A5"
             BuildableName = "worldwidewaves.app"
             BlueprintName = "worldwidewaves"
             ReferencedContainer = "container:worldwidewaves.xcodeproj">
