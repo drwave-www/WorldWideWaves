@@ -66,7 +66,7 @@ class CrowdSoundChoreographySimulationTest {
      */
     private data class SimulatedPerson(
         val id: Int,
-        val soundChoreographyManager: SoundChoreographyManager,
+        val soundChoreographyPlayer: SoundChoreographyPlayer,
         val playbackLog: MutableList<PlaybackEvent> = mutableListOf(),
     )
 
@@ -179,7 +179,7 @@ class CrowdSoundChoreographySimulationTest {
 
                         // Create manager for this person
                         val manager =
-                            SoundChoreographyManager().apply {
+                            SoundChoreographyPlayer().apply {
                                 setCurrentTrack(midiTrack)
                                 setLooping(true)
                                 setWaveform(SoundPlayer.Waveform.SQUARE)

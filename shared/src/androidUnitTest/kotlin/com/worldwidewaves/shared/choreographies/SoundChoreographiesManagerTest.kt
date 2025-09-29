@@ -72,7 +72,7 @@ class SoundChoreographyManagerTest : KoinTest {
     @MockK
     private lateinit var coroutineScopeProvider: CoroutineScopeProvider
 
-    private lateinit var manager: SoundChoreographyManager
+    private lateinit var manager: SoundChoreographyPlayer
 
     @BeforeTest
     fun setup() {
@@ -95,7 +95,7 @@ class SoundChoreographyManagerTest : KoinTest {
         every { clock.now() } returns Instant.fromEpochMilliseconds(0)
 
         // Create manager with mocked dependencies
-        manager = SoundChoreographyManager(coroutineScopeProvider)
+        manager = SoundChoreographyPlayer()
     }
 
     @AfterTest

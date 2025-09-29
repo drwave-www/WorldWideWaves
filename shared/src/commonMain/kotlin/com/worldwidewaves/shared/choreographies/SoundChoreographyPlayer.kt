@@ -22,8 +22,6 @@ package com.worldwidewaves.shared.choreographies
  */
 
 import com.worldwidewaves.shared.WWWGlobals.FileSystem
-import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
-import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.sound.MidiParser
 import com.worldwidewaves.shared.sound.MidiTrack
@@ -69,9 +67,7 @@ import kotlin.time.Instant
  * • [release] frees audio resources when the enclosing screen is disposed.
  */
 @OptIn(ExperimentalTime::class)
-class SoundChoreographyManager(
-    coroutineScopeProvider: CoroutineScopeProvider = DefaultCoroutineScopeProvider(),
-) : KoinComponent {
+class SoundChoreographyPlayer : KoinComponent {
     private val clock: IClock by inject()
     private val soundPlayer: SoundPlayer by inject()
 
