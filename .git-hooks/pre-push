@@ -1,0 +1,165 @@
+#!/bin/sh
+
+# Git LFS pre-push hook
+command -v git-lfs >/dev/null 2>&1 || { printf >&2 "\n%s\n\n" "This repository is configured for Git LFS but 'git-lfs' was not found on your path. If you no longer wish to use Git LFS, remove this hook by deleting the 'pre-push' file in the hooks directory (set by 'core.hookspath'; usually '.git/hooks')."; exit 2; }
+git lfs pre-push "$@"
+
+# Update translations before push (only if OPENAI_API_KEY is set)
+if [ -n "$OPENAI_API_KEY" ]; then
+    echo "Updating translations before push..."
+    if python3 scripts/translate/update_translations.py; then
+        # Check if translation updates created any changes
+        if ! git diff --quiet shared/src/commonMain/moko-resources/; then
+            echo "Translation updates created changes. Please review and commit them before pushing."
+            echo "Run: git add shared/src/commonMain/moko-resources/ && git commit -m 'Update translations'"
+            exit 1
+        fi
+        echo "Translations are up to date."
+    else
+        echo "Translation update failed. Please check the script and try again."
+        exit 1
+    fi
+else
+    echo "OPENAI_API_KEY not set. Skipping translation updates."
+    echo "To enable automatic translation updates, set your OPENAI_API_KEY environment variable."
+fi
+
+# Function to find Android SDK path
+find_android_sdk() {
+    # Check common Android SDK locations
+    if [ -n "$ANDROID_HOME" ] && [ -d "$ANDROID_HOME" ]; then
+        echo "$ANDROID_HOME"
+    elif [ -d "$HOME/Library/Android/sdk" ]; then
+        echo "$HOME/Library/Android/sdk"
+    elif [ -d "$HOME/Android/Sdk" ]; then
+        echo "$HOME/Android/Sdk"
+    else
+        return 1
+    fi
+}
+
+# Function to start Android emulator
+start_emulator() {
+    local android_sdk="$1"
+    local emulator_cmd="$android_sdk/emulator/emulator"
+
+    if [ ! -f "$emulator_cmd" ]; then
+        echo "❌ Emulator executable not found at: $emulator_cmd"
+        return 1
+    fi
+
+    # Get list of available AVDs
+    local avds=$("$emulator_cmd" -list-avds 2>/dev/null)
+    if [ -z "$avds" ]; then
+        echo "❌ No Android Virtual Devices (AVDs) found."
+        echo "Please create an AVD using Android Studio's AVD Manager."
+        return 1
+    fi
+
+    # Select the first available AVD
+    local avd_name=$(echo "$avds" | head -n 1)
+    echo "🚀 Starting Android emulator: $avd_name"
+
+    # Start emulator in background
+    "$emulator_cmd" -avd "$avd_name" -no-snapshot-save -no-audio -no-window &
+    local emulator_pid=$!
+
+    echo "⏳ Waiting for emulator to start (this may take 30-60 seconds)..."
+
+    # Wait for emulator to be ready (max 2 minutes)
+    local timeout=120
+    local count=0
+    while [ $count -lt $timeout ]; do
+        if adb devices | grep -q "emulator.*device"; then
+            echo "✅ Emulator is ready!"
+            # Wait a bit more for the system to be fully booted
+            echo "⏳ Waiting for system to fully boot..."
+            adb wait-for-device
+            sleep 10
+            return 0
+        fi
+        sleep 2
+        count=$((count + 2))
+        if [ $((count % 20)) -eq 0 ]; then
+            echo "   Still waiting... ($count/$timeout seconds)"
+        fi
+    done
+
+    echo "❌ Emulator failed to start within $timeout seconds"
+    # Try to kill the emulator process
+    kill $emulator_pid 2>/dev/null
+    return 1
+}
+
+# Run critical integration tests before push (with automatic emulator launch)
+echo "Checking for Android emulator availability..."
+
+# Check if adb is available
+if ! command -v adb >/dev/null 2>&1; then
+    echo "⚠️  Android SDK (adb) not found. Skipping integration tests."
+    echo "Integration tests will run in CI/CD pipeline."
+    exit 0
+fi
+
+emulator_was_running=false
+if adb devices | grep -q "emulator.*device"; then
+    echo "✅ Android emulator already running."
+    emulator_was_running=true
+else
+    echo "🔍 No running emulator detected. Attempting to start one..."
+
+    # Find Android SDK
+    android_sdk=$(find_android_sdk)
+    if [ $? -ne 0 ]; then
+        echo "⚠️  Android SDK not found. Skipping integration tests."
+        echo "Please set ANDROID_HOME or install Android SDK."
+        echo "Integration tests will run in CI/CD pipeline."
+        exit 0
+    fi
+
+    # Try to start emulator
+    if ! start_emulator "$android_sdk"; then
+        echo "⚠️  Failed to start Android emulator. Skipping integration tests."
+        echo "Integration tests will run in CI/CD pipeline."
+        exit 0
+    fi
+fi
+
+echo "📱 Android emulator is available. Running critical integration tests..."
+
+# Run only the most critical tests to avoid long delays
+critical_tests=(
+    "com.worldwidewaves.testing.real.RealSoundChoreographyIntegrationTest"
+    "com.worldwidewaves.testing.real.BaseRealIntegrationTest"
+)
+
+test_failed=false
+for test_class in "${critical_tests[@]}"; do
+    echo "🧪 Running critical test: $test_class"
+    if ! timeout 300 ./gradlew :composeApp:connectedDebugAndroidTest \
+        -Pandroid.testInstrumentationRunnerArguments.class="$test_class" \
+        --no-daemon --quiet; then
+        echo "❌ Critical integration test failed: $test_class"
+        test_failed=true
+        break
+    fi
+done
+
+# If we started the emulator, offer to shut it down
+if [ "$emulator_was_running" = false ]; then
+    echo ""
+    echo "💡 The emulator was started automatically for testing."
+    echo "   You can stop it manually with: adb emu kill"
+fi
+
+if [ "$test_failed" = true ]; then
+    echo "❌ Integration tests failed. Please fix the failing tests before pushing."
+    echo "To skip this check (not recommended), set SKIP_INTEGRATION_TESTS=1"
+    if [ "${SKIP_INTEGRATION_TESTS:-0}" = "1" ]; then
+        echo "⚠️  SKIP_INTEGRATION_TESTS=1 detected. Proceeding despite test failure."
+    else
+        exit 1
+    fi
+else
+    echo "✅ Critical integration tests passed!"
+fi

@@ -524,7 +524,7 @@ class WWWEventObserver(
                     Log.v("WWWEventObserver", "Simulation change detected for event ${event.id}")
                     send(Unit)
                 }
-            } catch (e: CancellationException) {
+            } catch (e: kotlinx.coroutines.CancellationException) {
                 Log.v("WWWEventObserver", "Simulation observation cancelled for event ${event.id}")
                 handleCancellationException(e)
             } catch (e: IllegalStateException) {
