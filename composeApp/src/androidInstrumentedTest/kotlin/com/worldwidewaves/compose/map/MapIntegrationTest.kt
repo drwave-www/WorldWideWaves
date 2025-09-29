@@ -658,8 +658,9 @@ private fun TestMapDownloadFlow(
                 }
             }
             is MapFeatureState.Downloading -> {
+                val currentState = state as MapFeatureState.Downloading
                 androidx.compose.material3.Text(
-                    "Downloading... ${state.progress}%",
+                    "Downloading... ${currentState.progress}%",
                     modifier = Modifier.testTag("download-progress"),
                 )
             }
@@ -677,15 +678,17 @@ private fun TestMapDownloadFlow(
                 onMapLoaded()
             }
             is MapFeatureState.Failed -> {
+                val currentState = state as MapFeatureState.Failed
                 androidx.compose.material3.Text(
-                    "Download Failed: ${state.errorMessage}",
+                    "Download Failed: ${currentState.errorMessage}",
                     modifier = Modifier.testTag("download-error"),
                 )
                 onErrorDisplayed()
             }
             is MapFeatureState.Retrying -> {
+                val currentState = state as MapFeatureState.Retrying
                 androidx.compose.material3.Text(
-                    "Retrying... ${state.attempt}/${state.maxAttempts}",
+                    "Retrying... ${currentState.attempt}/${currentState.maxAttempts}",
                     modifier = Modifier.testTag("retry-status"),
                 )
                 onRetry()
