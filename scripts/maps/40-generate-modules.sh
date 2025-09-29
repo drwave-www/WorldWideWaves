@@ -167,3 +167,86 @@ if [ ${#VALID_EVENTS[@]} -gt 0 ] && [ -f "$IOS_INFO_PLIST" ]; then
 else
     echo "Skipping Info.plist configuration: ${#VALID_EVENTS[@]} events, plist exists: $([ -f "$IOS_INFO_PLIST" ] && echo "yes" || echo "no")"
 fi
+
+# ========================================================================
+# iOS Xcode Project ODR Configuration (Idempotent)
+# ========================================================================
+
+echo "Configuring iOS ODR tags in Xcode project..."
+
+# Path to Xcode project
+IOS_XCODE_PROJECT="../../iosApp/worldwidewaves.xcodeproj/project.pbxproj"
+
+# Function to add ODR asset tags to Xcode project
+add_odr_tags_to_xcode() {
+    local project_file="$1"
+    local temp_project="/tmp/worldwidewaves_project_temp.pbxproj"
+
+    if [ ! -f "$project_file" ]; then
+        echo "Warning: Xcode project not found at $project_file"
+        return 1
+    fi
+
+    # Copy original project
+    cp "$project_file" "$temp_project"
+
+    echo "Adding ODR asset tags for ${#VALID_EVENTS[@]} events to Xcode project..."
+
+    # Generate asset tags by relative path entries
+    local asset_tags_entries=""
+    for event in "${VALID_EVENTS[@]}"; do
+        asset_tags_entries="${asset_tags_entries}				Maps/${event}/${event}.geojson = (${event}, );\n"
+        asset_tags_entries="${asset_tags_entries}				Maps/${event}/${event}.mbtiles = (${event}, );\n"
+    done
+
+    # Generate known asset tags entries
+    local known_tags_entries=""
+    for event in "${VALID_EVENTS[@]}"; do
+        known_tags_entries="${known_tags_entries}					${event},\n"
+    done
+
+    # Check if ODR configuration already exists
+    if grep -q "assetTagsByRelativePath" "$temp_project"; then
+        echo "ODR asset tags already exist in Xcode project, updating..."
+
+        # Replace existing assetTagsByRelativePath section
+        awk -v new_entries="$asset_tags_entries" '
+        /assetTagsByRelativePath = {/ {
+            print
+            print new_entries
+            # Skip existing entries until closing brace
+            while (getline > 0 && !/^\t\t\t};$/) {}
+            print "\t\t\t};"
+            next
+        }
+        { print }' "$temp_project" > "${temp_project}.tmp" && mv "${temp_project}.tmp" "$temp_project"
+
+        # Replace existing KnownAssetTags section
+        awk -v new_entries="$known_tags_entries" '
+        /KnownAssetTags = \(/ {
+            print
+            print new_entries
+            # Skip existing entries until closing parenthesis
+            while (getline > 0 && !/^\t\t\t\t\);$/) {}
+            print "\t\t\t\t);"
+            next
+        }
+        { print }' "$temp_project" > "${temp_project}.tmp" && mv "${temp_project}.tmp" "$temp_project"
+
+    else
+        echo "No existing ODR configuration found in Xcode project"
+        echo "Please add ODR configuration manually or ensure the project structure is correct"
+        return 1
+    fi
+
+    # Replace original with updated version
+    mv "$temp_project" "$project_file"
+    echo "Xcode project ODR configuration completed for ${#VALID_EVENTS[@]} events"
+}
+
+# Only configure if we have valid events and project exists
+if [ ${#VALID_EVENTS[@]} -gt 0 ] && [ -f "$IOS_XCODE_PROJECT" ]; then
+    add_odr_tags_to_xcode "$IOS_XCODE_PROJECT"
+else
+    echo "Skipping Xcode project configuration: ${#VALID_EVENTS[@]} events, project exists: $([ -f "$IOS_XCODE_PROJECT" ] && echo "yes" || echo "no")"
+fi
