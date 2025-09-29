@@ -186,9 +186,79 @@ object MidiParser {
             Log.e("MidiParser", "Runtime error reading MIDI file $midiResourcePath: ${e.message}")
             // Return null instead of crashing to allow graceful degradation
             null
+        } catch (e: Exception) {
+            Log.e("MidiParser", "Unexpected error reading MIDI file $midiResourcePath: ${e.message}")
+            // Return null instead of crashing to allow graceful degradation
+            null
         }
 
     // ------------------------------------------------------------------------
+
+    /**
+     * Helper function to validate MIDI header and handle format validation errors.
+     * Consolidates header validation exceptions into one place.
+     */
+    private fun validateMidiHeader(reader: ByteArrayReader): Triple<Int, Int, Int> {
+        try {
+            val headerChunkId = reader.readString(STRING_CHUNK_LENGTH)
+            Log.d("MidiParser", "Header chunk ID: $headerChunkId")
+            require(headerChunkId == HEADER_CHUNK_ID) { "Not a valid MIDI file (missing MThd header)" }
+
+            val headerLength = reader.readInt32()
+            require(headerLength == HEADER_CHUNK_LENGTH) { "Invalid MIDI header length: $headerLength" }
+
+            val format = reader.readInt16()
+            val numTracks = reader.readInt16()
+            val timeDivision = reader.readInt16()
+
+            return Triple(format, numTracks, timeDivision)
+        } catch (e: IllegalArgumentException) {
+            Log.e(TAG, "Invalid MIDI format: ${e.message}", throwable = e)
+            throw IllegalArgumentException("Invalid MIDI format: ${e.message}", e)
+        } catch (e: IndexOutOfBoundsException) {
+            Log.e(TAG, "Malformed MIDI data: ${e.message}", throwable = e)
+            throw IllegalArgumentException("Malformed MIDI data: ${e.message}", e)
+        }
+    }
+
+    /**
+     * Helper function to validate track and handle parsing errors.
+     * Consolidates track validation and parsing exceptions into one place.
+     */
+    private fun validateAndParseTrack(
+        reader: ByteArrayReader,
+        bytes: ByteArray,
+        trackIndex: Int,
+    ): Pair<Int, Int> {
+        try {
+            val trackChunkId = reader.readString(STRING_CHUNK_LENGTH)
+            require(trackChunkId == TRACK_CHUNK_ID) { "Invalid track chunk ID: $trackChunkId" }
+
+            val trackLength = reader.readInt32()
+            val remainingBytes = bytes.size - reader.position
+            require(trackLength >= 0) { "Invalid track length: $trackLength (negative length)" }
+            require(
+                trackLength <= remainingBytes,
+            ) { "Invalid track length: $trackLength bytes claimed but only $remainingBytes bytes available" }
+
+            return Pair(trackLength, reader.position + trackLength)
+        } catch (e: IllegalArgumentException) {
+            Log.e(TAG, "Invalid track $trackIndex format: ${e.message}", throwable = e)
+            throw IllegalArgumentException("Invalid track $trackIndex format: ${e.message}", e)
+        } catch (e: IndexOutOfBoundsException) {
+            Log.e(TAG, "Malformed track $trackIndex data: ${e.message}", throwable = e)
+            throw IllegalArgumentException("Malformed track $trackIndex data: ${e.message}", e)
+        } catch (e: NumberFormatException) {
+            Log.e(TAG, "Invalid number format in track $trackIndex: ${e.message}", throwable = e)
+            throw IllegalArgumentException("Invalid number format in track $trackIndex: ${e.message}", e)
+        } catch (e: ArithmeticException) {
+            Log.e(TAG, "Arithmetic error in track $trackIndex: ${e.message}", throwable = e)
+            throw IllegalArgumentException("Arithmetic error in track $trackIndex: ${e.message}", e)
+        } catch (e: RuntimeException) {
+            Log.e(TAG, "Runtime error in track $trackIndex: ${e.message}", throwable = e)
+            throw IllegalArgumentException("Runtime error in track $trackIndex: ${e.message}", e)
+        }
+    }
 
     /**
      * Parse raw MIDI file bytes using a memory-optimized streaming parser.
@@ -200,23 +270,8 @@ object MidiParser {
         try {
             val reader = ByteArrayReader(bytes)
 
-            // Read header chunk
-            val headerChunkId = reader.readString(STRING_CHUNK_LENGTH)
-            Log.d("MidiParser", "Header chunk ID: $headerChunkId")
-            require(headerChunkId == HEADER_CHUNK_ID) { "Not a valid MIDI file (missing MThd header)" }
-
-            // Read header length (should be 6)
-            val headerLength = reader.readInt32()
-            require(headerLength == HEADER_CHUNK_LENGTH) { "Invalid MIDI header length: $headerLength" }
-
-            // Read format type (0 = single track, 1 = multiple tracks, same timing, 2 = multiple tracks, independent timing)
-            val format = reader.readInt16()
-
-            // Read number of tracks
-            val numTracks = reader.readInt16()
-
-            // Read time division
-            val timeDivision = reader.readInt16()
+            // Validate header and get format information
+            val (format, numTracks, timeDivision) = validateMidiHeader(reader)
             val ticksPerBeat = calculateTicksPerBeat(timeDivision)
 
             // Memory optimization: Use streaming approach to reduce peak memory usage
@@ -234,21 +289,9 @@ object MidiParser {
                 val trackNotes = mutableListOf<MidiNoteInternal>()
                 val activeNotes = mutableMapOf<Pair<Int, Int>, NoteStartInfo>()
                 val trackTempoChanges = mutableListOf<TempoChange>()
-                // Read track chunk
-                val trackChunkId = reader.readString(STRING_CHUNK_LENGTH)
-                require(trackChunkId == TRACK_CHUNK_ID) { "Invalid track chunk ID: $trackChunkId" }
 
-                // Read track length
-                val trackLength = reader.readInt32()
-
-                // Validate track length against available data
-                val remainingBytes = bytes.size - reader.position
-                require(trackLength >= 0) { "Invalid track length: $trackLength (negative length)" }
-                require(
-                    trackLength <= remainingBytes,
-                ) { "Invalid track length: $trackLength bytes claimed but only $remainingBytes bytes available" }
-
-                val trackEndPosition = reader.position + trackLength
+                // Validate and parse track header
+                val (trackLength, trackEndPosition) = validateAndParseTrack(reader, bytes, i)
 
                 var currentTick = 0L
                 var runningStatus = 0
@@ -390,24 +433,11 @@ object MidiParser {
                 tempo = finalTempo.toInt(),
             )
         } catch (e: IllegalArgumentException) {
-            val argException = IllegalArgumentException("Invalid MIDI format: ${e.message}", e)
-            Log.e(TAG, "Invalid MIDI format: ${e.message}", throwable = e)
-            throw argException
-        } catch (e: IndexOutOfBoundsException) {
-            val boundsException = IllegalArgumentException("Malformed MIDI data: ${e.message}", e)
-            Log.e(TAG, "Malformed MIDI data: ${e.message}", throwable = e)
-            throw boundsException
-        } catch (e: NumberFormatException) {
-            val numException = IllegalArgumentException("Invalid number format in MIDI data: ${e.message}", e)
-            Log.e(TAG, "Invalid number format in MIDI data: ${e.message}", throwable = e)
-            throw numException
-        } catch (e: ArithmeticException) {
-            val mathException = IllegalArgumentException("Arithmetic error in MIDI parsing: ${e.message}", e)
-            Log.e(TAG, "Arithmetic error in MIDI parsing: ${e.message}", throwable = e)
-            throw mathException
-        } catch (e: RuntimeException) {
-            val runtimeException = IllegalArgumentException("Runtime error parsing MIDI: ${e.message}", e)
-            Log.e(TAG, "Runtime error parsing MIDI: ${e.message}", throwable = e)
+            // Already wrapped and logged in helper functions
+            throw e
+        } catch (e: Exception) {
+            val runtimeException = IllegalArgumentException("Unexpected error parsing MIDI: ${e.message}", e)
+            Log.e(TAG, "Unexpected error parsing MIDI: ${e.message}", throwable = e)
             throw runtimeException
         }
     }
