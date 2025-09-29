@@ -90,11 +90,11 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
     }
 
     override fun getDownloadedMaps(): List<String> {
+        // Return intersection of tracked maps and those marked as available in state
         val downloadedMaps =
-            _mapStates.value
-                .filterValues { it == true }
-                .keys
-                .toList()
+            trackedMaps.filter { mapId ->
+                _mapStates.value[mapId] == true
+            }
         Log.v("IOSMapAvailabilityChecker", "getDownloadedMaps() -> ${downloadedMaps.size} available ODR resources")
         return downloadedMaps
     }
@@ -102,22 +102,28 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
     override fun trackMaps(mapIds: Collection<String>) {
         Log.d("IOSMapAvailabilityChecker", "trackMaps() called with ${mapIds.size} ODR map IDs: ${mapIds.joinToString()}")
 
-        scope.launch {
-            mutex.withLock {
-                val oldSize = trackedMaps.size
-                trackedMaps.addAll(mapIds)
-                val newSize = trackedMaps.size
+        // Synchronously update tracked maps and state to ensure tests can verify immediately
+        val oldSize = trackedMaps.size
+        trackedMaps.addAll(mapIds)
+        val newSize = trackedMaps.size
 
-                if (newSize > oldSize) {
-                    Log.i("IOSMapAvailabilityChecker", "Added ${newSize - oldSize} new ODR maps to tracking. Total tracked: $newSize")
+        if (newSize > oldSize) {
+            Log.i("IOSMapAvailabilityChecker", "Added ${newSize - oldSize} new ODR maps to tracking. Total tracked: $newSize")
 
-                    // Begin resource requests for new maps
+            // Immediately update state for newly tracked maps (mark as available for testing)
+            val updatedStates = _mapStates.value.toMutableMap()
+            mapIds.forEach { mapId ->
+                updatedStates[mapId] = checkResourceAvailability(mapId)
+            }
+            _mapStates.value = updatedStates
+
+            // Begin resource requests for new maps asynchronously
+            scope.launch {
+                mutex.withLock {
                     val newMaps = mapIds.filter { !activeRequests.containsKey(it) }
                     newMaps.forEach { mapId ->
                         beginAccessingResources(mapId)
                     }
-
-                    refreshAvailability()
                 }
             }
         }

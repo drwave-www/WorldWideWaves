@@ -10,6 +10,9 @@ package com.worldwidewaves.shared.map
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -21,6 +24,7 @@ import kotlin.test.assertTrue
  *
  * These tests verify the iOS asset bundle-based map management approach.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class IOSPlatformMapManagerTest {
     @Test
     fun `isMapAvailable returns false for non-existent maps`() {
@@ -51,6 +55,10 @@ class IOSPlatformMapManagerTest {
                     downloadFailed = true
                 },
             )
+
+            // Wait for download to complete
+            advanceTimeBy(35000)
+            advanceUntilIdle()
 
             // Should have received progress updates
             assertTrue(progressUpdates.isNotEmpty())
@@ -88,6 +96,10 @@ class IOSPlatformMapManagerTest {
                     errorMessage = message
                 },
             )
+
+            // Wait for download to complete
+            advanceTimeBy(35000)
+            advanceUntilIdle()
 
             // Should receive error for missing bundle
             assertTrue(errorReceived)
