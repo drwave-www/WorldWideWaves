@@ -32,12 +32,6 @@ import org.koin.mp.KoinPlatform
 import kotlin.time.ExperimentalTime
 
 /**
- * Check if the current build is a debug build.
- * Platform-specific implementation that checks the appropriate debug flag.
- */
-expect fun isDebugBuild(): Boolean
-
-/**
  * Unified debug simulation setup for all platforms.
  *
  * Sets up default simulation for development and testing when in debug build.
@@ -49,8 +43,8 @@ expect fun isDebugBuild(): Boolean
 @OptIn(ExperimentalTime::class)
 fun setupDebugSimulation() {
     try {
-        // Check if debug mode is enabled using platform-specific BuildConfig
-        if (isDebugBuild()) {
+        // Check if debug mode is enabled using LogConfig (which reflects BuildConfig)
+        if (com.worldwidewaves.shared.WWWGlobals.LogConfig.ENABLE_DEBUG_LOGGING) {
             Log.d("DebugSimulation", "Setting up cross-platform DEBUG simulation")
 
             val wwwPlatform = KoinPlatform.getKoin().get<WWWPlatform>()

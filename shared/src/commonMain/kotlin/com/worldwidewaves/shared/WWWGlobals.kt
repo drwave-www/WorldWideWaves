@@ -32,7 +32,18 @@ fun debugBuild() {
     // This function can be used for other debug-specific initialization if needed
 
     // Note: Debug simulation setup is called later after Koin initialization
-    // from MainApplication.onCreate() (Android) and equivalent iOS location
+    // from MainApplication.onCreate() (Android) and doInitPlatform() (iOS)
+}
+
+/**
+ * Logging configuration constants
+ */
+object LogConfig {
+    // For now, keep logging enabled for development
+    // TODO: Make this BuildConfig-driven when BuildConfig is properly available
+    const val ENABLE_VERBOSE_LOGGING: Boolean = true
+    const val ENABLE_DEBUG_LOGGING: Boolean = true
+    const val ENABLE_PERFORMANCE_LOGGING: Boolean = true
 }
 
 /**
