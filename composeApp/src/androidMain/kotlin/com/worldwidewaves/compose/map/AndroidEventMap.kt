@@ -273,8 +273,8 @@ class AndroidEventMap(
     @Composable
     @Suppress("FunctionName")
     private fun HandleMapAvailability(mapState: MapState) {
-        // Check if map is downloaded
-        LaunchedEffect(Unit) {
+        // Check if map is downloaded - use event.id key to prevent redundant calls
+        LaunchedEffect(event.id) {
             mapState.mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
             mapState.setIsMapAvailable(mapAvailabilityChecker.isMapDownloaded(event.id))
             Log.i(TAG, "Initial map availability check result: ${event.id} available=${mapState.isMapAvailable}")
