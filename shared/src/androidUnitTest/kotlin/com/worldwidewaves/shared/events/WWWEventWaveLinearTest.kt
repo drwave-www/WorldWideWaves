@@ -702,9 +702,6 @@ class WWWEventWaveLinearTest : KoinTest {
 
             // WHEN: Check if user has been hit
             val hasBeenHit = waveLinear.hasUserBeenHitInCurrentPosition()
-
-            // THEN: Test passes if hit detection executes without exception
-            assertTrue(hasBeenHit is Boolean, "Hit detection should return a boolean value")
         }
 
     @Test

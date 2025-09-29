@@ -74,17 +74,18 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.coroutines.core)
 
-            implementation(compose.materialIconsExtended)
             implementation(libs.kotlinx.atomic)
             implementation(libs.koin.core)
             implementation(libs.napier)
 
-            implementation("org.jetbrains.compose.runtime:runtime:1.8.2")
-            implementation("org.jetbrains.compose.ui:ui:1.8.2")
-            implementation("org.jetbrains.compose.foundation:foundation:1.8.2")
-            implementation("org.jetbrains.compose.material:material:1.8.2")
-            implementation("org.jetbrains.compose.material3:material3:1.8.2")
-            implementation("org.jetbrains.compose.components:components-resources:1.8.2")
+            // Use Jetpack Compose Multiplatform consistently
+            implementation(compose.runtime)
+            implementation(compose.ui)
+            implementation(compose.foundation)
+            implementation(compose.material)
+            implementation(compose.material3)
+            implementation(compose.materialIconsExtended)
+            implementation(compose.components.resources)
 
             // REQUIRED so IOSLifecycleOwner can link:
             // implementation("org.jetbrains.androidx.lifecycle:lifecycle-common:2.8.4")
@@ -98,7 +99,7 @@ kotlin {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.koin.test)
-            implementation("io.mockk:mockk:1.13.12")
+            implementation(libs.mockk.android.v1120)
         }
         iosMain.dependencies {
             implementation("org.jetbrains.compose.ui:ui-uikit:1.8.2") {
@@ -115,31 +116,19 @@ kotlin {
             implementation(libs.maplibre.android)
             implementation(libs.androidx.datastore.preferences)
 
-            implementation("androidx.compose.material:material-icons-extended")
-
             implementation(libs.places)
             implementation(libs.androidx.ui.graphics.android)
             implementation(libs.androidx.annotation.jvm)
             implementation(libs.feature.delivery.ktx)
 
-            // Compose (Android) via BOM
-            implementation("androidx.compose:compose-bom:2024.09.01")
-            implementation("androidx.compose.ui:ui")
-            implementation("androidx.compose.foundation:foundation")
-            implementation("androidx.compose.material:material")
-            implementation("androidx.compose.material3:material3")
-
-            // Lifecycle + Compose lifecycle (Android-only)
-            implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
-            implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.4")
-            implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.4")
-            implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
-
-            // Compose Material3 for Android (you can keep JB MPP in common; this ensures Android has it)
-            // implementation("org.jetbrains.compose.material3:material3:1.8.2")
+            // Android-specific Lifecycle (without Compose BOM conflicts)
+            implementation(libs.androidx.lifecycle.runtime.ktx)
+            implementation(libs.androidx.lifecycle.viewmodel.ktx)
+            implementation(libs.androidx.lifecycle.runtime.compose)
+            implementation(libs.androidx.lifecycle.viewmodel.compose)
 
             // Coroutines on Android
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+            implementation(libs.kotlinx.coroutines.android)
         }
 
         /*
@@ -166,6 +155,25 @@ kotlin {
                 resources.setSrcDirs(emptySet<String>())
             }
         }
+    }
+}
+
+// Resolve KLIB conflicts between AndroidX and Compose Multiplatform
+configurations.all {
+    resolutionStrategy {
+        // Prefer Compose Multiplatform internal libraries for KMP metadata
+        force("org.jetbrains.compose.annotation-internal:annotation:1.8.2")
+        force("org.jetbrains.compose.collection-internal:collection:1.8.2")
+
+        // Force consistent annotation/collection library versions
+        force("androidx.annotation:annotation:1.9.1")
+        force("androidx.collection:collection:1.5.0")
+    }
+
+    // Only exclude in iOS metadata configurations to avoid Android conflicts
+    if (name.contains("ios", ignoreCase = true) || name.contains("metadata", ignoreCase = true)) {
+        exclude(group = "androidx.annotation", module = "annotation")
+        exclude(group = "androidx.collection", module = "collection")
     }
 }
 

@@ -92,6 +92,7 @@ class AudioTestActivity : ComponentActivity() {
     }
 
     @Composable
+    @Suppress("FunctionName")
     fun AudioTestScreen() {
         var isLoading by remember { mutableStateOf(false) }
         var isPlaying by remember { mutableStateOf(false) }

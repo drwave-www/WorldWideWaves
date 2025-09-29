@@ -35,6 +35,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
+import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -257,20 +258,21 @@ class AndroidEventMap(
         val mapState = setupMapState()
 
         // Handle map availability and download state
-        handleMapAvailability(mapState)
+        HandleMapAvailability(mapState)
 
         // Handle location permissions and GPS
-        handleLocationPermissions(mapState, autoMapDownload)
+        HandleLocationPermissions(mapState, autoMapDownload)
 
         // Render the map content
-        renderMapContent(mapState, modifier)
+        RenderMapContent(mapState, modifier)
     }
 
     /**
      * Handle map availability checks and download state updates
      */
     @Composable
-    private fun handleMapAvailability(mapState: MapState) {
+    @Suppress("FunctionName")
+    private fun HandleMapAvailability(mapState: MapState) {
         // Check if map is downloaded
         LaunchedEffect(Unit) {
             mapState.mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
@@ -299,7 +301,7 @@ class AndroidEventMap(
                     mapState.setInitStarted(false)
                 }
                 is MapFeatureState.Failed -> {
-                    val errorCode = (mapState.mapFeatureState as MapFeatureState.Failed).errorCode
+                    val errorCode = mapState.mapFeatureState.errorCode
                     Log.e(TAG, "Map download failed: ${event.id}, errorCode=$errorCode")
                     mapState.setMapError(true)
                     mapState.setIsMapDownloading(false)
@@ -318,7 +320,8 @@ class AndroidEventMap(
      * Handle location permissions and GPS setup
      */
     @Composable
-    private fun handleLocationPermissions(
+    @Suppress("FunctionName")
+    private fun HandleLocationPermissions(
         mapState: MapState,
         autoMapDownload: Boolean,
     ) {
@@ -374,6 +377,7 @@ class AndroidEventMap(
     }
 
     @Composable
+    @Suppress("FunctionName")
     private fun MapDownloadOverlay(
         state: MapFeatureState,
         onCancel: () -> Unit,
@@ -415,6 +419,7 @@ class AndroidEventMap(
     }
 
     @Composable
+    @Suppress("FunctionName")
     private fun MapErrorOverlay(onRetry: () -> Unit) {
         Surface(modifier = Modifier.fillMaxSize()) {
             ErrorMessage(
@@ -429,6 +434,7 @@ class AndroidEventMap(
     // ------------------------------------------------------------------------
 
     @Composable
+    @Suppress("FunctionName")
     private fun ErrorMessage(
         message: String,
         onRetry: () -> Unit,
@@ -472,6 +478,7 @@ class AndroidEventMap(
     }
 
     @Composable
+    @Suppress("FunctionName")
     private fun MapDownloadButton(onClick: () -> Unit) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Button(
@@ -496,7 +503,8 @@ class AndroidEventMap(
      * Render the main map content UI
      */
     @Composable
-    private fun renderMapContent(
+    @Suppress("FunctionName")
+    private fun RenderMapContent(
         mapState: MapState,
         modifier: Modifier,
     ) {
@@ -839,6 +847,7 @@ class AndroidEventMap(
     /**
      * Disable location component if it's currently activated
      */
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     private fun disableLocationComponentIfActivated(map: MapLibreMap) {
         if (map.locationComponent.isLocationComponentActivated) {
             // Always disable first to avoid stale state
