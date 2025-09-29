@@ -339,7 +339,6 @@ naming:
     excludeClassPattern: '$^'
     ignoreAnnotated: ['Composable', 'Preview']
     # Allow PascalCase for Compose functions in specific UI files
-    ignoreOverridden: true
   FunctionParameterNaming:
     active: true
     parameterPattern: '[a-z][A-Za-z0-9]*'

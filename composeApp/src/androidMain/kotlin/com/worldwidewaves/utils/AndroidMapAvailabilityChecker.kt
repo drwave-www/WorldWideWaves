@@ -176,20 +176,19 @@ class AndroidMapAvailabilityChecker(
         return downloaded
     }
 
-    fun canUninstallMap(eventId: String): Boolean {
+    fun canUninstallMap(eventId: String): Boolean =
         try {
             val splitInstallManager = SplitInstallManagerFactory.create(context)
-            return splitInstallManager.installedModules.contains(eventId) // Not installed, so can't uninstall
+            splitInstallManager.installedModules.contains(eventId)
         } catch (ise: IllegalStateException) {
             Log.e("MapAvailabilityChecker", "SplitInstallManager in invalid state: ${ise.message}")
             Log.e(TAG, "canUninstallMap id=$eventId exception=${ise.message}")
-            return false // If there's an error, assume it can't be uninstalled
+            false // If there's an error, assume it can't be uninstalled
         } catch (uoe: UnsupportedOperationException) {
             Log.e("MapAvailabilityChecker", "Unsupported operation on SplitInstallManager: ${uoe.message}")
             Log.e(TAG, "canUninstallMap id=$eventId exception=${uoe.message}")
-            return false // If there's an error, assume it can't be uninstalled
+            false // If there's an error, assume it can't be uninstalled
         }
-    }
 
     /**
      * Uninstall the dynamic-feature module corresponding to [eventId].
