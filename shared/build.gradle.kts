@@ -44,7 +44,7 @@ kotlin {
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "Shared"
-            isStatic = true
+            isStatic = false // Dynamic framework for iOS compatibility
             linkerOpts("-ObjC")
         }
     }
@@ -102,11 +102,11 @@ kotlin {
             implementation(libs.mockk.android.v1120)
         }
         iosMain.dependencies {
-            implementation("org.jetbrains.compose.ui:ui-uikit:1.8.2")
+            // No ui-uikit dependency - use business logic only for iOS (working pattern from 9c421d96)
         }
         androidMain.dependencies {
             implementation(libs.androidx.ui.text.google.fonts)
-            implementation(libs.androidx.annotation)
+            compileOnly(libs.androidx.annotation) // CompileOnly to avoid iOS conflicts
 
             implementation(libs.koin.android)
             implementation(libs.kotlinx.datetime)
@@ -155,38 +155,7 @@ kotlin {
     }
 }
 
-// Resolve KLIB conflicts between AndroidX and Compose Multiplatform
-configurations.all {
-    resolutionStrategy {
-        // Prefer Compose Multiplatform internal libraries for KMP metadata
-        force("org.jetbrains.compose.annotation-internal:annotation:1.8.2")
-        force("org.jetbrains.compose.collection-internal:collection:1.8.2")
-
-        // Force consistent annotation/collection library versions for Android only
-        if (name.contains("android", ignoreCase = true) && !name.contains("ios", ignoreCase = true)) {
-            force("androidx.annotation:annotation:1.9.1")
-            force("androidx.collection:collection:1.5.0")
-        }
-    }
-
-    // Module-specific excludes: allow lifecycle-common; block Android-only bits
-    val n = name.lowercase()
-    if (n.contains("commonmain") || n.contains("ios")) {
-        // allow lifecycle-common; block Android-only bits
-        exclude(group = "androidx.lifecycle", module = "lifecycle-runtime-compose")
-        exclude(group = "org.jetbrains.androidx.lifecycle", module = "lifecycle-runtime-compose")
-        exclude(group = "androidx.lifecycle", module = "lifecycle-viewmodel-compose")
-        exclude(group = "androidx.lifecycle", module = "lifecycle-runtime-ktx")
-        exclude(group = "androidx.lifecycle", module = "lifecycle-viewmodel-ktx")
-        exclude(group = "androidx.activity") // activity/fragment are Android-only
-        exclude(group = "androidx.fragment")
-        exclude(group = "androidx.compose.ui", module = "ui-tooling")
-        exclude(group = "androidx.compose.material") // old M2
-        exclude(group = "androidx.compose.material3") // AndroidX variant
-        exclude(group = "androidx.annotation")
-        exclude(group = "androidx.collection")
-    }
-}
+// Clean configuration without forced dependencies that break iOS compilation
 
 android {
     namespace = "com.worldwidewaves.shared"
