@@ -22,6 +22,7 @@
 
 DEST_DIR=../../maps/android/
 GRADLE_SETTINGS=../../settings.gradle.kts
+IOS_INFO_PLIST=../../iosApp/worldwidewaves/Info.plist
 
 cd "$(dirname "$0")" || exit # always work from executable folder
 
@@ -106,7 +107,63 @@ for event in $EVENTS; do # Retrieve Geojson files from OSM
   [ ! -f "$DEST_DIR_MODULE/.gitignore" ] && echo "/build" > "$DEST_DIR_MODULE/.gitignore"
 
   INCLUDE_GRADLE='include(":maps:android:'$event'")'
-  grep "$INCLUDE_GRADLE" "$GRADLE_SETTINGS" >/dev/null 2>&1
-  [ "$?" != 0 ] && echo "$INCLUDE_GRADLE" >> "$GRADLE_SETTINGS"
+  if ! grep -q "$INCLUDE_GRADLE" "$GRADLE_SETTINGS"; then
+    echo "$INCLUDE_GRADLE" >> "$GRADLE_SETTINGS"
+  fi
 
 done
+
+# ========================================================================
+# iOS Info.plist ODR Configuration (Idempotent)
+# ========================================================================
+
+echo "Configuring iOS ODR entries in Info.plist..."
+
+# Check if Info.plist exists and handle Xcode "Generate Info.plist = Yes" scenario
+if [ ! -f "$IOS_INFO_PLIST" ]; then
+    echo "Warning: Info.plist not found at $IOS_INFO_PLIST"
+    echo "If using Xcode 'Generate Info.plist = Yes', this is expected."
+    echo "ODR tags will be added to project.pbxproj instead during Xcode build."
+    exit 0
+fi
+
+# Function to add ODR entries to Info.plist idempotently
+add_odr_entries_to_plist() {
+    local plist_file="$1"
+    local temp_plist="/tmp/worldwidewaves_info_temp.plist"
+
+    # Copy original plist
+    cp "$plist_file" "$temp_plist"
+
+    # Check if NSBundleResourceRequestTags already exists
+    if ! plutil -extract NSBundleResourceRequestTags xml1 -o - "$temp_plist" >/dev/null 2>&1; then
+        # Add NSBundleResourceRequestTags dictionary
+        plutil -insert NSBundleResourceRequestTags -dictionary "$temp_plist"
+        echo "Added NSBundleResourceRequestTags to Info.plist"
+    fi
+
+    # Add entries for each valid event (idempotent)
+    for event in "${VALID_EVENTS[@]}"; do
+        if ! plutil -extract NSBundleResourceRequestTags."$event" xml1 -o - "$temp_plist" >/dev/null 2>&1; then
+            # Add array for this event
+            plutil -insert NSBundleResourceRequestTags."$event" -array "$temp_plist"
+            # Add geojson and mbtiles file references
+            plutil -insert NSBundleResourceRequestTags."$event" -string "$event.geojson" -append "$temp_plist"
+            plutil -insert NSBundleResourceRequestTags."$event" -string "$event.mbtiles" -append "$temp_plist"
+            echo "Added ODR tag for $event (geojson + mbtiles)"
+        else
+            echo "ODR tag for $event already exists, skipping"
+        fi
+    done
+
+    # Replace original with updated version
+    mv "$temp_plist" "$plist_file"
+    echo "Info.plist ODR configuration completed"
+}
+
+# Only configure if we have valid events and plist exists
+if [ ${#VALID_EVENTS[@]} -gt 0 ] && [ -f "$IOS_INFO_PLIST" ]; then
+    add_odr_entries_to_plist "$IOS_INFO_PLIST"
+else
+    echo "Skipping Info.plist configuration: ${#VALID_EVENTS[@]} events, plist exists: $([ -f "$IOS_INFO_PLIST" ] && echo "yes" || echo "no")"
+fi
