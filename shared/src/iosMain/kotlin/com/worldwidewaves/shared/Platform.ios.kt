@@ -255,15 +255,45 @@ actual fun getCacheDir(): String =
 
 @Throws(Throwable::class)
 actual suspend fun cacheDeepFile(fileName: String) {
-    // iOS implementation: Cache a file from deep/nested resources
-    // For iOS, this typically involves copying from app bundle to cache directory
+    // iOS implementation: Cache ODR resource to cache directory for fast access
     try {
-        // This would involve reading from iOS Bundle resources and writing to cache
-        // Implementation depends on iOS resource bundling strategy
-        // For now, this is a no-op as files are typically pre-bundled in iOS
+        Log.v("cacheDeepFile", "Attempting to cache ODR file: $fileName")
+
+        val cacheDir = getCacheDir()
+        val cachedFilePath = "$cacheDir/$fileName"
+
+        // Check if already cached
+        if (NSFileManager.defaultManager.fileExistsAtPath(cachedFilePath)) {
+            Log.d("cacheDeepFile", "File already cached: $fileName")
+            return
+        }
+
+        // Extract eventId from fileName (e.g., "paris_france.geojson" -> "paris_france")
+        val eventId = fileName.substringBeforeLast('.')
+        val extension = fileName.substringAfterLast('.')
+
+        // Try to find in ODR bundle resources (after ODR download)
+        val bundle = NSBundle.mainBundle
+        val resourcePath = bundle.pathForResource(eventId, extension, "Resources/Maps/$eventId")
+
+        if (resourcePath != null && NSFileManager.defaultManager.fileExistsAtPath(resourcePath)) {
+            // Copy from ODR bundle to cache
+            val copySuccess =
+                NSFileManager.defaultManager.copyItemAtPath(
+                    resourcePath,
+                    cachedFilePath,
+                    null,
+                )
+            if (copySuccess) {
+                Log.i("cacheDeepFile", "Successfully cached ODR file: $fileName -> $cachedFilePath")
+            } else {
+                Log.w("cacheDeepFile", "Failed to copy ODR file to cache: $fileName")
+            }
+        } else {
+            Log.w("cacheDeepFile", "ODR file not found for caching: $fileName")
+        }
     } catch (e: Exception) {
-        Log.w("cacheDeepFile", "Error caching file $fileName: ${e.message}")
-        // File caching is not critical for iOS operation
+        Log.w("cacheDeepFile", "Error caching ODR file $fileName: ${e.message}", e)
     }
 }
 
@@ -272,22 +302,35 @@ actual suspend fun cacheDeepFile(fileName: String) {
 // ---------------------------------------------------------------------------
 
 actual fun clearEventCache(eventId: String) {
-    // Also invalidate GeoJSON cache in memory
+    // Clear ODR cached files from cache directory
     try {
-        // Safe iOS approach - use direct Koin access without KoinComponent
+        val cacheDir = getCacheDir()
+        val geoJsonFile = "$cacheDir/$eventId.geojson"
+        val mbtileFile = "$cacheDir/$eventId.mbtiles"
+
+        // Remove cached files
+        if (NSFileManager.defaultManager.fileExistsAtPath(geoJsonFile)) {
+            NSFileManager.defaultManager.removeItemAtPath(geoJsonFile, null)
+            Log.i("clearEventCache", "Removed cached GeoJSON: $geoJsonFile")
+        }
+        if (NSFileManager.defaultManager.fileExistsAtPath(mbtileFile)) {
+            NSFileManager.defaultManager.removeItemAtPath(mbtileFile, null)
+            Log.i("clearEventCache", "Removed cached MBTiles: $mbtileFile")
+        }
+
+        // Also invalidate GeoJSON cache in memory
         val koin =
             org.koin.mp.KoinPlatform
                 .getKoin()
         val geoJsonProvider = koin.get<GeoJsonDataProvider>()
         geoJsonProvider.invalidateCache(eventId)
+
+        Log.i("clearEventCache", "Successfully cleared cache for event $eventId")
     } catch (e: IllegalStateException) {
         Log.w("clearEventCache", "State error clearing cache for event $eventId: ${e.message}")
-        // Cache invalidation is not critical for iOS operation
     } catch (e: Exception) {
-        Log.w("clearEventCache", "Unexpected error clearing cache for event $eventId: ${e.message}")
-        // Cache invalidation is not critical for iOS operation
+        Log.w("clearEventCache", "Error clearing cache for event $eventId: ${e.message}")
     }
-    // Note: Other map assets are shipped inside the app bundle and don't need clearing
 }
 
 actual fun isCachedFileStale(fileName: String): Boolean = false

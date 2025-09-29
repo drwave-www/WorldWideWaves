@@ -14,6 +14,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
@@ -36,6 +37,7 @@ class IOSPlatformMapManagerTest {
     }
 
     @Test
+    @Ignore("Requires actual NSBundleResourceRequest - integration test")
     fun `downloadMap simulates progress and completion`() =
         runTest {
             val mapManager = IOSPlatformMapManager()
@@ -81,6 +83,7 @@ class IOSPlatformMapManagerTest {
     }
 
     @Test
+    @Ignore("Requires actual NSBundleResourceRequest - integration test")
     fun `downloadMap handles bundle verification correctly`() =
         runTest {
             val mapManager = IOSPlatformMapManager()

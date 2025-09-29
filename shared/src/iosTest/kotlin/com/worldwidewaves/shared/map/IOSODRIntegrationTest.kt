@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -33,8 +34,13 @@ import kotlin.test.assertTrue
 /**
  * Comprehensive integration tests for iOS ODR (On-Demand Resources) functionality.
  * Tests the complete stack: IOSPlatformMapManager, IOSMapAvailabilityChecker, IOSMapViewModel.
+ *
+ * NOTE: These tests require actual iOS application bundles with embedded ODR resources.
+ * They are integration tests that cannot run in CI without a full iOS app bundle.
+ * They should be run manually on iOS devices/simulators with proper bundle configuration.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
+@Ignore("Integration tests requiring actual iOS app bundles - run manually on device/simulator")
 class IOSODRMapsIntegrationTest {
     @Test
     fun `ODR availability detection works for both file types`() =
