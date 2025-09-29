@@ -34,6 +34,7 @@ import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 import org.koin.core.logger.PrintLogger
+import platform.Foundation.NSBundle
 import platform.Foundation.NSCachesDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSSearchPathForDirectoriesInDomains
@@ -42,6 +43,7 @@ import platform.Foundation.NSURL
 import platform.Foundation.NSUTF8StringEncoding
 import platform.Foundation.NSUserDomainMask
 import platform.Foundation.create
+import platform.Foundation.stringWithContentsOfFile
 import platform.Foundation.writeToFile
 
 /**
@@ -119,41 +121,88 @@ private var koinApp: KoinApplication? = null
  * Simply instantiate the common `WWWPlatform` with the device name/version.
  */
 
+@OptIn(ExperimentalForeignApi::class)
 actual suspend fun readGeoJson(eventId: String): String? {
-    // iOS implementation: Read GeoJSON from app bundle resources
-    // For iOS, GeoJSON files are typically bundled within the app
+    // Production-grade iOS implementation: Read GeoJSON from ODR bundle resources
     return try {
-        // This would read from iOS Bundle.main.path(forResource:)
-        // For now, return null to indicate resource not found
-        // Implementation depends on iOS resource management strategy
-        null
+        Log.v("readGeoJson", "Loading GeoJSON for event $eventId")
+
+        val filePath = getMapFileAbsolutePath(eventId, "geojson")
+        if (filePath != null) {
+            Log.i("readGeoJson", "Reading GeoJSON from: $filePath")
+
+            // Use iOS Foundation API to read file contents safely
+            val content =
+                NSString
+                    .stringWithContentsOfFile(
+                        path = filePath,
+                        encoding = NSUTF8StringEncoding,
+                        error = null,
+                    )?.toString()
+
+            if (content != null) {
+                val preview = content.take(100).replace("\n", " ")
+                Log.i("readGeoJson", "Successfully loaded GeoJSON (${content.length} chars): $preview...")
+                content
+            } else {
+                Log.w("readGeoJson", "Failed to read file content from $filePath")
+                null
+            }
+        } else {
+            Log.d("readGeoJson", "GeoJSON file not found for event $eventId")
+            null
+        }
     } catch (e: Exception) {
-        Log.w("readGeoJson", "Error reading GeoJSON for event $eventId: ${e.message}")
+        Log.e("readGeoJson", "Error reading GeoJSON for event $eventId: ${e.message}", e)
         null
     }
 }
 
+@OptIn(ExperimentalForeignApi::class)
 @Throws(Throwable::class)
 actual suspend fun getMapFileAbsolutePath(
     eventId: String,
     extension: String,
 ): String? {
-    // iOS implementation: Get absolute path to map file
-    // iOS apps store resources in the app bundle or Documents directory
+    // Production-grade iOS implementation: Check cache and ODR bundle resources
     return try {
-        val cacheDir = getCacheDir()
         val fileName = "$eventId.$extension"
-        val filePath = "$cacheDir/$fileName"
+        Log.v("getMapFileAbsolutePath", "Looking for $fileName")
 
-        // Check if file exists in cache directory
-        if (NSFileManager.defaultManager.fileExistsAtPath(filePath)) {
-            filePath
-        } else {
-            // File not found in cache, could check app bundle resources here
-            null
+        // Priority 1: Check cache directory (downloaded maps)
+        val cacheDir = getCacheDir()
+        val cachePath = "$cacheDir/$fileName"
+        if (NSFileManager.defaultManager.fileExistsAtPath(cachePath)) {
+            Log.d("getMapFileAbsolutePath", "Found $fileName in cache: $cachePath")
+            return cachePath
         }
+
+        // Priority 2: Check main bundle resources (ODR maps)
+        val bundle = NSBundle.mainBundle
+        val resourcePath = bundle.pathForResource(eventId, extension)
+        if (resourcePath != null && NSFileManager.defaultManager.fileExistsAtPath(resourcePath)) {
+            Log.d("getMapFileAbsolutePath", "Found $fileName in bundle: $resourcePath")
+            return resourcePath
+        }
+
+        // Priority 3: Check Maps subdirectory in bundle (alternative ODR structure)
+        val mapsResourcePath = bundle.pathForResource(eventId, extension, "Maps")
+        if (mapsResourcePath != null && NSFileManager.defaultManager.fileExistsAtPath(mapsResourcePath)) {
+            Log.d("getMapFileAbsolutePath", "Found $fileName in Maps subdirectory: $mapsResourcePath")
+            return mapsResourcePath
+        }
+
+        // Priority 4: Check Resources/Maps subdirectory (alternative ODR structure)
+        val resourcesMapsPath = bundle.pathForResource(eventId, extension, "Resources/Maps")
+        if (resourcesMapsPath != null && NSFileManager.defaultManager.fileExistsAtPath(resourcesMapsPath)) {
+            Log.d("getMapFileAbsolutePath", "Found $fileName in Resources/Maps: $resourcesMapsPath")
+            return resourcesMapsPath
+        }
+
+        Log.d("getMapFileAbsolutePath", "Map file $fileName not found in any location")
+        null
     } catch (e: Exception) {
-        Log.w("getMapFileAbsolutePath", "Error accessing map file for event $eventId.$extension: ${e.message}")
+        Log.e("getMapFileAbsolutePath", "Error accessing map file $eventId.$extension: ${e.message}", e)
         null
     }
 }
