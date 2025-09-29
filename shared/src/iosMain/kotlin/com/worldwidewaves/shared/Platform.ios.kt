@@ -199,6 +199,20 @@ actual suspend fun getMapFileAbsolutePath(
             return resourcesMapsPath
         }
 
+        // Priority 5: Check city subdirectory structure: Maps/eventId/eventId.extension
+        val citySubdirPath = bundle.pathForResource(eventId, extension, "Maps/$eventId")
+        if (citySubdirPath != null && NSFileManager.defaultManager.fileExistsAtPath(citySubdirPath)) {
+            Log.d("getMapFileAbsolutePath", "Found $fileName in Maps/$eventId: $citySubdirPath")
+            return citySubdirPath
+        }
+
+        // Priority 6: Check Resources/Maps city subdirectory: Resources/Maps/eventId/eventId.extension
+        val resourcesCitySubdirPath = bundle.pathForResource(eventId, extension, "Resources/Maps/$eventId")
+        if (resourcesCitySubdirPath != null && NSFileManager.defaultManager.fileExistsAtPath(resourcesCitySubdirPath)) {
+            Log.d("getMapFileAbsolutePath", "Found $fileName in Resources/Maps/$eventId: $resourcesCitySubdirPath")
+            return resourcesCitySubdirPath
+        }
+
         Log.d("getMapFileAbsolutePath", "Map file $fileName not found in any location")
         null
     } catch (e: Exception) {
