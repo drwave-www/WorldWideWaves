@@ -13,6 +13,34 @@
 			</array>
 		</dict>
 	</array>
+	<key>NSBundleResourceRequestTags</key>
+	<dict>
+		<key>paris_france</key>
+		<array>
+			<string>paris_france.geojson</string>
+			<string>paris_france.mbtiles</string>
+		</array>
+		<key>new_york_usa</key>
+		<array>
+			<string>new_york_usa.geojson</string>
+			<string>new_york_usa.mbtiles</string>
+		</array>
+		<key>london_england</key>
+		<array>
+			<string>london_england.geojson</string>
+			<string>london_england.mbtiles</string>
+		</array>
+		<key>berlin_germany</key>
+		<array>
+			<string>berlin_germany.geojson</string>
+			<string>berlin_germany.mbtiles</string>
+		</array>
+		<key>tokyo_japan</key>
+		<array>
+			<string>tokyo_japan.geojson</string>
+			<string>tokyo_japan.mbtiles</string>
+		</array>
+	</dict>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
