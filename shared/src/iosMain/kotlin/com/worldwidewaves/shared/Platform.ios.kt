@@ -122,6 +122,7 @@ actual suspend fun readGeoJson(eventId: String): String? {
     }
 }
 
+@Throws(Throwable::class)
 actual suspend fun getMapFileAbsolutePath(
     eventId: String,
     extension: String,
@@ -159,6 +160,7 @@ actual fun cachedFilePath(fileName: String): String? {
 }
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
+@Throws(Throwable::class)
 actual fun cacheStringToFile(
     fileName: String,
     content: String,
@@ -177,6 +179,7 @@ actual fun getCacheDir(): String =
         true,
     ).first() as String
 
+@Throws(Throwable::class)
 actual suspend fun cacheDeepFile(fileName: String) {
     // iOS implementation: Cache a file from deep/nested resources
     // For iOS, this typically involves copying from app bundle to cache directory
