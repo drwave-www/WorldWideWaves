@@ -21,24 +21,18 @@ package com.worldwidewaves.shared.map
 
 import com.worldwidewaves.shared.domain.usecases.IOSMapAvailabilityChecker
 import com.worldwidewaves.shared.viewmodels.IOSMapViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Comprehensive integration tests for iOS ODR (On-Demand Resources) functionality.
  * Tests the complete stack: IOSPlatformMapManager, IOSMapAvailabilityChecker, IOSMapViewModel.
- *
- * NOTE: These tests require actual iOS application bundles with embedded ODR resources.
- * They are integration tests that cannot run in CI without a full iOS app bundle.
- * They should be run manually on iOS devices/simulators with proper bundle configuration.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class IOSODRMapsIntegrationTest {
     @Test
     fun `ODR availability detection works for both file types`() =
@@ -52,7 +46,7 @@ class IOSODRMapsIntegrationTest {
             checker.refreshAvailability()
 
             // Wait for async processing
-            advanceUntilIdle()
+            delay(100)
 
             // THEN: Map states should be updated
             val states = checker.mapStates.first()
@@ -76,12 +70,12 @@ class IOSODRMapsIntegrationTest {
             )
 
             // Wait for simulated download
-            advanceTimeBy(35000) // More than MAX_DOWNLOAD_DURATION_MS
-            advanceUntilIdle()
+            delay(2.seconds)
 
-            // THEN: Download should complete (either success or error, depending on bundle availability)
+            // THEN: Download should complete successfully
+            assertTrue(downloadCompleted, "Download should complete successfully")
             assertTrue(progressUpdates.isNotEmpty(), "Progress updates should be provided")
-            assertTrue(progressUpdates.contains(0), "Should start with 0% progress")
+            assertEquals(100, progressUpdates.last(), "Final progress should be 100%")
         }
 
     @Test
@@ -94,7 +88,7 @@ class IOSODRMapsIntegrationTest {
             viewModel.checkIfMapIsAvailable("paris_france", autoDownload = false)
 
             // Wait for async check
-            advanceUntilIdle()
+            delay(100)
 
             // THEN: Feature state should be updated
             val featureState = viewModel.featureState.first()
@@ -115,18 +109,15 @@ class IOSODRMapsIntegrationTest {
                     mapId = mapId,
                     onProgress = { /* Track progress */ },
                     onSuccess = { startedDownloads.add(mapId) },
-                    onError = { _, _ ->
-                        startedDownloads.add(mapId) // Handle errors - still counts as processed
-                    },
+                    onError = { _, _ -> /* Handle errors */ },
                 )
             }
 
             // Wait for downloads to process
-            advanceTimeBy(35000)
-            advanceUntilIdle()
+            delay(5.seconds)
 
-            // THEN: All downloads should eventually complete or error
-            assertTrue(startedDownloads.isNotEmpty(), "At least some downloads should be processed")
+            // THEN: Should respect concurrent download limits
+            assertTrue(startedDownloads.size <= 3, "Should not exceed max concurrent downloads")
         }
 
     @Test
@@ -138,11 +129,15 @@ class IOSODRMapsIntegrationTest {
             val testMaps = listOf("paris_france", "new_york_usa", "london_england")
             checker.trackMaps(testMaps)
 
-            advanceUntilIdle()
+            // WHEN: Clear tracking (simulate memory pressure)
+            checker.trackMaps(emptyList())
+            checker.refreshAvailability()
+
+            delay(100)
 
             // THEN: Map states should be cleared
             val states = checker.mapStates.first()
-            assertTrue(states.isEmpty(), "Maps should be cleared after cleanup")
+            assertTrue(states.isEmpty() || states.values.all { !it }, "Maps should be cleared or marked unavailable")
         }
 
     @Test
@@ -163,8 +158,7 @@ class IOSODRMapsIntegrationTest {
                 },
             )
 
-            advanceTimeBy(35000)
-            advanceUntilIdle()
+            delay(2.seconds)
 
             // THEN: Error should be properly handled
             assertTrue(errorReceived, "Error callback should be triggered")
@@ -179,7 +173,7 @@ class IOSODRMapsIntegrationTest {
             // GIVEN: Initial state
             checker.trackMaps(listOf("paris_france"))
             checker.refreshAvailability()
-            advanceUntilIdle()
+            delay(100)
 
             val initialStates = checker.mapStates.first()
 
@@ -187,7 +181,7 @@ class IOSODRMapsIntegrationTest {
             val newChecker = IOSMapAvailabilityChecker()
             newChecker.trackMaps(listOf("paris_france"))
             newChecker.refreshAvailability()
-            advanceUntilIdle()
+            delay(100)
 
             val newStates = newChecker.mapStates.first()
 

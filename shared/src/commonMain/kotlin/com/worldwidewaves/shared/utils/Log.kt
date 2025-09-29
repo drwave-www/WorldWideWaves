@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.utils
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals
 import io.github.aakira.napier.Napier
 
 /**
@@ -38,54 +37,39 @@ object Log {
      * Verbose logging - disabled in release builds for performance.
      * Use for detailed debugging information.
      */
-    @Throws(Throwable::class)
     fun v(
         tag: String,
         message: String,
-        throwable: Throwable?,
+        throwable: Throwable? = null,
     ) {
-        if (WWWGlobals.LogConfig.ENABLE_VERBOSE_LOGGING) {
+        if (LogConfig.ENABLE_VERBOSE_LOGGING) {
             Napier.v(tag = tag, message = message, throwable = throwable)
         }
     }
-
-    @Throws(Throwable::class)
-    fun v(
-        tag: String,
-        message: String,
-    ) = v(tag, message, null)
 
     /**
      * Debug logging - disabled in release builds for performance.
      * Use for general debugging information.
      */
-    @Throws(Throwable::class)
     fun d(
         tag: String,
         message: String,
         throwable: Throwable? = null,
     ) {
-        if (WWWGlobals.LogConfig.ENABLE_DEBUG_LOGGING) {
+        if (LogConfig.ENABLE_DEBUG_LOGGING) {
             Napier.d(tag = tag, message = message, throwable = throwable)
         }
     }
-
-    @Throws(Throwable::class)
-    fun d(
-        tag: String,
-        message: String,
-    ) = d(tag, message, null)
 
     /**
      * Performance logging - controlled by build configuration.
      * Use for high-frequency performance measurements that may impact app performance.
      */
-    @Throws(Throwable::class)
     fun performance(
         tag: String,
         message: String,
     ) {
-        if (WWWGlobals.LogConfig.ENABLE_PERFORMANCE_LOGGING) {
+        if (LogConfig.ENABLE_PERFORMANCE_LOGGING) {
             Napier.v(tag = tag, message = "[PERF] $message")
         }
     }
@@ -94,67 +78,39 @@ object Log {
      * Info logging - always enabled as it's essential for production monitoring.
      * Use for important application state changes and user actions.
      */
-    @Throws(Throwable::class)
     fun i(
         tag: String,
         message: String,
         throwable: Throwable? = null,
     ) = Napier.i(tag = tag, message = message, throwable = throwable)
 
-    @Throws(Throwable::class)
-    fun i(
-        tag: String,
-        message: String,
-    ) = i(tag, message, null)
-
     /**
      * Warning logging - always enabled for production issue detection.
      * Use for recoverable errors and important warnings.
      */
-    @Throws(Throwable::class)
     fun w(
         tag: String,
         message: String,
         throwable: Throwable? = null,
     ) = Napier.w(tag = tag, message = message, throwable = throwable)
 
-    @Throws(Throwable::class)
-    fun w(
-        tag: String,
-        message: String,
-    ) = w(tag, message, null)
-
     /**
      * Error logging - always enabled for critical issue tracking.
      * Use for errors that need immediate attention.
      */
-    @Throws(Throwable::class)
     fun e(
         tag: String,
         message: String,
         throwable: Throwable? = null,
     ) = Napier.e(tag = tag, message = message, throwable = throwable)
 
-    @Throws(Throwable::class)
-    fun e(
-        tag: String,
-        message: String,
-    ) = e(tag, message, null)
-
     /**
      * Critical error logging - always enabled for catastrophic failures.
      * Use for errors that should never happen in production.
      */
-    @Throws(Throwable::class)
     fun wtf(
         tag: String,
         message: String,
         throwable: Throwable? = null,
     ) = Napier.wtf(tag = tag, message = message, throwable = throwable)
-
-    @Throws(Throwable::class)
-    fun wtf(
-        tag: String,
-        message: String,
-    ) = wtf(tag, message, null)
 }

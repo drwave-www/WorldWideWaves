@@ -49,7 +49,6 @@ import kotlin.time.ExperimentalTime
 class GlobalSoundChoreographyManager(
     private val coroutineScopeProvider: CoroutineScopeProvider = DefaultCoroutineScopeProvider(),
 ) : KoinComponent {
-    @Suppress("UnusedPrivateProperty", "UnusedPrivateMember") // Injected for future clock-based features
     private val clock: IClock by inject()
     private val events: WWWEvents by inject()
     private var currentEvent: IWWWEvent? = null
@@ -189,13 +188,9 @@ class GlobalSoundChoreographyManager(
             var previousHitState = event.observer.userHasBeenHit.value
 
             event.observer.userHasBeenHit.collect { hasBeenHit ->
-                // Extract complex condition into named boolean variables for clarity
-                val isTransitionToHit = hasBeenHit && !previousHitState
-                val isEventActive = isActive && event.isRunning()
-
                 // Only play sound on transition from false to true (actual hit moment)
                 // AND only when the event is currently running (not done)
-                if (isTransitionToHit && isEventActive) {
+                if (hasBeenHit && !previousHitState && isActive && event.isRunning()) {
                     try {
                         Log.i(TAG, "User hit detected for event ${event.id} - playing sound")
                         event.warming.playCurrentSoundChoreographyTone()

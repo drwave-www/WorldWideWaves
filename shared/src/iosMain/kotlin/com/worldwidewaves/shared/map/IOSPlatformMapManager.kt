@@ -4,202 +4,343 @@ package com.worldwidewaves.shared.map
  * Copyright 2025 DrWave
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * https://www.apache.org/licenses/LICENSE-2.0
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-import com.worldwidewaves.shared.utils.Log
+import com.worldwidewaves.shared.utils.WWWLogger
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.withPermit
 import platform.Foundation.NSBundle
 import platform.Foundation.NSBundleResourceRequest
-import platform.Foundation.NSURL
+import kotlin.coroutines.resume
+import kotlin.random.Random
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
- * Tiny, production-ready iOS map manager using On-Demand Resources (ODR).
+ * iOS implementation of PlatformMapManager using On-Demand Resources (ODR).
  *
- * Responsibilities:
- * - Check if a tagged resource is currently available in the bundle.
- * - Trigger an ODR request for a given tag (mapId) and emit progress to 100.
- * - Cancel an ODR request gracefully.
+ * This implementation provides equivalent functionality to Android's Dynamic Feature Modules:
+ * - Uses ODR (On-Demand Resources) to download map resources on-demand
+ * - Manages resource lifecycle and availability
+ * - Provides progress updates during resource downloads
+ * - Supports cancellation of ongoing downloads
  *
- * Notes:
- * - We *simulate* progress ticks until the ODR completion arrives, then jump to 100.
- * - We treat completion as success only if at least one expected file exists in the bundle.
- * - We endAccessingResources() on cancel. On success/failure we also end access so callers
- *   should mount again when they actually read (see PlatformIOS functions).
+ * ODR Setup Required:
+ * - Map resources must be tagged in Xcode with corresponding mapIds
+ * - Resources should be marked as "On Demand" in project settings
+ * - Bundle tags in Info.plist must match map IDs
  */
-class IOSPlatformMapManager(
-    private val scope: CoroutineScope =
-        CoroutineScope(SupervisorJob() + Dispatchers.Default),
-    private val callbackDispatcher: CoroutineDispatcher = Dispatchers.Default,
-) : PlatformMapManager {
-    private val requests = mutableMapOf<String, NSBundleResourceRequest>()
-    private val progressJobs = mutableMapOf<String, Job>()
-    private val mutex = Mutex()
+@OptIn(ExperimentalTime::class)
+class IOSPlatformMapManager : PlatformMapManager {
+    companion object {
+        private const val MAP_BUNDLE_EXTENSION = "geojson"
+        private const val MAX_CONCURRENT_DOWNLOADS = 3 // iOS ODR best practice
+        private const val PROGRESS_UPDATE_INTERVAL_MS = 50L // Smoother progress updates
+        private const val MIN_DOWNLOAD_DURATION_MS = 1000L // Minimum realistic download time
+        private const val MAX_DOWNLOAD_DURATION_MS = 30000L // Maximum timeout
+
+        // Cache configuration
+        private const val CACHE_VALIDITY_MS = 30000L // 30 seconds cache validity
+        private const val CACHE_RETRY_WINDOW_MS = 5000L // 5 second retry window
+
+        // Duration estimates for different map types (in milliseconds)
+        private const val CITY_MAP_ADDITIONAL_DURATION_MS = 2000L
+        private const val COUNTRY_MAP_ADDITIONAL_DURATION_MS = 5000L
+        private const val WORLD_MAP_ADDITIONAL_DURATION_MS = 10000L
+        private const val DEFAULT_MAP_ADDITIONAL_DURATION_MS = 3000L
+
+        // Random variation bounds for realistic simulation
+        private const val MIN_VARIATION_FACTOR = 0.7
+        private const val MAX_VARIATION_FACTOR = 1.3
+
+        // Progress curve thresholds
+        private const val FAST_INITIAL_PROGRESS_THRESHOLD = 0.1
+        private const val SLOW_MIDDLE_PROGRESS_THRESHOLD = 0.7
+        private const val INITIAL_PROGRESS_MULTIPLIER = 3.0
+        private const val MIDDLE_PROGRESS_BASE = 0.3
+        private const val MIDDLE_PROGRESS_FACTOR = 0.5
+        private const val FINAL_PROGRESS_BASE = 0.8
+        private const val FINAL_PROGRESS_FACTOR = 0.5
+        private const val MAX_PROGRESS_WITHOUT_COMPLETION = 95
+
+        // Error codes
+        private const val ERROR_CODE_DOWNLOAD_FAILED = -1
+        private const val ERROR_CODE_UNKNOWN_ERROR = -2
+        private const val ERROR_CODE_DOWNLOAD_IN_PROGRESS = -3
+
+        // Progress constants
+        private const val COMPLETE_PROGRESS_PERCENT = 100
+    }
+
+    // Thread-safe resource management
+    private val activeRequests = mutableMapOf<String, NSBundleResourceRequest>()
+    private val requestMutex = Mutex()
+
+    // Concurrent download limiting
+    private val downloadSemaphore = Semaphore(MAX_CONCURRENT_DOWNLOADS)
+
+    // Cache invalidation support
+    private val availabilityCache = mutableMapOf<String, Pair<Boolean, Long>>()
+    private val cacheMutex = Mutex()
+    private val cacheValidityMs = CACHE_VALIDITY_MS
 
     /**
-     * Returns true if a typical file for this tag is visible in the bundle right now.
-     * Uses URLsForResourcesWithExtension (same as MapStore ODRPaths.resolve) which works reliably.
+     * Check if an ODR map resource is available.
      */
-    @OptIn(ExperimentalForeignApi::class)
+    @OptIn(ExperimentalForeignApi::class, ExperimentalTime::class)
     override fun isMapAvailable(mapId: String): Boolean {
-        Log.d(TAG, "Checking map availability for: $mapId")
+        return try {
+            val currentTime = Clock.System.now().toEpochMilliseconds()
 
-        // Use the SAME successful approach as ODRPaths.resolve() from MapStore.ios.kt
-        // URLsForResourcesWithExtension() does a global search and actually WORKS
-        val hasGeo = findResourceByExtensionSearch(mapId, "geojson") != null
-        val hasMb = findResourceByExtensionSearch(mapId, "mbtiles") != null
+            // Check cache first (with invalidation support)
+            availabilityCache[mapId]?.let { (cachedResult, cacheTime) ->
+                if (currentTime - cacheTime < cacheValidityMs) {
+                    WWWLogger.v("IOSPlatformMapManager", "Using cached availability for $mapId: $cachedResult")
+                    return cachedResult
+                } else {
+                    WWWLogger.d("IOSPlatformMapManager", "Cache expired for $mapId, refreshing...")
+                }
+            }
 
-        Log.i(TAG, "Map availability: mapId=$mapId, hasGeo=$hasGeo, hasMb=$hasMb, available=${hasGeo || hasMb}")
-        return hasGeo || hasMb
+            // Check if ODR resource with this tag is available
+            val bundle = NSBundle.mainBundle
+            val paths = bundle.pathsForResourcesOfType(MAP_BUNDLE_EXTENSION, inDirectory = mapId)
+            val isAvailable = paths.isNotEmpty()
+
+            // Cache the result with timestamp
+            availabilityCache[mapId] = Pair(isAvailable, currentTime)
+
+            WWWLogger.d("IOSPlatformMapManager", "ODR map availability check: $mapId -> $isAvailable (cached)")
+            isAvailable
+        } catch (e: Exception) {
+            WWWLogger.e("IOSPlatformMapManager", "Error checking ODR map availability: $mapId", e)
+
+            // Cache failure result for shorter period to allow retries
+            val currentTime = Clock.System.now().toEpochMilliseconds()
+            availabilityCache[mapId] = Pair(false, currentTime - cacheValidityMs + CACHE_RETRY_WINDOW_MS)
+            false
+        }
     }
 
     /**
-     * Start (or reuse) an ODR request for [mapId]. Emits 0..100. Calls onSuccess/onError at the end.
-     * If the tag doesn't exist in any pack, the completion handler returns error and we report failure.
+     * Download map using ODR (On-Demand Resources).
+     *
+     * This initiates an ODR resource request and provides progress updates.
      */
     @OptIn(ExperimentalForeignApi::class)
     override suspend fun downloadMap(
         mapId: String,
         onProgress: (Int) -> Unit,
         onSuccess: () -> Unit,
-        onError: (code: Int, message: String?) -> Unit,
-    ) {
-        Log.i(TAG, "📥 Starting ODR download for mapId: $mapId")
-        scope.launch {
-            val req =
-                mutex.withLock {
-                    requests.getOrPut(mapId) {
-                        Log.d(TAG, "Creating new NSBundleResourceRequest for tag: $mapId")
-                        NSBundleResourceRequest(setOf(mapId)).also { it.loadingPriority = 1.0 }
-                    }
+        onError: (Int, String?) -> Unit,
+    ) = downloadSemaphore.withPermit {
+        WWWLogger.i(
+            "IOSPlatformMapManager",
+            "Starting ODR map download: $mapId (${downloadSemaphore.availablePermits + 1}/${MAX_CONCURRENT_DOWNLOADS} slots)",
+        )
+
+        try {
+            // Check if already available (invalidate cache first)
+            invalidateCache(mapId)
+            if (isMapAvailable(mapId)) {
+                onProgress(COMPLETE_PROGRESS_PERCENT)
+                onSuccess()
+                WWWLogger.i("IOSPlatformMapManager", "ODR map already available: $mapId")
+                return@withPermit
+            }
+
+            requestMutex.withLock {
+                // Check if download is already in progress
+                if (activeRequests.containsKey(mapId)) {
+                    WWWLogger.w("IOSPlatformMapManager", "Download already in progress for $mapId")
+                    onError(ERROR_CODE_DOWNLOAD_IN_PROGRESS, "Download already in progress")
+                    return@withPermit
                 }
 
-            // start a progress ticker up to 90 while waiting
-            Log.d(TAG, "Starting progress ticker for: $mapId")
-            startProgressTicker(mapId, onProgress)
+                // Create NSBundleResourceRequest for the map tag
+                val resourceTags = setOf(mapId)
+                val request = NSBundleResourceRequest(resourceTags)
+                activeRequests[mapId] = request
 
-            Log.d(TAG, "Calling beginAccessingResources for: $mapId")
-            req.beginAccessingResourcesWithCompletionHandler { nsError ->
-                scope.launch(callbackDispatcher) {
-                    // Always finish at 100 for UX determinism (even on failure)
-                    onProgress(100)
+                // Setup realistic progress tracking
+                val downloadStartTime =
+                    Clock.System
+                        .now()
+                        .toEpochMilliseconds()
+                val estimatedDuration = estimateDownloadDuration(mapId)
 
-                    if (nsError != null) {
-                        Log.e(TAG, "ODR request failed for $mapId: code=${nsError.code}, message=${nsError.localizedDescription}")
+                WWWLogger.d("IOSPlatformMapManager", "Estimated download duration for $mapId: ${estimatedDuration}ms")
+
+                // Begin accessing the resource
+                val downloadSuccessful =
+                    suspendCancellableCoroutine { continuation ->
+                        request.beginAccessingResourcesWithCompletionHandler { error ->
+                            requestMutex.tryLock().let { locked ->
+                                if (locked) {
+                                    activeRequests.remove(mapId)
+                                    requestMutex.unlock()
+                                }
+                            }
+
+                            if (error != null) {
+                                WWWLogger.e("IOSPlatformMapManager", "ODR download failed for $mapId: ${error.localizedDescription}")
+                                continuation.resume(false)
+                            } else {
+                                WWWLogger.i("IOSPlatformMapManager", "ODR download succeeded for $mapId")
+                                continuation.resume(true)
+                            }
+                        }
+
+                        // Setup cancellation with proper cleanup
+                        continuation.invokeOnCancellation {
+                            requestMutex.tryLock().let { locked ->
+                                if (locked) {
+                                    activeRequests.remove(mapId)
+                                    request.endAccessingResources()
+                                    requestMutex.unlock()
+                                }
+                            }
+                            WWWLogger.d("IOSPlatformMapManager", "ODR download cancelled for $mapId")
+                        }
                     }
 
-                    val isAvailable = isMapAvailable(mapId)
-                    val ok = nsError == null && isAvailable
-                    Log.i(TAG, "ODR completion: mapId=$mapId, error=$nsError, isAvailable=$isAvailable, ok=$ok")
+                // Realistic progress simulation with exponential curve
+                simulateRealisticProgress(mapId, estimatedDuration, downloadStartTime, onProgress)
 
-                    if (ok) {
-                        Log.i(TAG, "✅ Map download SUCCESS for: $mapId")
-                        onSuccess()
-                    } else {
-                        val errorCode = nsError?.code?.toInt() ?: -1
-                        val errorMsg = nsError?.localizedDescription ?: "ODR/bundle error"
-                        Log.e(TAG, "❌ Map download FAILED for: $mapId (code=$errorCode, message=$errorMsg)")
-                        onError(errorCode, errorMsg)
-                    }
-
-                    // Cleanup: stop ticker + release access (we mount again when reading)
-                    Log.d(TAG, "Cleaning up ODR request for: $mapId")
-                    cancelProgressTicker(mapId)
-                    scope.launch { endRequest(mapId) }
+                if (downloadSuccessful) {
+                    onProgress(COMPLETE_PROGRESS_PERCENT)
+                    // Invalidate cache to reflect new availability
+                    invalidateCache(mapId)
+                    onSuccess()
+                } else {
+                    onError(ERROR_CODE_DOWNLOAD_FAILED, "ODR resource download failed")
                 }
             }
-        }
-    }
-
-    /** Cancel an ongoing download (no-op if none). */
-    override fun cancelDownload(mapId: String) {
-        Log.i(TAG, "Cancelling download for: $mapId")
-        scope.launch {
-            cancelProgressTicker(mapId)
-            endRequest(mapId)
-        }
-    }
-
-    // ---- Helpers ------------------------------------------------------------------------------
-
-    private fun startProgressTicker(
-        mapId: String,
-        onProgress: (Int) -> Unit,
-    ) {
-        // If a ticker is already running, do nothing.
-        if (progressJobs[mapId]?.isActive == true) {
-            Log.d(TAG, "Progress ticker already running for: $mapId")
-            return
-        }
-
-        Log.d(TAG, "Starting progress ticker for: $mapId")
-        progressJobs[mapId] =
-            scope.launch(callbackDispatcher) {
-                var p = 0
-                onProgress(0)
-                while (isActive && p < PROGRESS_MAX_BEFORE_COMPLETION) {
-                    delay(PROGRESS_TICK_DELAY_MS)
-                    p += PROGRESS_INCREMENT
-                    if (p > PROGRESS_MAX_BEFORE_COMPLETION) p = PROGRESS_MAX_BEFORE_COMPLETION
-                    Log.v(TAG, "Progress tick for $mapId: $p%")
-                    onProgress(p)
-                }
+        } catch (e: Exception) {
+            requestMutex.withLock {
+                activeRequests.remove(mapId)
             }
+            onError(ERROR_CODE_UNKNOWN_ERROR, e.message ?: "Unknown error during ODR download")
+            WWWLogger.e("IOSPlatformMapManager", "Error during ODR download: $mapId", e)
+        }
     }
 
     /**
-     * Find resource using global extension search (same as ODRPaths.resolve()).
-     * This approach works reliably where pathForResource() fails.
+     * Cancel active ODR download for the specified map.
      */
     @OptIn(ExperimentalForeignApi::class)
-    private fun findResourceByExtensionSearch(
-        eventId: String,
-        extension: String,
-    ): String? {
-        val bundle = NSBundle.mainBundle
-        val any = bundle.URLsForResourcesWithExtension(extension, null)
-        val urls = any?.mapNotNull { it as? NSURL } ?: emptyList()
+    override fun cancelDownload(mapId: String) {
+        WWWLogger.d("IOSPlatformMapManager", "Cancel ODR download requested for: $mapId")
 
-        val foundUrl =
-            urls.firstOrNull { url ->
-                val p = url.path ?: ""
-                p.endsWith("/$eventId.$extension") ||
-                    p.contains("/Maps/$eventId/")
+        try {
+            requestMutex.tryLock().let { locked ->
+                if (locked) {
+                    activeRequests[mapId]?.let { request ->
+                        try {
+                            request.endAccessingResources()
+                            activeRequests.remove(mapId)
+                            WWWLogger.i("IOSPlatformMapManager", "ODR download cancelled successfully: $mapId")
+                        } catch (e: Exception) {
+                            WWWLogger.e("IOSPlatformMapManager", "Error cancelling ODR download: $mapId", e)
+                        }
+                    } ?: run {
+                        WWWLogger.d("IOSPlatformMapManager", "No active ODR download to cancel for: $mapId")
+                    }
+                    requestMutex.unlock()
+                }
+            }
+        } catch (e: Exception) {
+            WWWLogger.e("IOSPlatformMapManager", "Error in cancelDownload synchronization: $mapId", e)
+        }
+    }
+
+    /**
+     * Estimates realistic download duration based on map ID characteristics.
+     * Factors in typical ODR resource sizes and network conditions.
+     */
+    private fun estimateDownloadDuration(mapId: String): Long {
+        // Estimate based on map complexity (city vs country vs world)
+        val baseDuration =
+            when {
+                mapId.contains("city") || mapId.contains("_") -> MIN_DOWNLOAD_DURATION_MS + CITY_MAP_ADDITIONAL_DURATION_MS
+                mapId.contains("country") -> MIN_DOWNLOAD_DURATION_MS + COUNTRY_MAP_ADDITIONAL_DURATION_MS
+                mapId.contains("world") -> MIN_DOWNLOAD_DURATION_MS + WORLD_MAP_ADDITIONAL_DURATION_MS
+                else -> MIN_DOWNLOAD_DURATION_MS + DEFAULT_MAP_ADDITIONAL_DURATION_MS
             }
 
-        if (foundUrl != null) {
-            Log.d(TAG, "Found $extension file for $eventId: ${foundUrl.path}")
-        } else {
-            Log.d(TAG, "No $extension file found for $eventId (searched ${urls.size} total $extension files)")
+        // Add random variation (±30%) to simulate real network conditions
+        val variation = Random.nextDouble(MIN_VARIATION_FACTOR, MAX_VARIATION_FACTOR)
+        return (baseDuration * variation).toLong().coerceAtMost(MAX_DOWNLOAD_DURATION_MS)
+    }
+
+    /**
+     * Simulates realistic progress with exponential curve matching real download patterns.
+     * Fast initial progress, slower middle phase, quick completion.
+     */
+    @OptIn(ExperimentalTime::class)
+    private suspend fun simulateRealisticProgress(
+        mapId: String,
+        estimatedDuration: Long,
+        startTime: Long,
+        onProgress: (Int) -> Unit,
+    ) {
+        try {
+            var lastProgress = 0
+            onProgress(0)
+
+            while (lastProgress < MAX_PROGRESS_WITHOUT_COMPLETION) {
+                // Check if download was cancelled
+                val isActive = requestMutex.withLock { activeRequests.containsKey(mapId) }
+                if (!isActive) break
+
+                delay(PROGRESS_UPDATE_INTERVAL_MS)
+
+                val elapsed = Clock.System.now().toEpochMilliseconds() - startTime
+                val progressRatio = (elapsed.toDouble() / estimatedDuration).coerceAtMost(MAX_PROGRESS_WITHOUT_COMPLETION / 100.0)
+
+                // Exponential progress curve: fast start, slower middle, quick end
+                val exponentialProgress =
+                    when {
+                        progressRatio < FAST_INITIAL_PROGRESS_THRESHOLD -> progressRatio * INITIAL_PROGRESS_MULTIPLIER // Fast initial 30%
+                        progressRatio < SLOW_MIDDLE_PROGRESS_THRESHOLD ->
+                            MIDDLE_PROGRESS_BASE +
+                                (progressRatio - FAST_INITIAL_PROGRESS_THRESHOLD) * MIDDLE_PROGRESS_FACTOR // Slower 50%
+                        else -> FINAL_PROGRESS_BASE + (progressRatio - SLOW_MIDDLE_PROGRESS_THRESHOLD) * FINAL_PROGRESS_FACTOR // Final 15%
+                    }
+
+                val currentProgress =
+                    (exponentialProgress * COMPLETE_PROGRESS_PERCENT).toInt().coerceIn(
+                        lastProgress + 1,
+                        MAX_PROGRESS_WITHOUT_COMPLETION,
+                    )
+
+                if (currentProgress > lastProgress) {
+                    onProgress(currentProgress)
+                    lastProgress = currentProgress
+                }
+            }
+        } catch (e: Exception) {
+            WWWLogger.e("IOSPlatformMapManager", "Error in progress simulation for $mapId", e)
         }
-
-        return foundUrl?.path
     }
 
-    companion object {
-        private const val TAG = "IOSPlatformMapManager"
-        private const val PROGRESS_TICK_DELAY_MS = 1000L
-        private const val PROGRESS_INCREMENT = 10
-        private const val PROGRESS_MAX_BEFORE_COMPLETION = 90
-    }
-
-    private suspend fun endRequest(mapId: String) {
-        mutex.withLock {
-            requests.remove(mapId)?.endAccessingResources()
+    /**
+     * Invalidates cached availability for specific map ID.
+     * Forces fresh ODR availability check on next access.
+     */
+    private suspend fun invalidateCache(mapId: String) {
+        cacheMutex.withLock {
+            availabilityCache.remove(mapId)
+            WWWLogger.v("IOSPlatformMapManager", "Cache invalidated for $mapId")
         }
-    }
-
-    private fun cancelProgressTicker(mapId: String) {
-        progressJobs.remove(mapId)?.cancel()
     }
 }

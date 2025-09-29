@@ -175,15 +175,8 @@ abstract class WWWEventWave :
     }
 
     suspend fun timeBeforeUserHit(): Duration? {
-        val hasBeenHit = hasUserBeenHitInCurrentPosition()
-        if (hasBeenHit) {
-            return null
-        }
-
-        val hitTime = userHitDateTime()
-        if (hitTime == null) {
-            return null
-        }
+        if (hasUserBeenHitInCurrentPosition()) return null
+        val hitTime = userHitDateTime() ?: return null
 
         // Calculate the duration between now and the hit time
         return hitTime - clock.now()

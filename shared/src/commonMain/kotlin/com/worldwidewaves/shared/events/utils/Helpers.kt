@@ -23,11 +23,11 @@ package com.worldwidewaves.shared.events.utils
 
 import com.worldwidewaves.shared.WWWGlobals.FileSystem
 import com.worldwidewaves.shared.WWWPlatform
-import com.worldwidewaves.shared.data.readGeoJson
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.format.DateTimeFormats
 import com.worldwidewaves.shared.generated.resources.Res
+import com.worldwidewaves.shared.readGeoJson
 import com.worldwidewaves.shared.utils.Log
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineDispatcher
@@ -157,9 +157,6 @@ class DefaultCoroutineScopeProvider(
     // Create scopes with exception handler included
     private val ioScope = CoroutineScope(supervisorJob + ioDispatcher + exceptionHandler)
     private val defaultScope = CoroutineScope(supervisorJob + defaultDispatcher + exceptionHandler)
-
-    // Note: Unused scope kept for potential future use
-    @Suppress("unused")
     private val scope = CoroutineScope(supervisorJob + defaultDispatcher + exceptionHandler)
 
     override fun launchIO(block: suspend CoroutineScope.() -> Unit): Job = ioScope.launch(block = block)
@@ -253,183 +250,61 @@ interface GeoJsonDataProvider {
     fun clearCache()
 }
 
-@OptIn(ExperimentalTime::class)
-class DefaultGeoJsonDataProvider :
-    GeoJsonDataProvider,
-    KoinComponent {
+class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
     private val cache = mutableMapOf<String, JsonObject?>()
-    private val lastAttemptTime = mutableMapOf<String, Instant>()
-    private val attemptCount = mutableMapOf<String, Int>()
 
     override suspend fun getGeoJsonData(eventId: String): JsonObject? {
-        val cachedResult = getCachedResult(eventId)
-        if (cachedResult != null) {
-            return cachedResult.value
+        // Check cache first
+        if (cache.containsKey(eventId)) {
+            return cache[eventId]
         }
 
-        val rateLimitResult = checkRateLimit(eventId)
-        if (rateLimitResult != null) {
-            return rateLimitResult
-        }
+        // Not in cache, load and cache the result
+        val result =
+            try {
+                Log.i(::getGeoJsonData.name, "Loading geojson data for event $eventId")
 
-        updateAttemptTracking(eventId)
+                val geojsonData = readGeoJson(eventId)
 
-        val result = loadGeoJsonData(eventId)
+                if (geojsonData != null) {
+                    val preview = geojsonData.take(80).replace("\n", "")
+                    Log.i(
+                        ::getGeoJsonData.name,
+                        "Retrieved geojson string (length=${geojsonData.length}) preview=\"${preview}\"",
+                    )
 
-        handleLoadResult(eventId, result)
+                    val jsonObj = Json.parseToJsonElement(geojsonData).jsonObject
+                    val keysSummary = jsonObj.keys.joinToString(", ")
+                    val rootType = jsonObj["type"]?.toString()
+                    Log.d(
+                        ::getGeoJsonData.name,
+                        "Parsed geojson top-level keys=[$keysSummary], type=$rootType",
+                    )
 
+                    jsonObj
+                } else {
+                    Log.d(::getGeoJsonData.name, "Geojson data is null for event $eventId")
+                    null
+                }
+            } catch (e: Exception) {
+                Log.e(::getGeoJsonData.name, "Error loading geojson data for event $eventId: ${e.message}")
+                null
+            }
+
+        // Cache the result (even if null) to avoid repeated attempts
+        cache[eventId] = result
         return result
     }
-
-    private data class CachedResult(
-        val value: JsonObject?,
-    )
-
-    private fun getCachedResult(eventId: String): CachedResult? {
-        val hasCachedValue = cache.containsKey(eventId)
-        return if (hasCachedValue) {
-            CachedResult(cache[eventId])
-        } else {
-            null
-        }
-    }
-
-    private fun checkRateLimit(eventId: String): JsonObject? {
-        val lastAttempt = lastAttemptTime[eventId] ?: return null
-        val isOdrUnavailable = isODRUnavailable(eventId)
-        if (!isOdrUnavailable) return null
-
-        val now = Clock.System.now()
-        val attempts = attemptCount[eventId] ?: 0
-        val timeSinceLastAttempt = now - lastAttempt
-
-        val minDelay = calculateMinDelay(attempts)
-
-        val shouldWait = timeSinceLastAttempt < minDelay
-        if (shouldWait) {
-            return null
-        }
-
-        val maxAttemptsReached = attempts >= MAX_ODR_ATTEMPTS
-        if (maxAttemptsReached) {
-            Log.w(::getGeoJsonData.name, "Giving up on $eventId after $attempts attempts")
-            cache[eventId] = null
-            return null
-        }
-
-        return null
-    }
-
-    private fun calculateMinDelay(attempts: Int): Duration =
-        when {
-            attempts < ATTEMPTS_FAST_RETRY -> Duration.parse("1s")
-            attempts < ATTEMPTS_MEDIUM_RETRY -> Duration.parse("5s")
-            else -> Duration.parse("30s")
-        }
-
-    private fun updateAttemptTracking(eventId: String) {
-        lastAttemptTime[eventId] = Clock.System.now()
-        val currentAttempts = attemptCount[eventId] ?: 0
-        attemptCount[eventId] = currentAttempts + 1
-    }
-
-    private suspend fun loadGeoJsonData(eventId: String): JsonObject? =
-        try {
-            Log.i(::getGeoJsonData.name, "Loading geojson data for event $eventId")
-
-            val geojsonData = readGeoJson(eventId)
-
-            parseGeoJsonData(eventId, geojsonData)
-        } catch (e: Exception) {
-            Log.e(::getGeoJsonData.name, "Error loading geojson data for event $eventId: ${e.message}")
-            null
-        }
-
-    private fun parseGeoJsonData(
-        eventId: String,
-        geojsonData: String?,
-    ): JsonObject? {
-        if (geojsonData == null) {
-            Log.d(::getGeoJsonData.name, "Geojson data is null for event $eventId")
-            return null
-        }
-
-        val preview = geojsonData.take(GEOJSON_PREVIEW_LENGTH).replace("\n", "")
-        Log.i(
-            ::getGeoJsonData.name,
-            "Retrieved geojson string (length=${geojsonData.length}) preview=\"${preview}\"",
-        )
-
-        val jsonObj = Json.parseToJsonElement(geojsonData).jsonObject
-        val keysSummary = jsonObj.keys.joinToString(", ")
-        val rootType = jsonObj["type"]?.toString()
-        Log.d(
-            ::getGeoJsonData.name,
-            "Parsed geojson top-level keys=[$keysSummary], type=$rootType",
-        )
-
-        return jsonObj
-    }
-
-    private fun handleLoadResult(
-        eventId: String,
-        result: JsonObject?,
-    ) {
-        val loadSuccessful = result != null
-        if (loadSuccessful) {
-            lastAttemptTime.remove(eventId)
-            attemptCount.remove(eventId)
-            Log.v(::getGeoJsonData.name, "Successfully loaded $eventId, reset attempt tracking")
-        }
-
-        val shouldCache = result != null || !isODRUnavailable(eventId)
-        if (shouldCache) {
-            cache[eventId] = result
-            Log.v(::getGeoJsonData.name, "Cached GeoJSON result for $eventId (success=$loadSuccessful)")
-        } else {
-            Log.i(::getGeoJsonData.name, "Not caching null result for $eventId (ODR may become available)")
-        }
-    }
-
-    companion object {
-        private const val MAX_ODR_ATTEMPTS = 20
-        private const val ATTEMPTS_FAST_RETRY = 3
-        private const val ATTEMPTS_MEDIUM_RETRY = 10
-        private const val GEOJSON_PREVIEW_LENGTH = 80
-    }
-
-    /**
-     * Check if GeoJSON failure is due to ODR resources being unavailable.
-     * On iOS, this allows retry when ODR downloads complete.
-     */
-    private fun isODRUnavailable(
-        @Suppress("UNUSED_PARAMETER") eventId: String,
-    ): Boolean =
-        try {
-            // This is a platform-specific check - only meaningful on iOS
-            val platform = get<WWWPlatform>()
-            platform.name.contains("iOS", ignoreCase = true)
-        } catch (e: Exception) {
-            // If we can't determine platform, err on the side of allowing retry
-            Log.v(::isODRUnavailable.name, "Could not determine platform for ODR check: ${e.message}")
-            true
-        }
 
     override fun invalidateCache(eventId: String) {
         if (cache.remove(eventId) != null) {
             Log.d(::invalidateCache.name, "Invalidated cache for event $eventId")
         }
-        // Also reset attempt tracking to allow immediate retry
-        lastAttemptTime.remove(eventId)
-        attemptCount.remove(eventId)
-        Log.d(::invalidateCache.name, "Reset attempt tracking for $eventId")
     }
 
     override fun clearCache() {
         val size = cache.size
         cache.clear()
-        lastAttemptTime.clear()
-        attemptCount.clear()
         Log.d(::clearCache.name, "Cleared GeoJSON cache ($size entries)")
     }
 }

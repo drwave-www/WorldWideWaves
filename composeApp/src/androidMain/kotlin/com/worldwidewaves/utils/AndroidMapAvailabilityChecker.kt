@@ -27,8 +27,8 @@ import com.google.android.play.core.splitinstall.SplitInstallManager
 import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
-import com.worldwidewaves.shared.data.clearEventCache
-import com.worldwidewaves.shared.data.clearUnavailableGeoJsonCache
+import com.worldwidewaves.shared.clearEventCache
+import com.worldwidewaves.shared.clearUnavailableGeoJsonCache
 import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

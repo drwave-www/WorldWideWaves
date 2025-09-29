@@ -24,7 +24,6 @@ package com.worldwidewaves.shared.viewmodels
 import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.map.PlatformMapManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -303,16 +302,13 @@ class IOSMapViewModelTest {
                 values.forEach { progress ->
                     onProgress(progress)
                     onProgressCallback?.invoke(progress)
-                    delay(1) // Small delay for test scheduler
                 }
             }
 
             if (simulateSuccessfulDownload) {
                 onProgress(100)
-                delay(1) // Small delay before completion
                 onSuccess()
             } else {
-                delay(1) // Small delay before error
                 onError(errorCode, errorMessage)
             }
         }

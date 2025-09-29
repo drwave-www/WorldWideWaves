@@ -34,7 +34,7 @@ import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListene
 import com.google.android.play.core.splitinstall.model.SplitInstallErrorCode
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.data.clearEventCache
+import com.worldwidewaves.shared.clearEventCache
 import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.viewmodels.MapDownloadManager
 import com.worldwidewaves.shared.viewmodels.MapDownloadUtils

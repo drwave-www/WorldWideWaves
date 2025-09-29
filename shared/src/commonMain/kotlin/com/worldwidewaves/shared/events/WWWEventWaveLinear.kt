@@ -64,16 +64,10 @@ data class WWWEventWaveLinear(
     // ---------------------------
 
     override suspend fun getWavePolygons(): WavePolygons? {
-        val isRunning = event.isRunning()
-        if (!isRunning) {
-            return null
-        }
+        if (!event.isRunning()) return null
 
         val elapsedTime = clock.now() - event.getWaveStartDateTime()
-        val hasElapsedTime = elapsedTime > 0.seconds
-        if (!hasElapsedTime) {
-            return null
-        }
+        if (elapsedTime <= 0.seconds) return null
 
         val composedLongitude = // Compose an earth-aware speed longitude with bands
             (cachedLongitude ?: EarthAdaptedSpeedLongitude(bbox(), speed, direction).also { cachedLongitude = it })
@@ -87,8 +81,7 @@ data class WWWEventWaveLinear(
         traversedPolygons.addAll(traversed)
         remainingPolygons.addAll(remaining)
 
-        val hasPolygons = traversedPolygons.isNotEmpty() || remainingPolygons.isNotEmpty()
-        return if (hasPolygons) {
+        return if (traversedPolygons.isNotEmpty() || remainingPolygons.isNotEmpty()) {
             WavePolygons(
                 clock.now(),
                 traversedPolygons,
@@ -161,20 +154,19 @@ data class WWWEventWaveLinear(
     }
 
     override suspend fun userHitDateTime(): Instant? {
-        val userPosition = getUserPosition()
-        if (userPosition == null) {
-            return null
-        }
-
-        val isPositionWithinArea = event.area.isPositionWithin(userPosition)
-        if (!isPositionWithinArea) {
-            return null
-        }
+        val userPosition = getUserPosition() ?: return null // FIXME / Check
+        if (!event.area.isPositionWithin(userPosition)) return null
 
         // Check if we have a cached result for a nearby position
-        val cachedResult = getCachedHitDateTimeIfValid(userPosition)
-        if (cachedResult != null) {
-            return cachedResult
+        if (cachedHitPosition != null && cachedHitDateTime != null) {
+            val isCloseEnough =
+                abs(cachedHitPosition!!.lat - userPosition.lat) < epsilonLatPosition &&
+                    abs(cachedHitPosition!!.lng - userPosition.lng) < epsilonLngPosition
+
+            // If the user hasn't moved significantly, return the cached result
+            if (isCloseEnough) {
+                return cachedHitDateTime
+            }
         }
 
         val waveStartTime = event.getWaveStartDateTime()
@@ -200,21 +192,6 @@ data class WWWEventWaveLinear(
         return hitDateTime
     }
 
-    /**
-     * Returns cached hit datetime if the user hasn't moved significantly
-     */
-    private fun getCachedHitDateTimeIfValid(userPosition: Position): Instant? {
-        if (cachedHitPosition == null || cachedHitDateTime == null) {
-            return null
-        }
-
-        val isCloseEnough =
-            abs(cachedHitPosition!!.lat - userPosition.lat) < epsilonLatPosition &&
-                abs(cachedHitPosition!!.lng - userPosition.lng) < epsilonLngPosition
-
-        return if (isCloseEnough) cachedHitDateTime else null
-    }
-
     override suspend fun closestWaveLongitude(latitude: Double): Double {
         val bbox = bbox()
         val maxEastWestDistance = calculateDistance(bbox.minLongitude, bbox.maxLongitude, latitude)
@@ -229,13 +206,9 @@ data class WWWEventWaveLinear(
     }
 
     override suspend fun userPositionToWaveRatio(): Double? {
-        val userPosition = getUserPosition()
-        if (userPosition == null) {
-            return null
-        }
+        val userPosition = getUserPosition() ?: return null // FIXME / Check
 
-        val isPositionWithinArea = event.area.isPositionWithin(userPosition)
-        if (!isPositionWithinArea) {
+        if (!event.area.isPositionWithin(userPosition)) {
             return null
         }
 

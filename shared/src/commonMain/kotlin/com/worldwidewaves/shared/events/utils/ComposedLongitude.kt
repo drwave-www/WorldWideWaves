@@ -106,9 +106,13 @@ open class ComposedLongitude(
         if (positions.isEmpty()) return Side.EAST // Arbitrary choice when empty
 
         // Handle vertical line (single longitude) case
-        val allSameLongitude = positions.size == 1 || positions.all { isLongitudeEqual(it.lng, positions.first().lng) }
-        if (allSameLongitude) {
-            return determineVerticalLineSide(point, positions.first().lng)
+        if (positions.size == 1 || positions.all { isLongitudeEqual(it.lng, positions.first().lng) }) {
+            val lineLng = positions.first().lng
+            return when {
+                isLongitudeEqual(point.lng, lineLng) -> Side.ON
+                point.lng - lineLng > 0 -> Side.EAST
+                else -> Side.WEST
+            }
         }
 
         for (i in 0 until positions.size - 1) {
@@ -120,8 +124,7 @@ open class ComposedLongitude(
                 return Side.ON
             }
 
-            val isOutsideLatitudeRange = point.lat < minOf(start.lat, end.lat) || point.lat > maxOf(start.lat, end.lat)
-            if (isOutsideLatitudeRange) {
+            if (point.lat < minOf(start.lat, end.lat) || point.lat > maxOf(start.lat, end.lat)) {
                 continue
             }
 
@@ -132,8 +135,7 @@ open class ComposedLongitude(
             // Calculate cross product
             val crossProduct = lineVector.cross(pointVector)
 
-            val isCrossProductSignificant = abs(crossProduct) > EPSILON
-            if (isCrossProductSignificant) {
+            if (abs(crossProduct) > EPSILON) {
                 return if (crossProduct < 0) Side.EAST else Side.WEST
             }
         }
@@ -144,26 +146,12 @@ open class ComposedLongitude(
         return Side.EAST
     }
 
-    private fun determineVerticalLineSide(
-        point: Position,
-        lineLng: Double,
-    ): Side =
-        when {
-            isLongitudeEqual(point.lng, lineLng) -> Side.ON
-            point.lng - lineLng > 0 -> Side.EAST
-            else -> Side.WEST
-        }
-
     fun intersectWithSegment(
         cutId: Int,
         segment: Segment,
     ): CutPosition? {
         if (positions.isEmpty()) return null
-
-        val isSinglePosition = positions.size == 1
-        if (isSinglePosition) {
-            return segment.intersectWithLng(cutId, positions.first().lng)
-        }
+        if (positions.size == 1) return segment.intersectWithLng(cutId, positions.first().lng)
 
         return positions
             .zipWithNext { start, end ->
@@ -181,9 +169,7 @@ open class ComposedLongitude(
      */
     fun intersectWithSegment(segment: Segment): Position? {
         if (positions.isEmpty()) return null
-
-        val isSinglePosition = positions.size == 1
-        if (isSinglePosition) {
+        if (positions.size == 1) {
             return segment.intersectWithLng(positions.first().lng)
         }
 
@@ -203,18 +189,12 @@ open class ComposedLongitude(
      */
     fun lngAt(lat: Double): Double? {
         if (positions.isEmpty()) return null
-
-        val isSinglePosition = positions.size == 1
-        if (isSinglePosition) {
-            return positions.first().lng
-        }
+        if (positions.size == 1) return positions.first().lng
 
         positions.zipWithNext { a, b ->
             val minLat = minOf(a.lat, b.lat)
             val maxLat = maxOf(a.lat, b.lat)
-            val isLatInRange = lat + EPSILON >= minLat && lat - EPSILON <= maxLat
-            val isNotHorizontal = abs(b.lat - a.lat) > EPSILON
-            if (isLatInRange && isNotHorizontal) {
+            if (lat + EPSILON >= minLat && lat - EPSILON <= maxLat && abs(b.lat - a.lat) > EPSILON) {
                 val t = (lat - a.lat) / (b.lat - a.lat)
                 return a.lng + t * (b.lng - a.lng)
             }

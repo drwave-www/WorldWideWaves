@@ -72,15 +72,11 @@ data class MidiTrack(
 // ----------------------------------------------------------------------------
 
 /**
- * Handles parsing of Standard MIDI File (SMF) format with global caching
+ * Handles parsing of Standard MIDI File (SMF) format
  */
 object MidiParser {
     // Logging tag
     private const val TAG = "MidiParser"
-
-    // Global MIDI file cache - keyed by resource path
-    // This ensures MIDI files are loaded only once for the entire application lifecycle
-    private val midiCache = mutableMapOf<String, MidiTrack?>()
 
     // Constants for MIDI file parsing
     private const val HEADER_CHUNK_ID = "MThd"
@@ -145,9 +141,8 @@ object MidiParser {
         }
 
     /**
-     * Validate MIDI header and return format information (unused - kept for potential direct usage)
+     * Validate MIDI header and return format information
      */
-    @Suppress("UnusedPrivateMember") // Kept for potential direct header reading without validation
     private fun readMidiHeader(reader: ByteArrayReader): Triple<Int, Int, Int> {
         val headerChunkId = reader.readString(CHUNK_ID_LENGTH)
         Log.d("MidiParser", "Header chunk ID: $headerChunkId")
@@ -168,56 +163,34 @@ object MidiParser {
     /**
      * Parse a MIDI file into a MidiTrack
      */
-    suspend fun parseMidiFile(midiResourcePath: String): MidiTrack? {
-        // Check cache first
-        if (midiCache.containsKey(midiResourcePath)) {
-            Log.d(TAG, "Using cached MIDI file: $midiResourcePath")
-            return midiCache[midiResourcePath]
+    suspend fun parseMidiFile(midiResourcePath: String): MidiTrack? =
+        try {
+            Log.d("MidiParser", "Loading MIDI file: $midiResourcePath")
+            val midiBytes = MidiResources.readMidiFile(midiResourcePath)
+            val track = parseMidiBytes(midiBytes)
+            Log.d("MidiParser", "Successfully parsed MIDI file: $midiResourcePath")
+            track
+        } catch (e: IllegalArgumentException) {
+            Log.e("MidiParser", "Invalid MIDI file format $midiResourcePath: ${e.message}")
+            // Return null instead of crashing to allow graceful degradation
+            null
+        } catch (e: org.jetbrains.compose.resources.MissingResourceException) {
+            Log.e("MidiParser", "Resource not found $midiResourcePath: ${e.message}")
+            // Return null instead of crashing to allow graceful degradation
+            null
+        } catch (e: IllegalStateException) {
+            Log.e("MidiParser", "Invalid state reading MIDI file $midiResourcePath: ${e.message}")
+            // Return null instead of crashing to allow graceful degradation
+            null
+        } catch (e: RuntimeException) {
+            Log.e("MidiParser", "Runtime error reading MIDI file $midiResourcePath: ${e.message}")
+            // Return null instead of crashing to allow graceful degradation
+            null
+        } catch (e: Exception) {
+            Log.e("MidiParser", "Unexpected error reading MIDI file $midiResourcePath: ${e.message}")
+            // Return null instead of crashing to allow graceful degradation
+            null
         }
-
-        // Load and parse MIDI file if not cached
-        Log.d(TAG, "Loading MIDI file (not cached): $midiResourcePath")
-        val track =
-            try {
-                val midiBytes = MidiResources.readMidiFile(midiResourcePath)
-                val parsedTrack = parseMidiBytes(midiBytes)
-                Log.i(TAG, "Successfully parsed and cached MIDI file: $midiResourcePath")
-                parsedTrack
-            } catch (e: IllegalArgumentException) {
-                Log.e(TAG, "Invalid MIDI file format $midiResourcePath: ${e.message}")
-                null
-            } catch (e: org.jetbrains.compose.resources.MissingResourceException) {
-                Log.e(TAG, "Resource not found $midiResourcePath: ${e.message}")
-                null
-            } catch (e: IllegalStateException) {
-                Log.e(TAG, "Invalid state reading MIDI file $midiResourcePath: ${e.message}")
-                null
-            } catch (e: RuntimeException) {
-                Log.e(TAG, "Runtime error reading MIDI file $midiResourcePath: ${e.message}")
-                null
-            } catch (e: Exception) {
-                @Suppress("TooGenericExceptionCaught") // Catch-all for unexpected errors during resource loading
-                Log.e(TAG, "Unexpected error reading MIDI file $midiResourcePath: ${e.message}")
-                null
-            }
-
-        // Cache the result (even if null to avoid repeated failed attempts)
-        midiCache[midiResourcePath] = track
-        return track
-    }
-
-    /**
-     * Clear the MIDI cache (useful for testing or memory management)
-     */
-    fun clearCache() {
-        Log.d(TAG, "Clearing MIDI cache (${midiCache.size} entries)")
-        midiCache.clear()
-    }
-
-    /**
-     * Get cache statistics for debugging
-     */
-    fun getCacheStats(): String = "MIDI cache: ${midiCache.size} files cached"
 
     // ------------------------------------------------------------------------
 
@@ -243,7 +216,6 @@ object MidiParser {
             Log.e(TAG, "Invalid MIDI format: ${e.message}", throwable = e)
             throw IllegalArgumentException("Invalid MIDI format: ${e.message}", e)
         } catch (e: IndexOutOfBoundsException) {
-            @Suppress("TooGenericExceptionCaught") // Catch IndexOutOfBounds as specific MIDI parsing error
             Log.e(TAG, "Malformed MIDI data: ${e.message}", throwable = e)
             throw IllegalArgumentException("Malformed MIDI data: ${e.message}", e)
         }
@@ -253,7 +225,6 @@ object MidiParser {
      * Helper function to validate track and handle parsing errors.
      * Consolidates track validation and parsing exceptions into one place.
      */
-    @Suppress("ThrowsCount") // Multiple exception types consolidated for comprehensive track validation
     private fun validateAndParseTrack(
         reader: ByteArrayReader,
         bytes: ByteArray,
@@ -275,7 +246,6 @@ object MidiParser {
             Log.e(TAG, "Invalid track $trackIndex format: ${e.message}", throwable = e)
             throw IllegalArgumentException("Invalid track $trackIndex format: ${e.message}", e)
         } catch (e: IndexOutOfBoundsException) {
-            @Suppress("TooGenericExceptionCaught") // Catch specific parsing exceptions for track validation
             Log.e(TAG, "Malformed track $trackIndex data: ${e.message}", throwable = e)
             throw IllegalArgumentException("Malformed track $trackIndex data: ${e.message}", e)
         } catch (e: NumberFormatException) {
@@ -365,13 +335,37 @@ object MidiParser {
                             }
                         }
                         (statusByte and STATUS_MASK_F0) == NOTE_ON -> {
-                            handleNoteOnEvent(statusByte, reader, activeNotes, trackNotes, currentTick)
+                            // Note on event
+                            val channel = statusByte and STATUS_MASK_0F
+                            val noteNumber = reader.readUInt8()
+                            val velocity = reader.readUInt8()
+
+                            if (velocity > 0) {
+                                // Start of note
+                                activeNotes[Pair(channel, noteNumber)] =
+                                    NoteStartInfo(
+                                        startTick = currentTick,
+                                        velocity = velocity,
+                                    )
+                            } else {
+                                // Note on with velocity 0 is equivalent to note off
+                                handleNoteOff(activeNotes, trackNotes, channel, noteNumber, currentTick)
+                            }
                         }
                         (statusByte and STATUS_MASK_F0) == NOTE_OFF -> {
-                            handleNoteOffEvent(statusByte, reader, activeNotes, trackNotes, currentTick)
+                            // Note off event
+                            val channel = statusByte and STATUS_MASK_0F
+                            val noteNumber = reader.readUInt8()
+                            reader.readUInt8() // Velocity (ignored for note off)
+
+                            handleNoteOff(activeNotes, trackNotes, channel, noteNumber, currentTick)
                         }
                         (statusByte and RUNNING_STATUS_MASK) != 0 -> {
-                            handleOtherMidiEvent(statusByte, reader)
+                            // Other MIDI events - skip data bytes
+                            when {
+                                (statusByte and STATUS_MASK_E0) == PROGRAM_CHANGE_STATUS -> reader.skip(SINGLE_DATA_BYTE_SKIP) // Program change, channel pressure - 1 data byte
+                                else -> reader.skip(DOUBLE_DATA_BYTE_SKIP) // Most other events - 2 data bytes
+                            }
                         }
                     }
                 }
@@ -495,65 +489,6 @@ object MidiParser {
     }
 
     // ------------------------------------------------------------------------
-
-    /**
-     * Handle a note-on MIDI event
-     */
-    private fun handleNoteOnEvent(
-        statusByte: Int,
-        reader: ByteArrayReader,
-        activeNotes: MutableMap<Pair<Int, Int>, NoteStartInfo>,
-        trackNotes: MutableList<MidiNoteInternal>,
-        currentTick: Long,
-    ) {
-        val channel = statusByte and STATUS_MASK_0F
-        val noteNumber = reader.readUInt8()
-        val velocity = reader.readUInt8()
-
-        if (velocity > 0) {
-            // Start of note
-            activeNotes[Pair(channel, noteNumber)] =
-                NoteStartInfo(
-                    startTick = currentTick,
-                    velocity = velocity,
-                )
-        } else {
-            // Note on with velocity 0 is equivalent to note off
-            handleNoteOff(activeNotes, trackNotes, channel, noteNumber, currentTick)
-        }
-    }
-
-    /**
-     * Handle a note-off MIDI event
-     */
-    private fun handleNoteOffEvent(
-        statusByte: Int,
-        reader: ByteArrayReader,
-        activeNotes: MutableMap<Pair<Int, Int>, NoteStartInfo>,
-        trackNotes: MutableList<MidiNoteInternal>,
-        currentTick: Long,
-    ) {
-        val channel = statusByte and STATUS_MASK_0F
-        val noteNumber = reader.readUInt8()
-        reader.readUInt8() // Velocity (ignored for note off)
-
-        handleNoteOff(activeNotes, trackNotes, channel, noteNumber, currentTick)
-    }
-
-    /**
-     * Handle other MIDI events (program change, control change, etc.)
-     */
-    private fun handleOtherMidiEvent(
-        statusByte: Int,
-        reader: ByteArrayReader,
-    ) {
-        when {
-            // Program change, channel pressure - 1 data byte
-            (statusByte and STATUS_MASK_E0) == PROGRAM_CHANGE_STATUS -> reader.skip(SINGLE_DATA_BYTE_SKIP)
-            // Most other events - 2 data bytes
-            else -> reader.skip(DOUBLE_DATA_BYTE_SKIP)
-        }
-    }
 
     /**
      * Handle a note-off event
