@@ -324,7 +324,7 @@ actual suspend fun cacheDeepFile(fileName: String) {
         cacheFile.parentFile?.mkdirs()
         cacheFile.outputStream().use { it.write(fileBytes) }
     } catch (e: java.io.FileNotFoundException) {
-        Log.w(::cacheDeepFile.name, "Cannot cache deep file: $fileName (resource not found)")
+        Log.w(::cacheDeepFile.name, "Cannot cache deep file: $fileName (resource not found)", e)
     } catch (e: SecurityException) {
         Log.e(::cacheDeepFile.name, "Security error caching file: $fileName", e)
     } catch (e: java.io.IOException) {

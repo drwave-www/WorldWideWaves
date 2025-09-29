@@ -50,9 +50,11 @@ object BundleInitializer {
                     try {
                         NSBundle.loadableBundle("com.worldwidewaves.shared.main")
                     } catch (e: Exception) {
+                        Log.w(TAG, "Failed to load bundle with identifier 'com.worldwidewaves.shared.main'", e)
                         try {
                             NSBundle.loadableBundle("com.worldwidewaves.shared")
                         } catch (e2: Exception) {
+                            Log.w(TAG, "Failed to load bundle with identifier 'com.worldwidewaves.shared', falling back to main bundle", e2)
                             NSBundle.mainBundle
                         }
                     }

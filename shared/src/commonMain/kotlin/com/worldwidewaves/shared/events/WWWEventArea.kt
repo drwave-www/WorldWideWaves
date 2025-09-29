@@ -480,6 +480,7 @@ data class WWWEventArea(
                     try {
                         polygon.jsonArray
                     } catch (e: Exception) {
+                        Log.w("WWWEventArea", "Invalid polygon JSON array at index $polygonIndex in MultiPolygon", e)
                         return@forEachIndexed
                     }
 
@@ -495,6 +496,7 @@ data class WWWEventArea(
                             try {
                                 ring.jsonArray
                             } catch (e: Exception) {
+                                Log.w("WWWEventArea", "Invalid ring JSON array at index $ringIndex in polygon", e)
                                 return@forEachIndexed
                             }
 
@@ -537,6 +539,7 @@ data class WWWEventArea(
                 try {
                     ring.jsonArray
                 } catch (e: Exception) {
+                    Log.w("WWWEventArea", "Invalid ring JSON array in processRing", e)
                     return
                 }
 
@@ -552,6 +555,7 @@ data class WWWEventArea(
                                 try {
                                     point.jsonArray
                                 } catch (e: Exception) {
+                                    Log.w("WWWEventArea", "Invalid point JSON array at index $pointIndex", e)
                                     return@mapIndexed null
                                 }
 
@@ -560,6 +564,7 @@ data class WWWEventArea(
                                     try {
                                         pointArray[0].jsonPrimitive.double
                                     } catch (e: Exception) {
+                                        Log.w("WWWEventArea", "Invalid longitude value at point index $pointIndex", e)
                                         return@mapIndexed null
                                     }
 
@@ -567,6 +572,7 @@ data class WWWEventArea(
                                     try {
                                         pointArray[1].jsonPrimitive.double
                                     } catch (e: Exception) {
+                                        Log.w("WWWEventArea", "Invalid latitude value at point index $pointIndex", e)
                                         return@mapIndexed null
                                     }
 
@@ -575,6 +581,7 @@ data class WWWEventArea(
                                 null
                             }
                         } catch (e: Exception) {
+                            Log.w("WWWEventArea", "Failed to process point at index $pointIndex", e)
                             null
                         }
                     }.filterNotNull()
@@ -587,6 +594,7 @@ data class WWWEventArea(
                 try {
                     positions.toPolygon
                 } catch (e: Exception) {
+                    Log.w("WWWEventArea", "Failed to convert positions to polygon", e)
                     return
                 }
 
