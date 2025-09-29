@@ -72,32 +72,30 @@ Monitor logs during testing:
 2. **After ODR Download**: Area detection works, wave button active
 3. **Cache Persistence**: Subsequent app launches use cached resources
 
-### 4. Testing Android-Like Download/Cache Flow
+### 4. iOS ODR vs Android Download/Cache Flow
 
-The iOS implementation mirrors Android behavior:
+**iOS ODR Hybrid Approach**: Try direct access first, fall back to caching if needed.
 
-1. **Download Phase**:
-   - Use `NSBundleResourceRequest` to download ODR assets
-   - Cache resources in `getCacheDir()` location
+**iOS ODR Flow**:
+1. **Download Phase**: `NSBundleResourceRequest.beginAccessingResources()`
+2. **Direct Access Attempt**: Try reading files directly via `bundle.pathForResource()`
+3. **Fallback Caching**: If direct access fails, copy files to cache directory
+4. **Priority**: Cache files take precedence over direct ODR access
 
-2. **Cache Access Phase**:
-   - Check cache first (`Priority 1` in `getMapFileAbsolutePath`)
-   - Use cached files for subsequent access
-   - No re-download unless cache is cleared
+**Android Flow (for comparison)**:
+1. **Download Phase**: Dynamic Feature Module download
+2. **Extraction Phase**: Extract files from APK to cache directory
+3. **Cache Access**: Always read from extracted cache files
 
-3. **Verification**:
-   ```bash
-   # Check cache contents
-   ls -la "$(xcrun simctl get_app_container booted com.worldwidewaves data)/Library/Caches/"
-   ```
+**iOS Strategy**: Optimistic direct access with reliable caching fallback.
 
 ### 5. Production vs Local Resource Handling
 
-| Scenario | Resource Source | Cache Behavior | Test Status |
-|----------|----------------|----------------|-------------|
-| App Store | ODR Download | ✅ Cached | Production |
-| Local Bundle | Bundle Access | ❌ No Cache | Development Only |
-| ODR Simulation | ODR Download | ✅ Cached | Test Production |
+| Scenario | Resource Source | Storage | Test Status |
+|----------|----------------|---------|-------------|
+| App Store | ODR Download | Direct Access + Cache Fallback | Production |
+| Local Bundle | Bundle Access | Direct Access (no ODR) | Development Only |
+| ODR Simulation | ODR Download | Direct Access + Cache Fallback | Test Production |
 
 ### 6. Testing Commands
 
@@ -125,7 +123,7 @@ xcrun simctl erase all
 #### ODR Mode (without Resources)
 - Resources load via ODR download (slower, production-like)
 - Initial "Location not available" until download completes
-- Cached for subsequent use
+- Directly accessible from bundle after download
 - ✅ Matches App Store behavior
 
 ### 8. Troubleshooting ODR Issues
@@ -134,7 +132,7 @@ xcrun simctl erase all
 |-------|-------|---------|
 | Immediate resource access | Bundle fallback | Remove Resources folder |
 | No ODR download | Missing ODR config | Check asset pack tags |
-| Cache not working | Wrong cache path | Verify `getCacheDir()` usage |
+| Files not accessible | ODR download incomplete | Verify `beginAccessingResources` success |
 | Download fails | Network/ODR server | Check Xcode ODR simulation |
 
 ## Testing Protocol
@@ -142,7 +140,7 @@ xcrun simctl erase all
 1. ✅ **Remove Resources**: Ensure no bundle fallback
 2. ✅ **Enable ODR Simulation**: Use Xcode ODR server
 3. ✅ **Test Download Flow**: Verify initial failure → download → success
-4. ✅ **Verify Caching**: Check cache persistence across app restarts
-5. ✅ **Monitor Logs**: Confirm cache access vs bundle access
+4. ✅ **Verify Persistence**: Check file availability across app restarts
+5. ✅ **Monitor Logs**: Confirm direct ODR access vs bundle fallback
 
-This ensures the iOS implementation properly handles production ODR conditions, matching the Android download/cache behavior.
+This ensures the iOS implementation properly handles production ODR conditions with direct file access (no additional caching layer needed like Android).

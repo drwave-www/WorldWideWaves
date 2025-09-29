@@ -164,73 +164,112 @@ actual suspend fun getMapFileAbsolutePath(
     eventId: String,
     extension: String,
 ): String? {
-    // Production-grade iOS implementation: Check cache and ODR bundle resources
+    // iOS ODR: Try direct access first, fall back to cache if needed
     return try {
         val fileName = "$eventId.$extension"
-        Log.v("getMapFileAbsolutePath", "Looking for $fileName")
+        Log.v("getMapFileAbsolutePath", "[$eventId] Looking for ODR file: $fileName")
 
-        // Priority 1: Check cache directory (downloaded maps)
+        // Priority 1: Check cache directory first (for extracted files)
         val cacheDir = getCacheDir()
         val cachePath = "$cacheDir/$fileName"
         if (NSFileManager.defaultManager.fileExistsAtPath(cachePath)) {
-            Log.d("getMapFileAbsolutePath", "Found $fileName in cache: $cachePath")
+            Log.i("getMapFileAbsolutePath", "[$eventId] Found cached file: $cachePath")
             return cachePath
         }
 
-        // Priority 2: Check main bundle resources (ODR maps)
+        // Priority 2: Try direct ODR access from bundle
         val bundle = NSBundle.mainBundle
-        val resourcePath = bundle.pathForResource(eventId, extension)
-        if (resourcePath != null && NSFileManager.defaultManager.fileExistsAtPath(resourcePath)) {
-            Log.d("getMapFileAbsolutePath", "Found $fileName in bundle: $resourcePath")
-            return resourcePath
+        val odrPaths =
+            listOf(
+                bundle.pathForResource(eventId, extension, "Resources/Maps/$eventId"),
+                bundle.pathForResource(eventId, extension, "Maps/$eventId"),
+                bundle.pathForResource(eventId, extension, "Resources/Maps"),
+                bundle.pathForResource(eventId, extension, "Maps"),
+                bundle.pathForResource(eventId, extension),
+            )
+
+        for (path in odrPaths) {
+            if (path != null && NSFileManager.defaultManager.fileExistsAtPath(path)) {
+                Log.i("getMapFileAbsolutePath", "[$eventId] Found ODR file directly: $path")
+
+                // Try to read the file to verify it's accessible
+                val content = NSString.stringWithContentsOfFile(path, NSUTF8StringEncoding, null)
+                if (content != null) {
+                    Log.i("getMapFileAbsolutePath", "[$eventId] ODR file is directly readable")
+                    return path
+                } else {
+                    Log.w("getMapFileAbsolutePath", "[$eventId] ODR file found but not readable: $path")
+                    // Fall through to cache the file
+                    break
+                }
+            }
         }
 
-        // Priority 3: Check Maps subdirectory in bundle (alternative ODR structure)
-        val mapsResourcePath = bundle.pathForResource(eventId, extension, "Maps")
-        if (mapsResourcePath != null && NSFileManager.defaultManager.fileExistsAtPath(mapsResourcePath)) {
-            Log.d("getMapFileAbsolutePath", "Found $fileName in Maps subdirectory: $mapsResourcePath")
-            return mapsResourcePath
-        }
-
-        // Priority 4: Check Resources/Maps subdirectory (alternative ODR structure)
-        val resourcesMapsPath = bundle.pathForResource(eventId, extension, "Resources/Maps")
-        if (resourcesMapsPath != null && NSFileManager.defaultManager.fileExistsAtPath(resourcesMapsPath)) {
-            Log.d("getMapFileAbsolutePath", "Found $fileName in Resources/Maps: $resourcesMapsPath")
-            return resourcesMapsPath
-        }
-
-        // Priority 5: Check city subdirectory structure: Maps/eventId/eventId.extension
-        val citySubdirPath = bundle.pathForResource(eventId, extension, "Maps/$eventId")
-        if (citySubdirPath != null && NSFileManager.defaultManager.fileExistsAtPath(citySubdirPath)) {
-            Log.d("getMapFileAbsolutePath", "Found $fileName in Maps/$eventId: $citySubdirPath")
-            return citySubdirPath
-        }
-
-        // Priority 6: Check Resources/Maps city subdirectory: Resources/Maps/eventId/eventId.extension
-        val resourcesCitySubdirPath = bundle.pathForResource(eventId, extension, "Resources/Maps/$eventId")
-        if (resourcesCitySubdirPath != null && NSFileManager.defaultManager.fileExistsAtPath(resourcesCitySubdirPath)) {
-            Log.d("getMapFileAbsolutePath", "Found $fileName in Resources/Maps/$eventId: $resourcesCitySubdirPath")
-            return resourcesCitySubdirPath
-        }
-
-        Log.d("getMapFileAbsolutePath", "Map file $fileName not found in any location")
+        Log.w("getMapFileAbsolutePath", "[$eventId] ODR file not found or not accessible: $fileName")
+        Log.i("getMapFileAbsolutePath", "[$eventId] File should be available after ODR download completes")
         null
     } catch (e: Exception) {
-        Log.e("getMapFileAbsolutePath", "Error accessing map file $eventId.$extension: ${e.message}", e)
+        Log.e("getMapFileAbsolutePath", "[$eventId] Error accessing ODR file $eventId.$extension: ${e.message}", e)
         null
     }
 }
 
 actual fun cachedFileExists(fileName: String): Boolean {
+    // iOS ODR: Check cache first, then ODR direct access
     val cacheDir = getCacheDir()
-    val filePath = "$cacheDir/$fileName"
-    return NSFileManager.defaultManager.fileExistsAtPath(filePath)
+    val cachePath = "$cacheDir/$fileName"
+    if (NSFileManager.defaultManager.fileExistsAtPath(cachePath)) {
+        return true
+    }
+
+    // Check ODR direct access
+    val eventId = fileName.substringBeforeLast('.')
+    val extension = fileName.substringAfterLast('.')
+    val bundle = NSBundle.mainBundle
+
+    val odrPaths =
+        listOf(
+            bundle.pathForResource(eventId, extension, "Resources/Maps/$eventId"),
+            bundle.pathForResource(eventId, extension, "Maps/$eventId"),
+            bundle.pathForResource(eventId, extension, "Resources/Maps"),
+            bundle.pathForResource(eventId, extension, "Maps"),
+            bundle.pathForResource(eventId, extension),
+        )
+
+    return odrPaths.any { path ->
+        path != null && NSFileManager.defaultManager.fileExistsAtPath(path)
+    }
 }
 
 actual fun cachedFilePath(fileName: String): String? {
+    // iOS ODR: Return cache path if exists, otherwise ODR path
     val cacheDir = getCacheDir()
-    val filePath = "$cacheDir/$fileName"
-    return NSURL.fileURLWithPath(filePath).absoluteString
+    val cachePath = "$cacheDir/$fileName"
+    if (NSFileManager.defaultManager.fileExistsAtPath(cachePath)) {
+        return NSURL.fileURLWithPath(cachePath).absoluteString
+    }
+
+    // Check ODR direct access
+    val eventId = fileName.substringBeforeLast('.')
+    val extension = fileName.substringAfterLast('.')
+    val bundle = NSBundle.mainBundle
+
+    val odrPaths =
+        listOf(
+            bundle.pathForResource(eventId, extension, "Resources/Maps/$eventId"),
+            bundle.pathForResource(eventId, extension, "Maps/$eventId"),
+            bundle.pathForResource(eventId, extension, "Resources/Maps"),
+            bundle.pathForResource(eventId, extension, "Maps"),
+            bundle.pathForResource(eventId, extension),
+        )
+
+    for (path in odrPaths) {
+        if (path != null && NSFileManager.defaultManager.fileExistsAtPath(path)) {
+            return NSURL.fileURLWithPath(path).absoluteString
+        }
+    }
+
+    return null
 }
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
@@ -255,45 +294,49 @@ actual fun getCacheDir(): String =
 
 @Throws(Throwable::class)
 actual suspend fun cacheDeepFile(fileName: String) {
-    // iOS implementation: Cache ODR resource to cache directory for fast access
+    // iOS ODR: Cache file if direct access fails
     try {
-        Log.v("cacheDeepFile", "Attempting to cache ODR file: $fileName")
+        val eventId = fileName.substringBeforeLast('.')
+        val extension = fileName.substringAfterLast('.')
+
+        Log.v("cacheDeepFile", "[$eventId] Attempting to cache ODR file: $fileName")
 
         val cacheDir = getCacheDir()
         val cachedFilePath = "$cacheDir/$fileName"
 
         // Check if already cached
         if (NSFileManager.defaultManager.fileExistsAtPath(cachedFilePath)) {
-            Log.d("cacheDeepFile", "File already cached: $fileName")
+            Log.d("cacheDeepFile", "[$eventId] File already cached: $fileName")
             return
         }
 
-        // Extract eventId from fileName (e.g., "paris_france.geojson" -> "paris_france")
-        val eventId = fileName.substringBeforeLast('.')
-        val extension = fileName.substringAfterLast('.')
-
-        // Try to find in ODR bundle resources (after ODR download)
+        // Try to find ODR file and copy to cache if not directly readable
         val bundle = NSBundle.mainBundle
-        val resourcePath = bundle.pathForResource(eventId, extension, "Resources/Maps/$eventId")
+        val odrPaths =
+            listOf(
+                bundle.pathForResource(eventId, extension, "Resources/Maps/$eventId"),
+                bundle.pathForResource(eventId, extension, "Maps/$eventId"),
+                bundle.pathForResource(eventId, extension, "Resources/Maps"),
+                bundle.pathForResource(eventId, extension, "Maps"),
+                bundle.pathForResource(eventId, extension),
+            )
 
-        if (resourcePath != null && NSFileManager.defaultManager.fileExistsAtPath(resourcePath)) {
-            // Copy from ODR bundle to cache
-            val copySuccess =
-                NSFileManager.defaultManager.copyItemAtPath(
-                    resourcePath,
-                    cachedFilePath,
-                    null,
-                )
-            if (copySuccess) {
-                Log.i("cacheDeepFile", "Successfully cached ODR file: $fileName -> $cachedFilePath")
-            } else {
-                Log.w("cacheDeepFile", "Failed to copy ODR file to cache: $fileName")
+        for (path in odrPaths) {
+            if (path != null && NSFileManager.defaultManager.fileExistsAtPath(path)) {
+                // Copy ODR file to cache for reliable access
+                val copySuccess = NSFileManager.defaultManager.copyItemAtPath(path, cachedFilePath, null)
+                if (copySuccess) {
+                    Log.i("cacheDeepFile", "[$eventId] Successfully cached ODR file: $fileName -> $cachedFilePath")
+                    return
+                } else {
+                    Log.w("cacheDeepFile", "[$eventId] Failed to copy ODR file to cache: $fileName")
+                }
             }
-        } else {
-            Log.w("cacheDeepFile", "ODR file not found for caching: $fileName")
         }
+
+        Log.w("cacheDeepFile", "[$eventId] ODR file not found for caching: $fileName")
     } catch (e: Exception) {
-        Log.w("cacheDeepFile", "Error caching ODR file $fileName: ${e.message}", e)
+        Log.w("cacheDeepFile", "[$fileName] Error caching ODR file: ${e.message}", e)
     }
 }
 
@@ -302,34 +345,37 @@ actual suspend fun cacheDeepFile(fileName: String) {
 // ---------------------------------------------------------------------------
 
 actual fun clearEventCache(eventId: String) {
-    // Clear ODR cached files from cache directory
+    // iOS ODR: Clear cached files and in-memory cache
     try {
         val cacheDir = getCacheDir()
         val geoJsonFile = "$cacheDir/$eventId.geojson"
         val mbtileFile = "$cacheDir/$eventId.mbtiles"
 
-        // Remove cached files
+        // Remove cached files if they exist
+        var filesRemoved = 0
         if (NSFileManager.defaultManager.fileExistsAtPath(geoJsonFile)) {
             NSFileManager.defaultManager.removeItemAtPath(geoJsonFile, null)
-            Log.i("clearEventCache", "Removed cached GeoJSON: $geoJsonFile")
+            Log.i("clearEventCache", "[$eventId] Removed cached GeoJSON: $geoJsonFile")
+            filesRemoved++
         }
         if (NSFileManager.defaultManager.fileExistsAtPath(mbtileFile)) {
             NSFileManager.defaultManager.removeItemAtPath(mbtileFile, null)
-            Log.i("clearEventCache", "Removed cached MBTiles: $mbtileFile")
+            Log.i("clearEventCache", "[$eventId] Removed cached MBTiles: $mbtileFile")
+            filesRemoved++
         }
 
-        // Also invalidate GeoJSON cache in memory
+        // Invalidate GeoJSON cache in memory
         val koin =
             org.koin.mp.KoinPlatform
                 .getKoin()
         val geoJsonProvider = koin.get<GeoJsonDataProvider>()
         geoJsonProvider.invalidateCache(eventId)
 
-        Log.i("clearEventCache", "Successfully cleared cache for event $eventId")
+        Log.i("clearEventCache", "[$eventId] Cleared cache: $filesRemoved files removed, memory cache invalidated")
     } catch (e: IllegalStateException) {
-        Log.w("clearEventCache", "State error clearing cache for event $eventId: ${e.message}")
+        Log.w("clearEventCache", "[$eventId] State error clearing cache: ${e.message}")
     } catch (e: Exception) {
-        Log.w("clearEventCache", "Error clearing cache for event $eventId: ${e.message}")
+        Log.w("clearEventCache", "[$eventId] Error clearing cache: ${e.message}")
     }
 }
 
