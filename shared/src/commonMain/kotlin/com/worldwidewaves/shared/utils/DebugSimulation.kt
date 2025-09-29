@@ -32,19 +32,25 @@ import org.koin.mp.KoinPlatform
 import kotlin.time.ExperimentalTime
 
 /**
+ * Check if the current build is a debug build.
+ * Platform-specific implementation that checks the appropriate debug flag.
+ */
+expect fun isDebugBuild(): Boolean
+
+/**
  * Unified debug simulation setup for all platforms.
  *
- * Sets up default simulation for development and testing when debug logging is enabled.
+ * Sets up default simulation for development and testing when in debug build.
  * Uses identical parameters across Android, iOS, and other platforms to ensure
  * consistent testing behavior.
  *
- * Called from debugBuild() during platform initialization.
+ * Called after Koin initialization when WWWPlatform is available.
  */
 @OptIn(ExperimentalTime::class)
 fun setupDebugSimulation() {
     try {
-        // Check if debug mode is enabled using cross-platform LogConfig
-        if (LogConfig.ENABLE_DEBUG_LOGGING) {
+        // Check if debug mode is enabled using platform-specific BuildConfig
+        if (isDebugBuild()) {
             Log.d("DebugSimulation", "Setting up cross-platform DEBUG simulation")
 
             val wwwPlatform = KoinPlatform.getKoin().get<WWWPlatform>()

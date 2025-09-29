@@ -31,9 +31,8 @@ fun debugBuild() {
     // Napier initialization is handled by initNapier() in platform-specific code
     // This function can be used for other debug-specific initialization if needed
 
-    // Unified debug simulation setup for all platforms
-    com.worldwidewaves.shared.utils
-        .setupDebugSimulation()
+    // Note: Debug simulation setup is called later after Koin initialization
+    // from MainApplication.onCreate() (Android) and equivalent iOS location
 }
 
 /**

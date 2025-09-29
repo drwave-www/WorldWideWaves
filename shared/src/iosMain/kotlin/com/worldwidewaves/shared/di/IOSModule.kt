@@ -55,9 +55,10 @@ val IOSModule =
 
         // Platform descriptor for iOS
         single<WWWPlatform> {
-            debugBuild()
             val device = UIDevice.currentDevice
-            WWWPlatform("iOS ${device.systemVersion}", get())
+            val platform = WWWPlatform("iOS ${device.systemVersion}", get())
+            debugBuild()
+            platform
         }
 
         single {

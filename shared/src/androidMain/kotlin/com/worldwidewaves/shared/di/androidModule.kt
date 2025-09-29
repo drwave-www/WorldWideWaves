@@ -40,8 +40,9 @@ import org.koin.dsl.module
 val androidModule =
     module {
         single<WWWPlatform> {
+            val platform = WWWPlatform("Android ${Build.VERSION.SDK_INT}", get())
             debugBuild()
-            WWWPlatform("Android ${Build.VERSION.SDK_INT}", get())
+            platform
         }
         single<ImageResolver<DrawableResource>> { AndroidImageResolver() }
         single(createdAtStart = true) { ChoreographyManager<DrawableResource>() }

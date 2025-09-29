@@ -89,6 +89,14 @@ fun doInitPlatform() {
                 Log.v(TAG, "HELPER: Modules added")
             }
         Log.i(TAG, "HELPER: startKoin completed successfully")
+
+        // Setup debug simulation after Koin initialization (same as Android MainApplication)
+        try {
+            com.worldwidewaves.shared.utils
+                .setupDebugSimulation()
+        } catch (e: Exception) {
+            Log.w(TAG, "DEBUG: Failed to setup debug simulation: ${e.message}")
+        }
     } catch (e: IllegalStateException) {
         Log.e(TAG, "ERROR: Koin state error: ${e.message}")
         Log.e(TAG, "ERROR: Exception type: ${e::class.simpleName}")

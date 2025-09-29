@@ -76,8 +76,14 @@ class MainApplication :
             modules(sharedModule + androidModule + applicationModule)
         }
 
-        // Debug simulation is now handled by debugBuild() -> setupDebugSimulation()
-        // This provides consistent behavior across Android and iOS platforms
+        // -------------------------------------------------------------------- //
+        //  Default simulation initialization (runs after Koin properties are ready)
+        // -------------------------------------------------------------------- //
+
+        if (BuildConfig.DEBUG) {
+            com.worldwidewaves.shared.utils
+                .setupDebugSimulation()
+        }
     }
 
     override fun onTerminate() {
