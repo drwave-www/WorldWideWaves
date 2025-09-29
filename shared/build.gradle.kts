@@ -239,7 +239,7 @@ multiplatformResources {
 
 buildkonfig {
     packageName = "com.worldwidewaves.shared"
-    exposeObjectWithName = "BuildKonfig" // Make BuildKonfig object public instead of internal
+    // Keep BuildKonfig internal to prevent Objective-C header generation issues
 
     // Default config for all targets (debug mode)
     defaultConfigs {

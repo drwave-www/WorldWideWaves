@@ -84,8 +84,8 @@ fun doInitPlatform() {
         Log.v(TAG, "HELPER: About to create startKoin block...")
         koinApp =
             startKoin {
-                // Add iOS logging equivalent to Android's androidLogger()
-                logger(PrintLogger(Level.DEBUG))
+                // Add iOS logging - use INFO level to reduce excessive debug output
+                logger(PrintLogger(if (BuildKonfig.DEBUG) Level.INFO else Level.ERROR))
                 Log.v(TAG, "HELPER: Logger added")
                 modules(sharedModule + IOSModule)
                 Log.v(TAG, "HELPER: Modules added")
