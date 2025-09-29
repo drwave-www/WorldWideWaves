@@ -7,364 +7,198 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		002FF5BD2865B3D1574EF372 /* berlin_germany.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 310EA638131C9158CC2CAB62 /* berlin_germany.geojson */; };
-		0309C4853F1C8D2B297AAD31 /* berlin_germany.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = FD9853E08E1127F6A07FB3EB /* berlin_germany.mbtiles */; };
-		117FB9D64D915AEBE9CB5787 /* london_england.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 87E46F07BD6E5061CDF7358D /* london_england.geojson */; };
-		25017E10F93189A616E6339E /* paris_france.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 576DC7EE01A35ECF1D485EFD /* paris_france.mbtiles */; };
-		2CF83B91BE8D42962D6E2339 /* london_england.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 394E84810688F478FC50C12A /* london_england.mbtiles */; };
-		30DEA55F34F0E89A50F44521 /* new_york_usa.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = F2B769FEA9E069597C596AC1 /* new_york_usa.mbtiles */; };
-		471523E2A97C4814FFCCC0CB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CD5086C5905652B0E9DD8CB /* AppDelegate.swift */; };
-		5632C5A116A5AC2AF455EE4D /* IOSPlatformEnabler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2ADD9DF121420E439A7BFC /* IOSPlatformEnabler.swift */; };
-		64BB1F1FA4D165A93A2CDB3D /* tokyo_japan.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = CE1F42748EAB1CBDA609A74A /* tokyo_japan.mbtiles */; };
-		72FBC343C6B69B24BD520246 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2C7DF2B4B609B7059E23829F /* Assets.xcassets */; };
-		7512EE3EADBF10ED014C9F7D /* tokyo_japan.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 8E3B377546B94D083F48B7BD /* tokyo_japan.geojson */; };
-		7EFD58E9D082DFE77EE74480 /* paris_france.geojson in Resources */ = {isa = PBXBuildFile; fileRef = AC4D9EE4EDF6C769B7220B96 /* paris_france.geojson */; };
-		978D111A0669BFC5B7CBAF48 /* new_york_usa.geojson in Resources */ = {isa = PBXBuildFile; fileRef = EB8EFDA708EC2061D8EAEECF /* new_york_usa.geojson */; };
-		A45C27B2789CC6C93B9C0689 /* Shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16F5769DD5EE70C56F81A2D0 /* Shared.framework */; };
-		C2BE707E3B6703F097B44CFF /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B379565E8867B938B665BB /* SceneDelegate.swift */; };
+		C17B465A2E8999FF0097A3A5 /* Shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C17B46592E8999FF0097A3A5 /* Shared.framework */; };
+		C17B465B2E8999FF0097A3A5 /* Shared.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C17B46592E8999FF0097A3A5 /* Shared.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		C17B465C2E8999FF0097A3A5 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				C17B465B2E8999FF0097A3A5 /* Shared.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
-		16F5769DD5EE70C56F81A2D0 /* Shared.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Shared.framework; path = "../shared/build/xcode-frameworks/$$(CONFIGURATION)/$$(SDK_NAME)/Shared.framework"; sourceTree = "<group>"; };
-		2C7DF2B4B609B7059E23829F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		310EA638131C9158CC2CAB62 /* berlin_germany.geojson */ = {isa = PBXFileReference; path = berlin_germany.geojson; sourceTree = "<group>"; };
-		35B379565E8867B938B665BB /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		394E84810688F478FC50C12A /* london_england.mbtiles */ = {isa = PBXFileReference; path = london_england.mbtiles; sourceTree = "<group>"; };
-		576DC7EE01A35ECF1D485EFD /* paris_france.mbtiles */ = {isa = PBXFileReference; path = paris_france.mbtiles; sourceTree = "<group>"; };
-		73CE5A39B51A4FC771A50939 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		87E46F07BD6E5061CDF7358D /* london_england.geojson */ = {isa = PBXFileReference; path = london_england.geojson; sourceTree = "<group>"; };
-		8E3B377546B94D083F48B7BD /* tokyo_japan.geojson */ = {isa = PBXFileReference; path = tokyo_japan.geojson; sourceTree = "<group>"; };
-		9CD5086C5905652B0E9DD8CB /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		AC4D9EE4EDF6C769B7220B96 /* paris_france.geojson */ = {isa = PBXFileReference; path = paris_france.geojson; sourceTree = "<group>"; };
-		CE1F42748EAB1CBDA609A74A /* tokyo_japan.mbtiles */ = {isa = PBXFileReference; path = tokyo_japan.mbtiles; sourceTree = "<group>"; };
-		DA2ADD9DF121420E439A7BFC /* IOSPlatformEnabler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSPlatformEnabler.swift; sourceTree = "<group>"; };
-		EB8EFDA708EC2061D8EAEECF /* new_york_usa.geojson */ = {isa = PBXFileReference; path = new_york_usa.geojson; sourceTree = "<group>"; };
-		EC2D9975210308DB08A03912 /* worldwidewaves.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = worldwidewaves.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		F2B769FEA9E069597C596AC1 /* new_york_usa.mbtiles */ = {isa = PBXFileReference; path = new_york_usa.mbtiles; sourceTree = "<group>"; };
-		FD9853E08E1127F6A07FB3EB /* berlin_germany.mbtiles */ = {isa = PBXFileReference; path = berlin_germany.mbtiles; sourceTree = "<group>"; };
+		C17B3C762E886C610097A3A5 /* worldwidewaves.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = worldwidewaves.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C17B46592E8999FF0097A3A5 /* Shared.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Shared.framework; path = "../shared/build/xcode-frameworks/Debug/iphonesimulator18.5/Shared.framework"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C17B46632E899ED40097A3A5 /* Exceptions for "worldwidewaves" folder in "worldwidewaves" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = C17B3C752E886C610097A3A5 /* worldwidewaves */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		C17B3C782E886C610097A3A5 /* worldwidewaves */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C17B46632E899ED40097A3A5 /* Exceptions for "worldwidewaves" folder in "worldwidewaves" target */,
+			);
+			path = worldwidewaves;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
-		D04AEFC0B649DE3A1CAC7533 /* Frameworks */ = {
+		C17B3C732E886C610097A3A5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A45C27B2789CC6C93B9C0689 /* Shared.framework in Frameworks */,
+				C17B465A2E8999FF0097A3A5 /* Shared.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		0DD34A42E17F29C38C415DB4 /* worldwidewaves */ = {
+		C17B3C6D2E886C610097A3A5 = {
 			isa = PBXGroup;
 			children = (
-				9CD5086C5905652B0E9DD8CB /* AppDelegate.swift */,
-				2C7DF2B4B609B7059E23829F /* Assets.xcassets */,
-				73CE5A39B51A4FC771A50939 /* Info.plist */,
-				DA2ADD9DF121420E439A7BFC /* IOSPlatformEnabler.swift */,
-				35B379565E8867B938B665BB /* SceneDelegate.swift */,
-				BD351EED9904FB9420D45E4E /* Resources */,
-			);
-			path = worldwidewaves;
-			sourceTree = "<group>";
-		};
-		128CC9ACC99B25AACCAEC888 /* new_york_usa */ = {
-			isa = PBXGroup;
-			children = (
-				EB8EFDA708EC2061D8EAEECF /* new_york_usa.geojson */,
-				F2B769FEA9E069597C596AC1 /* new_york_usa.mbtiles */,
-			);
-			path = new_york_usa;
-			sourceTree = "<group>";
-		};
-		277A06EE8DF61EEE601563FB /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				16F5769DD5EE70C56F81A2D0 /* Shared.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		4AEEB5C91C6EAC9D8A260ED3 /* london_england */ = {
-			isa = PBXGroup;
-			children = (
-				87E46F07BD6E5061CDF7358D /* london_england.geojson */,
-				394E84810688F478FC50C12A /* london_england.mbtiles */,
-			);
-			path = london_england;
-			sourceTree = "<group>";
-		};
-		7A1898B03378A29C0FCDCDB5 /* berlin_germany */ = {
-			isa = PBXGroup;
-			children = (
-				310EA638131C9158CC2CAB62 /* berlin_germany.geojson */,
-				FD9853E08E1127F6A07FB3EB /* berlin_germany.mbtiles */,
-			);
-			path = berlin_germany;
-			sourceTree = "<group>";
-		};
-		839DEEA12091BAE9676110DA /* tokyo_japan */ = {
-			isa = PBXGroup;
-			children = (
-				8E3B377546B94D083F48B7BD /* tokyo_japan.geojson */,
-				CE1F42748EAB1CBDA609A74A /* tokyo_japan.mbtiles */,
-			);
-			path = tokyo_japan;
-			sourceTree = "<group>";
-		};
-		BD351EED9904FB9420D45E4E /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				F3C9A3F9BEF65BA598091466 /* Maps */,
-			);
-			path = Resources;
-			sourceTree = "<group>";
-		};
-		DFBC35AF12E38482597E2537 /* paris_france */ = {
-			isa = PBXGroup;
-			children = (
-				AC4D9EE4EDF6C769B7220B96 /* paris_france.geojson */,
-				576DC7EE01A35ECF1D485EFD /* paris_france.mbtiles */,
-			);
-			path = paris_france;
-			sourceTree = "<group>";
-		};
-		ED2C2E1A03A3E85400F9B992 = {
-			isa = PBXGroup;
-			children = (
-				0DD34A42E17F29C38C415DB4 /* worldwidewaves */,
-				277A06EE8DF61EEE601563FB /* Frameworks */,
-				FA439C5C86516084108375DD /* Products */,
+				C17B3C782E886C610097A3A5 /* worldwidewaves */,
+				C17B46582E89981D0097A3A5 /* Frameworks */,
+				C17B3C772E886C610097A3A5 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		F3C9A3F9BEF65BA598091466 /* Maps */ = {
+		C17B3C772E886C610097A3A5 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				7A1898B03378A29C0FCDCDB5 /* berlin_germany */,
-				4AEEB5C91C6EAC9D8A260ED3 /* london_england */,
-				128CC9ACC99B25AACCAEC888 /* new_york_usa */,
-				DFBC35AF12E38482597E2537 /* paris_france */,
-				839DEEA12091BAE9676110DA /* tokyo_japan */,
-			);
-			path = Maps;
-			sourceTree = "<group>";
-		};
-		FA439C5C86516084108375DD /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				EC2D9975210308DB08A03912 /* worldwidewaves.app */,
+				C17B3C762E886C610097A3A5 /* worldwidewaves.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		C17B46582E89981D0097A3A5 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C17B46592E8999FF0097A3A5 /* Shared.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		B6FB086D2F766C75A831742D /* worldwidewaves */ = {
+		C17B3C752E886C610097A3A5 /* worldwidewaves */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 43A9EAB90619503B697BF162 /* Build configuration list for PBXNativeTarget "worldwidewaves" */;
+			buildConfigurationList = C17B3C972E886C630097A3A5 /* Build configuration list for PBXNativeTarget "worldwidewaves" */;
 			buildPhases = (
-				B428A9802AF9C4083BB9038F /* Sources */,
-				C0A156C269B1A4B3221ADA6F /* Resources */,
-				D04AEFC0B649DE3A1CAC7533 /* Frameworks */,
+				C17B3CA12E886C960097A3A5 /* ShellScript */,
+				C17B3C722E886C610097A3A5 /* Sources */,
+				C17B3C732E886C610097A3A5 /* Frameworks */,
+				C17B3C742E886C610097A3A5 /* Resources */,
+				C17B465C2E8999FF0097A3A5 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
+			fileSystemSynchronizedGroups = (
+				C17B3C782E886C610097A3A5 /* worldwidewaves */,
+			);
 			name = worldwidewaves;
 			packageProductDependencies = (
 			);
 			productName = worldwidewaves;
-			productReference = EC2D9975210308DB08A03912 /* worldwidewaves.app */;
+			productReference = C17B3C762E886C610097A3A5 /* worldwidewaves.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		DCD38800D199CE20587729E9 /* Project object */ = {
+		C17B3C6E2E886C610097A3A5 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1430;
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1640;
+				LastUpgradeCheck = 1640;
 				TargetAttributes = {
-					B6FB086D2F766C75A831742D = {
-						DevelopmentTeam = "";
+					C17B3C752E886C610097A3A5 = {
+						CreatedOnToolsVersion = 16.4;
 					};
 				};
 			};
-			buildConfigurationList = 01F4162C82F5900300A77937 /* Build configuration list for PBXProject "worldwidewaves" */;
-			compatibilityVersion = "Xcode 14.0";
+			buildConfigurationList = C17B3C712E886C610097A3A5 /* Build configuration list for PBXProject "worldwidewaves" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				Base,
 				en,
+				Base,
 			);
-			mainGroup = ED2C2E1A03A3E85400F9B992;
+			mainGroup = C17B3C6D2E886C610097A3A5;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
+			productRefGroup = C17B3C772E886C610097A3A5 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				B6FB086D2F766C75A831742D /* worldwidewaves */,
+				C17B3C752E886C610097A3A5 /* worldwidewaves */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		C0A156C269B1A4B3221ADA6F /* Resources */ = {
+		C17B3C742E886C610097A3A5 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				72FBC343C6B69B24BD520246 /* Assets.xcassets in Resources */,
-				002FF5BD2865B3D1574EF372 /* berlin_germany.geojson in Resources */,
-				0309C4853F1C8D2B297AAD31 /* berlin_germany.mbtiles in Resources */,
-				117FB9D64D915AEBE9CB5787 /* london_england.geojson in Resources */,
-				2CF83B91BE8D42962D6E2339 /* london_england.mbtiles in Resources */,
-				978D111A0669BFC5B7CBAF48 /* new_york_usa.geojson in Resources */,
-				30DEA55F34F0E89A50F44521 /* new_york_usa.mbtiles in Resources */,
-				7EFD58E9D082DFE77EE74480 /* paris_france.geojson in Resources */,
-				25017E10F93189A616E6339E /* paris_france.mbtiles in Resources */,
-				7512EE3EADBF10ED014C9F7D /* tokyo_japan.geojson in Resources */,
-				64BB1F1FA4D165A93A2CDB3D /* tokyo_japan.mbtiles in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		C17B3CA12E886C960097A3A5 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "export PATH=\"/opt/homebrew/opt/openjdk@17/bin:/opt/homebrew/bin:$PATH\"\nexport JAVA_HOME=\"/opt/homebrew/opt/openjdk@17\"\ncd \"$SRCROOT/..\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode \\\n  -PXCODE_CONFIGURATION=${CONFIGURATION} \\\n  -PPLATFORM_NAME=${PLATFORM_NAME} \\\n  -PARCHS=\"${ARCHS}\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
-		B428A9802AF9C4083BB9038F /* Sources */ = {
+		C17B3C722E886C610097A3A5 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				471523E2A97C4814FFCCC0CB /* AppDelegate.swift in Sources */,
-				5632C5A116A5AC2AF455EE4D /* IOSPlatformEnabler.swift in Sources */,
-				C2BE707E3B6703F097B44CFF /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		654349C0EB18452A13AB61A9 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
-				FRAMEWORK_SEARCH_PATHS = (
-					"../shared/build/xcode-frameworks/$$(CONFIGURATION)/$$(SDK_NAME)",
-					"\"../shared/build/xcode-frameworks/$$(CONFIGURATION)/$$(SDK_NAME)\"",
-				);
-				INFOPLIST_FILE = worldwidewaves/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				OTHER_LDFLAGS = (
-					"-lc++",
-					"-framework",
-					Shared,
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.worldwidewaves;
-				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
-		A3519EC1CB8F8B838111EDC5 /* Release */ = {
+		C17B3C952E886C630097A3A5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				SWIFT_VERSION = 5.0;
-			};
-			name = Release;
-		};
-		C738E5E3410ADC89620C0D24 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
-				FRAMEWORK_SEARCH_PATHS = (
-					"../shared/build/xcode-frameworks/$$(CONFIGURATION)/$$(SDK_NAME)",
-					"\"../shared/build/xcode-frameworks/$$(CONFIGURATION)/$$(SDK_NAME)\"",
-				);
-				INFOPLIST_FILE = worldwidewaves/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				OTHER_LDFLAGS = (
-					"-lc++",
-					"-framework",
-					Shared,
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.worldwidewaves;
-				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		ED49EC7E85293E643B657575 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
@@ -394,13 +228,14 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(inherited)",
 					"DEBUG=1",
+					"$(inherited)",
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -408,40 +243,157 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
+		};
+		C17B3C962E886C630097A3A5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C17B3C982E886C630097A3A5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)";
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)";
+				INFOPLIST_FILE = worldwidewaves/Info.plist;
+				INFOPLIST_KEY_CADisableMinimumFrameDurationOnPhone = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = WorldWideWaves;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.worldwidewaves;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C17B3C992E886C630097A3A5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)";
+				INFOPLIST_FILE = worldwidewaves/Info.plist;
+				INFOPLIST_KEY_CADisableMinimumFrameDurationOnPhone = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = WorldWideWaves;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.worldwidewaves;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		01F4162C82F5900300A77937 /* Build configuration list for PBXProject "worldwidewaves" */ = {
+		C17B3C712E886C610097A3A5 /* Build configuration list for PBXProject "worldwidewaves" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				ED49EC7E85293E643B657575 /* Debug */,
-				A3519EC1CB8F8B838111EDC5 /* Release */,
+				C17B3C952E886C630097A3A5 /* Debug */,
+				C17B3C962E886C630097A3A5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
-		43A9EAB90619503B697BF162 /* Build configuration list for PBXNativeTarget "worldwidewaves" */ = {
+		C17B3C972E886C630097A3A5 /* Build configuration list for PBXNativeTarget "worldwidewaves" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				C738E5E3410ADC89620C0D24 /* Debug */,
-				654349C0EB18452A13AB61A9 /* Release */,
+				C17B3C982E886C630097A3A5 /* Debug */,
+				C17B3C992E886C630097A3A5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = DCD38800D199CE20587729E9 /* Project object */;
+	rootObject = C17B3C6E2E886C610097A3A5 /* Project object */;
 }

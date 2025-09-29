@@ -180,6 +180,9 @@ class IOSPlatformMapManager : PlatformMapManager {
 
                 WWWLogger.d("IOSPlatformMapManager", "Estimated download duration for $mapId: ${estimatedDuration}ms")
 
+                // Start progress updates immediately
+                onProgress(0)
+
                 // Begin accessing the resource
                 val downloadSuccessful =
                     suspendCancellableCoroutine { continuation ->
@@ -222,7 +225,8 @@ class IOSPlatformMapManager : PlatformMapManager {
                     invalidateCache(mapId)
                     onSuccess()
                 } else {
-                    onError(ERROR_CODE_DOWNLOAD_FAILED, "ODR resource download failed")
+                    onProgress(COMPLETE_PROGRESS_PERCENT)
+                    onError(ERROR_CODE_DOWNLOAD_FAILED, "ODR resource not found in bundle")
                 }
             }
         } catch (e: Exception) {
