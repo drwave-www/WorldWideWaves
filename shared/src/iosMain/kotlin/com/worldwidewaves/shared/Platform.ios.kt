@@ -29,8 +29,6 @@ import dev.icerock.moko.resources.desc.desc
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import org.koin.core.KoinApplication
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 import org.koin.core.logger.PrintLogger
@@ -199,10 +197,12 @@ actual suspend fun cacheDeepFile(fileName: String) {
 actual fun clearEventCache(eventId: String) {
     // Also invalidate GeoJSON cache in memory
     try {
-        // Use KoinComponent approach for iOS
-        object : KoinComponent {
-            val geoJsonProvider: com.worldwidewaves.shared.events.utils.GeoJsonDataProvider by inject()
-        }.geoJsonProvider.invalidateCache(eventId)
+        // Safe iOS approach - use direct Koin access without KoinComponent
+        val koin =
+            org.koin.mp.KoinPlatform
+                .getKoin()
+        val geoJsonProvider = koin.get<com.worldwidewaves.shared.events.utils.GeoJsonDataProvider>()
+        geoJsonProvider.invalidateCache(eventId)
     } catch (e: IllegalStateException) {
         Log.w("clearEventCache", "State error clearing cache for event $eventId: ${e.message}")
         // Cache invalidation is not critical for iOS operation
