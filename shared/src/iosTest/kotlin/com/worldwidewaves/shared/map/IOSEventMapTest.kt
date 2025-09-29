@@ -28,7 +28,7 @@ import kotlin.test.assertEquals
  * Basic tests for IOSEventMap.
  * Tests the iOS-specific AbstractEventMap implementation without complex mocks.
  */
-class IOSEventMapTest {
+class IOSEventMapPlatformTest {
     @Test
     fun `IOSEventMap class exists and can be referenced`() {
         val className = IOSEventMap::class.simpleName
