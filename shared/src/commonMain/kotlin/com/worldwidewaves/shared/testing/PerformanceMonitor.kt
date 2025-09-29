@@ -211,10 +211,10 @@ open class PerformanceMonitor : IPerformanceMonitor {
         private const val PERFORMANCE_ACCURACY_PERCENT_MULTIPLIER = 100.0
 
         // Battery usage estimation constants
-        private const val BATTERY_MAH_PER_MINUTE = 2.5
-        private const val BACKGROUND_CPU_TIME_PER_MINUTE_MS = 100.0
-        private const val MAX_CPU_PERCENT = 15.0
-        private const val CPU_PERCENT_PER_MINUTE = 0.5
+        const val BATTERY_MAH_PER_MINUTE = 2.5
+        const val BACKGROUND_CPU_TIME_PER_MINUTE_MS = 100.0
+        const val MAX_CPU_PERCENT = 15.0
+        const val CPU_PERCENT_PER_MINUTE = 0.5
 
         // Time conversion constants
         private const val MICROSECONDS_PER_SECOND = 1_000_000.0
@@ -510,8 +510,14 @@ private class PerformanceTraceImpl(
         val durationMinutes = duration.inWholeMinutes.toDouble()
         return BatteryUsage(
             totalPowerMah = durationMinutes * PerformanceMonitor.BATTERY_MAH_PER_MINUTE, // Estimate: 2.5mAh per minute
-            backgroundCpuMs = metrics["background_cpu_time"] ?: (durationMinutes * PerformanceMonitor.BACKGROUND_CPU_TIME_PER_MINUTE_MS).toLong(),
-            averageCpuPercent = kotlin.math.min(PerformanceMonitor.MAX_CPU_PERCENT, durationMinutes * PerformanceMonitor.CPU_PERCENT_PER_MINUTE), // Max 15% CPU
+            backgroundCpuMs =
+                metrics["background_cpu_time"] ?: (durationMinutes * PerformanceMonitor.BACKGROUND_CPU_TIME_PER_MINUTE_MS).toLong(),
+            averageCpuPercent =
+                kotlin.math.min(
+                    PerformanceMonitor.MAX_CPU_PERCENT,
+                    durationMinutes * PerformanceMonitor.CPU_PERCENT_PER_MINUTE,
+                ),
+            // Max 15% CPU
         )
     }
 

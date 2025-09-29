@@ -41,6 +41,23 @@ class EarthAdaptedSpeedLongitude(
     private val speed: Double,
     private val direction: Direction,
 ) : ComposedLongitude(Position(0.0, coveredArea.latitudeOfWidestPart())) {
+    companion object {
+        // Safety and configuration constants
+        private const val MIN_BAND_WIDTH = 0.001
+        private const val MAX_BANDS = 20000
+
+        // Latitude boundaries (safe distances from poles)
+        private const val SAFE_SOUTH_LATITUDE = -87.0
+        private const val SAFE_NORTH_LATITUDE = 87.0
+
+        // Conversion constants
+        private const val MILLISECONDS_PER_SECOND = 1000
+
+        // Latitude limit constants
+        private const val MIN_LATITUDE = -90.0
+        private const val MAX_LATITUDE = 90.0
+    }
+
     /*
      * Latitude-split bands and longitude band for the wave.
      */
@@ -61,8 +78,8 @@ class EarthAdaptedSpeedLongitude(
     /*
      * Security checks for the wave.
      */
-    private val minBandWidth = 0.001
-    private val maxBands = 20000
+    private val minBandWidth = MIN_BAND_WIDTH
+    private val maxBands = MAX_BANDS
 
     /*
      * The duration of a single band refresh window in seconds.
@@ -130,7 +147,7 @@ class EarthAdaptedSpeedLongitude(
                 // Convert the total distance to longitude change at the current latitude
                 val longitudeChange = (totalDistanceCovered / (EARTH_RADIUS * cos(bandLatitude.toRadians()))).toDegrees()
 
-                val newLatitude = min(90.0, max(-90.0, bandLatitude + band.latWidth / 2))
+                val newLatitude = min(MAX_LATITUDE, max(MIN_LATITUDE, bandLatitude + band.latWidth / 2))
                 Position(
                     newLatitude,
                     when (direction) {
@@ -185,9 +202,9 @@ class EarthAdaptedSpeedLongitude(
         // Use safe distances from actual poles to avoid mathematical instabilities
         latLonBands.add(
             LatLonBand(
-                -87.0, // Safe distance from south pole but still outside most bounding boxes
+                SAFE_SOUTH_LATITUDE, // Safe distance from south pole but still outside most bounding boxes
                 0.0, // Lower latitude band
-                adjustLongitudeWidthAtLatitude(-87.0, lonBandWidthAtLongest),
+                adjustLongitudeWidthAtLatitude(SAFE_SOUTH_LATITUDE, lonBandWidthAtLongest),
             ),
         )
 
@@ -214,9 +231,9 @@ class EarthAdaptedSpeedLongitude(
 
         latLonBands.add(
             LatLonBand(
-                87.0, // Safe distance from north pole but still outside most bounding boxes
+                SAFE_NORTH_LATITUDE, // Safe distance from north pole but still outside most bounding boxes
                 0.0, // Higher latitude band
-                adjustLongitudeWidthAtLatitude(87.0, lonBandWidthAtLongest),
+                adjustLongitudeWidthAtLatitude(SAFE_NORTH_LATITUDE, lonBandWidthAtLongest),
             ),
         )
 
@@ -238,7 +255,7 @@ class EarthAdaptedSpeedLongitude(
      */
     fun calculateLonBandWidthAtLatitude(latitude: Double): Double {
         require(speed > 0) { "Speed must be greater than 0" }
-        val distanceCovered = speed * bandStepDuration.inWholeMilliseconds / 1000
+        val distanceCovered = speed * bandStepDuration.inWholeMilliseconds / MILLISECONDS_PER_SECOND
         Napier.v { "Distance covered by the wave in ${bandStepDuration}s at speed speed: $distanceCovered" }
         return (distanceCovered / (EARTH_RADIUS * cos(latitude.toRadians()))).toDegrees()
         // return (speed / (EARTH_RADIUS * cos(latitude.toRadians()))).toDegrees()
@@ -286,7 +303,7 @@ class EarthAdaptedSpeedLongitude(
         latitude: Double,
         lonWidthAtTheLongest: Double,
     ): Double {
-        require(abs(latitude) < 90) // Prevent division by zero
+        require(abs(latitude) < MAX_LATITUDE) // Prevent division by zero
         return lonWidthAtTheLongest / cos(latitude.toRadians())
     }
 }

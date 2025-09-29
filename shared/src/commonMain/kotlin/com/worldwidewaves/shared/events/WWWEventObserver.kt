@@ -493,6 +493,8 @@ class WWWEventObserver(
                     } catch (e: IllegalStateException) {
                         Log.w("WWWEventObserver", "State error - Platform not available for simulation observation: $e")
                         send(Unit) // Emit once to allow combine to work
+                        awaitClose()
+                        return@callbackFlow
                     } catch (e: Exception) {
                         Log.w("WWWEventObserver", "Unexpected error - Platform not available for simulation observation: $e")
                         send(Unit) // Emit once to allow combine to work

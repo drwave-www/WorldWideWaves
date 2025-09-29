@@ -47,6 +47,38 @@ class IOSPlatformMapManager : PlatformMapManager {
         private const val PROGRESS_UPDATE_INTERVAL_MS = 50L // Smoother progress updates
         private const val MIN_DOWNLOAD_DURATION_MS = 1000L // Minimum realistic download time
         private const val MAX_DOWNLOAD_DURATION_MS = 30000L // Maximum timeout
+
+        // Cache configuration
+        private const val CACHE_VALIDITY_MS = 30000L // 30 seconds cache validity
+        private const val CACHE_RETRY_WINDOW_MS = 5000L // 5 second retry window
+
+        // Duration estimates for different map types (in milliseconds)
+        private const val CITY_MAP_ADDITIONAL_DURATION_MS = 2000L
+        private const val COUNTRY_MAP_ADDITIONAL_DURATION_MS = 5000L
+        private const val WORLD_MAP_ADDITIONAL_DURATION_MS = 10000L
+        private const val DEFAULT_MAP_ADDITIONAL_DURATION_MS = 3000L
+
+        // Random variation bounds for realistic simulation
+        private const val MIN_VARIATION_FACTOR = 0.7
+        private const val MAX_VARIATION_FACTOR = 1.3
+
+        // Progress curve thresholds
+        private const val FAST_INITIAL_PROGRESS_THRESHOLD = 0.1
+        private const val SLOW_MIDDLE_PROGRESS_THRESHOLD = 0.7
+        private const val INITIAL_PROGRESS_MULTIPLIER = 3.0
+        private const val MIDDLE_PROGRESS_BASE = 0.3
+        private const val MIDDLE_PROGRESS_FACTOR = 0.5
+        private const val FINAL_PROGRESS_BASE = 0.8
+        private const val FINAL_PROGRESS_FACTOR = 0.5
+        private const val MAX_PROGRESS_WITHOUT_COMPLETION = 95
+
+        // Error codes
+        private const val ERROR_CODE_DOWNLOAD_FAILED = -1
+        private const val ERROR_CODE_UNKNOWN_ERROR = -2
+        private const val ERROR_CODE_DOWNLOAD_IN_PROGRESS = -3
+
+        // Progress constants
+        private const val COMPLETE_PROGRESS_PERCENT = 100
     }
 
     // Thread-safe resource management
@@ -59,7 +91,7 @@ class IOSPlatformMapManager : PlatformMapManager {
     // Cache invalidation support
     private val availabilityCache = mutableMapOf<String, Pair<Boolean, Long>>()
     private val cacheMutex = Mutex()
-    private val cacheValidityMs = 30000L // 30 seconds cache validity
+    private val cacheValidityMs = CACHE_VALIDITY_MS
 
     /**
      * Check if an ODR map resource is available.
@@ -94,7 +126,7 @@ class IOSPlatformMapManager : PlatformMapManager {
 
             // Cache failure result for shorter period to allow retries
             val currentTime = Clock.System.now().toEpochMilliseconds()
-            availabilityCache[mapId] = Pair(false, currentTime - cacheValidityMs + 5000L) // 5 second retry window
+            availabilityCache[mapId] = Pair(false, currentTime - cacheValidityMs + CACHE_RETRY_WINDOW_MS)
             false
         }
     }
@@ -120,7 +152,7 @@ class IOSPlatformMapManager : PlatformMapManager {
             // Check if already available (invalidate cache first)
             invalidateCache(mapId)
             if (isMapAvailable(mapId)) {
-                onProgress(100)
+                onProgress(COMPLETE_PROGRESS_PERCENT)
                 onSuccess()
                 WWWLogger.i("IOSPlatformMapManager", "ODR map already available: $mapId")
                 return@withPermit
@@ -130,7 +162,7 @@ class IOSPlatformMapManager : PlatformMapManager {
                 // Check if download is already in progress
                 if (activeRequests.containsKey(mapId)) {
                     WWWLogger.w("IOSPlatformMapManager", "Download already in progress for $mapId")
-                    onError(-3, "Download already in progress")
+                    onError(ERROR_CODE_DOWNLOAD_IN_PROGRESS, "Download already in progress")
                     return@withPermit
                 }
 
@@ -185,12 +217,12 @@ class IOSPlatformMapManager : PlatformMapManager {
                 simulateRealisticProgress(mapId, estimatedDuration, downloadStartTime, onProgress)
 
                 if (downloadSuccessful) {
-                    onProgress(100)
+                    onProgress(COMPLETE_PROGRESS_PERCENT)
                     // Invalidate cache to reflect new availability
                     invalidateCache(mapId)
                     onSuccess()
                 } else {
-                    onError(-1, "ODR resource download failed")
+                    onError(ERROR_CODE_DOWNLOAD_FAILED, "ODR resource download failed")
                 }
             }
         } catch (e: Exception) {
