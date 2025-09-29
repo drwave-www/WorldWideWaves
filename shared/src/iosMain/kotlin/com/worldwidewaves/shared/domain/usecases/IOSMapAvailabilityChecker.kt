@@ -119,9 +119,16 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
             // Begin resource requests for new maps asynchronously
             scope.launch {
                 mutex.withLock {
-                    val newMaps = mapIds.filter { !activeRequests.containsKey(it) }
-                    newMaps.forEach { mapId ->
-                        beginAccessingResources(mapId)
+                    val newMaps =
+                        mapIds.filter { mapId ->
+                            // Only start ODR if not already requesting AND not already available
+                            !activeRequests.containsKey(mapId) && _mapStates.value[mapId] != true
+                        }
+                    if (newMaps.isNotEmpty()) {
+                        Log.d("IOSMapAvailabilityChecker", "Starting ODR requests for ${newMaps.size} new maps: ${newMaps.joinToString()}")
+                        newMaps.forEach { mapId ->
+                            beginAccessingResources(mapId)
+                        }
                     }
                 }
             }
@@ -133,17 +140,15 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
         try {
             Log.v("IOSMapAvailabilityChecker", "Checking ODR availability for $mapId (ODR-only mode)")
 
-            // ONLY ODR: Check if resource is currently downloading or successfully downloaded
-            val isRequesting = activeRequests.containsKey(mapId)
-
             // Check current state - only return true if ODR has actually succeeded
             val currentState = _mapStates.value[mapId] ?: false
+            val isRequesting = activeRequests.containsKey(mapId)
 
             Log.v("IOSMapAvailabilityChecker", "ODR status for $mapId: requesting=$isRequesting, state=$currentState")
 
-            // Resource is available ONLY if ODR completed successfully (state=true)
-            // OR if currently downloading (which means ODR was initiated)
-            currentState || isRequesting
+            // CRITICAL FIX: Resource is available ONLY if ODR completed successfully (state=true)
+            // Do NOT return true just because it's requesting - that causes infinite loops
+            currentState
         } catch (e: Exception) {
             Log.e("IOSMapAvailabilityChecker", "Error checking ODR availability for $mapId", throwable = e)
             // NEVER assume available in error case - ODR must succeed explicitly
@@ -178,17 +183,20 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
                             currentStates[mapId] = true
                             _mapStates.value = currentStates
 
-                            // CRITICAL: Invalidate GeoJSON cache when ODR resources become available
-                            // This ensures that previously failed GeoJSON loads will be retried
-                            try {
-                                val koin =
-                                    org.koin.mp.KoinPlatform
-                                        .getKoin()
-                                val geoJsonProvider = koin.get<com.worldwidewaves.shared.events.utils.GeoJsonDataProvider>()
-                                geoJsonProvider.invalidateCache(mapId)
-                                Log.i("IOSMapAvailabilityChecker", "[$mapId] Invalidated GeoJSON cache after ODR success")
-                            } catch (e: Exception) {
-                                Log.w("IOSMapAvailabilityChecker", "[$mapId] Failed to invalidate GeoJSON cache: ${e.message}")
+                            // Invalidate GeoJSON cache after a delay to prevent immediate reload loops
+                            // The delay ensures ODR state is fully stable before allowing retry
+                            scope.launch {
+                                kotlinx.coroutines.delay(100) // Small delay to prevent tight loops
+                                try {
+                                    val koin =
+                                        org.koin.mp.KoinPlatform
+                                            .getKoin()
+                                    val geoJsonProvider = koin.get<com.worldwidewaves.shared.events.utils.GeoJsonDataProvider>()
+                                    geoJsonProvider.invalidateCache(mapId)
+                                    Log.i("IOSMapAvailabilityChecker", "[$mapId] Invalidated GeoJSON cache after ODR success (delayed)")
+                                } catch (e: Exception) {
+                                    Log.w("IOSMapAvailabilityChecker", "[$mapId] Failed to invalidate GeoJSON cache: ${e.message}")
+                                }
                             }
                         }
                     }
