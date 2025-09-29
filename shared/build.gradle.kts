@@ -239,6 +239,7 @@ multiplatformResources {
 
 buildkonfig {
     packageName = "com.worldwidewaves.shared"
+    exposeObjectWithName = "BuildKonfig" // Make BuildKonfig object public instead of internal
 
     // Default config for all targets (debug mode)
     defaultConfigs {
