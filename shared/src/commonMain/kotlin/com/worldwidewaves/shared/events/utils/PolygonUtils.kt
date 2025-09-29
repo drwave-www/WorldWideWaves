@@ -533,19 +533,19 @@ object PolygonUtils {
                 // Remove duplicate anchors and sort by latitude to get proper order along composed longitude
                 val uniqueAnchors = onLine.distinctBy { "${it.lat},${it.lng}" }.sortedBy { it.lat }
 
-                // Process consecutive anchors in latitude order (along composed longitude)
-                for (idx in 0 until uniqueAnchors.size - 1) {
-                    val anchor1 = uniqueAnchors[idx]
-                    val anchor2 = uniqueAnchors[idx + 1]
-
+                // Helper function to process anchor pair and insert intermediate points
+                fun processAnchorPair(
+                    anchor1: Position,
+                    anchor2: Position,
+                ) {
                     // Calculate midpoint latitude
                     val midLat = (anchor1.lat + anchor2.lat) / 2
-                    val midLng = lngToCut.lngAt(midLat) ?: continue
+                    val midLng = lngToCut.lngAt(midLat) ?: return
 
                     // Include intermediate points only when the composed-longitude
                     // segment between anchors lies inside the source polygon.
                     val insideMid = source.containsPosition(Position(midLat, midLng))
-                    if (!insideMid) continue
+                    if (!insideMid) return
 
                     // Get intermediate points between anchors
                     val between = lngToCut.positionsBetween(anchor1.lat, anchor2.lat)
@@ -581,6 +581,13 @@ object PolygonUtils {
                             }
                         }
                     }
+                }
+
+                // Process consecutive anchors in latitude order (along composed longitude)
+                for (idx in 0 until uniqueAnchors.size - 1) {
+                    val anchor1 = uniqueAnchors[idx]
+                    val anchor2 = uniqueAnchors[idx + 1]
+                    processAnchorPair(anchor1, anchor2)
                 }
                 polygon
             }

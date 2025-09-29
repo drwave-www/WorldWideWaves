@@ -65,6 +65,7 @@ import kotlinx.coroutines.isActive
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.min
+import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
 // Constants for choreography display
@@ -231,14 +232,20 @@ fun ChoreographyDisplay(
         @OptIn(ExperimentalTime::class)
         val startTime = clock.now()
 
+        // Helper function to check if the sequence should continue
+        fun shouldContinueSequence(elapsed: Duration): Boolean =
+            when {
+                remainingTime != null -> elapsed.compareTo(remainingTime!!) < 0
+                else -> elapsed.compareTo(sequence.duration) < 0
+            }
+
         while (this.isActive) {
-            // Check if we should stop showing the sequence
             @OptIn(ExperimentalTime::class)
             val elapsed = clock.now() - startTime
-            if (remainingTime != null) {
-                if (elapsed >= remainingTime!!) break
-            } else if (elapsed >= sequence.duration) {
-                break
+
+            // Check if we should stop showing the sequence
+            if (!shouldContinueSequence(elapsed)) {
+                return@LaunchedEffect
             }
 
             delay(sequence.timing.inWholeMilliseconds)
