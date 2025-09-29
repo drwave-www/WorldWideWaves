@@ -335,11 +335,8 @@ data class WWWEventArea(
             } catch (e: kotlinx.serialization.SerializationException) {
                 Log.w("WWWEventArea", "GeoJSON parsing error for event ${event.id}: ${e.message}")
                 // Polygon loading errors are handled gracefully - empty polygon list is acceptable
-            } catch (e: java.io.IOException) {
-                Log.w("WWWEventArea", "IO error loading polygons for event ${event.id}: ${e.message}")
-                // Polygon loading errors are handled gracefully - empty polygon list is acceptable
             } catch (e: Exception) {
-                Log.w("WWWEventArea", "Unexpected error loading polygons for event ${event.id}: ${e.message}")
+                Log.w("WWWEventArea", "Error loading polygons for event ${event.id}: ${e.message}")
                 // Polygon loading errors are handled gracefully - empty polygon list is acceptable
             }
 
@@ -364,11 +361,8 @@ data class WWWEventArea(
         } catch (e: kotlinx.serialization.SerializationException) {
             Log.w("WWWEventArea", "GeoJSON parsing error for event ${event.id}: ${e.message}")
             // GeoJSON data loading errors are handled gracefully
-        } catch (e: java.io.IOException) {
-            Log.w("WWWEventArea", "IO error loading GeoJSON for event ${event.id}: ${e.message}")
-            // GeoJSON data loading errors are handled gracefully
         } catch (e: Exception) {
-            Log.w("WWWEventArea", "Unexpected error loading GeoJSON for event ${event.id}: ${e.message}")
+            Log.w("WWWEventArea", "Error loading GeoJSON for event ${event.id}: ${e.message}")
             // GeoJSON data loading errors are handled gracefully
         }
     }

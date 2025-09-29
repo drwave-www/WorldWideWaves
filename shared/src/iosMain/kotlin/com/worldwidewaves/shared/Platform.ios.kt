@@ -118,11 +118,8 @@ actual suspend fun readGeoJson(eventId: String): String? {
         // For now, return null to indicate resource not found
         // Implementation depends on iOS resource management strategy
         null
-    } catch (e: java.io.IOException) {
-        Log.w("readGeoJson", "IO error reading GeoJSON for event $eventId: ${e.message}")
-        null
     } catch (e: Exception) {
-        Log.w("readGeoJson", "Unexpected error reading GeoJSON for event $eventId: ${e.message}")
+        Log.w("readGeoJson", "Error reading GeoJSON for event $eventId: ${e.message}")
         null
     }
 }
@@ -145,14 +142,8 @@ actual suspend fun getMapFileAbsolutePath(
             // File not found in cache, could check app bundle resources here
             null
         }
-    } catch (e: java.io.IOException) {
-        Log.w("getMapFileAbsolutePath", "IO error accessing map file for event $eventId.$extension: ${e.message}")
-        null
-    } catch (e: SecurityException) {
-        Log.w("getMapFileAbsolutePath", "Security error accessing map file for event $eventId.$extension: ${e.message}")
-        null
     } catch (e: Exception) {
-        Log.w("getMapFileAbsolutePath", "Unexpected error accessing map file for event $eventId.$extension: ${e.message}")
+        Log.w("getMapFileAbsolutePath", "Error accessing map file for event $eventId.$extension: ${e.message}")
         null
     }
 }
@@ -195,14 +186,8 @@ actual suspend fun cacheDeepFile(fileName: String) {
         // This would involve reading from iOS Bundle resources and writing to cache
         // Implementation depends on iOS resource bundling strategy
         // For now, this is a no-op as files are typically pre-bundled in iOS
-    } catch (e: java.io.IOException) {
-        Log.w("cacheDeepFile", "IO error caching file $fileName: ${e.message}")
-        // File caching is not critical for iOS operation
-    } catch (e: SecurityException) {
-        Log.w("cacheDeepFile", "Security error caching file $fileName: ${e.message}")
-        // File caching is not critical for iOS operation
     } catch (e: Exception) {
-        Log.w("cacheDeepFile", "Unexpected error caching file $fileName: ${e.message}")
+        Log.w("cacheDeepFile", "Error caching file $fileName: ${e.message}")
         // File caching is not critical for iOS operation
     }
 }

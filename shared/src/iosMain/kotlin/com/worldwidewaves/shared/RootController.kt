@@ -1,6 +1,6 @@
 package com.worldwidewaves.shared
 
-/* * Copyright 2025 DrWave
+/* Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries. The project aims to transcend physical and cultural
@@ -17,7 +17,8 @@ package com.worldwidewaves.shared
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. */
+ * limitations under the License.
+ */
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -32,6 +33,7 @@ import androidx.compose.ui.window.ComposeUIViewController
 import com.worldwidewaves.shared.map.IOSEventMap
 import com.worldwidewaves.shared.ui.activities.WWWEventActivity
 import com.worldwidewaves.shared.ui.activities.WWWMainActivity
+import com.worldwidewaves.shared.utils.BindIosLifecycle
 import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.utils.finishIOS
 import com.worldwidewaves.shared.viewmodels.MapViewModel
@@ -87,6 +89,8 @@ fun makeEventViewController(eventId: String): UIViewController {
                     platformEnabler = enabler,
                     mapViewModel = mapVm,
                 )
+
+            BindIosLifecycle(eventHost)
 
             eventHost.asComponent(
                 eventMapBuilder = { event -> IOSEventMap(event) },

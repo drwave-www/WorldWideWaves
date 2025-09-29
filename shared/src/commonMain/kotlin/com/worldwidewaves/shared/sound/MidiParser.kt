@@ -170,20 +170,12 @@ object MidiParser {
             val track = parseMidiBytes(midiBytes)
             Log.d("MidiParser", "Successfully parsed MIDI file: $midiResourcePath")
             track
-        } catch (e: java.io.FileNotFoundException) {
-            Log.w("MidiParser", "MIDI file not found: $midiResourcePath")
-            // Return null instead of crashing to allow graceful degradation
-            null
-        } catch (e: java.io.IOException) {
-            Log.e("MidiParser", "IO error reading MIDI file $midiResourcePath: ${e.message}")
-            // Return null instead of crashing to allow graceful degradation
-            null
         } catch (e: IllegalArgumentException) {
             Log.e("MidiParser", "Invalid MIDI file format $midiResourcePath: ${e.message}")
             // Return null instead of crashing to allow graceful degradation
             null
         } catch (e: Exception) {
-            Log.e("MidiParser", "Unexpected error parsing MIDI file $midiResourcePath: ${e.message}")
+            Log.e("MidiParser", "Error reading MIDI file $midiResourcePath: ${e.message}")
             // Return null instead of crashing to allow graceful degradation
             null
         }
@@ -389,8 +381,8 @@ object MidiParser {
                 totalDuration = totalDuration,
                 tempo = finalTempo.toInt(),
             )
-        } catch (e: java.io.IOException) {
-            val ioException = java.io.IOException("IO error parsing MIDI bytes: ${e.message}", e)
+        } catch (e: Exception) {
+            val ioException = Exception("IO error parsing MIDI bytes: ${e.message}", e)
             Log.e(TAG, "IO error parsing MIDI bytes: ${e.message}", throwable = e)
             throw ioException
         } catch (e: IllegalArgumentException) {
