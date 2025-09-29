@@ -21,7 +21,7 @@ package com.worldwidewaves.shared.di
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.choreographies.SoundChoreographyManager
+import com.worldwidewaves.shared.choreographies.SoundChoreographyPlayer
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.sound.GlobalSoundChoreographyManager
 import org.koin.dsl.module
@@ -29,6 +29,6 @@ import org.koin.dsl.module
 val commonModule =
     module {
         single { WWWEvents() }
-        single(createdAtStart = true) { SoundChoreographyManager() }
+        single(createdAtStart = true) { SoundChoreographyPlayer() }
         single { GlobalSoundChoreographyManager() }
     }

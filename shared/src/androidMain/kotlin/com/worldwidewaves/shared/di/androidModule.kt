@@ -29,7 +29,6 @@ import com.worldwidewaves.shared.data.DataStoreFactory
 import com.worldwidewaves.shared.data.DefaultDataStoreFactory
 import com.worldwidewaves.shared.data.FavoriteEventsStore
 import com.worldwidewaves.shared.data.keyValueStorePath
-import com.worldwidewaves.shared.debugBuild
 import com.worldwidewaves.shared.sound.AndroidSoundPlayer
 import com.worldwidewaves.shared.sound.SoundPlayer
 import com.worldwidewaves.shared.utils.AndroidImageResolver
@@ -40,7 +39,6 @@ import org.koin.dsl.module
 val androidModule =
     module {
         single<WWWPlatform> {
-            debugBuild()
             WWWPlatform("Android ${Build.VERSION.SDK_INT}", get())
         }
         single<ImageResolver<DrawableResource>> { AndroidImageResolver() }

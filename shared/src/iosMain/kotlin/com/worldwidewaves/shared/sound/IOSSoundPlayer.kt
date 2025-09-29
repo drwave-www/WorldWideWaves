@@ -1,5 +1,3 @@
-package com.worldwidewaves.shared.sound
-
 /*
  * Copyright 2025 DrWave
  *
@@ -21,54 +19,106 @@ package com.worldwidewaves.shared.sound
  * limitations under the License.
  */
 
+package com.worldwidewaves.shared.sound
+
+import com.worldwidewaves.shared.utils.Log
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.get
+import kotlinx.cinterop.set
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import platform.AVFAudio.AVAudioEngine
+import platform.AVFAudio.AVAudioMixerNode
+import platform.AVFAudio.AVAudioPCMBuffer
+import platform.AVFAudio.AVAudioPlayerNode
 import platform.AVFAudio.AVAudioSession
 import platform.AVFAudio.AVAudioSessionCategoryOptionMixWithOthers
 import platform.AVFAudio.AVAudioSessionCategoryPlayback
 import platform.AVFAudio.outputVolume
 import platform.AVFAudio.setActive
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * iOS implementation of SoundPlayer using AVAudioEngine
+ *
+ * This is a working implementation that provides functional audio capabilities
+ * while using iOS-safe APIs that compile correctly with Kotlin/Native.
  */
-@OptIn(ExperimentalForeignApi::class)
+@OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
 class IOSSoundPlayer :
     SoundPlayer,
     VolumeController {
+    companion object {
+        private const val TAG = "IOSSoundPlayer"
+    }
+
     private val audioSession = AVAudioSession.sharedInstance()
     private val audioEngine = AVAudioEngine()
+    private val playerNode = AVAudioPlayerNode()
+    private val mixerNode = AVAudioMixerNode()
+    private val playbackMutex = Mutex()
+    private var isEngineStarted = false
+    private var isEngineSetupAttempted = false
+    private var originalMixerVolume: Float = 1.0f
 
     init {
         setupAudioSession()
-        setupAudioEngine()
+        // Defer engine setup to first playback attempt
+        // This prevents crashes on simulators without audio I/O
     }
 
-    @OptIn(ExperimentalForeignApi::class)
     private fun setupAudioSession() {
-        audioSession.setCategory(
-            AVAudioSessionCategoryPlayback,
-            AVAudioSessionCategoryOptionMixWithOthers,
-            null,
-        )
-        audioSession.setActive(true, null)
+        try {
+            audioSession.setCategory(
+                AVAudioSessionCategoryPlayback,
+                AVAudioSessionCategoryOptionMixWithOthers,
+                null,
+            )
+            audioSession.setActive(true, null)
+            Log.v(TAG, "Audio session setup completed")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to setup audio session", e)
+        }
     }
 
-    @OptIn(ExperimentalForeignApi::class)
     private fun setupAudioEngine() {
-        audioEngine.prepare()
-        audioEngine.startAndReturnError(null)
+        if (isEngineSetupAttempted) return
+        isEngineSetupAttempted = true
+
+        try {
+            val outputNode = audioEngine.outputNode
+            val format = outputNode.outputFormatForBus(0u)
+
+            // Attach nodes: playerNode -> mixerNode -> outputNode
+            audioEngine.attachNode(playerNode)
+            audioEngine.attachNode(mixerNode)
+            audioEngine.connect(playerNode, mixerNode, format)
+            audioEngine.connect(mixerNode, outputNode, format)
+
+            audioEngine.prepare()
+            audioEngine.startAndReturnError(null)
+            isEngineStarted = true
+            Log.v(TAG, "Audio engine setup completed")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to setup audio engine (simulator or hardware issue)", e)
+            isEngineStarted = false
+        }
     }
 
-    @OptIn(ExperimentalForeignApi::class)
-    override fun getCurrentVolume(): Float = audioSession.outputVolume()
+    override fun getCurrentVolume(): Float {
+        // Return system output volume (read-only on iOS)
+        return audioSession.outputVolume()
+    }
 
     override fun setVolume(level: Float) {
-        // Note: iOS doesn't allow direct volume control from apps
-        // This requires special entitlements or using MPVolumeView
-        println("Volume control on iOS requires user interaction")
+        // iOS does not allow programmatic system volume changes
+        // We control mixer node volume instead
+        if (isEngineStarted) {
+            mixerNode.setVolume(level)
+            Log.v(TAG, "Set mixer volume to $level")
+        }
     }
 
     override suspend fun playTone(
@@ -77,18 +127,103 @@ class IOSSoundPlayer :
         duration: Duration,
         waveform: SoundPlayer.Waveform,
     ) {
-        try {
-            // Implementation would use AVAudioSourceNode to generate tones
-            // For now, we'll just simulate the tone playback with a delay
-            delay(duration)
-        } catch (e: Exception) {
-            println("Error playing tone: ${e.message}")
+        playbackMutex.withLock {
+            // Lazy engine initialization on first playback
+            if (!isEngineSetupAttempted) {
+                setupAudioEngine()
+            }
+
+            if (!isEngineStarted) {
+                Log.w(TAG, "Audio engine not available (simulator mode), skipping playback")
+                delay(duration) // Maintain timing even without audio
+                return@withLock
+            }
+
+            try {
+                // Save current mixer volume
+                originalMixerVolume = mixerNode.volume
+
+                // Set mixer to maximum volume
+                mixerNode.setVolume(1.0f)
+                Log.v(TAG, "Set volume to max (1.0) from $originalMixerVolume")
+
+                // Wait for volume change to take effect
+                delay(50.milliseconds)
+
+                Log.v(TAG, "Playing tone: freq=$frequency, amp=$amplitude, dur=$duration, wave=$waveform")
+
+                // Generate waveform samples using shared generator
+                val sampleRate = 44100
+                val samples =
+                    WaveformGenerator.generateWaveform(
+                        sampleRate = sampleRate,
+                        frequency = frequency,
+                        amplitude = amplitude,
+                        duration = duration,
+                        waveform = waveform,
+                    )
+
+                if (samples.isNotEmpty()) {
+                    // Use the mixer's output format to ensure compatibility
+                    val format = mixerNode.outputFormatForBus(0u)
+
+                    val frameCapacity = samples.size.toUInt()
+                    val buffer =
+                        AVAudioPCMBuffer(
+                            pCMFormat = format,
+                            frameCapacity = frameCapacity,
+                        )
+
+                    buffer.frameLength = frameCapacity
+
+                    // Copy samples to buffer
+                    val floatChannelData = buffer.floatChannelData
+                    if (floatChannelData != null) {
+                        val channel0 = floatChannelData[0]
+                        if (channel0 != null) {
+                            samples.forEachIndexed { index, sample ->
+                                channel0[index] = sample.toFloat()
+                            }
+
+                            // Schedule and play buffer
+                            playerNode.scheduleBuffer(buffer, null)
+                            playerNode.play()
+
+                            // Wait for playback to complete
+                            delay(duration + 50.milliseconds)
+                            Log.v(TAG, "iOS audio playback completed (${samples.size} samples)")
+                        } else {
+                            Log.w(TAG, "Failed to get channel 0 pointer")
+                        }
+                    } else {
+                        Log.w(TAG, "Failed to get channel data from buffer")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error playing tone: freq=$frequency, dur=$duration", e)
+            } finally {
+                // Always restore original mixer volume
+                mixerNode.setVolume(originalMixerVolume)
+                Log.v(TAG, "Restored volume to $originalMixerVolume")
+            }
         }
     }
 
-    @OptIn(ExperimentalForeignApi::class)
     override fun release() {
-        audioEngine.stop()
-        audioSession.setActive(false, null)
+        try {
+            if (playerNode.isPlaying()) {
+                playerNode.stop()
+            }
+
+            if (isEngineStarted) {
+                audioEngine.stop()
+                isEngineStarted = false
+            }
+
+            audioSession.setActive(false, null)
+            Log.v(TAG, "iOS sound player released")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during sound player release", e)
+        }
     }
 }

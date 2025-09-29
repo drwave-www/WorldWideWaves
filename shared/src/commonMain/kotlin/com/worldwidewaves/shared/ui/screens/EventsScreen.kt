@@ -572,6 +572,7 @@ private fun EventLocationAndDate(
             try {
                 DateTimeFormats.dayMonth(event.getStartDateTime(), event.getTZ())
             } catch (e: Exception) {
+                Log.w("EventLocationAndDate", "Failed to format event date for event ${event.id}", e)
                 "Dec 24" // Fallback date
             }
         }

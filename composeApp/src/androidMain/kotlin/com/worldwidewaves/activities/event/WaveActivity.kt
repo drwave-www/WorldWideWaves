@@ -22,53 +22,14 @@
 
 package com.worldwidewaves.activities.event
 
-import android.os.Bundle
-import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
-import com.google.android.play.core.splitcompat.SplitCompat
-import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.ui.activities.WWWWaveActivity
 import com.worldwidewaves.utils.AndroidPlatformEnabler
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
-class WaveActivity : AppCompatActivity() {
-    private var waveActivityImpl: WWWWaveActivity? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        val eventId = intent.getStringExtra("eventId")
-
-        // Ensure dynamic-feature splits are available immediately
-        SplitCompat.install(this)
-
-        val platformEnabler = AndroidPlatformEnabler(this)
-        if (eventId != null) {
-            waveActivityImpl = WWWWaveActivity(eventId, platformEnabler)
-            setContent {
-                waveActivityImpl!!.asComponent(
-                    eventMapBuilder = { event ->
-                        AndroidEventMap(event, context = this as AppCompatActivity)
-                    },
-                    onFinish = { finish() },
-                )
-            }
-        }
-    }
-
-    override fun onDestroy() {
-        waveActivityImpl?.onDestroy()
-        super.onDestroy()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        waveActivityImpl?.onResume()
-    }
-
-    override fun onPause() {
-        waveActivityImpl?.onPause()
-        super.onPause()
-    }
+class WaveActivity : AbstractEventAndroidActivity<WWWWaveActivity>() {
+    override fun createActivityImpl(
+        eventId: String,
+        platformEnabler: AndroidPlatformEnabler,
+    ): WWWWaveActivity = WWWWaveActivity(eventId, platformEnabler)
 }

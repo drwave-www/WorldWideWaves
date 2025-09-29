@@ -34,54 +34,54 @@ import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListene
 import com.google.android.play.core.splitinstall.model.SplitInstallErrorCode
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.clearEventCache
-import com.worldwidewaves.shared.map.MapFeatureState
+import com.worldwidewaves.shared.data.clearEventCache
 import com.worldwidewaves.shared.utils.Log
-import com.worldwidewaves.shared.viewmodels.BaseMapDownloadViewModel
+import com.worldwidewaves.shared.viewmodels.MapDownloadManager
 import com.worldwidewaves.shared.viewmodels.MapDownloadUtils
 import com.worldwidewaves.shared.viewmodels.MapViewModel
+import com.worldwidewaves.shared.viewmodels.PlatformMapDownloadAdapter
 import dev.icerock.moko.resources.desc.Resource
 import dev.icerock.moko.resources.desc.ResourceFormatted
 import dev.icerock.moko.resources.desc.StringDesc
 import kotlinx.coroutines.launch
 
 /**
- * Android implementation of map download ViewModel using shared base logic.
- * Preserves all original MapViewModel functionality while delegating common logic to shared base.
+ * Android implementation of MapViewModel using pure business logic composition.
+ * Handles Android-specific Play Core integration while delegating download logic to MapDownloadLogic.
+ *
+ * RESPONSIBILITIES:
+ * • Android UI lifecycle management (AndroidViewModel)
+ * • Play Core SplitInstallManager integration
+ * • Android-specific error message localization
+ * • Play Store listener management
+ * • Delegates business logic to MapDownloadLogic
  */
 class AndroidMapViewModel(
     application: Application,
 ) : AndroidViewModel(application),
     MapViewModel {
-    // Composition over inheritance - use shared logic
-    private val sharedLogic =
-        object : BaseMapDownloadViewModel() {
+    // Android-specific Play Core components
+    private val splitInstallManager: SplitInstallManager = SplitInstallManagerFactory.create(application)
+    private var currentSessionId = 0
+    private var installStateListener: SplitInstallStateUpdatedListener? = null
+
+    // Platform adapter for business logic
+    private val platformAdapter =
+        object : PlatformMapDownloadAdapter {
             override suspend fun isMapInstalled(mapId: String): Boolean = splitInstallManager.installedModules.contains(mapId)
 
             override suspend fun startPlatformDownload(
                 mapId: String,
                 onMapDownloaded: (() -> Unit)?,
             ) {
-                if (MapDownloadUtils.isActiveDownload(_featureState.value)) {
-                    Log.w(TAG, "downloadMap ignored – already downloading")
-                    return
-                }
-
-                _featureState.value = MapFeatureState.Pending
-                retryManager.resetRetryCount()
-
-                val request =
-                    SplitInstallRequest
-                        .newBuilder()
-                        .addModule(mapId)
-                        .build()
+                val request = SplitInstallRequest.newBuilder().addModule(mapId).build()
 
                 splitInstallManager
                     .startInstall(request)
                     .addOnSuccessListener { sessionId ->
                         Log.i(TAG, "startInstall success session=$sessionId")
                         currentSessionId = sessionId
-                        retryManager.resetRetryCount()
+                        downloadManager.retryManager.resetRetryCount()
                         onMapDownloaded?.invoke()
                     }.addOnFailureListener { exception ->
                         Log.e(TAG, "startInstall failure ${exception.message}")
@@ -134,29 +134,27 @@ class AndroidMapViewModel(
                 mapId: String,
                 onMapDownloaded: (() -> Unit)?,
             ) {
-                if (retryManager.canRetry()) {
-                    val delay = retryManager.getNextRetryDelay()
-                    val retryCount = retryManager.incrementRetryCount()
-                    _featureState.value = MapFeatureState.Retrying(retryCount, MapDownloadUtils.RetryManager.MAX_RETRIES)
+                if (downloadManager.retryManager.canRetry()) {
+                    val delay = downloadManager.retryManager.getNextRetryDelay()
+                    val retryCount = downloadManager.retryManager.incrementRetryCount()
+                    downloadManager.setStateRetrying(retryCount, MapDownloadUtils.RetryManager.MAX_RETRIES)
 
                     Handler(Looper.getMainLooper()).postDelayed({
-                        scope.launch {
-                            downloadMap(mapId, onMapDownloaded)
+                        viewModelScope.launch {
+                            downloadManager.downloadMap(mapId, onMapDownloaded)
                         }
                     }, delay)
                 } else {
-                    handleDownloadFailure(0, shouldRetry = false)
+                    downloadManager.handleDownloadFailure(0, shouldRetry = false)
                 }
             }
         }
 
-    // Android-specific Play Core components
-    private val splitInstallManager: SplitInstallManager = SplitInstallManagerFactory.create(application)
-    private var currentSessionId = 0
-    private var installStateListener: SplitInstallStateUpdatedListener? = null
+    // Pure business logic (no UI lifecycle concerns)
+    private val downloadManager: MapDownloadManager = MapDownloadManager(platformAdapter)
 
-    // Delegate public interface to shared logic
-    override val featureState = sharedLogic.featureState
+    // Delegate public interface to business logic
+    override val featureState = downloadManager.featureState
 
     private companion object Companion {
         private const val TAG = "MapViewModel"
@@ -176,7 +174,7 @@ class AndroidMapViewModel(
         autoDownload: Boolean,
     ) {
         viewModelScope.launch {
-            sharedLogic.checkIfMapIsAvailable(mapId, autoDownload)
+            downloadManager.checkIfMapIsAvailable(mapId, autoDownload)
         }
     }
 
@@ -185,13 +183,13 @@ class AndroidMapViewModel(
         onMapDownloaded: (() -> Unit)?,
     ) {
         viewModelScope.launch {
-            sharedLogic.downloadMap(mapId, onMapDownloaded)
+            downloadManager.downloadMap(mapId, onMapDownloaded)
         }
     }
 
     override fun cancelDownload() {
         viewModelScope.launch {
-            sharedLogic.cancelDownload()
+            downloadManager.cancelDownload()
         }
     }
 
@@ -218,38 +216,38 @@ class AndroidMapViewModel(
             SplitInstallSessionStatus.DOWNLOADING -> {
                 val totalBytes = state.totalBytesToDownload()
                 val downloadedBytes = state.bytesDownloaded()
-                sharedLogic.handleDownloadProgress(totalBytes, downloadedBytes)
+                downloadManager.handleDownloadProgress(totalBytes, downloadedBytes)
             }
             SplitInstallSessionStatus.DOWNLOADED -> {
-                sharedLogic.handleDownloadProgress(100, 100)
+                downloadManager.handleDownloadProgress(100, 100)
             }
             SplitInstallSessionStatus.INSTALLING -> {
-                sharedLogic._featureState.value = MapFeatureState.Installing
+                downloadManager.setStateInstalling()
             }
             SplitInstallSessionStatus.INSTALLED -> {
                 Log.i(TAG, "Status: INSTALLED – modules=${state.moduleNames()}")
                 val moduleIds = getModuleIdsFromState(state)
-                sharedLogic.handleInstallComplete(moduleIds)
+                downloadManager.handleInstallComplete(moduleIds)
                 currentSessionId = 0
             }
             SplitInstallSessionStatus.PENDING -> {
-                sharedLogic._featureState.value = MapFeatureState.Pending
+                downloadManager.setStatePending()
             }
             SplitInstallSessionStatus.FAILED -> {
                 handleAndroidFailure(state)
             }
             SplitInstallSessionStatus.CANCELED -> {
-                sharedLogic.handleDownloadCancellation()
+                downloadManager.handleDownloadCancellation()
                 currentSessionId = 0
             }
             SplitInstallSessionStatus.CANCELING -> {
-                sharedLogic._featureState.value = MapFeatureState.Canceling
+                downloadManager.setStateCanceling()
             }
             SplitInstallSessionStatus.REQUIRES_USER_CONFIRMATION -> {
-                sharedLogic._featureState.value = MapFeatureState.Pending
+                downloadManager.setStatePending()
             }
             else -> {
-                sharedLogic._featureState.value = MapFeatureState.Unknown
+                downloadManager.setStateUnknown()
             }
         }
     }
@@ -262,7 +260,7 @@ class AndroidMapViewModel(
         @Suppress("DEPRECATION")
         val shouldRetry = errorCode == SplitInstallErrorCode.SERVICE_DIED
 
-        sharedLogic.handleDownloadFailure(errorCode, shouldRetry)
+        downloadManager.handleDownloadFailure(errorCode, shouldRetry)
         currentSessionId = 0
     }
 
@@ -272,7 +270,7 @@ class AndroidMapViewModel(
         } catch (_: Exception) {
             emptyList()
         }.ifEmpty {
-            sharedLogic.currentMapId?.let { listOf(it) }.orEmpty()
+            downloadManager.currentMapId?.let { listOf(it) }.orEmpty()
         }
 
     override fun onCleared() {

@@ -69,6 +69,10 @@ abstract class WWWEventWave :
     DataValidator {
     enum class Direction { WEST, EAST }
 
+    companion object {
+        private const val MAX_WAVE_SPEED = 20
+    }
+
     @OptIn(ExperimentalTime::class)
     /**
      * Immutable snapshot of the wave geometry at a given moment.
@@ -171,8 +175,15 @@ abstract class WWWEventWave :
     }
 
     suspend fun timeBeforeUserHit(): Duration? {
-        if (hasUserBeenHitInCurrentPosition()) return null
-        val hitTime = userHitDateTime() ?: return null
+        val hasBeenHit = hasUserBeenHitInCurrentPosition()
+        if (hasBeenHit) {
+            return null
+        }
+
+        val hitTime = userHitDateTime()
+        if (hitTime == null) {
+            return null
+        }
 
         // Calculate the duration between now and the hit time
         return hitTime - clock.now()
@@ -216,8 +227,8 @@ abstract class WWWEventWave :
         mutableListOf<String>()
             .apply {
                 when {
-                    speed <= 0 || speed >= 20 ->
-                        add("Speed must be greater than 0 and less than 20")
+                    speed <= 0 || speed >= MAX_WAVE_SPEED ->
+                        add("Speed must be greater than 0 and less than $MAX_WAVE_SPEED")
 
                     else -> { /* No validation errors */ }
                 }

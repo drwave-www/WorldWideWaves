@@ -60,7 +60,7 @@ fun SharedLocationPermissionRequest(onPermissionResult: (Boolean) -> Unit = {}):
                 showPermissionDialog = false
                 permissionGranted = true
                 onPermissionResult(true)
-                PlatformRequestLocationPermission()
+                platformRequestLocationPermission()
             },
             onDenied = {
                 showPermissionDialog = false
@@ -108,7 +108,7 @@ expect fun PlatformLocationPermissionCheck(): Boolean
  * Android: Launches Android permission request
  * iOS: Requests iOS location authorization
  */
-expect fun PlatformRequestLocationPermission()
+expect fun platformRequestLocationPermission()
 
 /**
  * Shared GPS enable check component.
@@ -118,7 +118,7 @@ expect fun PlatformRequestLocationPermission()
 fun SharedGPSEnableCheck(onResult: (Boolean) -> Unit = {}) {
     var showGPSDialog by remember { mutableStateOf(false) }
 
-    val isGPSEnabled = PlatformGPSEnabledCheck()
+    val isGPSEnabled = platformGPSEnabledCheck()
 
     if (!isGPSEnabled && !showGPSDialog) {
         showGPSDialog = true
@@ -128,7 +128,7 @@ fun SharedGPSEnableCheck(onResult: (Boolean) -> Unit = {}) {
         GPSEnableDialog(
             onEnable = {
                 showGPSDialog = false
-                PlatformOpenLocationSettings()
+                platformOpenLocationSettings()
                 onResult(true)
             },
             onCancel = {
@@ -167,11 +167,11 @@ private fun GPSEnableDialog(
  * iOS: Checks Core Location services enabled
  */
 @Composable
-expect fun PlatformGPSEnabledCheck(): Boolean
+expect fun platformGPSEnabledCheck(): Boolean
 
 /**
  * Platform-specific open location settings.
  * Android: Opens location settings Intent
  * iOS: Opens iOS Settings app
  */
-expect fun PlatformOpenLocationSettings()
+expect fun platformOpenLocationSettings()

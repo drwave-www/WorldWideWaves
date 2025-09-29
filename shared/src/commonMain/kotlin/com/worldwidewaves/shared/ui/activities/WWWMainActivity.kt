@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.choreographies.SoundChoreographyPlayer
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.sound.GlobalSoundChoreographyManager
 import com.worldwidewaves.shared.ui.AboutTabScreen
@@ -66,6 +67,10 @@ import org.koin.core.component.inject
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
+private object UIConstants {
+    val DEBUG_BUTTON_COLOR = Color(0xFF4CAF50) // Green color for debug button
+}
+
 /**
  * iOS-safe UI properties structure using basic types
  */
@@ -79,7 +84,7 @@ open class WWWMainActivity
         private val platform: WWWPlatform by inject()
         protected val events: WWWEvents by inject()
         private val globalSoundChoreography: GlobalSoundChoreographyManager by inject()
-        private val soundChoreographyManager: com.worldwidewaves.shared.choreographies.SoundChoreographyManager by inject()
+        private val soundChoreographyPlayer: SoundChoreographyPlayer by inject()
 
         private val eventsListScreen: EventsListScreen by inject()
         private val aboutTabScreen: AboutTabScreen by inject()
@@ -104,8 +109,8 @@ open class WWWMainActivity
         suspend fun initialize() {
             Log.i("WWWMainActivity", "Initializing WWWMainActivity")
 
-            // iOS FIX: Initialize sound choreography manager since init{} was removed
-            soundChoreographyManager.initialize()
+            // Load the sound choreography
+            soundChoreographyPlayer.initialize()
 
             // Begin loading events – when done, flag so splash can disappear
             events.loadEvents(onTermination = {
@@ -191,7 +196,7 @@ open class WWWMainActivity
                                     Modifier
                                         .align(Alignment.BottomEnd)
                                         .padding(end = 16.dp, bottom = bottomOffset),
-                                containerColor = Color(0xFF4CAF50), // Green color
+                                containerColor = UIConstants.DEBUG_BUTTON_COLOR,
                                 shape = CircleShape,
                             ) {
                                 Icon(

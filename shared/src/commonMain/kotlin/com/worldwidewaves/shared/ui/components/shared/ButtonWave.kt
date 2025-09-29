@@ -44,13 +44,6 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 /**
- * Interface for platform-specific navigation to wave screen.
- */
-fun interface WaveNavigator {
-    fun navigateToWave(eventId: String)
-}
-
-/**
  * Shared cross-platform wave button component.
  * Primary button that navigates to wave screen when the wave is active or imminent.
  */
@@ -114,4 +107,11 @@ fun ButtonWave(
                 ),
         )
     }
+}
+
+/**
+ * Interface for platform-specific navigation to wave screen.
+ */
+fun interface WaveNavigator {
+    fun navigateToWave(eventId: String)
 }

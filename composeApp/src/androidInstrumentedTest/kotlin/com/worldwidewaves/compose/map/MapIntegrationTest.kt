@@ -24,6 +24,8 @@ package com.worldwidewaves.compose.map
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -645,7 +647,8 @@ private fun TestMapDownloadFlow(
                 .fillMaxSize()
                 .testTag("map-download-flow"),
     ) {
-        when (val state = stateFlow.value) {
+        val state by stateFlow.collectAsState()
+        when (state) {
             is MapFeatureState.NotAvailable -> {
                 androidx.compose.material3.Button(
                     onClick = onDownloadComplete,
@@ -655,8 +658,9 @@ private fun TestMapDownloadFlow(
                 }
             }
             is MapFeatureState.Downloading -> {
+                val currentState = state as MapFeatureState.Downloading
                 androidx.compose.material3.Text(
-                    "Downloading... ${state.progress}%",
+                    "Downloading... ${currentState.progress}%",
                     modifier = Modifier.testTag("download-progress"),
                 )
             }
@@ -674,15 +678,17 @@ private fun TestMapDownloadFlow(
                 onMapLoaded()
             }
             is MapFeatureState.Failed -> {
+                val currentState = state as MapFeatureState.Failed
                 androidx.compose.material3.Text(
-                    "Download Failed: ${state.errorMessage}",
+                    "Download Failed: ${currentState.errorMessage}",
                     modifier = Modifier.testTag("download-error"),
                 )
                 onErrorDisplayed()
             }
             is MapFeatureState.Retrying -> {
+                val currentState = state as MapFeatureState.Retrying
                 androidx.compose.material3.Text(
-                    "Retrying... ${state.attempt}/${state.maxAttempts}",
+                    "Retrying... ${currentState.attempt}/${currentState.maxAttempts}",
                     modifier = Modifier.testTag("retry-status"),
                 )
                 onRetry()

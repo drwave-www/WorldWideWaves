@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C125F0372E8C7A4D00AAD24C /* MapLibre in Frameworks */ = {isa = PBXBuildFile; productRef = C125F0362E8C7A4D00AAD24C /* MapLibre */; };
 		C17B465A2E8999FF0097A3A5 /* Shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C17B46592E8999FF0097A3A5 /* Shared.framework */; };
 		C17B465B2E8999FF0097A3A5 /* Shared.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C17B46592E8999FF0097A3A5 /* Shared.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
@@ -33,6 +34,88 @@
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		C17B46632E899ED40097A3A5 /* Exceptions for "worldwidewaves" folder in "worldwidewaves" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			assetTagsByRelativePath = {
+				Maps/bangalore_india/bangalore_india.geojson = (bangalore_india, );
+				Maps/bangalore_india/bangalore_india.mbtiles = (bangalore_india, );
+				Maps/bangkok_thailand/bangkok_thailand.geojson = (bangkok_thailand, );
+				Maps/bangkok_thailand/bangkok_thailand.mbtiles = (bangkok_thailand, );
+				Maps/beijing_china/beijing_china.geojson = (beijing_china, );
+				Maps/beijing_china/beijing_china.mbtiles = (beijing_china, );
+				Maps/berlin_germany/berlin_germany.geojson = (berlin_germany, );
+				Maps/berlin_germany/berlin_germany.mbtiles = (berlin_germany, );
+				Maps/bogota_colombia/bogota_colombia.geojson = (bogota_colombia, );
+				Maps/bogota_colombia/bogota_colombia.mbtiles = (bogota_colombia, );
+				Maps/buenos_aires_argentina/buenos_aires_argentina.geojson = (buenos_aires_argentina, );
+				Maps/buenos_aires_argentina/buenos_aires_argentina.mbtiles = (buenos_aires_argentina, );
+				Maps/cairo_egypt/cairo_egypt.geojson = (cairo_egypt, );
+				Maps/cairo_egypt/cairo_egypt.mbtiles = (cairo_egypt, );
+				Maps/chicago_usa/chicago_usa.geojson = (chicago_usa, );
+				Maps/chicago_usa/chicago_usa.mbtiles = (chicago_usa, );
+				Maps/delhi_india/delhi_india.geojson = (delhi_india, );
+				Maps/delhi_india/delhi_india.mbtiles = (delhi_india, );
+				Maps/dubai_united_arab_emirates/dubai_united_arab_emirates.geojson = (dubai_united_arab_emirates, );
+				Maps/dubai_united_arab_emirates/dubai_united_arab_emirates.mbtiles = (dubai_united_arab_emirates, );
+				Maps/hong_kong_china/hong_kong_china.geojson = (hong_kong_china, );
+				Maps/hong_kong_china/hong_kong_china.mbtiles = (hong_kong_china, );
+				Maps/istanbul_turkey/istanbul_turkey.geojson = (istanbul_turkey, );
+				Maps/istanbul_turkey/istanbul_turkey.mbtiles = (istanbul_turkey, );
+				Maps/jakarta_indonesia/jakarta_indonesia.geojson = (jakarta_indonesia, );
+				Maps/jakarta_indonesia/jakarta_indonesia.mbtiles = (jakarta_indonesia, );
+				Maps/johannesburg_south_africa/johannesburg_south_africa.geojson = (johannesburg_south_africa, );
+				Maps/johannesburg_south_africa/johannesburg_south_africa.mbtiles = (johannesburg_south_africa, );
+				Maps/karachi_pakistan/karachi_pakistan.geojson = (karachi_pakistan, );
+				Maps/karachi_pakistan/karachi_pakistan.mbtiles = (karachi_pakistan, );
+				Maps/kinshasa_democratic_republic_of_the_congo/kinshasa_democratic_republic_of_the_congo.geojson = (kinshasa_democratic_republic_of_the_congo, );
+				Maps/kinshasa_democratic_republic_of_the_congo/kinshasa_democratic_republic_of_the_congo.mbtiles = (kinshasa_democratic_republic_of_the_congo, );
+				Maps/lagos_nigeria/lagos_nigeria.geojson = (lagos_nigeria, );
+				Maps/lagos_nigeria/lagos_nigeria.mbtiles = (lagos_nigeria, );
+				Maps/lima_peru/lima_peru.geojson = (lima_peru, );
+				Maps/lima_peru/lima_peru.mbtiles = (lima_peru, );
+				Maps/london_england/london_england.geojson = (london_england, );
+				Maps/london_england/london_england.mbtiles = (london_england, );
+				Maps/los_angeles_usa/los_angeles_usa.geojson = (los_angeles_usa, );
+				Maps/los_angeles_usa/los_angeles_usa.mbtiles = (los_angeles_usa, );
+				Maps/madrid_spain/madrid_spain.geojson = (madrid_spain, );
+				Maps/madrid_spain/madrid_spain.mbtiles = (madrid_spain, );
+				Maps/manila_philippines/manila_philippines.geojson = (manila_philippines, );
+				Maps/manila_philippines/manila_philippines.mbtiles = (manila_philippines, );
+				Maps/melbourne_australia/melbourne_australia.geojson = (melbourne_australia, );
+				Maps/melbourne_australia/melbourne_australia.mbtiles = (melbourne_australia, );
+				Maps/mexico_city_mexico/mexico_city_mexico.geojson = (mexico_city_mexico, );
+				Maps/mexico_city_mexico/mexico_city_mexico.mbtiles = (mexico_city_mexico, );
+				Maps/moscow_russia/moscow_russia.geojson = (moscow_russia, );
+				Maps/moscow_russia/moscow_russia.mbtiles = (moscow_russia, );
+				Maps/mumbai_india/mumbai_india.geojson = (mumbai_india, );
+				Maps/mumbai_india/mumbai_india.mbtiles = (mumbai_india, );
+				Maps/nairobi_kenya/nairobi_kenya.geojson = (nairobi_kenya, );
+				Maps/nairobi_kenya/nairobi_kenya.mbtiles = (nairobi_kenya, );
+				Maps/new_york_usa/new_york_usa.geojson = (new_york_usa, );
+				Maps/new_york_usa/new_york_usa.mbtiles = (new_york_usa, );
+				Maps/paris_france/paris_france.geojson = (paris_france, );
+				Maps/paris_france/paris_france.mbtiles = (paris_france, );
+				Maps/rome_italy/rome_italy.geojson = (rome_italy, );
+				Maps/rome_italy/rome_italy.mbtiles = (rome_italy, );
+				Maps/san_francisco_usa/san_francisco_usa.geojson = (san_francisco_usa, );
+				Maps/san_francisco_usa/san_francisco_usa.mbtiles = (san_francisco_usa, );
+				Maps/santiago_chile/santiago_chile.geojson = (santiago_chile, );
+				Maps/santiago_chile/santiago_chile.mbtiles = (santiago_chile, );
+				Maps/sao_paulo_brazil/sao_paulo_brazil.geojson = (sao_paulo_brazil, );
+				Maps/sao_paulo_brazil/sao_paulo_brazil.mbtiles = (sao_paulo_brazil, );
+				Maps/seoul_south_korea/seoul_south_korea.geojson = (seoul_south_korea, );
+				Maps/seoul_south_korea/seoul_south_korea.mbtiles = (seoul_south_korea, );
+				Maps/shanghai_china/shanghai_china.geojson = (shanghai_china, );
+				Maps/shanghai_china/shanghai_china.mbtiles = (shanghai_china, );
+				Maps/sydney_australia/sydney_australia.geojson = (sydney_australia, );
+				Maps/sydney_australia/sydney_australia.mbtiles = (sydney_australia, );
+				Maps/tehran_iran/tehran_iran.geojson = (tehran_iran, );
+				Maps/tehran_iran/tehran_iran.mbtiles = (tehran_iran, );
+				Maps/tokyo_japan/tokyo_japan.geojson = (tokyo_japan, );
+				Maps/tokyo_japan/tokyo_japan.mbtiles = (tokyo_japan, );
+				Maps/toronto_canada/toronto_canada.geojson = (toronto_canada, );
+				Maps/toronto_canada/toronto_canada.mbtiles = (toronto_canada, );
+				Maps/vancouver_canada/vancouver_canada.geojson = (vancouver_canada, );
+				Maps/vancouver_canada/vancouver_canada.mbtiles = (vancouver_canada, );
+			};
 			membershipExceptions = (
 				Info.plist,
 			);
@@ -56,6 +139,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C125F0372E8C7A4D00AAD24C /* MapLibre in Frameworks */,
 				C17B465A2E8999FF0097A3A5 /* Shared.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -110,6 +194,7 @@
 			);
 			name = worldwidewaves;
 			packageProductDependencies = (
+				C125F0362E8C7A4D00AAD24C /* MapLibre */,
 			);
 			productName = worldwidewaves;
 			productReference = C17B3C762E886C610097A3A5 /* worldwidewaves.app */;
@@ -122,6 +207,48 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
+				KnownAssetTags = (
+					bangalore_india,
+					bangkok_thailand,
+					beijing_china,
+					berlin_germany,
+					bogota_colombia,
+					buenos_aires_argentina,
+					cairo_egypt,
+					chicago_usa,
+					delhi_india,
+					dubai_united_arab_emirates,
+					hong_kong_china,
+					istanbul_turkey,
+					jakarta_indonesia,
+					johannesburg_south_africa,
+					karachi_pakistan,
+					kinshasa_democratic_republic_of_the_congo,
+					lagos_nigeria,
+					lima_peru,
+					london_england,
+					los_angeles_usa,
+					madrid_spain,
+					manila_philippines,
+					melbourne_australia,
+					mexico_city_mexico,
+					moscow_russia,
+					mumbai_india,
+					nairobi_kenya,
+					new_york_usa,
+					paris_france,
+					rome_italy,
+					san_francisco_usa,
+					santiago_chile,
+					sao_paulo_brazil,
+					seoul_south_korea,
+					shanghai_china,
+					sydney_australia,
+					tehran_iran,
+					tokyo_japan,
+					toronto_canada,
+					vancouver_canada,
+				);
 				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1640;
 				TargetAttributes = {
@@ -139,6 +266,9 @@
 			);
 			mainGroup = C17B3C6D2E886C610097A3A5;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C125F0352E8C7A4D00AAD24C /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C17B3C772E886C610097A3A5 /* Products */;
 			projectDirPath = "";
@@ -226,6 +356,8 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
+				ENABLE_ON_DEMAND_RESOURCES = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -317,12 +449,17 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
+				"EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE[sdk=iphoneos*]" = NO;
+				"EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE[sdk=iphonesimulator*]" = NO;
+				ENABLE_ON_DEMAND_RESOURCES = YES;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)";
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)";
 				INFOPLIST_FILE = worldwidewaves/Info.plist;
 				INFOPLIST_KEY_CADisableMinimumFrameDurationOnPhone = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = WorldWideWaves;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -333,6 +470,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				MARKETING_VERSION = 1.0;
+				ON_DEMAND_RESOURCES_INITIAL_INSTALL_TAGS = paris_france;
 				PRODUCT_BUNDLE_IDENTIFIER = com.worldwidewaves;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -348,11 +486,16 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = NO;
+				"EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE[sdk=iphoneos*]" = NO;
+				"EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE[sdk=iphonesimulator*]" = NO;
+				ENABLE_ON_DEMAND_RESOURCES = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)";
 				INFOPLIST_FILE = worldwidewaves/Info.plist;
 				INFOPLIST_KEY_CADisableMinimumFrameDurationOnPhone = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = WorldWideWaves;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -362,6 +505,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				ON_DEMAND_RESOURCES_INITIAL_INSTALL_TAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.worldwidewaves;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -392,6 +536,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C125F0352E8C7A4D00AAD24C /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/maplibre/maplibre-gl-native-distribution";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.19.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C125F0362E8C7A4D00AAD24C /* MapLibre */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C125F0352E8C7A4D00AAD24C /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */;
+			productName = MapLibre;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C17B3C6E2E886C610097A3A5 /* Project object */;
 }

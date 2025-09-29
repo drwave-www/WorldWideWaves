@@ -28,6 +28,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.icerock.moko.multiplatform)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.buildkonfig)
 }
 
 kotlin {
@@ -44,7 +45,7 @@ kotlin {
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "Shared"
-            isStatic = true
+            isStatic = false // Dynamic framework for iOS compatibility
             linkerOpts("-ObjC")
         }
     }
@@ -74,72 +75,58 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.coroutines.core)
 
-            implementation(compose.materialIconsExtended)
             implementation(libs.kotlinx.atomic)
             implementation(libs.koin.core)
             implementation(libs.napier)
 
+            // Use explicit Compose versions for iOS compatibility (working config from cd6a8f37)
             implementation("org.jetbrains.compose.runtime:runtime:1.8.2")
             implementation("org.jetbrains.compose.ui:ui:1.8.2")
             implementation("org.jetbrains.compose.foundation:foundation:1.8.2")
             implementation("org.jetbrains.compose.material:material:1.8.2")
             implementation("org.jetbrains.compose.material3:material3:1.8.2")
             implementation("org.jetbrains.compose.components:components-resources:1.8.2")
+            implementation(compose.materialIconsExtended)
 
             // REQUIRED so IOSLifecycleOwner can link:
-            // implementation("org.jetbrains.androidx.lifecycle:lifecycle-common:2.8.4")
+            implementation("org.jetbrains.androidx.lifecycle:lifecycle-common:2.8.4")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.koin.test)
         }
-        androidUnitTest.dependencies {
+        getByName("androidUnitTest").dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.koin.test)
-            implementation("io.mockk:mockk:1.13.12")
+            implementation(libs.mockk.android.v1120)
         }
         iosMain.dependencies {
-            implementation("org.jetbrains.compose.ui:ui-uikit:1.8.2") {
-                exclude(group = "androidx.lifecycle")
-                exclude(group = "org.jetbrains.androidx.lifecycle")
-            }
+            // No ui-uikit dependency - use business logic only for iOS (working pattern from 9c421d96)
         }
         androidMain.dependencies {
             implementation(libs.androidx.ui.text.google.fonts)
-            implementation(libs.androidx.annotation)
+            compileOnly(libs.androidx.annotation) // CompileOnly to avoid iOS conflicts
 
             implementation(libs.koin.android)
             implementation(libs.kotlinx.datetime)
             implementation(libs.maplibre.android)
             implementation(libs.androidx.datastore.preferences)
 
-            implementation("androidx.compose.material:material-icons-extended")
-
             implementation(libs.places)
             implementation(libs.androidx.ui.graphics.android)
             implementation(libs.androidx.annotation.jvm)
             implementation(libs.feature.delivery.ktx)
 
-            // Compose (Android) via BOM
-            implementation("androidx.compose:compose-bom:2024.09.01")
-            implementation("androidx.compose.ui:ui")
-            implementation("androidx.compose.foundation:foundation")
-            implementation("androidx.compose.material:material")
-            implementation("androidx.compose.material3:material3")
-
-            // Lifecycle + Compose lifecycle (Android-only)
-            implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
-            implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.4")
-            implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.4")
-            implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
-
-            // Compose Material3 for Android (you can keep JB MPP in common; this ensures Android has it)
-            // implementation("org.jetbrains.compose.material3:material3:1.8.2")
+            // Android-specific Lifecycle (without Compose BOM conflicts)
+            implementation(libs.androidx.lifecycle.runtime.ktx)
+            implementation(libs.androidx.lifecycle.viewmodel.ktx)
+            implementation(libs.androidx.lifecycle.runtime.compose)
+            implementation(libs.androidx.lifecycle.viewmodel.compose)
 
             // Coroutines on Android
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+            implementation(libs.kotlinx.coroutines.android)
         }
 
         /*
@@ -169,6 +156,8 @@ kotlin {
     }
 }
 
+// Clean configuration without forced dependencies that break iOS compilation
+
 android {
     namespace = "com.worldwidewaves.shared"
     compileSdk =
@@ -176,29 +165,17 @@ android {
             .get()
             .toInt()
 
-    defaultConfig {
-        // Logging configuration for shared module
-        buildConfigField("boolean", "ENABLE_VERBOSE_LOGGING", "true")
-        buildConfigField("boolean", "ENABLE_DEBUG_LOGGING", "true")
-        buildConfigField("boolean", "ENABLE_PERFORMANCE_LOGGING", "true")
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures {
         compose = true
-        buildConfig = true
+        buildConfig = false
     }
     buildTypes {
         release {
             isMinifyEnabled = false
-
-            // Production logging configuration - disable verbose/debug logging for performance and security
-            buildConfigField("boolean", "ENABLE_VERBOSE_LOGGING", "false")
-            buildConfigField("boolean", "ENABLE_DEBUG_LOGGING", "false")
-            buildConfigField("boolean", "ENABLE_PERFORMANCE_LOGGING", "false")
         }
     }
     packaging {
@@ -258,6 +235,29 @@ multiplatformResources {
     resourcesPackage.set("com.worldwidewaves.shared")
     resourcesClassName.set("MokoRes")
     iosBaseLocalizationRegion.set("en")
+}
+
+buildkonfig {
+    packageName = "com.worldwidewaves.shared"
+    // Keep BuildKonfig internal to prevent Objective-C header generation issues
+
+    // Default config for all targets (debug mode)
+    defaultConfigs {
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "DEBUG", "true")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "ENABLE_VERBOSE_LOGGING", "true")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "ENABLE_DEBUG_LOGGING", "true")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "ENABLE_PERFORMANCE_LOGGING", "true")
+    }
+
+    // Release configuration - disable debug mode and verbose/debug logging for performance and security
+    targetConfigs {
+        create("release") {
+            buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "DEBUG", "false")
+            buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "ENABLE_VERBOSE_LOGGING", "false")
+            buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "ENABLE_DEBUG_LOGGING", "false")
+            buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "ENABLE_PERFORMANCE_LOGGING", "false")
+        }
+    }
 }
 
 tasks.named("compileTestKotlinIosArm64").configure {

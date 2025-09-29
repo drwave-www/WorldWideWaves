@@ -21,67 +21,15 @@ package com.worldwidewaves.shared.utils
  * limitations under the License.
  */
 
-import androidx.compose.runtime.Composable
 import com.worldwidewaves.shared.PlatformEnabler
-import com.worldwidewaves.shared.utils.Log
-import platform.Foundation.NSURL
-import platform.UIKit.UIAlertAction
-import platform.UIKit.UIAlertActionStyleDefault
-import platform.UIKit.UIAlertController
-import platform.UIKit.UIAlertControllerStyleAlert
-import platform.UIKit.UIApplication
+import org.koin.core.context.loadKoinModules
+import org.koin.dsl.module
 
-class IOSPlatformEnabler
-    @Throws(Throwable::class)
-    constructor() : PlatformEnabler {
-        override fun openEventActivity(eventId: String) {
-            Log.i("IOSPlatformEnabler", "Opening Event for eventId: $eventId")
-            toast("Event details: $eventId")
-        }
-
-        override fun openWaveActivity(eventId: String) {
-            Log.i("IOSPlatformEnabler", "Opening Wave for eventId: $eventId")
-            toast("Wave activity: $eventId")
-        }
-
-        override fun toast(message: String) {
-            val alert =
-                UIAlertController.alertControllerWithTitle(
-                    title = "WorldWideWaves",
-                    message = message,
-                    preferredStyle = UIAlertControllerStyleAlert,
-                )
-
-            alert.addAction(
-                UIAlertAction.actionWithTitle(
-                    title = "OK",
-                    style = UIAlertActionStyleDefault,
-                    handler = null,
-                ),
-            )
-
-            UIApplication.sharedApplication.keyWindow?.rootViewController?.presentViewController(
-                alert,
-                animated = true,
-                completion = null,
-            )
-        }
-
-        @Composable
-        override fun OpenUrl(url: String) {
-            openUrl(url)
-        }
-
-        override fun openUrl(url: String) {
-            try {
-                val nsUrl = NSURL.URLWithString(url)
-                if (nsUrl != null && UIApplication.sharedApplication.canOpenURL(nsUrl)) {
-                    UIApplication.sharedApplication.openURL(nsUrl)
-                } else {
-                    Log.e("IOSPlatformEnabler", "Cannot open URL: $url")
-                }
-            } catch (e: Exception) {
-                Log.e("IOSPlatformEnabler", "Failed to open URL: $url", throwable = e)
-            }
-        }
-    }
+// Called from Swift to install the Swift implementation in DI
+fun registerPlatformEnabler(enabler: PlatformEnabler) {
+    loadKoinModules(
+        module {
+            single<PlatformEnabler> { enabler }
+        },
+    )
+}

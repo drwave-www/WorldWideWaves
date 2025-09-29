@@ -27,7 +27,6 @@ import com.worldwidewaves.shared.WWWGlobals.MapDisplay
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Polygon
-import com.worldwidewaves.shared.events.utils.PolygonUtils.Quad
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.position.PositionManager
 import kotlinx.coroutines.CoroutineScope
@@ -161,14 +160,24 @@ abstract class AbstractEventMap<T>(
         // Calculate the new southwest and northeast longitudes or latitudes,
         // depending on whether the event map is wider or taller than the MapLibre component.
         val screenComponentRatio = screenWidth / screenHeight
-        val (newSwLat, newNeLat, newSwLng, newNeLng) =
-            if (eventAspectRatio > screenComponentRatio) {
-                val lngDiff = eventMapHeight * screenComponentRatio / 2
-                Quad(sw.lat, ne.lat, centerLng - lngDiff, centerLng + lngDiff)
-            } else {
-                val latDiff = eventMapWidth / screenComponentRatio / 2
-                Quad(centerLat - latDiff, centerLat + latDiff, sw.lng, ne.lng)
-            }
+        val newSwLat: Double
+        val newNeLat: Double
+        val newSwLng: Double
+        val newNeLng: Double
+
+        if (eventAspectRatio > screenComponentRatio) {
+            val lngDiff = eventMapHeight * screenComponentRatio / 2
+            newSwLat = sw.lat
+            newNeLat = ne.lat
+            newSwLng = centerLng - lngDiff
+            newNeLng = centerLng + lngDiff
+        } else {
+            val latDiff = eventMapWidth / screenComponentRatio / 2
+            newSwLat = centerLat - latDiff
+            newNeLat = centerLat + latDiff
+            newSwLng = sw.lng
+            newNeLng = ne.lng
+        }
 
         val bounds =
             BoundingBox.fromCorners(
@@ -261,12 +270,20 @@ abstract class AbstractEventMap<T>(
      * Moves the camera to show both the user and wave positions with good padding
      */
     suspend fun targetUserAndWave() {
-        val userPosition = locationProvider?.currentLocation?.value ?: return
-        val closestWaveLongitude = event.wave.userClosestWaveLongitude() ?: return
+        val userPosition = locationProvider?.currentLocation?.value
+        val closestWaveLongitude = event.wave.userClosestWaveLongitude()
+
+        if (userPosition == null || closestWaveLongitude == null) {
+            return
+        }
+
         val wavePosition = Position(userPosition.latitude, closestWaveLongitude)
 
         // Create the bounds containing user and wave positions
-        val bounds = BoundingBox.fromCorners(listOf(userPosition, wavePosition)) ?: return
+        val bounds = BoundingBox.fromCorners(listOf(userPosition, wavePosition))
+        if (bounds == null) {
+            return
+        }
 
         // Get the area's bounding box
         val areaBbox = event.area.bbox()
@@ -371,11 +388,13 @@ abstract class AbstractEventMap<T>(
         }
 
         // Auto-target the user the first time (optional) if no interaction yet
-        if (mapConfig.autoTargetUserOnFirstLocation &&
-            !userHasBeenLocated &&
-            !userInteracted &&
-            mapConfig.initialCameraPosition == MapCameraPosition.WINDOW
-        ) {
+        val shouldAutoTarget =
+            mapConfig.autoTargetUserOnFirstLocation &&
+                !userHasBeenLocated &&
+                !userInteracted &&
+                mapConfig.initialCameraPosition == MapCameraPosition.WINDOW
+
+        if (shouldAutoTarget) {
             scope.launch {
                 targetUser()
             }

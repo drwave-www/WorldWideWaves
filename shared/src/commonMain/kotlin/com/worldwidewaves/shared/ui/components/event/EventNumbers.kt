@@ -53,6 +53,10 @@ import kotlin.time.ExperimentalTime
  * Shared EventNumbers component - displays wave timing and progression information.
  * Works identically on both Android and iOS platforms.
  */
+
+// UI Constants
+private const val QUINARY_LIGHT_COLOR = 0xFFFFFFFF
+
 @OptIn(ExperimentalTime::class)
 @Composable
 fun EventNumbers(
@@ -121,7 +125,7 @@ fun EventNumbers(
                 Modifier
                     .border(
                         width = Event.NUMBERS_BORDERWIDTH.dp,
-                        color = Color(0xFFFFFFFF), // quinaryLight
+                        color = Color(QUINARY_LIGHT_COLOR), // quinaryLight
                         shape =
                             RoundedCornerShape(
                                 topStart = Event.NUMBERS_BORDERROUND.dp,

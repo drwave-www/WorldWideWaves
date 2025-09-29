@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.data
  * limitations under the License.
  */
 
-import androidx.annotation.VisibleForTesting
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
@@ -77,7 +76,6 @@ class DefaultDataStoreFactory : DataStoreFactory {
  * Test implementation of DataStoreFactory that creates in-memory DataStore instances.
  * Each test gets a clean, isolated DataStore instance.
  */
-@VisibleForTesting
 class TestDataStoreFactory : DataStoreFactory {
     override fun create(producePath: () -> String): DataStore<Preferences> {
         try {
@@ -97,7 +95,6 @@ class TestDataStoreFactory : DataStoreFactory {
  *
  * @deprecated Tests should use testDatastoreModule with TestDataStoreFactory instead
  */
-@VisibleForTesting
 @Deprecated(
     "Tests should use testDatastoreModule with TestDataStoreFactory instead",
     ReplaceWith("TestDataStoreFactory().create(producePath)"),

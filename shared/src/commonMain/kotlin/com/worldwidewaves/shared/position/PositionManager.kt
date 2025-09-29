@@ -155,18 +155,26 @@ class PositionManager(
         new: PositionState,
     ): Boolean {
         // Always accept if no current position
-        if (current.position == null) return true
+        val noCurrentPosition = current.position == null
+        if (noCurrentPosition) {
+            return true
+        }
 
         // Always accept clearing operations (null position)
-        if (new.position == null) return true
+        val isClearingOperation = new.position == null
+        if (isClearingOperation) {
+            return true
+        }
 
         // Always accept if new source has higher priority (lower ordinal)
-        return when {
-            current.source == null -> true
-            new.source == null -> false
-            new.source.ordinal <= current.source.ordinal -> true
-            else -> false
-        }
+        val shouldAccept =
+            when {
+                current.source == null -> true
+                new.source == null -> false
+                new.source.ordinal <= current.source.ordinal -> true
+                else -> false
+            }
+        return shouldAccept
     }
 
     /**

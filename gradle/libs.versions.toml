@@ -12,6 +12,10 @@ androidx-material = "1.13.0"
 compose-plugin = "1.8.2"
 kotlin = "2.2.0"
 kotlinVersion = "2.2.0"
+kotlinSerialization = "2.2.0"
+googleServices = "4.4.3"
+firebaseCrashlyticsPlugin = "3.0.6"
+gradleToolchainResolver = "0.8.0"
 compose = "1.8.2"
 skiko = "0.9.4.2"
 kotlinxCoroutinesCore = "1.10.2"
@@ -23,6 +27,10 @@ kotlinxDatetime = "0.7.1"
 kotlinxSerializationJson = "1.9.0"
 lifecycleLivedataKtx = "2.9.4"
 lifecycleViewmodelKtx = "2.9.4"
+lifecycleRuntimeKtx = "2.9.4"
+lifecycleRuntimeCompose = "2.9.4"
+lifecycleViewmodelCompose = "2.9.4"
+kotlinxCoroutinesAndroid = "1.10.2"
 mockkAndroid = "1.14.5"
 mockkCommon = "1.12.5"
 navigationFragmentKtx = "2.9.5"
@@ -46,10 +54,12 @@ icerockMoko = "0.25.0"
 ktlint = "1.4.1"
 detekt = "1.23.7"
 material3 = "1.4.0"
+buildkonfig = "0.15.2"
 
 [libraries]
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
 compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose" }
+compose-ui-uikit = { module = "org.jetbrains.compose.ui:ui-uikit", version.ref = "compose" }
 compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose" }
 compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose" }
 compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
@@ -68,6 +78,10 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycleLivedataKtx" }
 androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
+androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
@@ -113,3 +127,8 @@ licenseReport = { id = "com.github.jk1.dependency-license-report", version = "2.
 icerock-moko-multiplatform = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "icerockMoko" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "12.1.1" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinSerialization" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }
+gradle-toolchain-resolver = { id = "org.gradle.toolchains.foojay-resolver-convention", version.ref = "gradleToolchainResolver" }
+buildkonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildkonfig" }

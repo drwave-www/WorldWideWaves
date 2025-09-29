@@ -35,8 +35,9 @@ import kotlinx.coroutines.flow.StateFlow
 abstract class BaseMapDownloadViewModel :
     BaseViewModel(),
     IMapDownloadManager {
-    val _featureState = MutableStateFlow<MapFeatureState>(MapFeatureState.NotChecked)
-    override val featureState: StateFlow<MapFeatureState> = _featureState
+    private val featureStateMutable = MutableStateFlow<MapFeatureState>(MapFeatureState.NotChecked)
+
+    override val featureState: StateFlow<MapFeatureState> = featureStateMutable
 
     var currentMapId: String? = null
     val retryManager = MapDownloadUtils.RetryManager()
@@ -90,9 +91,9 @@ abstract class BaseMapDownloadViewModel :
         currentMapId = mapId
 
         if (isMapInstalled(mapId)) {
-            _featureState.value = MapFeatureState.Available
+            featureStateMutable.value = MapFeatureState.Available
         } else {
-            _featureState.value = MapFeatureState.NotAvailable
+            featureStateMutable.value = MapFeatureState.NotAvailable
             if (autoDownload) {
                 downloadMap(mapId)
             }
@@ -106,12 +107,12 @@ abstract class BaseMapDownloadViewModel :
         Log.i(TAG, "downloadMap called for $mapId")
 
         // Prevent concurrent downloads
-        if (MapDownloadUtils.isActiveDownload(_featureState.value)) {
+        if (MapDownloadUtils.isActiveDownload(featureStateMutable.value)) {
             Log.w(TAG, "downloadMap ignored – already downloading")
             return
         }
 
-        _featureState.value = MapFeatureState.Pending
+        featureStateMutable.value = MapFeatureState.Pending
         retryManager.resetRetryCount()
         currentMapId = mapId
 
@@ -134,12 +135,12 @@ abstract class BaseMapDownloadViewModel :
         downloadedBytes: Long,
     ) {
         val progressPercent = MapDownloadUtils.calculateProgressPercent(totalBytes, downloadedBytes)
-        _featureState.value = MapFeatureState.Downloading(progressPercent)
+        featureStateMutable.value = MapFeatureState.Downloading(progressPercent)
     }
 
     fun handleDownloadSuccess() {
         Log.i(TAG, "Download completed successfully")
-        _featureState.value = MapFeatureState.Installed
+        featureStateMutable.value = MapFeatureState.Installed
         retryManager.resetRetryCount()
     }
 
@@ -151,22 +152,46 @@ abstract class BaseMapDownloadViewModel :
 
         if (shouldRetry && retryManager.canRetry()) {
             val retryCount = retryManager.incrementRetryCount()
-            _featureState.value = MapFeatureState.Retrying(retryCount, MapDownloadUtils.RetryManager.MAX_RETRIES)
+            featureStateMutable.value = MapFeatureState.Retrying(retryCount, MapDownloadUtils.RetryManager.MAX_RETRIES)
             Log.i(TAG, "Scheduling retry #$retryCount")
         } else {
-            _featureState.value = MapFeatureState.Failed(errorCode, getErrorMessage(errorCode))
+            featureStateMutable.value = MapFeatureState.Failed(errorCode, getErrorMessage(errorCode))
             retryManager.resetRetryCount()
         }
     }
 
     fun handleDownloadCancellation() {
         Log.w(TAG, "Download canceled")
-        _featureState.value = MapFeatureState.NotAvailable
+        featureStateMutable.value = MapFeatureState.NotAvailable
         retryManager.resetRetryCount()
     }
 
     fun handleInstallComplete(moduleIds: List<String>) {
         clearCacheForInstalledMaps(moduleIds)
         handleDownloadSuccess()
+    }
+
+    // Public methods for specific state updates needed by composition pattern
+    fun setStateInstalling() {
+        featureStateMutable.value = MapFeatureState.Installing
+    }
+
+    fun setStatePending() {
+        featureStateMutable.value = MapFeatureState.Pending
+    }
+
+    fun setStateCanceling() {
+        featureStateMutable.value = MapFeatureState.Canceling
+    }
+
+    fun setStateUnknown() {
+        featureStateMutable.value = MapFeatureState.Unknown
+    }
+
+    fun setStateRetrying(
+        retryCount: Int,
+        maxRetries: Int,
+    ) {
+        featureStateMutable.value = MapFeatureState.Retrying(retryCount, maxRetries)
     }
 }

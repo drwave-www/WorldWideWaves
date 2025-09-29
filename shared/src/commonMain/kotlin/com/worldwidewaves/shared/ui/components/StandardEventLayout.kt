@@ -58,6 +58,7 @@ fun StandardEventLayout(
     additionalContent: @Composable () -> Unit = {},
     // iOS FIX: Dependencies passed as parameters to prevent deadlock
     platform: WWWPlatform = getIOSSafePlatform(),
+    @Suppress("UnusedParameter") // Kept for API consistency, may be needed for future timing features
     clock: IClock = getIOSSafeClock(),
 ) {
     // iOS FIX: Removed dangerous object : KoinComponent pattern

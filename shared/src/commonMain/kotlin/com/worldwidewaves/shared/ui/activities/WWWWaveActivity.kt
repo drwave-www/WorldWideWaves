@@ -32,7 +32,6 @@ class WWWWaveActivity(
     platformEnabler: PlatformEnabler,
     showSplash: Boolean = false,
 ) : WWWAbstractEventWaveActivity(eventId, platformEnabler, showSplash) {
-
     @Composable
     override fun Event(
         event: IWWWEvent,

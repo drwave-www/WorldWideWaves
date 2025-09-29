@@ -98,6 +98,7 @@ fun requestLocationPermission(): Boolean {
 // ------------------------------------
 
 @Composable
+@Suppress("FunctionName")
 fun CheckGPSEnable() {
     val context = LocalContext.current
     val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
