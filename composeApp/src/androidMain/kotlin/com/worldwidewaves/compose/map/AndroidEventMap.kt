@@ -160,7 +160,7 @@ class AndroidEventMap(
 
     // Overrides properties from AbstractEventMap
     override val locationProvider: WWWLocationProvider by inject(AndroidWWWLocationProvider::class.java)
-    override val mapLibreAdapter: AndroidMapLibreAdapter by lazy { AndroidMapLibreAdapter() }
+    override val mapLibreAdapter: AndroidMapLibreAdapter by inject(AndroidMapLibreAdapter::class.java)
 
     /** Holds the last [MapLibreMap] provided by MapView so we can (re-)enable
      *  the location component whenever permission or provider state changes. */
