@@ -169,15 +169,10 @@ class AndroidEventMap(
     private val mapAvailabilityChecker: AndroidMapAvailabilityChecker by inject(AndroidMapAvailabilityChecker::class.java)
 
     /**
-     * The Compose UI for the map
+     * Setup map state variables and return them as a data class
      */
     @Composable
-    override fun Draw(
-        autoMapDownload: Boolean,
-        modifier: Modifier,
-    ) {
-        Log.i(TAG, "Screen composable entered: eventId=${event.id}, autoMapDownload=$autoMapDownload")
-
+    private fun setupMapState(): MapState {
         val scope = rememberCoroutineScope()
         var isMapLoaded by remember { mutableStateOf(false) }
         var mapError by remember { mutableStateOf(false) }
@@ -199,20 +194,97 @@ class AndroidEventMap(
         val mapViewModel: AndroidMapViewModel = viewModel()
         val mapFeatureState by mapViewModel.featureState.collectAsState()
 
+        return MapState(
+            scope = scope,
+            isMapLoaded = isMapLoaded,
+            mapError = mapError,
+            hasLocationPermission = hasLocationPermission,
+            isMapAvailable = isMapAvailable,
+            isMapDownloading = isMapDownloading,
+            userCanceled = userCanceled,
+            initStarted = initStarted,
+            lastMapView = lastMapView,
+            mapLibreView = mapLibreView,
+            mapViewModel = mapViewModel,
+            mapFeatureState = mapFeatureState,
+            setIsMapLoaded = { isMapLoaded = it },
+            setMapError = { mapError = it },
+            setHasLocationPermission = { hasLocationPermission = it },
+            setIsMapAvailable = { isMapAvailable = it },
+            setIsMapDownloading = { isMapDownloading = it },
+            setUserCanceled = { userCanceled = it },
+            setInitStarted = { initStarted = it },
+            setLastMapView = { lastMapView = it },
+        )
+    }
+
+    /**
+     * Data class to hold map state variables and their setters
+     */
+    private data class MapState(
+        val scope: CoroutineScope,
+        val isMapLoaded: Boolean,
+        val mapError: Boolean,
+        val hasLocationPermission: Boolean,
+        val isMapAvailable: Boolean,
+        val isMapDownloading: Boolean,
+        val userCanceled: Boolean,
+        val initStarted: Boolean,
+        val lastMapView: MapView?,
+        val mapLibreView: MapView,
+        val mapViewModel: AndroidMapViewModel,
+        val mapFeatureState: MapFeatureState,
+        val setIsMapLoaded: (Boolean) -> Unit,
+        val setMapError: (Boolean) -> Unit,
+        val setHasLocationPermission: (Boolean) -> Unit,
+        val setIsMapAvailable: (Boolean) -> Unit,
+        val setIsMapDownloading: (Boolean) -> Unit,
+        val setUserCanceled: (Boolean) -> Unit,
+        val setInitStarted: (Boolean) -> Unit,
+        val setLastMapView: (MapView?) -> Unit,
+    )
+
+    /**
+     * The Compose UI for the map
+     */
+    @Composable
+    override fun Draw(
+        autoMapDownload: Boolean,
+        modifier: Modifier,
+    ) {
+        Log.i(TAG, "Screen composable entered: eventId=${event.id}, autoMapDownload=$autoMapDownload")
+
+        val mapState = setupMapState()
+
+        // Handle map availability and download state
+        handleMapAvailability(mapState)
+
+        // Handle location permissions and GPS
+        handleLocationPermissions(mapState, autoMapDownload)
+
+        // Render the map content
+        renderMapContent(mapState, modifier)
+    }
+
+    /**
+     * Handle map availability checks and download state updates
+     */
+    @Composable
+    private fun handleMapAvailability(mapState: MapState) {
         // Check if map is downloaded
         LaunchedEffect(Unit) {
-            mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
-            isMapAvailable = mapAvailabilityChecker.isMapDownloaded(event.id)
-            Log.i(TAG, "Initial map availability check result: ${event.id} available=$isMapAvailable")
+            mapState.mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
+            mapState.setIsMapAvailable(mapAvailabilityChecker.isMapDownloaded(event.id))
+            Log.i(TAG, "Initial map availability check result: ${event.id} available=${mapState.isMapAvailable}")
         }
 
         // Update download state based on MapViewModel state
-        LaunchedEffect(mapFeatureState) {
-            when (mapFeatureState) {
+        LaunchedEffect(mapState.mapFeatureState) {
+            when (mapState.mapFeatureState) {
                 is MapFeatureState.Downloading -> {
-                    isMapDownloading = true
+                    mapState.setIsMapDownloading(true)
                 }
-                is MapFeatureState.Pending -> isMapDownloading = true
+                is MapFeatureState.Pending -> mapState.setIsMapDownloading(true)
                 is MapFeatureState.Installed -> {
                     Log.i(TAG, "Map installed: ${event.id}")
                     // Make the just-installed split immediately visible to this
@@ -220,30 +292,39 @@ class AndroidEventMap(
                     context.let {
                         SplitCompat.installActivity(it)
                     }
-                    isMapDownloading = false
-                    isMapAvailable = true
-                    mapError = false
+                    mapState.setIsMapDownloading(false)
+                    mapState.setIsMapAvailable(true)
+                    mapState.setMapError(false)
                     // Allow a fresh initialization attempt now that install finished
-                    initStarted = false
+                    mapState.setInitStarted(false)
                 }
                 is MapFeatureState.Failed -> {
-                    val errorCode = (mapFeatureState as MapFeatureState.Failed).errorCode
+                    val errorCode = (mapState.mapFeatureState as MapFeatureState.Failed).errorCode
                     Log.e(TAG, "Map download failed: ${event.id}, errorCode=$errorCode")
-                    mapError = true
-                    isMapDownloading = false
+                    mapState.setMapError(true)
+                    mapState.setIsMapDownloading(false)
                     // Reset init flag so a new attempt can be triggered after failure
-                    initStarted = false
+                    mapState.setInitStarted(false)
                 }
-                is MapFeatureState.Canceling -> isMapDownloading = false
-                is MapFeatureState.Installing -> isMapDownloading = true
-                is MapFeatureState.NotAvailable -> isMapDownloading = false
+                is MapFeatureState.Canceling -> mapState.setIsMapDownloading(false)
+                is MapFeatureState.Installing -> mapState.setIsMapDownloading(true)
+                is MapFeatureState.NotAvailable -> mapState.setIsMapDownloading(false)
                 else -> {}
             }
         }
+    }
 
+    /**
+     * Handle location permissions and GPS setup
+     */
+    @Composable
+    private fun handleLocationPermissions(
+        mapState: MapState,
+        autoMapDownload: Boolean,
+    ) {
         // Request GPS location Android permissions
-        hasLocationPermission = requestLocationPermission()
-        if (hasLocationPermission) {
+        mapState.setHasLocationPermission(requestLocationPermission())
+        if (mapState.hasLocationPermission) {
             CheckGPSEnable()
         }
 
@@ -254,7 +335,7 @@ class AndroidEventMap(
                 LifecycleEventObserver { _, event ->
                     if (event == Lifecycle.Event.ON_RESUME) {
                         val granted = isLocationPermissionGranted(context)
-                        hasLocationPermission = granted
+                        mapState.setHasLocationPermission(granted)
                         updateLocationComponent(context, granted)
                     }
                 }
@@ -272,7 +353,7 @@ class AndroidEventMap(
                         i: Intent?,
                     ) {
                         val granted = isLocationPermissionGranted(context)
-                        hasLocationPermission = granted
+                        mapState.setHasLocationPermission(granted)
                         updateLocationComponent(context, granted)
                     }
                 }
@@ -284,83 +365,10 @@ class AndroidEventMap(
         }
 
         // Auto-download map once when requested by caller
-        LaunchedEffect(isMapAvailable, autoMapDownload, userCanceled) {
-            if (!isMapAvailable && autoMapDownload && !userCanceled) {
+        LaunchedEffect(mapState.isMapAvailable, autoMapDownload, mapState.userCanceled) {
+            if (!mapState.isMapAvailable && autoMapDownload && !mapState.userCanceled) {
                 Log.i(TAG, "Auto-downloading map: ${event.id}")
-                mapViewModel.downloadMap(event.id)
-            }
-        }
-
-        // The map view
-        Box(modifier = modifier) {
-            // Default map image as background
-            Image(
-                modifier = Modifier.fillMaxSize(),
-                painter = painterResource(event.getMapImage() as DrawableResource),
-                contentDescription = "defaultMap",
-                contentScale = ContentScale.Crop,
-            )
-
-            // LibreMap as Android Composable - only visible when map is loaded
-            AndroidView(
-                factory = { mapLibreView },
-                update = { v ->
-                    if (lastMapView !== v) {
-                        lastMapView = v
-                        isMapLoaded = false
-                        initStarted = false
-                        mapError = false
-                    }
-
-                    if (isMapAvailable && !isMapLoaded && !initStarted) {
-                        initStarted = true
-                        Log.i(TAG, "Starting map init from AndroidView.update")
-                        loadMap(
-                            context = context,
-                            scope = scope,
-                            mapLibreView = v,
-                            hasLocationPermission = hasLocationPermission,
-                            lifecycle = lifecycleOwner.lifecycle,
-                            onMapLoaded = {
-                                Log.i(TAG, "Map successfully loaded: ${event.id}")
-                                isMapLoaded = true
-                                onMapLoaded()
-                            },
-                            onMapError = {
-                                Log.e(TAG, "Error loading map: ${event.id}")
-                                mapError = true
-                                initStarted = false // allow retry
-                            },
-                        )
-                    }
-                },
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .alpha(if (isMapLoaded) 1f else 0f),
-            )
-
-            // Show appropriate UI based on map state
-            when {
-                isMapLoaded -> Unit
-                isMapDownloading && !mapError ->
-                    MapDownloadOverlay(mapFeatureState) {
-                        userCanceled = true
-                        mapViewModel.cancelDownload()
-                    }
-                mapError && isMapDownloading ->
-                    MapErrorOverlay {
-                        mapError = false
-                        initStarted = false
-                        mapViewModel.downloadMap(event.id)
-                    }
-                !isMapAvailable ->
-                    MapDownloadButton {
-                        mapError = false
-                        isMapDownloading = true
-                        userCanceled = false
-                        mapViewModel.downloadMap(event.id)
-                    }
+                mapState.mapViewModel.downloadMap(event.id)
             }
         }
     }
@@ -480,6 +488,90 @@ class AndroidEventMap(
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                 )
+            }
+        }
+    }
+
+    /**
+     * Render the main map content UI
+     */
+    @Composable
+    private fun renderMapContent(
+        mapState: MapState,
+        modifier: Modifier,
+    ) {
+        val lifecycleOwner = LocalLifecycleOwner.current
+
+        // The map view
+        Box(modifier = modifier) {
+            // Default map image as background
+            Image(
+                modifier = Modifier.fillMaxSize(),
+                painter = painterResource(event.getMapImage() as DrawableResource),
+                contentDescription = "defaultMap",
+                contentScale = ContentScale.Crop,
+            )
+
+            // LibreMap as Android Composable - only visible when map is loaded
+            AndroidView(
+                factory = { mapState.mapLibreView },
+                update = { v ->
+                    if (mapState.lastMapView !== v) {
+                        mapState.setLastMapView(v)
+                        mapState.setIsMapLoaded(false)
+                        mapState.setInitStarted(false)
+                        mapState.setMapError(false)
+                    }
+
+                    if (mapState.isMapAvailable && !mapState.isMapLoaded && !mapState.initStarted) {
+                        mapState.setInitStarted(true)
+                        Log.i(TAG, "Starting map init from AndroidView.update")
+                        loadMap(
+                            context = context,
+                            scope = mapState.scope,
+                            mapLibreView = v,
+                            hasLocationPermission = mapState.hasLocationPermission,
+                            lifecycle = lifecycleOwner.lifecycle,
+                            onMapLoaded = {
+                                Log.i(TAG, "Map successfully loaded: ${event.id}")
+                                mapState.setIsMapLoaded(true)
+                                onMapLoaded()
+                            },
+                            onMapError = {
+                                Log.e(TAG, "Error loading map: ${event.id}")
+                                mapState.setMapError(true)
+                                mapState.setInitStarted(false) // allow retry
+                            },
+                        )
+                    }
+                },
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .alpha(if (mapState.isMapLoaded) 1f else 0f),
+            )
+
+            // Show appropriate UI based on map state
+            when {
+                mapState.isMapLoaded -> Unit
+                mapState.isMapDownloading && !mapState.mapError ->
+                    MapDownloadOverlay(mapState.mapFeatureState) {
+                        mapState.setUserCanceled(true)
+                        mapState.mapViewModel.cancelDownload()
+                    }
+                mapState.mapError && mapState.isMapDownloading ->
+                    MapErrorOverlay {
+                        mapState.setMapError(false)
+                        mapState.setInitStarted(false)
+                        mapState.mapViewModel.downloadMap(event.id)
+                    }
+                !mapState.isMapAvailable ->
+                    MapDownloadButton {
+                        mapState.setMapError(false)
+                        mapState.setIsMapDownloading(true)
+                        mapState.setUserCanceled(false)
+                        mapState.mapViewModel.downloadMap(event.id)
+                    }
             }
         }
     }
@@ -705,45 +797,81 @@ class AndroidEventMap(
         hasPermission: Boolean,
     ) {
         Log.i(TAG, "Updating location component, permission=$hasPermission")
+
         val map = currentMap
         if (map == null) {
             Log.w(TAG, "Cannot update location component - map is null")
             return
         }
 
-        map.style?.let {
-            try {
-                // Check if location component is activated before trying to disable it
-                if (map.locationComponent.isLocationComponentActivated) {
-                    // Always disable first to avoid stale state
-                    map.locationComponent.isLocationComponentEnabled = false
-                }
-
-                if (hasPermission) {
-                    setupMapLocationComponent(map, context)
-                }
-            } catch (se: SecurityException) {
-                // Permission might have been revoked between check and use
-                Log.w(TAG, "Location permission missing when enabling component", se)
-            } catch (ise: IllegalStateException) {
-                // Map component might be in invalid state
-                Log.e(TAG, "Map component in invalid state", ise)
-            } catch (uoe: UnsupportedOperationException) {
-                // Map operation not supported
-                Log.e(TAG, "Unsupported map operation", uoe)
-            } catch (e: IllegalStateException) {
-                // Location component not initialized - this is expected on first run
-                if (e.message?.contains("LocationComponent has to be activated") == true) {
-                    Log.d(TAG, "Location component not yet initialized, will activate it")
-                    if (hasPermission) {
-                        setupMapLocationComponent(map, context)
-                    }
-                } else {
-                    Log.e(TAG, "Unexpected illegal state with location component", e)
-                }
-            }
-        } ?: run {
+        val style = map.style
+        if (style == null) {
             Log.w(TAG, "Cannot update location component - map style is null")
+            return
+        }
+
+        updateLocationComponentWithStyle(map, context, hasPermission)
+    }
+
+    /**
+     * Helper method to update location component when map and style are available
+     */
+    private fun updateLocationComponentWithStyle(
+        map: MapLibreMap,
+        context: Context,
+        hasPermission: Boolean,
+    ) {
+        try {
+            disableLocationComponentIfActivated(map)
+
+            if (hasPermission) {
+                setupMapLocationComponent(map, context)
+            }
+        } catch (se: SecurityException) {
+            handleLocationPermissionError(se)
+        } catch (ise: IllegalStateException) {
+            handleLocationComponentStateError(ise, map, context, hasPermission)
+        } catch (uoe: UnsupportedOperationException) {
+            Log.e(TAG, "Unsupported map operation", uoe)
+        }
+    }
+
+    /**
+     * Disable location component if it's currently activated
+     */
+    private fun disableLocationComponentIfActivated(map: MapLibreMap) {
+        if (map.locationComponent.isLocationComponentActivated) {
+            // Always disable first to avoid stale state
+            map.locationComponent.isLocationComponentEnabled = false
+        }
+    }
+
+    /**
+     * Handle permission errors when updating location component
+     */
+    private fun handleLocationPermissionError(exception: SecurityException) {
+        // Permission might have been revoked between check and use
+        Log.w(TAG, "Location permission missing when enabling component", exception)
+    }
+
+    /**
+     * Handle illegal state errors when updating location component
+     */
+    private fun handleLocationComponentStateError(
+        exception: IllegalStateException,
+        map: MapLibreMap,
+        context: Context,
+        hasPermission: Boolean,
+    ) {
+        val message = exception.message
+        if (message?.contains("LocationComponent has to be activated") == true) {
+            Log.d(TAG, "Location component not yet initialized, will activate it")
+            if (hasPermission) {
+                setupMapLocationComponent(map, context)
+            }
+        } else {
+            // Map component might be in invalid state
+            Log.e(TAG, "Map component in invalid state", exception)
         }
     }
 
