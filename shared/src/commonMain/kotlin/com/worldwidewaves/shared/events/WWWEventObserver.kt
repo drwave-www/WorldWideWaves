@@ -655,7 +655,6 @@ class WWWEventObserver(
      * Validates the current state consistency for debugging purposes.
      * This method helps identify state management issues during development.
      */
-    @androidx.annotation.VisibleForTesting
     suspend fun validateStateConsistency(): List<String> {
         val issues = mutableListOf<String>()
 

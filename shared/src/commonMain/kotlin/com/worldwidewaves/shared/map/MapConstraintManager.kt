@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.map
  * limitations under the License.
  */
 
-import androidx.annotation.UiThread
 import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
@@ -62,7 +61,6 @@ class MapConstraintManager(
     /**
      * Apply constraints to a MapLibre map
      */
-    @UiThread
     fun applyConstraints() {
         // Calculate visible region padding from the map
         updateVisibleRegionPadding()

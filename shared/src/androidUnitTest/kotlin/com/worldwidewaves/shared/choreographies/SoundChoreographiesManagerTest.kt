@@ -111,13 +111,15 @@ class SoundChoreographyManagerTest : KoinTest {
 
             try {
                 // Setup mock return value
-                val mockedTrack = MidiTrack(
-                    name = "Test Track",
-                    notes = listOf(
-                        MidiNote(60, 80, 0.milliseconds, 300.milliseconds)
-                    ),
-                    totalDuration = 300.milliseconds
-                )
+                val mockedTrack =
+                    MidiTrack(
+                        name = "Test Track",
+                        notes =
+                            listOf(
+                                MidiNote(60, 80, 0.milliseconds, 300.milliseconds),
+                            ),
+                        totalDuration = 300.milliseconds,
+                    )
                 coEvery { MidiParser.parseMidiFile(any()) } returns mockedTrack
 
                 // iOS FIX: Test now verifies explicit initialize() call instead of init{} block

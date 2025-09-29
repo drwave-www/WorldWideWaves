@@ -18,11 +18,12 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
-import kotlinx.datetime.Clock
 import platform.Foundation.NSBundle
 import platform.Foundation.NSBundleResourceRequest
 import kotlin.coroutines.resume
 import kotlin.random.Random
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * iOS implementation of PlatformMapManager using On-Demand Resources (ODR).
@@ -38,6 +39,7 @@ import kotlin.random.Random
  * - Resources should be marked as "On Demand" in project settings
  * - Bundle tags in Info.plist must match map IDs
  */
+@OptIn(ExperimentalTime::class)
 class IOSPlatformMapManager : PlatformMapManager {
     companion object {
         private const val MAP_BUNDLE_EXTENSION = "geojson"
@@ -62,13 +64,10 @@ class IOSPlatformMapManager : PlatformMapManager {
     /**
      * Check if an ODR map resource is available.
      */
-    @OptIn(ExperimentalForeignApi::class)
+    @OptIn(ExperimentalForeignApi::class, ExperimentalTime::class)
     override fun isMapAvailable(mapId: String): Boolean {
         return try {
-            val currentTime =
-                kotlinx.datetime.Clock.System
-                    .now()
-                    .toEpochMilliseconds()
+            val currentTime = Clock.System.now().toEpochMilliseconds()
 
             // Check cache first (with invalidation support)
             availabilityCache[mapId]?.let { (cachedResult, cacheTime) ->
@@ -94,10 +93,7 @@ class IOSPlatformMapManager : PlatformMapManager {
             WWWLogger.e("IOSPlatformMapManager", "Error checking ODR map availability: $mapId", e)
 
             // Cache failure result for shorter period to allow retries
-            val currentTime =
-                kotlinx.datetime.Clock.System
-                    .now()
-                    .toEpochMilliseconds()
+            val currentTime = Clock.System.now().toEpochMilliseconds()
             availabilityCache[mapId] = Pair(false, currentTime - cacheValidityMs + 5000L) // 5 second retry window
             false
         }
@@ -145,7 +141,7 @@ class IOSPlatformMapManager : PlatformMapManager {
 
                 // Setup realistic progress tracking
                 val downloadStartTime =
-                    kotlinx.datetime.Clock.System
+                    Clock.System
                         .now()
                         .toEpochMilliseconds()
                 val estimatedDuration = estimateDownloadDuration(mapId)
@@ -258,6 +254,7 @@ class IOSPlatformMapManager : PlatformMapManager {
      * Simulates realistic progress with exponential curve matching real download patterns.
      * Fast initial progress, slower middle phase, quick completion.
      */
+    @OptIn(ExperimentalTime::class)
     private suspend fun simulateRealisticProgress(
         mapId: String,
         estimatedDuration: Long,
@@ -275,10 +272,7 @@ class IOSPlatformMapManager : PlatformMapManager {
 
                 delay(PROGRESS_UPDATE_INTERVAL_MS)
 
-                val elapsed =
-                    kotlinx.datetime.Clock.System
-                        .now()
-                        .toEpochMilliseconds() - startTime
+                val elapsed = Clock.System.now().toEpochMilliseconds() - startTime
                 val progressRatio = (elapsed.toDouble() / estimatedDuration).coerceAtMost(0.95)
 
                 // Exponential progress curve: fast start, slower middle, quick end
@@ -379,20 +373,14 @@ class IOSPlatformMapManager : PlatformMapManager {
                 "status" to "healthy",
                 "odr_bundle_available" to (bundle != null),
                 "stats" to stats,
-                "timestamp" to
-                    kotlinx.datetime.Clock.System
-                        .now()
-                        .toEpochMilliseconds(),
+                "timestamp" to Clock.System.now().toEpochMilliseconds(),
             )
         } catch (e: Exception) {
             WWWLogger.e("IOSPlatformMapManager", "Health check failed", e)
             mapOf(
                 "status" to "error",
                 "error" to (e.message ?: "Unknown error"),
-                "timestamp" to
-                    kotlinx.datetime.Clock.System
-                        .now()
-                        .toEpochMilliseconds(),
+                "timestamp" to Clock.System.now().toEpochMilliseconds(),
             )
         }
 }

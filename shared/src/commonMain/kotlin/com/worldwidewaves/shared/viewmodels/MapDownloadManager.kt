@@ -22,65 +22,45 @@ package com.worldwidewaves.shared.viewmodels
  */
 
 import com.worldwidewaves.shared.map.MapFeatureState
-import com.worldwidewaves.shared.ui.BaseViewModel
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Shared base ViewModel for map download management.
- * Contains all platform-agnostic logic extracted from Android MapViewModel.
- * Platform-specific subclasses provide download implementation details.
+ * Manager for map download operations across platforms.
+ *
+ * Contains all platform-agnostic download workflow logic without UI lifecycle concerns.
+ * Used by composition in platform-specific ViewModels (AndroidMapViewModel, IOSMapViewModel).
+ *
+ * RESPONSIBILITIES:
+ * • Download state management
+ * • Retry logic with exponential backoff
+ * • Progress tracking
+ * • Error handling and recovery
+ * • Platform-agnostic download workflow
+ *
+ * DEPENDENCIES:
+ * • PlatformMapDownloadAdapter (for platform-specific operations)
+ *
+ * USED BY:
+ * • AndroidMapViewModel (composition)
+ * • IOSMapViewModel (composition)
  */
-abstract class BaseMapDownloadViewModel :
-    BaseViewModel(),
-    IMapDownloadManager {
-    val _featureState = MutableStateFlow<MapFeatureState>(MapFeatureState.NotChecked)
-
+class MapDownloadManager(
+    private val platformAdapter: PlatformMapDownloadAdapter,
+) : IMapDownloadManager {
+    private val _featureState = MutableStateFlow<MapFeatureState>(MapFeatureState.NotChecked)
     override val featureState: StateFlow<MapFeatureState> = _featureState
 
     var currentMapId: String? = null
     val retryManager = MapDownloadUtils.RetryManager()
 
     companion object {
-        private const val TAG = "BaseMapDownloadViewModel"
+        private const val TAG = "MapDownloadManager"
     }
 
     // ------------------------------------------------------------------------
-    // Abstract methods for platform-specific implementation
-    // ------------------------------------------------------------------------
-
-    /**
-     * Platform-specific check if map module is installed.
-     */
-    protected abstract suspend fun isMapInstalled(mapId: String): Boolean
-
-    /**
-     * Platform-specific map download initiation.
-     * Should call handleDownloadProgress, handleDownloadSuccess, or handleDownloadFailure.
-     */
-    protected abstract suspend fun startPlatformDownload(
-        mapId: String,
-        onMapDownloaded: (() -> Unit)?,
-    )
-
-    /**
-     * Platform-specific download cancellation.
-     */
-    protected abstract suspend fun cancelPlatformDownload()
-
-    /**
-     * Platform-specific error code to string resource mapping.
-     */
-    protected abstract fun getLocalizedErrorMessage(errorCode: Int): String
-
-    /**
-     * Platform-specific cleanup when maps are installed.
-     */
-    protected abstract fun clearCacheForInstalledMaps(mapIds: List<String>)
-
-    // ------------------------------------------------------------------------
-    // Shared implementation (extracted from Android MapViewModel)
+    // Public API - IMapDownloadManager implementation
     // ------------------------------------------------------------------------
 
     override suspend fun checkIfMapIsAvailable(
@@ -90,7 +70,7 @@ abstract class BaseMapDownloadViewModel :
         Log.d(TAG, "checkIfMapIsAvailable id=$mapId auto=$autoDownload")
         currentMapId = mapId
 
-        if (isMapInstalled(mapId)) {
+        if (platformAdapter.isMapInstalled(mapId)) {
             _featureState.value = MapFeatureState.Available
         } else {
             _featureState.value = MapFeatureState.NotAvailable
@@ -116,18 +96,18 @@ abstract class BaseMapDownloadViewModel :
         retryManager.resetRetryCount()
         currentMapId = mapId
 
-        startPlatformDownload(mapId, onMapDownloaded)
+        platformAdapter.startPlatformDownload(mapId, onMapDownloaded)
     }
 
     override suspend fun cancelDownload() {
         Log.i(TAG, "cancelDownload called")
-        cancelPlatformDownload()
+        platformAdapter.cancelPlatformDownload()
     }
 
-    override fun getErrorMessage(errorCode: Int): String = getLocalizedErrorMessage(errorCode)
+    override fun getErrorMessage(errorCode: Int): String = platformAdapter.getLocalizedErrorMessage(errorCode)
 
     // ------------------------------------------------------------------------
-    // Shared helper methods for platform implementations
+    // Helper methods for platform adapters
     // ------------------------------------------------------------------------
 
     fun handleDownloadProgress(
@@ -155,7 +135,7 @@ abstract class BaseMapDownloadViewModel :
             _featureState.value = MapFeatureState.Retrying(retryCount, MapDownloadUtils.RetryManager.MAX_RETRIES)
             Log.i(TAG, "Scheduling retry #$retryCount")
         } else {
-            _featureState.value = MapFeatureState.Failed(errorCode, getErrorMessage(errorCode))
+            _featureState.value = MapFeatureState.Failed(errorCode, platformAdapter.getLocalizedErrorMessage(errorCode))
             retryManager.resetRetryCount()
         }
     }
@@ -167,11 +147,11 @@ abstract class BaseMapDownloadViewModel :
     }
 
     fun handleInstallComplete(moduleIds: List<String>) {
-        clearCacheForInstalledMaps(moduleIds)
+        platformAdapter.clearCacheForInstalledMaps(moduleIds)
         handleDownloadSuccess()
     }
 
-    // Public methods for specific state updates needed by composition pattern
+    // State update methods for platform adapters
     fun setStateInstalling() {
         _featureState.value = MapFeatureState.Installing
     }
@@ -194,4 +174,33 @@ abstract class BaseMapDownloadViewModel :
     ) {
         _featureState.value = MapFeatureState.Retrying(retryCount, maxRetries)
     }
+}
+
+/**
+ * Platform adapter interface for MapDownloadLogic.
+ *
+ * RESPONSIBILITIES:
+ * • Platform-specific map installation checks
+ * • Platform-specific download initiation
+ * • Platform-specific cancellation
+ * • Platform-specific error message localization
+ * • Platform-specific cache management
+ *
+ * IMPLEMENTORS:
+ * • AndroidMapViewModel (anonymous object)
+ * • IOSMapViewModel (anonymous object)
+ */
+interface PlatformMapDownloadAdapter {
+    suspend fun isMapInstalled(mapId: String): Boolean
+
+    suspend fun startPlatformDownload(
+        mapId: String,
+        onMapDownloaded: (() -> Unit)?,
+    )
+
+    suspend fun cancelPlatformDownload()
+
+    fun getLocalizedErrorMessage(errorCode: Int): String
+
+    fun clearCacheForInstalledMaps(mapIds: List<String>)
 }

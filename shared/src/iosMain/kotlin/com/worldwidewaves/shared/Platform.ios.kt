@@ -21,13 +21,19 @@
 package com.worldwidewaves.shared
 
 import com.worldwidewaves.shared.di.IOSModule
+import com.worldwidewaves.shared.di.sharedModule
+import com.worldwidewaves.shared.utils.Log
+import com.worldwidewaves.shared.utils.initNapier
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.desc.desc
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
+import org.koin.core.KoinApplication
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import org.koin.core.context.loadKoinModules
+import org.koin.core.context.startKoin
+import org.koin.core.logger.Level
+import org.koin.core.logger.PrintLogger
 import platform.Foundation.NSCachesDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSSearchPathForDirectoriesInDomains
@@ -38,11 +44,59 @@ import platform.Foundation.NSUserDomainMask
 import platform.Foundation.create
 import platform.Foundation.writeToFile
 
-fun initKoinIOS() {
-    // Initialise Koin only once (see Helper.doInitKoin).
-    doInitKoin()
-    loadKoinModules(IOSModule)
+/**
+ * Initialise Koin for iOS.
+ *
+ * Swift code calls this via `HelperKt.doInitKoin()`.
+ * We load every common module *and* the iOS-specific module only once.
+ */
+@Throws(Throwable::class)
+fun doInitPlatform() {
+    // Prevent multiple initialisations when called repeatedly from Swift previews/tests.
+    if (koinApp != null) return
+
+    // Initialize Napier logging for iOS
+    Log.v(TAG, "HELPER: doInitKoin() starting with enhanced coroutine exception handling")
+
+    // Initialize MokoRes bundle BEFORE anything else
+    Log.v(TAG, "HELPER: About to initialize MokoRes bundle")
+    try {
+        val bundleInitialized = BundleInitializer.initializeBundle()
+        Log.i(TAG, "HELPER: MokoRes bundle initialization result: $bundleInitialized")
+    } catch (e: Exception) {
+        Log.e(TAG, "ERROR: MokoRes bundle initialization failed: ${e.message}")
+    }
+
+    // Re-enable initNapier with bulletproof NSLogAntilog
+    Log.v(TAG, "HELPER: About to call initNapier()")
+    try {
+        initNapier()
+        Log.i(TAG, "HELPER: initNapier() completed successfully")
+    } catch (e: Exception) {
+        Log.e(TAG, "ERROR: initNapier() failed: ${e.message}")
+    }
+
+    try {
+        Log.v(TAG, "HELPER: About to create startKoin block...")
+        koinApp =
+            startKoin {
+                // Add iOS logging equivalent to Android's androidLogger()
+                logger(PrintLogger(Level.DEBUG))
+                Log.v(TAG, "HELPER: Logger added")
+                modules(sharedModule + IOSModule)
+                Log.v(TAG, "HELPER: Modules added")
+            }
+        Log.i(TAG, "HELPER: startKoin completed successfully")
+    } catch (e: Exception) {
+        Log.e(TAG, "ERROR: startKoin failed: ${e.message}")
+        Log.e(TAG, "ERROR: Exception type: ${e::class.simpleName}")
+    }
 }
+
+// Private holder to remember if Koin has already been started.
+// `KoinApplication` is available on every KMP target so we can
+// safely keep the reference here.
+private var koinApp: KoinApplication? = null
 
 /**
  * Platform descriptor for iOS.

@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.data.InitFavoriteEvent
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.EventsConfigurationProvider
@@ -187,7 +186,6 @@ class WWWEvents : KoinComponent {
             }
         }
 
-    @VisibleForTesting
     fun confValidationErrors(events: List<IWWWEvent>) = events.associateWith(IWWWEvent::validationErrors)
 
     // ---------------------------
@@ -206,7 +204,6 @@ class WWWEvents : KoinComponent {
 
     // ---------------------------
 
-    @VisibleForTesting
     fun onEventsLoaded() {
         Log.i(::WWWEvents.name, "Events loaded successfully. Calling ${pendingLoadedCallbacks.size} pending callbacks")
         eventsLoaded = true
@@ -221,7 +218,6 @@ class WWWEvents : KoinComponent {
             }.clear()
     }
 
-    @VisibleForTesting
     fun onLoadingError(exception: Exception) {
         loadingError = exception
         pendingErrorCallbacks.onEach { callback -> callback.invoke(exception) }.clear()

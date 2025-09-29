@@ -59,6 +59,19 @@ class BaseMapDownloadViewModelTest {
         override fun clearCacheForInstalledMaps(mapIds: List<String>) {
             // Test implementation - no-op
         }
+
+        // Test helper to set state for testing
+        fun setTestState(state: MapFeatureState) {
+            when (state) {
+                MapFeatureState.Pending -> setStatePending()
+                MapFeatureState.Installing -> setStateInstalling()
+                MapFeatureState.Canceling -> setStateCanceling()
+                MapFeatureState.Unknown -> setStateUnknown()
+                is MapFeatureState.Downloading -> handleDownloadProgress(100, state.progress.toLong())
+                is MapFeatureState.Retrying -> setStateRetrying(state.attempt, state.maxAttempts)
+                else -> handleDownloadFailure(-1, false)
+            }
+        }
     }
 
     @Test
@@ -100,7 +113,7 @@ class BaseMapDownloadViewModelTest {
             val viewModel = TestMapDownloadViewModel()
 
             // Set state to downloading
-            viewModel._featureState.value = MapFeatureState.Downloading(50)
+            viewModel.setTestState(MapFeatureState.Downloading(50))
 
             viewModel.downloadMap("test_map")
 

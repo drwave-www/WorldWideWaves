@@ -19,7 +19,6 @@ package com.worldwidewaves.shared.di
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.choreographies.ChoreographyManager
 import com.worldwidewaves.shared.data.FavoriteEventsStore
@@ -38,9 +37,10 @@ import com.worldwidewaves.shared.sound.IOSSoundPlayer
 import com.worldwidewaves.shared.sound.SoundPlayer
 import com.worldwidewaves.shared.ui.DebugTabScreen
 import com.worldwidewaves.shared.utils.IOSImageResolver
-import com.worldwidewaves.shared.utils.IOSPlatformEnabler
 import com.worldwidewaves.shared.utils.ImageResolver
 import com.worldwidewaves.shared.viewmodels.EventsViewModel
+import com.worldwidewaves.shared.viewmodels.IOSMapViewModel
+import com.worldwidewaves.shared.viewmodels.MapViewModel
 import org.koin.dsl.module
 import platform.UIKit.UIDevice
 import platform.UIKit.UIImage
@@ -51,7 +51,7 @@ val IOSModule =
         single<ImageResolver<UIImage>> { IOSImageResolver() }
         single<WWWLocationProvider> { IOSWWWLocationProvider() }
 
-        single<PlatformEnabler> { IOSPlatformEnabler() }
+        // Note: PlatformEnabler is injected into koin by Swift IOS
 
         // Platform descriptor for iOS
         single<WWWPlatform> {
@@ -86,4 +86,7 @@ val IOSModule =
         single<PlatformMapManager> { IOSPlatformMapManager() }
         single<MapLibreAdapter<Any>> { IOSMapLibreAdapter() }
         single { MapStateManager(get()) }
+
+        // iOS MapViewModel
+        single<MapViewModel> { IOSMapViewModel(get()) }
     }

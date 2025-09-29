@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.events.utils.Position.Companion.nextId
 
 // ----------------------------------------------------------------------------
@@ -89,7 +88,6 @@ open class Position(
 }
 
 // Can only be initialized from internal context
-@VisibleForTesting
 internal fun <T : Position> T.init(): T =
     apply {
         id = nextId++

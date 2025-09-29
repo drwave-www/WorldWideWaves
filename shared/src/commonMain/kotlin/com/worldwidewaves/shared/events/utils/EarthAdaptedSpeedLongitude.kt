@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.WWWGlobals.Wave
 import com.worldwidewaves.shared.events.WWWEventWave.Direction
 import com.worldwidewaves.shared.events.utils.GeoUtils.EARTH_RADIUS
@@ -145,7 +144,6 @@ class EarthAdaptedSpeedLongitude(
 
     // ------------------------
 
-    @VisibleForTesting
     fun bands(): Map<Double, LatLonBand> {
         if (cachedBands == null) {
             val bands = calculateWaveBands().associateBy { it.latitude }
@@ -171,7 +169,6 @@ class EarthAdaptedSpeedLongitude(
      * - This ensures that the perceived wave speed is uniform across different latitudes by
      *   adjusting the band widths accordingly.
      */
-    @VisibleForTesting
     fun calculateWaveBands(): List<LatLonBand> {
         val (sw, ne) = coveredArea
         val latLonBands = mutableListOf<LatLonBand>()
@@ -239,7 +236,6 @@ class EarthAdaptedSpeedLongitude(
      *   for the shrinking distance between meridians at higher latitudes.
      * - The result is the longitude band width at that specific latitude.
      */
-    @VisibleForTesting
     fun calculateLonBandWidthAtLatitude(latitude: Double): Double {
         require(speed > 0) { "Speed must be greater than 0" }
         val distanceCovered = speed * bandStepDuration.inWholeMilliseconds / 1000
@@ -258,7 +254,6 @@ class EarthAdaptedSpeedLongitude(
      * - This ensures that the wave speed is perceived uniformly across different latitudes.
      * - The formula is: latBandWidth = lonBandWidthAtEquator / cos(latitude)
      */
-    @VisibleForTesting
     fun calculateOptimalLatBandWidth(
         latitude: Double,
         lonBandWidthAtEquator: Double,
@@ -287,7 +282,6 @@ class EarthAdaptedSpeedLongitude(
      *   is perceived the same at different latitudes.
      * - The formula is: adjustedLonWidth = lonWidth / cos(latitude)
      */
-    @VisibleForTesting
     fun adjustLongitudeWidthAtLatitude(
         latitude: Double,
         lonWidthAtTheLongest: Double,
