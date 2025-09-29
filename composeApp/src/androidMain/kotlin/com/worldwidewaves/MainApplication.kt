@@ -31,7 +31,6 @@ import com.worldwidewaves.shared.di.androidModule
 import com.worldwidewaves.shared.di.sharedModule
 import com.worldwidewaves.shared.utils.CloseableCoroutineScope
 import com.worldwidewaves.shared.utils.initNapier
-import com.worldwidewaves.shared.utils.setupDebugSimulation
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
@@ -77,10 +76,8 @@ class MainApplication :
             modules(sharedModule + androidModule + applicationModule)
         }
 
-        // -------------------------------------------------------------------- //
-        //  Default simulation initialization (runs after Koin properties are ready)
-        // -------------------------------------------------------------------- //
-        setupDebugSimulation()
+        // Debug simulation is now handled by debugBuild() -> setupDebugSimulation()
+        // This provides consistent behavior across Android and iOS platforms
     }
 
     override fun onTerminate() {

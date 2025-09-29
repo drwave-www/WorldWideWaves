@@ -1,0 +1,40 @@
+name: iosApp
+options:
+  bundleIdPrefix: com.worldwidewaves
+  createIntermediateGroups: true
+  developmentLanguage: en
+  deploymentTarget:
+    iOS: "15.0"
+targets:
+  iosApp:
+    type: application
+    platform: iOS
+    sources:
+      - path: iosApp
+        excludes:
+          - "*.xcodeproj"
+          - "build"
+          - "DerivedData"
+    settings:
+      INFOPLIST_FILE: iosApp/Info.plist
+      PRODUCT_BUNDLE_IDENTIFIER: com.worldwidewaves.iosApp
+      DEVELOPMENT_TEAM: ""
+      OTHER_LDFLAGS: [
+        "-lc++",
+        "-framework", "Shared"
+      ]
+      FRAMEWORK_SEARCH_PATHS: [
+        "../shared/build/xcode-frameworks/$$(CONFIGURATION)/$$(SDK_NAME)"
+      ]
+    dependencies:
+      - framework: ../shared/build/xcode-frameworks/$$(CONFIGURATION)/$$(SDK_NAME)/Shared.framework
+        embed: false
+schemes:
+  iosApp:
+    build:
+      targets:
+        iosApp: all
+    run:
+      config: Debug
+    archive:
+      config: Release

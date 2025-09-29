@@ -18,7 +18,7 @@ import io.github.aakira.napier.Napier
  * making logs visible via xcrun simctl log commands.
  */
 actual fun initNapier() {
-    if (com.worldwidewaves.shared.WWWGlobals.LogConfig.ENABLE_DEBUG_LOGGING) {
+    if (LogConfig.ENABLE_DEBUG_LOGGING) {
         Napier.base(OSLogAntilog())
     } else {
         Napier.takeLogarithm()

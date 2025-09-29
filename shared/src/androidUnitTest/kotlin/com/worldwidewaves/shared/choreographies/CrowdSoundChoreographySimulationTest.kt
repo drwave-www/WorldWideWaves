@@ -23,7 +23,6 @@ package com.worldwidewaves.shared.choreographies
 
 import com.worldwidewaves.shared.WWWGlobals.FileSystem
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.sound.MidiNote
 import com.worldwidewaves.shared.sound.MidiParser
 import com.worldwidewaves.shared.sound.MidiTrack
 import com.worldwidewaves.shared.sound.SoundPlayer
@@ -66,7 +65,7 @@ class CrowdSoundChoreographySimulationTest {
      */
     private data class SimulatedPerson(
         val id: Int,
-        val soundChoreographyPlayer: SoundChoreographyPlayer,
+        val soundChoreographyManager: SoundChoreographyManager,
         val playbackLog: MutableList<PlaybackEvent> = mutableListOf(),
     )
 
@@ -131,7 +130,7 @@ class CrowdSoundChoreographySimulationTest {
      * Create a mock MIDI track for testing when real file isn't available
      */
     private fun createMockMidiTrack(): MidiTrack {
-        val mockNotes = mutableListOf<MidiNote>()
+        val mockNotes = mutableListOf<com.worldwidewaves.shared.sound.MidiNote>()
         val trackDuration = 15.seconds
         val noteInterval = 200.milliseconds // Notes every 200ms
         val noteDuration = 400.milliseconds // Each note lasts 400ms, ensuring overlap
@@ -145,7 +144,7 @@ class CrowdSoundChoreographySimulationTest {
             for (pitchOffset in 0..2) {
                 val currentPitch = (pitch + pitchOffset) % 128
                 mockNotes.add(
-                    MidiNote(
+                    com.worldwidewaves.shared.sound.MidiNote(
                         pitch = currentPitch,
                         velocity = Random.nextInt(80, 127),
                         startTime = currentTime,
@@ -179,7 +178,7 @@ class CrowdSoundChoreographySimulationTest {
 
                         // Create manager for this person
                         val manager =
-                            SoundChoreographyPlayer().apply {
+                            SoundChoreographyManager().apply {
                                 setCurrentTrack(midiTrack)
                                 setLooping(true)
                                 setWaveform(SoundPlayer.Waveform.SQUARE)

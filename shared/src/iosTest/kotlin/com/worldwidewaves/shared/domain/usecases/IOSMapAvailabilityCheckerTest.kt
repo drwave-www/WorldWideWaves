@@ -304,6 +304,8 @@ class IOSMapAvailabilityCheckerTest {
             checker.getDownloadedMaps()
             // Should have some tracked maps
 
+            // Cleanup should clear everything
+            checker.cleanup()
             advanceUntilIdle()
 
             val finalTrackedMaps = checker.getDownloadedMaps()
@@ -325,6 +327,8 @@ class IOSMapAvailabilityCheckerTest {
             // Should not crash and should track the resource
             checker.getDownloadedMaps()
 
+            // Cleanup after test
+            checker.cleanup()
             advanceUntilIdle()
         }
 }

@@ -59,7 +59,8 @@ class EventsListScreen(
             viewModel.loadEvents()
         }
 
-        // Refresh map availability when screen loads (KMM-compatible approach)
+        // TODO: Refresh map availability when screen resumes
+        // FIXED: Use KMM-compatible approach instead of Android lifecycle
         LaunchedEffect(Unit) {
             mapChecker.refreshAvailability()
         }

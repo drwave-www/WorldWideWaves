@@ -93,5 +93,5 @@ interface WaveProgressionTracker {
     /**
      * Clears progression history to free memory.
      */
-    suspend fun clearProgressionHistory()
+    fun clearProgressionHistory()
 }

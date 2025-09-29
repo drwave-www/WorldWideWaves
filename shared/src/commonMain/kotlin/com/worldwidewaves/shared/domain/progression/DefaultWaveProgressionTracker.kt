@@ -28,8 +28,6 @@ import com.worldwidewaves.shared.events.WWWEventArea
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.utils.Log
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 
 /**
  * Default implementation of WaveProgressionTracker.
@@ -45,7 +43,6 @@ class DefaultWaveProgressionTracker(
 ) : WaveProgressionTracker {
     private val progressionHistory = mutableListOf<ProgressionSnapshot>()
     private val maxHistorySize = 100
-    private val historyMutex = Mutex()
 
     override suspend fun calculateProgression(event: IWWWEvent): Double {
         return try {
@@ -114,22 +111,18 @@ class DefaultWaveProgressionTracker(
                     isInWaveArea = isInArea,
                 )
 
-            // Add to history with circular buffer behavior (thread-safe)
-            historyMutex.withLock {
-                progressionHistory.add(snapshot)
-                if (progressionHistory.size > maxHistorySize) {
-                    progressionHistory.removeAt(0)
-                }
+            // Add to history with circular buffer behavior
+            progressionHistory.add(snapshot)
+            if (progressionHistory.size > maxHistorySize) {
+                progressionHistory.removeAt(0)
             }
         } catch (e: Exception) {
             Log.e("WaveProgressionTracker", "Error recording progression snapshot: $e")
         }
     }
 
-    override suspend fun clearProgressionHistory() {
-        historyMutex.withLock {
-            progressionHistory.clear()
-        }
+    override fun clearProgressionHistory() {
+        progressionHistory.clear()
         Log.v("WaveProgressionTracker", "Cleared progression history")
     }
 }

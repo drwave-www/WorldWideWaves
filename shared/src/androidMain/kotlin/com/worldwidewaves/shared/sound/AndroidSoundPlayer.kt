@@ -26,7 +26,6 @@ import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioTrack
-import android.os.Build
 import com.worldwidewaves.shared.WWWGlobals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -191,13 +190,13 @@ class AndroidSoundPlayer(
         // Audio processing and playback, not I/O
         val bufferSizeInBytes = buffer.getRawBuffer().size
 
-        val builder =
+        val audioTrack =
             AudioTrack
                 .Builder()
                 .setAudioAttributes(
                     AudioAttributes
                         .Builder()
-                        .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
                         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                         .build(),
                 ).setAudioFormat(
@@ -209,13 +208,7 @@ class AndroidSoundPlayer(
                         .build(),
                 ).setBufferSizeInBytes(bufferSizeInBytes)
                 .setTransferMode(AudioTrack.MODE_STATIC)
-
-        // setPerformanceMode is only available on API 26+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            builder.setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
-        }
-
-        val audioTrack = builder.build()
+                .build()
 
         synchronized(activeTracks) {
             activeTracks.add(audioTrack)

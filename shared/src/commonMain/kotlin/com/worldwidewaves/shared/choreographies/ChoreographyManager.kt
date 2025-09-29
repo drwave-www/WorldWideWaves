@@ -187,26 +187,18 @@ open class ChoreographyManager<T> : KoinComponent {
 
     @OptIn(ExperimentalResourceApi::class)
     private suspend fun loadDefinition(definitionResource: String): ChoreographyDefinition {
-        // Return cached definition if available
-        val cachedDefinition = definition
-        if (cachedDefinition != null) {
-            return cachedDefinition
-        }
+        definition?.let { return it }
 
-        // Load and parse definition
-        val loadedDefinition =
-            try {
-                val bytes = Res.readBytes(definitionResource)
-                val jsonString = bytes.decodeToString()
-                json.decodeFromString<ChoreographyDefinition>(jsonString).also {
-                    definition = it
-                }
-            } catch (e: Exception) {
-                Log.e("ChoreographyManager", "Error loading choreography definition: ${e.message}")
-                ChoreographyDefinition()
+        try {
+            val bytes = Res.readBytes(definitionResource)
+            val jsonString = bytes.decodeToString()
+            return json.decodeFromString<ChoreographyDefinition>(jsonString).also {
+                definition = it
             }
-
-        return loadedDefinition
+        } catch (e: Exception) {
+            Log.e("ChoreographyManager", "Error loading choreography definition: ${e.message}")
+            return ChoreographyDefinition()
+        }
     }
 
     // ------------------------------------------------------------------------
@@ -241,10 +233,8 @@ open class ChoreographyManager<T> : KoinComponent {
     open suspend fun getCurrentWarmingSequence(startTime: Instant): DisplayableSequence<T>? {
         ensureChoreographyLoaded()
 
-        val resolved = resolvedSequences
-        if (resolved == null || resolved.warmingSequences.isEmpty()) {
-            return null
-        }
+        val resolved = resolvedSequences ?: return null
+        if (resolved.warmingSequences.isEmpty()) return null
 
         val totalTiming = resolved.warmingSequences.last().endTime
         val elapsedTime = clock.now() - startTime
@@ -264,8 +254,7 @@ open class ChoreographyManager<T> : KoinComponent {
                 wrappedElapsedTime >= it.startTime && wrappedElapsedTime < it.endTime
             } ?: resolved.warmingSequences.first()
 
-        val result = sequence.toDisplayable(sequence.endTime - wrappedElapsedTime)
-        return result
+        return sequence.toDisplayable(sequence.endTime - wrappedElapsedTime)
     }
 
     /**
@@ -302,10 +291,8 @@ open class ChoreographyManager<T> : KoinComponent {
      * Warming sequences are less timing-critical so this version is acceptable.
      */
     open fun getCurrentWarmingSequenceImmediate(startTime: Instant): DisplayableSequence<T>? {
-        val resolved = resolvedSequences
-        if (resolved == null || resolved.warmingSequences.isEmpty()) {
-            return null
-        }
+        val resolved = resolvedSequences ?: return null
+        if (resolved.warmingSequences.isEmpty()) return null
 
         val totalTiming = resolved.warmingSequences.last().endTime
         val elapsedTime = clock.now() - startTime
@@ -323,8 +310,7 @@ open class ChoreographyManager<T> : KoinComponent {
                 wrappedElapsedTime >= it.startTime && wrappedElapsedTime < it.endTime
             } ?: resolved.warmingSequences.first()
 
-        val result = sequence.toDisplayable(sequence.endTime - wrappedElapsedTime)
-        return result
+        return sequence.toDisplayable(sequence.endTime - wrappedElapsedTime)
     }
 
     /**

@@ -17,123 +17,86 @@ import com.worldwidewaves.shared.utils.WWWLogger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-private const val TAG = "IOSMapLibreAdapter"
+private const val DEFAULT_IPHONE_WIDTH = 375.0
+private const val DEFAULT_IPHONE_HEIGHT = 812.0
 
 /**
- * iOS implementation of MapLibreAdapter using iOS MapLibre SDK via Swift wrapper.
+ * iOS implementation of MapLibreAdapter using iOS MapLibre SDK.
  *
- * This adapter bridges Kotlin shared logic to Swift MapLibreViewWrapper which wraps
- * the native iOS MapLibre SDK (MLNMapView). The Swift wrapper is injected via setMap()
- * and must conform to the expected interface (defined in MapLibreViewWrapper.swift).
+ * This adapter provides a bridge between the shared map logic and iOS MapLibre,
+ * implementing all the map operations required by the WorldWideWaves application.
  *
- * Architecture:
- * - Kotlin (this class) ← → Swift (MapLibreViewWrapper) ← → Objective-C/Swift (MapLibre SDK)
- *
- * Note: Swift classes are accessed via dynamic dispatch since Kotlin/Native can only directly
- * interop with Objective-C (not Swift). The Swift wrapper uses @objc annotations to expose
- * its interface.
+ * Note: Full MapLibre iOS SDK integration will be completed when MapLibre iOS
+ * bindings are properly configured in the build system.
  */
 class IOSMapLibreAdapter : MapLibreAdapter<Any> {
-    // Swift wrapper instance - accessed via runtime checks
-    private var wrapper: Any? = null
-
+    private var mapView: Any? = null
     private val _currentPosition = MutableStateFlow<Position?>(null)
     private val _currentZoom = MutableStateFlow(10.0)
 
     override val currentPosition: StateFlow<Position?> = _currentPosition
     override val currentZoom: StateFlow<Double> = _currentZoom
 
-    /**
-     * Sets the MapLibre wrapper (expects MapLibreViewWrapper Swift object).
-     * The wrapper should already have the MLNMapView configured.
-     */
     override fun setMap(map: Any) {
-        this.wrapper = map
-        WWWLogger.d(TAG, "Map wrapper set")
+        this.mapView = map
+        WWWLogger.d("IOSMapLibreAdapter", "Map view set")
 
-        // Note: Camera position and zoom updates will be pushed from Swift delegate callbacks
-        // via updateCameraPosition() and updateZoom() methods
+        // NOTE: Set up map listeners for position and zoom changes
+        // This will be implemented when iOS MapLibre SDK integration is completed
     }
 
     override fun setStyle(
         stylePath: String,
         callback: () -> Unit?,
     ) {
-        if (wrapper == null) {
-            WWWLogger.w(TAG, "Cannot set style - wrapper not initialized")
-            return
+        if (mapView != null) {
+            WWWLogger.d("IOSMapLibreAdapter", "Setting map style: $stylePath")
+
+            // NOTE: Implement iOS MapLibre style setting
+            // When MapLibre iOS bindings are available:
+            // (mapView as MLNMapView).styleURL = URL(string: stylePath)
+
+            callback.invoke()
+        } else {
+            WWWLogger.w("IOSMapLibreAdapter", "Cannot set style - map view not initialized")
         }
-
-        WWWLogger.d(TAG, "Setting map style: $stylePath")
-
-        // NOTE: Swift wrapper call will be implemented via cinterop
-        // For now, just invoke callback to prevent blocking
-        callback.invoke()
     }
 
     override fun getWidth(): Double {
-        if (wrapper == null) return 375.0 // Default iPhone width
-
-        // NOTE: Swift wrapper call will be implemented via cinterop
-        return 375.0
+        // NOTE: Implement with proper MapLibre iOS bindings
+        return DEFAULT_IPHONE_WIDTH
     }
 
     override fun getHeight(): Double {
-        if (wrapper == null) return 812.0 // Default iPhone height
-
-        // NOTE: Swift wrapper call will be implemented via cinterop
-        return 812.0
+        // NOTE: Implement with proper MapLibre iOS bindings
+        return DEFAULT_IPHONE_HEIGHT
     }
 
     override fun getCameraPosition(): Position? {
-        if (wrapper == null) return null
-
-        // NOTE: Swift wrapper call will be implemented via cinterop
-        return null
+        // NOTE: Implement with proper MapLibre iOS bindings
+        // }
+        return null // Will be implemented with MapLibre bindings
     }
 
     override fun getVisibleRegion(): BoundingBox {
-        if (wrapper == null) {
-            return createFallbackBounds()
-        }
-
-        // NOTE: Swift wrapper call will be implemented via cinterop
-        return createFallbackBounds()
-    }
-
-    private fun createFallbackBounds(): BoundingBox =
-        BoundingBox.fromCorners(
+        // NOTE: Implement with proper MapLibre iOS bindings
+        // Will be implemented when MapLibre iOS SDK bindings are available
+        val sw = Position(0.0, 0.0)
+        val ne = Position(0.0, 0.0)
+        return BoundingBox.fromCorners(listOf(sw, ne)) ?: BoundingBox.fromCorners(
             listOf(
                 Position(WWWGlobals.Geodetic.MIN_LATITUDE, WWWGlobals.Geodetic.MIN_LONGITUDE),
                 Position(WWWGlobals.Geodetic.MAX_LATITUDE, WWWGlobals.Geodetic.MAX_LONGITUDE),
             ),
         )!!
-
-    /**
-     * Update camera position from Swift delegate callback.
-     * Called by Swift code when map camera changes.
-     */
-    fun updateCameraPosition(
-        latitude: Double,
-        longitude: Double,
-    ) {
-        _currentPosition.value = Position(latitude, longitude)
-    }
-
-    /**
-     * Update zoom level from Swift delegate callback.
-     * Called by Swift code when map zoom changes.
-     */
-    fun updateZoom(zoom: Double) {
-        _currentZoom.value = zoom
     }
 
     override fun moveCamera(bounds: BoundingBox) {
-        if (wrapper != null) {
+        if (mapView != null) {
             WWWLogger.d("IOSMapLibreAdapter", "Moving camera to bounds")
 
             // NOTE: Implement iOS MapLibre camera movement
-            // Will be implemented via cinterop bindings
+            // Will be implemented when MapLibre iOS SDK bindings are available
         }
     }
 
@@ -142,11 +105,11 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         zoom: Double?,
         callback: MapCameraCallback?,
     ) {
-        if (wrapper != null) {
+        if (mapView != null) {
             WWWLogger.d("IOSMapLibreAdapter", "Animating camera to position: ${position.lat}, ${position.lng}")
 
             // NOTE: Implement iOS MapLibre camera animation
-            // Will be implemented via cinterop bindings
+            // Will be implemented when MapLibre iOS SDK bindings are available
 
             callback?.onFinish()
         }
@@ -157,11 +120,11 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         padding: Int,
         callback: MapCameraCallback?,
     ) {
-        if (wrapper != null) {
+        if (mapView != null) {
             WWWLogger.d("IOSMapLibreAdapter", "Animating camera to bounds with padding: $padding")
 
             // NOTE: Implement iOS MapLibre bounds animation
-            // Will be implemented via cinterop bindings
+            // Will be implemented when MapLibre iOS SDK bindings are available
 
             callback?.onFinish()
         }
@@ -180,17 +143,17 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
     }
 
     override fun setMinZoomPreference(minZoom: Double) {
-        if (wrapper != null) {
-            // NOTE: Implement via cinterop bindings
-            // wrapper.minimumZoomLevel = minZoom
+        if (mapView != null) {
+            // NOTE: Implement with proper MapLibre iOS bindings
+            // (mapView as MLNMapView).minimumZoomLevel = minZoom
             WWWLogger.d("IOSMapLibreAdapter", "Set minimum zoom level: $minZoom")
         }
     }
 
     override fun setMaxZoomPreference(maxZoom: Double) {
-        if (wrapper != null) {
-            // NOTE: Implement via cinterop bindings
-            // wrapper.maximumZoomLevel = maxZoom
+        if (mapView != null) {
+            // NOTE: Implement with proper MapLibre iOS bindings
+            // (mapView as MLNMapView).maximumZoomLevel = maxZoom
             WWWLogger.d("IOSMapLibreAdapter", "Set maximum zoom level: $maxZoom")
         }
     }
@@ -211,11 +174,11 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         polygons: List<Any>,
         clearExisting: Boolean,
     ) {
-        if (wrapper != null) {
+        if (mapView != null) {
             WWWLogger.d("IOSMapLibreAdapter", "Adding ${polygons.size} wave polygons, clearExisting: $clearExisting")
 
             // NOTE: Implement iOS MapLibre polygon rendering
-            // Will be implemented via cinterop bindings
+            // Will be implemented when MapLibre iOS SDK bindings are available
             // Convert polygons to iOS MapLibre format and add to map
             // Handle clearExisting flag to remove previous polygons
         }

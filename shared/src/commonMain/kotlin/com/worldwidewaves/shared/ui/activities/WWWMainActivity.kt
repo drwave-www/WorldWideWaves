@@ -46,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.WWWPlatform
-import com.worldwidewaves.shared.choreographies.SoundChoreographyPlayer
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.sound.GlobalSoundChoreographyManager
 import com.worldwidewaves.shared.ui.AboutTabScreen
@@ -84,7 +83,7 @@ open class WWWMainActivity
         private val platform: WWWPlatform by inject()
         protected val events: WWWEvents by inject()
         private val globalSoundChoreography: GlobalSoundChoreographyManager by inject()
-        private val soundChoreographyPlayer: SoundChoreographyPlayer by inject()
+        private val soundChoreographyManager: com.worldwidewaves.shared.choreographies.SoundChoreographyManager by inject()
 
         private val eventsListScreen: EventsListScreen by inject()
         private val aboutTabScreen: AboutTabScreen by inject()
@@ -109,8 +108,8 @@ open class WWWMainActivity
         suspend fun initialize() {
             Log.i("WWWMainActivity", "Initializing WWWMainActivity")
 
-            // Load the sound choreography
-            soundChoreographyPlayer.initialize()
+            // iOS FIX: Initialize sound choreography manager since init{} was removed
+            soundChoreographyManager.initialize()
 
             // Begin loading events – when done, flag so splash can disappear
             events.loadEvents(onTermination = {

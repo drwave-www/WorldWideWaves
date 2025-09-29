@@ -36,6 +36,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockkObject
 import io.mockk.slot
+import io.mockk.spyk
 import io.mockk.unmockkObject
 import io.mockk.verify
 import kotlinx.coroutines.Job
@@ -71,7 +72,7 @@ class SoundChoreographyManagerTest : KoinTest {
     @MockK
     private lateinit var coroutineScopeProvider: CoroutineScopeProvider
 
-    private lateinit var manager: SoundChoreographyPlayer
+    private lateinit var manager: SoundChoreographyManager
 
     @BeforeTest
     fun setup() {
@@ -94,7 +95,7 @@ class SoundChoreographyManagerTest : KoinTest {
         every { clock.now() } returns Instant.fromEpochMilliseconds(0)
 
         // Create manager with mocked dependencies
-        manager = SoundChoreographyPlayer()
+        manager = SoundChoreographyManager(coroutineScopeProvider)
     }
 
     @AfterTest
@@ -170,18 +171,15 @@ class SoundChoreographyManagerTest : KoinTest {
     @Test
     fun `test preloadMidiFile returns false when MIDI load fails`() =
         runTest {
-            // Mock MidiParser as object to control its behavior
-            mockkObject(MidiParser)
-            try {
-                coEvery { MidiParser.parseMidiFile("test.mid") } throws Exception("Test exception")
+            // Create a spy on MidiParser to control its behavior
+            val midiParserSpy = spyk(MidiParser)
 
-                // Test the preloadMidiFile function
-                val result = manager.preloadMidiFile("test.mid")
+            coEvery { midiParserSpy.parseMidiFile(any()) } throws Exception("Test exception")
 
-                assertFalse(result, "preloadMidiFile should return false when it fails")
-            } finally {
-                unmockkObject(MidiParser)
-            }
+            // Test the preloadMidiFile function
+            val result = manager.preloadMidiFile("test.mid")
+
+            assertFalse(result, "preloadMidiFile should return false when it fails")
         }
 
     @Test

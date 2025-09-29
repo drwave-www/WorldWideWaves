@@ -221,7 +221,7 @@ fun ChoreographyDisplay(
 
     // iOS FIX: Removed dangerous object : KoinComponent pattern
 
-    var currentImageIndex by remember(sequence) { mutableIntStateOf(0) }
+    var currentImageIndex by remember { mutableIntStateOf(0) }
     val remainingTime by remember(sequence) { mutableStateOf(sequence.remainingDuration) }
 
     // Get the painter
@@ -301,7 +301,6 @@ fun ChoreographyDisplay(
                     val offsetX = (size.width - scaledWidth) / 2f
                     val offsetY = (size.height - scaledHeight) / 2f
 
-                    // Enhanced rendering for better quality on Android to match iOS
                     clipRect(
                         left = offsetX,
                         top = offsetY,
@@ -316,7 +315,7 @@ fun ChoreographyDisplay(
                                 draw(
                                     size =
                                         Size(
-                                            width = scaledWidth * 4, // Always 4 frames per sprite sheet
+                                            width = scaledWidth * 4, // Always 4 frames per slide
                                             height = scaledHeight,
                                         ),
                                 )

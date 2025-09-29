@@ -75,7 +75,7 @@ conf() {
 get_osmAdminids() {
   local event="$1"
   local ids
-
+  
   # First try to get the osmAdminids as an array
   ids=$(./bin/jq -r --arg event "$event" \
     '.[] | select(.id == $event) | .area.osmAdminids | if type=="array" then map(tostring) | join(",") else . end' "$EVENTS_FILE")
@@ -84,14 +84,14 @@ get_osmAdminids() {
   if [ "$ids" = "null" ] || [ -z "$ids" ]; then
     ids=$(./bin/jq -r --arg event "$event" \
       '.[] | select(.id == $event) | .area.osmAdminid' "$EVENTS_FILE")
-
+    
     # If neither field exists, return an error
     if [ "$ids" = "null" ] || [ -z "$ids" ]; then
       echo ""
       return 1
     fi
   fi
-
+  
   echo "$ids"
 }
 
@@ -102,22 +102,22 @@ get_event_bbox() {
   local event="$1"
   local direct_bbox
   direct_bbox=$(conf "$event" "area.bbox")
-
+  
   # If a direct bbox is specified, use that
   if [ "$direct_bbox" != "null" ] && [ -n "$direct_bbox" ]; then
     adjust_bbox_to_16_9 "$direct_bbox"
     return
   fi
-
+  
   # Get the OSM admin IDs
   local osmAdminids
   osmAdminids=$(get_osmAdminids "$event")
-
+  
   if [ -z "$osmAdminids" ]; then
     echo "Error: No area.bbox or area.osmAdminids found for event $event" >&2
     return 1
   fi
-
+  
   # Use the admin IDs to get the bbox
   local calc_bbox
   calc_bbox=$(./libs/get_bbox.dep.sh "$osmAdminids" bbox)
@@ -138,12 +138,12 @@ adjust_bbox_to_16_9() {
     echo ""
     return
   fi
-
+  
   # Print initial bbox to STDERR
   echo "Initial bbox: $bbox" >&2
-
+  
   IFS=',' read -r minLng minLat maxLng maxLat <<< "$bbox"
-
+  
   # Validate numeric
   for v in "$minLng" "$minLat" "$maxLng" "$maxLat"; do
     if ! [[ $v =~ ^-?[0-9.]+$ ]]; then
@@ -216,22 +216,22 @@ get_event_center() {
   local event="$1"
   local direct_center
   direct_center=$(conf "$event" "area.center")
-
+  
   # If a direct center is specified, use that
   if [ "$direct_center" != "null" ] && [ -n "$direct_center" ]; then
     echo "$direct_center"
     return
   fi
-
+  
   # Get the OSM admin IDs
   local osmAdminids
   osmAdminids=$(get_osmAdminids "$event")
-
+  
   if [ -z "$osmAdminids" ]; then
     echo "Error: No area.center or area.osmAdminids found for event $event" >&2
     return 1
   fi
-
+  
   # Use the admin IDs to get the center
   ./libs/get_bbox.dep.sh "$osmAdminids" center
 }
@@ -239,8 +239,7 @@ get_event_center() {
 safe_replace() {
   local pattern=$1
   local value=$2
-  local escaped_value
-  escaped_value=$(echo "$value" | sed 's/[\/&~]/\\&/g')
+  local escaped_value=$(echo "$value" | sed 's/[\/&~]/\\&/g')
   echo "s~$pattern~$escaped_value~g"
 }
 
@@ -262,13 +261,8 @@ tpl() {
   center=$(get_event_center "$event")
 
   # Replace placeholders with event properties and bbox/center data
-
-  # First, replace the event ID placeholder (most common case)
-  eval sed -i $SED_INPLACE_FLAG \
-    -e "\"$(safe_replace "#id#" "$event")\"" \
-    -e "\"$(safe_replace "#map.center#" "$center")\"" \
-    -e "\"$(safe_replace "#map.bbox#" "$bbox")\"" \
-    "$tpl_file"
+  # First, handle array values specifically
+  # Replace osmAdminids array elements with their values using proper array syntax
 
   # Then handle all other properties using the standard approach
   ./bin/jq -r 'paths | map(tostring) | join(".")' "$EVENTS_FILE" | grep -v '\[[0-9]\]' | grep -v '[0-9]$' | sed -e 's/^[0-9\.]*\.*//' | sort | uniq | while read -r prop; do
@@ -276,6 +270,8 @@ tpl() {
       # Use portable in-place editing for both GNU and BSD sed
       eval sed -i $SED_INPLACE_FLAG \
         -e "\"$(safe_replace "#${prop}#" "$(conf "$event" "$prop")")\"" \
+        -e "\"$(safe_replace "#map.center#" "$center")\"" \
+        -e "\"$(safe_replace "#map.bbox#" "$bbox")\"" \
         "$tpl_file"
     fi
   done

@@ -169,7 +169,6 @@ class DefaultObservationScheduler(
     private suspend fun buildReasonString(
         event: IWWWEvent,
         phase: ObservationPhase,
-        @Suppress("UnusedParameter") // May be used for future detailed scheduling reasons
         interval: Duration,
     ): String {
         val now = clock.now()

@@ -47,7 +47,6 @@ import kotlin.time.Instant.Companion.DISTANT_FUTURE
  */
 class DefaultEventStateManager(
     private val waveProgressionTracker: WaveProgressionTracker,
-    @Suppress("UnusedPrivateProperty") // Injected for timing-critical state calculations
     private val clock: IClock,
 ) : EventStateManager {
     override suspend fun calculateEventState(
@@ -96,11 +95,8 @@ class DefaultEventStateManager(
     ): List<StateValidationIssue> {
         val issues = mutableListOf<StateValidationIssue>()
 
-        // Validate progression bounds - extract complex condition into named booleans
-        val isProgressionOutOfRange = input.progression < 0.0 || input.progression > 100.0
-        val isProgressionInvalid = input.progression.isNaN() || input.progression.isInfinite()
-
-        if (isProgressionOutOfRange || isProgressionInvalid) {
+        // Validate progression bounds
+        if (input.progression < 0.0 || input.progression > 100.0 || input.progression.isNaN() || input.progression.isInfinite()) {
             issues.add(
                 StateValidationIssue(
                     field = "progression",

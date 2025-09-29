@@ -54,7 +54,6 @@ icerockMoko = "0.25.0"
 ktlint = "1.4.1"
 detekt = "1.23.7"
 material3 = "1.4.0"
-buildkonfig = "0.15.2"
 
 [libraries]
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -131,4 +130,3 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }
 gradle-toolchain-resolver = { id = "org.gradle.toolchains.foojay-resolver-convention", version.ref = "gradleToolchainResolver" }
-buildkonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildkonfig" }
