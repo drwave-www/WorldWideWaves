@@ -125,11 +125,11 @@ private var koinApp: KoinApplication? = null
 actual suspend fun readGeoJson(eventId: String): String? {
     // Production-grade iOS implementation: Read GeoJSON from ODR bundle resources
     return try {
-        Log.v("readGeoJson", "[$eventId] 📥 Loading GeoJSON for event $eventId")
+        Log.v("readGeoJson", "[$eventId] Loading GeoJSON for event $eventId")
 
         val filePath = getMapFileAbsolutePath(eventId, "geojson")
         if (filePath != null) {
-            Log.i("readGeoJson", "[$eventId] 📖 Reading GeoJSON from: $filePath")
+            Log.i("readGeoJson", "[$eventId] Reading GeoJSON from: $filePath")
 
             // Use iOS Foundation API to read file contents safely
             val content =
@@ -142,18 +142,18 @@ actual suspend fun readGeoJson(eventId: String): String? {
 
             if (content != null) {
                 val preview = content.take(100).replace("\n", " ")
-                Log.i("readGeoJson", "[$eventId] ✅ Successfully loaded GeoJSON (${content.length} chars): $preview...")
+                Log.i("readGeoJson", "[$eventId] Successfully loaded GeoJSON (${content.length} chars): $preview...")
                 content
             } else {
-                Log.w("readGeoJson", "[$eventId] ❌ Failed to read file content from $filePath")
+                Log.w("readGeoJson", "[$eventId] Failed to read file content from $filePath")
                 null
             }
         } else {
-            Log.d("readGeoJson", "[$eventId] ❌ GeoJSON file not found for event $eventId")
+            Log.d("readGeoJson", "[$eventId] GeoJSON file not found for event $eventId")
             null
         }
     } catch (e: Exception) {
-        Log.e("readGeoJson", "[$eventId] 💥 Error reading GeoJSON for event $eventId: ${e.message}", e)
+        Log.e("readGeoJson", "[$eventId] Error reading GeoJSON for event $eventId: ${e.message}", e)
         null
     }
 }
@@ -167,18 +167,18 @@ actual suspend fun getMapFileAbsolutePath(
     // Production-grade iOS implementation: Check cache and ODR bundle resources
     return try {
         val fileName = "$eventId.$extension"
-        Log.i("getMapFileAbsolutePath", "[$eventId] 🔍 iOS RESOURCE SEARCH: Looking for $fileName")
-        Log.i("getMapFileAbsolutePath", "[$eventId] 📱 Bundle info: ${NSBundle.mainBundle}")
+        Log.i("getMapFileAbsolutePath", "[$eventId] iOS RESOURCE SEARCH: Looking for $fileName")
+        Log.i("getMapFileAbsolutePath", "[$eventId] Bundle info: ${NSBundle.mainBundle}")
 
         // Priority 1: Check cache directory (downloaded maps)
         val cacheDir = getCacheDir()
         val cachePath = "$cacheDir/$fileName"
         Log.v("getMapFileAbsolutePath", "[$eventId] Priority 1: Checking cache directory: $cachePath")
         if (NSFileManager.defaultManager.fileExistsAtPath(cachePath)) {
-            Log.i("getMapFileAbsolutePath", "[$eventId] ✅ FOUND $fileName in cache: $cachePath")
+            Log.i("getMapFileAbsolutePath", "[$eventId] FOUND $fileName in cache: $cachePath")
             return cachePath
         }
-        Log.v("getMapFileAbsolutePath", "[$eventId] ❌ Not found in cache directory")
+        Log.v("getMapFileAbsolutePath", "[$eventId] Not found in cache directory")
 
         // Priority 2: Check main bundle resources (ODR maps)
         val bundle = NSBundle.mainBundle
@@ -186,40 +186,40 @@ actual suspend fun getMapFileAbsolutePath(
         val resourcePath = bundle.pathForResource(eventId, extension)
         Log.v("getMapFileAbsolutePath", "[$eventId] bundle.pathForResource($eventId, $extension) = $resourcePath")
         if (resourcePath != null && NSFileManager.defaultManager.fileExistsAtPath(resourcePath)) {
-            Log.i("getMapFileAbsolutePath", "[$eventId] ✅ FOUND $fileName in bundle: $resourcePath")
+            Log.i("getMapFileAbsolutePath", "[$eventId] FOUND $fileName in bundle: $resourcePath")
             return resourcePath
         }
-        Log.v("getMapFileAbsolutePath", "[$eventId] ❌ Not found in main bundle")
+        Log.v("getMapFileAbsolutePath", "[$eventId] Not found in main bundle")
 
         // Priority 3: Check Maps subdirectory in bundle (alternative ODR structure)
         Log.v("getMapFileAbsolutePath", "[$eventId] Priority 3: Checking Maps subdirectory")
         val mapsResourcePath = bundle.pathForResource(eventId, extension, "Maps")
         Log.v("getMapFileAbsolutePath", "[$eventId] bundle.pathForResource($eventId, $extension, \"Maps\") = $mapsResourcePath")
         if (mapsResourcePath != null && NSFileManager.defaultManager.fileExistsAtPath(mapsResourcePath)) {
-            Log.i("getMapFileAbsolutePath", "[$eventId] ✅ FOUND $fileName in Maps subdirectory: $mapsResourcePath")
+            Log.i("getMapFileAbsolutePath", "[$eventId] FOUND $fileName in Maps subdirectory: $mapsResourcePath")
             return mapsResourcePath
         }
-        Log.v("getMapFileAbsolutePath", "[$eventId] ❌ Not found in Maps subdirectory")
+        Log.v("getMapFileAbsolutePath", "[$eventId] Not found in Maps subdirectory")
 
         // Priority 4: Check Resources/Maps subdirectory (alternative ODR structure)
         Log.v("getMapFileAbsolutePath", "[$eventId] Priority 4: Checking Resources/Maps subdirectory")
         val resourcesMapsPath = bundle.pathForResource(eventId, extension, "Resources/Maps")
         Log.v("getMapFileAbsolutePath", "[$eventId] bundle.pathForResource($eventId, $extension, \"Resources/Maps\") = $resourcesMapsPath")
         if (resourcesMapsPath != null && NSFileManager.defaultManager.fileExistsAtPath(resourcesMapsPath)) {
-            Log.i("getMapFileAbsolutePath", "[$eventId] ✅ FOUND $fileName in Resources/Maps: $resourcesMapsPath")
+            Log.i("getMapFileAbsolutePath", "[$eventId] FOUND $fileName in Resources/Maps: $resourcesMapsPath")
             return resourcesMapsPath
         }
-        Log.v("getMapFileAbsolutePath", "[$eventId] ❌ Not found in Resources/Maps subdirectory")
+        Log.v("getMapFileAbsolutePath", "[$eventId] Not found in Resources/Maps subdirectory")
 
         // Priority 5: Check city subdirectory structure: Maps/eventId/eventId.extension
         Log.v("getMapFileAbsolutePath", "[$eventId] Priority 5: Checking city subdirectory Maps/$eventId")
         val citySubdirPath = bundle.pathForResource(eventId, extension, "Maps/$eventId")
         Log.v("getMapFileAbsolutePath", "[$eventId] bundle.pathForResource($eventId, $extension, \"Maps/$eventId\") = $citySubdirPath")
         if (citySubdirPath != null && NSFileManager.defaultManager.fileExistsAtPath(citySubdirPath)) {
-            Log.i("getMapFileAbsolutePath", "[$eventId] ✅ FOUND $fileName in Maps/$eventId: $citySubdirPath")
+            Log.i("getMapFileAbsolutePath", "[$eventId] FOUND $fileName in Maps/$eventId: $citySubdirPath")
             return citySubdirPath
         }
-        Log.v("getMapFileAbsolutePath", "[$eventId] ❌ Not found in Maps/$eventId subdirectory")
+        Log.v("getMapFileAbsolutePath", "[$eventId] Not found in Maps/$eventId subdirectory")
 
         // Priority 6: Check Resources/Maps city subdirectory: Resources/Maps/eventId/eventId.extension
         Log.v("getMapFileAbsolutePath", "[$eventId] Priority 6: Checking Resources/Maps/$eventId (EXPECTED PATH)")
@@ -229,16 +229,16 @@ actual suspend fun getMapFileAbsolutePath(
             "[$eventId] bundle.pathForResource($eventId, $extension, \"Resources/Maps/$eventId\") = $resourcesCitySubdirPath",
         )
         if (resourcesCitySubdirPath != null && NSFileManager.defaultManager.fileExistsAtPath(resourcesCitySubdirPath)) {
-            Log.i("getMapFileAbsolutePath", "[$eventId] ✅ SUCCESS! FOUND $fileName in Resources/Maps/$eventId: $resourcesCitySubdirPath")
+            Log.i("getMapFileAbsolutePath", "[$eventId] SUCCESS! FOUND $fileName in Resources/Maps/$eventId: $resourcesCitySubdirPath")
             return resourcesCitySubdirPath
         }
-        Log.w("getMapFileAbsolutePath", "[$eventId] ❌ Not found in Resources/Maps/$eventId (THIS SHOULD HAVE WORKED!)")
+        Log.w("getMapFileAbsolutePath", "[$eventId] Not found in Resources/Maps/$eventId (THIS SHOULD HAVE WORKED!)")
 
-        Log.w("getMapFileAbsolutePath", "[$eventId] 🚨 SEARCH FAILED: Map file $fileName not found in any of 6 search locations")
-        Log.i("getMapFileAbsolutePath", "[$eventId] 📍 Expected location: Resources/Maps/$eventId/$fileName")
+        Log.w("getMapFileAbsolutePath", "[$eventId] SEARCH FAILED: Map file $fileName not found in any of 6 search locations")
+        Log.i("getMapFileAbsolutePath", "[$eventId] Expected location: Resources/Maps/$eventId/$fileName")
         null
     } catch (e: Exception) {
-        Log.e("getMapFileAbsolutePath", "[$eventId] 💥 EXCEPTION in iOS resource search for $eventId.$extension: ${e.message}", e)
+        Log.e("getMapFileAbsolutePath", "[$eventId] EXCEPTION in iOS resource search for $eventId.$extension: ${e.message}", e)
         null
     }
 }
