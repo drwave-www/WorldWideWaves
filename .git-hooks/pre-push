@@ -70,11 +70,11 @@ start_emulator() {
     local timeout=120
     local count=0
     while [ $count -lt $timeout ]; do
-        if adb devices | grep -q "emulator.*device"; then
+        if $adb_cmd devices | grep -q "emulator.*device"; then
             echo "✅ Emulator is ready!"
             # Wait a bit more for the system to be fully booted
             echo "⏳ Waiting for system to fully boot..."
-            adb wait-for-device
+            $adb_cmd wait-for-device
             sleep 10
             return 0
         fi
@@ -95,26 +95,38 @@ start_emulator() {
 echo "Checking for Android emulator availability..."
 
 # Check if adb is available
-if ! command -v adb >/dev/null 2>&1; then
-    echo "⚠️  Android SDK (adb) not found. Skipping integration tests."
-    echo "Integration tests will run in CI/CD pipeline."
-    exit 0
+adb_cmd=""
+if command -v adb >/dev/null 2>&1; then
+    adb_cmd="adb"
+else
+    # Try to find adb in common Android SDK locations
+    android_sdk=$(find_android_sdk)
+    if [ $? -eq 0 ] && [ -f "$android_sdk/platform-tools/adb" ]; then
+        adb_cmd="$android_sdk/platform-tools/adb"
+        echo "📱 Found Android SDK at: $android_sdk"
+    else
+        echo "⚠️  Android SDK (adb) not found. Skipping integration tests."
+        echo "Integration tests will run in CI/CD pipeline."
+        exit 0
+    fi
 fi
 
 emulator_was_running=false
-if adb devices | grep -q "emulator.*device"; then
+if $adb_cmd devices | grep -q "emulator.*device"; then
     echo "✅ Android emulator already running."
     emulator_was_running=true
 else
     echo "🔍 No running emulator detected. Attempting to start one..."
 
-    # Find Android SDK
-    android_sdk=$(find_android_sdk)
-    if [ $? -ne 0 ]; then
-        echo "⚠️  Android SDK not found. Skipping integration tests."
-        echo "Please set ANDROID_HOME or install Android SDK."
-        echo "Integration tests will run in CI/CD pipeline."
-        exit 0
+    # Find Android SDK (if not already found)
+    if [ -z "$android_sdk" ]; then
+        android_sdk=$(find_android_sdk)
+        if [ $? -ne 0 ]; then
+            echo "⚠️  Android SDK not found. Skipping integration tests."
+            echo "Please set ANDROID_HOME or install Android SDK."
+            echo "Integration tests will run in CI/CD pipeline."
+            exit 0
+        fi
     fi
 
     # Try to start emulator
@@ -149,7 +161,7 @@ done
 if [ "$emulator_was_running" = false ]; then
     echo ""
     echo "💡 The emulator was started automatically for testing."
-    echo "   You can stop it manually with: adb emu kill"
+    echo "   You can stop it manually with: $adb_cmd emu kill"
 fi
 
 if [ "$test_failed" = true ]; then
