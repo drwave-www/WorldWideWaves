@@ -19,18 +19,23 @@ targets:
       - name: paris_france
         resources:
           - path: worldwidewaves/Resources/Maps/paris_france
+        priority: 1.0
       - name: new_york_usa
         resources:
           - path: worldwidewaves/Resources/Maps/new_york_usa
+        priority: 1.0
       - name: london_england
         resources:
           - path: worldwidewaves/Resources/Maps/london_england
+        priority: 1.0
       - name: berlin_germany
         resources:
           - path: worldwidewaves/Resources/Maps/berlin_germany
+        priority: 1.0
       - name: tokyo_japan
         resources:
           - path: worldwidewaves/Resources/Maps/tokyo_japan
+        priority: 1.0
     settings:
       INFOPLIST_FILE: worldwidewaves/Info.plist
       PRODUCT_BUNDLE_IDENTIFIER: com.worldwidewaves
