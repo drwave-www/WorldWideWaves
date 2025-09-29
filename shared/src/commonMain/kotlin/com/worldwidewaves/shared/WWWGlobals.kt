@@ -27,25 +27,6 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
-fun debugBuild() {
-    // Napier initialization is handled by initNapier() in platform-specific code
-    // This function can be used for other debug-specific initialization if needed
-
-    // Note: Debug simulation setup is called later after Koin initialization
-    // from MainApplication.onCreate() (Android) and doInitPlatform() (iOS)
-}
-
-/**
- * Logging configuration constants
- */
-object LogConfig {
-    // For now, keep logging enabled for development
-    // TODO: Make this BuildConfig-driven when BuildConfig is properly available
-    const val ENABLE_VERBOSE_LOGGING: Boolean = true
-    const val ENABLE_DEBUG_LOGGING: Boolean = true
-    const val ENABLE_PERFORMANCE_LOGGING: Boolean = true
-}
-
 /**
  * Global constants for WorldWideWaves application
  *
@@ -53,6 +34,17 @@ object LogConfig {
  * Constants are grouped logically to improve maintainability and discoverability.
  */
 object WWWGlobals {
+    /**
+     * Logging configuration constants
+     */
+    object LogConfig {
+        // For now, keep logging enabled for development
+        // TODO: Make this BuildConfig-driven when BuildConfig is properly available
+        const val ENABLE_VERBOSE_LOGGING: Boolean = true
+        const val ENABLE_DEBUG_LOGGING: Boolean = true
+        const val ENABLE_PERFORMANCE_LOGGING: Boolean = true
+    }
+
     // ============================================================================================
     // GEODETIC & WAVE PHYSICS CONSTANTS
     // ============================================================================================
@@ -149,12 +141,6 @@ object WWWGlobals {
 
         /** Default number of audio channels (mono) */
         const val DEFAULT_CHANNELS = 1
-
-        /** Attack time for audio envelope to avoid clicks (seconds) */
-        const val ENVELOPE_ATTACK_TIME = 0.01 // 10ms
-
-        /** Release time for audio envelope to avoid clicks (seconds) */
-        const val ENVELOPE_RELEASE_TIME = 0.01 // 10ms
     }
 
     /**
@@ -182,12 +168,6 @@ object WWWGlobals {
         /** Default microseconds per beat (120 BPM) */
         const val DEFAULT_MICROSECONDS_PER_BEAT = 500000L
 
-        /** MIDI header chunk length (should always be 6) */
-        const val HEADER_CHUNK_LENGTH = 6
-
-        /** Default ticks per beat for MIDI timing */
-        const val DEFAULT_TICKS_PER_BEAT = 24
-
         /** MIDI octave divisor for note calculations */
         const val OCTAVE_DIVISOR = 12
 
@@ -210,28 +190,8 @@ object WWWGlobals {
     }
 
     // ============================================================================================
-    // SPATIAL INDEXING & MAP CONSTANTS
+    // MAP CONSTANTS
     // ============================================================================================
-
-    /**
-     * Spatial Indexing Constants for Performance Optimization
-     */
-    object SpatialIndex {
-        /** Default grid size for spatial indexing */
-        const val DEFAULT_GRID_SIZE = 16
-
-        /** Minimum polygon size for spatial optimization */
-        const val SPATIAL_OPTIMIZATION_THRESHOLD = 100
-
-        /** Minimum grid size for adaptive spatial indexing */
-        const val MIN_ADAPTIVE_GRID_SIZE = 4
-
-        /** Divisor for calculating adaptive grid size based on polygon size */
-        const val POLYGON_SIZE_DIVISOR = 20
-
-        /** Maximum cache size for trigonometric calculations */
-        const val TRIG_CACHE_MAX_SIZE = 200
-    }
 
     /**
      * Map Display Constants
@@ -321,18 +281,6 @@ object WWWGlobals {
     }
 
     // ============================================================================================
-    // EXTERNAL SERVICE URLS
-    // ============================================================================================
-
-    /**
-     * External Service URLs
-     */
-    object Urls {
-        /** Base URL for Instagram integration */
-        const val INSTAGRAM_BASE = "https://www.instagram.com/"
-    }
-
-    // ============================================================================================
     // BYTE PROCESSING & BIT MANIPULATION
     // ============================================================================================
 
@@ -379,30 +327,6 @@ object WWWGlobals {
 
         /** Standard buffer size for file I/O operations (8KB) */
         const val BUFFER_SIZE = 8192
-
-        /** Chunk size for streaming operations */
-        const val CHUNK_SIZE = 512
-
-        /** Maximum buffer size for large operations */
-        const val MAX_BUFFER_SIZE = 8192
-    }
-
-    // ============================================================================================
-    // CHOREOGRAPHY CONSTANTS
-    // ============================================================================================
-
-    /**
-     * Choreography Sequence Constants
-     */
-    object Choreography {
-        /** Maximum number of warming sequences */
-        const val MAX_WARMING_SEQUENCES = 6
-
-        /** First warming sequence number */
-        const val FIRST_WARMING_SEQ = 1
-
-        /** Default choreography duration in milliseconds */
-        const val DEFAULT_DURATION = 1000L
     }
 
     // ============================================================================================
