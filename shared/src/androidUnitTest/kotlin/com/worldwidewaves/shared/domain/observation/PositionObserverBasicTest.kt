@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.domain.observation
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-
 import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Position

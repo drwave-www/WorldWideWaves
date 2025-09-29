@@ -24,8 +24,6 @@ package com.worldwidewaves.shared.viewmodels
 import com.worldwidewaves.shared.map.PlatformMapManager
 import com.worldwidewaves.shared.ui.BaseViewModel
 import com.worldwidewaves.shared.utils.Log
-import com.worldwidewaves.shared.viewmodels.MapDownloadManager
-import com.worldwidewaves.shared.viewmodels.PlatformMapDownloadAdapter
 import kotlinx.coroutines.launch
 
 /**

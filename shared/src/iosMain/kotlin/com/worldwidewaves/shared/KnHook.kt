@@ -20,7 +20,6 @@ package com.worldwidewaves.shared
  * limitations under the License. */
 
 import kotlin.experimental.ExperimentalNativeApi
-import kotlin.native.setUnhandledExceptionHook
 
 @OptIn(ExperimentalNativeApi::class)
 fun installKNHook() {

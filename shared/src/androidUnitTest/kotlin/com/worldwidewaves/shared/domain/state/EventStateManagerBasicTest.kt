@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.domain.state
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-
 import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
