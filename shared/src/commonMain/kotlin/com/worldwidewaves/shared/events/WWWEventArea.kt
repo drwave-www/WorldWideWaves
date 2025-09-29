@@ -75,7 +75,7 @@ data class WWWEventArea(
     DataValidator {
     private var _event: IWWWEvent? = null
     private var event: IWWWEvent
-        get() = _event ?: throw IllegalStateException("Event not set")
+        get() = _event ?: error("Event not set")
         set(value) {
             _event = value
         }
@@ -332,7 +332,14 @@ data class WWWEventArea(
                 coroutineScopeProvider.withDefaultContext {
                     loadPolygonsFromGeoJson(tempPolygons)
                 }
-            } catch (ignored: Exception) {
+            } catch (e: kotlinx.serialization.SerializationException) {
+                Log.w("WWWEventArea", "GeoJSON parsing error for event ${event.id}: ${e.message}")
+                // Polygon loading errors are handled gracefully - empty polygon list is acceptable
+            } catch (e: java.io.IOException) {
+                Log.w("WWWEventArea", "IO error loading polygons for event ${event.id}: ${e.message}")
+                // Polygon loading errors are handled gracefully - empty polygon list is acceptable
+            } catch (e: Exception) {
+                Log.w("WWWEventArea", "Unexpected error loading polygons for event ${event.id}: ${e.message}")
                 // Polygon loading errors are handled gracefully - empty polygon list is acceptable
             }
 
@@ -354,7 +361,14 @@ data class WWWEventArea(
             if (geoJsonData != null) {
                 processGeoJsonData(geoJsonData, tempPolygons)
             }
-        } catch (ignored: Exception) {
+        } catch (e: kotlinx.serialization.SerializationException) {
+            Log.w("WWWEventArea", "GeoJSON parsing error for event ${event.id}: ${e.message}")
+            // GeoJSON data loading errors are handled gracefully
+        } catch (e: java.io.IOException) {
+            Log.w("WWWEventArea", "IO error loading GeoJSON for event ${event.id}: ${e.message}")
+            // GeoJSON data loading errors are handled gracefully
+        } catch (e: Exception) {
+            Log.w("WWWEventArea", "Unexpected error loading GeoJSON for event ${event.id}: ${e.message}")
             // GeoJSON data loading errors are handled gracefully
         }
     }
@@ -386,7 +400,11 @@ data class WWWEventArea(
                 if (geometry != null) {
                     processGeometry(geometry, tempPolygons)
                 }
-            } catch (ignored: Exception) {
+            } catch (e: kotlinx.serialization.SerializationException) {
+                Log.v("WWWEventArea", "GeoJSON feature parsing error: ${e.message}")
+                // Feature geometry processing errors are handled gracefully
+            } catch (e: Exception) {
+                Log.v("WWWEventArea", "Unexpected feature geometry processing error: ${e.message}")
                 // Feature geometry processing errors are handled gracefully
             }
         }
@@ -398,7 +416,11 @@ data class WWWEventArea(
     ) {
         try {
             processGeometry(geoJsonData, tempPolygons)
-        } catch (ignored: Exception) {
+        } catch (e: kotlinx.serialization.SerializationException) {
+            Log.v("WWWEventArea", "GeoJSON direct geometry parsing error: ${e.message}")
+            // Direct geometry processing errors are handled gracefully
+        } catch (e: Exception) {
+            Log.v("WWWEventArea", "Unexpected direct geometry processing error: ${e.message}")
             // Direct geometry processing errors are handled gracefully
         }
     }
@@ -417,7 +439,14 @@ data class WWWEventArea(
                     coordinates?.forEachIndexed { ringIndex, ring ->
                         try {
                             processRing(ring, tempPolygons)
-                        } catch (ignored: Exception) {
+                        } catch (e: NumberFormatException) {
+                            Log.v("WWWEventArea", "Invalid numeric data in ring geometry: ${e.message}")
+                            // Ignore invalid ring geometry and continue processing
+                        } catch (e: kotlinx.serialization.SerializationException) {
+                            Log.v("WWWEventArea", "Ring geometry parsing error: ${e.message}")
+                            // Ignore invalid ring geometry and continue processing
+                        } catch (e: Exception) {
+                            Log.v("WWWEventArea", "Unexpected ring geometry error: ${e.message}")
                             // Ignore invalid ring geometry and continue processing
                         }
                     }
@@ -429,7 +458,11 @@ data class WWWEventArea(
                 else -> {
                 }
             }
-        } catch (ignored: Exception) {
+        } catch (e: kotlinx.serialization.SerializationException) {
+            Log.v("WWWEventArea", "Geometry processing parsing error: ${e.message}")
+            // Geometry processing errors are handled gracefully
+        } catch (e: Exception) {
+            Log.v("WWWEventArea", "Unexpected geometry processing error: ${e.message}")
             // Geometry processing errors are handled gracefully
         }
     }
@@ -476,11 +509,25 @@ data class WWWEventArea(
                         }
 
                         processRing(ring, tempPolygons)
-                    } catch (ignored: Exception) {
+                    } catch (e: NumberFormatException) {
+                        Log.v("WWWEventArea", "Invalid numeric data in MultiPolygon ring: ${e.message}")
+                        // Ring processing errors are handled gracefully
+                    } catch (e: kotlinx.serialization.SerializationException) {
+                        Log.v("WWWEventArea", "MultiPolygon ring parsing error: ${e.message}")
+                        // Ring processing errors are handled gracefully
+                    } catch (e: Exception) {
+                        Log.v("WWWEventArea", "Unexpected MultiPolygon ring error: ${e.message}")
                         // Ring processing errors are handled gracefully
                     }
                 }
-            } catch (ignored: Exception) {
+            } catch (e: NumberFormatException) {
+                Log.v("WWWEventArea", "Invalid numeric data in MultiPolygon: ${e.message}")
+                // MultiPolygon processing errors are handled gracefully
+            } catch (e: kotlinx.serialization.SerializationException) {
+                Log.v("WWWEventArea", "MultiPolygon parsing error: ${e.message}")
+                // MultiPolygon processing errors are handled gracefully
+            } catch (e: Exception) {
+                Log.v("WWWEventArea", "Unexpected MultiPolygon processing error: ${e.message}")
                 // MultiPolygon processing errors are handled gracefully
             }
         }
@@ -554,7 +601,14 @@ data class WWWEventArea(
             } else {
                 // Polygon with only one point is ignored
             }
-        } catch (ignored: Exception) {
+        } catch (e: NumberFormatException) {
+            Log.v("WWWEventArea", "Invalid numeric data in ring processing: ${e.message}")
+            // Ring processing errors are handled gracefully
+        } catch (e: kotlinx.serialization.SerializationException) {
+            Log.v("WWWEventArea", "Ring processing parsing error: ${e.message}")
+            // Ring processing errors are handled gracefully
+        } catch (e: Exception) {
+            Log.v("WWWEventArea", "Unexpected ring processing error: ${e.message}")
             // Ring processing errors are handled gracefully
         }
     }
