@@ -27,10 +27,20 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
+@OptIn(kotlin.time.ExperimentalTime::class)
 fun debugBuild() {
     // Napier initialization is handled by initNapier() in platform-specific code
     // This function can be used for other debug-specific initialization if needed
+
+    // Platform-specific debug simulation setup
+    setupDebugSimulation()
 }
+
+/**
+ * Sets up debug simulation for development and testing.
+ * Called from debugBuild() during platform initialization.
+ */
+expect fun setupDebugSimulation()
 
 /**
  * Global constants for WorldWideWaves application
