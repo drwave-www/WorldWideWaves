@@ -23,7 +23,6 @@ import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.choreographies.ChoreographyManager
 import com.worldwidewaves.shared.data.FavoriteEventsStore
 import com.worldwidewaves.shared.data.IOSFavoriteEventsStore
-import com.worldwidewaves.shared.debugBuild
 import com.worldwidewaves.shared.domain.usecases.IOSMapAvailabilityChecker
 import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker
 import com.worldwidewaves.shared.map.IOSMapLibreAdapter
@@ -55,7 +54,6 @@ val IOSModule =
 
         // Platform descriptor for iOS
         single<WWWPlatform> {
-            debugBuild()
             val device = UIDevice.currentDevice
             WWWPlatform("iOS ${device.systemVersion}", get())
         }

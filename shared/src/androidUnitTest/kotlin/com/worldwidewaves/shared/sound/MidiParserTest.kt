@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.sound
  * limitations under the License.
  */
 
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
@@ -593,41 +594,50 @@ class MidiParserTest {
     @Test
     fun `should parse resource file successfully when mocked`() =
         runTest {
-            // GIVEN: Mocked MidiResources
+            // GIVEN: Clear any existing mocks and cache first
+            clearAllMocks()
+            MidiParser.clearCache() // Clear any cached results that might interfere
+
+            val mockMidiBytes =
+                byteArrayOf(
+                    // Minimal valid MIDI
+                    0x4D,
+                    0x54,
+                    0x68,
+                    0x64, // "MThd"
+                    0x00,
+                    0x00,
+                    0x00,
+                    0x06, // Header length
+                    0x00,
+                    0x00, // Format 0
+                    0x00,
+                    0x01, // 1 track
+                    0x00,
+                    0x60, // 96 ticks per quarter note
+                    0x4D,
+                    0x54,
+                    0x72,
+                    0x6B, // "MTrk"
+                    0x00,
+                    0x00,
+                    0x00,
+                    0x04, // Track length
+                    0x00,
+                    0xFF.toByte(),
+                    0x2F,
+                    0x00, // End of track
+                )
+
+            // Test direct parsing first to ensure the bytes are valid
+            val directTrack = MidiParser.parseMidiBytes(mockMidiBytes)
+            assertTrue(directTrack != null, "Direct parsing should work with valid MIDI bytes")
+            assertEquals("Parsed MIDI Track", directTrack.name, "Should have default track name")
+
+            // GIVEN: Mock MidiResources for file-based parsing test
             mockkObject(MidiResources)
             try {
-                val mockMidiBytes =
-                    byteArrayOf(
-                        // Minimal valid MIDI
-                        0x4D,
-                        0x54,
-                        0x68,
-                        0x64, // "MThd"
-                        0x00,
-                        0x00,
-                        0x00,
-                        0x06, // Header length
-                        0x00,
-                        0x00, // Format 0
-                        0x00,
-                        0x01, // 1 track
-                        0x00,
-                        0x60, // 96 ticks per quarter note
-                        0x4D,
-                        0x54,
-                        0x72,
-                        0x6B, // "MTrk"
-                        0x00,
-                        0x00,
-                        0x00,
-                        0x04, // Track length
-                        0x00,
-                        0xFF.toByte(),
-                        0x2F,
-                        0x00, // End of track
-                    )
-
-                coEvery { MidiResources.readMidiFile(any()) } returns mockMidiBytes
+                coEvery { MidiResources.readMidiFile("test.mid") } returns mockMidiBytes
 
                 // WHEN: Parsing MIDI file from resource
                 val track = MidiParser.parseMidiFile("test.mid")

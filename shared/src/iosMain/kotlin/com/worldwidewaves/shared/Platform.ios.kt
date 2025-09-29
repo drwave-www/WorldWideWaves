@@ -22,8 +22,10 @@ package com.worldwidewaves.shared
 
 import com.worldwidewaves.shared.di.IOSModule
 import com.worldwidewaves.shared.di.sharedModule
+import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
 import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.utils.initNapier
+import com.worldwidewaves.shared.utils.setupDebugSimulation
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.desc.desc
 import kotlinx.cinterop.BetaInteropApi
@@ -89,6 +91,15 @@ fun doInitPlatform() {
                 Log.v(TAG, "HELPER: Modules added")
             }
         Log.i(TAG, "HELPER: startKoin completed successfully")
+
+        // Setup debug simulation after Koin initialization (same as Android MainApplication)
+        if (BuildKonfig.DEBUG) {
+            try {
+                setupDebugSimulation()
+            } catch (e: Exception) {
+                Log.w(TAG, "DEBUG: Failed to setup debug simulation: ${e.message}")
+            }
+        }
     } catch (e: IllegalStateException) {
         Log.e(TAG, "ERROR: Koin state error: ${e.message}")
         Log.e(TAG, "ERROR: Exception type: ${e::class.simpleName}")
@@ -204,7 +215,7 @@ actual fun clearEventCache(eventId: String) {
         val koin =
             org.koin.mp.KoinPlatform
                 .getKoin()
-        val geoJsonProvider = koin.get<com.worldwidewaves.shared.events.utils.GeoJsonDataProvider>()
+        val geoJsonProvider = koin.get<GeoJsonDataProvider>()
         geoJsonProvider.invalidateCache(eventId)
     } catch (e: IllegalStateException) {
         Log.w("clearEventCache", "State error clearing cache for event $eventId: ${e.message}")

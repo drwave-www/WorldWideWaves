@@ -72,11 +72,15 @@ data class MidiTrack(
 // ----------------------------------------------------------------------------
 
 /**
- * Handles parsing of Standard MIDI File (SMF) format
+ * Handles parsing of Standard MIDI File (SMF) format with global caching
  */
 object MidiParser {
     // Logging tag
     private const val TAG = "MidiParser"
+
+    // Global MIDI file cache - keyed by resource path
+    // This ensures MIDI files are loaded only once for the entire application lifecycle
+    private val midiCache = mutableMapOf<String, MidiTrack?>()
 
     // Constants for MIDI file parsing
     private const val HEADER_CHUNK_ID = "MThd"
@@ -163,34 +167,55 @@ object MidiParser {
     /**
      * Parse a MIDI file into a MidiTrack
      */
-    suspend fun parseMidiFile(midiResourcePath: String): MidiTrack? =
-        try {
-            Log.d("MidiParser", "Loading MIDI file: $midiResourcePath")
-            val midiBytes = MidiResources.readMidiFile(midiResourcePath)
-            val track = parseMidiBytes(midiBytes)
-            Log.d("MidiParser", "Successfully parsed MIDI file: $midiResourcePath")
-            track
-        } catch (e: IllegalArgumentException) {
-            Log.e("MidiParser", "Invalid MIDI file format $midiResourcePath: ${e.message}")
-            // Return null instead of crashing to allow graceful degradation
-            null
-        } catch (e: org.jetbrains.compose.resources.MissingResourceException) {
-            Log.e("MidiParser", "Resource not found $midiResourcePath: ${e.message}")
-            // Return null instead of crashing to allow graceful degradation
-            null
-        } catch (e: IllegalStateException) {
-            Log.e("MidiParser", "Invalid state reading MIDI file $midiResourcePath: ${e.message}")
-            // Return null instead of crashing to allow graceful degradation
-            null
-        } catch (e: RuntimeException) {
-            Log.e("MidiParser", "Runtime error reading MIDI file $midiResourcePath: ${e.message}")
-            // Return null instead of crashing to allow graceful degradation
-            null
-        } catch (e: Exception) {
-            Log.e("MidiParser", "Unexpected error reading MIDI file $midiResourcePath: ${e.message}")
-            // Return null instead of crashing to allow graceful degradation
-            null
+    suspend fun parseMidiFile(midiResourcePath: String): MidiTrack? {
+        // Check cache first
+        if (midiCache.containsKey(midiResourcePath)) {
+            Log.d(TAG, "Using cached MIDI file: $midiResourcePath")
+            return midiCache[midiResourcePath]
         }
+
+        // Load and parse MIDI file if not cached
+        Log.d(TAG, "Loading MIDI file (not cached): $midiResourcePath")
+        val track =
+            try {
+                val midiBytes = MidiResources.readMidiFile(midiResourcePath)
+                val parsedTrack = parseMidiBytes(midiBytes)
+                Log.i(TAG, "Successfully parsed and cached MIDI file: $midiResourcePath")
+                parsedTrack
+            } catch (e: IllegalArgumentException) {
+                Log.e(TAG, "Invalid MIDI file format $midiResourcePath: ${e.message}")
+                null
+            } catch (e: org.jetbrains.compose.resources.MissingResourceException) {
+                Log.e(TAG, "Resource not found $midiResourcePath: ${e.message}")
+                null
+            } catch (e: IllegalStateException) {
+                Log.e(TAG, "Invalid state reading MIDI file $midiResourcePath: ${e.message}")
+                null
+            } catch (e: RuntimeException) {
+                Log.e(TAG, "Runtime error reading MIDI file $midiResourcePath: ${e.message}")
+                null
+            } catch (e: Exception) {
+                Log.e(TAG, "Unexpected error reading MIDI file $midiResourcePath: ${e.message}")
+                null
+            }
+
+        // Cache the result (even if null to avoid repeated failed attempts)
+        midiCache[midiResourcePath] = track
+        return track
+    }
+
+    /**
+     * Clear the MIDI cache (useful for testing or memory management)
+     */
+    fun clearCache() {
+        Log.d(TAG, "Clearing MIDI cache (${midiCache.size} entries)")
+        midiCache.clear()
+    }
+
+    /**
+     * Get cache statistics for debugging
+     */
+    fun getCacheStats(): String = "MIDI cache: ${midiCache.size} files cached"
 
     // ------------------------------------------------------------------------
 
