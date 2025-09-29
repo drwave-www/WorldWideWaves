@@ -131,9 +131,6 @@ object WWWGlobals {
      * Audio System Constants
      */
     object Audio {
-        /** Standard sample rate for audio generation (Hz) */
-        const val STANDARD_SAMPLE_RATE = 44100
-
         const val BITS_PER_SAMPLE_8BIT = 8
 
         /** Default bits per sample for audio */
@@ -159,34 +156,11 @@ object WWWGlobals {
         /** Maximum MIDI velocity value */
         const val MAX_VELOCITY = 127
 
-        /** Maximum MIDI pitch value */
-        const val MAX_PITCH = 127
-
-        /** Default tempo in beats per minute */
-        const val DEFAULT_TEMPO_BPM = 120
-
-        /** Default microseconds per beat (120 BPM) */
-        const val DEFAULT_MICROSECONDS_PER_BEAT = 500000L
-
         /** MIDI octave divisor for note calculations */
         const val OCTAVE_DIVISOR = 12
 
         /** Default octave for MIDI operations */
         const val DEFAULT_OCTAVE = 8
-
-        // Velocity Constants
-        /** Soft MIDI velocity value */
-        const val VELOCITY_SOFT = 64
-
-        /** Medium MIDI velocity value */
-        const val VELOCITY_MEDIUM = 96
-
-        /** Loud MIDI velocity value */
-        const val VELOCITY_LOUD = 127
-
-        // Note Duration Constants
-        /** Short note duration in milliseconds */
-        const val NOTE_DURATION_SHORT = 250
     }
 
     // ============================================================================================
@@ -454,15 +428,6 @@ object WWWGlobals {
         const val RULE_CONTENTS_FONTSIZE = Dimensions.FONTSIZE_SMALL
         const val RULE_QUESTION_FONTSIZE = Dimensions.FONTSIZE_SMALL2
         const val RULE_ANSWER_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
-
-        // Additional FAQ constants for About screens
-        const val TEXT_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
-        const val ACCESS_LINK_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
-        const val RULES_TITLE_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
-        const val RULES_TEXT_FONTSIZE = Dimensions.FONTSIZE_SMALL
-        const val QUESTION_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
-        const val ANSWER_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
-        const val SIMULATE_BUTTON_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
     }
 
     /**
@@ -513,29 +478,6 @@ object WWWGlobals {
     // ============================================================================================
     // PERFORMANCE & LOCATION CONSTANTS (SHARED)
     // ============================================================================================
-
-    /**
-     * Performance Thresholds (Business Logic)
-     */
-    object PerformanceThresholds {
-        /** Excellent timing accuracy threshold (percentage) */
-        const val TIMING_ACCURACY_EXCELLENT = 95.0
-
-        /** Good timing accuracy threshold (percentage) */
-        const val TIMING_ACCURACY_GOOD = 90.0
-
-        /** High participation rate threshold */
-        const val PARTICIPATION_RATE_HIGH = 0.8
-
-        /** Medium participation rate threshold */
-        const val PARTICIPATION_RATE_MEDIUM = 0.6
-
-        /** Low memory usage threshold (percentage) */
-        const val MEMORY_USAGE_LOW = 60.0
-
-        /** Medium memory usage threshold (percentage) */
-        const val MEMORY_USAGE_MEDIUM = 80.0
-    }
 
     /**
      * Location Accuracy Constants (GPS-agnostic)
