@@ -229,7 +229,7 @@ class IOSPlatformMapManager : PlatformMapManager {
             requestMutex.withLock {
                 activeRequests.remove(mapId)
             }
-            onError(-2, e.message ?: "Unknown error during ODR download")
+            onError(ERROR_CODE_UNKNOWN_ERROR, e.message ?: "Unknown error during ODR download")
             WWWLogger.e("IOSPlatformMapManager", "Error during ODR download: $mapId", e)
         }
     }
@@ -271,14 +271,14 @@ class IOSPlatformMapManager : PlatformMapManager {
         // Estimate based on map complexity (city vs country vs world)
         val baseDuration =
             when {
-                mapId.contains("city") || mapId.contains("_") -> MIN_DOWNLOAD_DURATION_MS + 2000L // 3 seconds for cities
-                mapId.contains("country") -> MIN_DOWNLOAD_DURATION_MS + 5000L // 6 seconds for countries
-                mapId.contains("world") -> MIN_DOWNLOAD_DURATION_MS + 10000L // 11 seconds for world
-                else -> MIN_DOWNLOAD_DURATION_MS + 3000L // 4 seconds default
+                mapId.contains("city") || mapId.contains("_") -> MIN_DOWNLOAD_DURATION_MS + CITY_MAP_ADDITIONAL_DURATION_MS
+                mapId.contains("country") -> MIN_DOWNLOAD_DURATION_MS + COUNTRY_MAP_ADDITIONAL_DURATION_MS
+                mapId.contains("world") -> MIN_DOWNLOAD_DURATION_MS + WORLD_MAP_ADDITIONAL_DURATION_MS
+                else -> MIN_DOWNLOAD_DURATION_MS + DEFAULT_MAP_ADDITIONAL_DURATION_MS
             }
 
         // Add random variation (±30%) to simulate real network conditions
-        val variation = Random.nextDouble(0.7, 1.3)
+        val variation = Random.nextDouble(MIN_VARIATION_FACTOR, MAX_VARIATION_FACTOR)
         return (baseDuration * variation).toLong().coerceAtMost(MAX_DOWNLOAD_DURATION_MS)
     }
 
@@ -297,7 +297,7 @@ class IOSPlatformMapManager : PlatformMapManager {
             var lastProgress = 0
             onProgress(0)
 
-            while (lastProgress < 95) {
+            while (lastProgress < MAX_PROGRESS_WITHOUT_COMPLETION) {
                 // Check if download was cancelled
                 val isActive = requestMutex.withLock { activeRequests.containsKey(mapId) }
                 if (!isActive) break
@@ -305,17 +305,23 @@ class IOSPlatformMapManager : PlatformMapManager {
                 delay(PROGRESS_UPDATE_INTERVAL_MS)
 
                 val elapsed = Clock.System.now().toEpochMilliseconds() - startTime
-                val progressRatio = (elapsed.toDouble() / estimatedDuration).coerceAtMost(0.95)
+                val progressRatio = (elapsed.toDouble() / estimatedDuration).coerceAtMost(MAX_PROGRESS_WITHOUT_COMPLETION / 100.0)
 
                 // Exponential progress curve: fast start, slower middle, quick end
                 val exponentialProgress =
                     when {
-                        progressRatio < 0.1 -> progressRatio * 3.0 // Fast initial 30%
-                        progressRatio < 0.7 -> 0.3 + (progressRatio - 0.1) * 0.5 // Slower 50%
-                        else -> 0.8 + (progressRatio - 0.7) * 0.5 // Final 15%
+                        progressRatio < FAST_INITIAL_PROGRESS_THRESHOLD -> progressRatio * INITIAL_PROGRESS_MULTIPLIER // Fast initial 30%
+                        progressRatio < SLOW_MIDDLE_PROGRESS_THRESHOLD ->
+                            MIDDLE_PROGRESS_BASE +
+                                (progressRatio - FAST_INITIAL_PROGRESS_THRESHOLD) * MIDDLE_PROGRESS_FACTOR // Slower 50%
+                        else -> FINAL_PROGRESS_BASE + (progressRatio - SLOW_MIDDLE_PROGRESS_THRESHOLD) * FINAL_PROGRESS_FACTOR // Final 15%
                     }
 
-                val currentProgress = (exponentialProgress * 100).toInt().coerceIn(lastProgress + 1, 95)
+                val currentProgress =
+                    (exponentialProgress * COMPLETE_PROGRESS_PERCENT).toInt().coerceIn(
+                        lastProgress + 1,
+                        MAX_PROGRESS_WITHOUT_COMPLETION,
+                    )
 
                 if (currentProgress > lastProgress) {
                     onProgress(currentProgress)

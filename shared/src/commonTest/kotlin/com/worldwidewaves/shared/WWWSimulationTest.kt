@@ -19,7 +19,6 @@ package com.worldwidewaves.shared
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-
 import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
