@@ -15,6 +15,27 @@ targets:
           - "*.xcodeproj"
           - "build"
           - "DerivedData"
+    onDemandResourceTags:
+      - name: paris_france
+        resources:
+          - path: Resources/Maps/paris_france
+        priority: 1.0
+      - name: new_york_usa
+        resources:
+          - path: Resources/Maps/new_york_usa
+        priority: 1.0
+      - name: london_england
+        resources:
+          - path: Resources/Maps/london_england
+        priority: 1.0
+      - name: berlin_germany
+        resources:
+          - path: Resources/Maps/berlin_germany
+        priority: 1.0
+      - name: tokyo_japan
+        resources:
+          - path: Resources/Maps/tokyo_japan
+        priority: 1.0
     settings:
       INFOPLIST_FILE: iosApp/Info.plist
       PRODUCT_BUNDLE_IDENTIFIER: com.worldwidewaves.iosApp

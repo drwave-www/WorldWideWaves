@@ -44,8 +44,17 @@
 				C117AD187833E2513BD2F553 /* Info.plist */,
 				C48831BCD2AAA6C0E72E14AE /* IOSPlatformEnabler.swift */,
 				1285E8A7B7E7359EA11B9591 /* SceneDelegate.swift */,
+				1EEC3D4E9285A39087C3ADA0 /* Resources */,
 			);
 			path = iosApp;
+			sourceTree = "<group>";
+		};
+		1EEC3D4E9285A39087C3ADA0 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B8313D83B62BDD6C6E13D0F1 /* Maps */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		3666012298E772D226418813 /* Frameworks */ = {
@@ -71,6 +80,13 @@
 				86038AE1032E284E79B32AD6 /* iosApp.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		B8313D83B62BDD6C6E13D0F1 /* Maps */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Maps;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
