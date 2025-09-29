@@ -93,10 +93,12 @@ fun doInitPlatform() {
         Log.i(TAG, "HELPER: startKoin completed successfully")
 
         // Setup debug simulation after Koin initialization (same as Android MainApplication)
-        try {
-            setupDebugSimulation()
-        } catch (e: Exception) {
-            Log.w(TAG, "DEBUG: Failed to setup debug simulation: ${e.message}")
+        if (BuildKonfig.DEBUG) {
+            try {
+                setupDebugSimulation()
+            } catch (e: Exception) {
+                Log.w(TAG, "DEBUG: Failed to setup debug simulation: ${e.message}")
+            }
         }
     } catch (e: IllegalStateException) {
         Log.e(TAG, "ERROR: Koin state error: ${e.message}")

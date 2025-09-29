@@ -240,16 +240,18 @@ multiplatformResources {
 buildkonfig {
     packageName = "com.worldwidewaves.shared"
 
-    // Default config for all targets
+    // Default config for all targets (debug mode)
     defaultConfigs {
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "DEBUG", "true")
         buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "ENABLE_VERBOSE_LOGGING", "true")
         buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "ENABLE_DEBUG_LOGGING", "true")
         buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "ENABLE_PERFORMANCE_LOGGING", "true")
     }
 
-    // Release configuration - disable verbose/debug logging for performance and security
+    // Release configuration - disable debug mode and verbose/debug logging for performance and security
     targetConfigs {
         create("release") {
+            buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "DEBUG", "false")
             buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "ENABLE_VERBOSE_LOGGING", "false")
             buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "ENABLE_DEBUG_LOGGING", "false")
             buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "ENABLE_PERFORMANCE_LOGGING", "false")

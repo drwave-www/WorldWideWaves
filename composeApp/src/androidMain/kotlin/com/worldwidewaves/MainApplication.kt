@@ -80,10 +80,7 @@ class MainApplication :
         // -------------------------------------------------------------------- //
         //  Default simulation initialization (runs after Koin properties are ready)
         // -------------------------------------------------------------------- //
-
-        if (BuildConfig.DEBUG) {
-            setupDebugSimulation()
-        }
+        setupDebugSimulation()
     }
 
     override fun onTerminate() {
