@@ -18,18 +18,18 @@ actual fun PlatformLocationPermissionCheck(): Boolean {
     return true // Placeholder - would check Core Location authorization
 }
 
-actual fun PlatformRequestLocationPermission() {
+actual fun platformRequestLocationPermission() {
     // iOS location permission request implementation
     // Would use Core Location requestWhenInUseAuthorization
 }
 
 @Composable
-actual fun PlatformGPSEnabledCheck(): Boolean {
+actual fun platformGPSEnabledCheck(): Boolean {
     // iOS location services enabled check
     return true // Placeholder - would check CLLocationManager.locationServicesEnabled()
 }
 
-actual fun PlatformOpenLocationSettings() {
+actual fun platformOpenLocationSettings() {
     // iOS open settings implementation
     // Would use UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString))
 }

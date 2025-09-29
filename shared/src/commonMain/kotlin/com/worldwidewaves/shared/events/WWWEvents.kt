@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.data.InitFavoriteEvent
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.EventsConfigurationProvider
@@ -58,6 +57,10 @@ import kotlin.time.ExperimentalTime
  * StateFlow exposed by this service to drive their lists or selectors.
  */
 class WWWEvents : KoinComponent {
+    companion object {
+        private const val JSON_PREVIEW_LENGTH = 200
+    }
+
     private val loadingMutex = Mutex()
 
     private val initFavoriteEvent: InitFavoriteEvent by inject()
@@ -118,7 +121,7 @@ class WWWEvents : KoinComponent {
 
                 val eventsJsonString: String = eventsConfigurationProvider.geoEventsConfiguration()
                 Log.i("WWWEvents.loadEventsJob", "Received JSON string: ${eventsJsonString.length} characters")
-                Log.i("WWWEvents.loadEventsJob", "JSON preview: ${eventsJsonString.take(200)}")
+                Log.i("WWWEvents.loadEventsJob", "JSON preview: ${eventsJsonString.take(JSON_PREVIEW_LENGTH)}")
 
                 Log.i("WWWEvents.loadEventsJob", "Decoding JSON to events...")
                 val events: List<IWWWEvent> = eventsDecoder.decodeFromJson(eventsJsonString)
@@ -187,7 +190,6 @@ class WWWEvents : KoinComponent {
             }
         }
 
-    @VisibleForTesting
     fun confValidationErrors(events: List<IWWWEvent>) = events.associateWith(IWWWEvent::validationErrors)
 
     // ---------------------------
@@ -206,7 +208,6 @@ class WWWEvents : KoinComponent {
 
     // ---------------------------
 
-    @VisibleForTesting
     fun onEventsLoaded() {
         Log.i(::WWWEvents.name, "Events loaded successfully. Calling ${pendingLoadedCallbacks.size} pending callbacks")
         eventsLoaded = true
@@ -221,7 +222,6 @@ class WWWEvents : KoinComponent {
             }.clear()
     }
 
-    @VisibleForTesting
     fun onLoadingError(exception: Exception) {
         loadingError = exception
         pendingErrorCallbacks.onEach { callback -> callback.invoke(exception) }.clear()

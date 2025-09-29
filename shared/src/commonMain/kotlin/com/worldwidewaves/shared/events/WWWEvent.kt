@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.IWWWEvent.WaveNumbersLiterals
@@ -225,7 +224,6 @@ data class WWWEvent(
 
     override fun getLiteralStartTime(): String = IClock.instantToLiteral(getStartDateTime(), getTZ())
 
-    @VisibleForTesting
     override suspend fun getLiteralEndTime(): String = IClock.instantToLiteral(getEndDateTime(), getTZ())
 
     // -----------------------------------------------------------------------

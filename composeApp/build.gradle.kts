@@ -1,3 +1,22 @@
+/* * Copyright 2025 DrWave
+ *
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. */
+
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
@@ -114,6 +133,20 @@ android {
                 "/META-INF/{AL2.0,LGPL2.1}",
             ),
         )
+
+        // Exclude specific native libraries from symbol stripping
+        jniLibs.useLegacyPackaging = true
+        jniLibs.keepDebugSymbols.addAll(
+            listOf(
+                "**/libandroidx.graphics.path.so",
+                "**/libcrashlytics-common.so",
+                "**/libcrashlytics-handler.so",
+                "**/libcrashlytics-trampoline.so",
+                "**/libcrashlytics.so",
+                "**/libdatastore_shared_counter.so",
+                "**/libmaplibre.so",
+            ),
+        )
     }
     buildTypes {
         release {
@@ -149,46 +182,46 @@ android {
     }
     dynamicFeatures +=
         setOf(
-            ":maps:android:paris_france",
-            ":maps:android:new_york_usa",
-            ":maps:android:los_angeles_usa",
-            ":maps:android:mexico_city_mexico",
-            ":maps:android:sao_paulo_brazil",
-            ":maps:android:buenos_aires_argentina",
-            ":maps:android:london_england",
-            ":maps:android:berlin_germany",
-            ":maps:android:madrid_spain",
-            ":maps:android:rome_italy",
-            ":maps:android:moscow_russia",
-            ":maps:android:cairo_egypt",
-            ":maps:android:johannesburg_south_africa",
-            ":maps:android:nairobi_kenya",
-            ":maps:android:lagos_nigeria",
-            ":maps:android:dubai_united_arab_emirates",
-            ":maps:android:mumbai_india",
-            ":maps:android:delhi_india",
-            ":maps:android:bangalore_india",
-            ":maps:android:jakarta_indonesia",
-            ":maps:android:bangkok_thailand",
-            ":maps:android:manila_philippines",
-            ":maps:android:tokyo_japan",
-            ":maps:android:seoul_south_korea",
-            ":maps:android:beijing_china",
-            ":maps:android:shanghai_china",
-            ":maps:android:hong_kong_china",
-            ":maps:android:sydney_australia",
-            ":maps:android:melbourne_australia",
-            ":maps:android:toronto_canada",
-            ":maps:android:vancouver_canada",
-            ":maps:android:chicago_usa",
-            ":maps:android:san_francisco_usa",
-            ":maps:android:lima_peru",
-            ":maps:android:bogota_colombia",
-            ":maps:android:santiago_chile",
-            ":maps:android:tehran_iran",
-            ":maps:android:istanbul_turkey",
-            ":maps:android:karachi_pakistan",
-            ":maps:android:kinshasa_democratic_republic_of_the_congo",
+            ":maps:paris_france",
+            ":maps:new_york_usa",
+            ":maps:los_angeles_usa",
+            ":maps:mexico_city_mexico",
+            ":maps:sao_paulo_brazil",
+            ":maps:buenos_aires_argentina",
+            ":maps:london_england",
+            ":maps:berlin_germany",
+            ":maps:madrid_spain",
+            ":maps:rome_italy",
+            ":maps:moscow_russia",
+            ":maps:cairo_egypt",
+            ":maps:johannesburg_south_africa",
+            ":maps:nairobi_kenya",
+            ":maps:lagos_nigeria",
+            ":maps:dubai_united_arab_emirates",
+            ":maps:mumbai_india",
+            ":maps:delhi_india",
+            ":maps:bangalore_india",
+            ":maps:jakarta_indonesia",
+            ":maps:bangkok_thailand",
+            ":maps:manila_philippines",
+            ":maps:tokyo_japan",
+            ":maps:seoul_south_korea",
+            ":maps:beijing_china",
+            ":maps:shanghai_china",
+            ":maps:hong_kong_china",
+            ":maps:sydney_australia",
+            ":maps:melbourne_australia",
+            ":maps:toronto_canada",
+            ":maps:vancouver_canada",
+            ":maps:chicago_usa",
+            ":maps:san_francisco_usa",
+            ":maps:lima_peru",
+            ":maps:bogota_colombia",
+            ":maps:santiago_chile",
+            ":maps:tehran_iran",
+            ":maps:istanbul_turkey",
+            ":maps:karachi_pakistan",
+            ":maps:kinshasa_democratic_republic_of_the_congo",
         )
     dependencies {
         debugImplementation(compose.uiTooling)

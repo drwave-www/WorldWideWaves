@@ -92,6 +92,7 @@ class AudioTestActivity : ComponentActivity() {
     }
 
     @Composable
+    @Suppress("FunctionName")
     fun AudioTestScreen() {
         var isLoading by remember { mutableStateOf(false) }
         var isPlaying by remember { mutableStateOf(false) }
@@ -309,7 +310,7 @@ class AudioTestActivity : ComponentActivity() {
         val crowdSize = 5
         val playbackInterval = 600.milliseconds
 
-        val waveStartTime = Instant.fromEpochMilliseconds(System.currentTimeMillis())
+        Instant.fromEpochMilliseconds(System.currentTimeMillis())
         var currentTime = Duration.ZERO
 
         while (currentTime < simulationDuration) {

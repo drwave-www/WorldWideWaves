@@ -49,6 +49,7 @@ import kotlin.time.ExperimentalTime
 class GlobalSoundChoreographyManager(
     private val coroutineScopeProvider: CoroutineScopeProvider = DefaultCoroutineScopeProvider(),
 ) : KoinComponent {
+    @Suppress("UnusedPrivateProperty", "UnusedPrivateMember") // Injected for future clock-based features
     private val clock: IClock by inject()
     private val events: WWWEvents by inject()
     private var currentEvent: IWWWEvent? = null
@@ -181,16 +182,28 @@ class GlobalSoundChoreographyManager(
         Log.i(TAG, "Starting sound choreography for event: ${event.id}")
         isActive = true
 
-        // Start observing wave hits and play sound when hit
+        // Start observing wave hits and play sound only on transition (false -> true)
         coroutineScopeProvider.scopeDefault().launch {
+            // Initialize previousHitState based on current state to prevent playing
+            // sound for already-hit events when entering the activity
+            var previousHitState = event.observer.userHasBeenHit.value
+
             event.observer.userHasBeenHit.collect { hasBeenHit ->
-                if (hasBeenHit && isActive) {
+                // Extract complex condition into named boolean variables for clarity
+                val isTransitionToHit = hasBeenHit && !previousHitState
+                val isEventActive = isActive && event.isRunning()
+
+                // Only play sound on transition from false to true (actual hit moment)
+                // AND only when the event is currently running (not done)
+                if (isTransitionToHit && isEventActive) {
                     try {
+                        Log.i(TAG, "User hit detected for event ${event.id} - playing sound")
                         event.warming.playCurrentSoundChoreographyTone()
                     } catch (e: Exception) {
                         Log.e(TAG, "Error playing sound choreography tone", e)
                     }
                 }
+                previousHitState = hasBeenHit
             }
         }
     }

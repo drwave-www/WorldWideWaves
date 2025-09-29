@@ -111,6 +111,7 @@ data class ColorFamily(
 )
 
 @Composable
+@Suppress("FunctionName")
 fun AppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,

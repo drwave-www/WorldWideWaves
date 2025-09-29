@@ -53,8 +53,8 @@ class WWWEventActivity(
         val mapFeatureState by mapViewModel.featureState.collectAsState()
         var showMapRequiredDialog by remember { mutableStateOf(false) }
 
-        // Check map availability for simulation
-        LaunchedEffect(Unit) {
+        // Check map availability - use event.id key to prevent redundant calls
+        LaunchedEffect(event.id) {
             mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
         }
 

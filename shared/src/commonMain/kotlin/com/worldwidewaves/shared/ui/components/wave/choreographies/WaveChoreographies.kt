@@ -65,6 +65,7 @@ import kotlinx.coroutines.isActive
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.min
+import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
 // Constants for choreography display
@@ -220,7 +221,7 @@ fun ChoreographyDisplay(
 
     // iOS FIX: Removed dangerous object : KoinComponent pattern
 
-    var currentImageIndex by remember { mutableIntStateOf(0) }
+    var currentImageIndex by remember(sequence) { mutableIntStateOf(0) }
     val remainingTime by remember(sequence) { mutableStateOf(sequence.remainingDuration) }
 
     // Get the painter
@@ -231,14 +232,20 @@ fun ChoreographyDisplay(
         @OptIn(ExperimentalTime::class)
         val startTime = clock.now()
 
+        // Helper function to check if the sequence should continue
+        fun shouldContinueSequence(elapsed: Duration): Boolean =
+            when {
+                remainingTime != null -> elapsed.compareTo(remainingTime!!) < 0
+                else -> elapsed.compareTo(sequence.duration) < 0
+            }
+
         while (this.isActive) {
-            // Check if we should stop showing the sequence
             @OptIn(ExperimentalTime::class)
             val elapsed = clock.now() - startTime
-            if (remainingTime != null) {
-                if (elapsed >= remainingTime!!) break
-            } else if (elapsed >= sequence.duration) {
-                break
+
+            // Check if we should stop showing the sequence
+            if (!shouldContinueSequence(elapsed)) {
+                return@LaunchedEffect
             }
 
             delay(sequence.timing.inWholeMilliseconds)
@@ -294,6 +301,7 @@ fun ChoreographyDisplay(
                     val offsetX = (size.width - scaledWidth) / 2f
                     val offsetY = (size.height - scaledHeight) / 2f
 
+                    // Enhanced rendering for better quality on Android to match iOS
                     clipRect(
                         left = offsetX,
                         top = offsetY,
@@ -308,7 +316,7 @@ fun ChoreographyDisplay(
                                 draw(
                                     size =
                                         Size(
-                                            width = scaledWidth * 4, // Always 4 frames per slide
+                                            width = scaledWidth * 4, // Always 4 frames per sprite sheet
                                             height = scaledHeight,
                                         ),
                                 )

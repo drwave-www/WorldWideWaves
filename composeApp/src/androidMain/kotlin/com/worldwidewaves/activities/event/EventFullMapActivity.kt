@@ -21,11 +21,9 @@ package com.worldwidewaves.activities.event
  * limitations under the License.
  */
 
-import android.os.Bundle
-import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.compose.map.AndroidEventMap
+import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
 import com.worldwidewaves.shared.ui.activities.WWWFullMapActivity
@@ -33,51 +31,22 @@ import com.worldwidewaves.utils.AndroidPlatformEnabler
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
-class EventFullMapActivity : AppCompatActivity() {
-    private var fullMapActivity: WWWFullMapActivity? = null
+class EventFullMapActivity : AbstractEventAndroidActivity<WWWFullMapActivity>() {
+    override fun createActivityImpl(
+        eventId: String,
+        platformEnabler: AndroidPlatformEnabler,
+    ): WWWFullMapActivity = WWWFullMapActivity(eventId, platformEnabler)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        val eventId = intent.getStringExtra("eventId")
-
-        // Ensure dynamic-feature splits are available immediately
-        SplitCompat.install(this)
-
-        val platformEnabler = AndroidPlatformEnabler(this)
-        if (eventId != null) {
-            fullMapActivity = WWWFullMapActivity(eventId, platformEnabler)
-            setContent {
-                fullMapActivity!!.asComponent(
-                    eventMapBuilder = { event ->
-                        AndroidEventMap(
-                            event,
-                            context = this as AppCompatActivity,
-                            mapConfig =
-                                EventMapConfig(
-                                    initialCameraPosition = MapCameraPosition.WINDOW,
-                                    autoTargetUserOnFirstLocation = true,
-                                ),
-                        )
-                    },
-                    onFinish = { finish() },
-                )
-            }
+    override fun createEventMapBuilder(): (IWWWEvent) -> AndroidEventMap =
+        { event ->
+            AndroidEventMap(
+                event,
+                context = this as AppCompatActivity,
+                mapConfig =
+                    EventMapConfig(
+                        initialCameraPosition = MapCameraPosition.WINDOW,
+                        autoTargetUserOnFirstLocation = true,
+                    ),
+            )
         }
-    }
-
-    override fun onDestroy() {
-        fullMapActivity?.onDestroy()
-        super.onDestroy()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        fullMapActivity?.onResume()
-    }
-
-    override fun onPause() {
-        fullMapActivity?.onPause()
-        super.onPause()
-    }
 }

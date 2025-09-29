@@ -29,6 +29,7 @@ import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Instant
 
 /**
  * Test data builders for consistent, reusable test fixtures.
@@ -160,7 +161,7 @@ object TestDataBuilders {
      * Builder for creating test clocks with deterministic time
      */
     class ClockBuilder {
-        private var baseTime: kotlinx.datetime.Instant = kotlinx.datetime.Instant.fromEpochMilliseconds(BASE_TIMESTAMP)
+        private var baseTime: Instant = kotlinx.datetime.Instant.fromEpochMilliseconds(BASE_TIMESTAMP)
         private var autoAdvance: Boolean = false
         private var advanceStep: kotlin.time.Duration = 1.minutes
 

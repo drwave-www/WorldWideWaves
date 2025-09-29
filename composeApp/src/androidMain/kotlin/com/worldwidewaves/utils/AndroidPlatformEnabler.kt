@@ -26,6 +26,7 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import com.worldwidewaves.activities.event.EventActivity
 import com.worldwidewaves.activities.event.WaveActivity
 import com.worldwidewaves.shared.PlatformEnabler
@@ -60,7 +61,9 @@ class AndroidPlatformEnabler(
 
     @Composable
     override fun OpenUrl(url: String) {
-        openUrl(url)
+        LaunchedEffect(url) {
+            openUrl(url)
+        }
     }
 
     override fun openUrl(url: String) {

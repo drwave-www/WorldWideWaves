@@ -39,6 +39,30 @@ WorldWideWaves orchestrates human waves through cities globally. Users can:
 ./gradlew test
 ```
 
+### Git Hooks Setup (Recommended)
+
+Set up shared git hooks for enhanced development workflow:
+
+```bash
+# One-time setup for development workflow enhancements
+./dev/setup-git-hooks.sh
+```
+
+**Features enabled:**
+- 🚀 **Automatic Android emulator launch** for integration testing
+- 🔄 **Translation updates** (when `OPENAI_API_KEY` is set)
+- 🧪 **Critical integration tests** run before each push
+- 💾 **Automatic backup** of any existing custom hooks
+
+**Quick commands:**
+```bash
+# Skip integration tests temporarily
+SKIP_INTEGRATION_TESTS=1 git push
+
+# Update hooks after pulling latest changes
+./dev/setup-git-hooks.sh
+```
+
 ### Development Commands
 See [CLAUDE.md](./CLAUDE.md) for complete development guide.
 
@@ -202,5 +226,5 @@ The simulation proves that when 50 people play the same MIDI file with slight ti
 
 ---
 
-**License**: See [LICENSE](./LICENSE)  
+**License**: See [LICENSE](./LICENSE)
 **Documentation**: [CLAUDE.md](./CLAUDE.md) | [iOS Plan](./IOS_ADAPTATION_PLAN.md)

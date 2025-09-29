@@ -253,7 +253,7 @@ class WWWEventWaveLinearTest : KoinTest {
             coEvery { mockEvent.area.isPositionWithin(userPosition) } returns true
 
             // WHEN
-            val result = waveLinear.timeBeforeUserHit()
+            waveLinear.timeBeforeUserHit()
 
             // THEN: Test passes if method executes without exception
             // The actual return value can be null or non-null depending on implementation
@@ -415,32 +415,31 @@ class WWWEventWaveLinearTest : KoinTest {
             val cutPosition1Right = Position(-10.0, 10.0).init()
             val cutPosition2Left = Position(10.0, -10.0).init()
             val cutPosition2Right = Position(10.0, 10.0).init()
-            val lastWaveState =
-                WWWEventWave.WavePolygons(
-                    timestamp = startTime,
-                    traversedPolygons =
-                        listOf(
-                            Polygon.fromPositions(
-                                listOf(
-                                    CutPosition(-10.0, 0.0, 42, cutPosition1Left, cutPosition1Right),
-                                    CutPosition(10.0, 0.0, 42, cutPosition1Left, cutPosition1Right),
-                                    Position(10.0, -10.0),
-                                    Position(-10.0, -10.0),
-                                ),
+            WWWEventWave.WavePolygons(
+                timestamp = startTime,
+                traversedPolygons =
+                    listOf(
+                        Polygon.fromPositions(
+                            listOf(
+                                CutPosition(-10.0, 0.0, 42, cutPosition1Left, cutPosition1Right),
+                                CutPosition(10.0, 0.0, 42, cutPosition1Left, cutPosition1Right),
+                                Position(10.0, -10.0),
+                                Position(-10.0, -10.0),
                             ),
                         ),
-                    remainingPolygons =
-                        listOf(
-                            Polygon.fromPositions(
-                                listOf(
-                                    CutPosition(10.0, 0.0, 42, cutPosition2Left, cutPosition2Right),
-                                    Position(10.0, 10.0),
-                                    Position(-10.0, 10.0),
-                                    CutPosition(-10.0, 0.0, 42, cutPosition2Left, cutPosition2Right),
-                                ),
+                    ),
+                remainingPolygons =
+                    listOf(
+                        Polygon.fromPositions(
+                            listOf(
+                                CutPosition(10.0, 0.0, 42, cutPosition2Left, cutPosition2Right),
+                                Position(10.0, 10.0),
+                                Position(-10.0, 10.0),
+                                CutPosition(-10.0, 0.0, 42, cutPosition2Left, cutPosition2Right),
                             ),
                         ),
-                )
+                    ),
+            )
             val mockBoundingBox = mockPolygons.first().bbox()
 
             coEvery { mockArea.getPolygons() } returns mockPolygons
@@ -703,9 +702,6 @@ class WWWEventWaveLinearTest : KoinTest {
 
             // WHEN: Check if user has been hit
             val hasBeenHit = waveLinear.hasUserBeenHitInCurrentPosition()
-
-            // THEN: Test passes if hit detection executes without exception
-            assertTrue(hasBeenHit is Boolean, "Hit detection should return a boolean value")
         }
 
     @Test

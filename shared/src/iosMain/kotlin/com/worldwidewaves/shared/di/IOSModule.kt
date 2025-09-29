@@ -19,14 +19,12 @@ package com.worldwidewaves.shared.di
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.choreographies.ChoreographyManager
 import com.worldwidewaves.shared.data.FavoriteEventsStore
 import com.worldwidewaves.shared.data.IOSFavoriteEventsStore
-import com.worldwidewaves.shared.debugBuild
-import com.worldwidewaves.shared.domain.usecases.IMapAvailabilityChecker
 import com.worldwidewaves.shared.domain.usecases.IOSMapAvailabilityChecker
+import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker
 import com.worldwidewaves.shared.map.IOSMapLibreAdapter
 import com.worldwidewaves.shared.map.IOSPlatformMapManager
 import com.worldwidewaves.shared.map.IOSWWWLocationProvider
@@ -38,24 +36,24 @@ import com.worldwidewaves.shared.sound.IOSSoundPlayer
 import com.worldwidewaves.shared.sound.SoundPlayer
 import com.worldwidewaves.shared.ui.DebugTabScreen
 import com.worldwidewaves.shared.utils.IOSImageResolver
-import com.worldwidewaves.shared.utils.IOSPlatformEnabler
 import com.worldwidewaves.shared.utils.ImageResolver
 import com.worldwidewaves.shared.viewmodels.EventsViewModel
+import com.worldwidewaves.shared.viewmodels.IOSMapViewModel
+import com.worldwidewaves.shared.viewmodels.MapViewModel
+import org.jetbrains.compose.resources.DrawableResource
 import org.koin.dsl.module
 import platform.UIKit.UIDevice
-import platform.UIKit.UIImage
 
 val IOSModule =
     module {
         single<SoundPlayer> { IOSSoundPlayer() }
-        single<ImageResolver<UIImage>> { IOSImageResolver() }
+        single<ImageResolver<DrawableResource>> { IOSImageResolver() }
         single<WWWLocationProvider> { IOSWWWLocationProvider() }
 
-        single<PlatformEnabler> { IOSPlatformEnabler() }
+        // Note: PlatformEnabler is injected into koin by Swift IOS
 
         // Platform descriptor for iOS
         single<WWWPlatform> {
-            debugBuild()
             val device = UIDevice.currentDevice
             WWWPlatform("iOS ${device.systemVersion}", get())
         }
@@ -70,11 +68,11 @@ val IOSModule =
             )
         }
 
-        // ChoreographyManager for iOS
-        single(createdAtStart = true) { ChoreographyManager<UIImage>() }
+        // ChoreographyManager for iOS - using DrawableResource for cross-platform compatibility
+        single(createdAtStart = true) { ChoreographyManager<DrawableResource>() }
 
         // iOS Map Availability Checker (production-grade iOS implementation)
-        single<IMapAvailabilityChecker> { IOSMapAvailabilityChecker() }
+        single<MapAvailabilityChecker> { IOSMapAvailabilityChecker() }
 
         // Debug screen - iOS implementation
         single<DebugTabScreen?> { DebugTabScreen() }
@@ -86,4 +84,7 @@ val IOSModule =
         single<PlatformMapManager> { IOSPlatformMapManager() }
         single<MapLibreAdapter<Any>> { IOSMapLibreAdapter() }
         single { MapStateManager(get()) }
+
+        // iOS MapViewModel
+        single<MapViewModel> { IOSMapViewModel(get()) }
     }

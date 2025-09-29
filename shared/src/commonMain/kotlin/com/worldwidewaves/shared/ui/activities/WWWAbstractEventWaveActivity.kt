@@ -69,7 +69,10 @@ abstract class WWWAbstractEventWaveActivity(
         this.Load()
         this.onEventLoaded { loadedEvent ->
             event = loadedEvent
-            eventMap = eventMapBuilder(loadedEvent)
+            // Only create eventMap if it doesn't exist yet (prevent multiple instances)
+            if (eventMap == null) {
+                eventMap = eventMapBuilder(loadedEvent)
+            }
         }
 
         event?.let { evt ->

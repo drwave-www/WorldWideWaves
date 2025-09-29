@@ -59,7 +59,7 @@ EventsListScreen → EventActivity → EventFullMapActivity
 class MainActivity : AppCompatActivity() {
     // Sets up bottom navigation with:
     // - Events List tab
-    // - About tab  
+    // - About tab
     // - Settings tab (future)
 }
 ```
@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
 class EventActivity : AbstractEventBackActivity() {
     // Shows:
     // - Event countdown timer
-    // - Event details and description  
+    // - Event details and description
     // - Map preview button
     // - Join wave button (when active)
 }
@@ -168,7 +168,7 @@ fun AndroidEventMap(
 ```kotlin
 class EventsViewModel : ViewModel() {
     private val eventsFlow = MutableStateFlow<List<WWWEvent>>(emptyList())
-    
+
     fun loadEvents() {
         viewModelScope.launch {
             // Load events from shared module
@@ -197,7 +197,7 @@ class MapViewModel : ViewModel() {
 ### 🔧 Utils (`/utils`)
 - `LocationAccessHelpers` - Location permission handling
 - `MapAvailabilityChecker` - Dynamic feature availability
-- `CoroutineHelpers` - Coroutine utilities
+- `CloseableCoroutineScope` - Coroutine utilities
 - `AndroidWWWLocationProvider` - Android location service
 
 ## Configuration
@@ -206,14 +206,14 @@ class MapViewModel : ViewModel() {
 ```kotlin
 android {
     namespace = "com.worldwidewaves"
-    
+
     // Dynamic Features - 40+ city maps
     dynamicFeatures += setOf(
         ":maps:android:paris_france",
         ":maps:android:london_england",
         // ... all other cities
     )
-    
+
     buildFeatures {
         compose = true
         viewBinding = true
@@ -255,7 +255,7 @@ dependencies {
 ```kotlin
 class EventsViewModel : ViewModel() {
     private val eventObserver: WWWEventObserver by inject()
-    
+
     fun loadEvents() {
         viewModelScope.launch {
             // Use shared business logic
@@ -271,7 +271,7 @@ class EventsViewModel : ViewModel() {
 // Load offline map for city
 private fun setupOfflineMap(cityName: String) {
     val mapView = MapView(context)
-    
+
     // Check if dynamic feature is available
     if (MapAvailabilityChecker.isAvailable(cityName)) {
         // Load offline tiles from assets
@@ -286,14 +286,14 @@ private fun setupOfflineMap(cityName: String) {
 @Composable
 fun WaveScreen(event: WWWEvent) {
     val choreographyManager: ChoreographyManager by inject()
-    
+
     LaunchedEffect(event) {
         choreographyManager.startWaveSequence(event) { frame ->
             // Update animation frame
             currentFrame = frame
         }
     }
-    
+
     ChoreographyView(
         frame = currentFrame,
         modifier = Modifier.fillMaxSize()
@@ -309,7 +309,7 @@ fun WaveScreen(event: WWWEvent) {
 fun testEventViewModel() {
     val viewModel = EventsViewModel()
     viewModel.loadEvents()
-    
+
     // Verify events loaded
     assert(viewModel.events.value.isNotEmpty())
 }
@@ -322,11 +322,11 @@ fun testEventNavigation() {
     composeTestRule.setContent {
         EventsListScreen()
     }
-    
+
     composeTestRule
         .onNodeWithText("Event Title")
         .performClick()
-    
+
     // Verify navigation to EventActivity
 }
 ```
@@ -362,12 +362,12 @@ class MapAvailabilityChecker {
             .installedModules
             .contains(cityName)
     }
-    
+
     fun requestInstall(cityName: String) {
         val request = SplitInstallRequest.newBuilder()
             .addModule(cityName)
             .build()
-        
+
         splitInstallManager.startInstall(request)
     }
 }
@@ -394,7 +394,7 @@ class MapAvailabilityChecker {
 4. Add preview functions for development
 
 ### New ViewModel
-1. Extend `ViewModel` 
+1. Extend `ViewModel`
 2. Inject shared module dependencies
 3. Expose `StateFlow`/`LiveData` for UI
 4. Handle lifecycle properly

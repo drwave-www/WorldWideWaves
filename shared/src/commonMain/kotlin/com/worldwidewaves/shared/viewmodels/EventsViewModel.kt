@@ -20,8 +20,6 @@ import com.worldwidewaves.shared.domain.usecases.GetSortedEventsUseCase
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.ui.BaseViewModel
 import com.worldwidewaves.shared.utils.WWWLogger
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -74,14 +72,7 @@ class EventsViewModel(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    // Exception handler for coroutines
-    private val exceptionHandler =
-        CoroutineExceptionHandler { _, throwable ->
-            WWWLogger.e("EventsViewModel", "Coroutine error: ${throwable.message}", throwable)
-            if (throwable !is CancellationException) {
-                _loadingError.value = true
-            }
-        }
+    // Exception handler removed - unused in the codebase
 
     // ---------------------------
 
