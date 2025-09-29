@@ -47,15 +47,6 @@ kotlin {
             isStatic = true
             linkerOpts("-ObjC")
         }
-        iosTarget.compilations.getByName("main") {
-            compileTaskProvider.configure {
-                compilerOptions {
-                    freeCompilerArgs.add("-Xdisable-phases=Devirtualization")
-                    freeCompilerArgs.add("-Xno-optimized-callable-references")
-                    freeCompilerArgs.add("-Xpartial-linkage=disable")
-                }
-            }
-        }
     }
 
     /*
@@ -87,38 +78,17 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.napier)
 
-            // Use Jetpack Compose Multiplatform consistently
-            implementation(compose.runtime) {
-                exclude(group = "androidx.annotation")
-                exclude(group = "androidx.collection")
-            }
-            implementation(compose.ui) {
-                exclude(group = "androidx.annotation")
-                exclude(group = "androidx.collection")
-            }
-            implementation(compose.foundation) {
-                exclude(group = "androidx.annotation")
-                exclude(group = "androidx.collection")
-            }
-            implementation(compose.material) {
-                exclude(group = "androidx.annotation")
-                exclude(group = "androidx.collection")
-            }
-            implementation(compose.material3) {
-                exclude(group = "androidx.annotation")
-                exclude(group = "androidx.collection")
-            }
-            implementation(compose.materialIconsExtended) {
-                exclude(group = "androidx.annotation")
-                exclude(group = "androidx.collection")
-            }
-            implementation(compose.components.resources) {
-                exclude(group = "androidx.annotation")
-                exclude(group = "androidx.collection")
-            }
+            // Use explicit Compose versions for iOS compatibility (working config from cd6a8f37)
+            implementation("org.jetbrains.compose.runtime:runtime:1.8.2")
+            implementation("org.jetbrains.compose.ui:ui:1.8.2")
+            implementation("org.jetbrains.compose.foundation:foundation:1.8.2")
+            implementation("org.jetbrains.compose.material:material:1.8.2")
+            implementation("org.jetbrains.compose.material3:material3:1.8.2")
+            implementation("org.jetbrains.compose.components:components-resources:1.8.2")
+            implementation(compose.materialIconsExtended)
 
             // REQUIRED so IOSLifecycleOwner can link:
-            // implementation("org.jetbrains.androidx.lifecycle:lifecycle-common:2.8.4")
+            implementation("org.jetbrains.androidx.lifecycle:lifecycle-common:2.8.4")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -132,12 +102,7 @@ kotlin {
             implementation(libs.mockk.android.v1120)
         }
         iosMain.dependencies {
-            implementation("org.jetbrains.compose.ui:ui-uikit:1.6.11") {
-                exclude(group = "androidx.lifecycle")
-                exclude(group = "org.jetbrains.androidx.lifecycle")
-                exclude(group = "androidx.annotation")
-                exclude(group = "androidx.collection")
-            }
+            implementation("org.jetbrains.compose.ui:ui-uikit:1.8.2")
         }
         androidMain.dependencies {
             implementation(libs.androidx.ui.text.google.fonts)
@@ -194,8 +159,8 @@ kotlin {
 configurations.all {
     resolutionStrategy {
         // Prefer Compose Multiplatform internal libraries for KMP metadata
-        force("org.jetbrains.compose.annotation-internal:annotation:1.6.11")
-        force("org.jetbrains.compose.collection-internal:collection:1.6.11")
+        force("org.jetbrains.compose.annotation-internal:annotation:1.8.2")
+        force("org.jetbrains.compose.collection-internal:collection:1.8.2")
 
         // Force consistent annotation/collection library versions for Android only
         if (name.contains("android", ignoreCase = true) && !name.contains("ios", ignoreCase = true)) {
@@ -204,15 +169,22 @@ configurations.all {
         }
     }
 
-    // Exclude AndroidX from all iOS and Native configurations
-    if (name.contains("ios", ignoreCase = true) ||
-        name.contains("native", ignoreCase = true) ||
-        name.contains("metadata", ignoreCase = true)
-    ) {
+    // Module-specific excludes: allow lifecycle-common; block Android-only bits
+    val n = name.lowercase()
+    if (n.contains("commonmain") || n.contains("ios")) {
+        // allow lifecycle-common; block Android-only bits
+        exclude(group = "androidx.lifecycle", module = "lifecycle-runtime-compose")
+        exclude(group = "org.jetbrains.androidx.lifecycle", module = "lifecycle-runtime-compose")
+        exclude(group = "androidx.lifecycle", module = "lifecycle-viewmodel-compose")
+        exclude(group = "androidx.lifecycle", module = "lifecycle-runtime-ktx")
+        exclude(group = "androidx.lifecycle", module = "lifecycle-viewmodel-ktx")
+        exclude(group = "androidx.activity") // activity/fragment are Android-only
+        exclude(group = "androidx.fragment")
+        exclude(group = "androidx.compose.ui", module = "ui-tooling")
+        exclude(group = "androidx.compose.material") // old M2
+        exclude(group = "androidx.compose.material3") // AndroidX variant
         exclude(group = "androidx.annotation")
         exclude(group = "androidx.collection")
-        exclude(group = "androidx.lifecycle")
-        exclude(group = "org.jetbrains.androidx.lifecycle")
     }
 }
 
