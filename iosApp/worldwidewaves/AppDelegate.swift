@@ -33,11 +33,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UISceneConfiguration(name: "Default Configuration", sessionRole: session.role)
     }
 
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+    func application(_ app: UIApplication,
+                     open url: URL,
+                     options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
         NSLog("[AppDelegate] 🔗 application:openURL: \(url.absoluteString)")
         if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let sceneDelegate = scene.delegate as? SceneDelegate,
-           let viewController = sceneDelegate.perform(#selector(getter: SceneDelegate.window)) != nil ? sceneDelegate.viewController(for: url) : nil {
+           let viewController = sceneDelegate.perform(#selector(getter: SceneDelegate.window)) != nil
+                ? sceneDelegate.viewController(for: url) : nil {
             if let nav = sceneDelegate.nav {
                 nav.pushViewController(viewController, animated: true)
             } else {

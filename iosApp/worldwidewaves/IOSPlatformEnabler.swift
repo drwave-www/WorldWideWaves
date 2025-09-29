@@ -142,14 +142,14 @@ final class IOSPlatformEnabler: PlatformEnabler {
             label.bottomAnchor.constraint(equalTo: container.safeAreaLayoutGuide.bottomAnchor, constant: -24)
         ])
 
-        UIView.animate(withDuration: 0.25, animations: { label.alpha = 1 }) { _ in
+        UIView.animate(withDuration: 0.25, animations: { label.alpha = 1 }, completion: { _ in
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                UIView.animate(withDuration: 0.25, animations: { label.alpha = 0 }) { _ in
+                UIView.animate(withDuration: 0.25, animations: { label.alpha = 0 }, completion: { _ in
                     label.removeFromSuperview()
                     NSLog("[IOSPlatformEnabler] 🍞 showToast end (removed)")
-                }
+                })
             }
-        }
+        })
     }
 }
 
