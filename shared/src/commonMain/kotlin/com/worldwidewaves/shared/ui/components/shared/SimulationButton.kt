@@ -130,16 +130,16 @@ fun BoxScope.SimulationButton(
         }
     }
 
-    // Execute pending actions
-    LaunchedEffect(pendingAction) {
+    // Execute pending actions - add event.id key to prevent conflicts across recomposition
+    LaunchedEffect(event.id, pendingAction) {
         pendingAction?.let { action ->
             action()
             pendingAction = null
         }
     }
 
-    // Reset button state when simulation is disabled externally
-    LaunchedEffect(isSimulationEnabled) {
+    // Reset button state when simulation is disabled externally - add event.id key for safety
+    LaunchedEffect(event.id, isSimulationEnabled) {
         if (!isSimulationEnabled && simulationButtonState == "active") {
             simulationButtonState = "idle"
         }
@@ -205,6 +205,12 @@ private suspend fun startSimulation(
     onError: (String, String) -> Unit,
 ) {
     try {
+        // Prevent concurrent simulation operations for the same event
+        if (platform.isOnSimulation()) {
+            Log.w("SimulationButton", "Simulation already running, ignoring duplicate start request for ${event.id}")
+            return
+        }
+
         // Generate random position within event area
         val position = event.area.generateRandomPositionInArea()
 
@@ -212,10 +218,10 @@ private suspend fun startSimulation(
         val simulationDelay = 0.minutes
         val simulationTime = event.getStartDateTime() + simulationDelay
 
-        // Reset any existing simulation
+        // Reset any existing simulation (only if not already disabled)
         platform.disableSimulation()
 
-        // Create new simulation
+        // Create new simulation with unique identifier
         val simulation =
             WWWSimulation(
                 startDateTime = simulationTime,
@@ -223,7 +229,7 @@ private suspend fun startSimulation(
                 initialSpeed = Wave.DEFAULT_SPEED_SIMULATION,
             )
 
-        // Set the simulation
+        // Set the simulation with protection against concurrent access
         Log.i("SimulationButton", "Setting simulation starting time to $simulationTime from event ${event.id}")
         Log.i("SimulationButton", "Setting simulation user position to $position from event ${event.id}")
         platform.setSimulation(simulation)

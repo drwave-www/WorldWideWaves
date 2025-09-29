@@ -61,13 +61,27 @@ fun rememberEventState(
     event: IWWWEvent,
     platform: WWWPlatform,
 ): EventState {
-    val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
-    val progression by event.observer.progression.collectAsState()
-    val isInArea by event.observer.userIsInArea.collectAsState()
-    val isSimulationModeEnabled by platform.simulationModeEnabled.collectAsState()
-    val endDateTime = remember { mutableStateOf<Instant?>(null) }
+    // Stabilize state collection with event.id keys to prevent observer multiplication
+    val eventStatus by remember(event.id) {
+        event.observer.eventStatus
+    }.collectAsState(Status.UNDEFINED)
+
+    val progression by remember(event.id) {
+        event.observer.progression
+    }.collectAsState()
+
+    val isInArea by remember(event.id) {
+        event.observer.userIsInArea
+    }.collectAsState()
+
+    val isSimulationModeEnabled by remember(platform) {
+        platform.simulationModeEnabled
+    }.collectAsState()
+
+    val endDateTime = remember(event.id) { mutableStateOf<Instant?>(null) }
 
     // Recompute end date-time each time progression changes (after polygons load, duration becomes accurate)
+    // Use event.id key to prevent duplicate LaunchedEffect execution
     LaunchedEffect(event.id, progression) {
         endDateTime.value = event.getEndDateTime()
     }

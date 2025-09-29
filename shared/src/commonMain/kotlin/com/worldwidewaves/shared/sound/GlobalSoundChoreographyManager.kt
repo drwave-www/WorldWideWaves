@@ -181,16 +181,20 @@ class GlobalSoundChoreographyManager(
         Log.i(TAG, "Starting sound choreography for event: ${event.id}")
         isActive = true
 
-        // Start observing wave hits and play sound when hit
+        // Start observing wave hits and play sound only on transition (false -> true)
         coroutineScopeProvider.scopeDefault().launch {
+            var previousHitState = false
             event.observer.userHasBeenHit.collect { hasBeenHit ->
-                if (hasBeenHit && isActive) {
+                // Only play sound on transition from false to true (actual hit moment)
+                if (hasBeenHit && !previousHitState && isActive) {
                     try {
+                        Log.i(TAG, "User hit detected for event ${event.id} - playing sound")
                         event.warming.playCurrentSoundChoreographyTone()
                     } catch (e: Exception) {
                         Log.e(TAG, "Error playing sound choreography tone", e)
                     }
                 }
+                previousHitState = hasBeenHit
             }
         }
     }
