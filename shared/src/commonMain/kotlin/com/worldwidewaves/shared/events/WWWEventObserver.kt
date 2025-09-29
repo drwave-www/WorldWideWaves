@@ -278,8 +278,17 @@ class WWWEventObserver(
                     val currentProgression =
                         try {
                             waveProgressionTracker.calculateProgression(event)
-                        } catch (e: Throwable) {
-                            Log.e("WWWEventObserver", "Error getting wave progression for event ${event.id}: $e")
+                        } catch (e: IllegalArgumentException) {
+                            Log.e("WWWEventObserver", "Invalid arguments for wave progression calculation for event ${event.id}: $e")
+                            0.0
+                        } catch (e: IllegalStateException) {
+                            Log.e("WWWEventObserver", "Invalid state for wave progression calculation for event ${event.id}: $e")
+                            0.0
+                        } catch (e: ArithmeticException) {
+                            Log.e("WWWEventObserver", "Arithmetic error in wave progression calculation for event ${event.id}: $e")
+                            0.0
+                        } catch (e: RuntimeException) {
+                            Log.e("WWWEventObserver", "Runtime error getting wave progression for event ${event.id}: $e")
                             0.0
                         }
 
@@ -449,8 +458,17 @@ class WWWEventObserver(
                     val progression =
                         try {
                             waveProgressionTracker.calculateProgression(event)
-                        } catch (e: Throwable) {
-                            Log.e("WWWEventObserver", "Error calculating progression for event ${event.id}: $e")
+                        } catch (e: IllegalArgumentException) {
+                            Log.e("WWWEventObserver", "Invalid arguments for progression calculation for event ${event.id}: $e")
+                            0.0
+                        } catch (e: IllegalStateException) {
+                            Log.e("WWWEventObserver", "Invalid state for progression calculation for event ${event.id}: $e")
+                            0.0
+                        } catch (e: ArithmeticException) {
+                            Log.e("WWWEventObserver", "Arithmetic error in progression calculation for event ${event.id}: $e")
+                            0.0
+                        } catch (e: RuntimeException) {
+                            Log.e("WWWEventObserver", "Runtime error calculating progression for event ${event.id}: $e")
                             0.0
                         }
 

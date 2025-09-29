@@ -174,8 +174,16 @@ object MidiParser {
             Log.e("MidiParser", "Invalid MIDI file format $midiResourcePath: ${e.message}")
             // Return null instead of crashing to allow graceful degradation
             null
-        } catch (e: Exception) {
-            Log.e("MidiParser", "Error reading MIDI file $midiResourcePath: ${e.message}")
+        } catch (e: org.jetbrains.compose.resources.MissingResourceException) {
+            Log.e("MidiParser", "Resource not found $midiResourcePath: ${e.message}")
+            // Return null instead of crashing to allow graceful degradation
+            null
+        } catch (e: IllegalStateException) {
+            Log.e("MidiParser", "Invalid state reading MIDI file $midiResourcePath: ${e.message}")
+            // Return null instead of crashing to allow graceful degradation
+            null
+        } catch (e: RuntimeException) {
+            Log.e("MidiParser", "Runtime error reading MIDI file $midiResourcePath: ${e.message}")
             // Return null instead of crashing to allow graceful degradation
             null
         }
@@ -381,10 +389,6 @@ object MidiParser {
                 totalDuration = totalDuration,
                 tempo = finalTempo.toInt(),
             )
-        } catch (e: Exception) {
-            val ioException = Exception("IO error parsing MIDI bytes: ${e.message}", e)
-            Log.e(TAG, "IO error parsing MIDI bytes: ${e.message}", throwable = e)
-            throw ioException
         } catch (e: IllegalArgumentException) {
             val argException = IllegalArgumentException("Invalid MIDI format: ${e.message}", e)
             Log.e(TAG, "Invalid MIDI format: ${e.message}", throwable = e)
@@ -393,10 +397,18 @@ object MidiParser {
             val boundsException = IllegalArgumentException("Malformed MIDI data: ${e.message}", e)
             Log.e(TAG, "Malformed MIDI data: ${e.message}", throwable = e)
             throw boundsException
-        } catch (e: Exception) {
-            val parseException = IllegalArgumentException("Unexpected MIDI parsing error: ${e.message}", e)
-            Log.e(TAG, "Unexpected MIDI parsing error: ${e.message}", throwable = e)
-            throw parseException
+        } catch (e: NumberFormatException) {
+            val numException = IllegalArgumentException("Invalid number format in MIDI data: ${e.message}", e)
+            Log.e(TAG, "Invalid number format in MIDI data: ${e.message}", throwable = e)
+            throw numException
+        } catch (e: ArithmeticException) {
+            val mathException = IllegalArgumentException("Arithmetic error in MIDI parsing: ${e.message}", e)
+            Log.e(TAG, "Arithmetic error in MIDI parsing: ${e.message}", throwable = e)
+            throw mathException
+        } catch (e: RuntimeException) {
+            val runtimeException = IllegalArgumentException("Runtime error parsing MIDI: ${e.message}", e)
+            Log.e(TAG, "Runtime error parsing MIDI: ${e.message}", throwable = e)
+            throw runtimeException
         }
     }
 
