@@ -19,7 +19,6 @@ package com.worldwidewaves.shared.sound
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -40,9 +39,10 @@ class GlobalSoundChoreographyManagerTest {
         fun simulateHitStateChange(
             hasBeenHit: Boolean,
             isActive: Boolean = true,
+            isEventRunning: Boolean = true,
         ) {
             // This is the fixed logic from GlobalSoundChoreographyManager
-            if (hasBeenHit && !previousHitState && isActive) {
+            if (hasBeenHit && !previousHitState && isActive && isEventRunning) {
                 soundPlayed = true
             }
             previousHitState = hasBeenHit
@@ -92,5 +92,15 @@ class GlobalSoundChoreographyManagerTest {
 
         // THEN: No sound should play
         assertFalse(soundPlayed, "Sound should NOT play when choreography is inactive")
+
+        // SCENARIO 4: DONE event (event not running)
+        soundPlayed = false
+        previousHitState = false
+
+        // WHEN: User gets hit but event is DONE (not running)
+        simulateHitStateChange(hasBeenHit = true, isActive = true, isEventRunning = false)
+
+        // THEN: No sound should play for DONE events
+        assertFalse(soundPlayed, "Sound should NOT play when event is DONE (not running)")
     }
 }
