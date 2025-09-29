@@ -250,7 +250,9 @@ interface GeoJsonDataProvider {
     fun clearCache()
 }
 
-class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
+class DefaultGeoJsonDataProvider :
+    GeoJsonDataProvider,
+    KoinComponent {
     private val cache = mutableMapOf<String, JsonObject?>()
 
     override suspend fun getGeoJsonData(eventId: String): JsonObject? {
@@ -291,10 +293,33 @@ class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
                 null
             }
 
-        // Cache the result (even if null) to avoid repeated attempts
-        cache[eventId] = result
+        // Cache successful results. For null results, only cache if it's not due to ODR unavailability
+        // This allows retry when ODR resources become available later
+        val shouldCache = result != null || !isODRUnavailable(eventId)
+        if (shouldCache) {
+            cache[eventId] = result
+            Log.v(::getGeoJsonData.name, "Cached GeoJSON result for $eventId (success=${result != null})")
+        } else {
+            Log.i(::getGeoJsonData.name, "Not caching null result for $eventId (ODR may become available)")
+        }
+
         return result
     }
+
+    /**
+     * Check if GeoJSON failure is due to ODR resources being unavailable.
+     * On iOS, this allows retry when ODR downloads complete.
+     */
+    private fun isODRUnavailable(eventId: String): Boolean =
+        try {
+            // This is a platform-specific check - only meaningful on iOS
+            val platform = get<WWWPlatform>()
+            platform.name.contains("iOS", ignoreCase = true)
+        } catch (e: Exception) {
+            // If we can't determine platform, err on the side of allowing retry
+            Log.v(::isODRUnavailable.name, "Could not determine platform for ODR check: ${e.message}")
+            true
+        }
 
     override fun invalidateCache(eventId: String) {
         if (cache.remove(eventId) != null) {

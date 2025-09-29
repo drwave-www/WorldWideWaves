@@ -177,6 +177,19 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
                             val currentStates = _mapStates.value.toMutableMap()
                             currentStates[mapId] = true
                             _mapStates.value = currentStates
+
+                            // CRITICAL: Invalidate GeoJSON cache when ODR resources become available
+                            // This ensures that previously failed GeoJSON loads will be retried
+                            try {
+                                val koin =
+                                    org.koin.mp.KoinPlatform
+                                        .getKoin()
+                                val geoJsonProvider = koin.get<com.worldwidewaves.shared.events.utils.GeoJsonDataProvider>()
+                                geoJsonProvider.invalidateCache(mapId)
+                                Log.i("IOSMapAvailabilityChecker", "[$mapId] Invalidated GeoJSON cache after ODR success")
+                            } catch (e: Exception) {
+                                Log.w("IOSMapAvailabilityChecker", "[$mapId] Failed to invalidate GeoJSON cache: ${e.message}")
+                            }
                         }
                     }
                 }
