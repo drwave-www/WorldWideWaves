@@ -45,16 +45,19 @@ import kotlin.time.Instant
  * Workflow:
  * • At start-up, the manager pre-loads a MIDI file located at
  *   [FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE] (or any custom path via
- *   [preloadMidiFile]).  The file is parsed into a single [MidiTrack] that
+ *   [preloadMidiFile]). The file is parsed into a single [MidiTrack] that
  *   stores note, timing and velocity information.
- * • When a device gets “hit” by the wave the UI calls [playCurrentSoundTone]
- *   passing the *wave start* timestamp.  The manager maps the current
+ * • **MIDI files are cached globally** - once a MIDI file is loaded, it's reused
+ *   across all events and manager instances for the entire application lifecycle.
+ *   This ensures optimal performance and memory usage.
+ * • When a device gets "hit" by the wave the UI calls [playCurrentSoundTone]
+ *   passing the *wave start* timestamp. The manager maps the current
  *   `clock.now() – waveStartTime` to a position inside the track (with optional
  *   looping) and fetches all notes whose `[start,end]` window contains that
  *   position.
  * • One of those active notes is randomly selected so each device contributes
  *   a different tone, creating a crowd-sourced chord.
- * • The selected note’s pitch / velocity are converted to
+ * • The selected note's pitch / velocity are converted to
  *   `frequency` / `amplitude` using helpers in [WaveformGenerator] and finally
  *   played through the platform-specific [SoundPlayer] with the currently
  *   chosen [Waveform][SoundPlayer.Waveform] (default *sine*).

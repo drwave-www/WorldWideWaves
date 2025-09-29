@@ -109,7 +109,7 @@ open class WWWMainActivity
         suspend fun initialize() {
             Log.i("WWWMainActivity", "Initializing WWWMainActivity")
 
-            // iOS FIX: Initialize sound choreography manager since init{} was removed
+            // Load the sound choreography
             soundChoreographyManager.initialize()
 
             // Begin loading events – when done, flag so splash can disappear
