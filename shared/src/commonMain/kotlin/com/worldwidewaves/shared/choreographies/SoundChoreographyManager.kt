@@ -78,6 +78,7 @@ class SoundChoreographyManager(
     // MIDI track data
     private var currentTrack: MidiTrack? = null
     private var looping: Boolean = true
+    private var isInitialized: Boolean = false
 
     // Selected instrument settings - SQUARE waveform has richer harmonics for better perceived loudness
     private var selectedWaveform = SoundPlayer.Waveform.SQUARE
@@ -88,9 +89,20 @@ class SoundChoreographyManager(
     /**
      * ⚠️ iOS CRITICAL: Initialize manager by preloading default MIDI file.
      * Must be called from @Composable LaunchedEffect, never from init{} or constructor.
+     *
+     * This method is idempotent - it will only initialize once per manager instance.
+     * Subsequent calls are no-ops that return immediately.
      */
     suspend fun initialize() {
-        preloadMidiFile(FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE)
+        if (isInitialized) {
+            Log.d("SoundChoreographyManager", "Already initialized, skipping")
+            return
+        }
+
+        val success = preloadMidiFile(FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE)
+        if (success) {
+            isInitialized = true
+        }
     }
 
     /**
