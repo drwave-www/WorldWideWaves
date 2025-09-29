@@ -19,7 +19,6 @@ package com.worldwidewaves.shared
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
@@ -46,4 +45,4 @@ fun SimpleTestAppUI() {
 /**
  * Simple test string that can be accessed from Swift
  */
-const val simpleComposeTestResult: String = "✅ Simple Compose function accessible from iOS!"
+const val SIMPLE_COMPOSE_TEST_RESULT: String = "✅ Simple Compose function accessible from iOS!"
