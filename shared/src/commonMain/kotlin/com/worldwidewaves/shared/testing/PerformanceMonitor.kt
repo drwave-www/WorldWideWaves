@@ -363,8 +363,8 @@ open class PerformanceMonitor : IPerformanceMonitor {
     override fun getPerformanceReport(): PerformanceReport =
         PerformanceReport(
             appVersion = DEFAULT_APP_VERSION, // This should come from build config
-            platform = getPlatformName(),
-            deviceInfo = getDeviceInfo(),
+            platform = platformName,
+            deviceInfo = deviceInfo,
             reportPeriod = 24.hours,
             metrics = _performanceMetrics.value,
             criticalIssues = detectCriticalIssues(),
@@ -466,9 +466,9 @@ open class PerformanceMonitor : IPerformanceMonitor {
         return recommendations
     }
 
-    private fun getPlatformName(): String = "Unknown" // Platform-specific implementation needed
+    private val platformName: String = "Unknown" // Platform-specific implementation needed
 
-    private fun getDeviceInfo(): String = "Unknown" // Platform-specific implementation needed
+    private val deviceInfo: String = "Unknown" // Platform-specific implementation needed
 }
 
 /**
