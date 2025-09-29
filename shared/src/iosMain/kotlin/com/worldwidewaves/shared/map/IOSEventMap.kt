@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.position.PositionManager
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 import org.koin.mp.KoinPlatform
@@ -101,15 +102,20 @@ class IOSEventMap(
         autoMapDownload: Boolean,
         modifier: Modifier,
     ) {
-        val currentLocation by (
-            locationProvider?.currentLocation
-                ?: kotlinx.coroutines.flow.MutableStateFlow<Position?>(null)
-        ).collectAsState()
+        // Get unified position from PositionManager (same as Android)
+        val positionManager = KoinPlatform.getKoin().get<PositionManager>()
+        val currentLocation by positionManager.position.collectAsState()
 
         var mapIsLoaded by remember { mutableStateOf(false) }
 
-        // Signal map loaded after UI composition
+        // Initialize position system integration (same as AbstractEventMap)
         LaunchedEffect(Unit) {
+            // Start location updates and integrate with PositionManager
+            locationProvider?.startLocationUpdates { rawPosition ->
+                // Update PositionManager with GPS position
+                positionManager.updatePosition(PositionManager.PositionSource.GPS, rawPosition)
+            }
+
             mapIsLoaded = true
             onMapLoaded()
         }

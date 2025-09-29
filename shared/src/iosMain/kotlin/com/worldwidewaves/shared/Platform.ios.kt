@@ -34,14 +34,15 @@ import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 import org.koin.core.logger.PrintLogger
+import platform.Foundation.NSBundle
 import platform.Foundation.NSCachesDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSSearchPathForDirectoriesInDomains
 import platform.Foundation.NSString
-import platform.Foundation.NSURL
 import platform.Foundation.NSUTF8StringEncoding
 import platform.Foundation.NSUserDomainMask
 import platform.Foundation.create
+import platform.Foundation.stringWithContentsOfFile
 import platform.Foundation.writeToFile
 
 /**
@@ -119,55 +120,204 @@ private var koinApp: KoinApplication? = null
  * Simply instantiate the common `WWWPlatform` with the device name/version.
  */
 
+@OptIn(ExperimentalForeignApi::class)
 actual suspend fun readGeoJson(eventId: String): String? {
-    // iOS implementation: Read GeoJSON from app bundle resources
-    // For iOS, GeoJSON files are typically bundled within the app
+    // Production-grade iOS implementation: Read GeoJSON from ODR bundle resources
     return try {
-        // This would read from iOS Bundle.main.path(forResource:)
-        // For now, return null to indicate resource not found
-        // Implementation depends on iOS resource management strategy
-        null
+        Log.v("readGeoJson", "Loading GeoJSON for event $eventId")
+
+        val filePath = getMapFileAbsolutePath(eventId, "geojson")
+        if (filePath != null) {
+            Log.i("readGeoJson", "Reading GeoJSON from: $filePath")
+
+            // Use iOS Foundation API to read file contents safely
+            val content =
+                NSString
+                    .stringWithContentsOfFile(
+                        path = filePath,
+                        encoding = NSUTF8StringEncoding,
+                        error = null,
+                    )?.toString()
+
+            if (content != null) {
+                val preview = content.take(100).replace("\n", " ")
+                Log.i("readGeoJson", "Successfully loaded GeoJSON (${content.length} chars): $preview...")
+                content
+            } else {
+                Log.w("readGeoJson", "Failed to read file content from $filePath")
+                null
+            }
+        } else {
+            Log.d("readGeoJson", "GeoJSON file not found for event $eventId")
+            null
+        }
     } catch (e: Exception) {
-        Log.w("readGeoJson", "Error reading GeoJSON for event $eventId: ${e.message}")
+        Log.e("readGeoJson", "Error reading GeoJSON for event $eventId: ${e.message}", e)
         null
     }
 }
 
+@OptIn(ExperimentalForeignApi::class)
 @Throws(Throwable::class)
 actual suspend fun getMapFileAbsolutePath(
     eventId: String,
     extension: String,
 ): String? {
-    // iOS implementation: Get absolute path to map file
-    // iOS apps store resources in the app bundle or Documents directory
+    // iOS ODR: MUST only work after NSBundleResourceRequest.beginAccessingResources() succeeds
     return try {
-        val cacheDir = getCacheDir()
         val fileName = "$eventId.$extension"
-        val filePath = "$cacheDir/$fileName"
+        Log.v("getMapFileAbsolutePath", "[$eventId] Checking ODR availability for: $fileName")
 
-        // Check if file exists in cache directory
-        if (NSFileManager.defaultManager.fileExistsAtPath(filePath)) {
-            filePath
-        } else {
-            // File not found in cache, could check app bundle resources here
-            null
+        // Get MapAvailabilityChecker to verify ODR status
+        val koin =
+            org.koin.mp.KoinPlatform
+                .getKoin()
+        val mapChecker = koin.get<com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker>()
+
+        if (!mapChecker.isMapDownloaded(eventId)) {
+            Log.w("getMapFileAbsolutePath", "[$eventId] ODR resources not available - map not downloaded")
+            return null
         }
+
+        Log.v("getMapFileAbsolutePath", "[$eventId] ODR confirmed available, resolving path: $fileName")
+
+        // ONLY after ODR availability confirmed, resolve via Bundle APIs
+        val bundle = NSBundle.mainBundle
+        val odrPaths =
+            listOf(
+                bundle.pathForResource(eventId, extension, "Resources/Maps/$eventId"),
+                bundle.pathForResource(eventId, extension, "Maps/$eventId"),
+                bundle.pathForResource(eventId, extension, "Resources/Maps"),
+                bundle.pathForResource(eventId, extension, "Maps"),
+                bundle.pathForResource(eventId, extension),
+            )
+
+        for (path in odrPaths) {
+            if (path != null && NSFileManager.defaultManager.fileExistsAtPath(path)) {
+                Log.i("getMapFileAbsolutePath", "[$eventId] Found ODR file after availability check: $path")
+                return path
+            }
+        }
+
+        Log.e("getMapFileAbsolutePath", "[$eventId] ODR shows available but file not found - ODR lifecycle issue")
+        null
     } catch (e: Exception) {
-        Log.w("getMapFileAbsolutePath", "Error accessing map file for event $eventId.$extension: ${e.message}")
+        Log.e("getMapFileAbsolutePath", "[$eventId] Error resolving ODR file $eventId.$extension: ${e.message}", e)
         null
     }
 }
 
 actual fun cachedFileExists(fileName: String): Boolean {
-    val cacheDir = getCacheDir()
-    val filePath = "$cacheDir/$fileName"
-    return NSFileManager.defaultManager.fileExistsAtPath(filePath)
+    // Handle different file types: style files are cached, map files are in ODR bundle
+    if (fileName.startsWith("style-")) {
+        // Style files are in cache directory
+        val cacheDir = getCacheDir()
+        val filePath = "$cacheDir/$fileName"
+        return NSFileManager.defaultManager.fileExistsAtPath(filePath)
+    } else {
+        // Map files are in ODR bundle - MUST respect ODR lifecycle
+        val eventId = fileName.substringBeforeLast('.')
+
+        try {
+            // Check ODR availability via MapAvailabilityChecker
+            val koin =
+                org.koin.mp.KoinPlatform
+                    .getKoin()
+            val mapChecker = koin.get<com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker>()
+
+            if (!mapChecker.isMapDownloaded(eventId)) {
+                Log.v("cachedFileExists", "ODR resources not available for: $fileName")
+                return false
+            }
+
+            // ONLY after ODR availability confirmed, check Bundle APIs
+            val extension = fileName.substringAfterLast('.')
+            val bundle = NSBundle.mainBundle
+
+            val odrPaths =
+                listOf(
+                    bundle.pathForResource(eventId, extension, "Resources/Maps/$eventId"),
+                    bundle.pathForResource(eventId, extension, "Maps/$eventId"),
+                    bundle.pathForResource(eventId, extension, "Resources/Maps"),
+                    bundle.pathForResource(eventId, extension, "Maps"),
+                    bundle.pathForResource(eventId, extension),
+                )
+
+            return odrPaths.any { path ->
+                path != null && NSFileManager.defaultManager.fileExistsAtPath(path)
+            }
+        } catch (e: Exception) {
+            Log.e("cachedFileExists", "Error checking ODR availability for: $fileName", throwable = e)
+            return false
+        }
+    }
 }
 
 actual fun cachedFilePath(fileName: String): String? {
-    val cacheDir = getCacheDir()
-    val filePath = "$cacheDir/$fileName"
-    return NSURL.fileURLWithPath(filePath).absoluteString
+    val fileNameWithoutExt = fileName.substringBeforeLast('.')
+    val extension = fileName.substringAfterLast('.')
+    val bundle = NSBundle.mainBundle
+
+    Log.v("cachedFilePath", "Looking for file: $fileName")
+
+    // Handle different file types: style files are generated and cached, map files are in ODR bundle
+    if (fileName.startsWith("style-")) {
+        // Style files (e.g., "style-paris_france.json") are generated and cached
+        val cacheDir = getCacheDir()
+        val filePath = "$cacheDir/$fileName"
+        return if (NSFileManager.defaultManager.fileExistsAtPath(filePath)) {
+            // Convert filesystem path to file:// URL for MapLibre compatibility
+            "file://$filePath"
+        } else {
+            Log.w("cachedFilePath", "Style file not found in cache: $filePath")
+            null
+        }
+    } else {
+        // Map files (e.g., "paris_france.mbtiles", "paris_france.geojson") are in ODR bundle
+        // MUST respect ODR lifecycle - only accessible after beginAccessingResources() succeeds
+        val eventId = fileNameWithoutExt // e.g., "paris_france"
+
+        try {
+            // Check ODR availability via MapAvailabilityChecker
+            val koin =
+                org.koin.mp.KoinPlatform
+                    .getKoin()
+            val mapChecker = koin.get<com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker>()
+
+            if (!mapChecker.isMapDownloaded(eventId)) {
+                Log.w("cachedFilePath", "ODR resources not available for: $fileName")
+                return null
+            }
+
+            Log.v("cachedFilePath", "ODR confirmed available for: $fileName")
+
+            // ONLY after ODR availability confirmed, resolve via Bundle APIs
+            val odrUrls: List<platform.Foundation.NSURL?> =
+                listOf(
+                    bundle.URLForResource(eventId, withExtension = extension, subdirectory = "Resources/Maps/$eventId"),
+                    bundle.URLForResource(eventId, withExtension = extension, subdirectory = "Maps/$eventId"),
+                    bundle.URLForResource(eventId, withExtension = extension, subdirectory = "Resources/Maps"),
+                    bundle.URLForResource(eventId, withExtension = extension, subdirectory = "Maps"),
+                    bundle.URLForResource(eventId, withExtension = extension, subdirectory = null),
+                )
+
+            for (url in odrUrls) {
+                if (url != null) {
+                    val absoluteString = url.absoluteString
+                    if (absoluteString != null) {
+                        Log.v("cachedFilePath", "Found ODR file after availability check: $absoluteString")
+                        return absoluteString
+                    }
+                }
+            }
+
+            Log.e("cachedFilePath", "ODR shows available but file not found - ODR lifecycle issue: $fileName")
+            return null
+        } catch (e: Exception) {
+            Log.e("cachedFilePath", "Error checking ODR availability for: $fileName", throwable = e)
+            return null
+        }
+    }
 }
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
@@ -192,16 +342,8 @@ actual fun getCacheDir(): String =
 
 @Throws(Throwable::class)
 actual suspend fun cacheDeepFile(fileName: String) {
-    // iOS implementation: Cache a file from deep/nested resources
-    // For iOS, this typically involves copying from app bundle to cache directory
-    try {
-        // This would involve reading from iOS Bundle resources and writing to cache
-        // Implementation depends on iOS resource bundling strategy
-        // For now, this is a no-op as files are typically pre-bundled in iOS
-    } catch (e: Exception) {
-        Log.w("cacheDeepFile", "Error caching file $fileName: ${e.message}")
-        // File caching is not critical for iOS operation
-    }
+    // iOS ODR: No caching needed - files are directly accessible after beginAccessingResources
+    Log.v("cacheDeepFile", "[$fileName] iOS ODR: No caching needed, files directly accessible via Bundle APIs")
 }
 
 // ---------------------------------------------------------------------------
@@ -209,22 +351,21 @@ actual suspend fun cacheDeepFile(fileName: String) {
 // ---------------------------------------------------------------------------
 
 actual fun clearEventCache(eventId: String) {
-    // Also invalidate GeoJSON cache in memory
+    // iOS ODR: Only clear in-memory cache - ODR files managed by system
     try {
-        // Safe iOS approach - use direct Koin access without KoinComponent
+        // Invalidate GeoJSON cache in memory
         val koin =
             org.koin.mp.KoinPlatform
                 .getKoin()
         val geoJsonProvider = koin.get<GeoJsonDataProvider>()
         geoJsonProvider.invalidateCache(eventId)
+
+        Log.i("clearEventCache", "[$eventId] Cleared in-memory cache (ODR files managed by iOS)")
     } catch (e: IllegalStateException) {
-        Log.w("clearEventCache", "State error clearing cache for event $eventId: ${e.message}")
-        // Cache invalidation is not critical for iOS operation
+        Log.w("clearEventCache", "[$eventId] State error clearing memory cache: ${e.message}")
     } catch (e: Exception) {
-        Log.w("clearEventCache", "Unexpected error clearing cache for event $eventId: ${e.message}")
-        // Cache invalidation is not critical for iOS operation
+        Log.w("clearEventCache", "[$eventId] Error clearing memory cache: ${e.message}")
     }
-    // Note: Other map assets are shipped inside the app bundle and don't need clearing
 }
 
 actual fun isCachedFileStale(fileName: String): Boolean = false
