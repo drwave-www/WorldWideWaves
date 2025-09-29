@@ -20,19 +20,16 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.remember
 import androidx.compose.ui.window.ComposeUIViewController
+import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.IOSEventMap
+import com.worldwidewaves.shared.map.MapCameraPosition
 import com.worldwidewaves.shared.ui.activities.WWWEventActivity
+import com.worldwidewaves.shared.ui.activities.WWWFullMapActivity
 import com.worldwidewaves.shared.ui.activities.WWWMainActivity
+import com.worldwidewaves.shared.ui.activities.WWWWaveActivity
 import com.worldwidewaves.shared.utils.BindIosLifecycle
 import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.utils.finishIOS
@@ -42,76 +39,100 @@ import platform.UIKit.UIViewController
 
 const val TAG = "RootController"
 
-@Composable
-private fun NotWiredUI() {
-    Log.v(TAG, ">>> NotWiredUI ENTER")
-    // TODO: Replace with your real Full Map screen Composable.
-    Box(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(Color(0xFFFFD54F)),
-        // visible amber background
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = "Not Yet Wired",
-            color = Color.Black,
-            fontSize = 28.sp,
-        )
-    }
-}
+// ---------- Small helpers (DI + VC factory) ----------
 
-fun makeMainViewController(): UIViewController =
-    ComposeUIViewController(configure = { enforceStrictPlistSanityCheck = false }) {
-        Log.v(TAG, ">>> ENTERING IOS MAIN VIEW CONTROLLER")
-        val enabler: PlatformEnabler = KoinPlatform.getKoin().get()
-        WWWMainActivity(platformEnabler = enabler).Draw()
-    }
+class VCBox(
+    var vc: UIViewController? = null,
+)
 
-fun makeEventViewController(eventId: String): UIViewController {
-    // Use a box to avoid lateinit capture warnings
-    class VCBox(
-        var vc: UIViewController? = null,
-    )
+private fun diEnabler(): PlatformEnabler = KoinPlatform.getKoin().get()
+
+private fun diMapVm(): MapViewModel = KoinPlatform.getKoin().get()
+
+/** Common VC creator that wires `finish()` and logs entry per screen. */
+private inline fun makeComposeVC(
+    logLabel: String,
+    crossinline finish: @Composable (finish: () -> Unit) -> Unit,
+): UIViewController {
     val box = VCBox()
-
     val vc =
         ComposeUIViewController(configure = { enforceStrictPlistSanityCheck = false }) {
-            Log.v(TAG, ">>> ENTERING IOS EVENT VIEW CONTROLLER")
-
-            val enabler: PlatformEnabler = KoinPlatform.getKoin().get()
-            val mapVm: MapViewModel = KoinPlatform.getKoin().get()
-
-            val eventHost =
-                WWWEventActivity(
-                    eventId = eventId,
-                    platformEnabler = enabler,
-                    mapViewModel = mapVm,
-                )
-
-            BindIosLifecycle(eventHost)
-
-            eventHost.asComponent(
-                eventMapBuilder = { event -> IOSEventMap(event) },
-                onFinish = { box.vc?.finishIOS() },
-            )
+            Log.v(TAG, ">>> ENTERING $logLabel")
+            finish { box.vc?.finishIOS() }
         }
 
     box.vc = vc
     return vc
 }
 
-fun makeWaveViewController(eventId: String): UIViewController =
-    ComposeUIViewController(configure = { enforceStrictPlistSanityCheck = false }) {
-        Log.v(TAG, ">>> ENTERING IOS WAVE VIEW CONTROLLER")
+// ---------- Public factories ----------
 
-        NotWiredUI()
+fun makeMainViewController(): UIViewController =
+    makeComposeVC("IOS MAIN VIEW CONTROLLER") {
+        val enabler = diEnabler()
+        WWWMainActivity(platformEnabler = enabler).Draw()
     }
 
-fun makeFullMapViewController(): UIViewController =
-    ComposeUIViewController(configure = { enforceStrictPlistSanityCheck = false }) {
-        Log.v(TAG, ">>> ENTERING IOS FULL MAP VIEW CONTROLLER")
+@Suppress("unused")
+fun makeEventViewController(eventId: String): UIViewController =
+    makeComposeVC("IOS EVENT VIEW CONTROLLER") { finish ->
+        val enabler = diEnabler()
+        val mapVm = diMapVm()
 
-        NotWiredUI()
+        val host =
+            remember(eventId) {
+                WWWEventActivity(eventId = eventId, platformEnabler = enabler, mapViewModel = mapVm)
+            }
+
+        BindIosLifecycle(host)
+
+        host.asComponent(
+            eventMapBuilder = { event -> IOSEventMap(event) },
+            onFinish = finish,
+        )
+    }
+
+@Suppress("unused")
+fun makeWaveViewController(eventId: String): UIViewController =
+    makeComposeVC("IOS WAVE VIEW CONTROLLER") { finish ->
+        val enabler = diEnabler()
+
+        val host =
+            remember(eventId) {
+                WWWWaveActivity(eventId = eventId, platformEnabler = enabler)
+            }
+
+        BindIosLifecycle(host)
+
+        host.asComponent(
+            eventMapBuilder = { event -> IOSEventMap(event) },
+            onFinish = finish,
+        )
+    }
+
+@Suppress("unused")
+fun makeFullMapViewController(eventId: String): UIViewController =
+    makeComposeVC("IOS FULL MAP VIEW CONTROLLER") { finish ->
+        val enabler = diEnabler()
+
+        val host =
+            remember(eventId) {
+                WWWFullMapActivity(eventId = eventId, platformEnabler = enabler)
+            }
+
+        BindIosLifecycle(host)
+
+        host.asComponent(
+            eventMapBuilder = { event ->
+                IOSEventMap(
+                    event,
+                    mapConfig =
+                        EventMapConfig(
+                            initialCameraPosition = MapCameraPosition.WINDOW,
+                            autoTargetUserOnFirstLocation = true,
+                        ),
+                )
+            },
+            onFinish = finish,
+        )
     }

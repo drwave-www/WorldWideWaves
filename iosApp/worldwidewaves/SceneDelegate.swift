@@ -57,9 +57,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             NSLog("[\(tag)] ✅ routed -> WaveViewController(id=\(id))")
             return viewController
 
-        case "map", "fullmap":
-            NSLog("[\(tag)] ✅ routed -> FullMapViewController")
-            return RootControllerKt.makeFullMapViewController()
+        case "fullmap":
+            guard let id = id else {
+                NSLog("[\(tag)] ❌ full map route missing id")
+                return nil
+            }
+            let viewController = RootControllerKt.makeFullMapViewController(eventId: id)
+            NSLog("[\(tag)] ✅ routed -> FullMapViewController(id=\(id))")
+            return viewController
 
         default:
             NSLog("[\(tag)] ❓ unknown host: \(host ?? "nil")")
