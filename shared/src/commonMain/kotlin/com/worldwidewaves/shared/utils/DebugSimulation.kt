@@ -19,11 +19,12 @@
  * limitations under the License.
  */
 
-package com.worldwidewaves.shared
+package com.worldwidewaves.shared.utils
 
+import com.worldwidewaves.shared.WWWGlobals
+import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.WWWSimulation
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.utils.Log
-import com.worldwidewaves.shared.utils.LogConfig
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -31,15 +32,20 @@ import org.koin.mp.KoinPlatform
 import kotlin.time.ExperimentalTime
 
 /**
- * Android implementation of debug simulation setup.
+ * Unified debug simulation setup for all platforms.
  *
  * Sets up default simulation for development and testing when debug logging is enabled.
+ * Uses identical parameters across Android, iOS, and other platforms to ensure
+ * consistent testing behavior.
+ *
+ * Called from debugBuild() during platform initialization.
  */
 @OptIn(ExperimentalTime::class)
-actual fun setupDebugSimulation() {
+fun setupDebugSimulation() {
     try {
+        // Check if debug mode is enabled using cross-platform LogConfig
         if (LogConfig.ENABLE_DEBUG_LOGGING) {
-            Log.d("DebugSimulation", "Setting up Android DEBUG simulation")
+            Log.d("DebugSimulation", "Setting up cross-platform DEBUG simulation")
 
             val wwwPlatform = KoinPlatform.getKoin().get<WWWPlatform>()
             val timeZone = TimeZone.of("Europe/Paris")
@@ -48,17 +54,18 @@ actual fun setupDebugSimulation() {
             wwwPlatform.setSimulation(
                 WWWSimulation(
                     startDateTime = now,
-                    // Use test-verified Paris coordinates (known to be inside area)
+                    // Use test-verified Paris coordinates (known to be inside paris_france event area)
                     userPosition = Position(lat = 48.8566, lng = 2.3522),
                     initialSpeed = WWWGlobals.Wave.DEFAULT_SPEED_SIMULATION,
                 ),
-            ) // In Paris, 1h is 2mn
+            ) // In Paris, 1h wave duration = 2mn real time
 
-            Log.i("DebugSimulation", "Android DEBUG simulation setup completed")
+            Log.i("DebugSimulation", "Cross-platform DEBUG simulation setup completed")
         } else {
-            Log.d("DebugSimulation", "Not in DEBUG mode, skipping simulation setup")
+            Log.d("DebugSimulation", "Debug logging disabled, skipping simulation setup")
         }
     } catch (e: Exception) {
-        Log.e("DebugSimulation", "Failed to setup Android DEBUG simulation", e)
+        Log.e("DebugSimulation", "Failed to setup DEBUG simulation", e)
+        // Non-critical error, don't throw - debug simulation failure shouldn't crash the app
     }
 }
