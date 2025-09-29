@@ -82,7 +82,6 @@ class IOSWWWLocationProvider : WWWLocationProvider {
         }
     }
 
-    @Throws(Throwable::class)
     override fun startLocationUpdates(onLocationUpdate: (Position) -> Unit) {
         if (isUpdating) {
             Log.d(TAG, "Location updates already started")
@@ -187,9 +186,7 @@ private class IOSLocationDelegate(
     private val onLocationUpdate: (CLLocation) -> Unit,
 ) : NSObject(),
     CLLocationManagerDelegateProtocol {
-    companion object {
-        private const val TAG = "IOSLocationDelegate"
-    }
+    private val tag = "IOSLocationDelegate"
 
     override fun locationManager(
         manager: CLLocationManager,
@@ -204,11 +201,11 @@ private class IOSLocationDelegate(
                 if (location.horizontalAccuracy <= WWWGlobals.LocationAccuracy.GPS_LOW_ACCURACY_THRESHOLD) {
                     onLocationUpdate(location)
                 } else {
-                    Log.v(TAG, "Ignoring inaccurate location: accuracy=${location.horizontalAccuracy}")
+                    Log.v(tag, "Ignoring inaccurate location: accuracy=${location.horizontalAccuracy}")
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error in didUpdateLocations", e)
+            Log.e(tag, "Error in didUpdateLocations", e)
         }
     }
 
@@ -216,33 +213,33 @@ private class IOSLocationDelegate(
         manager: CLLocationManager,
         didFailWithError: NSError,
     ) {
-        Log.e(TAG, "Location manager failed with error: ${didFailWithError.localizedDescription}")
+        Log.e(tag, "Location manager failed with error: ${didFailWithError.localizedDescription}")
     }
 
     override fun locationManager(
         manager: CLLocationManager,
         didChangeAuthorizationStatus: Int,
     ) {
-        Log.d(TAG, "Location authorization status changed: $didChangeAuthorizationStatus")
+        Log.d(tag, "Location authorization status changed: $didChangeAuthorizationStatus")
 
         when (didChangeAuthorizationStatus) {
             kCLAuthorizationStatusAuthorizedWhenInUse,
             kCLAuthorizationStatusAuthorizedAlways,
             -> {
-                Log.d(TAG, "Location permission granted, starting location updates")
+                Log.d(tag, "Location permission granted, starting location updates")
                 manager.startUpdatingLocation()
             }
             kCLAuthorizationStatusDenied -> {
-                Log.w(TAG, "Location permission denied by user")
+                Log.w(tag, "Location permission denied by user")
             }
             kCLAuthorizationStatusRestricted -> {
-                Log.w(TAG, "Location services restricted")
+                Log.w(tag, "Location services restricted")
             }
             kCLAuthorizationStatusNotDetermined -> {
-                Log.d(TAG, "Location permission not yet determined")
+                Log.d(tag, "Location permission not yet determined")
             }
             else -> {
-                Log.w(TAG, "Unknown location authorization status: $didChangeAuthorizationStatus")
+                Log.w(tag, "Unknown location authorization status: $didChangeAuthorizationStatus")
             }
         }
     }
