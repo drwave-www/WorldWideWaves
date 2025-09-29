@@ -24,8 +24,8 @@ import com.worldwidewaves.shared.choreographies.ChoreographyManager
 import com.worldwidewaves.shared.data.FavoriteEventsStore
 import com.worldwidewaves.shared.data.IOSFavoriteEventsStore
 import com.worldwidewaves.shared.debugBuild
-import com.worldwidewaves.shared.domain.usecases.IMapAvailabilityChecker
 import com.worldwidewaves.shared.domain.usecases.IOSMapAvailabilityChecker
+import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker
 import com.worldwidewaves.shared.map.IOSMapLibreAdapter
 import com.worldwidewaves.shared.map.IOSPlatformMapManager
 import com.worldwidewaves.shared.map.IOSWWWLocationProvider
@@ -74,7 +74,7 @@ val IOSModule =
         single(createdAtStart = true) { ChoreographyManager<UIImage>() }
 
         // iOS Map Availability Checker (production-grade iOS implementation)
-        single<IMapAvailabilityChecker> { IOSMapAvailabilityChecker() }
+        single<MapAvailabilityChecker> { IOSMapAvailabilityChecker() }
 
         // Debug screen - iOS implementation
         single<DebugTabScreen?> { DebugTabScreen() }

@@ -29,8 +29,8 @@ fun getChoreographyText(
 ): StringResource =
     when (sequenceType) {
         "warming" -> getChoreographyWarmingText(sequenceNumber)
-        "waiting" -> com.worldwidewaves.shared.getChoreographyWaitingText()
-        "hit" -> com.worldwidewaves.shared.getChoreographyHitText()
+        "waiting" -> getChoreographyWaitingText()
+        "hit" -> getChoreographyHitText()
         else -> throw IllegalArgumentException("Invalid choreography type: $sequenceType")
     }
 

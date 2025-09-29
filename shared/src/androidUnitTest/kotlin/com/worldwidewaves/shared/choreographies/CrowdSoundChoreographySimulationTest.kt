@@ -173,8 +173,8 @@ class CrowdSoundChoreographySimulationTest {
             (1..CROWD_SIZE)
                 .map { personId ->
                     async {
-                        val mockClock = mockk<IClock>()
-                        val mockSoundPlayer = mockk<SoundPlayer>(relaxed = true)
+                        mockk<IClock>()
+                        mockk<SoundPlayer>(relaxed = true)
 
                         // Create manager for this person
                         val manager =

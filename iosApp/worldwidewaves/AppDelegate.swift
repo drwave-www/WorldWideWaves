@@ -36,12 +36,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
         NSLog("[AppDelegate] 🔗 application:openURL: \(url.absoluteString)")
         if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let sd = scene.delegate as? SceneDelegate,
-           let vc = sd.perform(#selector(getter: SceneDelegate.window)) != nil ? sd.viewController(for: url) : nil {
-            if let nav = sd.nav {
-                nav.pushViewController(vc, animated: true)
+           let sceneDelegate = scene.delegate as? SceneDelegate,
+           let viewController = sceneDelegate.perform(#selector(getter: SceneDelegate.window)) != nil ? sceneDelegate.viewController(for: url) : nil {
+            if let nav = sceneDelegate.nav {
+                nav.pushViewController(viewController, animated: true)
             } else {
-                sd.setRoot(vc, in: scene)
+                sceneDelegate.setRoot(viewController, in: scene)
             }
             return true
         }

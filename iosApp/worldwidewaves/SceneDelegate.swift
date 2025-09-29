@@ -44,22 +44,22 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 NSLog("[\(tag)] ❌ event route missing id")
                 return nil
             }
-            let vc = RootControllerKt.MakeEventViewController(eventId: id)
+            let viewController = RootControllerKt.makeEventViewController(eventId: id)
             NSLog("[\(tag)] ✅ routed -> EventViewController(id=\(id))")
-            return vc
+            return viewController
 
         case "wave":
             guard let id = id else {
                 NSLog("[\(tag)] ❌ wave route missing id")
                 return nil
             }
-            let vc = RootControllerKt.MakeWaveViewController(eventId: id)
+            let viewController = RootControllerKt.makeWaveViewController(eventId: id)
             NSLog("[\(tag)] ✅ routed -> WaveViewController(id=\(id))")
-            return vc
+            return viewController
 
         case "map", "fullmap":
             NSLog("[\(tag)] ✅ routed -> FullMapViewController")
-            return RootControllerKt.MakeFullMapViewController()
+            return RootControllerKt.makeFullMapViewController()
 
         default:
             NSLog("[\(tag)] ❓ unknown host: \(host ?? "nil")")
@@ -125,7 +125,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             NSLog("[\(tag)] ℹ️ no deep link; launching main")
         }
 
-        let mainVC = RootControllerKt.MakeMainViewController()
+        let mainVC = RootControllerKt.makeMainViewController()
         setRoot(mainVC, in: windowScene)
     }
 

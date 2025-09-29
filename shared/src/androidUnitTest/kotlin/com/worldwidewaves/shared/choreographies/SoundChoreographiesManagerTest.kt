@@ -907,8 +907,8 @@ class WaveformGeneratorTest {
             )
 
         // Sawtooth should have both gradual ramps and sharp transitions
-        val middleStart = samples.size / 4
-        val middleEnd = 3 * samples.size / 4
+        samples.size / 4
+        3 * samples.size / 4
 
         // Look for the characteristic sawtooth pattern
         val peakFound = samples.any { abs(it) > 0.8 }

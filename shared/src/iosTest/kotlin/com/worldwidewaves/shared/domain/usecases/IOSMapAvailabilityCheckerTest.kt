@@ -54,9 +54,9 @@ class IOSMapAvailabilityCheckerTest {
             val checker = IOSMapAvailabilityChecker()
 
             // ODR resources may not be immediately available
-            val result1 = checker.isMapDownloaded("paris_france")
-            val result2 = checker.isMapDownloaded("london_uk")
-            val result3 = checker.isMapDownloaded("nonexistent_event")
+            checker.isMapDownloaded("paris_france")
+            checker.isMapDownloaded("london_uk")
+            checker.isMapDownloaded("nonexistent_event")
 
             // Results depend on actual ODR configuration
             // In test environment, these will likely be false unless ODR is configured
@@ -301,7 +301,7 @@ class IOSMapAvailabilityCheckerTest {
             checker.trackMaps(listOf("paris_france", "london_uk"))
             advanceUntilIdle()
 
-            val trackedMaps = checker.getDownloadedMaps()
+            checker.getDownloadedMaps()
             // Should have some tracked maps
 
             // Cleanup should clear everything
@@ -325,7 +325,7 @@ class IOSMapAvailabilityCheckerTest {
             advanceUntilIdle()
 
             // Should not crash and should track the resource
-            val trackedMaps = checker.getDownloadedMaps()
+            checker.getDownloadedMaps()
 
             // Cleanup after test
             checker.cleanup()

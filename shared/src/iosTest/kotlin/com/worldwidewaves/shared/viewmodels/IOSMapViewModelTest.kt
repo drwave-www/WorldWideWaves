@@ -204,7 +204,7 @@ class IOSMapViewModelTest {
                     999 to "Unknown error (code: 999)",
                 )
 
-            errorCodes.forEach { (code, expectedMessage) ->
+            errorCodes.forEach { (code, _) ->
                 mockPlatformMapManager.errorCode = code
                 mockPlatformMapManager.simulateSuccessfulDownload = false
 

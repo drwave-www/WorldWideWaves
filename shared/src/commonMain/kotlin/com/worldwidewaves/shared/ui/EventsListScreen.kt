@@ -28,7 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.data.SetEventFavorite
-import com.worldwidewaves.shared.domain.usecases.IMapAvailabilityChecker
+import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker
 import com.worldwidewaves.shared.ui.screens.EventsScreen
 import com.worldwidewaves.shared.viewmodels.EventsViewModel
 import org.koin.core.component.KoinComponent
@@ -40,7 +40,7 @@ import org.koin.core.component.KoinComponent
  */
 class EventsListScreen(
     private val viewModel: EventsViewModel,
-    private val mapChecker: IMapAvailabilityChecker,
+    private val mapChecker: MapAvailabilityChecker,
     private val setEventFavorite: SetEventFavorite,
 ) : TabScreen,
     KoinComponent {

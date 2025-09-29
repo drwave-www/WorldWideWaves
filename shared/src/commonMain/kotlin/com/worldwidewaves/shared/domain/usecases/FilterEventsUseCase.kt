@@ -33,7 +33,7 @@ import kotlinx.coroutines.flow.StateFlow
  * @param mapAvailabilityChecker Service for checking map download status
  */
 class FilterEventsUseCase(
-    private val mapAvailabilityChecker: IMapAvailabilityChecker,
+    private val mapAvailabilityChecker: MapAvailabilityChecker,
 ) {
     /**
      * Filters a list of events based on the specified criteria.
@@ -107,7 +107,7 @@ data class EventFilterCriteria(
  * Interface for checking map availability/download status.
  * This interface will be implemented by platform-specific map checkers.
  */
-interface IMapAvailabilityChecker {
+interface MapAvailabilityChecker {
     val mapStates: StateFlow<Map<String, Boolean>>
 
     fun refreshAvailability()

@@ -29,7 +29,7 @@ import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListene
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
 import com.worldwidewaves.shared.clearEventCache
 import com.worldwidewaves.shared.clearUnavailableGeoJsonCache
-import com.worldwidewaves.shared.domain.usecases.IMapAvailabilityChecker
+import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -41,11 +41,11 @@ import kotlin.coroutines.resume
  * Uses a reactive approach with StateFlow to notify observers of changes.
  * Automatically listens for module installation events.
  */
-class MapAvailabilityChecker(
+class AndroidMapAvailabilityChecker(
     val context: Context,
-) : IMapAvailabilityChecker {
+) : MapAvailabilityChecker {
     /** Log tag used throughout this helper for easy filtering. */
-    private companion object {
+    private companion object Companion {
         private const val TAG = "MapAvail"
     }
 
@@ -78,7 +78,7 @@ class MapAvailabilityChecker(
             SplitInstallStateUpdatedListener { state ->
                 when (state.status()) {
                     SplitInstallSessionStatus.INSTALLED -> {
-                        Log.d(::MapAvailabilityChecker.name, "Module installation completed")
+                        Log.d(::AndroidMapAvailabilityChecker.name, "Module installation completed")
                         Log.d(
                             TAG,
                             "session=${state.sessionId()} INSTALLED modules=${state.moduleNames()}",
@@ -86,7 +86,7 @@ class MapAvailabilityChecker(
                         // If this module had previously been "forced" unavailable
                         // (deferred uninstall), drop the override so it becomes
                         // visible again without requiring an app restart.
-                        state.moduleNames()?.forEach { id ->
+                        state.moduleNames().forEach { id ->
                             forcedUnavailable.remove(id)
                             // Clear the session cache for newly installed maps
                             clearUnavailableGeoJsonCache(id)
@@ -94,7 +94,7 @@ class MapAvailabilityChecker(
                         refreshAvailability()
                     }
                     SplitInstallSessionStatus.FAILED -> {
-                        Log.d(::MapAvailabilityChecker.name, "Module installation failed: ${state.errorCode()}")
+                        Log.d(::AndroidMapAvailabilityChecker.name, "Module installation failed: ${state.errorCode()}")
                         Log.w(
                             TAG,
                             "session=${state.sessionId()} FAILED code=${state.errorCode()}",
@@ -102,7 +102,7 @@ class MapAvailabilityChecker(
                         refreshAvailability()
                     }
                     SplitInstallSessionStatus.CANCELED -> {
-                        Log.d(::MapAvailabilityChecker.name, "Module installation canceled")
+                        Log.d(::AndroidMapAvailabilityChecker.name, "Module installation canceled")
                         Log.i(TAG, "session=${state.sessionId()} CANCELED")
                         refreshAvailability()
                     }
@@ -133,7 +133,7 @@ class MapAvailabilityChecker(
      */
     override fun refreshAvailability() {
         val installedModules = splitInstallManager.installedModules
-        Log.d(::MapAvailabilityChecker.name, "Refreshing availability. Installed modules: $installedModules")
+        Log.d(::AndroidMapAvailabilityChecker.name, "Refreshing availability. Installed modules: $installedModules")
         Log.d(TAG, "queried=$queriedMaps forcedUnavailable=$forcedUnavailable")
 
         // Build updated state map
@@ -169,7 +169,7 @@ class MapAvailabilityChecker(
     override fun getDownloadedMaps(): List<String> {
         val downloaded =
             mapStates.value
-                .filterValues { it == true }
+                .filterValues { it }
                 .keys
                 .toList()
         Log.d(TAG, "getDownloadedMaps -> $downloaded")

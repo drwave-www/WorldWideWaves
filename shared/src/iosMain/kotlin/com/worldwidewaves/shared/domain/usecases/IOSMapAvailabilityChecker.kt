@@ -53,7 +53,7 @@ import platform.Foundation.NSProgress
  *
  * This is a production-grade implementation suitable for iOS deployment.
  */
-class IOSMapAvailabilityChecker : IMapAvailabilityChecker {
+class IOSMapAvailabilityChecker : MapAvailabilityChecker {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val _mapStates = MutableStateFlow<Map<String, Boolean>>(emptyMap())
     override val mapStates: StateFlow<Map<String, Boolean>> = _mapStates.asStateFlow()

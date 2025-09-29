@@ -63,7 +63,7 @@ class NetworkResilienceTest : BaseIntegrationTest() {
     fun testNetworkOutage_eventLoading_gracefullyHandles() =
         runTest {
             val networkManager = createMockNetworkManager()
-            val eventRepository = createMockEventRepository()
+            createMockEventRepository()
 
             // Simulate network outage
             every { networkManager.isNetworkAvailable() } returns false

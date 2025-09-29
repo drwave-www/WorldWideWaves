@@ -103,7 +103,7 @@ class EventsRepositoryImplTest {
             every {
                 mockWWWEvents.loadEvents(any(), any(), any())
             } answers {
-                val onLoaded = secondArg<(() -> Unit)?>()
+                secondArg<(() -> Unit)?>()
                 val onLoadingError = thirdArg<((Exception) -> Unit)?>()
 
                 // Simulate loading error

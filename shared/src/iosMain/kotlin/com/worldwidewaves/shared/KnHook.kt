@@ -19,7 +19,6 @@ package com.worldwidewaves.shared
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-
 import kotlin.experimental.ExperimentalNativeApi
 import kotlin.native.setUnhandledExceptionHook
 

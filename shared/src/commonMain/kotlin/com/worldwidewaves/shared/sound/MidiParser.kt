@@ -309,19 +309,19 @@ object MidiParser {
                                 handleNoteOff(activeNotes, trackNotes, channel, noteNumber, currentTick)
                             }
                         }
-                        (statusByte and 0xF0) == NOTE_OFF -> {
+                        (statusByte and STATUS_MASK_F0) == NOTE_OFF -> {
                             // Note off event
-                            val channel = statusByte and 0x0F
+                            val channel = statusByte and STATUS_MASK_0F
                             val noteNumber = reader.readUInt8()
                             reader.readUInt8() // Velocity (ignored for note off)
 
                             handleNoteOff(activeNotes, trackNotes, channel, noteNumber, currentTick)
                         }
-                        (statusByte and 0x80) != 0 -> {
+                        (statusByte and RUNNING_STATUS_MASK) != 0 -> {
                             // Other MIDI events - skip data bytes
                             when {
-                                (statusByte and 0xE0) == 0xC0 -> reader.skip(1) // Program change, channel pressure - 1 data byte
-                                else -> reader.skip(2) // Most other events - 2 data bytes
+                                (statusByte and STATUS_MASK_E0) == PROGRAM_CHANGE_STATUS -> reader.skip(SINGLE_DATA_BYTE_SKIP) // Program change, channel pressure - 1 data byte
+                                else -> reader.skip(DOUBLE_DATA_BYTE_SKIP) // Most other events - 2 data bytes
                             }
                         }
                     }
@@ -361,7 +361,7 @@ object MidiParser {
                 }
 
             // Calculate final tempo (use the last tempo change)
-            val finalTempo = 60_000_000 / globalTempoChanges.last().microsecondsPerBeat
+            val finalTempo = MICROSECONDS_PER_MINUTE / globalTempoChanges.last().microsecondsPerBeat
 
             // Calculate total duration
             val lastTick = finalNotes.maxOfOrNull { it.startTick + it.durationTicks } ?: 0L
@@ -369,13 +369,13 @@ object MidiParser {
 
             Log.d("MidiParser", "MIDI file details:")
             Log.d("MidiParser", "Format: $format, Tracks: $numTracks, Ticks per beat: $ticksPerBeat")
-            Log.d("MidiParser", "Initial tempo: ${60_000_000 / globalTempoChanges.first().microsecondsPerBeat} BPM")
+            Log.d("MidiParser", "Initial tempo: ${MICROSECONDS_PER_MINUTE / globalTempoChanges.first().microsecondsPerBeat} BPM")
             Log.d("MidiParser", "Tempo changes: ${globalTempoChanges.size}")
             Log.d("MidiParser", "Notes found: ${notes.size}")
             Log.d("MidiParser", "Total duration: ${totalDuration.inWholeSeconds} seconds")
 
             // Dump first few notes for debugging
-            notes.take(5).forEachIndexed { index, note ->
+            notes.take(DEBUG_NOTES_LIMIT).forEachIndexed { index, note ->
                 Log.d(
                     "MidiParser",
                     "Note $index: Pitch=${note.pitch}, Start=${note.startTime.inWholeMilliseconds}ms, " +
@@ -430,13 +430,13 @@ object MidiParser {
                 // This tick is before the current tempo change, so calculate with the previous tempo
                 val ticksInThisTempo = ticks - lastTempoTick
                 elapsedSeconds += (ticksInThisTempo.toDouble() / ticksPerBeat) *
-                    (lastTempoMPB.toDouble() / 1_000_000)
+                    (lastTempoMPB.toDouble() / MICROSECONDS_PER_SECOND)
                 break
             } else {
                 // Calculate segment up to this tempo change
                 val ticksInThisTempo = currentChange.tick - lastTempoTick
                 elapsedSeconds += (ticksInThisTempo.toDouble() / ticksPerBeat) *
-                    (lastTempoMPB.toDouble() / 1_000_000)
+                    (lastTempoMPB.toDouble() / MICROSECONDS_PER_SECOND)
 
                 // Move to next tempo
                 lastTempoTick = currentChange.tick

@@ -60,14 +60,14 @@ private fun NotWiredUI() {
     }
 }
 
-fun MakeMainViewController(): UIViewController =
+fun makeMainViewController(): UIViewController =
     ComposeUIViewController(configure = { enforceStrictPlistSanityCheck = false }) {
         Log.v(TAG, ">>> ENTERING IOS MAIN VIEW CONTROLLER")
         val enabler: PlatformEnabler = KoinPlatform.getKoin().get()
         WWWMainActivity(platformEnabler = enabler).Draw()
     }
 
-fun MakeEventViewController(eventId: String): UIViewController {
+fun makeEventViewController(eventId: String): UIViewController {
     // Use a box to avoid lateinit capture warnings
     class VCBox(
         var vc: UIViewController? = null,
@@ -98,14 +98,14 @@ fun MakeEventViewController(eventId: String): UIViewController {
     return vc
 }
 
-fun MakeWaveViewController(eventId: String): UIViewController =
+fun makeWaveViewController(eventId: String): UIViewController =
     ComposeUIViewController(configure = { enforceStrictPlistSanityCheck = false }) {
         Log.v(TAG, ">>> ENTERING IOS WAVE VIEW CONTROLLER")
 
         NotWiredUI()
     }
 
-fun MakeFullMapViewController(): UIViewController =
+fun makeFullMapViewController(): UIViewController =
     ComposeUIViewController(configure = { enforceStrictPlistSanityCheck = false }) {
         Log.v(TAG, ">>> ENTERING IOS FULL MAP VIEW CONTROLLER")
 

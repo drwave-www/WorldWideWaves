@@ -81,8 +81,8 @@ final class IOSPlatformEnabler: PlatformEnabler {
         }
         if UIApplication.shared.canOpenURL(url) {
             NSLog("[\(tag)] ✅ canOpenURL -> opening")
-            UIApplication.shared.open(url) { ok in
-                NSLog("[\(self.tag)] 📬 openURL completion: \(ok ? "success" : "failed")")
+            UIApplication.shared.open(url) { success in
+                NSLog("[\(self.tag)] 📬 openURL completion: \(success ? "success" : "failed")")
             }
         } else {
             NSLog("[\(tag)] ❌ cannot open URL (scheme not registered?)")
@@ -98,25 +98,25 @@ final class IOSPlatformEnabler: PlatformEnabler {
                 .flatMap { $0.windows }
                 .first { $0.isKeyWindow }?.rootViewController)
 
-        func dive(_ vc: UIViewController?) -> UIViewController? {
-            if let nav = vc as? UINavigationController {
+        func dive(_ viewController: UIViewController?) -> UIViewController? {
+            if let nav = viewController as? UINavigationController {
                 NSLog("[IOSPlatformEnabler] 🔎 topVC: UINavigationController -> visibleViewController")
                 return dive(nav.visibleViewController)
             }
-            if let tab = vc as? UITabBarController {
+            if let tab = viewController as? UITabBarController {
                 NSLog("[IOSPlatformEnabler] 🔎 topVC: UITabBarController -> selectedViewController")
                 return dive(tab.selectedViewController)
             }
-            if let presented = vc?.presentedViewController {
+            if let presented = viewController?.presentedViewController {
                 NSLog("[IOSPlatformEnabler] 🔎 topVC: presentedViewController -> \(type(of: presented))")
                 return dive(presented)
             }
-            if let final = vc {
+            if let final = viewController {
                 NSLog("[IOSPlatformEnabler] 🔝 topVC resolved: \(type(of: final))")
             } else {
                 NSLog("[IOSPlatformEnabler] ⚠️ topVC: none found")
             }
-            return vc
+            return viewController
         }
 
         return dive(resolvedBase)

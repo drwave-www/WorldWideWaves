@@ -297,8 +297,13 @@ class WWWEventObserver(
                             }.onEach { observation ->
                                 try {
                                     updateStates(observation.progression, observation.status)
+                                } catch (e: IllegalStateException) {
+                                    Log.e("WWWEventObserver", "State error updating states for event ${event.id}: $e")
+                                } catch (e: kotlinx.coroutines.CancellationException) {
+                                    // Expected during cancellation, re-throw to maintain coroutine semantics
+                                    throw e
                                 } catch (e: Exception) {
-                                    Log.e("WWWEventObserver", "Error updating states for event ${event.id}: $e")
+                                    Log.e("WWWEventObserver", "Unexpected error updating states for event ${event.id}: $e")
                                 }
                             }.launchIn(coroutineScopeProvider.scopeDefault())
 
@@ -311,8 +316,13 @@ class WWWEventObserver(
                             }.onEach { observation ->
                                 try {
                                     _userIsInArea.updateIfChanged(observation.isInArea)
+                                } catch (e: IllegalStateException) {
+                                    Log.e("WWWEventObserver", "State error updating user area status for event ${event.id}: $e")
+                                } catch (e: kotlinx.coroutines.CancellationException) {
+                                    // Expected during cancellation, re-throw to maintain coroutine semantics
+                                    throw e
                                 } catch (e: Exception) {
-                                    Log.e("WWWEventObserver", "Error updating user area status for event ${event.id}: $e")
+                                    Log.e("WWWEventObserver", "Unexpected error updating user area status for event ${event.id}: $e")
                                 }
                             }.launchIn(coroutineScopeProvider.scopeDefault())
 
@@ -323,8 +333,13 @@ class WWWEventObserver(
                                 try {
                                     Log.v("WWWEventObserver", "Direct position changed, updating area detection for event ${event.id}")
                                     updateAreaDetection()
+                                } catch (e: IllegalStateException) {
+                                    Log.e("WWWEventObserver", "State error in updateAreaDetection for event ${event.id}: $e")
+                                } catch (e: kotlinx.coroutines.CancellationException) {
+                                    // Expected during cancellation, re-throw to maintain coroutine semantics
+                                    throw e
                                 } catch (e: Exception) {
-                                    Log.e("WWWEventObserver", "Error in updateAreaDetection for event ${event.id}: $e")
+                                    Log.e("WWWEventObserver", "Unexpected error in updateAreaDetection for event ${event.id}: $e")
                                 }
                             }.launchIn(coroutineScopeProvider.scopeDefault())
 
@@ -337,8 +352,13 @@ class WWWEventObserver(
                                         Log.v("WWWEventObserver", "Polygons loaded, updating area detection for event ${event.id}")
                                         updateAreaDetection()
                                     }
+                                } catch (e: IllegalStateException) {
+                                    Log.e("WWWEventObserver", "State error in polygon loading handler for event ${event.id}: $e")
+                                } catch (e: kotlinx.coroutines.CancellationException) {
+                                    // Expected during cancellation, re-throw to maintain coroutine semantics
+                                    throw e
                                 } catch (e: Exception) {
-                                    Log.e("WWWEventObserver", "Error in polygon loading handler for event ${event.id}: $e")
+                                    Log.e("WWWEventObserver", "Unexpected error in polygon loading handler for event ${event.id}: $e")
                                 }
                             }.launchIn(coroutineScopeProvider.scopeDefault())
 
@@ -354,13 +374,18 @@ class WWWEventObserver(
                                 polygonLoadingJob.cancel()
                             }
                         }
-                } catch (e: Exception) {
-                    // This is expected when feature map hasn't been downloaded yet - downgrade to info
+                } catch (e: IllegalStateException) {
+                    // Common state error during initialization
                     if (e.message?.contains("Flow context cannot contain job") == true) {
                         Log.i("WWWEventObserver", "Feature map not yet downloaded for event ${event.id}")
                     } else {
-                        Log.e("WWWEventObserver", "Failed to start observation for event ${event.id}", throwable = e)
+                        Log.e("WWWEventObserver", "State error starting observation for event ${event.id}: ${e.message}")
                     }
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    // Expected during cancellation, re-throw to maintain coroutine semantics
+                    throw e
+                } catch (e: Exception) {
+                    Log.e("WWWEventObserver", "Unexpected error starting observation for event ${event.id}", throwable = e)
                 }
             }
         }
@@ -372,8 +397,10 @@ class WWWEventObserver(
                 unifiedObservationJob?.cancelAndJoin()
             } catch (_: CancellationException) {
                 // Expected exception during cancellation
+            } catch (e: IllegalStateException) {
+                Log.e("stopObservation", "State error stopping unified observation: $e")
             } catch (e: Exception) {
-                Log.e("stopObservation", "Error stopping unified observation: $e")
+                Log.e("stopObservation", "Unexpected error stopping unified observation: $e")
             } finally {
                 unifiedObservationJob = null
             }
@@ -397,8 +424,13 @@ class WWWEventObserver(
             // Ensure area detection is called on every unified observation update for immediate response
             try {
                 updateAreaDetection()
+            } catch (e: IllegalStateException) {
+                Log.e("WWWEventObserver", "State error in area detection from unified flow for event ${event.id}: $e")
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                // Expected during cancellation, re-throw to maintain coroutine semantics
+                throw e
             } catch (e: Exception) {
-                Log.e("WWWEventObserver", "Error in area detection from unified flow for event ${event.id}: $e")
+                Log.e("WWWEventObserver", "Unexpected error in area detection from unified flow for event ${event.id}: $e")
             }
         }
 
@@ -425,15 +457,23 @@ class WWWEventObserver(
                     val status =
                         try {
                             event.getStatus()
+                        } catch (e: IllegalStateException) {
+                            Log.e("WWWEventObserver", "State error getting event status for event ${event.id}: $e")
+                            Status.UNDEFINED
                         } catch (e: Exception) {
-                            Log.e("WWWEventObserver", "Error getting event status for event ${event.id}: $e")
+                            Log.e("WWWEventObserver", "Unexpected error getting event status for event ${event.id}: $e")
                             Status.UNDEFINED
                         }
                     val eventObservation = EventObservation(progression, status)
                     send(eventObservation)
                 }
+            } catch (e: IllegalStateException) {
+                Log.e("periodicObservationFlow", "State error in periodic observation flow: $e")
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                // Expected during cancellation, re-throw to maintain coroutine semantics
+                throw e
             } catch (e: Exception) {
-                Log.e("periodicObservationFlow", "Error in periodic observation flow: $e")
+                Log.e("periodicObservationFlow", "Unexpected error in periodic observation flow: $e")
             }
 
             awaitClose {
@@ -450,8 +490,11 @@ class WWWEventObserver(
                 val platform =
                     try {
                         get<WWWPlatform>()
+                    } catch (e: IllegalStateException) {
+                        Log.w("WWWEventObserver", "State error - Platform not available for simulation observation: $e")
+                        send(Unit) // Emit once to allow combine to work
                     } catch (e: Exception) {
-                        Log.w("WWWEventObserver", "Platform not available for simulation observation: $e")
+                        Log.w("WWWEventObserver", "Unexpected error - Platform not available for simulation observation: $e")
                         send(Unit) // Emit once to allow combine to work
                         awaitClose()
                         return@callbackFlow
@@ -461,15 +504,17 @@ class WWWEventObserver(
                 send(Unit)
 
                 // Then collect simulation changes
-                platform.simulationChanged.collect { _ ->
+                platform.simulationChanged.collect {
                     Log.v("WWWEventObserver", "Simulation change detected for event ${event.id}")
                     send(Unit)
                 }
             } catch (e: CancellationException) {
                 Log.v("WWWEventObserver", "Simulation observation cancelled for event ${event.id}")
                 throw e
+            } catch (e: IllegalStateException) {
+                Log.e("WWWEventObserver", "State error in simulation observation for event ${event.id}: $e")
             } catch (e: Exception) {
-                Log.e("WWWEventObserver", "Error in simulation observation for event ${event.id}: $e")
+                Log.e("WWWEventObserver", "Unexpected error in simulation observation for event ${event.id}: $e")
             }
 
             awaitClose()
@@ -530,8 +575,14 @@ class WWWEventObserver(
             updatePositionRatioIfSignificant(calculatedState.userPositionRatio)
             updateTimeBeforeHitIfSignificant(calculatedState.timeBeforeHit)
             _hitDateTime.updateIfChanged(calculatedState.hitDateTime)
+        } catch (e: IllegalStateException) {
+            Log.e("WWWEventObserver", "State error calculating event state: $e")
+            // Fall back to basic state updates for safety
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            // Expected during cancellation, re-throw to maintain coroutine semantics
+            throw e
         } catch (e: Exception) {
-            Log.e("WWWEventObserver", "Error calculating event state: $e")
+            Log.e("WWWEventObserver", "Unexpected error calculating event state: $e")
             // Fall back to basic state updates for safety
             updateProgressionIfSignificant(progression)
             _eventStatus.updateIfChanged(status)
@@ -557,8 +608,11 @@ class WWWEventObserver(
                 userIsInArea = _userIsInArea.value,
                 timestamp = clock.now(),
             )
+        } catch (e: IllegalStateException) {
+            Log.e("WWWEventObserver", "State error creating current EventState: $e")
+            null
         } catch (e: Exception) {
-            Log.e("WWWEventObserver", "Error creating current EventState: $e")
+            Log.e("WWWEventObserver", "Unexpected error creating current EventState: $e")
             null
         }
 
@@ -581,8 +635,14 @@ class WWWEventObserver(
                     _userIsInArea.updateIfChanged(isInArea)
                 }
                 // If polygon data not yet loaded, the PositionObserver will handle it when available
+            } catch (e: IllegalStateException) {
+                Log.e("WWWEventObserver", "updateAreaDetection: State exception $e, eventId=${event.id}")
+                // On error, assume user is not in area for safety
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                // Expected during cancellation, re-throw to maintain coroutine semantics
+                throw e
             } catch (e: Exception) {
-                Log.e("WWWEventObserver", "updateAreaDetection: Exception $e, eventId=${event.id}")
+                Log.e("WWWEventObserver", "updateAreaDetection: Unexpected exception $e, eventId=${event.id}")
                 // On error, assume user is not in area for safety
                 _userIsInArea.updateIfChanged(false)
             }
@@ -673,8 +733,11 @@ class WWWEventObserver(
                 val actualUserInArea =
                     try {
                         waveProgressionTracker.isUserInWaveArea(userPosition, event.area)
+                    } catch (e: IllegalStateException) {
+                        Log.e("WWWEventObserver", "State error validating user in area: $e")
+                        false
                     } catch (e: Exception) {
-                        Log.e("WWWEventObserver", "Error validating user in area: $e")
+                        Log.e("WWWEventObserver", "Unexpected error validating user in area: $e")
                         false
                     }
                 if (actualUserInArea != observerUserInArea) {
@@ -690,8 +753,10 @@ class WWWEventObserver(
             if (observerStatus != actualStatus) {
                 issues.add("Status inconsistency: observer=$observerStatus, actual=$actualStatus")
             }
+        } catch (e: IllegalStateException) {
+            issues.add("State error during validation: ${e.message}")
         } catch (e: Exception) {
-            issues.add("Error during state validation: ${e.message}")
+            issues.add("Unexpected error during state validation: ${e.message}")
         }
 
         if (issues.isNotEmpty()) {

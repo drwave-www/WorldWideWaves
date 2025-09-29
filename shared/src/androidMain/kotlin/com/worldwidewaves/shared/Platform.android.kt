@@ -25,7 +25,7 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import com.google.android.play.core.splitcompat.SplitCompat
-import com.worldwidewaves.shared.domain.usecases.IMapAvailabilityChecker
+import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker
 import com.worldwidewaves.shared.generated.resources.Res
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.desc.desc
@@ -96,7 +96,7 @@ actual suspend fun getMapFileAbsolutePath(
     extension: String,
 ): String? {
     val context: Context by inject(Context::class.java)
-    val mapChecker: IMapAvailabilityChecker by inject(IMapAvailabilityChecker::class.java)
+    val mapChecker: MapAvailabilityChecker by inject(MapAvailabilityChecker::class.java)
     val cachedFile = File(context.cacheDir, "$eventId.$extension")
     val metadataFile = File(context.cacheDir, "$eventId.$extension.metadata")
 
@@ -323,13 +323,14 @@ actual suspend fun cacheDeepFile(fileName: String) {
 
         cacheFile.parentFile?.mkdirs()
         cacheFile.outputStream().use { it.write(fileBytes) }
+    } catch (e: java.io.FileNotFoundException) {
+        Log.w(::cacheDeepFile.name, "Cannot cache deep file: $fileName (resource not found)")
+    } catch (e: SecurityException) {
+        Log.e(::cacheDeepFile.name, "Security error caching file: $fileName", e)
+    } catch (e: java.io.IOException) {
+        Log.e(::cacheDeepFile.name, "IO error caching file: $fileName", e)
     } catch (e: Exception) {
-        // Only log full stack trace for unexpected errors
-        if (e is java.io.FileNotFoundException) {
-            Log.w(::cacheDeepFile.name, "Cannot cache deep file: $fileName (resource not found)")
-        } else {
-            Log.e(::cacheDeepFile.name, "Error caching file: $fileName", e)
-        }
+        Log.e(::cacheDeepFile.name, "Unexpected error caching file: $fileName", e)
     }
 }
 

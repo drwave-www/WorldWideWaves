@@ -132,7 +132,7 @@ class PerformanceMemoryTest : BaseIntegrationTest() {
     @Test
     fun testConcurrentOperations_multipleAsyncTasks_maintainsPerformance() =
         runTest {
-            val performanceMonitor = mockPerformanceMonitor
+            mockPerformanceMonitor
             val taskManager = createMockTaskManager()
 
             val startMark =

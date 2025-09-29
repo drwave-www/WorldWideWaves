@@ -10,7 +10,7 @@ package com.worldwidewaves.shared.utils
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-import com.worldwidewaves.shared.MakeMainViewController
+import com.worldwidewaves.shared.makeMainViewController
 import platform.Foundation.NSLog
 import platform.UIKit.UIViewController
 import platform.UIKit.navigationController
@@ -32,7 +32,7 @@ internal fun UIViewController.finishIOS() {
             // You can’t “close” an iOS app from code (App Store-rejected).
             // The right fallback when there’s no presenter/nav is
             // to replace the root VC with your main screen.
-            val newRoot = MakeMainViewController()
+            val newRoot = makeMainViewController()
             val win = this.view.window
             if (win != null) {
                 win.rootViewController = newRoot

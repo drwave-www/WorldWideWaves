@@ -118,7 +118,7 @@ class WavePolygonRelevancyTest {
                 )
 
             testCases.forEach { (name, polygon, cutLongitude) ->
-                val originalBbox = polygon.bbox()
+                polygon.bbox()
 
                 // Test polygon splitting accuracy
                 val splitResult = PolygonUtils.splitByLongitude(polygon, cutLongitude)

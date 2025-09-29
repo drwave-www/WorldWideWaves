@@ -63,15 +63,19 @@ fun doInitPlatform() {
     try {
         val bundleInitialized = BundleInitializer.initializeBundle()
         Log.i(TAG, "HELPER: MokoRes bundle initialization result: $bundleInitialized")
+    } catch (e: IllegalStateException) {
+        Log.e(TAG, "ERROR: MokoRes bundle state error: ${e.message}")
     } catch (e: Exception) {
         Log.e(TAG, "ERROR: MokoRes bundle initialization failed: ${e.message}")
     }
 
-    // Re-enable initNapier with bulletproof NSLogAntilog
+    // Re-enable initNapier with bulletproof OSLogAntilog
     Log.v(TAG, "HELPER: About to call initNapier()")
     try {
         initNapier()
         Log.i(TAG, "HELPER: initNapier() completed successfully")
+    } catch (e: IllegalStateException) {
+        Log.e(TAG, "ERROR: Napier state error: ${e.message}")
     } catch (e: Exception) {
         Log.e(TAG, "ERROR: initNapier() failed: ${e.message}")
     }
@@ -87,6 +91,9 @@ fun doInitPlatform() {
                 Log.v(TAG, "HELPER: Modules added")
             }
         Log.i(TAG, "HELPER: startKoin completed successfully")
+    } catch (e: IllegalStateException) {
+        Log.e(TAG, "ERROR: Koin state error: ${e.message}")
+        Log.e(TAG, "ERROR: Exception type: ${e::class.simpleName}")
     } catch (e: Exception) {
         Log.e(TAG, "ERROR: startKoin failed: ${e.message}")
         Log.e(TAG, "ERROR: Exception type: ${e::class.simpleName}")
@@ -111,7 +118,11 @@ actual suspend fun readGeoJson(eventId: String): String? {
         // For now, return null to indicate resource not found
         // Implementation depends on iOS resource management strategy
         null
+    } catch (e: java.io.IOException) {
+        Log.w("readGeoJson", "IO error reading GeoJSON for event $eventId: ${e.message}")
+        null
     } catch (e: Exception) {
+        Log.w("readGeoJson", "Unexpected error reading GeoJSON for event $eventId: ${e.message}")
         null
     }
 }
@@ -134,7 +145,14 @@ actual suspend fun getMapFileAbsolutePath(
             // File not found in cache, could check app bundle resources here
             null
         }
+    } catch (e: java.io.IOException) {
+        Log.w("getMapFileAbsolutePath", "IO error accessing map file for event $eventId.$extension: ${e.message}")
+        null
+    } catch (e: SecurityException) {
+        Log.w("getMapFileAbsolutePath", "Security error accessing map file for event $eventId.$extension: ${e.message}")
+        null
     } catch (e: Exception) {
+        Log.w("getMapFileAbsolutePath", "Unexpected error accessing map file for event $eventId.$extension: ${e.message}")
         null
     }
 }
@@ -177,8 +195,15 @@ actual suspend fun cacheDeepFile(fileName: String) {
         // This would involve reading from iOS Bundle resources and writing to cache
         // Implementation depends on iOS resource bundling strategy
         // For now, this is a no-op as files are typically pre-bundled in iOS
+    } catch (e: java.io.IOException) {
+        Log.w("cacheDeepFile", "IO error caching file $fileName: ${e.message}")
+        // File caching is not critical for iOS operation
+    } catch (e: SecurityException) {
+        Log.w("cacheDeepFile", "Security error caching file $fileName: ${e.message}")
+        // File caching is not critical for iOS operation
     } catch (e: Exception) {
-        // Silent failure - file caching is not critical for iOS operation
+        Log.w("cacheDeepFile", "Unexpected error caching file $fileName: ${e.message}")
+        // File caching is not critical for iOS operation
     }
 }
 
@@ -193,8 +218,12 @@ actual fun clearEventCache(eventId: String) {
         object : KoinComponent {
             val geoJsonProvider: com.worldwidewaves.shared.events.utils.GeoJsonDataProvider by inject()
         }.geoJsonProvider.invalidateCache(eventId)
+    } catch (e: IllegalStateException) {
+        Log.w("clearEventCache", "State error clearing cache for event $eventId: ${e.message}")
+        // Cache invalidation is not critical for iOS operation
     } catch (e: Exception) {
-        // Silent failure - cache invalidation is not critical for iOS operation
+        Log.w("clearEventCache", "Unexpected error clearing cache for event $eventId: ${e.message}")
+        // Cache invalidation is not critical for iOS operation
     }
     // Note: Other map assets are shipped inside the app bundle and don't need clearing
 }

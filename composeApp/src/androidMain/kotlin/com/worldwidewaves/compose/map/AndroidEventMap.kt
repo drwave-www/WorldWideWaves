@@ -89,9 +89,9 @@ import com.worldwidewaves.shared.map.WWWLocationProvider
 import com.worldwidewaves.shared.toMapLibrePolygon
 import com.worldwidewaves.shared.ui.components.DownloadProgressIndicator
 import com.worldwidewaves.shared.ui.components.LoadingIndicator
+import com.worldwidewaves.utils.AndroidMapAvailabilityChecker
 import com.worldwidewaves.utils.AndroidWWWLocationProvider
 import com.worldwidewaves.utils.CheckGPSEnable
-import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.requestLocationPermission
 import com.worldwidewaves.viewmodels.AndroidMapViewModel
 import dev.icerock.moko.resources.compose.stringResource
@@ -166,7 +166,7 @@ class AndroidEventMap(
     private var currentMap: MapLibreMap? = null
 
     // Map availability and download state tracking
-    private val mapAvailabilityChecker: MapAvailabilityChecker by inject(MapAvailabilityChecker::class.java)
+    private val mapAvailabilityChecker: AndroidMapAvailabilityChecker by inject(AndroidMapAvailabilityChecker::class.java)
 
     /**
      * The Compose UI for the map
