@@ -21,11 +21,6 @@ package com.worldwidewaves.activities.event
  * limitations under the License.
  */
 
-import android.os.Bundle
-import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
-import com.google.android.play.core.splitcompat.SplitCompat
-import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.ui.activities.WWWEventActivity
 import com.worldwidewaves.utils.AndroidPlatformEnabler
 import com.worldwidewaves.viewmodels.AndroidMapViewModel
@@ -33,44 +28,11 @@ import org.koin.android.ext.android.inject
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
-class EventActivity : AppCompatActivity() {
-    private var eventActivityImpl: WWWEventActivity? = null
+class EventActivity : AbstractEventAndroidActivity<WWWEventActivity>() {
     private val mapViewModel: AndroidMapViewModel by inject()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        val eventId = intent.getStringExtra("eventId")
-
-        // Ensure dynamic-feature splits are available immediately
-        SplitCompat.install(this)
-
-        val platformEnabler = AndroidPlatformEnabler(this)
-        if (eventId != null) {
-            eventActivityImpl = WWWEventActivity(eventId, platformEnabler, mapViewModel)
-            setContent {
-                eventActivityImpl!!.asComponent(
-                    eventMapBuilder = { event ->
-                        AndroidEventMap(event, context = this@EventActivity)
-                    },
-                    onFinish = { finish() },
-                )
-            }
-        }
-    }
-
-    override fun onDestroy() {
-        eventActivityImpl?.onDestroy()
-        super.onDestroy()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        eventActivityImpl?.onResume()
-    }
-
-    override fun onPause() {
-        eventActivityImpl?.onPause()
-        super.onPause()
-    }
+    override fun createActivityImpl(
+        eventId: String,
+        platformEnabler: AndroidPlatformEnabler,
+    ): WWWEventActivity = WWWEventActivity(eventId, platformEnabler, mapViewModel)
 }
