@@ -73,6 +73,12 @@ data class WWWEventArea(
     val bbox: String? = null,
 ) : KoinComponent,
     DataValidator {
+    companion object {
+        private const val MIN_SHRINK_FACTOR = 0.1
+        private const val POSITION_ATTEMPTS_PER_SHRINK = 20
+        private const val SHRINK_FACTOR_MULTIPLIER = 0.8
+    }
+
     private var _event: IWWWEvent? = null
     private var event: IWWWEvent
         get() = _event ?: error("Event not set")
@@ -206,13 +212,13 @@ data class WWWEventArea(
         var attempts = 0
         var shrinkFactor = 1.0
 
-        while (attempts < maxAttempts && shrinkFactor > 0.1) {
+        while (attempts < maxAttempts && shrinkFactor > MIN_SHRINK_FACTOR) {
             val center = event.area.getCenter()
             val latRange = (bbox.ne.lat - bbox.sw.lat) * shrinkFactor
             val lngRange = (bbox.ne.lng - bbox.sw.lng) * shrinkFactor
 
-            repeat(20) {
-                // Try 20 times with current shrink factor
+            repeat(POSITION_ATTEMPTS_PER_SHRINK) {
+                // Try multiple times with current shrink factor
                 val randomLat = center.lat + (Random.nextDouble() - 0.5) * latRange
                 val randomLng = center.lng + (Random.nextDouble() - 0.5) * lngRange
                 val position = Position(randomLat, randomLng)
@@ -222,7 +228,7 @@ data class WWWEventArea(
                 }
             }
 
-            shrinkFactor *= 0.8 // Shrink the sampling area
+            shrinkFactor *= SHRINK_FACTOR_MULTIPLIER // Shrink the sampling area
             attempts++
         }
 

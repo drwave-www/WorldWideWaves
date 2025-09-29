@@ -57,6 +57,10 @@ import kotlin.time.ExperimentalTime
  * StateFlow exposed by this service to drive their lists or selectors.
  */
 class WWWEvents : KoinComponent {
+    companion object {
+        private const val JSON_PREVIEW_LENGTH = 200
+    }
+
     private val loadingMutex = Mutex()
 
     private val initFavoriteEvent: InitFavoriteEvent by inject()
@@ -117,7 +121,7 @@ class WWWEvents : KoinComponent {
 
                 val eventsJsonString: String = eventsConfigurationProvider.geoEventsConfiguration()
                 Log.i("WWWEvents.loadEventsJob", "Received JSON string: ${eventsJsonString.length} characters")
-                Log.i("WWWEvents.loadEventsJob", "JSON preview: ${eventsJsonString.take(200)}")
+                Log.i("WWWEvents.loadEventsJob", "JSON preview: ${eventsJsonString.take(JSON_PREVIEW_LENGTH)}")
 
                 Log.i("WWWEvents.loadEventsJob", "Decoding JSON to events...")
                 val events: List<IWWWEvent> = eventsDecoder.decodeFromJson(eventsJsonString)

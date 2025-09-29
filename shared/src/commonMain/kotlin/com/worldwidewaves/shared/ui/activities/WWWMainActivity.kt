@@ -66,6 +66,10 @@ import org.koin.core.component.inject
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
+private object UIConstants {
+    val DEBUG_BUTTON_COLOR = Color(0xFF4CAF50) // Green color for debug button
+}
+
 /**
  * iOS-safe UI properties structure using basic types
  */
@@ -191,7 +195,7 @@ open class WWWMainActivity
                                     Modifier
                                         .align(Alignment.BottomEnd)
                                         .padding(end = 16.dp, bottom = bottomOffset),
-                                containerColor = Color(0xFF4CAF50), // Green color
+                                containerColor = UIConstants.DEBUG_BUTTON_COLOR,
                                 shape = CircleShape,
                             ) {
                                 Icon(

@@ -452,7 +452,7 @@ object MidiParser {
         if (ticks > lastTempoTick) {
             val ticksInLastTempo = ticks - lastTempoTick
             elapsedSeconds += (ticksInLastTempo.toDouble() / ticksPerBeat) *
-                (lastTempoMPB.toDouble() / 1_000_000)
+                (lastTempoMPB.toDouble() / MICROSECONDS_PER_SECOND)
         }
 
         return elapsedSeconds.seconds

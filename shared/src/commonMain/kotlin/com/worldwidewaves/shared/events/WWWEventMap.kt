@@ -66,6 +66,10 @@ class WWWEventMap(
     val zone: String,
 ) : KoinComponent,
     DataValidator {
+    companion object {
+        private const val MAX_ZOOM_LIMIT = 20.0
+    }
+
     private var _event: IWWWEvent? = null
     private var event: IWWWEvent
         get() = requireNotNull(_event) { "Event not set" }
@@ -161,8 +165,8 @@ class WWWEventMap(
         mutableListOf<String>()
             .apply {
                 when {
-                    maxZoom.toString().toDoubleOrNull() == null || maxZoom <= 0 || maxZoom >= 20 ->
-                        this.add("Map Maxzoom must be a positive double less than 20")
+                    maxZoom.toString().toDoubleOrNull() == null || maxZoom <= 0 || maxZoom >= MAX_ZOOM_LIMIT ->
+                        this.add("Map Maxzoom must be a positive double less than $MAX_ZOOM_LIMIT")
 
                     language.isEmpty() ->
                         this.add("Map language is empty")

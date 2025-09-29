@@ -28,6 +28,8 @@ import kotlin.math.min
 // ----------------------------------------------------------------------------
 
 object PolygonUtils {
+    private const val FLOATING_POINT_EPSILON = 1e-12
+
     data class Quad<A, B, C, D>(
         val first: A,
         val second: B,
@@ -457,7 +459,13 @@ object PolygonUtils {
 
         val output = mutableListOf<Position>()
 
-        fun isInside(p: Position): Boolean = if (keepLeft) p.lng <= cutLng + 1e-12 else p.lng >= cutLng - 1e-12
+        fun isInside(p: Position): Boolean =
+            if (keepLeft) {
+                p.lng <= cutLng + FLOATING_POINT_EPSILON
+            } else {
+                p.lng >=
+                    cutLng - FLOATING_POINT_EPSILON
+            }
 
         var prev = points.last()
         var prevInside = isInside(prev)

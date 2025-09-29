@@ -45,6 +45,8 @@ class BoundingBox private constructor(
     // --- Companion object
 
     companion object {
+        private const val LONGITUDE_HALF_RANGE = 180.0
+
         fun fromCorners(
             sw: Position,
             ne: Position,
@@ -65,7 +67,7 @@ class BoundingBox private constructor(
             val maxLat = positions.maxOf { it.lat }
             val lngs = positions.map { it.lng }
             val (swLng, neLng) =
-                if (lngs.max() - lngs.min() > 180) {
+                if (lngs.max() - lngs.min() > LONGITUDE_HALF_RANGE) {
                     lngs.max() to lngs.min()
                 } else {
                     lngs.min() to lngs.max()
