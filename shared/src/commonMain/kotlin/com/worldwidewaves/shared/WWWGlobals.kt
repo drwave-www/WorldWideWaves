@@ -27,15 +27,6 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
-fun debugBuild() {
-    // Napier initialization is handled by initNapier() in platform-specific code
-    // This function can be used for other debug-specific initialization if needed
-
-    // Unified debug simulation setup for all platforms
-    com.worldwidewaves.shared.utils
-        .setupDebugSimulation()
-}
-
 /**
  * Global constants for WorldWideWaves application
  *
@@ -43,6 +34,15 @@ fun debugBuild() {
  * Constants are grouped logically to improve maintainability and discoverability.
  */
 object WWWGlobals {
+    /**
+     * Logging configuration constants - driven by BuildKonfig
+     */
+    object LogConfig {
+        val ENABLE_VERBOSE_LOGGING: Boolean = BuildKonfig.ENABLE_VERBOSE_LOGGING
+        val ENABLE_DEBUG_LOGGING: Boolean = BuildKonfig.ENABLE_DEBUG_LOGGING
+        val ENABLE_PERFORMANCE_LOGGING: Boolean = BuildKonfig.ENABLE_PERFORMANCE_LOGGING
+    }
+
     // ============================================================================================
     // GEODETIC & WAVE PHYSICS CONSTANTS
     // ============================================================================================
@@ -60,9 +60,6 @@ object WWWGlobals {
 
         /** Minimum perceptible speed difference for wave splits (m/s) */
         const val MIN_PERCEPTIBLE_SPEED_DIFFERENCE = 10000.0
-
-        /** Precision tolerance for geometric half-plane clipping operations */
-        const val HALF_PLANE_TOLERANCE = 1e-12
 
         // Coordinate Validation Constants
         /** Minimum valid latitude value (degrees) */
@@ -129,9 +126,6 @@ object WWWGlobals {
      * Audio System Constants
      */
     object Audio {
-        /** Standard sample rate for audio generation (Hz) */
-        const val STANDARD_SAMPLE_RATE = 44100
-
         const val BITS_PER_SAMPLE_8BIT = 8
 
         /** Default bits per sample for audio */
@@ -139,12 +133,6 @@ object WWWGlobals {
 
         /** Default number of audio channels (mono) */
         const val DEFAULT_CHANNELS = 1
-
-        /** Attack time for audio envelope to avoid clicks (seconds) */
-        const val ENVELOPE_ATTACK_TIME = 0.01 // 10ms
-
-        /** Release time for audio envelope to avoid clicks (seconds) */
-        const val ENVELOPE_RELEASE_TIME = 0.01 // 10ms
     }
 
     /**
@@ -163,65 +151,16 @@ object WWWGlobals {
         /** Maximum MIDI velocity value */
         const val MAX_VELOCITY = 127
 
-        /** Maximum MIDI pitch value */
-        const val MAX_PITCH = 127
-
-        /** Default tempo in beats per minute */
-        const val DEFAULT_TEMPO_BPM = 120
-
-        /** Default microseconds per beat (120 BPM) */
-        const val DEFAULT_MICROSECONDS_PER_BEAT = 500000L
-
-        /** MIDI header chunk length (should always be 6) */
-        const val HEADER_CHUNK_LENGTH = 6
-
-        /** Default ticks per beat for MIDI timing */
-        const val DEFAULT_TICKS_PER_BEAT = 24
-
         /** MIDI octave divisor for note calculations */
         const val OCTAVE_DIVISOR = 12
 
         /** Default octave for MIDI operations */
         const val DEFAULT_OCTAVE = 8
-
-        // Velocity Constants
-        /** Soft MIDI velocity value */
-        const val VELOCITY_SOFT = 64
-
-        /** Medium MIDI velocity value */
-        const val VELOCITY_MEDIUM = 96
-
-        /** Loud MIDI velocity value */
-        const val VELOCITY_LOUD = 127
-
-        // Note Duration Constants
-        /** Short note duration in milliseconds */
-        const val NOTE_DURATION_SHORT = 250
     }
 
     // ============================================================================================
-    // SPATIAL INDEXING & MAP CONSTANTS
+    // MAP CONSTANTS
     // ============================================================================================
-
-    /**
-     * Spatial Indexing Constants for Performance Optimization
-     */
-    object SpatialIndex {
-        /** Default grid size for spatial indexing */
-        const val DEFAULT_GRID_SIZE = 16
-
-        /** Minimum polygon size for spatial optimization */
-        const val SPATIAL_OPTIMIZATION_THRESHOLD = 100
-
-        /** Minimum grid size for adaptive spatial indexing */
-        const val MIN_ADAPTIVE_GRID_SIZE = 4
-
-        /** Divisor for calculating adaptive grid size based on polygon size */
-        const val POLYGON_SIZE_DIVISOR = 20
-
-        /** Maximum cache size for trigonometric calculations */
-        const val TRIG_CACHE_MAX_SIZE = 200
-    }
 
     /**
      * Map Display Constants
@@ -232,13 +171,6 @@ object WWWGlobals {
 
         /** Target zoom level for wave display */
         const val TARGET_WAVE_ZOOM = 13.0
-
-        /** Percentage thresholds for map constraint calculations */
-        const val CONSTRAINT_SMALL_THRESHOLD = 0.1
-        const val CONSTRAINT_MEDIUM_THRESHOLD = 0.2
-        const val CONSTRAINT_LARGE_THRESHOLD = 0.4
-        const val CONSTRAINT_PADDING_MULTIPLIER = 0.5
-        const val CONSTRAINT_EXTRA_MARGIN = 1.5
 
         /** Threshold for significant padding/constraint changes (10%) */
         const val CHANGE_THRESHOLD = 0.1
@@ -260,12 +192,6 @@ object WWWGlobals {
 
         /** Programmatic splash minimum duration - ensures proper user experience */
         val SPLASH_MIN_DURATION = 3000.milliseconds
-
-        /** Maximum duration for splash screen display - fallback timeout */
-        val SPLASH_MAX_DURATION = 5000.milliseconds
-
-        /** Splash screen check interval for status validation */
-        const val SPLASH_CHECK_INTERVAL_MS = 100L
 
         /** Camera animation duration for map transitions (milliseconds) */
         const val MAP_CAMERA_ANIMATION_DURATION_MS = 500
@@ -308,18 +234,6 @@ object WWWGlobals {
 
         /** Style listing file */
         const val STYLE_LISTING = "$STYLE_FOLDER/listing"
-    }
-
-    // ============================================================================================
-    // EXTERNAL SERVICE URLS
-    // ============================================================================================
-
-    /**
-     * External Service URLs
-     */
-    object Urls {
-        /** Base URL for Instagram integration */
-        const val INSTAGRAM_BASE = "https://www.instagram.com/"
     }
 
     // ============================================================================================
@@ -369,30 +283,6 @@ object WWWGlobals {
 
         /** Standard buffer size for file I/O operations (8KB) */
         const val BUFFER_SIZE = 8192
-
-        /** Chunk size for streaming operations */
-        const val CHUNK_SIZE = 512
-
-        /** Maximum buffer size for large operations */
-        const val MAX_BUFFER_SIZE = 8192
-    }
-
-    // ============================================================================================
-    // CHOREOGRAPHY CONSTANTS
-    // ============================================================================================
-
-    /**
-     * Choreography Sequence Constants
-     */
-    object Choreography {
-        /** Maximum number of warming sequences */
-        const val MAX_WARMING_SEQUENCES = 6
-
-        /** First warming sequence number */
-        const val FIRST_WARMING_SEQ = 1
-
-        /** Default choreography duration in milliseconds */
-        const val DEFAULT_DURATION = 1000L
     }
 
     // ============================================================================================
@@ -474,7 +364,6 @@ object WWWGlobals {
         const val GEOLOCME_HEIGHT = 45
         const val GEOLOCME_BORDER = 2
         const val GEOLOCME_FONTSIZE = Dimensions.FONTSIZE_SMALL2
-        const val GEOLOC_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
 
         // Numbers Display
         const val NUMBERS_BORDERWIDTH = 2
@@ -484,7 +373,6 @@ object WWWGlobals {
         const val NUMBERS_LABEL_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
         const val NUMBERS_VALUE_FONTSIZE = Dimensions.FONTSIZE_BIG
         const val NUMBERS_TZ_FONTSIZE = Dimensions.FONTSIZE_SMALL
-        const val NUMBERS_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
     }
 
     /**
@@ -520,15 +408,6 @@ object WWWGlobals {
         const val RULE_CONTENTS_FONTSIZE = Dimensions.FONTSIZE_SMALL
         const val RULE_QUESTION_FONTSIZE = Dimensions.FONTSIZE_SMALL2
         const val RULE_ANSWER_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
-
-        // Additional FAQ constants for About screens
-        const val TEXT_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
-        const val ACCESS_LINK_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
-        const val RULES_TITLE_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
-        const val RULES_TEXT_FONTSIZE = Dimensions.FONTSIZE_SMALL
-        const val QUESTION_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
-        const val ANSWER_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
-        const val SIMULATE_BUTTON_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
     }
 
     /**
@@ -579,29 +458,6 @@ object WWWGlobals {
     // ============================================================================================
     // PERFORMANCE & LOCATION CONSTANTS (SHARED)
     // ============================================================================================
-
-    /**
-     * Performance Thresholds (Business Logic)
-     */
-    object PerformanceThresholds {
-        /** Excellent timing accuracy threshold (percentage) */
-        const val TIMING_ACCURACY_EXCELLENT = 95.0
-
-        /** Good timing accuracy threshold (percentage) */
-        const val TIMING_ACCURACY_GOOD = 90.0
-
-        /** High participation rate threshold */
-        const val PARTICIPATION_RATE_HIGH = 0.8
-
-        /** Medium participation rate threshold */
-        const val PARTICIPATION_RATE_MEDIUM = 0.6
-
-        /** Low memory usage threshold (percentage) */
-        const val MEMORY_USAGE_LOW = 60.0
-
-        /** Medium memory usage threshold (percentage) */
-        const val MEMORY_USAGE_MEDIUM = 80.0
-    }
 
     /**
      * Location Accuracy Constants (GPS-agnostic)

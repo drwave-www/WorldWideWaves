@@ -10,6 +10,7 @@ package com.worldwidewaves.shared.utils
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
+import com.worldwidewaves.shared.WWWGlobals
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 
@@ -18,7 +19,7 @@ import io.github.aakira.napier.Napier
  * Uses DebugAntilog which outputs to Android Logcat.
  */
 actual fun initNapier() {
-    if (LogConfig.ENABLE_DEBUG_LOGGING) {
+    if (WWWGlobals.LogConfig.ENABLE_DEBUG_LOGGING) {
         Napier.base(DebugAntilog())
     } else {
         Napier.takeLogarithm()

@@ -24,7 +24,7 @@ package com.worldwidewaves.shared.events
 import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.choreographies.ChoreographyManager
 import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
-import com.worldwidewaves.shared.choreographies.SoundChoreographyManager
+import com.worldwidewaves.shared.choreographies.SoundChoreographyPlayer
 import com.worldwidewaves.shared.events.utils.IClock
 import io.github.aakira.napier.Napier
 import org.jetbrains.compose.resources.DrawableResource
@@ -40,7 +40,7 @@ class WWWEventWaveWarming(
 ) : KoinComponent {
     private val clock: IClock by inject()
     private val choreographyManager: ChoreographyManager<DrawableResource> by inject()
-    val soundChoreographyManager: SoundChoreographyManager by inject()
+    val soundChoreographyPlayer: SoundChoreographyPlayer by inject()
 
     fun getWarmingDuration(): Duration = WaveTiming.WARMING_DURATION
 
@@ -63,7 +63,7 @@ class WWWEventWaveWarming(
      * no production-code dependency is introduced.
      */
     suspend fun playCurrentSoundChoreographyTone(): Int? {
-        val note = soundChoreographyManager.playCurrentSoundTone(event.getStartDateTime())
+        val note = soundChoreographyPlayer.playCurrentSoundTone(event.getStartDateTime())
         notifyDebug(note)
         return note
     }
@@ -74,7 +74,7 @@ class WWWEventWaveWarming(
      */
     suspend fun playCurrentSoundChoreographyTone(forceStartTime: Instant? = null): Int? {
         val startTime = forceStartTime ?: event.getStartDateTime()
-        val note = soundChoreographyManager.playCurrentSoundTone(startTime)
+        val note = soundChoreographyPlayer.playCurrentSoundTone(startTime)
         notifyDebug(note)
         return note
     }

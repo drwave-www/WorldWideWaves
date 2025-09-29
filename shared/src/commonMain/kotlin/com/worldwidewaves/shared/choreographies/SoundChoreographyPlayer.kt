@@ -22,8 +22,6 @@ package com.worldwidewaves.shared.choreographies
  */
 
 import com.worldwidewaves.shared.WWWGlobals.FileSystem
-import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
-import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.sound.MidiParser
 import com.worldwidewaves.shared.sound.MidiTrack
@@ -45,16 +43,19 @@ import kotlin.time.Instant
  * Workflow:
  * • At start-up, the manager pre-loads a MIDI file located at
  *   [FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE] (or any custom path via
- *   [preloadMidiFile]).  The file is parsed into a single [MidiTrack] that
+ *   [preloadMidiFile]). The file is parsed into a single [MidiTrack] that
  *   stores note, timing and velocity information.
- * • When a device gets “hit” by the wave the UI calls [playCurrentSoundTone]
- *   passing the *wave start* timestamp.  The manager maps the current
+ * • **MIDI files are cached globally** - once a MIDI file is loaded, it's reused
+ *   across all events and manager instances for the entire application lifecycle.
+ *   This ensures optimal performance and memory usage.
+ * • When a device gets "hit" by the wave the UI calls [playCurrentSoundTone]
+ *   passing the *wave start* timestamp. The manager maps the current
  *   `clock.now() – waveStartTime` to a position inside the track (with optional
  *   looping) and fetches all notes whose `[start,end]` window contains that
  *   position.
  * • One of those active notes is randomly selected so each device contributes
  *   a different tone, creating a crowd-sourced chord.
- * • The selected note’s pitch / velocity are converted to
+ * • The selected note's pitch / velocity are converted to
  *   `frequency` / `amplitude` using helpers in [WaveformGenerator] and finally
  *   played through the platform-specific [SoundPlayer] with the currently
  *   chosen [Waveform][SoundPlayer.Waveform] (default *sine*).
@@ -66,15 +67,14 @@ import kotlin.time.Instant
  * • [release] frees audio resources when the enclosing screen is disposed.
  */
 @OptIn(ExperimentalTime::class)
-class SoundChoreographyManager(
-    coroutineScopeProvider: CoroutineScopeProvider = DefaultCoroutineScopeProvider(),
-) : KoinComponent {
+class SoundChoreographyPlayer : KoinComponent {
     private val clock: IClock by inject()
     private val soundPlayer: SoundPlayer by inject()
 
     // MIDI track data
     private var currentTrack: MidiTrack? = null
     private var looping: Boolean = true
+    private var isInitialized: Boolean = false
 
     // Selected instrument settings - SQUARE waveform has richer harmonics for better perceived loudness
     private var selectedWaveform = SoundPlayer.Waveform.SQUARE
@@ -85,9 +85,20 @@ class SoundChoreographyManager(
     /**
      * ⚠️ iOS CRITICAL: Initialize manager by preloading default MIDI file.
      * Must be called from @Composable LaunchedEffect, never from init{} or constructor.
+     *
+     * This method is idempotent - it will only initialize once per manager instance.
+     * Subsequent calls are no-ops that return immediately.
      */
     suspend fun initialize() {
-        preloadMidiFile(FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE)
+        if (isInitialized) {
+            Log.d("SoundChoreographyManager", "Already initialized, skipping")
+            return
+        }
+
+        val success = preloadMidiFile(FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE)
+        if (success) {
+            isInitialized = true
+        }
     }
 
     /**

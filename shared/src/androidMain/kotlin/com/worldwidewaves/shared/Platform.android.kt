@@ -26,6 +26,7 @@ import android.os.Build
 import android.util.Log
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker
+import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
 import com.worldwidewaves.shared.generated.resources.Res
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.desc.desc
@@ -50,8 +51,8 @@ fun clearUnavailableGeoJsonCache(eventId: String) {
 
     // Also invalidate GeoJSON cache in memory to force fresh load
     try {
-        val geoJsonProvider: com.worldwidewaves.shared.events.utils.GeoJsonDataProvider by inject(
-            com.worldwidewaves.shared.events.utils.GeoJsonDataProvider::class.java,
+        val geoJsonProvider: GeoJsonDataProvider by inject(
+            GeoJsonDataProvider::class.java,
         )
         geoJsonProvider.invalidateCache(eventId)
     } catch (e: Exception) {
@@ -359,8 +360,8 @@ actual fun clearEventCache(eventId: String) {
 
     // Also invalidate GeoJSON cache in memory
     try {
-        val geoJsonProvider: com.worldwidewaves.shared.events.utils.GeoJsonDataProvider by inject(
-            com.worldwidewaves.shared.events.utils.GeoJsonDataProvider::class.java,
+        val geoJsonProvider: GeoJsonDataProvider by inject(
+            GeoJsonDataProvider::class.java,
         )
         geoJsonProvider.invalidateCache(eventId)
     } catch (e: Exception) {

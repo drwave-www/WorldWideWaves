@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.utils
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWGlobals
 import io.github.aakira.napier.Napier
 
 /**
@@ -42,7 +43,7 @@ object Log {
         message: String,
         throwable: Throwable? = null,
     ) {
-        if (LogConfig.ENABLE_VERBOSE_LOGGING) {
+        if (WWWGlobals.LogConfig.ENABLE_VERBOSE_LOGGING) {
             Napier.v(tag = tag, message = message, throwable = throwable)
         }
     }
@@ -56,7 +57,7 @@ object Log {
         message: String,
         throwable: Throwable? = null,
     ) {
-        if (LogConfig.ENABLE_DEBUG_LOGGING) {
+        if (WWWGlobals.LogConfig.ENABLE_DEBUG_LOGGING) {
             Napier.d(tag = tag, message = message, throwable = throwable)
         }
     }
@@ -69,7 +70,7 @@ object Log {
         tag: String,
         message: String,
     ) {
-        if (LogConfig.ENABLE_PERFORMANCE_LOGGING) {
+        if (WWWGlobals.LogConfig.ENABLE_PERFORMANCE_LOGGING) {
             Napier.v(tag = tag, message = "[PERF] $message")
         }
     }
