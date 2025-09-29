@@ -163,12 +163,25 @@ actual suspend fun getMapFileAbsolutePath(
     eventId: String,
     extension: String,
 ): String? {
-    // iOS ODR: Direct Bundle access after successful beginAccessingResources
+    // iOS ODR: MUST only work after NSBundleResourceRequest.beginAccessingResources() succeeds
     return try {
         val fileName = "$eventId.$extension"
-        Log.v("getMapFileAbsolutePath", "[$eventId] Resolving ODR file via Bundle: $fileName")
+        Log.v("getMapFileAbsolutePath", "[$eventId] Checking ODR availability for: $fileName")
 
-        // Always resolve via Bundle APIs (ODR files are virtually mounted after download)
+        // Get MapAvailabilityChecker to verify ODR status
+        val koin =
+            org.koin.mp.KoinPlatform
+                .getKoin()
+        val mapChecker = koin.get<com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker>()
+
+        if (!mapChecker.isMapDownloaded(eventId)) {
+            Log.w("getMapFileAbsolutePath", "[$eventId] ODR resources not available - map not downloaded")
+            return null
+        }
+
+        Log.v("getMapFileAbsolutePath", "[$eventId] ODR confirmed available, resolving path: $fileName")
+
+        // ONLY after ODR availability confirmed, resolve via Bundle APIs
         val bundle = NSBundle.mainBundle
         val odrPaths =
             listOf(
@@ -181,13 +194,12 @@ actual suspend fun getMapFileAbsolutePath(
 
         for (path in odrPaths) {
             if (path != null && NSFileManager.defaultManager.fileExistsAtPath(path)) {
-                Log.i("getMapFileAbsolutePath", "[$eventId] Found ODR file: $path")
+                Log.i("getMapFileAbsolutePath", "[$eventId] Found ODR file after availability check: $path")
                 return path
             }
         }
 
-        Log.w("getMapFileAbsolutePath", "[$eventId] ODR file not found: $fileName")
-        Log.i("getMapFileAbsolutePath", "[$eventId] Note: Ensure NSBundleResourceRequest.beginAccessingResources() completed successfully")
+        Log.e("getMapFileAbsolutePath", "[$eventId] ODR shows available but file not found - ODR lifecycle issue")
         null
     } catch (e: Exception) {
         Log.e("getMapFileAbsolutePath", "[$eventId] Error resolving ODR file $eventId.$extension: ${e.message}", e)
@@ -196,48 +208,116 @@ actual suspend fun getMapFileAbsolutePath(
 }
 
 actual fun cachedFileExists(fileName: String): Boolean {
-    // iOS ODR: Check if file exists via Bundle APIs (ODR files are virtually mounted)
-    val eventId = fileName.substringBeforeLast('.')
-    val extension = fileName.substringAfterLast('.')
-    val bundle = NSBundle.mainBundle
+    // Handle different file types: style files are cached, map files are in ODR bundle
+    if (fileName.startsWith("style-")) {
+        // Style files are in cache directory
+        val cacheDir = getCacheDir()
+        val filePath = "$cacheDir/$fileName"
+        return NSFileManager.defaultManager.fileExistsAtPath(filePath)
+    } else {
+        // Map files are in ODR bundle - MUST respect ODR lifecycle
+        val eventId = fileName.substringBeforeLast('.')
 
-    val odrPaths =
-        listOf(
-            bundle.pathForResource(eventId, extension, "Resources/Maps/$eventId"),
-            bundle.pathForResource(eventId, extension, "Maps/$eventId"),
-            bundle.pathForResource(eventId, extension, "Resources/Maps"),
-            bundle.pathForResource(eventId, extension, "Maps"),
-            bundle.pathForResource(eventId, extension),
-        )
+        try {
+            // Check ODR availability via MapAvailabilityChecker
+            val koin =
+                org.koin.mp.KoinPlatform
+                    .getKoin()
+            val mapChecker = koin.get<com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker>()
 
-    return odrPaths.any { path ->
-        path != null && NSFileManager.defaultManager.fileExistsAtPath(path)
+            if (!mapChecker.isMapDownloaded(eventId)) {
+                Log.v("cachedFileExists", "ODR resources not available for: $fileName")
+                return false
+            }
+
+            // ONLY after ODR availability confirmed, check Bundle APIs
+            val extension = fileName.substringAfterLast('.')
+            val bundle = NSBundle.mainBundle
+
+            val odrPaths =
+                listOf(
+                    bundle.pathForResource(eventId, extension, "Resources/Maps/$eventId"),
+                    bundle.pathForResource(eventId, extension, "Maps/$eventId"),
+                    bundle.pathForResource(eventId, extension, "Resources/Maps"),
+                    bundle.pathForResource(eventId, extension, "Maps"),
+                    bundle.pathForResource(eventId, extension),
+                )
+
+            return odrPaths.any { path ->
+                path != null && NSFileManager.defaultManager.fileExistsAtPath(path)
+            }
+        } catch (e: Exception) {
+            Log.e("cachedFileExists", "Error checking ODR availability for: $fileName", throwable = e)
+            return false
+        }
     }
 }
 
 actual fun cachedFilePath(fileName: String): String? {
-    // iOS ODR: Return Bundle URL for ODR files (no caching needed)
-    val eventId = fileName.substringBeforeLast('.')
+    val fileNameWithoutExt = fileName.substringBeforeLast('.')
     val extension = fileName.substringAfterLast('.')
     val bundle = NSBundle.mainBundle
 
-    // Use URL APIs as recommended by Apple
-    val odrUrls =
-        listOf(
-            bundle.urlForResource(eventId, extension, "Resources/Maps/$eventId"),
-            bundle.urlForResource(eventId, extension, "Maps/$eventId"),
-            bundle.urlForResource(eventId, extension, "Resources/Maps"),
-            bundle.urlForResource(eventId, extension, "Maps"),
-            bundle.urlForResource(eventId, extension),
-        )
+    Log.v("cachedFilePath", "Looking for file: $fileName")
 
-    for (url in odrUrls) {
-        if (url != null) {
-            return url.absoluteString
+    // Handle different file types: style files are generated and cached, map files are in ODR bundle
+    if (fileName.startsWith("style-")) {
+        // Style files (e.g., "style-paris_france.json") are generated and cached
+        val cacheDir = getCacheDir()
+        val filePath = "$cacheDir/$fileName"
+        return if (NSFileManager.defaultManager.fileExistsAtPath(filePath)) {
+            // Convert filesystem path to file:// URL for MapLibre compatibility
+            "file://$filePath"
+        } else {
+            Log.w("cachedFilePath", "Style file not found in cache: $filePath")
+            null
+        }
+    } else {
+        // Map files (e.g., "paris_france.mbtiles", "paris_france.geojson") are in ODR bundle
+        // MUST respect ODR lifecycle - only accessible after beginAccessingResources() succeeds
+        val eventId = fileNameWithoutExt // e.g., "paris_france"
+
+        try {
+            // Check ODR availability via MapAvailabilityChecker
+            val koin =
+                org.koin.mp.KoinPlatform
+                    .getKoin()
+            val mapChecker = koin.get<com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker>()
+
+            if (!mapChecker.isMapDownloaded(eventId)) {
+                Log.w("cachedFilePath", "ODR resources not available for: $fileName")
+                return null
+            }
+
+            Log.v("cachedFilePath", "ODR confirmed available for: $fileName")
+
+            // ONLY after ODR availability confirmed, resolve via Bundle APIs
+            val odrUrls: List<platform.Foundation.NSURL?> =
+                listOf(
+                    bundle.URLForResource(eventId, withExtension = extension, subdirectory = "Resources/Maps/$eventId"),
+                    bundle.URLForResource(eventId, withExtension = extension, subdirectory = "Maps/$eventId"),
+                    bundle.URLForResource(eventId, withExtension = extension, subdirectory = "Resources/Maps"),
+                    bundle.URLForResource(eventId, withExtension = extension, subdirectory = "Maps"),
+                    bundle.URLForResource(eventId, withExtension = extension, subdirectory = null),
+                )
+
+            for (url in odrUrls) {
+                if (url != null) {
+                    val absoluteString = url.absoluteString
+                    if (absoluteString != null) {
+                        Log.v("cachedFilePath", "Found ODR file after availability check: $absoluteString")
+                        return absoluteString
+                    }
+                }
+            }
+
+            Log.e("cachedFilePath", "ODR shows available but file not found - ODR lifecycle issue: $fileName")
+            return null
+        } catch (e: Exception) {
+            Log.e("cachedFilePath", "Error checking ODR availability for: $fileName", throwable = e)
+            return null
         }
     }
-
-    return null
 }
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)

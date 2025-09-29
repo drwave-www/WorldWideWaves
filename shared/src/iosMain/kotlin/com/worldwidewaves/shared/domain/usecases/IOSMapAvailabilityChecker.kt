@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import platform.Foundation.NSBundle
 import platform.Foundation.NSProgress
 
 /**
@@ -132,27 +131,23 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
     @OptIn(ExperimentalForeignApi::class)
     private fun checkResourceAvailability(mapId: String): Boolean =
         try {
-            // For testing: if map is tracked, consider it available
-            // For production: check actual ODR resource availability
-            if (trackedMaps.contains(mapId)) {
-                // In test environment, tracked maps are considered available
-                // In production with actual ODR, this would be supplemented by real checks
-                Log.v("IOSMapAvailabilityChecker", "Map $mapId is tracked, considering available for testing")
-                true
-            } else {
-                // Check if ODR resource with this tag is actually available
-                val resourceRequest = NSBundle.mainBundle.pathsForResourcesOfType("", inDirectory = mapId)
-                val isAvailable = (resourceRequest as? List<*>)?.isNotEmpty() == true
+            Log.v("IOSMapAvailabilityChecker", "Checking ODR availability for $mapId (ODR-only mode)")
 
-                // Also check if resource is currently downloading
-                val isRequesting = activeRequests.containsKey(mapId)
+            // ONLY ODR: Check if resource is currently downloading or successfully downloaded
+            val isRequesting = activeRequests.containsKey(mapId)
 
-                isAvailable || isRequesting
-            }
+            // Check current state - only return true if ODR has actually succeeded
+            val currentState = _mapStates.value[mapId] ?: false
+
+            Log.v("IOSMapAvailabilityChecker", "ODR status for $mapId: requesting=$isRequesting, state=$currentState")
+
+            // Resource is available ONLY if ODR completed successfully (state=true)
+            // OR if currently downloading (which means ODR was initiated)
+            currentState || isRequesting
         } catch (e: Exception) {
             Log.e("IOSMapAvailabilityChecker", "Error checking ODR availability for $mapId", throwable = e)
-            // For tracked maps, assume available in error case (test-friendly)
-            trackedMaps.contains(mapId)
+            // NEVER assume available in error case - ODR must succeed explicitly
+            false
         }
 
     @OptIn(ExperimentalForeignApi::class)
