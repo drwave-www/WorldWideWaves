@@ -44,7 +44,7 @@ import kotlin.time.ExperimentalTime
 fun setupDebugSimulation() {
     try {
         // Check if debug mode is enabled using LogConfig (which reflects BuildConfig)
-        if (com.worldwidewaves.shared.WWWGlobals.LogConfig.ENABLE_DEBUG_LOGGING) {
+        if (WWWGlobals.LogConfig.ENABLE_DEBUG_LOGGING) {
             Log.d("DebugSimulation", "Setting up cross-platform DEBUG simulation")
 
             val wwwPlatform = KoinPlatform.getKoin().get<WWWPlatform>()

@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.choreographies.SoundChoreographyManager
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.sound.GlobalSoundChoreographyManager
 import com.worldwidewaves.shared.ui.AboutTabScreen
@@ -83,7 +84,7 @@ open class WWWMainActivity
         private val platform: WWWPlatform by inject()
         protected val events: WWWEvents by inject()
         private val globalSoundChoreography: GlobalSoundChoreographyManager by inject()
-        private val soundChoreographyManager: com.worldwidewaves.shared.choreographies.SoundChoreographyManager by inject()
+        private val soundChoreographyManager: SoundChoreographyManager by inject()
 
         private val eventsListScreen: EventsListScreen by inject()
         private val aboutTabScreen: AboutTabScreen by inject()

@@ -28,6 +28,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.icerock.moko.multiplatform)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.buildkonfig)
 }
 
 kotlin {
@@ -95,7 +96,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.koin.test)
         }
-        androidUnitTest.dependencies {
+        getByName("androidUnitTest").dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.koin.test)
@@ -164,29 +165,17 @@ android {
             .get()
             .toInt()
 
-    defaultConfig {
-        // Logging configuration for shared module
-        buildConfigField("boolean", "ENABLE_VERBOSE_LOGGING", "true")
-        buildConfigField("boolean", "ENABLE_DEBUG_LOGGING", "true")
-        buildConfigField("boolean", "ENABLE_PERFORMANCE_LOGGING", "true")
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures {
         compose = true
-        buildConfig = true
+        buildConfig = false
     }
     buildTypes {
         release {
             isMinifyEnabled = false
-
-            // Production logging configuration - disable verbose/debug logging for performance and security
-            buildConfigField("boolean", "ENABLE_VERBOSE_LOGGING", "false")
-            buildConfigField("boolean", "ENABLE_DEBUG_LOGGING", "false")
-            buildConfigField("boolean", "ENABLE_PERFORMANCE_LOGGING", "false")
         }
     }
     packaging {
@@ -246,6 +235,26 @@ multiplatformResources {
     resourcesPackage.set("com.worldwidewaves.shared")
     resourcesClassName.set("MokoRes")
     iosBaseLocalizationRegion.set("en")
+}
+
+buildkonfig {
+    packageName = "com.worldwidewaves.shared"
+
+    // Default config for all targets
+    defaultConfigs {
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "ENABLE_VERBOSE_LOGGING", "true")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "ENABLE_DEBUG_LOGGING", "true")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "ENABLE_PERFORMANCE_LOGGING", "true")
+    }
+
+    // Release configuration - disable verbose/debug logging for performance and security
+    targetConfigs {
+        create("release") {
+            buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "ENABLE_VERBOSE_LOGGING", "false")
+            buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "ENABLE_DEBUG_LOGGING", "false")
+            buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "ENABLE_PERFORMANCE_LOGGING", "false")
+        }
+    }
 }
 
 tasks.named("compileTestKotlinIosArm64").configure {

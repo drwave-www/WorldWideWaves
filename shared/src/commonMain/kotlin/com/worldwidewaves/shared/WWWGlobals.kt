@@ -35,14 +35,12 @@ import kotlin.time.Duration.Companion.seconds
  */
 object WWWGlobals {
     /**
-     * Logging configuration constants
+     * Logging configuration constants - driven by BuildKonfig
      */
     object LogConfig {
-        // For now, keep logging enabled for development
-        // TODO: Make this BuildConfig-driven when BuildConfig is properly available
-        const val ENABLE_VERBOSE_LOGGING: Boolean = true
-        const val ENABLE_DEBUG_LOGGING: Boolean = true
-        const val ENABLE_PERFORMANCE_LOGGING: Boolean = true
+        val ENABLE_VERBOSE_LOGGING: Boolean = BuildKonfig.ENABLE_VERBOSE_LOGGING
+        val ENABLE_DEBUG_LOGGING: Boolean = BuildKonfig.ENABLE_DEBUG_LOGGING
+        val ENABLE_PERFORMANCE_LOGGING: Boolean = BuildKonfig.ENABLE_PERFORMANCE_LOGGING
     }
 
     // ============================================================================================
@@ -62,9 +60,6 @@ object WWWGlobals {
 
         /** Minimum perceptible speed difference for wave splits (m/s) */
         const val MIN_PERCEPTIBLE_SPEED_DIFFERENCE = 10000.0
-
-        /** Precision tolerance for geometric half-plane clipping operations */
-        const val HALF_PLANE_TOLERANCE = 1e-12
 
         // Coordinate Validation Constants
         /** Minimum valid latitude value (degrees) */
@@ -177,13 +172,6 @@ object WWWGlobals {
         /** Target zoom level for wave display */
         const val TARGET_WAVE_ZOOM = 13.0
 
-        /** Percentage thresholds for map constraint calculations */
-        const val CONSTRAINT_SMALL_THRESHOLD = 0.1
-        const val CONSTRAINT_MEDIUM_THRESHOLD = 0.2
-        const val CONSTRAINT_LARGE_THRESHOLD = 0.4
-        const val CONSTRAINT_PADDING_MULTIPLIER = 0.5
-        const val CONSTRAINT_EXTRA_MARGIN = 1.5
-
         /** Threshold for significant padding/constraint changes (10%) */
         const val CHANGE_THRESHOLD = 0.1
 
@@ -204,12 +192,6 @@ object WWWGlobals {
 
         /** Programmatic splash minimum duration - ensures proper user experience */
         val SPLASH_MIN_DURATION = 3000.milliseconds
-
-        /** Maximum duration for splash screen display - fallback timeout */
-        val SPLASH_MAX_DURATION = 5000.milliseconds
-
-        /** Splash screen check interval for status validation */
-        const val SPLASH_CHECK_INTERVAL_MS = 100L
 
         /** Camera animation duration for map transitions (milliseconds) */
         const val MAP_CAMERA_ANIMATION_DURATION_MS = 500
@@ -382,7 +364,6 @@ object WWWGlobals {
         const val GEOLOCME_HEIGHT = 45
         const val GEOLOCME_BORDER = 2
         const val GEOLOCME_FONTSIZE = Dimensions.FONTSIZE_SMALL2
-        const val GEOLOC_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
 
         // Numbers Display
         const val NUMBERS_BORDERWIDTH = 2
@@ -392,7 +373,6 @@ object WWWGlobals {
         const val NUMBERS_LABEL_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
         const val NUMBERS_VALUE_FONTSIZE = Dimensions.FONTSIZE_BIG
         const val NUMBERS_TZ_FONTSIZE = Dimensions.FONTSIZE_SMALL
-        const val NUMBERS_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
     }
 
     /**

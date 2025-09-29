@@ -31,6 +31,7 @@ import com.worldwidewaves.shared.di.androidModule
 import com.worldwidewaves.shared.di.sharedModule
 import com.worldwidewaves.shared.utils.CloseableCoroutineScope
 import com.worldwidewaves.shared.utils.initNapier
+import com.worldwidewaves.shared.utils.setupDebugSimulation
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
@@ -81,8 +82,7 @@ class MainApplication :
         // -------------------------------------------------------------------- //
 
         if (BuildConfig.DEBUG) {
-            com.worldwidewaves.shared.utils
-                .setupDebugSimulation()
+            setupDebugSimulation()
         }
     }
 
