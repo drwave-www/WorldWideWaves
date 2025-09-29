@@ -1,4 +1,4 @@
-name: worldwidewaves
+name: iosApp
 options:
   bundleIdPrefix: com.worldwidewaves
   createIntermediateGroups: true
@@ -6,39 +6,18 @@ options:
   deploymentTarget:
     iOS: "15.0"
 targets:
-  worldwidewaves:
+  iosApp:
     type: application
     platform: iOS
     sources:
-      - path: worldwidewaves
+      - path: iosApp
         excludes:
           - "*.xcodeproj"
           - "build"
           - "DerivedData"
-    onDemandResourceTags:
-      - name: paris_france
-        resources:
-          - path: worldwidewaves/Resources/Maps/paris_france
-        priority: 1.0
-      - name: new_york_usa
-        resources:
-          - path: worldwidewaves/Resources/Maps/new_york_usa
-        priority: 1.0
-      - name: london_england
-        resources:
-          - path: worldwidewaves/Resources/Maps/london_england
-        priority: 1.0
-      - name: berlin_germany
-        resources:
-          - path: worldwidewaves/Resources/Maps/berlin_germany
-        priority: 1.0
-      - name: tokyo_japan
-        resources:
-          - path: worldwidewaves/Resources/Maps/tokyo_japan
-        priority: 1.0
     settings:
-      INFOPLIST_FILE: worldwidewaves/Info.plist
-      PRODUCT_BUNDLE_IDENTIFIER: com.worldwidewaves
+      INFOPLIST_FILE: iosApp/Info.plist
+      PRODUCT_BUNDLE_IDENTIFIER: com.worldwidewaves.iosApp
       DEVELOPMENT_TEAM: ""
       OTHER_LDFLAGS: [
         "-lc++",
@@ -51,10 +30,10 @@ targets:
       - framework: ../shared/build/xcode-frameworks/$$(CONFIGURATION)/$$(SDK_NAME)/Shared.framework
         embed: false
 schemes:
-  worldwidewaves:
+  iosApp:
     build:
       targets:
-        worldwidewaves: all
+        iosApp: all
     run:
       config: Debug
     archive:
