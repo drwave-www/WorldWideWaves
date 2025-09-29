@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.WWWGlobals.Wave
 import com.worldwidewaves.shared.events.WWWEventWave.Direction
 import com.worldwidewaves.shared.events.utils.GeoUtils.EARTH_RADIUS
@@ -52,10 +53,6 @@ class EarthAdaptedSpeedLongitude(
 
         // Conversion constants
         private const val MILLISECONDS_PER_SECOND = 1000
-
-        // Latitude limit constants
-        private const val MIN_LATITUDE = -90.0
-        private const val MAX_LATITUDE = 90.0
     }
 
     /*
@@ -147,7 +144,14 @@ class EarthAdaptedSpeedLongitude(
                 // Convert the total distance to longitude change at the current latitude
                 val longitudeChange = (totalDistanceCovered / (EARTH_RADIUS * cos(bandLatitude.toRadians()))).toDegrees()
 
-                val newLatitude = min(MAX_LATITUDE, max(MIN_LATITUDE, bandLatitude + band.latWidth / 2))
+                val newLatitude =
+                    min(
+                        WWWGlobals.Geodetic.MAX_LATITUDE,
+                        max(
+                            WWWGlobals.Geodetic.MIN_LATITUDE,
+                            bandLatitude + band.latWidth / 2,
+                        ),
+                    )
                 Position(
                     newLatitude,
                     when (direction) {
@@ -303,7 +307,7 @@ class EarthAdaptedSpeedLongitude(
         latitude: Double,
         lonWidthAtTheLongest: Double,
     ): Double {
-        require(abs(latitude) < MAX_LATITUDE) // Prevent division by zero
+        require(abs(latitude) < WWWGlobals.Geodetic.MAX_LATITUDE) // Prevent division by zero
         return lonWidthAtTheLongest / cos(latitude.toRadians())
     }
 }

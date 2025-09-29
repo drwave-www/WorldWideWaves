@@ -10,17 +10,13 @@ package com.worldwidewaves.shared.map
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
+import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.utils.WWWLogger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-// Geographic constants
-private const val MIN_LATITUDE = -90.0
-private const val MAX_LATITUDE = 90.0
-private const val MIN_LONGITUDE = -180.0
-private const val MAX_LONGITUDE = 180.0
 private const val DEFAULT_IPHONE_WIDTH = 375.0
 private const val DEFAULT_IPHONE_HEIGHT = 812.0
 
@@ -89,8 +85,8 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         val ne = Position(0.0, 0.0)
         return BoundingBox.fromCorners(listOf(sw, ne)) ?: BoundingBox.fromCorners(
             listOf(
-                Position(MIN_LATITUDE, MIN_LONGITUDE),
-                Position(MAX_LATITUDE, MAX_LONGITUDE),
+                Position(WWWGlobals.Geodetic.MIN_LATITUDE, WWWGlobals.Geodetic.MIN_LONGITUDE),
+                Position(WWWGlobals.Geodetic.MAX_LATITUDE, WWWGlobals.Geodetic.MAX_LONGITUDE),
             ),
         )!!
     }

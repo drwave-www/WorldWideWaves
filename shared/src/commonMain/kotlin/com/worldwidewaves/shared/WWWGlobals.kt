@@ -59,6 +59,19 @@ object WWWGlobals {
 
         /** Precision tolerance for geometric half-plane clipping operations */
         const val HALF_PLANE_TOLERANCE = 1e-12
+
+        // Coordinate Validation Constants
+        /** Minimum valid latitude value (degrees) */
+        const val MIN_LATITUDE = -90.0
+
+        /** Maximum valid latitude value (degrees) */
+        const val MAX_LATITUDE = 90.0
+
+        /** Minimum valid longitude value (degrees) */
+        const val MIN_LONGITUDE = -180.0
+
+        /** Maximum valid longitude value (degrees) */
+        const val MAX_LONGITUDE = 180.0
     }
 
     /**
@@ -166,6 +179,20 @@ object WWWGlobals {
 
         /** Default octave for MIDI operations */
         const val DEFAULT_OCTAVE = 8
+
+        // Velocity Constants
+        /** Soft MIDI velocity value */
+        const val VELOCITY_SOFT = 64
+
+        /** Medium MIDI velocity value */
+        const val VELOCITY_MEDIUM = 96
+
+        /** Loud MIDI velocity value */
+        const val VELOCITY_LOUD = 127
+
+        // Note Duration Constants
+        /** Short note duration in milliseconds */
+        const val NOTE_DURATION_SHORT = 250
     }
 
     // ============================================================================================
@@ -338,6 +365,12 @@ object WWWGlobals {
 
         /** Standard buffer size for file I/O operations (8KB) */
         const val BUFFER_SIZE = 8192
+
+        /** Chunk size for streaming operations */
+        const val CHUNK_SIZE = 512
+
+        /** Maximum buffer size for large operations */
+        const val MAX_BUFFER_SIZE = 8192
     }
 
     // ============================================================================================
@@ -353,6 +386,9 @@ object WWWGlobals {
 
         /** First warming sequence number */
         const val FIRST_WARMING_SEQ = 1
+
+        /** Default choreography duration in milliseconds */
+        const val DEFAULT_DURATION = 1000L
     }
 
     // ============================================================================================

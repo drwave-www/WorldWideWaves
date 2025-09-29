@@ -23,6 +23,7 @@ package com.worldwidewaves.shared.domain.observation
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
@@ -63,12 +64,6 @@ class DefaultPositionObserver(
     companion object {
         // Earth's radius in meters for distance calculations
         private const val EARTH_RADIUS_METERS = 6371000.0
-
-        // Position validation bounds
-        private const val MIN_LATITUDE = -90.0
-        private const val MAX_LATITUDE = 90.0
-        private const val MIN_LONGITUDE = -180.0
-        private const val MAX_LONGITUDE = 180.0
 
         // Minimum significant position change (meters) to avoid GPS noise
         private const val MIN_POSITION_CHANGE_METERS = 1.0
@@ -121,8 +116,8 @@ class DefaultPositionObserver(
     override fun getCurrentPosition(): Position? = positionManager.getCurrentPosition()
 
     override fun isValidPosition(position: Position): Boolean =
-        position.lat in MIN_LATITUDE..MAX_LATITUDE &&
-            position.lng in MIN_LONGITUDE..MAX_LONGITUDE &&
+        position.lat in WWWGlobals.Geodetic.MIN_LATITUDE..WWWGlobals.Geodetic.MAX_LATITUDE &&
+            position.lng in WWWGlobals.Geodetic.MIN_LONGITUDE..WWWGlobals.Geodetic.MAX_LONGITUDE &&
             !position.lat.isNaN() &&
             !position.lng.isNaN() &&
             position.lat.isFinite() &&
