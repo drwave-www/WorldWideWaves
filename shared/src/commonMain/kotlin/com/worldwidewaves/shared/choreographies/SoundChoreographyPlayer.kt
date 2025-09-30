@@ -130,7 +130,10 @@ class SoundChoreographyPlayer : KoinComponent {
      * in the MIDI track based on elapsed time since the given start time.
      */
     suspend fun playCurrentSoundTone(waveStartTime: Instant): Int? {
-        val track = currentTrack ?: return null
+        val track = currentTrack
+        if (track == null) {
+            return null
+        }
 
         // Calculate elapsed time since wave start
         val elapsedTime = clock.now() - waveStartTime
@@ -146,7 +149,9 @@ class SoundChoreographyPlayer : KoinComponent {
         // Find all notes that are active at this position
         val activeNotes = track.notes.filter { it.isActiveAt(trackPosition) }
 
-        if (activeNotes.isEmpty()) return null
+        if (activeNotes.isEmpty()) {
+            return null
+        }
 
         // Select a random note from active notes
         val selectedNote = activeNotes[Random.nextInt(activeNotes.size)]
@@ -165,7 +170,8 @@ class SoundChoreographyPlayer : KoinComponent {
             waveform = selectedWaveform,
         )
 
-        return selectedNote.pitch
+        val result = selectedNote.pitch
+        return result
     }
 
     /**

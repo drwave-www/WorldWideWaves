@@ -179,15 +179,7 @@ fun clearEventCache(eventId: String) {
     val context: Context by inject(Context::class.java)
     val cacheDir = context.cacheDir
 
-    // Also invalidate GeoJSON cache in memory
-    try {
-        val geoJsonProvider: GeoJsonDataProvider by inject(
-            GeoJsonDataProvider::class.java,
-        )
-        geoJsonProvider.invalidateCache(eventId)
-    } catch (e: Exception) {
-        Log.w(::clearEventCache.name, "Failed to invalidate GeoJSON cache for $eventId: ${e.message}")
-    }
+    invalidateGeoJsonCache(eventId)
 
     val targets =
         listOf(
@@ -199,18 +191,40 @@ fun clearEventCache(eventId: String) {
             "style-$eventId.json.metadata",
         )
 
-    for (name in targets) {
-        try {
-            val f = File(cacheDir, name)
-            if (f.exists()) {
-                if (f.delete()) {
-                    Log.i(::clearEventCache.name, "Deleted cached file $name")
-                } else {
-                    Log.e(::clearEventCache.name, "Failed to delete cached file $name")
-                }
+    targets.forEach { name ->
+        deleteCachedFile(cacheDir, name)
+    }
+}
+
+/**
+ * Invalidates the GeoJSON cache for the specified event.
+ */
+private fun invalidateGeoJsonCache(eventId: String) {
+    try {
+        val geoJsonProvider: GeoJsonDataProvider by inject(GeoJsonDataProvider::class.java)
+        geoJsonProvider.invalidateCache(eventId)
+    } catch (e: Exception) {
+        Log.w(::clearEventCache.name, "Failed to invalidate GeoJSON cache for $eventId: ${e.message}")
+    }
+}
+
+/**
+ * Attempts to delete a cached file from the given cache directory.
+ */
+private fun deleteCachedFile(
+    cacheDir: File,
+    fileName: String,
+) {
+    try {
+        val file = File(cacheDir, fileName)
+        if (file.exists()) {
+            if (file.delete()) {
+                Log.i(::clearEventCache.name, "Deleted cached file $fileName")
+            } else {
+                Log.e(::clearEventCache.name, "Failed to delete cached file $fileName")
             }
-        } catch (e: Exception) {
-            Log.e(::clearEventCache.name, "Error while deleting $name", e)
         }
+    } catch (e: Exception) {
+        Log.e(::clearEventCache.name, "Error while deleting $fileName", e)
     }
 }

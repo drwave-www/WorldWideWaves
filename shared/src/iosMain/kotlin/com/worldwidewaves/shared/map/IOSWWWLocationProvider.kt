@@ -196,12 +196,6 @@ class IOSWWWLocationProvider : WWWLocationProvider {
             !position.lng.isNaN() &&
             position.lat.isFinite() &&
             position.lng.isFinite()
-
-    private fun handleLocationPermissionDenied() {
-        Log.w(TAG, "Location services not available, app functionality will be limited")
-        // Could provide a default location for testing, but in production should handle gracefully
-        // _currentLocation.value remains null to indicate no location available
-    }
 }
 
 /**

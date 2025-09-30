@@ -21,92 +21,59 @@ package com.worldwidewaves.shared.utils
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.generated.resources.Res
+import com.worldwidewaves.shared.generated.resources.e_choreography_hit
+import com.worldwidewaves.shared.generated.resources.e_choreography_waiting
+import com.worldwidewaves.shared.generated.resources.e_choreography_warming_seq_1
+import com.worldwidewaves.shared.generated.resources.e_choreography_warming_seq_2
+import com.worldwidewaves.shared.generated.resources.e_choreography_warming_seq_3
+import com.worldwidewaves.shared.generated.resources.e_choreography_warming_seq_4
+import com.worldwidewaves.shared.generated.resources.e_choreography_warming_seq_5
+import com.worldwidewaves.shared.generated.resources.e_choreography_warming_seq_6
+import com.worldwidewaves.shared.generated.resources.transparent
 import io.github.aakira.napier.Napier
-import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.useContents
-import platform.CoreGraphics.CGRectMake
-import platform.CoreGraphics.CGSizeMake
-import platform.UIKit.UIGraphicsBeginImageContext
-import platform.UIKit.UIGraphicsEndImageContext
-import platform.UIKit.UIGraphicsGetImageFromCurrentImageContext
-import platform.UIKit.UIImage
+import org.jetbrains.compose.resources.DrawableResource
 
-@OptIn(ExperimentalForeignApi::class)
-class IOSImageResolver : ImageResolver<UIImage> {
+object IOSDrawableResources {
+    // Mapping of path names to resource IDs - same as Android for cross-platform compatibility
+    private val resourceMap =
+        mapOf(
+            "e_choreography_warming_seq_1" to Res.drawable.e_choreography_warming_seq_1,
+            "e_choreography_warming_seq_2" to Res.drawable.e_choreography_warming_seq_2,
+            "e_choreography_warming_seq_3" to Res.drawable.e_choreography_warming_seq_3,
+            "e_choreography_warming_seq_4" to Res.drawable.e_choreography_warming_seq_4,
+            "e_choreography_warming_seq_5" to Res.drawable.e_choreography_warming_seq_5,
+            "e_choreography_warming_seq_6" to Res.drawable.e_choreography_warming_seq_6,
+            "e_choreography_waiting" to Res.drawable.e_choreography_waiting,
+            "e_choreography_hit" to Res.drawable.e_choreography_hit,
+        )
+
+    // Get resource ID by path, with fallback to transparent
+    fun getResource(path: String): DrawableResource? = resourceMap[path] ?: Res.drawable.transparent
+}
+
+/**
+ * iOS implementation of ImageResolver using DrawableResource for cross-platform compatibility.
+ * This matches the Android implementation to ensure choreography works consistently.
+ */
+class IOSImageResolver : ImageResolver<DrawableResource> {
     /**
-     * Resolves a resource path to a UIImage.
+     * Resolves a resource path to a DrawableResource for cross-platform compatibility.
      *
      * @param path The resource path to resolve.
-     * @return The UIImage for the resource, or null if not found.
+     * @return The DrawableResource for the resource, or null if not found.
      */
-    override fun resolve(path: String): UIImage? {
+    override fun resolve(path: String): DrawableResource? {
         try {
-            // Try to load image from main bundle
-            return UIImage.imageNamed(path)
-                ?: run {
-                    Napier.e("Failed to load image: $path")
-                    null
-                }
-        } catch (e: Exception) {
-            Napier.e("Error loading image $path: ${e.message}")
-            return null
-        }
-    }
-
-    /**
-     * Extracts a specific frame from a sprite sheet.
-     *
-     * @param path The resource path of the sprite sheet.
-     * @param frameIndex The index of the frame to extract (0-based).
-     * @param frameWidth The width of a single frame in pixels.
-     * @param frameHeight The height of a single frame in pixels.
-     * @param frameCount The total number of frames in the sprite sheet.
-     * @return The UIImage for the specific frame, or null if extraction fails.
-     */
-    @OptIn(ExperimentalForeignApi::class)
-    fun resolveFrame(
-        path: String,
-        frameIndex: Int,
-        frameWidth: Int,
-        frameHeight: Int,
-        frameCount: Int,
-    ): UIImage? {
-        if (frameIndex < 0 || frameIndex >= frameCount) {
-            Napier.e("Invalid frame index: $frameIndex (must be between 0 and ${frameCount - 1})")
-            return null
-        }
-
-        try {
-            // Load the full sprite sheet image
-            val fullImage = resolve(path) ?: return null
-
-            // Calculate the frame rectangle
-            val x = frameIndex * frameWidth.toDouble()
-            val y = 0.0
-            val width = frameWidth.toDouble()
-            val height = frameHeight.toDouble()
-
-            // Begin a new image context with the size of our desired frame
-            UIGraphicsBeginImageContext(CGSizeMake(width, height))
-
-            // Extract the CValue<CGSize> into concrete width / height values
-            val (imgWidth, imgHeight) = fullImage.size.useContents { width to height }
-
-            // Draw the full image at a negative offset so only the desired portion appears in the context
-            fullImage.drawInRect(CGRectMake(-x, -y, imgWidth, imgHeight))
-
-            // Get the cropped image from the context
-            val croppedImage = UIGraphicsGetImageFromCurrentImageContext()
-
-            // End the image context
-            UIGraphicsEndImageContext()
-
-            return croppedImage ?: run {
-                Napier.e("Failed to create cropped image for $path at index $frameIndex")
-                null
+            val resource = IOSDrawableResources.getResource(path)
+            if (resource == null) {
+                Napier.e("Failed to resolve choreography image: $path")
+            } else {
+                Napier.d("Successfully resolved choreography image: $path")
             }
+            return resource
         } catch (e: Exception) {
-            Napier.e("Error extracting frame from $path at index $frameIndex: ${e.message}")
+            Napier.e("Error resolving choreography image $path: ${e.message}")
             return null
         }
     }

@@ -19,6 +19,7 @@ package com.worldwidewaves.shared
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
+import com.worldwidewaves.shared.data.getMapFileAbsolutePath
 import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
 import kotlinx.coroutines.test.runTest
 import org.koin.core.context.startKoin

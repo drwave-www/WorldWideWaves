@@ -323,16 +323,20 @@ object GeoUtils {
         val dLng = segment.end.lng - segment.start.lng
 
         // Handle special cases: horizontal and vertical segments
-        if (abs(dLat) < EPSILON) {
-            // Horizontal segment
-            return abs(point.lat - segment.start.lat) < EPSILON &&
-                isLongitudeInRange(point.lng, segment.start.lng, segment.end.lng)
+        val isHorizontalSegment = abs(dLat) < EPSILON
+        if (isHorizontalSegment) {
+            val isOnLatitude = abs(point.lat - segment.start.lat) < EPSILON
+            val isInLongitudeRange = isLongitudeInRange(point.lng, segment.start.lng, segment.end.lng)
+            return isOnLatitude && isInLongitudeRange
         }
 
-        if (abs(dLng) < EPSILON) {
-            // Vertical segment
-            return isLongitudeEqual(point.lng, segment.start.lng) &&
-                point.lat in minOf(segment.start.lat, segment.end.lat)..maxOf(segment.start.lat, segment.end.lat)
+        val isVerticalSegment = abs(dLng) < EPSILON
+        if (isVerticalSegment) {
+            val isOnLongitude = isLongitudeEqual(point.lng, segment.start.lng)
+            val minLat = minOf(segment.start.lat, segment.end.lat)
+            val maxLat = maxOf(segment.start.lat, segment.end.lat)
+            val isInLatitudeRange = point.lat in minLat..maxLat
+            return isOnLongitude && isInLatitudeRange
         }
 
         // Calculate the parametric value t for the point
@@ -340,6 +344,8 @@ object GeoUtils {
         val tLng = (point.lng - segment.start.lng) / dLng
 
         // Check if t values are the same and within the range [0, 1]
-        return abs(tLat - tLng) < EPSILON && tLat in 0.0..1.0
+        val areTValuesEqual = abs(tLat - tLng) < EPSILON
+        val isTLatInRange = tLat in 0.0..1.0
+        return areTValuesEqual && isTLatInRange
     }
 }
