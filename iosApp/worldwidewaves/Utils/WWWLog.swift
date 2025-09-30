@@ -23,56 +23,63 @@ import Shared
 
 /// Swift wrapper for Kotlin Log that handles try/catch automatically
 /// Usage: WWWLog.d("MyTag", "My message")
+/// Usage with error: WWWLog.e("MyTag", "Failed", error: someError)
 enum WWWLog {
     /// Verbose logging - disabled in release builds
-    static func v(_ tag: String, _ message: String) {
+    static func v(_ tag: String, _ message: String, error: Error? = nil) {
+        let fullMessage = error != nil ? "\(message): \(error!.localizedDescription)" : message
         do {
-            try Log.shared.v(tag: tag, message: message)
+            try Log.shared.v(tag: tag, message: fullMessage)
         } catch {
             print("⚠️ [WWWLog] Failed to log verbose: \(error)")
         }
     }
 
     /// Debug logging - disabled in release builds
-    static func d(_ tag: String, _ message: String) {
+    static func d(_ tag: String, _ message: String, error: Error? = nil) {
+        let fullMessage = error != nil ? "\(message): \(error!.localizedDescription)" : message
         do {
-            try Log.shared.d(tag: tag, message: message)
+            try Log.shared.d(tag: tag, message: fullMessage)
         } catch {
             print("⚠️ [WWWLog] Failed to log debug: \(error)")
         }
     }
 
     /// Info logging - always enabled
-    static func i(_ tag: String, _ message: String) {
+    static func i(_ tag: String, _ message: String, error: Error? = nil) {
+        let fullMessage = error != nil ? "\(message): \(error!.localizedDescription)" : message
         do {
-            try Log.shared.i(tag: tag, message: message)
+            try Log.shared.i(tag: tag, message: fullMessage)
         } catch {
             print("⚠️ [WWWLog] Failed to log info: \(error)")
         }
     }
 
     /// Warning logging - always enabled
-    static func w(_ tag: String, _ message: String) {
+    static func w(_ tag: String, _ message: String, error: Error? = nil) {
+        let fullMessage = error != nil ? "\(message): \(error!.localizedDescription)" : message
         do {
-            try Log.shared.w(tag: tag, message: message)
+            try Log.shared.w(tag: tag, message: fullMessage)
         } catch {
             print("⚠️ [WWWLog] Failed to log warning: \(error)")
         }
     }
 
     /// Error logging - always enabled
-    static func e(_ tag: String, _ message: String, throwable: KotlinThrowable? = nil) {
+    static func e(_ tag: String, _ message: String, error: Error? = nil) {
+        let fullMessage = error != nil ? "\(message): \(error!.localizedDescription)" : message
         do {
-            try Log.shared.e(tag: tag, message: message, throwable: throwable)
+            try Log.shared.e(tag: tag, message: fullMessage)
         } catch {
             print("⚠️ [WWWLog] Failed to log error: \(error)")
         }
     }
 
     /// Critical error logging - always enabled
-    static func wtf(_ tag: String, _ message: String, throwable: KotlinThrowable? = nil) {
+    static func wtf(_ tag: String, _ message: String, error: Error? = nil) {
+        let fullMessage = error != nil ? "\(message): \(error!.localizedDescription)" : message
         do {
-            try Log.shared.wtf(tag: tag, message: message, throwable: throwable)
+            try Log.shared.wtf(tag: tag, message: fullMessage)
         } catch {
             print("⚠️ [WWWLog] Failed to log wtf: \(error)")
         }

@@ -336,7 +336,7 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
     }
 
     public func mapViewDidFailLoadingMap(_ mapView: MLNMapView, withError error: Error) {
-        WWWLog.e(Self.tag, "Failed to load map: \(error.localizedDescription)")
+        WWWLog.e(Self.tag, "Failed to load map", error: error)
     }
 }
 
