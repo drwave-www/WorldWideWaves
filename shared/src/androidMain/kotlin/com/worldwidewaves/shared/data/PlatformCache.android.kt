@@ -19,7 +19,6 @@ package com.worldwidewaves.shared.data
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-
 import android.content.Context
 import android.os.Build
 import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider

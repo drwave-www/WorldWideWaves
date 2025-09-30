@@ -19,7 +19,6 @@ package com.worldwidewaves.shared.domain.usecases
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import platform.Foundation.NSBundle
