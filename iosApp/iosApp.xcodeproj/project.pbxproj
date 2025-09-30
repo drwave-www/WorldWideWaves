@@ -1,0 +1,999 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		00D7590070623DDAD7C15436 /* sao_paulo_brazil.geojson in Resources */ = {isa = PBXBuildFile; fileRef = CE235842570CA4013344399E /* sao_paulo_brazil.geojson */; };
+		03F1F03ED96B15E7D8292CC2 /* toronto_canada.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 67BAB76BC242235A68B8DB62 /* toronto_canada.geojson */; };
+		04A1A0232AA2EE265342E13A /* berlin_germany.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 45CA2169669FC7343A111220 /* berlin_germany.mbtiles */; };
+		08FE2EF2DAED829688EE5665 /* IOSPlatformEnabler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCBB4F8E3E5598E56A6085B5 /* IOSPlatformEnabler.swift */; };
+		0C5DF02E9122036BAF629DC6 /* hong_kong_china.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = E80A57F4E41230A116F32B34 /* hong_kong_china.mbtiles */; };
+		13EE0949E70105EB98D0B57B /* san_francisco_usa.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = D6903D4CC9A3507033FF55AE /* san_francisco_usa.mbtiles */; };
+		1432FF20CA82AD8D8B28B5A3 /* cairo_egypt.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 8C287A36F75FDD6D2F41F6B7 /* cairo_egypt.geojson */; };
+		14580D47AF68230DADEEE135 /* lima_peru.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 8C2661BBD38DACCD12314CBB /* lima_peru.geojson */; };
+		19F6347B33F0043FFAA34876 /* tehran_iran.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = E024FC952A1845AC065BEC3B /* tehran_iran.mbtiles */; };
+		1A256A4D69BA2C997078C31D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 01BC28CF91C3735EBA7CFF8F /* Assets.xcassets */; };
+		1E86D15BE6B80C3EEA566357 /* moscow_russia.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 000CD06835BE81866AD16966 /* moscow_russia.geojson */; };
+		238CD5B68CD2235B03E9ED9D /* buenos_aires_argentina.geojson in Resources */ = {isa = PBXBuildFile; fileRef = D07C91A96B01ADA03B2CB0D8 /* buenos_aires_argentina.geojson */; };
+		2C0B57FEFD820D5922A593C5 /* mumbai_india.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 29AB54B84EF2F9778E29A90F /* mumbai_india.mbtiles */; };
+		2D7DDEE7D9A877185B37D6EE /* lagos_nigeria.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 2935FFDD0D39999B27FDD461 /* lagos_nigeria.geojson */; };
+		304DB0A0B7E30D74A7F598BF /* moscow_russia.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 68F4A1F056D74A22861935A8 /* moscow_russia.mbtiles */; };
+		30E0DCDD91BC43B370ADACE4 /* london_england.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 7C8F2F3B056AD26D80120808 /* london_england.geojson */; };
+		39F5F820CD4BDB8C91DDDF0D /* cairo_egypt.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = ED711D6B3FA2BE1261BC25A9 /* cairo_egypt.mbtiles */; };
+		3B58D2AA95DFE1CA1102E41F /* seoul_south_korea.geojson in Resources */ = {isa = PBXBuildFile; fileRef = EDF732998F247BF53D07CFCB /* seoul_south_korea.geojson */; };
+		3B8E79DF806FE54AEEF0E12B /* buenos_aires_argentina.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 9318102BC6A8226D2C351287 /* buenos_aires_argentina.mbtiles */; };
+		3FDB1643C1DF6514C3FA40DB /* new_york_usa.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 8089D66A419AA4428232CC1F /* new_york_usa.geojson */; };
+		4111524551AF743484F28BAB /* bangalore_india.geojson in Resources */ = {isa = PBXBuildFile; fileRef = A4E1C78EA7354E8E81534AC5 /* bangalore_india.geojson */; };
+		423BF1ED1364BE8CA24D1A36 /* santiago_chile.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 7ED61228B47C8A0C812344E8 /* santiago_chile.geojson */; };
+		425619E908ACCFEA2CF0FF5E /* karachi_pakistan.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 93B13B0F2E713504EE592B3B /* karachi_pakistan.geojson */; };
+		49D1248AB28627E1F884C71D /* bangalore_india.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = C27441F76242B09AE68EC486 /* bangalore_india.mbtiles */; };
+		4A1B8484EA21FEA884B0A13E /* berlin_germany.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 702D5A27085E9A60729D4149 /* berlin_germany.geojson */; };
+		4BDCD41054971FFC5FD523D2 /* bangkok_thailand.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 58CFAA3CE3442761A3089E5F /* bangkok_thailand.geojson */; };
+		4E77AFD5C2B00E927573D493 /* Shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BCACD5445C37FEB9733A013 /* Shared.framework */; };
+		51B1B9599D5E57CA62788364 /* manila_philippines.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = AA243747A91EADBAD7002CD1 /* manila_philippines.mbtiles */; };
+		55FB27B57B63372560B9AA43 /* mexico_city_mexico.geojson in Resources */ = {isa = PBXBuildFile; fileRef = CE751F2A02E737175BD92467 /* mexico_city_mexico.geojson */; };
+		5C99127A62B47BDDB756E0CC /* los_angeles_usa.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 5477B4AB8E5078CEC85B09AF /* los_angeles_usa.geojson */; };
+		5CF93911A331785B87DA40E7 /* sydney_australia.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = FDEB6313B89EAD35BB4AF633 /* sydney_australia.mbtiles */; };
+		628A4C360732C8C165D0B666 /* mexico_city_mexico.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 7BABFCF4CF10CEFDD0D41420 /* mexico_city_mexico.mbtiles */; };
+		673E3CD7C953D4A3821F3980 /* dubai_united_arab_emirates.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 05C6CA437E39F0539858537A /* dubai_united_arab_emirates.geojson */; };
+		6888348E11B4ACE4C623B9E1 /* tehran_iran.geojson in Resources */ = {isa = PBXBuildFile; fileRef = C7CBBE9CF5280E117555DD63 /* tehran_iran.geojson */; };
+		6A003C3C5FF9676A11AE88C6 /* lima_peru.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = AE5BA8A3AE8ED7E545945C4C /* lima_peru.mbtiles */; };
+		6B6A3597DA719CC4219046E5 /* sydney_australia.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 1BBBED0B5881C170581B98AD /* sydney_australia.geojson */; };
+		6EC68EB10575894CBAFE06CA /* bangkok_thailand.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 01E0869E7758DF66DD91C933 /* bangkok_thailand.mbtiles */; };
+		70EBF5D3CD0951E9BB6319DD /* paris_france.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 09D64CEEFD1C95DF228CC978 /* paris_france.mbtiles */; };
+		7A6160EE417BF12076415D8B /* bogota_colombia.geojson in Resources */ = {isa = PBXBuildFile; fileRef = B06FD6CC1004CECE43F2F385 /* bogota_colombia.geojson */; };
+		7C70F6FD4DCDAF8134899D3A /* madrid_spain.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 3965C7C92214E71DEBE9B71F /* madrid_spain.geojson */; };
+		7D049B235E61BE2976CC322C /* santiago_chile.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = B1BDFFAD5E14E6F3E12E40D3 /* santiago_chile.mbtiles */; };
+		7DFA81B06437217B2DB09414 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AE5DB61367E41231F64BA77 /* AppDelegate.swift */; };
+		7E5FF6F825C430E3A1EA6F7B /* melbourne_australia.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 73DBFFC2162CA6F627990BEF /* melbourne_australia.mbtiles */; };
+		7F560F1233F046444672393C /* tokyo_japan.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = A95ED409502C6B93B6966901 /* tokyo_japan.mbtiles */; };
+		8808267C0608B2BE34FE1706 /* madrid_spain.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 4AA4B41105FC5B022BDBE849 /* madrid_spain.mbtiles */; };
+		8B3BFF7049381515198E5A76 /* chicago_usa.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = D25C1D10CEA336E14CBF93F8 /* chicago_usa.mbtiles */; };
+		8B6B7C64C80B581942BB5E21 /* seoul_south_korea.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 8042DA7BF2444691252FF721 /* seoul_south_korea.mbtiles */; };
+		8DFC8A002750C06FCCB73CAE /* rome_italy.geojson in Resources */ = {isa = PBXBuildFile; fileRef = BA58C048AE2C1456C22E72F8 /* rome_italy.geojson */; };
+		925DE9602948E7BE0E5D4EE4 /* paris_france.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 956BA91B3837C82888BC8D31 /* paris_france.geojson */; };
+		9364061D79FB3B0CCC52BE55 /* nairobi_kenya.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 1F48A77D7E39EA6C5A972976 /* nairobi_kenya.geojson */; };
+		93CD12E4342C8F31289A165D /* beijing_china.geojson in Resources */ = {isa = PBXBuildFile; fileRef = BED8717791B919FD1DB04127 /* beijing_china.geojson */; };
+		96437A2A2D1DE1EB1C7C7DC2 /* mumbai_india.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 7E9BC210EF03BF2EBDC8A86E /* mumbai_india.geojson */; };
+		977FF5BB493D1B27E09F7B28 /* bogota_colombia.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 706B5595923310DBD41012DF /* bogota_colombia.mbtiles */; };
+		97A83B59EFC8FEDCCD06F4C3 /* delhi_india.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 9861880F2AB70FB0CF525A2A /* delhi_india.mbtiles */; };
+		981E87148F6E48894EC0D71F /* san_francisco_usa.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 29B0AD060AB7947BB6F1E567 /* san_francisco_usa.geojson */; };
+		98AACF7FAF75A43F0169D97C /* istanbul_turkey.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 72BFF9687DD60E7A8882F998 /* istanbul_turkey.mbtiles */; };
+		9BD4F216CDBE622120B6F13B /* kinshasa_democratic_republic_of_the_congo.geojson in Resources */ = {isa = PBXBuildFile; fileRef = E724840CCA9A5F387A8FEA68 /* kinshasa_democratic_republic_of_the_congo.geojson */; };
+		9C16B28F5A53F8B7A177E9D1 /* melbourne_australia.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 61ABBB017DF1214E1BE787C7 /* melbourne_australia.geojson */; };
+		A03D6A38B47B38D5EBA67356 /* shanghai_china.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 718FB006482B8225E210AA70 /* shanghai_china.geojson */; };
+		A0BD111720B7406B624F688E /* tokyo_japan.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 5E1B4408816F81E3C7408203 /* tokyo_japan.geojson */; };
+		A69DB9311DA1F0289BC32413 /* jakarta_indonesia.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 38FAD55B99F21EA7191A2CB9 /* jakarta_indonesia.mbtiles */; };
+		AD60B0EE5A0B0156AE77E7BF /* karachi_pakistan.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = EBB33561FBE2B28A396FFD0E /* karachi_pakistan.mbtiles */; };
+		B2D48DD554B28C5E4556DE7C /* chicago_usa.geojson in Resources */ = {isa = PBXBuildFile; fileRef = DA7AD4EA6BE1D1799C3E05F0 /* chicago_usa.geojson */; };
+		B2F62A53166DD705DF365123 /* los_angeles_usa.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = F8EF667F3CCC345C2E50C4B2 /* los_angeles_usa.mbtiles */; };
+		B303CB66140C8B73B20EEDDE /* new_york_usa.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = E86D9CF5C13F27FCFC1B1953 /* new_york_usa.mbtiles */; };
+		BC00A4F69E07F51AD60D18A7 /* istanbul_turkey.geojson in Resources */ = {isa = PBXBuildFile; fileRef = ACBC9F759DC591EC215FEC35 /* istanbul_turkey.geojson */; };
+		BEEC9835710C44F2F71846AC /* vancouver_canada.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 6725B34E2FC2F4CF7741AD8E /* vancouver_canada.geojson */; };
+		BFC16193081DB1D0DB870CB2 /* johannesburg_south_africa.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 6EA14484305026EAFB414045 /* johannesburg_south_africa.geojson */; };
+		BFEE0D312A278C11C29E5726 /* nairobi_kenya.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 6572964A31B5932135E34DAB /* nairobi_kenya.mbtiles */; };
+		C88DDA312F6426898518DD6C /* johannesburg_south_africa.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 78CBFEE6BE7A69C7DCD3EDA9 /* johannesburg_south_africa.mbtiles */; };
+		CC34B2025A6DC939439F0898 /* rome_italy.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 37B946F708CD3C8B8F1D2CF0 /* rome_italy.mbtiles */; };
+		D1D5B4F2EE5DCD001F0D7670 /* vancouver_canada.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 7EBB74C6D7BDFAAE5BCE33E3 /* vancouver_canada.mbtiles */; };
+		D3571C79804FA61EBF96452C /* london_england.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 0EC83E709B860646E6D74E8E /* london_england.mbtiles */; };
+		E97A4C8375B5619AD93AD17F /* manila_philippines.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 04F5240BECAC851EA1A91299 /* manila_philippines.geojson */; };
+		EA81A0ACA2818483DF0C7BA6 /* toronto_canada.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = D30A848F9D7705EF64597B56 /* toronto_canada.mbtiles */; };
+		ECB1797775D80F55C4A819AB /* beijing_china.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 8CDCE5D780F7A344A02F2608 /* beijing_china.mbtiles */; };
+		EEE6396747EED112E3CAE15A /* lagos_nigeria.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = B7D472004EF7B57430B53AC5 /* lagos_nigeria.mbtiles */; };
+		F1ECBF29F22C9534394F6FD4 /* delhi_india.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 81076CCA21243E8E698E96C5 /* delhi_india.geojson */; };
+		F3CA182BD35602418BAD8C1F /* shanghai_china.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 4E6842C9C3BF9EE98DD9764E /* shanghai_china.mbtiles */; };
+		F5C69D3FE1322C05F7C0441A /* hong_kong_china.geojson in Resources */ = {isa = PBXBuildFile; fileRef = AEC4BA5023B57A7F57C56431 /* hong_kong_china.geojson */; };
+		F626EB9F6921A7AD254A28CF /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CEBDBD7B715092BF99AC5BC /* SceneDelegate.swift */; };
+		F754D9E5F4A9432B0C9C4E47 /* jakarta_indonesia.geojson in Resources */ = {isa = PBXBuildFile; fileRef = A947D2A804C6B612C352CF04 /* jakarta_indonesia.geojson */; };
+		F7D1B39839DC7737D438420A /* dubai_united_arab_emirates.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = DAC093AF0B87650E6CD41290 /* dubai_united_arab_emirates.mbtiles */; };
+		F88E749A2CDC9B5F8354F3DF /* kinshasa_democratic_republic_of_the_congo.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = DD0866DCC6CA2E79AEF27CAD /* kinshasa_democratic_republic_of_the_congo.mbtiles */; };
+		FBFF5F650AE9918A7791409F /* sao_paulo_brazil.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 7A62F07DE3221A065089A9CA /* sao_paulo_brazil.mbtiles */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		000CD06835BE81866AD16966 /* moscow_russia.geojson */ = {isa = PBXFileReference; path = moscow_russia.geojson; sourceTree = "<group>"; };
+		01BC28CF91C3735EBA7CFF8F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		01E0869E7758DF66DD91C933 /* bangkok_thailand.mbtiles */ = {isa = PBXFileReference; path = bangkok_thailand.mbtiles; sourceTree = "<group>"; };
+		04F5240BECAC851EA1A91299 /* manila_philippines.geojson */ = {isa = PBXFileReference; path = manila_philippines.geojson; sourceTree = "<group>"; };
+		05C6CA437E39F0539858537A /* dubai_united_arab_emirates.geojson */ = {isa = PBXFileReference; path = dubai_united_arab_emirates.geojson; sourceTree = "<group>"; };
+		09D64CEEFD1C95DF228CC978 /* paris_france.mbtiles */ = {isa = PBXFileReference; path = paris_france.mbtiles; sourceTree = "<group>"; };
+		0BCACD5445C37FEB9733A013 /* Shared.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Shared.framework; path = "../shared/build/xcode-frameworks/$$(CONFIGURATION)/$$(SDK_NAME)/Shared.framework"; sourceTree = "<group>"; };
+		0EC83E709B860646E6D74E8E /* london_england.mbtiles */ = {isa = PBXFileReference; path = london_england.mbtiles; sourceTree = "<group>"; };
+		1371E6F1EAC22011DA950686 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		1BBBED0B5881C170581B98AD /* sydney_australia.geojson */ = {isa = PBXFileReference; path = sydney_australia.geojson; sourceTree = "<group>"; };
+		1F48A77D7E39EA6C5A972976 /* nairobi_kenya.geojson */ = {isa = PBXFileReference; path = nairobi_kenya.geojson; sourceTree = "<group>"; };
+		2935FFDD0D39999B27FDD461 /* lagos_nigeria.geojson */ = {isa = PBXFileReference; path = lagos_nigeria.geojson; sourceTree = "<group>"; };
+		29AB54B84EF2F9778E29A90F /* mumbai_india.mbtiles */ = {isa = PBXFileReference; path = mumbai_india.mbtiles; sourceTree = "<group>"; };
+		29B0AD060AB7947BB6F1E567 /* san_francisco_usa.geojson */ = {isa = PBXFileReference; path = san_francisco_usa.geojson; sourceTree = "<group>"; };
+		37B946F708CD3C8B8F1D2CF0 /* rome_italy.mbtiles */ = {isa = PBXFileReference; path = rome_italy.mbtiles; sourceTree = "<group>"; };
+		38FAD55B99F21EA7191A2CB9 /* jakarta_indonesia.mbtiles */ = {isa = PBXFileReference; path = jakarta_indonesia.mbtiles; sourceTree = "<group>"; };
+		3965C7C92214E71DEBE9B71F /* madrid_spain.geojson */ = {isa = PBXFileReference; path = madrid_spain.geojson; sourceTree = "<group>"; };
+		3CEBDBD7B715092BF99AC5BC /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		45CA2169669FC7343A111220 /* berlin_germany.mbtiles */ = {isa = PBXFileReference; path = berlin_germany.mbtiles; sourceTree = "<group>"; };
+		4AA4B41105FC5B022BDBE849 /* madrid_spain.mbtiles */ = {isa = PBXFileReference; path = madrid_spain.mbtiles; sourceTree = "<group>"; };
+		4AE5DB61367E41231F64BA77 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		4E6842C9C3BF9EE98DD9764E /* shanghai_china.mbtiles */ = {isa = PBXFileReference; path = shanghai_china.mbtiles; sourceTree = "<group>"; };
+		5477B4AB8E5078CEC85B09AF /* los_angeles_usa.geojson */ = {isa = PBXFileReference; path = los_angeles_usa.geojson; sourceTree = "<group>"; };
+		58CFAA3CE3442761A3089E5F /* bangkok_thailand.geojson */ = {isa = PBXFileReference; path = bangkok_thailand.geojson; sourceTree = "<group>"; };
+		5E1B4408816F81E3C7408203 /* tokyo_japan.geojson */ = {isa = PBXFileReference; path = tokyo_japan.geojson; sourceTree = "<group>"; };
+		61ABBB017DF1214E1BE787C7 /* melbourne_australia.geojson */ = {isa = PBXFileReference; path = melbourne_australia.geojson; sourceTree = "<group>"; };
+		6572964A31B5932135E34DAB /* nairobi_kenya.mbtiles */ = {isa = PBXFileReference; path = nairobi_kenya.mbtiles; sourceTree = "<group>"; };
+		6725B34E2FC2F4CF7741AD8E /* vancouver_canada.geojson */ = {isa = PBXFileReference; path = vancouver_canada.geojson; sourceTree = "<group>"; };
+		67BAB76BC242235A68B8DB62 /* toronto_canada.geojson */ = {isa = PBXFileReference; path = toronto_canada.geojson; sourceTree = "<group>"; };
+		68F4A1F056D74A22861935A8 /* moscow_russia.mbtiles */ = {isa = PBXFileReference; path = moscow_russia.mbtiles; sourceTree = "<group>"; };
+		6EA14484305026EAFB414045 /* johannesburg_south_africa.geojson */ = {isa = PBXFileReference; path = johannesburg_south_africa.geojson; sourceTree = "<group>"; };
+		702D5A27085E9A60729D4149 /* berlin_germany.geojson */ = {isa = PBXFileReference; path = berlin_germany.geojson; sourceTree = "<group>"; };
+		706B5595923310DBD41012DF /* bogota_colombia.mbtiles */ = {isa = PBXFileReference; path = bogota_colombia.mbtiles; sourceTree = "<group>"; };
+		718FB006482B8225E210AA70 /* shanghai_china.geojson */ = {isa = PBXFileReference; path = shanghai_china.geojson; sourceTree = "<group>"; };
+		72BFF9687DD60E7A8882F998 /* istanbul_turkey.mbtiles */ = {isa = PBXFileReference; path = istanbul_turkey.mbtiles; sourceTree = "<group>"; };
+		73DBFFC2162CA6F627990BEF /* melbourne_australia.mbtiles */ = {isa = PBXFileReference; path = melbourne_australia.mbtiles; sourceTree = "<group>"; };
+		78CBFEE6BE7A69C7DCD3EDA9 /* johannesburg_south_africa.mbtiles */ = {isa = PBXFileReference; path = johannesburg_south_africa.mbtiles; sourceTree = "<group>"; };
+		7A62F07DE3221A065089A9CA /* sao_paulo_brazil.mbtiles */ = {isa = PBXFileReference; path = sao_paulo_brazil.mbtiles; sourceTree = "<group>"; };
+		7BABFCF4CF10CEFDD0D41420 /* mexico_city_mexico.mbtiles */ = {isa = PBXFileReference; path = mexico_city_mexico.mbtiles; sourceTree = "<group>"; };
+		7C8F2F3B056AD26D80120808 /* london_england.geojson */ = {isa = PBXFileReference; path = london_england.geojson; sourceTree = "<group>"; };
+		7E9BC210EF03BF2EBDC8A86E /* mumbai_india.geojson */ = {isa = PBXFileReference; path = mumbai_india.geojson; sourceTree = "<group>"; };
+		7EBB74C6D7BDFAAE5BCE33E3 /* vancouver_canada.mbtiles */ = {isa = PBXFileReference; path = vancouver_canada.mbtiles; sourceTree = "<group>"; };
+		7ED61228B47C8A0C812344E8 /* santiago_chile.geojson */ = {isa = PBXFileReference; path = santiago_chile.geojson; sourceTree = "<group>"; };
+		8042DA7BF2444691252FF721 /* seoul_south_korea.mbtiles */ = {isa = PBXFileReference; path = seoul_south_korea.mbtiles; sourceTree = "<group>"; };
+		8089D66A419AA4428232CC1F /* new_york_usa.geojson */ = {isa = PBXFileReference; path = new_york_usa.geojson; sourceTree = "<group>"; };
+		81076CCA21243E8E698E96C5 /* delhi_india.geojson */ = {isa = PBXFileReference; path = delhi_india.geojson; sourceTree = "<group>"; };
+		86038AE1032E284E79B32AD6 /* iosApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = iosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8C2661BBD38DACCD12314CBB /* lima_peru.geojson */ = {isa = PBXFileReference; path = lima_peru.geojson; sourceTree = "<group>"; };
+		8C287A36F75FDD6D2F41F6B7 /* cairo_egypt.geojson */ = {isa = PBXFileReference; path = cairo_egypt.geojson; sourceTree = "<group>"; };
+		8CDCE5D780F7A344A02F2608 /* beijing_china.mbtiles */ = {isa = PBXFileReference; path = beijing_china.mbtiles; sourceTree = "<group>"; };
+		9318102BC6A8226D2C351287 /* buenos_aires_argentina.mbtiles */ = {isa = PBXFileReference; path = buenos_aires_argentina.mbtiles; sourceTree = "<group>"; };
+		93B13B0F2E713504EE592B3B /* karachi_pakistan.geojson */ = {isa = PBXFileReference; path = karachi_pakistan.geojson; sourceTree = "<group>"; };
+		956BA91B3837C82888BC8D31 /* paris_france.geojson */ = {isa = PBXFileReference; path = paris_france.geojson; sourceTree = "<group>"; };
+		9861880F2AB70FB0CF525A2A /* delhi_india.mbtiles */ = {isa = PBXFileReference; path = delhi_india.mbtiles; sourceTree = "<group>"; };
+		A4E1C78EA7354E8E81534AC5 /* bangalore_india.geojson */ = {isa = PBXFileReference; path = bangalore_india.geojson; sourceTree = "<group>"; };
+		A947D2A804C6B612C352CF04 /* jakarta_indonesia.geojson */ = {isa = PBXFileReference; path = jakarta_indonesia.geojson; sourceTree = "<group>"; };
+		A95ED409502C6B93B6966901 /* tokyo_japan.mbtiles */ = {isa = PBXFileReference; path = tokyo_japan.mbtiles; sourceTree = "<group>"; };
+		AA243747A91EADBAD7002CD1 /* manila_philippines.mbtiles */ = {isa = PBXFileReference; path = manila_philippines.mbtiles; sourceTree = "<group>"; };
+		ACBC9F759DC591EC215FEC35 /* istanbul_turkey.geojson */ = {isa = PBXFileReference; path = istanbul_turkey.geojson; sourceTree = "<group>"; };
+		AE5BA8A3AE8ED7E545945C4C /* lima_peru.mbtiles */ = {isa = PBXFileReference; path = lima_peru.mbtiles; sourceTree = "<group>"; };
+		AEC4BA5023B57A7F57C56431 /* hong_kong_china.geojson */ = {isa = PBXFileReference; path = hong_kong_china.geojson; sourceTree = "<group>"; };
+		B06FD6CC1004CECE43F2F385 /* bogota_colombia.geojson */ = {isa = PBXFileReference; path = bogota_colombia.geojson; sourceTree = "<group>"; };
+		B1BDFFAD5E14E6F3E12E40D3 /* santiago_chile.mbtiles */ = {isa = PBXFileReference; path = santiago_chile.mbtiles; sourceTree = "<group>"; };
+		B7D472004EF7B57430B53AC5 /* lagos_nigeria.mbtiles */ = {isa = PBXFileReference; path = lagos_nigeria.mbtiles; sourceTree = "<group>"; };
+		BA58C048AE2C1456C22E72F8 /* rome_italy.geojson */ = {isa = PBXFileReference; path = rome_italy.geojson; sourceTree = "<group>"; };
+		BED8717791B919FD1DB04127 /* beijing_china.geojson */ = {isa = PBXFileReference; path = beijing_china.geojson; sourceTree = "<group>"; };
+		C27441F76242B09AE68EC486 /* bangalore_india.mbtiles */ = {isa = PBXFileReference; path = bangalore_india.mbtiles; sourceTree = "<group>"; };
+		C7CBBE9CF5280E117555DD63 /* tehran_iran.geojson */ = {isa = PBXFileReference; path = tehran_iran.geojson; sourceTree = "<group>"; };
+		CE235842570CA4013344399E /* sao_paulo_brazil.geojson */ = {isa = PBXFileReference; path = sao_paulo_brazil.geojson; sourceTree = "<group>"; };
+		CE751F2A02E737175BD92467 /* mexico_city_mexico.geojson */ = {isa = PBXFileReference; path = mexico_city_mexico.geojson; sourceTree = "<group>"; };
+		D07C91A96B01ADA03B2CB0D8 /* buenos_aires_argentina.geojson */ = {isa = PBXFileReference; path = buenos_aires_argentina.geojson; sourceTree = "<group>"; };
+		D25C1D10CEA336E14CBF93F8 /* chicago_usa.mbtiles */ = {isa = PBXFileReference; path = chicago_usa.mbtiles; sourceTree = "<group>"; };
+		D30A848F9D7705EF64597B56 /* toronto_canada.mbtiles */ = {isa = PBXFileReference; path = toronto_canada.mbtiles; sourceTree = "<group>"; };
+		D6903D4CC9A3507033FF55AE /* san_francisco_usa.mbtiles */ = {isa = PBXFileReference; path = san_francisco_usa.mbtiles; sourceTree = "<group>"; };
+		DA7AD4EA6BE1D1799C3E05F0 /* chicago_usa.geojson */ = {isa = PBXFileReference; path = chicago_usa.geojson; sourceTree = "<group>"; };
+		DAC093AF0B87650E6CD41290 /* dubai_united_arab_emirates.mbtiles */ = {isa = PBXFileReference; path = dubai_united_arab_emirates.mbtiles; sourceTree = "<group>"; };
+		DCBB4F8E3E5598E56A6085B5 /* IOSPlatformEnabler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSPlatformEnabler.swift; sourceTree = "<group>"; };
+		DD0866DCC6CA2E79AEF27CAD /* kinshasa_democratic_republic_of_the_congo.mbtiles */ = {isa = PBXFileReference; path = kinshasa_democratic_republic_of_the_congo.mbtiles; sourceTree = "<group>"; };
+		E024FC952A1845AC065BEC3B /* tehran_iran.mbtiles */ = {isa = PBXFileReference; path = tehran_iran.mbtiles; sourceTree = "<group>"; };
+		E724840CCA9A5F387A8FEA68 /* kinshasa_democratic_republic_of_the_congo.geojson */ = {isa = PBXFileReference; path = kinshasa_democratic_republic_of_the_congo.geojson; sourceTree = "<group>"; };
+		E80A57F4E41230A116F32B34 /* hong_kong_china.mbtiles */ = {isa = PBXFileReference; path = hong_kong_china.mbtiles; sourceTree = "<group>"; };
+		E86D9CF5C13F27FCFC1B1953 /* new_york_usa.mbtiles */ = {isa = PBXFileReference; path = new_york_usa.mbtiles; sourceTree = "<group>"; };
+		EBB33561FBE2B28A396FFD0E /* karachi_pakistan.mbtiles */ = {isa = PBXFileReference; path = karachi_pakistan.mbtiles; sourceTree = "<group>"; };
+		ED711D6B3FA2BE1261BC25A9 /* cairo_egypt.mbtiles */ = {isa = PBXFileReference; path = cairo_egypt.mbtiles; sourceTree = "<group>"; };
+		EDF732998F247BF53D07CFCB /* seoul_south_korea.geojson */ = {isa = PBXFileReference; path = seoul_south_korea.geojson; sourceTree = "<group>"; };
+		F8EF667F3CCC345C2E50C4B2 /* los_angeles_usa.mbtiles */ = {isa = PBXFileReference; path = los_angeles_usa.mbtiles; sourceTree = "<group>"; };
+		FDEB6313B89EAD35BB4AF633 /* sydney_australia.mbtiles */ = {isa = PBXFileReference; path = sydney_australia.mbtiles; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		EF8A6E9BFD470986D9D5C9B5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4E77AFD5C2B00E927573D493 /* Shared.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0E75C98C79C2F775BEECF927 /* melbourne_australia */ = {
+			isa = PBXGroup;
+			children = (
+				61ABBB017DF1214E1BE787C7 /* melbourne_australia.geojson */,
+				73DBFFC2162CA6F627990BEF /* melbourne_australia.mbtiles */,
+			);
+			path = melbourne_australia;
+			sourceTree = "<group>";
+		};
+		0EB92457304C2D7AF6FF3DAD /* madrid_spain */ = {
+			isa = PBXGroup;
+			children = (
+				3965C7C92214E71DEBE9B71F /* madrid_spain.geojson */,
+				4AA4B41105FC5B022BDBE849 /* madrid_spain.mbtiles */,
+			);
+			path = madrid_spain;
+			sourceTree = "<group>";
+		};
+		146F4E0668506D949A9DF013 /* tokyo_japan */ = {
+			isa = PBXGroup;
+			children = (
+				5E1B4408816F81E3C7408203 /* tokyo_japan.geojson */,
+				A95ED409502C6B93B6966901 /* tokyo_japan.mbtiles */,
+			);
+			path = tokyo_japan;
+			sourceTree = "<group>";
+		};
+		1B1EA35635841BDD04882FC0 /* bogota_colombia */ = {
+			isa = PBXGroup;
+			children = (
+				B06FD6CC1004CECE43F2F385 /* bogota_colombia.geojson */,
+				706B5595923310DBD41012DF /* bogota_colombia.mbtiles */,
+			);
+			path = bogota_colombia;
+			sourceTree = "<group>";
+		};
+		1CA0A4DD9D541731057F662D /* hong_kong_china */ = {
+			isa = PBXGroup;
+			children = (
+				AEC4BA5023B57A7F57C56431 /* hong_kong_china.geojson */,
+				E80A57F4E41230A116F32B34 /* hong_kong_china.mbtiles */,
+			);
+			path = hong_kong_china;
+			sourceTree = "<group>";
+		};
+		1CCA38C3A6A236AF160A3EEE /* bangalore_india */ = {
+			isa = PBXGroup;
+			children = (
+				A4E1C78EA7354E8E81534AC5 /* bangalore_india.geojson */,
+				C27441F76242B09AE68EC486 /* bangalore_india.mbtiles */,
+			);
+			path = bangalore_india;
+			sourceTree = "<group>";
+		};
+		24C0DFE1778FDC9C22365836 /* Maps */ = {
+			isa = PBXGroup;
+			children = (
+				1CCA38C3A6A236AF160A3EEE /* bangalore_india */,
+				D2437154C69E510B266B16F7 /* bangkok_thailand */,
+				9C427B9B0895F2CA6424782A /* beijing_china */,
+				93CBAF4C81AB4E292F63C0E4 /* berlin_germany */,
+				1B1EA35635841BDD04882FC0 /* bogota_colombia */,
+				774B0A1B3F692D75040CE80F /* buenos_aires_argentina */,
+				A6F8E6AEC439883A8DD1EB3F /* cairo_egypt */,
+				265327D11CE51B81C2341C47 /* chicago_usa */,
+				B7C22661201C5A7F7EC05C6C /* delhi_india */,
+				5858A2788740CB26AE5495C6 /* dubai_united_arab_emirates */,
+				1CA0A4DD9D541731057F662D /* hong_kong_china */,
+				C6E6247C2421F9403A5DD6E2 /* istanbul_turkey */,
+				D3FA40ED527307305B3548BD /* jakarta_indonesia */,
+				A218B10751589A98C866F426 /* johannesburg_south_africa */,
+				68EC0811303857D1727C237C /* karachi_pakistan */,
+				4DD55CC452683BB8077DA26B /* kinshasa_democratic_republic_of_the_congo */,
+				CE2C97223562CB1703E9BFD0 /* lagos_nigeria */,
+				9FEB6F114FC9E365A14D5683 /* lima_peru */,
+				9AD491314A2CE326091CA299 /* london_england */,
+				C0783F03FE41A5D68F01B872 /* los_angeles_usa */,
+				0EB92457304C2D7AF6FF3DAD /* madrid_spain */,
+				EE9800581C163B27746D99F3 /* manila_philippines */,
+				0E75C98C79C2F775BEECF927 /* melbourne_australia */,
+				E46F3365EB63BE5D68C5407E /* mexico_city_mexico */,
+				C6AFB6C2DBEB7AEED1D1D9CB /* moscow_russia */,
+				593DF337F651CF6B74B8CE74 /* mumbai_india */,
+				E82717A76A6C4E531FD1E6BC /* nairobi_kenya */,
+				CB9704EDA9CD23B8DC4F2569 /* new_york_usa */,
+				D17229265F04AE7DDEAD98A5 /* paris_france */,
+				63F9BF4664D8F8127D5A47C2 /* rome_italy */,
+				C741BFA0BA18663C46609D2C /* san_francisco_usa */,
+				56F6200BDE93C6DAAED10DD0 /* santiago_chile */,
+				B183F67EBC49B3E15A8F7D7B /* sao_paulo_brazil */,
+				FE4E4167BC0C75C9A5F5D048 /* seoul_south_korea */,
+				A9849139C7468837A02D09E4 /* shanghai_china */,
+				5CE6FCD82FFB1BF02F89F9C8 /* sydney_australia */,
+				C4F359B24865283F0DB50E32 /* tehran_iran */,
+				146F4E0668506D949A9DF013 /* tokyo_japan */,
+				59A335C11050ABB95ECABC9A /* toronto_canada */,
+				7AA2333F5E99E4B82E3BD448 /* vancouver_canada */,
+			);
+			path = Maps;
+			sourceTree = "<group>";
+		};
+		265327D11CE51B81C2341C47 /* chicago_usa */ = {
+			isa = PBXGroup;
+			children = (
+				DA7AD4EA6BE1D1799C3E05F0 /* chicago_usa.geojson */,
+				D25C1D10CEA336E14CBF93F8 /* chicago_usa.mbtiles */,
+			);
+			path = chicago_usa;
+			sourceTree = "<group>";
+		};
+		3666012298E772D226418813 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				0BCACD5445C37FEB9733A013 /* Shared.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		38B69C3F79CD97858CF7B609 = {
+			isa = PBXGroup;
+			children = (
+				63F737699A88D21B02D16842 /* worldwidewaves */,
+				3666012298E772D226418813 /* Frameworks */,
+				94C98B8B3A2BFC1966447269 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		4DD55CC452683BB8077DA26B /* kinshasa_democratic_republic_of_the_congo */ = {
+			isa = PBXGroup;
+			children = (
+				E724840CCA9A5F387A8FEA68 /* kinshasa_democratic_republic_of_the_congo.geojson */,
+				DD0866DCC6CA2E79AEF27CAD /* kinshasa_democratic_republic_of_the_congo.mbtiles */,
+			);
+			path = kinshasa_democratic_republic_of_the_congo;
+			sourceTree = "<group>";
+		};
+		56F6200BDE93C6DAAED10DD0 /* santiago_chile */ = {
+			isa = PBXGroup;
+			children = (
+				7ED61228B47C8A0C812344E8 /* santiago_chile.geojson */,
+				B1BDFFAD5E14E6F3E12E40D3 /* santiago_chile.mbtiles */,
+			);
+			path = santiago_chile;
+			sourceTree = "<group>";
+		};
+		5858A2788740CB26AE5495C6 /* dubai_united_arab_emirates */ = {
+			isa = PBXGroup;
+			children = (
+				05C6CA437E39F0539858537A /* dubai_united_arab_emirates.geojson */,
+				DAC093AF0B87650E6CD41290 /* dubai_united_arab_emirates.mbtiles */,
+			);
+			path = dubai_united_arab_emirates;
+			sourceTree = "<group>";
+		};
+		593DF337F651CF6B74B8CE74 /* mumbai_india */ = {
+			isa = PBXGroup;
+			children = (
+				7E9BC210EF03BF2EBDC8A86E /* mumbai_india.geojson */,
+				29AB54B84EF2F9778E29A90F /* mumbai_india.mbtiles */,
+			);
+			path = mumbai_india;
+			sourceTree = "<group>";
+		};
+		59A335C11050ABB95ECABC9A /* toronto_canada */ = {
+			isa = PBXGroup;
+			children = (
+				67BAB76BC242235A68B8DB62 /* toronto_canada.geojson */,
+				D30A848F9D7705EF64597B56 /* toronto_canada.mbtiles */,
+			);
+			path = toronto_canada;
+			sourceTree = "<group>";
+		};
+		5CE6FCD82FFB1BF02F89F9C8 /* sydney_australia */ = {
+			isa = PBXGroup;
+			children = (
+				1BBBED0B5881C170581B98AD /* sydney_australia.geojson */,
+				FDEB6313B89EAD35BB4AF633 /* sydney_australia.mbtiles */,
+			);
+			path = sydney_australia;
+			sourceTree = "<group>";
+		};
+		63F737699A88D21B02D16842 /* worldwidewaves */ = {
+			isa = PBXGroup;
+			children = (
+				4AE5DB61367E41231F64BA77 /* AppDelegate.swift */,
+				01BC28CF91C3735EBA7CFF8F /* Assets.xcassets */,
+				1371E6F1EAC22011DA950686 /* Info.plist */,
+				DCBB4F8E3E5598E56A6085B5 /* IOSPlatformEnabler.swift */,
+				3CEBDBD7B715092BF99AC5BC /* SceneDelegate.swift */,
+				24C0DFE1778FDC9C22365836 /* Maps */,
+			);
+			path = worldwidewaves;
+			sourceTree = "<group>";
+		};
+		63F9BF4664D8F8127D5A47C2 /* rome_italy */ = {
+			isa = PBXGroup;
+			children = (
+				BA58C048AE2C1456C22E72F8 /* rome_italy.geojson */,
+				37B946F708CD3C8B8F1D2CF0 /* rome_italy.mbtiles */,
+			);
+			path = rome_italy;
+			sourceTree = "<group>";
+		};
+		68EC0811303857D1727C237C /* karachi_pakistan */ = {
+			isa = PBXGroup;
+			children = (
+				93B13B0F2E713504EE592B3B /* karachi_pakistan.geojson */,
+				EBB33561FBE2B28A396FFD0E /* karachi_pakistan.mbtiles */,
+			);
+			path = karachi_pakistan;
+			sourceTree = "<group>";
+		};
+		774B0A1B3F692D75040CE80F /* buenos_aires_argentina */ = {
+			isa = PBXGroup;
+			children = (
+				D07C91A96B01ADA03B2CB0D8 /* buenos_aires_argentina.geojson */,
+				9318102BC6A8226D2C351287 /* buenos_aires_argentina.mbtiles */,
+			);
+			path = buenos_aires_argentina;
+			sourceTree = "<group>";
+		};
+		7AA2333F5E99E4B82E3BD448 /* vancouver_canada */ = {
+			isa = PBXGroup;
+			children = (
+				6725B34E2FC2F4CF7741AD8E /* vancouver_canada.geojson */,
+				7EBB74C6D7BDFAAE5BCE33E3 /* vancouver_canada.mbtiles */,
+			);
+			path = vancouver_canada;
+			sourceTree = "<group>";
+		};
+		93CBAF4C81AB4E292F63C0E4 /* berlin_germany */ = {
+			isa = PBXGroup;
+			children = (
+				702D5A27085E9A60729D4149 /* berlin_germany.geojson */,
+				45CA2169669FC7343A111220 /* berlin_germany.mbtiles */,
+			);
+			path = berlin_germany;
+			sourceTree = "<group>";
+		};
+		94C98B8B3A2BFC1966447269 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				86038AE1032E284E79B32AD6 /* iosApp.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9AD491314A2CE326091CA299 /* london_england */ = {
+			isa = PBXGroup;
+			children = (
+				7C8F2F3B056AD26D80120808 /* london_england.geojson */,
+				0EC83E709B860646E6D74E8E /* london_england.mbtiles */,
+			);
+			path = london_england;
+			sourceTree = "<group>";
+		};
+		9C427B9B0895F2CA6424782A /* beijing_china */ = {
+			isa = PBXGroup;
+			children = (
+				BED8717791B919FD1DB04127 /* beijing_china.geojson */,
+				8CDCE5D780F7A344A02F2608 /* beijing_china.mbtiles */,
+			);
+			path = beijing_china;
+			sourceTree = "<group>";
+		};
+		9FEB6F114FC9E365A14D5683 /* lima_peru */ = {
+			isa = PBXGroup;
+			children = (
+				8C2661BBD38DACCD12314CBB /* lima_peru.geojson */,
+				AE5BA8A3AE8ED7E545945C4C /* lima_peru.mbtiles */,
+			);
+			path = lima_peru;
+			sourceTree = "<group>";
+		};
+		A218B10751589A98C866F426 /* johannesburg_south_africa */ = {
+			isa = PBXGroup;
+			children = (
+				6EA14484305026EAFB414045 /* johannesburg_south_africa.geojson */,
+				78CBFEE6BE7A69C7DCD3EDA9 /* johannesburg_south_africa.mbtiles */,
+			);
+			path = johannesburg_south_africa;
+			sourceTree = "<group>";
+		};
+		A6F8E6AEC439883A8DD1EB3F /* cairo_egypt */ = {
+			isa = PBXGroup;
+			children = (
+				8C287A36F75FDD6D2F41F6B7 /* cairo_egypt.geojson */,
+				ED711D6B3FA2BE1261BC25A9 /* cairo_egypt.mbtiles */,
+			);
+			path = cairo_egypt;
+			sourceTree = "<group>";
+		};
+		A9849139C7468837A02D09E4 /* shanghai_china */ = {
+			isa = PBXGroup;
+			children = (
+				718FB006482B8225E210AA70 /* shanghai_china.geojson */,
+				4E6842C9C3BF9EE98DD9764E /* shanghai_china.mbtiles */,
+			);
+			path = shanghai_china;
+			sourceTree = "<group>";
+		};
+		B183F67EBC49B3E15A8F7D7B /* sao_paulo_brazil */ = {
+			isa = PBXGroup;
+			children = (
+				CE235842570CA4013344399E /* sao_paulo_brazil.geojson */,
+				7A62F07DE3221A065089A9CA /* sao_paulo_brazil.mbtiles */,
+			);
+			path = sao_paulo_brazil;
+			sourceTree = "<group>";
+		};
+		B7C22661201C5A7F7EC05C6C /* delhi_india */ = {
+			isa = PBXGroup;
+			children = (
+				81076CCA21243E8E698E96C5 /* delhi_india.geojson */,
+				9861880F2AB70FB0CF525A2A /* delhi_india.mbtiles */,
+			);
+			path = delhi_india;
+			sourceTree = "<group>";
+		};
+		C0783F03FE41A5D68F01B872 /* los_angeles_usa */ = {
+			isa = PBXGroup;
+			children = (
+				5477B4AB8E5078CEC85B09AF /* los_angeles_usa.geojson */,
+				F8EF667F3CCC345C2E50C4B2 /* los_angeles_usa.mbtiles */,
+			);
+			path = los_angeles_usa;
+			sourceTree = "<group>";
+		};
+		C4F359B24865283F0DB50E32 /* tehran_iran */ = {
+			isa = PBXGroup;
+			children = (
+				C7CBBE9CF5280E117555DD63 /* tehran_iran.geojson */,
+				E024FC952A1845AC065BEC3B /* tehran_iran.mbtiles */,
+			);
+			path = tehran_iran;
+			sourceTree = "<group>";
+		};
+		C6AFB6C2DBEB7AEED1D1D9CB /* moscow_russia */ = {
+			isa = PBXGroup;
+			children = (
+				000CD06835BE81866AD16966 /* moscow_russia.geojson */,
+				68F4A1F056D74A22861935A8 /* moscow_russia.mbtiles */,
+			);
+			path = moscow_russia;
+			sourceTree = "<group>";
+		};
+		C6E6247C2421F9403A5DD6E2 /* istanbul_turkey */ = {
+			isa = PBXGroup;
+			children = (
+				ACBC9F759DC591EC215FEC35 /* istanbul_turkey.geojson */,
+				72BFF9687DD60E7A8882F998 /* istanbul_turkey.mbtiles */,
+			);
+			path = istanbul_turkey;
+			sourceTree = "<group>";
+		};
+		C741BFA0BA18663C46609D2C /* san_francisco_usa */ = {
+			isa = PBXGroup;
+			children = (
+				29B0AD060AB7947BB6F1E567 /* san_francisco_usa.geojson */,
+				D6903D4CC9A3507033FF55AE /* san_francisco_usa.mbtiles */,
+			);
+			path = san_francisco_usa;
+			sourceTree = "<group>";
+		};
+		CB9704EDA9CD23B8DC4F2569 /* new_york_usa */ = {
+			isa = PBXGroup;
+			children = (
+				8089D66A419AA4428232CC1F /* new_york_usa.geojson */,
+				E86D9CF5C13F27FCFC1B1953 /* new_york_usa.mbtiles */,
+			);
+			path = new_york_usa;
+			sourceTree = "<group>";
+		};
+		CE2C97223562CB1703E9BFD0 /* lagos_nigeria */ = {
+			isa = PBXGroup;
+			children = (
+				2935FFDD0D39999B27FDD461 /* lagos_nigeria.geojson */,
+				B7D472004EF7B57430B53AC5 /* lagos_nigeria.mbtiles */,
+			);
+			path = lagos_nigeria;
+			sourceTree = "<group>";
+		};
+		D17229265F04AE7DDEAD98A5 /* paris_france */ = {
+			isa = PBXGroup;
+			children = (
+				956BA91B3837C82888BC8D31 /* paris_france.geojson */,
+				09D64CEEFD1C95DF228CC978 /* paris_france.mbtiles */,
+			);
+			path = paris_france;
+			sourceTree = "<group>";
+		};
+		D2437154C69E510B266B16F7 /* bangkok_thailand */ = {
+			isa = PBXGroup;
+			children = (
+				58CFAA3CE3442761A3089E5F /* bangkok_thailand.geojson */,
+				01E0869E7758DF66DD91C933 /* bangkok_thailand.mbtiles */,
+			);
+			path = bangkok_thailand;
+			sourceTree = "<group>";
+		};
+		D3FA40ED527307305B3548BD /* jakarta_indonesia */ = {
+			isa = PBXGroup;
+			children = (
+				A947D2A804C6B612C352CF04 /* jakarta_indonesia.geojson */,
+				38FAD55B99F21EA7191A2CB9 /* jakarta_indonesia.mbtiles */,
+			);
+			path = jakarta_indonesia;
+			sourceTree = "<group>";
+		};
+		E46F3365EB63BE5D68C5407E /* mexico_city_mexico */ = {
+			isa = PBXGroup;
+			children = (
+				CE751F2A02E737175BD92467 /* mexico_city_mexico.geojson */,
+				7BABFCF4CF10CEFDD0D41420 /* mexico_city_mexico.mbtiles */,
+			);
+			path = mexico_city_mexico;
+			sourceTree = "<group>";
+		};
+		E82717A76A6C4E531FD1E6BC /* nairobi_kenya */ = {
+			isa = PBXGroup;
+			children = (
+				1F48A77D7E39EA6C5A972976 /* nairobi_kenya.geojson */,
+				6572964A31B5932135E34DAB /* nairobi_kenya.mbtiles */,
+			);
+			path = nairobi_kenya;
+			sourceTree = "<group>";
+		};
+		EE9800581C163B27746D99F3 /* manila_philippines */ = {
+			isa = PBXGroup;
+			children = (
+				04F5240BECAC851EA1A91299 /* manila_philippines.geojson */,
+				AA243747A91EADBAD7002CD1 /* manila_philippines.mbtiles */,
+			);
+			path = manila_philippines;
+			sourceTree = "<group>";
+		};
+		FE4E4167BC0C75C9A5F5D048 /* seoul_south_korea */ = {
+			isa = PBXGroup;
+			children = (
+				EDF732998F247BF53D07CFCB /* seoul_south_korea.geojson */,
+				8042DA7BF2444691252FF721 /* seoul_south_korea.mbtiles */,
+			);
+			path = seoul_south_korea;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		78B53CC79860CBFC2F5543C6 /* iosApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 29DCA9F0B3A40325067EB163 /* Build configuration list for PBXNativeTarget "iosApp" */;
+			buildPhases = (
+				297B59D9CE634556D6007C40 /* Sources */,
+				1623B02D10928C8101C1F806 /* Resources */,
+				EF8A6E9BFD470986D9D5C9B5 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = iosApp;
+			packageProductDependencies = (
+			);
+			productName = iosApp;
+			productReference = 86038AE1032E284E79B32AD6 /* iosApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		242FB5348943441C388468CE /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1540;
+				TargetAttributes = {
+					78B53CC79860CBFC2F5543C6 = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = FF7CA1CA754D017066F1822F /* Build configuration list for PBXProject "iosApp" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 38B69C3F79CD97858CF7B609;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				78B53CC79860CBFC2F5543C6 /* iosApp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1623B02D10928C8101C1F806 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1A256A4D69BA2C997078C31D /* Assets.xcassets in Resources */,
+				4111524551AF743484F28BAB /* bangalore_india.geojson in Resources */,
+				49D1248AB28627E1F884C71D /* bangalore_india.mbtiles in Resources */,
+				4BDCD41054971FFC5FD523D2 /* bangkok_thailand.geojson in Resources */,
+				6EC68EB10575894CBAFE06CA /* bangkok_thailand.mbtiles in Resources */,
+				93CD12E4342C8F31289A165D /* beijing_china.geojson in Resources */,
+				ECB1797775D80F55C4A819AB /* beijing_china.mbtiles in Resources */,
+				4A1B8484EA21FEA884B0A13E /* berlin_germany.geojson in Resources */,
+				04A1A0232AA2EE265342E13A /* berlin_germany.mbtiles in Resources */,
+				7A6160EE417BF12076415D8B /* bogota_colombia.geojson in Resources */,
+				977FF5BB493D1B27E09F7B28 /* bogota_colombia.mbtiles in Resources */,
+				238CD5B68CD2235B03E9ED9D /* buenos_aires_argentina.geojson in Resources */,
+				3B8E79DF806FE54AEEF0E12B /* buenos_aires_argentina.mbtiles in Resources */,
+				1432FF20CA82AD8D8B28B5A3 /* cairo_egypt.geojson in Resources */,
+				39F5F820CD4BDB8C91DDDF0D /* cairo_egypt.mbtiles in Resources */,
+				B2D48DD554B28C5E4556DE7C /* chicago_usa.geojson in Resources */,
+				8B3BFF7049381515198E5A76 /* chicago_usa.mbtiles in Resources */,
+				F1ECBF29F22C9534394F6FD4 /* delhi_india.geojson in Resources */,
+				97A83B59EFC8FEDCCD06F4C3 /* delhi_india.mbtiles in Resources */,
+				673E3CD7C953D4A3821F3980 /* dubai_united_arab_emirates.geojson in Resources */,
+				F7D1B39839DC7737D438420A /* dubai_united_arab_emirates.mbtiles in Resources */,
+				F5C69D3FE1322C05F7C0441A /* hong_kong_china.geojson in Resources */,
+				0C5DF02E9122036BAF629DC6 /* hong_kong_china.mbtiles in Resources */,
+				BC00A4F69E07F51AD60D18A7 /* istanbul_turkey.geojson in Resources */,
+				98AACF7FAF75A43F0169D97C /* istanbul_turkey.mbtiles in Resources */,
+				F754D9E5F4A9432B0C9C4E47 /* jakarta_indonesia.geojson in Resources */,
+				A69DB9311DA1F0289BC32413 /* jakarta_indonesia.mbtiles in Resources */,
+				BFC16193081DB1D0DB870CB2 /* johannesburg_south_africa.geojson in Resources */,
+				C88DDA312F6426898518DD6C /* johannesburg_south_africa.mbtiles in Resources */,
+				425619E908ACCFEA2CF0FF5E /* karachi_pakistan.geojson in Resources */,
+				AD60B0EE5A0B0156AE77E7BF /* karachi_pakistan.mbtiles in Resources */,
+				9BD4F216CDBE622120B6F13B /* kinshasa_democratic_republic_of_the_congo.geojson in Resources */,
+				F88E749A2CDC9B5F8354F3DF /* kinshasa_democratic_republic_of_the_congo.mbtiles in Resources */,
+				2D7DDEE7D9A877185B37D6EE /* lagos_nigeria.geojson in Resources */,
+				EEE6396747EED112E3CAE15A /* lagos_nigeria.mbtiles in Resources */,
+				14580D47AF68230DADEEE135 /* lima_peru.geojson in Resources */,
+				6A003C3C5FF9676A11AE88C6 /* lima_peru.mbtiles in Resources */,
+				30E0DCDD91BC43B370ADACE4 /* london_england.geojson in Resources */,
+				D3571C79804FA61EBF96452C /* london_england.mbtiles in Resources */,
+				5C99127A62B47BDDB756E0CC /* los_angeles_usa.geojson in Resources */,
+				B2F62A53166DD705DF365123 /* los_angeles_usa.mbtiles in Resources */,
+				7C70F6FD4DCDAF8134899D3A /* madrid_spain.geojson in Resources */,
+				8808267C0608B2BE34FE1706 /* madrid_spain.mbtiles in Resources */,
+				E97A4C8375B5619AD93AD17F /* manila_philippines.geojson in Resources */,
+				51B1B9599D5E57CA62788364 /* manila_philippines.mbtiles in Resources */,
+				9C16B28F5A53F8B7A177E9D1 /* melbourne_australia.geojson in Resources */,
+				7E5FF6F825C430E3A1EA6F7B /* melbourne_australia.mbtiles in Resources */,
+				55FB27B57B63372560B9AA43 /* mexico_city_mexico.geojson in Resources */,
+				628A4C360732C8C165D0B666 /* mexico_city_mexico.mbtiles in Resources */,
+				1E86D15BE6B80C3EEA566357 /* moscow_russia.geojson in Resources */,
+				304DB0A0B7E30D74A7F598BF /* moscow_russia.mbtiles in Resources */,
+				96437A2A2D1DE1EB1C7C7DC2 /* mumbai_india.geojson in Resources */,
+				2C0B57FEFD820D5922A593C5 /* mumbai_india.mbtiles in Resources */,
+				9364061D79FB3B0CCC52BE55 /* nairobi_kenya.geojson in Resources */,
+				BFEE0D312A278C11C29E5726 /* nairobi_kenya.mbtiles in Resources */,
+				3FDB1643C1DF6514C3FA40DB /* new_york_usa.geojson in Resources */,
+				B303CB66140C8B73B20EEDDE /* new_york_usa.mbtiles in Resources */,
+				925DE9602948E7BE0E5D4EE4 /* paris_france.geojson in Resources */,
+				70EBF5D3CD0951E9BB6319DD /* paris_france.mbtiles in Resources */,
+				8DFC8A002750C06FCCB73CAE /* rome_italy.geojson in Resources */,
+				CC34B2025A6DC939439F0898 /* rome_italy.mbtiles in Resources */,
+				981E87148F6E48894EC0D71F /* san_francisco_usa.geojson in Resources */,
+				13EE0949E70105EB98D0B57B /* san_francisco_usa.mbtiles in Resources */,
+				423BF1ED1364BE8CA24D1A36 /* santiago_chile.geojson in Resources */,
+				7D049B235E61BE2976CC322C /* santiago_chile.mbtiles in Resources */,
+				00D7590070623DDAD7C15436 /* sao_paulo_brazil.geojson in Resources */,
+				FBFF5F650AE9918A7791409F /* sao_paulo_brazil.mbtiles in Resources */,
+				3B58D2AA95DFE1CA1102E41F /* seoul_south_korea.geojson in Resources */,
+				8B6B7C64C80B581942BB5E21 /* seoul_south_korea.mbtiles in Resources */,
+				A03D6A38B47B38D5EBA67356 /* shanghai_china.geojson in Resources */,
+				F3CA182BD35602418BAD8C1F /* shanghai_china.mbtiles in Resources */,
+				6B6A3597DA719CC4219046E5 /* sydney_australia.geojson in Resources */,
+				5CF93911A331785B87DA40E7 /* sydney_australia.mbtiles in Resources */,
+				6888348E11B4ACE4C623B9E1 /* tehran_iran.geojson in Resources */,
+				19F6347B33F0043FFAA34876 /* tehran_iran.mbtiles in Resources */,
+				A0BD111720B7406B624F688E /* tokyo_japan.geojson in Resources */,
+				7F560F1233F046444672393C /* tokyo_japan.mbtiles in Resources */,
+				03F1F03ED96B15E7D8292CC2 /* toronto_canada.geojson in Resources */,
+				EA81A0ACA2818483DF0C7BA6 /* toronto_canada.mbtiles in Resources */,
+				BEEC9835710C44F2F71846AC /* vancouver_canada.geojson in Resources */,
+				D1D5B4F2EE5DCD001F0D7670 /* vancouver_canada.mbtiles in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		297B59D9CE634556D6007C40 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7DFA81B06437217B2DB09414 /* AppDelegate.swift in Sources */,
+				08FE2EF2DAED829688EE5665 /* IOSPlatformEnabler.swift in Sources */,
+				F626EB9F6921A7AD254A28CF /* SceneDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		11814011E7D6EC822BFBC66D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		6C824A6EB4BAD43AE2A4BB29 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		9221A1FDC06803E8A2FC6E61 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"../shared/build/xcode-frameworks/$$(CONFIGURATION)/$$(SDK_NAME)",
+					"\"../shared/build/xcode-frameworks/$$(CONFIGURATION)/$$(SDK_NAME)\"",
+				);
+				INFOPLIST_FILE = worldwidewaves/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"-lc++",
+					"-framework",
+					Shared,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.worldwidewaves.iosApp;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		AF835BFF1220CA5AB5B867E4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"../shared/build/xcode-frameworks/$$(CONFIGURATION)/$$(SDK_NAME)",
+					"\"../shared/build/xcode-frameworks/$$(CONFIGURATION)/$$(SDK_NAME)\"",
+				);
+				INFOPLIST_FILE = worldwidewaves/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"-lc++",
+					"-framework",
+					Shared,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.worldwidewaves.iosApp;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		29DCA9F0B3A40325067EB163 /* Build configuration list for PBXNativeTarget "iosApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9221A1FDC06803E8A2FC6E61 /* Debug */,
+				AF835BFF1220CA5AB5B867E4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		FF7CA1CA754D017066F1822F /* Build configuration list for PBXProject "iosApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6C824A6EB4BAD43AE2A4BB29 /* Debug */,
+				11814011E7D6EC822BFBC66D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 242FB5348943441C388468CE /* Project object */;
+}
