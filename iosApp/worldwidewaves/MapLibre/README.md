@@ -4,12 +4,56 @@ This directory contains the iOS MapLibre integration for WorldWideWaves.
 
 ## Architecture
 
-The iOS map implementation uses a **pure SwiftUI + Kotlin business logic** approach:
+The iOS map implementation uses a **pure SwiftUI + Kotlin business logic** approach (per CLAUDE.md to avoid Compose/iOS crashes):
 
-- **MapLibreViewWrapper.swift**: Swift wrapper around MapLibre Native SDK (`MLNMapView`)
-- **EventMapView.swift**: SwiftUI `UIViewRepresentable` for displaying maps
-- **IOSEventMap.kt**: Kotlin business logic for event maps (ODR, position, wave polygons)
-- **IOSMapLibreAdapter.kt**: Placeholder adapter (scaffolded but uses Swift wrapper via app layer)
+- **MapLibreViewWrapper.swift**: Swift wrapper around MapLibre Native SDK (`MLNMapView`) - @objc compatible
+- **EventMapView.swift**: SwiftUI `UIViewRepresentable` for displaying interactive maps
+- **MapLibreWrapperProtocol.h**: Objective-C protocol defining the wrapper interface
+- **IOSEventMap.kt**: Kotlin status/fallback UI with download management (shows cards, not interactive map)
+- **IOSMapLibreAdapter.kt**: Scaffolded adapter (for future cinterop integration if needed)
+
+## Two-Layer Architecture
+
+### Layer 1: Swift UI (Interactive Map Display)
+**For Production Use** - Use this in your iOS app:
+
+```swift
+import SwiftUI
+import Shared
+
+struct EventScreen: View {
+    let event: IWWWEvent
+    @State private var mapWrapper: MapLibreViewWrapper?
+
+    var body: some View {
+        EventMapView(
+            styleURL: getStyleURL(for: event),
+            initialLatitude: event.map.center.lat,
+            initialLongitude: event.map.center.lng,
+            initialZoom: 12.0,
+            wrapper: $mapWrapper
+        )
+        .onAppear {
+            // Initialize Kotlin business logic
+            // Generate wave polygons via Kotlin
+            // Call mapWrapper?.addWavePolygons(...) to display them
+        }
+    }
+}
+```
+
+### Layer 2: Kotlin Status UI (Fallback/Debug)
+**IOSEventMap** provides download management and status display but does NOT render an interactive map. It shows:
+- Download progress indicator
+- ODR status and errors
+- GPS coordinates (text)
+- Wave polygon count
+- Download/retry/cancel buttons
+
+This layer is useful for:
+- Testing download logic without full map
+- Status monitoring during development
+- Fallback UI if map fails to load
 
 ## Why Not Kotlin/Native Cinterop?
 
