@@ -26,6 +26,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import platform.AVFAudio.AVAudioEngine
+import platform.AVFAudio.AVAudioMixerNode
 import platform.AVFAudio.AVAudioPlayerNode
 import platform.AVFAudio.AVAudioSession
 import platform.AVFAudio.AVAudioSessionCategoryOptionMixWithOthers
@@ -52,9 +53,11 @@ class IOSSoundPlayer :
     private val audioSession = AVAudioSession.sharedInstance()
     private val audioEngine = AVAudioEngine()
     private val playerNode = AVAudioPlayerNode()
+    private val mixerNode = AVAudioMixerNode()
     private val playbackMutex = Mutex()
     private var isEngineStarted = false
     private var isEngineSetupAttempted = false
+    private var originalMixerVolume: Float = 1.0f
 
     init {
         setupAudioSession()
@@ -84,9 +87,11 @@ class IOSSoundPlayer :
             val outputNode = audioEngine.outputNode
             val format = outputNode.outputFormatForBus(0u)
 
-            // Attach player node and connect to output
+            // Attach nodes: playerNode -> mixerNode -> outputNode
             audioEngine.attachNode(playerNode)
-            audioEngine.connect(playerNode, outputNode, format)
+            audioEngine.attachNode(mixerNode)
+            audioEngine.connect(playerNode, mixerNode, format)
+            audioEngine.connect(mixerNode, outputNode, format)
 
             audioEngine.prepare()
             audioEngine.startAndReturnError(null)
@@ -98,10 +103,18 @@ class IOSSoundPlayer :
         }
     }
 
-    override fun getCurrentVolume(): Float = audioSession.outputVolume()
+    override fun getCurrentVolume(): Float {
+        // Return system output volume (read-only on iOS)
+        return audioSession.outputVolume()
+    }
 
     override fun setVolume(level: Float) {
-        Log.v(TAG, "Volume control on iOS requires user interaction via MPVolumeView")
+        // iOS does not allow programmatic system volume changes
+        // We control mixer node volume instead
+        if (isEngineStarted) {
+            mixerNode.setVolume(level)
+            Log.v(TAG, "Set mixer volume to $level")
+        }
     }
 
     override suspend fun playTone(
@@ -116,12 +129,22 @@ class IOSSoundPlayer :
                 setupAudioEngine()
             }
 
+            if (!isEngineStarted) {
+                Log.w(TAG, "Audio engine not available (simulator mode), skipping playback")
+                delay(duration) // Maintain timing even without audio
+                return@withLock
+            }
+
             try {
-                if (!isEngineStarted) {
-                    Log.w(TAG, "Audio engine not available (simulator mode), skipping playback")
-                    delay(duration) // Maintain timing even without audio
-                    return@withLock
-                }
+                // Save current mixer volume
+                originalMixerVolume = mixerNode.volume
+
+                // Set mixer to maximum volume
+                mixerNode.setVolume(1.0f)
+                Log.v(TAG, "Set volume to max (1.0) from $originalMixerVolume")
+
+                // Wait for volume change to take effect
+                delay(50.milliseconds)
 
                 Log.v(TAG, "Playing tone: freq=$frequency, amp=$amplitude, dur=$duration, wave=$waveform")
 
@@ -144,6 +167,10 @@ class IOSSoundPlayer :
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error playing tone: freq=$frequency, dur=$duration", e)
+            } finally {
+                // Always restore original mixer volume
+                mixerNode.setVolume(originalMixerVolume)
+                Log.v(TAG, "Restored volume to $originalMixerVolume")
             }
         }
     }
