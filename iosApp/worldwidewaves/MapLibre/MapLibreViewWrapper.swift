@@ -21,7 +21,6 @@
 import Foundation
 import MapLibre
 import UIKit
-import Shared
 
 /// Swift bridging layer for MapLibre Native iOS SDK
 /// Provides Kotlin-friendly API for IOSMapLibreAdapter
@@ -39,36 +38,36 @@ import Shared
 
     @objc public override init() {
         super.init()
-        Log.shared.d(tag: Self.tag, message: "Initializing MapLibreViewWrapper", throwable: nil)
+        WWWLog.d(Self.tag, "Initializing MapLibreViewWrapper")
     }
 
     // MARK: - Map Setup
 
     @objc public func setMapView(_ mapView: MLNMapView) {
-        Log.shared.d(tag: Self.tag, message: "setMapView called, bounds: \(mapView.bounds)", throwable: nil)
+        WWWLog.d(Self.tag, "setMapView called, bounds: \(mapView.bounds)")
         self.mapView = mapView
         self.mapView?.delegate = self
 
         // Add tap gesture recognizer for map clicks
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleMapTap(_:)))
         self.mapView?.addGestureRecognizer(tapGesture)
-        Log.shared.d(tag: Self.tag, message: "Map view configured successfully", throwable: nil)
+        WWWLog.d(Self.tag, "Map view configured successfully")
     }
 
     @objc public func setStyle(styleURL: String, completion: @escaping () -> Void) {
-        Log.shared.d(tag: Self.tag, message: "setStyle called with URL: \(styleURL)", throwable: nil)
+        WWWLog.d(Self.tag, "setStyle called with URL: \(styleURL)")
         guard let mapView = mapView else {
-            Log.shared.e(tag: Self.tag, message: "Cannot set style - mapView is nil", throwable: nil)
+            WWWLog.e(Self.tag, "Cannot set style - mapView is nil")
             return
         }
 
         self.onStyleLoaded = completion
 
         if let url = URL(string: styleURL) {
-            Log.shared.d(tag: Self.tag, message: "Setting style URL on map view", throwable: nil)
+            WWWLog.d(Self.tag, "Setting style URL on map view")
             mapView.styleURL = url
         } else {
-            Log.shared.e(tag: Self.tag, message: "Invalid style URL: \(styleURL)", throwable: nil)
+            WWWLog.e(Self.tag, "Invalid style URL: \(styleURL)")
         }
     }
 
@@ -221,15 +220,15 @@ import Shared
     // MARK: - Wave Polygons
 
     @objc public func addWavePolygons(polygons: [[CLLocationCoordinate2D]], clearExisting: Bool) {
-        Log.shared.i(tag: Self.tag, message: "addWavePolygons: \(polygons.count) polygons, clearExisting: \(clearExisting)", throwable: nil)
+        WWWLog.i(Self.tag, "addWavePolygons: \(polygons.count) polygons, clearExisting: \(clearExisting)")
         guard let mapView = mapView, let style = mapView.style else {
-            Log.shared.e(tag: Self.tag, message: "Cannot add polygons - style not loaded (mapView: \(mapView != nil), style: \(mapView?.style != nil))", throwable: nil)
+            WWWLog.e(Self.tag, "Cannot add polygons - style not loaded (mapView: \(mapView != nil), style: \(mapView?.style != nil))")
             return
         }
 
         // Clear existing polygons if requested
         if clearExisting {
-            Log.shared.d(tag: Self.tag, message: "Clearing existing wave polygons", throwable: nil)
+            WWWLog.d(Self.tag, "Clearing existing wave polygons")
             clearWavePolygons()
         }
 
@@ -325,19 +324,19 @@ import Shared
 
 extension MapLibreViewWrapper: MLNMapViewDelegate {
     public func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
-        Log.shared.i(tag: Self.tag, message: "Style loaded successfully", throwable: nil)
+        WWWLog.i(Self.tag, "Style loaded successfully")
         onStyleLoaded?()
         onStyleLoaded = nil
     }
 
     public func mapView(_ mapView: MLNMapView, regionDidChangeAnimated animated: Bool) {
         // Camera idle event
-        Log.shared.v(tag: Self.tag, message: "Region changed, camera idle", throwable: nil)
+        WWWLog.v(Self.tag, "Region changed, camera idle")
         onCameraIdle?()
     }
 
     public func mapViewDidFailLoadingMap(_ mapView: MLNMapView, withError error: Error) {
-        Log.shared.e(tag: Self.tag, message: "Failed to load map", throwable: error as? KotlinThrowable)
+        WWWLog.e(Self.tag, "Failed to load map", throwable: error as? KotlinThrowable)
     }
 }
 

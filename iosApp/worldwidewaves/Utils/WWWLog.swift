@@ -25,37 +25,36 @@ import Shared
 /// Usage: WWWLog.d("MyTag", "My message")
 enum WWWLog {
     /// Verbose logging - disabled in release builds
-    static func v(_ tag: String, _ message: String, throwable: KotlinThrowable? = nil) {
+    static func v(_ tag: String, _ message: String) {
         do {
-            try Log.shared.v(tag: tag, message: message, throwable: throwable)
+            try Log.shared.v(tag: tag, message: message)
         } catch {
-            // Logging should never fail, but handle gracefully
             print("⚠️ [WWWLog] Failed to log verbose: \(error)")
         }
     }
 
     /// Debug logging - disabled in release builds
-    static func d(_ tag: String, _ message: String, throwable: KotlinThrowable? = nil) {
+    static func d(_ tag: String, _ message: String) {
         do {
-            try Log.shared.d(tag: tag, message: message, throwable: throwable)
+            try Log.shared.d(tag: tag, message: message)
         } catch {
             print("⚠️ [WWWLog] Failed to log debug: \(error)")
         }
     }
 
     /// Info logging - always enabled
-    static func i(_ tag: String, _ message: String, throwable: KotlinThrowable? = nil) {
+    static func i(_ tag: String, _ message: String) {
         do {
-            try Log.shared.i(tag: tag, message: message, throwable: throwable)
+            try Log.shared.i(tag: tag, message: message)
         } catch {
             print("⚠️ [WWWLog] Failed to log info: \(error)")
         }
     }
 
     /// Warning logging - always enabled
-    static func w(_ tag: String, _ message: String, throwable: KotlinThrowable? = nil) {
+    static func w(_ tag: String, _ message: String) {
         do {
-            try Log.shared.w(tag: tag, message: message, throwable: throwable)
+            try Log.shared.w(tag: tag, message: message)
         } catch {
             print("⚠️ [WWWLog] Failed to log warning: \(error)")
         }
