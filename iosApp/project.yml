@@ -1,19 +1,19 @@
-name: iosApp
+name: worldwidewaves
 fileFormat: 48
 options:
   bundleIdPrefix: com.worldwidewaves
   createIntermediateGroups: true
   developmentLanguage: en
   deploymentTarget:
-    iOS: "15.0"
-  xcodeVersion: "15.4"
+    iOS: "18.5"
+  xcodeVersion: "16.4"
   minimumXcodeGenVersion: "2.39.0"
 packages:
-  MapLibreNative:
+  MapLibre:
     url: https://github.com/maplibre/maplibre-native
     from: 6.7.1
 targets:
-  iosApp:
+  worldwidewaves:
     type: application
     platform: iOS
     sources:
@@ -185,25 +185,44 @@ targets:
         priority: 1.0
     settings:
       INFOPLIST_FILE: worldwidewaves/Info.plist
-      PRODUCT_BUNDLE_IDENTIFIER: com.worldwidewaves.iosApp
+      PRODUCT_BUNDLE_IDENTIFIER: com.worldwidewaves
       DEVELOPMENT_TEAM: ""
-      OTHER_LDFLAGS: [
-        "-lc++",
-        "-framework", "Shared"
-      ]
+      CODE_SIGN_STYLE: Automatic
+      MARKETING_VERSION: "1.0"
+      CURRENT_PROJECT_VERSION: 1
+      TARGETED_DEVICE_FAMILY: "1,2"
+      ENABLE_PREVIEWS: YES
+      GENERATE_INFOPLIST_FILE: YES
+      INFOPLIST_KEY_CADisableMinimumFrameDurationOnPhone: YES
+      INFOPLIST_KEY_CFBundleDisplayName: WorldWideWaves
+      INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+      INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+      INFOPLIST_KEY_UILaunchScreen_Generation: YES
+      SWIFT_EMIT_LOC_STRINGS: YES
+      SWIFT_VERSION: "5.0"
       FRAMEWORK_SEARCH_PATHS: [
-        "../shared/build/xcode-frameworks/$$(CONFIGURATION)/$$(SDK_NAME)"
+        "$$(SRCROOT)/../shared/build/xcode-frameworks/$$(CONFIGURATION)/$$(SDK_NAME)"
       ]
+      HEADER_SEARCH_PATHS: [
+        "$$(SRCROOT)/../shared/build/xcode-frameworks/$$(CONFIGURATION)/$$(SDK_NAME)"
+      ]
+      ON_DEMAND_RESOURCES_INITIAL_INSTALL_TAGS:
+        Debug: paris_france
+        Release: ""
+      EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE:
+        Debug: YES
+        Release: NO
     dependencies:
       - framework: ../shared/build/xcode-frameworks/$$(CONFIGURATION)/$$(SDK_NAME)/Shared.framework
-        embed: false
-      - package: MapLibreNative
+        embed: true
+        codeSign: true
+      - package: MapLibre
         product: MapLibre
 schemes:
-  iosApp:
+  worldwidewaves:
     build:
       targets:
-        iosApp: all
+        worldwidewaves: all
     run:
       config: Debug
     archive:
