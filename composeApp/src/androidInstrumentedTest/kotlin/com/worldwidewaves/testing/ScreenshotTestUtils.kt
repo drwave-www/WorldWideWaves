@@ -135,7 +135,7 @@ object ScreenshotTestUtils {
         errorContext: String,
         testName: String,
     ) {
-        val filename = "error_${testName}_${errorContext}_${System.currentTimeMillis()}"
+        val filename = "error_${testName}_${errorContext}_${testName.hashCode()}"
         captureScreenshot(composeTestRule, filename, "error_screenshots")
     }
 }
