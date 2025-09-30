@@ -33,8 +33,8 @@
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		C17B46632E899ED40097A3A5 /* Exceptions for "worldwidewaves" folder in "worldwidewaves" target */ = {
 				assetTagsByRelativePath = {
-				../maps/paris_france/src/main/assets/paris_france.geojson = (paris_france, );
-				../maps/paris_france/src/main/assets/paris_france.mbtiles = (paris_france, );
+				Maps/paris_france/paris_france.geojson = (paris_france, );
+				Maps/paris_france/paris_france.mbtiles = (paris_france, );
 
 			};
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;

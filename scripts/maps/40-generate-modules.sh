@@ -169,10 +169,66 @@ else
 fi
 
 # ========================================================================
-# iOS Xcode Project ODR Configuration (Reference maps/* in place)
+# iOS ODR Symbolic Links Setup
 # ========================================================================
 
-echo "Configuring iOS ODR to reference maps/* files in place..."
+echo "Setting up iOS ODR symbolic links to maps/* files..."
+
+# Function to create symbolic links for iOS ODR
+create_ios_odr_links() {
+    local ios_maps_dir="../../iosApp/worldwidewaves/Maps"
+
+    # Create Maps directory if it doesn't exist
+    mkdir -p "$ios_maps_dir"
+
+    echo "Creating symbolic links for ${#VALID_EVENTS[@]} events..."
+
+    for event in "${VALID_EVENTS[@]}"; do
+        local event_dir="$ios_maps_dir/$event"
+        local source_dir="../../maps/$event/src/main/assets"
+
+        # Create event directory if it doesn't exist
+        mkdir -p "$event_dir"
+
+        # Create symbolic links for geojson and mbtiles files
+        local geojson_link="$event_dir/$event.geojson"
+        local mbtiles_link="$event_dir/$event.mbtiles"
+        local geojson_source="../../../../maps/$event/src/main/assets/$event.geojson"
+        local mbtiles_source="../../../../maps/$event/src/main/assets/$event.mbtiles"
+
+        # Remove existing links if they exist
+        [ -L "$geojson_link" ] && rm "$geojson_link"
+        [ -L "$mbtiles_link" ] && rm "$mbtiles_link"
+
+        # Create symbolic links only if source files exist
+        if [ -f "$source_dir/$event.geojson" ]; then
+            ln -s "$geojson_source" "$geojson_link"
+            echo "Created symbolic link: $event.geojson"
+        else
+            echo "Warning: Source file not found for $event.geojson"
+        fi
+
+        if [ -f "$source_dir/$event.mbtiles" ]; then
+            ln -s "$mbtiles_source" "$mbtiles_link"
+            echo "Created symbolic link: $event.mbtiles"
+        else
+            echo "Warning: Source file not found for $event.mbtiles"
+        fi
+    done
+}
+
+# Create symbolic links
+if [ ${#VALID_EVENTS[@]} -gt 0 ]; then
+    create_ios_odr_links
+else
+    echo "Skipping iOS symbolic links: no valid events"
+fi
+
+# ========================================================================
+# iOS Xcode Project ODR Configuration
+# ========================================================================
+
+echo "Configuring iOS ODR in Xcode project..."
 
 # Path to Xcode project
 IOS_XCODE_PROJECT="../../iosApp/worldwidewaves.xcodeproj/project.pbxproj"
@@ -192,12 +248,12 @@ add_odr_tags_to_xcode() {
 
     echo "Adding ODR asset tags for ${#VALID_EVENTS[@]} events to reference source files..."
 
-    # Generate asset tags by relative path entries - reference source maps/* directly
+    # Generate asset tags by relative path entries - reference linked files in iOS project
     local asset_tags_entries=""
     for event in "${VALID_EVENTS[@]}"; do
-        # Reference files directly from maps/{event}/src/main/assets/
-        asset_tags_entries="${asset_tags_entries}				../maps/${event}/src/main/assets/${event}.geojson = (${event}, );\n"
-        asset_tags_entries="${asset_tags_entries}				../maps/${event}/src/main/assets/${event}.mbtiles = (${event}, );\n"
+        # Reference files via symbolic links in iOS project structure
+        asset_tags_entries="${asset_tags_entries}				Maps/${event}/${event}.geojson = (${event}, );\n"
+        asset_tags_entries="${asset_tags_entries}				Maps/${event}/${event}.mbtiles = (${event}, );\n"
     done
 
     # Generate known asset tags entries
