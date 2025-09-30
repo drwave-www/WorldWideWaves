@@ -19,9 +19,11 @@ package com.worldwidewaves.shared.domain.usecases
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
+import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import platform.Foundation.NSBundle
+import platform.Foundation.NSBundleResourceRequest
 
 /**
  * Minimal iOS shim: ODR is mounted ad-hoc by platform code; this class only
@@ -32,6 +34,7 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
 
     private val _mapStates = MutableStateFlow<Map<String, Boolean>>(emptyMap())
     override val mapStates: StateFlow<Map<String, Boolean>> = _mapStates
+    private val probeRequests = mutableSetOf<NSBundleResourceRequest>()
 
     override fun trackMaps(mapIds: Collection<String>) {
         if (mapIds.isEmpty()) return
@@ -53,12 +56,52 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
         // no-op — downloads/mounting are performed ad-hoc by platform code (NSBundleResourceRequest)
     }
 
+    // Keep strong refs until callbacks fire
+
+    @OptIn(ExperimentalForeignApi::class)
     override fun isMapDownloaded(eventId: String): Boolean {
-        // True only if resource is physically present in the app bundle
-        val sub = "Maps/$eventId"
-        val hasGeo = NSBundle.mainBundle.pathForResource(eventId, "geojson", sub) != null
-        val hasMbtiles = NSBundle.mainBundle.pathForResource(eventId, "mbtiles", sub) != null
-        return hasGeo || hasMbtiles
+        val b = NSBundle.mainBundle
+        val subs: Array<String?> = arrayOf("worldwidewaves/Maps/$eventId", "Maps/$eventId", null)
+        val visible = subs.any { sub ->
+            b.pathForResource(eventId, "geojson", sub) != null ||
+                    b.pathForResource(eventId, "mbtiles", sub) != null
+        }
+        if (visible) {
+            if (_mapStates.value[eventId] != true) {
+                val m = _mapStates.value.toMutableMap()
+                m[eventId] = true
+                _mapStates.value = m
+            }
+            return true
+        }
+
+        // Not visible → probe without downloading
+        conditionallyProbe(eventId)
+        return false
+    }
+
+    @OptIn(ExperimentalForeignApi::class)
+    private fun conditionallyProbe(tag: String) {
+        val req = NSBundleResourceRequest(setOf(tag))
+        probeRequests.add(req) // strong ref for lifetime of the async probe
+
+        req.conditionallyBeginAccessingResourcesWithCompletionHandler { available ->
+            // End access immediately; this was only a probe
+            if (available) try { req.endAccessingResources() } catch (_: Throwable) {}
+
+            val b = NSBundle.mainBundle
+            val subs: Array<String?> = arrayOf("worldwidewaves/Maps/$tag", "Maps/$tag", null)
+            val visible = subs.any { sub ->
+                b.pathForResource(tag, "geojson", sub) != null ||
+                        b.pathForResource(tag, "mbtiles", sub) != null
+            }
+
+            val m = _mapStates.value.toMutableMap()
+            m[tag] = available && visible
+            _mapStates.value = m
+
+            probeRequests.remove(req)
+        }
     }
 
     override fun getDownloadedMaps(): List<String> = tracked.filter { isMapDownloaded(it) }

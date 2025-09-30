@@ -22,11 +22,16 @@
 package com.worldwidewaves.shared.sound
 
 import com.worldwidewaves.shared.utils.Log
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.get
+import kotlinx.cinterop.set
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import platform.AVFAudio.AVAudioEngine
+import platform.AVFAudio.AVAudioFormat
 import platform.AVFAudio.AVAudioMixerNode
+import platform.AVFAudio.AVAudioPCMBuffer
 import platform.AVFAudio.AVAudioPlayerNode
 import platform.AVFAudio.AVAudioSession
 import platform.AVFAudio.AVAudioSessionCategoryOptionMixWithOthers
@@ -149,21 +154,59 @@ class IOSSoundPlayer :
                 Log.v(TAG, "Playing tone: freq=$frequency, amp=$amplitude, dur=$duration, wave=$waveform")
 
                 // Generate waveform samples using shared generator
+                val sampleRate = 44100
                 val samples =
                     WaveformGenerator.generateWaveform(
-                        sampleRate = 44100,
+                        sampleRate = sampleRate,
                         frequency = frequency,
                         amplitude = amplitude,
                         duration = duration,
                         waveform = waveform,
                     )
 
-                // For now, simulate audio playback with proper timing
-                // Full AVAudioPCMBuffer integration requires more complex CInterop setup
                 if (samples.isNotEmpty()) {
-                    playerNode.play()
-                    delay(duration + 50.milliseconds)
-                    Log.v(TAG, "iOS audio playback completed (${samples.size} samples)")
+                    // Create PCM buffer and schedule for playback
+                    val format =
+                        AVAudioFormat(
+                            standardFormatWithSampleRate = sampleRate.toDouble(),
+                            channels = 1u,
+                        )
+
+                    val frameCapacity = samples.size.toUInt()
+                    val buffer =
+                        AVAudioPCMBuffer(
+                            pCMFormat = format,
+                            frameCapacity = frameCapacity,
+                        )
+
+                    if (buffer != null) {
+                        buffer.frameLength = frameCapacity
+
+                        // Copy samples to buffer
+                        val floatChannelData = buffer.floatChannelData
+                        if (floatChannelData != null) {
+                            val channel0 = floatChannelData[0]
+                            if (channel0 != null) {
+                                samples.forEachIndexed { index, sample ->
+                                    channel0[index] = sample.toFloat()
+                                }
+
+                                // Schedule and play buffer
+                                playerNode.scheduleBuffer(buffer, null)
+                                playerNode.play()
+
+                                // Wait for playback to complete
+                                delay(duration + 50.milliseconds)
+                                Log.v(TAG, "iOS audio playback completed (${samples.size} samples)")
+                            } else {
+                                Log.w(TAG, "Failed to get channel 0 pointer")
+                            }
+                        } else {
+                            Log.w(TAG, "Failed to get channel data from buffer")
+                        }
+                    } else {
+                        Log.w(TAG, "Failed to create PCM buffer")
+                    }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error playing tone: freq=$frequency, dur=$duration", e)
