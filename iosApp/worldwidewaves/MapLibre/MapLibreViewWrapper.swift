@@ -77,9 +77,12 @@ import UIKit
 
     // MARK: - Camera Position
 
-    @objc public func getCameraCenter() -> (latitude: Double, longitude: Double)? {
-        guard let center = mapView?.centerCoordinate else { return nil }
-        return (center.latitude, center.longitude)
+    @objc public func getCameraCenterLatitude() -> Double {
+        return mapView?.centerCoordinate.latitude ?? 0.0
+    }
+
+    @objc public func getCameraCenterLongitude() -> Double {
+        return mapView?.centerCoordinate.longitude ?? 0.0
     }
 
     @objc public func getCameraZoom() -> Double {
@@ -95,21 +98,21 @@ import UIKit
 
     // MARK: - Camera Movement
 
-    @objc public func moveCamera(latitude: Double, longitude: Double, zoom: Double?) {
+    @objc public func moveCamera(latitude: Double, longitude: Double, zoom: NSNumber?) {
         guard let mapView = mapView else { return }
 
         let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
         mapView.setCenter(coordinate, animated: false)
 
         if let zoom = zoom {
-            mapView.zoomLevel = zoom
+            mapView.zoomLevel = zoom.doubleValue
         }
     }
 
     @objc public func animateCamera(
         latitude: Double,
         longitude: Double,
-        zoom: Double?,
+        zoom: NSNumber?,
         callback: MapCameraCallbackWrapper?
     ) {
         guard let mapView = mapView else {
@@ -120,7 +123,7 @@ import UIKit
         self.cameraAnimationCallback = callback
 
         let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-        let targetZoom = zoom ?? mapView.zoomLevel
+        let targetZoom = zoom?.doubleValue ?? mapView.zoomLevel
 
         UIView.animate(
             withDuration: 0.5,
