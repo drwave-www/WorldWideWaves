@@ -1,5 +1,4 @@
 language = Objective-C
-headers = MapLibreWrapperProtocol.h
-headerFilter = MapLibreWrapperProtocol.h
+headers = MapLibreWrapper.h
 
-compilerOpts = -I../../../iosApp/worldwidewaves/MapLibre
+compilerOpts.ios = -I/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/nativeInterop/cinterop

@@ -14,28 +14,33 @@ import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.utils.WWWLogger
+import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import platform.darwin.NSObject
 
 private const val TAG = "IOSMapLibreAdapter"
+
+// Default dimensions for iPhone (used when wrapper not available)
+private const val DEFAULT_WIDTH = 375.0
+private const val DEFAULT_HEIGHT = 812.0
 
 /**
  * iOS implementation of MapLibreAdapter using iOS MapLibre SDK via Swift wrapper.
  *
- * This adapter bridges Kotlin shared logic to Swift MapLibreViewWrapper which wraps
- * the native iOS MapLibre SDK (MLNMapView). The Swift wrapper is injected via setMap()
- * and must conform to the expected interface (defined in MapLibreViewWrapper.swift).
+ * This adapter bridges Kotlin shared logic to Swift MapLibreViewWrapper.
+ * The Swift wrapper (MapLibreViewWrapper from iosApp) is passed via setMap()
+ * as an NSObject and methods are called via Kotlin/Native ObjC interop.
  *
  * Architecture:
- * - Kotlin (this class) ← → Swift (MapLibreViewWrapper) ← → Objective-C/Swift (MapLibre SDK)
+ * - Kotlin (this class) ← ObjC interop → Swift (@objc MapLibreViewWrapper) ← → MapLibre SDK
  *
- * Note: Swift classes are accessed via dynamic dispatch since Kotlin/Native can only directly
- * interop with Objective-C (not Swift). The Swift wrapper uses @objc annotations to expose
- * its interface.
+ * The wrapper must be an @objc Swift class with @objc methods to be callable from Kotlin.
  */
+@OptIn(ExperimentalForeignApi::class)
 class IOSMapLibreAdapter : MapLibreAdapter<Any> {
-    // Swift wrapper instance - accessed via runtime checks
-    private var wrapper: Any? = null
+    // Swift wrapper instance as NSObject (all @objc Swift classes inherit from NSObject)
+    private var wrapper: NSObject? = null
 
     private val _currentPosition = MutableStateFlow<Position?>(null)
     private val _currentZoom = MutableStateFlow(10.0)
@@ -44,15 +49,34 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
     override val currentZoom: StateFlow<Double> = _currentZoom
 
     /**
-     * Sets the MapLibre wrapper (expects MapLibreViewWrapper Swift object).
+     * Sets the MapLibre wrapper (expects @objc Swift MapLibreViewWrapper).
      * The wrapper should already have the MLNMapView configured.
      */
     override fun setMap(map: Any) {
-        this.wrapper = map
-        WWWLogger.d(TAG, "Map wrapper set")
+        this.wrapper = map as? NSObject
+        if (wrapper != null) {
+            WWWLogger.i(TAG, "Map wrapper set successfully (type: ${wrapper!!::class.simpleName})")
+            // Update initial camera state from wrapper
+            updateCameraStateFromWrapper()
+        } else {
+            WWWLogger.e(TAG, "Failed to cast map to NSObject")
+        }
+    }
 
-        // Note: Camera position and zoom updates will be pushed from Swift delegate callbacks
-        // via updateCameraPosition() and updateZoom() methods
+    /**
+     * Update camera state from wrapper's current values using performSelector
+     */
+    private fun updateCameraStateFromWrapper() {
+        wrapper?.let { w ->
+            try {
+                // Note: Actual method calls will need to use performSelector or
+                // the wrapper methods need to be accessible via platform imports
+                // For now, just log that wrapper is set
+                WWWLogger.d(TAG, "Wrapper ready for method calls")
+            } catch (e: Exception) {
+                WWWLogger.e(TAG, "Error updating camera state: ${e.message}")
+            }
+        }
     }
 
     override fun setStyle(
@@ -72,24 +96,36 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
     }
 
     override fun getWidth(): Double {
-        if (wrapper == null) return 375.0 // Default iPhone width
+        if (wrapper == null) {
+            WWWLogger.w(TAG, "getWidth() called with null wrapper, returning default")
+            return DEFAULT_WIDTH
+        }
 
-        // NOTE: Swift wrapper call will be implemented via cinterop
-        return 375.0
+        // TODO: Call wrapper.getWidth() via performSelector or ObjC runtime
+        // For now return default until method calling is implemented
+        return DEFAULT_WIDTH
     }
 
     override fun getHeight(): Double {
-        if (wrapper == null) return 812.0 // Default iPhone height
+        if (wrapper == null) {
+            WWWLogger.w(TAG, "getHeight() called with null wrapper, returning default")
+            return DEFAULT_HEIGHT
+        }
 
-        // NOTE: Swift wrapper call will be implemented via cinterop
-        return 812.0
+        // TODO: Call wrapper.getHeight() via performSelector or ObjC runtime
+        // For now return default until method calling is implemented
+        return DEFAULT_HEIGHT
     }
 
     override fun getCameraPosition(): Position? {
-        if (wrapper == null) return null
+        if (wrapper == null) {
+            WWWLogger.w(TAG, "getCameraPosition() called with null wrapper")
+            return null
+        }
 
-        // NOTE: Swift wrapper call will be implemented via cinterop
-        return null
+        // TODO: Call wrapper.getCameraCenterLatitude/Longitude() via performSelector
+        // For now return current state
+        return _currentPosition.value
     }
 
     override fun getVisibleRegion(): BoundingBox {
