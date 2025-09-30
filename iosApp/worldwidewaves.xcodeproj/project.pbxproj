@@ -114,7 +114,6 @@
 				Maps/toronto_canada/toronto_canada.mbtiles = (toronto_canada, );
 				Maps/vancouver_canada/vancouver_canada.geojson = (vancouver_canada, );
 				Maps/vancouver_canada/vancouver_canada.mbtiles = (vancouver_canada, );
-
 			};
 			membershipExceptions = (
 				Info.plist,
@@ -246,7 +245,6 @@
 					tokyo_japan,
 					toronto_canada,
 					vancouver_canada,
-
 				);
 				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1640;
@@ -497,7 +495,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				ON_DEMAND_RESOURCES_INITIAL_INSTALL_TAGS = paris_france;
+				ON_DEMAND_RESOURCES_INITIAL_INSTALL_TAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.worldwidewaves;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

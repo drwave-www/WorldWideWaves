@@ -4,7 +4,7 @@
 
     <dist:module
         dist:instant="false"
-        dist:title="@string/map_title_#id#">
+        dist:title="@string/map_title_paris_france">
         <dist:delivery>
             <dist:on-demand />
         </dist:delivery>

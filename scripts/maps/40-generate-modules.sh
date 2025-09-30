@@ -106,7 +106,7 @@ for event in $EVENTS; do # Retrieve Geojson files from OSM
 
   [ ! -f "$DEST_DIR_MODULE/.gitignore" ] && echo "/build" > "$DEST_DIR_MODULE/.gitignore"
 
-  INCLUDE_GRADLE='include(":maps:android:'$event'")'
+  INCLUDE_GRADLE='include(":maps:'$event'")'
   if ! grep -q "$INCLUDE_GRADLE" "$GRADLE_SETTINGS"; then
     echo "$INCLUDE_GRADLE" >> "$GRADLE_SETTINGS"
   fi
@@ -172,56 +172,86 @@ fi
 # iOS ODR Symbolic Links Setup
 # ========================================================================
 
-echo "Setting up iOS ODR symbolic links to maps/* files..."
+echo "Setting up iOS ODR files to maps/* files..."
 
-# Function to create symbolic links for iOS ODR
-create_ios_odr_links() {
+# Function to copy files for iOS ODR (all files go to ODR assetpacks)
+create_ios_odr_files() {
     local ios_maps_dir="../../iosApp/worldwidewaves/Maps"
 
     # Create Maps directory if it doesn't exist
     mkdir -p "$ios_maps_dir"
 
-    echo "Creating symbolic links for ${#VALID_EVENTS[@]} events..."
+    # Get all cities that have Android files (existing + new)
+    local all_android_cities=()
 
+    # Find all cities that have files in Android maps structure
+    if [ -d "../../maps" ]; then
+        while IFS= read -r -d '' android_city_dir; do
+            local city
+            city=$(basename "$android_city_dir")
+            local geojson_file="$android_city_dir/src/main/assets/$city.geojson"
+            local mbtiles_file="$android_city_dir/src/main/assets/$city.mbtiles"
+            if [ -f "$geojson_file" ] && [ -f "$mbtiles_file" ]; then
+                all_android_cities+=("$city")
+            fi
+        done < <(find "../../maps" -mindepth 1 -maxdepth 1 -type d -print0)
+    fi
+
+    # Add any new cities from current VALID_EVENTS that have files
     for event in "${VALID_EVENTS[@]}"; do
+        local android_geojson="../../maps/$event/src/main/assets/$event.geojson"
+        local android_mbtiles="../../maps/$event/src/main/assets/$event.mbtiles"
+        if [ -f "$android_geojson" ] && [ -f "$android_mbtiles" ]; then
+            local found=false
+            for existing_city in "${all_android_cities[@]}"; do
+                if [[ "$existing_city" == "$event" ]]; then
+                    found=true
+                    break
+                fi
+            done
+            if [[ "$found" == "false" ]]; then
+                all_android_cities+=("$event")
+            fi
+        fi
+    done
+
+    echo "Copying ODR files for ${#all_android_cities[@]} cities with complete Android files: ${all_android_cities[*]}"
+
+    for event in "${all_android_cities[@]}"; do
         local event_dir="$ios_maps_dir/$event"
         local source_dir="../../maps/$event/src/main/assets"
 
         # Create event directory if it doesn't exist
         mkdir -p "$event_dir"
 
-        # Create symbolic links for geojson and mbtiles files
-        local geojson_link="$event_dir/$event.geojson"
-        local mbtiles_link="$event_dir/$event.mbtiles"
-        local geojson_source="../../../../maps/$event/src/main/assets/$event.geojson"
-        local mbtiles_source="../../../../maps/$event/src/main/assets/$event.mbtiles"
+        # Copy files for geojson and mbtiles from Android location
+        local geojson_dest="$event_dir/$event.geojson"
+        local mbtiles_dest="$event_dir/$event.mbtiles"
+        local geojson_source="$source_dir/$event.geojson"
+        local mbtiles_source="$source_dir/$event.mbtiles"
 
-        # Remove existing links if they exist
-        [ -L "$geojson_link" ] && rm "$geojson_link"
-        [ -L "$mbtiles_link" ] && rm "$mbtiles_link"
-
-        # Create symbolic links only if source files exist
-        if [ -f "$source_dir/$event.geojson" ]; then
-            ln -s "$geojson_source" "$geojson_link"
-            echo "Created symbolic link: $event.geojson"
+        # Copy files only if destination is outdated (both files are guaranteed to exist)
+        if [ ! -f "$geojson_dest" ] || [ "$geojson_source" -nt "$geojson_dest" ]; then
+            cp "$geojson_source" "$geojson_dest"
+            echo "Copied ODR file: $event.geojson"
         else
-            echo "Warning: Source file not found for $event.geojson"
+            echo "ODR file up to date: $event.geojson"
         fi
 
-        if [ -f "$source_dir/$event.mbtiles" ]; then
-            ln -s "$mbtiles_source" "$mbtiles_link"
-            echo "Created symbolic link: $event.mbtiles"
+        if [ ! -f "$mbtiles_dest" ] || [ "$mbtiles_source" -nt "$mbtiles_dest" ]; then
+            cp "$mbtiles_source" "$mbtiles_dest"
+            echo "Copied ODR file: $event.mbtiles"
         else
-            echo "Warning: Source file not found for $event.mbtiles"
+            echo "ODR file up to date: $event.mbtiles"
         fi
     done
 }
 
-# Create symbolic links
+# Copy ODR files
 if [ ${#VALID_EVENTS[@]} -gt 0 ]; then
-    create_ios_odr_links
+    create_ios_odr_files
 else
-    echo "Skipping iOS symbolic links: no valid events"
+    echo "Skipping iOS ODR files: no valid events"
 fi
 
 # ========================================================================
@@ -246,19 +276,34 @@ add_odr_tags_to_xcode() {
     # Copy original project
     cp "$project_file" "$temp_project"
 
-    echo "Adding ODR asset tags for ${#VALID_EVENTS[@]} events to reference source files..."
+    # Get all cities that have iOS ODR files (existing + newly copied)
+    local ios_maps_dir="../../iosApp/worldwidewaves/Maps"
+    local all_ios_cities=()
 
-    # Generate asset tags by relative path entries - reference linked files in iOS project
+    # Add existing cities from iOS Maps directory
+    if [ -d "$ios_maps_dir" ]; then
+        while IFS= read -r -d '' city_dir; do
+            local city
+            city=$(basename "$city_dir")
+            if [ -f "$city_dir/$city.geojson" ] && [ -f "$city_dir/$city.mbtiles" ]; then
+                all_ios_cities+=("$city")
+            fi
+        done < <(find "$ios_maps_dir" -mindepth 1 -maxdepth 1 -type d -print0)
+    fi
+
+    echo "Adding ODR asset tags for ${#all_ios_cities[@]} total cities with iOS files: ${all_ios_cities[*]}"
+
+    # Generate asset tags by relative path entries - reference files in iOS project structure
     local asset_tags_entries=""
-    for event in "${VALID_EVENTS[@]}"; do
-        # Reference files via symbolic links in iOS project structure
+    for event in "${all_ios_cities[@]}"; do
+        # Reference files in iOS project structure
         asset_tags_entries="${asset_tags_entries}				Maps/${event}/${event}.geojson = (${event}, );\n"
         asset_tags_entries="${asset_tags_entries}				Maps/${event}/${event}.mbtiles = (${event}, );\n"
     done
 
     # Generate known asset tags entries
     local known_tags_entries=""
-    for event in "${VALID_EVENTS[@]}"; do
+    for event in "${all_ios_cities[@]}"; do
         known_tags_entries="${known_tags_entries}					${event},\n"
     done
 
@@ -315,7 +360,7 @@ add_odr_tags_to_xcode() {
 
     # Replace original with updated version
     mv "$temp_project" "$project_file"
-    echo "Xcode project ODR configuration completed for ${#VALID_EVENTS[@]} events"
+    echo "Xcode project ODR configuration completed for ${#all_ios_cities[@]} total cities"
 }
 
 # Only configure if we have valid events and project exists

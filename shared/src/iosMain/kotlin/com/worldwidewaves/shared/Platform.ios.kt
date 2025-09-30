@@ -163,12 +163,12 @@ actual suspend fun getMapFileAbsolutePath(
     eventId: String,
     extension: String,
 ): String? {
-    // iOS ODR: MUST only work after NSBundleResourceRequest.beginAccessingResources() succeeds
+    // iOS ODR: Use correct Bundle API pattern - no subdirectories, just name + extension
     return try {
         val fileName = "$eventId.$extension"
         Log.v("getMapFileAbsolutePath", "[$eventId] Checking ODR availability for: $fileName")
 
-        // Get MapAvailabilityChecker to verify ODR status
+        // Get MapAvailabilityChecker to verify ODR status AND ensure request is retained
         val koin =
             org.koin.mp.KoinPlatform
                 .getKoin()
@@ -181,26 +181,29 @@ actual suspend fun getMapFileAbsolutePath(
 
         Log.v("getMapFileAbsolutePath", "[$eventId] ODR confirmed available, resolving path: $fileName")
 
-        // ONLY after ODR availability confirmed, resolve via Bundle APIs
+        // CORRECT PATTERN: Use Bundle.main with name + extension only (no subdirectory)
+        // The NSBundleResourceRequest must be retained for this to work
         val bundle = NSBundle.mainBundle
-        val odrPaths =
-            listOf(
-                bundle.pathForResource(eventId, extension, "Resources/Maps/$eventId"),
-                bundle.pathForResource(eventId, extension, "Maps/$eventId"),
-                bundle.pathForResource(eventId, extension, "Resources/Maps"),
-                bundle.pathForResource(eventId, extension, "Maps"),
-                bundle.pathForResource(eventId, extension),
-            )
+        val resourcePath = bundle.pathForResource(eventId, extension)
 
-        for (path in odrPaths) {
-            if (path != null && NSFileManager.defaultManager.fileExistsAtPath(path)) {
-                Log.i("getMapFileAbsolutePath", "[$eventId] Found ODR file after availability check: $path")
-                return path
+        if (resourcePath != null && NSFileManager.defaultManager.fileExistsAtPath(resourcePath)) {
+            Log.i("getMapFileAbsolutePath", "[$eventId] Found ODR file: $resourcePath")
+            return resourcePath
+        } else {
+            // Debug: Log what Bundle actually sees
+            Log.w("getMapFileAbsolutePath", "[$eventId] Bundle.pathForResource returned: $resourcePath")
+
+            // Try URL-based approach as fallback
+            val resourceURL = bundle.URLForResource(eventId, extension)
+            if (resourceURL != null) {
+                val urlPath = resourceURL.path
+                Log.i("getMapFileAbsolutePath", "[$eventId] Found ODR file via URL: $urlPath")
+                return urlPath
             }
-        }
 
-        Log.e("getMapFileAbsolutePath", "[$eventId] ODR shows available but file not found - ODR lifecycle issue")
-        null
+            Log.e("getMapFileAbsolutePath", "[$eventId] ODR file not found - request may not be retained")
+            return null
+        }
     } catch (e: Exception) {
         Log.e("getMapFileAbsolutePath", "[$eventId] Error resolving ODR file $eventId.$extension: ${e.message}", e)
         null

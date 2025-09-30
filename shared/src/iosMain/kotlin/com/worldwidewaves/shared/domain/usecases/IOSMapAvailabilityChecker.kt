@@ -32,6 +32,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import platform.Foundation.NSBundle
+import platform.Foundation.NSBundleResourceRequest
 import platform.Foundation.NSProgress
 
 /**
@@ -58,8 +60,15 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
     override val mapStates: StateFlow<Map<String, Boolean>> = _mapStates.asStateFlow()
 
     private val trackedMaps = mutableSetOf<String>()
-    private val activeRequests = mutableMapOf<String, NSProgress>()
+
+    // CRITICAL FIX: Keep strong references to NSBundleResourceRequest to prevent deallocation
+    private val requests = mutableMapOf<String, NSBundleResourceRequest>()
+    private val activeProgress = mutableMapOf<String, NSProgress>()
     private val mutex = Mutex()
+
+    init {
+        Log.i("IOSMapAvailabilityChecker", "🚀 IOSMapAvailabilityChecker INSTANTIATED! This should appear in logs if DI is working.")
+    }
 
     @OptIn(ExperimentalForeignApi::class)
     override fun refreshAvailability() {
@@ -98,6 +107,28 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
         return downloadedMaps
     }
 
+    /**
+     * Explicitly request download of a specific map resource.
+     * This triggers ODR download for maps that aren't initial install tags.
+     */
+    override fun requestMapDownload(eventId: String) {
+        if (!trackedMaps.contains(eventId)) {
+            Log.w("IOSMapAvailabilityChecker", "Cannot request download for untracked map: $eventId")
+            return
+        }
+
+        scope.launch {
+            mutex.withLock {
+                if (!activeProgress.containsKey(eventId) && _mapStates.value[eventId] != true) {
+                    Log.i("IOSMapAvailabilityChecker", "Explicitly requesting ODR download for: $eventId")
+                    beginAccessingResources(eventId)
+                } else {
+                    Log.d("IOSMapAvailabilityChecker", "Map $eventId already requesting or available")
+                }
+            }
+        }
+    }
+
     override fun trackMaps(mapIds: Collection<String>) {
         Log.d("IOSMapAvailabilityChecker", "trackMaps() called with ${mapIds.size} ODR map IDs: ${mapIds.joinToString()}")
 
@@ -109,49 +140,125 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
         if (newSize > oldSize) {
             Log.i("IOSMapAvailabilityChecker", "Added ${newSize - oldSize} new ODR maps to tracking. Total tracked: $newSize")
 
-            // Immediately update state for newly tracked maps (mark as available for testing)
+            // All ODR resources (including initial install tags) start as unavailable
+            // They become available only after beginAccessingResources completes successfully
             val updatedStates = _mapStates.value.toMutableMap()
             mapIds.forEach { mapId ->
-                updatedStates[mapId] = checkResourceAvailability(mapId)
+                // All new maps start as unavailable - ODR request is needed first
+                Log.d("IOSMapAvailabilityChecker", "Adding $mapId to tracking")
+                updatedStates[mapId] = false // Start as unavailable until ODR completes
             }
             _mapStates.value = updatedStates
 
-            // Begin resource requests for new maps asynchronously
+            // Only automatically request initial install tags (configured via ODR in Xcode project)
+            // Regular ODR resources should be requested explicitly via requestMapDownload()
             scope.launch {
                 mutex.withLock {
-                    val newMaps =
+                    // TODO: Read initial install tags from ODR configuration instead of hardcoding
+                    // For now, get from iOS bundle Info.plist ON_DEMAND_RESOURCES_INITIAL_INSTALL_TAGS
+                    val initialInstallTags = getInitialInstallTags()
+                    val newInitialInstallMaps =
                         mapIds.filter { mapId ->
-                            // Only start ODR if not already requesting AND not already available
-                            !activeRequests.containsKey(mapId) && _mapStates.value[mapId] != true
+                            // Only auto-request initial install tags
+                            mapId in initialInstallTags &&
+                                !activeProgress.containsKey(mapId) &&
+                                _mapStates.value[mapId] != true
                         }
-                    if (newMaps.isNotEmpty()) {
-                        Log.d("IOSMapAvailabilityChecker", "Starting ODR requests for ${newMaps.size} new maps: ${newMaps.joinToString()}")
-                        newMaps.forEach { mapId ->
+                    if (newInitialInstallMaps.isNotEmpty()) {
+                        Log.d("IOSMapAvailabilityChecker", "Auto-requesting initial install tags: ${newInitialInstallMaps.joinToString()}")
+                        newInitialInstallMaps.forEach { mapId ->
                             beginAccessingResources(mapId)
                         }
+                    }
+
+                    // Log regular ODR maps that are tracked but not auto-requested
+                    val regularODRMaps = mapIds.filter { it !in initialInstallTags }
+                    if (regularODRMaps.isNotEmpty()) {
+                        Log.d(
+                            "IOSMapAvailabilityChecker",
+                            "Tracked ${regularODRMaps.size} regular ODR maps (not auto-requested): ${regularODRMaps.joinToString()}",
+                        )
                     }
                 }
             }
         }
     }
 
+    /**
+     * Debug what Bundle actually sees after ODR success
+     */
+    @OptIn(ExperimentalForeignApi::class)
+    private fun debugBundleContents(mapId: String) {
+        try {
+            val bundle = NSBundle.mainBundle
+
+            // Check what geojson files Bundle can see
+            val geojsonUrls = bundle.URLsForResourcesWithExtension("geojson", null)
+            Log.d("IOSMapAvailabilityChecker", "[$mapId] Bundle sees ${geojsonUrls?.count()} .geojson files total")
+
+            val mbtileUrls = bundle.URLsForResourcesWithExtension("mbtiles", null)
+            Log.d("IOSMapAvailabilityChecker", "[$mapId] Bundle sees ${mbtileUrls?.count()} .mbtiles files total")
+
+            // Try specific lookups
+            val geojsonPath = bundle.pathForResource(mapId, "geojson")
+            val geojsonURL = bundle.URLForResource(mapId, "geojson")
+
+            Log.d("IOSMapAvailabilityChecker", "[$mapId] pathForResource(geojson): $geojsonPath")
+            Log.d("IOSMapAvailabilityChecker", "[$mapId] URLForResource(geojson): $geojsonURL")
+
+            val mbtilesPath = bundle.pathForResource(mapId, "mbtiles")
+            val mbtilesURL = bundle.URLForResource(mapId, "mbtiles")
+
+            Log.d("IOSMapAvailabilityChecker", "[$mapId] pathForResource(mbtiles): $mbtilesPath")
+            Log.d("IOSMapAvailabilityChecker", "[$mapId] URLForResource(mbtiles): $mbtilesURL")
+        } catch (e: Exception) {
+            Log.w("IOSMapAvailabilityChecker", "[$mapId] Debug bundle contents failed: ${e.message}")
+        }
+    }
+
+    /**
+     * Get initial install tags from iOS bundle configuration instead of hardcoding.
+     * Reads from Info.plist ON_DEMAND_RESOURCES_INITIAL_INSTALL_TAGS.
+     */
+    @OptIn(ExperimentalForeignApi::class)
+    private fun getInitialInstallTags(): List<String> =
+        try {
+            val bundle = platform.Foundation.NSBundle.mainBundle
+            val initialInstallTags = bundle.objectForInfoDictionaryKey("ON_DEMAND_RESOURCES_INITIAL_INSTALL_TAGS") as? String
+
+            if (initialInstallTags != null) {
+                val tags = initialInstallTags.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                Log.d("IOSMapAvailabilityChecker", "Read initial install tags from bundle: $tags")
+                tags
+            } else {
+                Log.w(
+                    "IOSMapAvailabilityChecker",
+                    "No ON_DEMAND_RESOURCES_INITIAL_INSTALL_TAGS found in Info.plist, defaulting to empty list",
+                )
+                emptyList()
+            }
+        } catch (e: Exception) {
+            Log.e("IOSMapAvailabilityChecker", "Error reading initial install tags from bundle: ${e.message}")
+            // Fallback: no auto-download
+            emptyList()
+        }
+
     @OptIn(ExperimentalForeignApi::class)
     private fun checkResourceAvailability(mapId: String): Boolean =
         try {
-            Log.v("IOSMapAvailabilityChecker", "Checking ODR availability for $mapId (ODR-only mode)")
+            Log.v("IOSMapAvailabilityChecker", "Checking ODR availability for $mapId")
 
             // Check current state - only return true if ODR has actually succeeded
             val currentState = _mapStates.value[mapId] ?: false
-            val isRequesting = activeRequests.containsKey(mapId)
+            val isRequesting = activeProgress.containsKey(mapId)
 
             Log.v("IOSMapAvailabilityChecker", "ODR status for $mapId: requesting=$isRequesting, state=$currentState")
 
-            // CRITICAL FIX: Resource is available ONLY if ODR completed successfully (state=true)
-            // Do NOT return true just because it's requesting - that causes infinite loops
+            // Resource is available ONLY if ODR completed successfully (state=true)
+            // This applies to ALL ODR resources, including initial install tags
             currentState
         } catch (e: Exception) {
             Log.e("IOSMapAvailabilityChecker", "Error checking ODR availability for $mapId", throwable = e)
-            // NEVER assume available in error case - ODR must succeed explicitly
             false
         }
 
@@ -161,31 +268,64 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
             Log.d("IOSMapAvailabilityChecker", "Beginning ODR resource access for $mapId")
 
             // Create NSBundleResourceRequest for the map tag
+            // Use setOf for Kotlin/Native compatibility
             val resourceTags = setOf(mapId)
-            val request = platform.Foundation.NSBundleResourceRequest(resourceTags)
+            val request = NSBundleResourceRequest(resourceTags)
+            request.loadingPriority = 1.0
+
+            Log.d("IOSMapAvailabilityChecker", "[$mapId] Created NSBundleResourceRequest with tags: $resourceTags")
+            Log.d("IOSMapAvailabilityChecker", "[$mapId] Request object: $request")
+            Log.d("IOSMapAvailabilityChecker", "[$mapId] Request progress: ${request.progress}")
+
+            // CRITICAL FIX: Cancel any previous request for this tag before creating new one
+            requests.remove(mapId)?.let { oldRequest ->
+                Log.d("IOSMapAvailabilityChecker", "[$mapId] Ending previous ODR request before starting new one")
+                oldRequest.endAccessingResources()
+            }
+
+            // CRITICAL FIX: Store strong reference to prevent deallocation
+            requests[mapId] = request
+            activeProgress[mapId] = request.progress
 
             // Begin accessing the resource asynchronously
+            Log.d("IOSMapAvailabilityChecker", "[$mapId] Calling beginAccessingResourcesWithCompletionHandler...")
             request.beginAccessingResourcesWithCompletionHandler { error ->
+                Log.d("IOSMapAvailabilityChecker", "[$mapId] ⚡ ODR COMPLETION CALLBACK INVOKED ⚡")
+                Log.d("IOSMapAvailabilityChecker", "[$mapId] Callback error parameter: $error")
+
                 scope.launch {
+                    Log.d("IOSMapAvailabilityChecker", "[$mapId] Inside coroutine scope in callback")
                     mutex.withLock {
-                        activeRequests.remove(mapId)
+                        Log.d("IOSMapAvailabilityChecker", "[$mapId] Acquired mutex lock in callback")
+                        activeProgress.remove(mapId)
 
                         if (error != null) {
-                            Log.e("IOSMapAvailabilityChecker", "ODR resource access failed for $mapId: ${error.localizedDescription}")
+                            Log.e("IOSMapAvailabilityChecker", "[$mapId] ODR resource access FAILED: ${error.localizedDescription}")
+                            Log.e("IOSMapAvailabilityChecker", "[$mapId] Error code: ${error.code}")
+                            Log.e("IOSMapAvailabilityChecker", "[$mapId] Error domain: ${error.domain}")
+                            Log.e("IOSMapAvailabilityChecker", "[$mapId] Error userInfo: ${error.userInfo}")
+
                             // Update state to reflect failure
                             val currentStates = _mapStates.value.toMutableMap()
                             currentStates[mapId] = false
                             _mapStates.value = currentStates
+                            Log.d("IOSMapAvailabilityChecker", "[$mapId] Updated state to FAILED")
                         } else {
-                            Log.i("IOSMapAvailabilityChecker", "ODR resource access succeeded for $mapId")
+                            Log.i("IOSMapAvailabilityChecker", "[$mapId] ODR resource access SUCCEEDED ✅")
+
                             // Update state to reflect success
                             val currentStates = _mapStates.value.toMutableMap()
                             currentStates[mapId] = true
                             _mapStates.value = currentStates
+                            Log.d("IOSMapAvailabilityChecker", "[$mapId] Updated state to SUCCESS")
+
+                            // Debug: Log what Bundle actually sees after ODR success
+                            debugBundleContents(mapId)
 
                             // Invalidate GeoJSON cache after a delay to prevent immediate reload loops
                             // The delay ensures ODR state is fully stable before allowing retry
                             scope.launch {
+                                Log.d("IOSMapAvailabilityChecker", "[$mapId] Starting delayed cache invalidation...")
                                 kotlinx.coroutines.delay(100) // Small delay to prevent tight loops
                                 try {
                                     val koin =
@@ -202,28 +342,29 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
                     }
                 }
             }
+            Log.d(
+                "IOSMapAvailabilityChecker",
+                "[$mapId] beginAccessingResourcesWithCompletionHandler call completed, waiting for callback...",
+            )
 
-            // Track the active request
-            activeRequests[mapId] = request.progress
+            Log.d("IOSMapAvailabilityChecker", "[$mapId] Stored strong reference. Total requests: ${requests.size}")
         } catch (e: Exception) {
             Log.e("IOSMapAvailabilityChecker", "Exception starting ODR resource access for $mapId", throwable = e)
         }
     }
 
     /**
-     * Cleanup method to end resource access for tracked maps.
-     * Should be called when the checker is no longer needed.
+     * Release ODR resources for a specific map.
      */
     @OptIn(ExperimentalForeignApi::class)
-    fun cleanup() {
+    fun release(mapId: String) =
         scope.launch {
             mutex.withLock {
-                Log.d("IOSMapAvailabilityChecker", "Cleaning up ODR resources for ${trackedMaps.size} maps")
+                Log.d("IOSMapAvailabilityChecker", "Releasing ODR resources for $mapId")
 
-                trackedMaps.forEach { mapId ->
+                // CRITICAL FIX: End accessing on the same request instance we created
+                requests.remove(mapId)?.let { request ->
                     try {
-                        val resourceTags = setOf(mapId)
-                        val request = platform.Foundation.NSBundleResourceRequest(resourceTags)
                         request.endAccessingResources()
                         Log.v("IOSMapAvailabilityChecker", "Ended ODR resource access for $mapId")
                     } catch (e: Exception) {
@@ -231,10 +372,39 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
                     }
                 }
 
-                activeRequests.clear()
+                activeProgress.remove(mapId)
+                trackedMaps.remove(mapId)
+
+                val currentStates = _mapStates.value.toMutableMap()
+                currentStates.remove(mapId)
+                _mapStates.value = currentStates
+            }
+        }
+
+    /**
+     * Cleanup method to end resource access for all tracked maps.
+     * Should be called when the checker is no longer needed.
+     */
+    @OptIn(ExperimentalForeignApi::class)
+    fun cleanup() =
+        scope.launch {
+            mutex.withLock {
+                Log.d("IOSMapAvailabilityChecker", "Cleaning up ODR resources for ${requests.size} active requests")
+
+                // CRITICAL FIX: End accessing on the same request instances we created
+                requests.values.forEach { request ->
+                    try {
+                        request.endAccessingResources()
+                        Log.v("IOSMapAvailabilityChecker", "Ended ODR resource access")
+                    } catch (e: Exception) {
+                        Log.w("IOSMapAvailabilityChecker", "Error ending ODR resource access", throwable = e)
+                    }
+                }
+
+                requests.clear()
+                activeProgress.clear()
                 trackedMaps.clear()
                 _mapStates.value = emptyMap()
             }
         }
-    }
 }

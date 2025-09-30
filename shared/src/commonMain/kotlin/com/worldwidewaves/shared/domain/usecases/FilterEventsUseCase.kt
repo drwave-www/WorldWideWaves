@@ -117,4 +117,13 @@ interface MapAvailabilityChecker {
     fun getDownloadedMaps(): List<String>
 
     fun trackMaps(mapIds: Collection<String>)
+
+    /**
+     * Request explicit download of a map resource.
+     * This is used for on-demand downloading of maps that aren't initial install tags.
+     * Platform implementations may provide this functionality (e.g., iOS ODR).
+     */
+    fun requestMapDownload(eventId: String) {
+        // Default implementation does nothing - platforms can override
+    }
 }

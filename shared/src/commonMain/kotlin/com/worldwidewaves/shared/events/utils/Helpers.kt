@@ -250,16 +250,53 @@ interface GeoJsonDataProvider {
     fun clearCache()
 }
 
+@OptIn(kotlin.time.ExperimentalTime::class)
 class DefaultGeoJsonDataProvider :
     GeoJsonDataProvider,
     KoinComponent {
     private val cache = mutableMapOf<String, JsonObject?>()
+    private val lastAttemptTime = mutableMapOf<String, kotlin.time.Instant>()
+    private val attemptCount = mutableMapOf<String, Int>()
 
     override suspend fun getGeoJsonData(eventId: String): JsonObject? {
         // Check cache first
         if (cache.containsKey(eventId)) {
             return cache[eventId]
         }
+
+        // Rate limiting for ODR requests to prevent infinite loops
+        val now = Clock.System.now()
+        val lastAttempt = lastAttemptTime[eventId]
+        val attempts = attemptCount[eventId] ?: 0
+
+        if (lastAttempt != null && isODRUnavailable(eventId)) {
+            val timeSinceLastAttempt = now - lastAttempt
+            val minDelay =
+                when {
+                    attempts < 3 -> Duration.parse("1s") // First 3 attempts: 1 second apart
+                    attempts < 10 -> Duration.parse("5s") // Next 7 attempts: 5 seconds apart
+                    else -> Duration.parse("30s") // After that: 30 seconds apart
+                }
+
+            if (timeSinceLastAttempt < minDelay) {
+                Log.v(
+                    ::getGeoJsonData.name,
+                    "Rate limiting $eventId: last attempt ${timeSinceLastAttempt.inWholeSeconds}s ago, need ${minDelay.inWholeSeconds}s (attempt $attempts)",
+                )
+                return null // Return null without incrementing attempts
+            }
+
+            // Stop trying after many attempts
+            if (attempts >= 20) {
+                Log.w(::getGeoJsonData.name, "Giving up on $eventId after $attempts attempts")
+                cache[eventId] = null // Cache the failure to stop retrying
+                return null
+            }
+        }
+
+        // Update attempt tracking
+        lastAttemptTime[eventId] = now
+        attemptCount[eventId] = attempts + 1
 
         // Not in cache, load and cache the result
         val result =
@@ -293,6 +330,13 @@ class DefaultGeoJsonDataProvider :
                 null
             }
 
+        // Reset attempt tracking on successful load
+        if (result != null) {
+            lastAttemptTime.remove(eventId)
+            attemptCount.remove(eventId)
+            Log.v(::getGeoJsonData.name, "Successfully loaded $eventId, reset attempt tracking")
+        }
+
         // Cache successful results. For null results, only cache if it's not due to ODR unavailability
         // This allows retry when ODR resources become available later
         val shouldCache = result != null || !isODRUnavailable(eventId)
@@ -325,11 +369,17 @@ class DefaultGeoJsonDataProvider :
         if (cache.remove(eventId) != null) {
             Log.d(::invalidateCache.name, "Invalidated cache for event $eventId")
         }
+        // Also reset attempt tracking to allow immediate retry
+        lastAttemptTime.remove(eventId)
+        attemptCount.remove(eventId)
+        Log.d(::invalidateCache.name, "Reset attempt tracking for $eventId")
     }
 
     override fun clearCache() {
         val size = cache.size
         cache.clear()
+        lastAttemptTime.clear()
+        attemptCount.clear()
         Log.d(::clearCache.name, "Cleared GeoJSON cache ($size entries)")
     }
 }
