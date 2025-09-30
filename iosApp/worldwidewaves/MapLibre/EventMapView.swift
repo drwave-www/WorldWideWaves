@@ -35,37 +35,37 @@ struct EventMapView: UIViewRepresentable {
     @Binding var wrapper: MapLibreViewWrapper?
 
     func makeUIView(context: Context) -> MLNMapView {
-        Log.shared.i(tag: Self.tag, message: "makeUIView - Creating map view")
-        Log.shared.d(tag: Self.tag, message: "Style URL: \(styleURL)")
-        Log.shared.d(tag: Self.tag, message: "Initial position: lat=\(initialLatitude), lng=\(initialLongitude), zoom=\(initialZoom)")
+        Log.shared.i(tag: Self.tag, message: "makeUIView - Creating map view", throwable: nil)
+        Log.shared.d(tag: Self.tag, message: "Style URL: \(styleURL)", throwable: nil)
+        Log.shared.d(tag: Self.tag, message: "Initial position: lat=\(initialLatitude), lng=\(initialLongitude), zoom=\(initialZoom)", throwable: nil)
 
         let mapView = MLNMapView(frame: .zero)
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
-        Log.shared.d(tag: Self.tag, message: "Map view created, frame: \(mapView.frame)")
+        Log.shared.d(tag: Self.tag, message: "Map view created, frame: \(mapView.frame)", throwable: nil)
 
         // Set initial camera position
         let coordinate = CLLocationCoordinate2D(latitude: initialLatitude, longitude: initialLongitude)
         mapView.setCenter(coordinate, zoomLevel: initialZoom, animated: false)
-        Log.shared.d(tag: Self.tag, message: "Camera position set")
+        Log.shared.d(tag: Self.tag, message: "Camera position set", throwable: nil)
 
         // Set style URL
         if let url = URL(string: styleURL) {
             mapView.styleURL = url
-            Log.shared.d(tag: Self.tag, message: "Style URL set on map view")
+            Log.shared.d(tag: Self.tag, message: "Style URL set on map view", throwable: nil)
         } else {
-            Log.shared.e(tag: Self.tag, message: "Invalid style URL: \(styleURL)")
+            Log.shared.e(tag: Self.tag, message: "Invalid style URL: \(styleURL)", throwable: nil)
         }
 
         // Create wrapper and bind to the map view
         let mapWrapper = MapLibreViewWrapper()
         mapWrapper.setMapView(mapView)
-        Log.shared.d(tag: Self.tag, message: "Wrapper bound to map view")
+        Log.shared.d(tag: Self.tag, message: "Wrapper bound to map view", throwable: nil)
 
         // Update binding
         DispatchQueue.main.async {
             self.wrapper = mapWrapper
-            Log.shared.d(tag: Self.tag, message: "Wrapper binding updated in main thread")
+            Log.shared.d(tag: Self.tag, message: "Wrapper binding updated in main thread", throwable: nil)
         }
 
         return mapView

@@ -39,36 +39,36 @@ import Shared
 
     @objc public override init() {
         super.init()
-        Log.shared.d(tag: Self.tag, message: "Initializing MapLibreViewWrapper")
+        Log.shared.d(tag: Self.tag, message: "Initializing MapLibreViewWrapper", throwable: nil)
     }
 
     // MARK: - Map Setup
 
     @objc public func setMapView(_ mapView: MLNMapView) {
-        Log.shared.d(tag: Self.tag, message: "setMapView called, bounds: \(mapView.bounds)")
+        Log.shared.d(tag: Self.tag, message: "setMapView called, bounds: \(mapView.bounds)", throwable: nil)
         self.mapView = mapView
         self.mapView?.delegate = self
 
         // Add tap gesture recognizer for map clicks
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleMapTap(_:)))
         self.mapView?.addGestureRecognizer(tapGesture)
-        Log.shared.d(tag: Self.tag, message: "Map view configured successfully")
+        Log.shared.d(tag: Self.tag, message: "Map view configured successfully", throwable: nil)
     }
 
     @objc public func setStyle(styleURL: String, completion: @escaping () -> Void) {
-        Log.shared.d(tag: Self.tag, message: "setStyle called with URL: \(styleURL)")
+        Log.shared.d(tag: Self.tag, message: "setStyle called with URL: \(styleURL)", throwable: nil)
         guard let mapView = mapView else {
-            Log.shared.e(tag: Self.tag, message: "Cannot set style - mapView is nil")
+            Log.shared.e(tag: Self.tag, message: "Cannot set style - mapView is nil", throwable: nil)
             return
         }
 
         self.onStyleLoaded = completion
 
         if let url = URL(string: styleURL) {
-            Log.shared.d(tag: Self.tag, message: "Setting style URL on map view")
+            Log.shared.d(tag: Self.tag, message: "Setting style URL on map view", throwable: nil)
             mapView.styleURL = url
         } else {
-            Log.shared.e(tag: Self.tag, message: "Invalid style URL: \(styleURL)")
+            Log.shared.e(tag: Self.tag, message: "Invalid style URL: \(styleURL)", throwable: nil)
         }
     }
 
@@ -221,15 +221,15 @@ import Shared
     // MARK: - Wave Polygons
 
     @objc public func addWavePolygons(polygons: [[CLLocationCoordinate2D]], clearExisting: Bool) {
-        Log.shared.i(tag: Self.tag, message: "addWavePolygons: \(polygons.count) polygons, clearExisting: \(clearExisting)")
+        Log.shared.i(tag: Self.tag, message: "addWavePolygons: \(polygons.count) polygons, clearExisting: \(clearExisting)", throwable: nil)
         guard let mapView = mapView, let style = mapView.style else {
-            Log.shared.e(tag: Self.tag, message: "Cannot add polygons - style not loaded (mapView: \(mapView != nil), style: \(mapView?.style != nil))")
+            Log.shared.e(tag: Self.tag, message: "Cannot add polygons - style not loaded (mapView: \(mapView != nil), style: \(mapView?.style != nil))", throwable: nil)
             return
         }
 
         // Clear existing polygons if requested
         if clearExisting {
-            Log.shared.d(tag: Self.tag, message: "Clearing existing wave polygons")
+            Log.shared.d(tag: Self.tag, message: "Clearing existing wave polygons", throwable: nil)
             clearWavePolygons()
         }
 
@@ -325,14 +325,14 @@ import Shared
 
 extension MapLibreViewWrapper: MLNMapViewDelegate {
     public func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
-        Log.shared.i(tag: Self.tag, message: "Style loaded successfully")
+        Log.shared.i(tag: Self.tag, message: "Style loaded successfully", throwable: nil)
         onStyleLoaded?()
         onStyleLoaded = nil
     }
 
     public func mapView(_ mapView: MLNMapView, regionDidChangeAnimated animated: Bool) {
         // Camera idle event
-        Log.shared.v(tag: Self.tag, message: "Region changed, camera idle")
+        Log.shared.v(tag: Self.tag, message: "Region changed, camera idle", throwable: nil)
         onCameraIdle?()
     }
 
