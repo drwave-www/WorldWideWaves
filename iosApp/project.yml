@@ -1,4 +1,5 @@
 name: iosApp
+fileFormat: 48
 options:
   bundleIdPrefix: com.worldwidewaves
   createIntermediateGroups: true

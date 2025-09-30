@@ -29,13 +29,11 @@ import platform.Foundation.NSBundleResourceRequest
  * or assets are present as Initial Install Tags.
  */
 class IOSMapAvailabilityChecker : MapAvailabilityChecker {
-    private val tag = "IOSMapAvailabilityChecker"
     private val tracked = mutableSetOf<String>()
     private val _mapStates = MutableStateFlow<Map<String, Boolean>>(emptyMap())
     override val mapStates: StateFlow<Map<String, Boolean>> = _mapStates
 
     // Prevent GC and allow pinning for explicitly requested maps
-    private val probeRequests = mutableSetOf<NSBundleResourceRequest>() // short-lived, conditional probes
     private val pinnedRequests = mutableMapOf<String, NSBundleResourceRequest>() // long-lived, explicit downloads
 
     private val initialTags: Set<String> by lazy {
@@ -75,6 +73,10 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
         pinnedRequests[eventId] = req
         req.beginAccessingResourcesWithCompletionHandler { error ->
             val ok = (error == null)
+            if (ok) {
+                com.worldwidewaves.shared.data.MapDownloadGate
+                    .allow(eventId)
+            }
             val m = _mapStates.value.toMutableMap()
             m[eventId] = ok || inPersistentCache(eventId)
             _mapStates.value = m
@@ -90,9 +92,11 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
 
     // Call this when you want to allow purge:
     fun releaseDownloadedMap(eventId: String) {
-        pinnedRequests.remove(eventId)?.let { r ->
+        com.worldwidewaves.shared.data.MapDownloadGate
+            .disallow(eventId)
+        pinnedRequests.remove(eventId)?.let {
             try {
-                r.endAccessingResources()
+                it.endAccessingResources()
             } catch (_: Throwable) {
             }
         }

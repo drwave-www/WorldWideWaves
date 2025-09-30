@@ -55,6 +55,26 @@ expect suspend fun platformFetchToFile(
 private val unavailable = mutableSetOf<String>()
 private val lock = Mutex()
 
+object MapDownloadGate {
+    private val allowed = mutableSetOf<String>()
+
+    fun allow(tag: String) {
+        allowed += tag
+    }
+
+    fun disallow(tag: String) {
+        allowed -= tag
+    }
+
+    fun isAllowed(tag: String) = tag in allowed
+}
+
+expect fun platformTryCopyInitialTagToCache(
+    eventId: String,
+    extension: String,
+    destAbsolutePath: String,
+): Boolean
+
 /** Clear the “unavailable” session cache + in-memory geojson cache. */
 fun clearUnavailableGeoJsonCache(eventId: String) {
     unavailable.remove(eventId)
@@ -78,17 +98,13 @@ suspend fun readGeoJson(eventId: String): String? {
 }
 
 /** Single, shared implementation for both Android & iOS. */
+// commonMain (MapStore)
 suspend fun getMapFileAbsolutePath(
     eventId: String,
     extension: String,
 ): String? =
     lock.withLock {
-        Log.d("MapStore", "getMapFileAbsolutePath: Getting $eventId.$extension")
-
-        if (extension == "geojson" && unavailable.contains(eventId)) {
-            Log.d("MapStore", "getMapFileAbsolutePath: $eventId marked as unavailable")
-            return null
-        }
+        if (extension == "geojson" && unavailable.contains(eventId)) return null
 
         val root = platformCacheRoot().also { platformEnsureDir(it) }
         val fileName = "$eventId.$extension"
@@ -96,33 +112,32 @@ suspend fun getMapFileAbsolutePath(
         val meta = metaPath(root, fileName)
         val stamp = platformAppVersionStamp()
 
-        // Fast path: valid cached copy with matching app stamp
-        if (platformFileExists(dataPath) && platformFileExists(meta)) {
-            val cachedStamp = runCatching { platformReadText(meta) }.getOrNull()
-            if (cachedStamp == stamp) {
-                Log.i("MapStore", "getMapFileAbsolutePath: Using cached $fileName")
-                return dataPath
-            }
-            // stale -> drop and refetch
-            Log.d("MapStore", "getMapFileAbsolutePath: Stale cache for $fileName, refetching")
-            runCatching { platformDeleteFile(dataPath) }
-            runCatching { platformDeleteFile(meta) }
+        // cache hit
+        if (platformFileExists(dataPath) &&
+            platformFileExists(meta) &&
+            runCatching { platformReadText(meta) }.getOrNull() == stamp
+        ) {
+            return dataPath
         }
 
-        // Fetch (mount ODR / open split / copy stream -> persistent cache)
-        Log.d("MapStore", "getMapFileAbsolutePath: Fetching $fileName from platform")
-        val ok = platformFetchToFile(eventId, extension, dataPath)
-        if (!ok) {
-            Log.w("MapStore", "getMapFileAbsolutePath: Failed to fetch $fileName")
-            if (extension == "geojson") unavailable.add(eventId)
+        // downloads disallowed → try copying from currently-visible bundle/split (no mount)
+        if (!MapDownloadGate.isAllowed(eventId)) {
+            if (platformTryCopyInitialTagToCache(eventId, extension, dataPath)) {
+                platformWriteText(meta, stamp)
+                if (extension == "geojson") platformInvalidateGeoJson(eventId)
+                return dataPath
+            }
             return null
         }
 
-        // Mark with current app stamp and invalidate in-memory caches where needed
-        runCatching { platformWriteText(meta, stamp) }
+        // explicit download
+        val ok = platformFetchToFile(eventId, extension, dataPath)
+        if (!ok) {
+            if (extension == "geojson") unavailable.add(eventId)
+            return null
+        }
+        platformWriteText(meta, stamp)
         if (extension == "geojson") platformInvalidateGeoJson(eventId)
-
-        Log.i("MapStore", "getMapFileAbsolutePath: Successfully fetched $fileName")
         return dataPath
     }
 

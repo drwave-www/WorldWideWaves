@@ -40,6 +40,20 @@ private const val TAG = "MapStore"
 
 private fun ctx(): Context = inject<Context>(Context::class.java).value
 
+object ODRDownloadGate {
+    private val allowed = mutableSetOf<String>()
+
+    fun allow(tag: String) {
+        allowed += tag
+    }
+
+    fun disallow(tag: String) {
+        allowed -= tag
+    }
+
+    fun isAllowed(tag: String) = tag in allowed
+}
+
 // ---- platform shims ----
 actual fun platformCacheRoot(): String = ctx().cacheDir.absolutePath
 

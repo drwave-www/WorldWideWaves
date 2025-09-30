@@ -47,7 +47,10 @@ object ODRPaths {
     fun bundleHas(eventId: String): Boolean = resolve(eventId, "geojson") != null || resolve(eventId, "mbtiles") != null
 
     /** Resolve absolute path for an ODR resource, being defensive about layout. */
-    fun resolve(eventId: String, extension: String): String? {
+    fun resolve(
+        eventId: String,
+        extension: String,
+    ): String? {
         val b = NSBundle.mainBundle
         val subs = arrayOf("Maps/$eventId", "worldwidewaves/Maps/$eventId", null)
         for (sub in subs) {
@@ -56,11 +59,12 @@ object ODRPaths {
         }
         val any = b.URLsForResourcesWithExtension(extension, null)
         val urls = any?.mapNotNull { it as? NSURL } ?: emptyList()
-        return urls.firstOrNull { url ->
-            val p = url.path ?: ""
-            p.endsWith("/$eventId.$extension") ||
+        return urls
+            .firstOrNull { url ->
+                val p = url.path ?: ""
+                p.endsWith("/$eventId.$extension") ||
                     p.contains("/Maps/$eventId/")
-        }?.path
+            }?.path
     }
 }
 
@@ -80,6 +84,17 @@ private fun appSupportMapsDir(): String {
     val mapsUrl = requireNotNull(baseUrl.URLByAppendingPathComponent("Maps"))
     fm.createDirectoryAtURL(mapsUrl, withIntermediateDirectories = true, attributes = null, error = null)
     return mapsUrl.path ?: (NSTemporaryDirectory() + "/Maps")
+}
+
+actual fun platformTryCopyInitialTagToCache(
+    eventId: String,
+    extension: String,
+    destAbsolutePath: String,
+): Boolean {
+    val src = ODRPaths.resolve(eventId, extension) ?: return false // no mount, just visible?
+    val fm = NSFileManager.defaultManager
+    if (fm.fileExistsAtPath(destAbsolutePath)) fm.removeItemAtPath(destAbsolutePath, null)
+    return fm.copyItemAtPath(src, destAbsolutePath, null)
 }
 
 // ---------- platform shims ----------
