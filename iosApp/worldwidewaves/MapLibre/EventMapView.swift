@@ -34,37 +34,37 @@ struct EventMapView: UIViewRepresentable {
     @Binding var wrapper: MapLibreViewWrapper?
 
     func makeUIView(context: Context) -> MLNMapView {
-        WWWLog.i(tag, "makeUIView - Creating map view")
-        WWWLog.d(tag, "Style URL: \(styleURL)")
-        WWWLog.d(tag, "Initial position: lat=\(initialLatitude), lng=\(initialLongitude), zoom=\(initialZoom)")
+        WWWLog.i(Self.tag, "makeUIView - Creating map view")
+        WWWLog.d(Self.tag, "Style URL: \(styleURL)")
+        WWWLog.d(Self.tag, "Initial position: lat=\(initialLatitude), lng=\(initialLongitude), zoom=\(initialZoom)")
 
         let mapView = MLNMapView(frame: .zero)
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
-        WWWLog.d(tag, "Map view created, frame: \(mapView.frame)")
+        WWWLog.d(Self.tag, "Map view created, frame: \(mapView.frame)")
 
         // Set initial camera position
         let coordinate = CLLocationCoordinate2D(latitude: initialLatitude, longitude: initialLongitude)
         mapView.setCenter(coordinate, zoomLevel: initialZoom, animated: false)
-        WWWLog.d(tag, "Camera position set")
+        WWWLog.d(Self.tag, "Camera position set")
 
         // Set style URL
         if let url = URL(string: styleURL) {
             mapView.styleURL = url
-            WWWLog.d(tag, "Style URL set on map view")
+            WWWLog.d(Self.tag, "Style URL set on map view")
         } else {
-            WWWLog.e(tag, "Invalid style URL: \(styleURL)")
+            WWWLog.e(Self.tag, "Invalid style URL: \(styleURL)")
         }
 
         // Create wrapper and bind to the map view
         let mapWrapper = MapLibreViewWrapper()
         mapWrapper.setMapView(mapView)
-        WWWLog.d(tag, "Wrapper bound to map view")
+        WWWLog.d(Self.tag, "Wrapper bound to map view")
 
         // Update binding
         DispatchQueue.main.async {
             self.wrapper = mapWrapper
-            WWWLog.d(tag, "Wrapper binding updated in main thread")
+            WWWLog.d(Self.tag, "Wrapper binding updated in main thread")
         }
 
         return mapView
