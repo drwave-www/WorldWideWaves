@@ -257,7 +257,7 @@ private suspend fun cacheAssetFromContext(
  * returns `false` to simulate the absence of cached files.
  *
  */
-actual fun cachedFileExists(fileName: String): Boolean {
+actual suspend fun cachedFileExists(fileName: String): Boolean {
     val context: Context by inject(Context::class.java)
     val isDevelopmentMode = Build.HARDWARE == "ranchu" || Build.HARDWARE == "goldfish"
 
@@ -284,7 +284,7 @@ actual fun cachedFileExists(fileName: String): Boolean {
  * it returns `null`.
  *
  */
-actual fun cachedFilePath(fileName: String): String? {
+actual suspend fun cachedFilePath(fileName: String): String? {
     val context: Context by inject(Context::class.java)
     return File(context.cacheDir, fileName).takeIf { it.exists() }?.toURI()?.path
 }

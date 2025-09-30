@@ -116,9 +116,9 @@ expect suspend fun getMapFileAbsolutePath(
     extension: String,
 ): String?
 
-expect fun cachedFileExists(fileName: String): Boolean
+expect suspend fun cachedFileExists(fileName: String): Boolean
 
-expect fun cachedFilePath(fileName: String): String?
+expect suspend fun cachedFilePath(fileName: String): String?
 
 expect fun cacheStringToFile(
     fileName: String,

@@ -13,6 +13,10 @@
 			</array>
 		</dict>
 	</array>
+	<key>NSOnDemandResourcesInitialInstallTags</key>
+	<array>
+		<string>paris_france</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
