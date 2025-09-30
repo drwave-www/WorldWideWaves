@@ -19,87 +19,171 @@ package com.worldwidewaves.shared.domain.usecases
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-import kotlinx.cinterop.ExperimentalForeignApi
+import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import platform.Foundation.NSBundle
 import platform.Foundation.NSBundleResourceRequest
+import platform.darwin.DISPATCH_TIME_NOW
+import platform.darwin.NSEC_PER_MSEC
+import platform.darwin.dispatch_semaphore_create
+import platform.darwin.dispatch_semaphore_signal
+import platform.darwin.dispatch_semaphore_wait
+import platform.darwin.dispatch_time
 
 /**
- * Minimal iOS shim: ODR is mounted ad-hoc by platform code; this class only
- * fulfils the MapAvailabilityChecker interface so other modules compile.
+ * iOS ODR availability checker.
+ * No downloads occur unless requestMapDownload(...) is called,
+ * or assets are present as Initial Install Tags.
  */
 class IOSMapAvailabilityChecker : MapAvailabilityChecker {
+    private val tag = "IOSMapAvailabilityChecker"
     private val tracked = mutableSetOf<String>()
-
     private val _mapStates = MutableStateFlow<Map<String, Boolean>>(emptyMap())
     override val mapStates: StateFlow<Map<String, Boolean>> = _mapStates
-    private val probeRequests = mutableSetOf<NSBundleResourceRequest>()
+
+    // Prevent GC and allow pinning for explicitly requested maps
+    private val probeRequests = mutableSetOf<NSBundleResourceRequest>() // short-lived, conditional probes
+    private val pinnedRequests = mutableMapOf<String, NSBundleResourceRequest>() // long-lived, explicit downloads
 
     override fun trackMaps(mapIds: Collection<String>) {
         if (mapIds.isEmpty()) return
         tracked += mapIds
-        // best-effort state (true only if file is already in bundle as an initial tag)
         val updated = _mapStates.value.toMutableMap()
-        for (id in mapIds) updated[id] = isMapDownloaded(id)
+        for (id in mapIds) updated[id] = isMapDownloaded(id) // non-downloading checks
         _mapStates.value = updated
     }
 
     override fun refreshAvailability() {
         if (tracked.isEmpty()) return
         val updated = mutableMapOf<String, Boolean>()
-        for (id in tracked) updated[id] = isMapDownloaded(id)
+        for (id in tracked) updated[id] = isMapDownloaded(id) // non-downloading checks
         _mapStates.value = updated
     }
 
+    /** Explicit download+cache. Pins the pack until you call requestMapDownload again with force=false or implement a release. */
     override fun requestMapDownload(eventId: String) {
-        // no-op — downloads/mounting are performed ad-hoc by platform code (NSBundleResourceRequest)
+        if (pinnedRequests.containsKey(eventId)) return
+        val req = NSBundleResourceRequest(setOf(eventId)).apply { loadingPriority = 1.0 }
+        pinnedRequests[eventId] = req
+        req.beginAccessingResourcesWithCompletionHandler { error ->
+            val ok = (error == null)
+            val m = _mapStates.value.toMutableMap()
+            m[eventId] = ok
+            _mapStates.value = m
+            if (!ok) {
+                try {
+                    req.endAccessingResources()
+                } catch (_: Throwable) {
+                }
+                pinnedRequests.remove(eventId)
+            }
+        }
     }
 
-    // Keep strong refs until callbacks fire
-
-    @OptIn(ExperimentalForeignApi::class)
-    override fun isMapDownloaded(eventId: String): Boolean {
-        val b = NSBundle.mainBundle
-        val subs: Array<String?> = arrayOf("worldwidewaves/Maps/$eventId", "Maps/$eventId", null)
-        val visible = subs.any { sub ->
-            b.pathForResource(eventId, "geojson", sub) != null ||
-                    b.pathForResource(eventId, "mbtiles", sub) != null
+    // Call this when you want to allow purge:
+    fun releaseDownloadedMap(eventId: String) {
+        pinnedRequests.remove(eventId)?.let { r ->
+            try {
+                r.endAccessingResources()
+            } catch (_: Throwable) {
+            }
         }
-        if (visible) {
-            if (_mapStates.value[eventId] != true) {
-                val m = _mapStates.value.toMutableMap()
+    }
+
+    // ---------- Non-downloading checks ----------
+
+    override fun isMapDownloaded(eventId: String): Boolean {
+        // 1) Fast path: persistent cache already has a copy → downloaded.
+        //    Mirror your MapStore cache rule.
+        val cacheRoot =
+            com.worldwidewaves.shared.data
+                .platformCacheRoot()
+        val fm = platform.Foundation.NSFileManager.defaultManager
+        val inCache =
+            fm.fileExistsAtPath("$cacheRoot/$eventId.geojson") ||
+                fm.fileExistsAtPath("$cacheRoot/$eventId.mbtiles")
+
+        if (inCache) {
+            val m = _mapStates.value.toMutableMap()
+            if (m[eventId] != true) {
                 m[eventId] = true
                 _mapStates.value = m
             }
+            Log.d(tag, "$eventId map download status : true")
             return true
         }
 
-        // Not visible → probe without downloading
-        conditionallyProbe(eventId)
-        return false
+        // 2) If the pack is currently mounted or an initial tag, Bundle may already expose it.
+        if (com.worldwidewaves.shared.data.ODRPaths
+                .bundleHas(eventId)
+        ) {
+            val m = _mapStates.value.toMutableMap()
+            if (m[eventId] != true) {
+                m[eventId] = true
+                _mapStates.value = m
+            }
+            Log.d(tag, "$eventId map download status : true")
+            return true
+        }
+
+        // 3) ODR “available without download?” probe. Do not mount or download.
+        return if (!platform.Foundation.NSThread.isMainThread) {
+            val ok = conditionallyIsAvailableSync(eventId, timeoutMs = 100)
+            val m = _mapStates.value.toMutableMap()
+            m[eventId] = ok
+            _mapStates.value = m
+            Log.d(tag, "$eventId map download status : $ok")
+            ok
+        } else {
+            conditionallyProbe(eventId)
+            Log.d(tag, "$eventId map download status : false")
+            false
+        }
     }
 
-    @OptIn(ExperimentalForeignApi::class)
+    // Synchronous, non-downloading availability check. Do NOT call on main thread.
+    private fun conditionallyIsAvailableSync(
+        tag: String,
+        timeoutMs: Long,
+    ): Boolean {
+        val req = NSBundleResourceRequest(setOf(tag))
+        probeRequests.add(req)
+        var available = false
+        val sem = dispatch_semaphore_create(0)
+        req.conditionallyBeginAccessingResourcesWithCompletionHandler { ok ->
+            available = ok
+            if (ok) {
+                try {
+                    req.endAccessingResources()
+                } catch (_: Throwable) {
+                }
+            }
+            dispatch_semaphore_signal(sem)
+        }
+        val t =
+            if (timeoutMs <= 0) {
+                DISPATCH_TIME_NOW
+            } else {
+                dispatch_time(DISPATCH_TIME_NOW, timeoutMs * NSEC_PER_MSEC.toLong())
+            }
+        dispatch_semaphore_wait(sem, t)
+        probeRequests.remove(req)
+        return available
+    }
+
     private fun conditionallyProbe(tag: String) {
         val req = NSBundleResourceRequest(setOf(tag))
-        probeRequests.add(req) // strong ref for lifetime of the async probe
-
+        probeRequests.add(req)
         req.conditionallyBeginAccessingResourcesWithCompletionHandler { available ->
-            // End access immediately; this was only a probe
-            if (available) try { req.endAccessingResources() } catch (_: Throwable) {}
-
-            val b = NSBundle.mainBundle
-            val subs: Array<String?> = arrayOf("worldwidewaves/Maps/$tag", "Maps/$tag", null)
-            val visible = subs.any { sub ->
-                b.pathForResource(tag, "geojson", sub) != null ||
-                        b.pathForResource(tag, "mbtiles", sub) != null
+            if (available) {
+                try {
+                    req.endAccessingResources()
+                } catch (_: Throwable) {
+                }
             }
-
             val m = _mapStates.value.toMutableMap()
-            m[tag] = available && visible
+            m[tag] = available
             _mapStates.value = m
-
             probeRequests.remove(req)
         }
     }

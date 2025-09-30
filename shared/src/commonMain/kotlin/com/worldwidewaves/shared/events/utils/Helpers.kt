@@ -279,10 +279,6 @@ class DefaultGeoJsonDataProvider :
                 }
 
             if (timeSinceLastAttempt < minDelay) {
-//                Log.v(
-//                    ::getGeoJsonData.name,
-//                    "Rate limiting $eventId: last attempt ${timeSinceLastAttempt.inWholeSeconds}s ago, need ${minDelay.inWholeSeconds}s (attempt $attempts)",
-//                )
                 return null // Return null without incrementing attempts
             }
 

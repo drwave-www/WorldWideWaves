@@ -83,8 +83,13 @@ actual suspend fun platformFetchToFile(
     destAbsolutePath: String,
 ): Boolean =
     withContext(Dispatchers.IO) {
+        Log.d(TAG, "platformFetchToFile: Fetching $eventId.$extension to $destAbsolutePath")
+
         val mapChecker: MapAvailabilityChecker by inject(MapAvailabilityChecker::class.java)
-        if (!mapChecker.isMapDownloaded(eventId)) return@withContext false
+        if (!mapChecker.isMapDownloaded(eventId)) {
+            Log.w(TAG, "platformFetchToFile: Map $eventId not downloaded, aborting")
+            return@withContext false
+        }
 
         val context: Context by inject(Context::class.java)
         val assetName = "$eventId.$extension"
@@ -94,6 +99,8 @@ actual suspend fun platformFetchToFile(
 
         for (attempt in 0 until 3) {
             try {
+                Log.d(TAG, "platformFetchToFile: Attempt ${attempt + 1}/3 for $assetName")
+
                 val base = context
                 val splitCtx =
                     if (Build.VERSION.SDK_INT >= 26) {
@@ -123,9 +130,11 @@ actual suspend fun platformFetchToFile(
                 }
 
                 success = true
+                Log.i(TAG, "platformFetchToFile: Successfully fetched $assetName")
                 break
             } catch (e: FileNotFoundException) {
                 last = e
+                Log.w(TAG, "platformFetchToFile: Asset $assetName not found (attempt ${attempt + 1}/3)")
                 if (attempt < 2) delay(120)
             } catch (e: Exception) {
                 last = e
@@ -133,7 +142,9 @@ actual suspend fun platformFetchToFile(
             }
         }
 
-        if (!success) Log.d(TAG, "platformFetchToFile($eventId.$extension) failed: ${last?.message}")
+        if (!success) {
+            Log.e(TAG, "platformFetchToFile: Failed to fetch $eventId.$extension after 3 attempts: ${last?.message}")
+        }
         success
     }
 

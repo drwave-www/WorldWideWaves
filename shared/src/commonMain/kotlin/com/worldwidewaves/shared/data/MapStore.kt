@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.data
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -66,7 +67,13 @@ private fun metaPath(
 ) = "$root/$name.metadata"
 
 suspend fun readGeoJson(eventId: String): String? {
-    val p = getMapFileAbsolutePath(eventId, "geojson") ?: return null
+    Log.d("MapStore", "readGeoJson: Reading GeoJSON for $eventId")
+    val p = getMapFileAbsolutePath(eventId, "geojson")
+    if (p == null) {
+        Log.w("MapStore", "readGeoJson: No file path for $eventId")
+        return null
+    }
+    Log.d("MapStore", "readGeoJson: Reading from $p")
     return platformReadText(p)
 }
 
@@ -76,7 +83,12 @@ suspend fun getMapFileAbsolutePath(
     extension: String,
 ): String? =
     lock.withLock {
-        if (extension == "geojson" && unavailable.contains(eventId)) return null
+        Log.d("MapStore", "getMapFileAbsolutePath: Getting $eventId.$extension")
+
+        if (extension == "geojson" && unavailable.contains(eventId)) {
+            Log.d("MapStore", "getMapFileAbsolutePath: $eventId marked as unavailable")
+            return null
+        }
 
         val root = platformCacheRoot().also { platformEnsureDir(it) }
         val fileName = "$eventId.$extension"
@@ -87,15 +99,21 @@ suspend fun getMapFileAbsolutePath(
         // Fast path: valid cached copy with matching app stamp
         if (platformFileExists(dataPath) && platformFileExists(meta)) {
             val cachedStamp = runCatching { platformReadText(meta) }.getOrNull()
-            if (cachedStamp == stamp) return dataPath
+            if (cachedStamp == stamp) {
+                Log.i("MapStore", "getMapFileAbsolutePath: Using cached $fileName")
+                return dataPath
+            }
             // stale -> drop and refetch
+            Log.d("MapStore", "getMapFileAbsolutePath: Stale cache for $fileName, refetching")
             runCatching { platformDeleteFile(dataPath) }
             runCatching { platformDeleteFile(meta) }
         }
 
         // Fetch (mount ODR / open split / copy stream -> persistent cache)
+        Log.d("MapStore", "getMapFileAbsolutePath: Fetching $fileName from platform")
         val ok = platformFetchToFile(eventId, extension, dataPath)
         if (!ok) {
+            Log.w("MapStore", "getMapFileAbsolutePath: Failed to fetch $fileName")
             if (extension == "geojson") unavailable.add(eventId)
             return null
         }
@@ -104,6 +122,7 @@ suspend fun getMapFileAbsolutePath(
         runCatching { platformWriteText(meta, stamp) }
         if (extension == "geojson") platformInvalidateGeoJson(eventId)
 
+        Log.i("MapStore", "getMapFileAbsolutePath: Successfully fetched $fileName")
         return dataPath
     }
 
