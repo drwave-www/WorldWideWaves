@@ -7,6 +7,7 @@ package com.worldwidewaves.shared.map
  * https://www.apache.org/licenses/LICENSE-2.0
  */
 
+import com.worldwidewaves.shared.utils.Log
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -47,10 +48,15 @@ class IOSPlatformMapManager(
     /** Returns true if a typical file for this tag is visible in the bundle right now. */
     @OptIn(ExperimentalForeignApi::class)
     override fun isMapAvailable(mapId: String): Boolean {
+        Log.d(TAG, "Checking map availability for: $mapId")
         // Consider either .geojson or .mbtiles as proof of availability.
         val sub = "Maps/$mapId"
-        val hasGeo = NSBundle.mainBundle.pathForResource(mapId, "geojson", sub) != null
-        val hasMb = NSBundle.mainBundle.pathForResource(mapId, "mbtiles", sub) != null
+        val geoPath = NSBundle.mainBundle.pathForResource(mapId, "geojson", sub)
+        val mbPath = NSBundle.mainBundle.pathForResource(mapId, "mbtiles", sub)
+        val hasGeo = geoPath != null
+        val hasMb = mbPath != null
+
+        Log.d(TAG, "Map availability check: mapId=$mapId, hasGeo=$hasGeo (path=$geoPath), hasMb=$hasMb (path=$mbPath)")
         return hasGeo || hasMb
     }
 
@@ -65,30 +71,46 @@ class IOSPlatformMapManager(
         onSuccess: () -> Unit,
         onError: (code: Int, message: String?) -> Unit,
     ) {
+        Log.i(TAG, "📥 Starting ODR download for mapId: $mapId")
         scope.launch {
             val req =
                 mutex.withLock {
                     requests.getOrPut(mapId) {
+                        Log.d(TAG, "Creating new NSBundleResourceRequest for tag: $mapId")
                         NSBundleResourceRequest(setOf(mapId)).also { it.loadingPriority = 1.0 }
                     }
                 }
 
             // start a progress ticker up to 90 while waiting
+            Log.d(TAG, "Starting progress ticker for: $mapId")
             startProgressTicker(mapId, onProgress)
 
+            Log.d(TAG, "Calling beginAccessingResources for: $mapId")
             req.beginAccessingResourcesWithCompletionHandler { nsError ->
                 scope.launch(callbackDispatcher) {
                     // Always finish at 100 for UX determinism (even on failure)
                     onProgress(100)
 
-                    val ok = nsError == null && isMapAvailable(mapId)
+                    if (nsError != null) {
+                        Log.e(TAG, "ODR request failed for $mapId: code=${nsError.code}, message=${nsError.localizedDescription}")
+                    }
+
+                    val isAvailable = isMapAvailable(mapId)
+                    val ok = nsError == null && isAvailable
+                    Log.i(TAG, "ODR completion: mapId=$mapId, error=$nsError, isAvailable=$isAvailable, ok=$ok")
+
                     if (ok) {
+                        Log.i(TAG, "✅ Map download SUCCESS for: $mapId")
                         onSuccess()
                     } else {
-                        onError(nsError?.code?.toInt() ?: -1, nsError?.localizedDescription ?: "ODR/bundle error")
+                        val errorCode = nsError?.code?.toInt() ?: -1
+                        val errorMsg = nsError?.localizedDescription ?: "ODR/bundle error"
+                        Log.e(TAG, "❌ Map download FAILED for: $mapId (code=$errorCode, message=$errorMsg)")
+                        onError(errorCode, errorMsg)
                     }
 
                     // Cleanup: stop ticker + release access (we mount again when reading)
+                    Log.d(TAG, "Cleaning up ODR request for: $mapId")
                     cancelProgressTicker(mapId)
                     scope.launch { endRequest(mapId) }
                 }
@@ -98,6 +120,7 @@ class IOSPlatformMapManager(
 
     /** Cancel an ongoing download (no-op if none). */
     override fun cancelDownload(mapId: String) {
+        Log.i(TAG, "Cancelling download for: $mapId")
         scope.launch {
             cancelProgressTicker(mapId)
             endRequest(mapId)
@@ -111,8 +134,12 @@ class IOSPlatformMapManager(
         onProgress: (Int) -> Unit,
     ) {
         // If a ticker is already running, do nothing.
-        if (progressJobs[mapId]?.isActive == true) return
+        if (progressJobs[mapId]?.isActive == true) {
+            Log.d(TAG, "Progress ticker already running for: $mapId")
+            return
+        }
 
+        Log.d(TAG, "Starting progress ticker for: $mapId")
         progressJobs[mapId] =
             scope.launch(callbackDispatcher) {
                 var p = 0
@@ -121,12 +148,14 @@ class IOSPlatformMapManager(
                     delay(PROGRESS_TICK_DELAY_MS)
                     p += PROGRESS_INCREMENT
                     if (p > PROGRESS_MAX_BEFORE_COMPLETION) p = PROGRESS_MAX_BEFORE_COMPLETION
+                    Log.v(TAG, "Progress tick for $mapId: $p%")
                     onProgress(p)
                 }
             }
     }
 
     companion object {
+        private const val TAG = "IOSPlatformMapManager"
         private const val PROGRESS_TICK_DELAY_MS = 1000L
         private const val PROGRESS_INCREMENT = 10
         private const val PROGRESS_MAX_BEFORE_COMPLETION = 90
