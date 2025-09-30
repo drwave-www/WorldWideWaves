@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.map
  */
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,9 +33,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,12 +53,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.position.PositionManager
+import com.worldwidewaves.shared.ui.components.DownloadProgressIndicator
+import com.worldwidewaves.shared.ui.components.LoadingIndicator
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import org.koin.mp.KoinPlatform
 import platform.UIKit.UIImage
 
@@ -187,6 +195,108 @@ class IOSEventMap(
                             textAlign = TextAlign.Center,
                         )
                     }
+                }
+            }
+
+            // Download overlay UI (matching Android behavior)
+            when {
+                downloadState.isDownloading && downloadState.error == null ->
+                    MapDownloadOverlay(
+                        progress = downloadState.progress,
+                        onCancel = { downloadCoordinator.cancelDownload(event.id) },
+                    )
+
+                downloadState.error != null ->
+                    MapErrorOverlay(
+                        errorMessage = downloadState.error!!,
+                        onRetry = {
+                            MainScope().launch {
+                                downloadCoordinator.downloadMap(event.id)
+                            }
+                        },
+                    )
+
+                !downloadState.isAvailable && !downloadState.isDownloading ->
+                    MapDownloadButton {
+                        kotlinx.coroutines.MainScope().launch {
+                            downloadCoordinator.downloadMap(event.id)
+                        }
+                    }
+            }
+        }
+    }
+
+    @Composable
+    @Suppress("FunctionName")
+    private fun MapDownloadOverlay(
+        progress: Int,
+        onCancel: () -> Unit,
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
+        ) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                if (progress > 0) {
+                    DownloadProgressIndicator(
+                        progress = progress,
+                        message = stringResource(MokoRes.strings.map_downloading),
+                        onCancel = onCancel,
+                    )
+                } else {
+                    LoadingIndicator(message = stringResource(MokoRes.strings.map_starting_download))
+                }
+            }
+        }
+    }
+
+    @Composable
+    @Suppress("FunctionName")
+    private fun MapErrorOverlay(
+        errorMessage: String,
+        onRetry: () -> Unit,
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background.copy(alpha = 0.9f),
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = "Download Failed",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = errorMessage,
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = onRetry) {
+                    Text("Retry")
+                }
+            }
+        }
+    }
+
+    @Composable
+    @Suppress("FunctionName")
+    private fun MapDownloadButton(onClick: () -> Unit) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
+        ) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Button(onClick = onClick) {
+                    Text(
+                        text = stringResource(MokoRes.strings.map_download),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
                 }
             }
         }
