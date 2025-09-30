@@ -45,34 +45,20 @@ class IOSPlatformMapManager(
     private val progressJobs = mutableMapOf<String, Job>()
     private val mutex = Mutex()
 
-    /** Returns true if a typical file for this tag is visible in the bundle right now. */
+    /**
+     * Returns true if a typical file for this tag is visible in the bundle right now.
+     * Uses URLsForResourcesWithExtension (same as MapStore ODRPaths.resolve) which works reliably.
+     */
     @OptIn(ExperimentalForeignApi::class)
     override fun isMapAvailable(mapId: String): Boolean {
         Log.d(TAG, "Checking map availability for: $mapId")
-        // Try multiple approaches to locate the file
-        // Approach 1: Direct path in subdirectory
-        val sub = "Maps/$mapId"
-        val geoPath1 = NSBundle.mainBundle.pathForResource(mapId, "geojson", sub)
-        val mbPath1 = NSBundle.mainBundle.pathForResource(mapId, "mbtiles", sub)
 
-        // Approach 2: Search in bundle without subdirectory
-        val geoPath2 = NSBundle.mainBundle.pathForResource(mapId, "geojson")
-        val mbPath2 = NSBundle.mainBundle.pathForResource(mapId, "mbtiles")
+        // Use the SAME successful approach as ODRPaths.resolve() from MapStore.ios.kt
+        // URLsForResourcesWithExtension() does a global search and actually WORKS
+        val hasGeo = findResourceByExtensionSearch(mapId, "geojson") != null
+        val hasMb = findResourceByExtensionSearch(mapId, "mbtiles") != null
 
-        // Approach 3: Full path search
-        val geoPath3 = NSBundle.mainBundle.pathForResource("$mapId/$mapId", "geojson")
-        val mbPath3 = NSBundle.mainBundle.pathForResource("$mapId/$mapId", "mbtiles")
-
-        val hasGeo = geoPath1 != null || geoPath2 != null || geoPath3 != null
-        val hasMb = mbPath1 != null || mbPath2 != null || mbPath3 != null
-        val finalGeoPath = geoPath1 ?: geoPath2 ?: geoPath3
-        val finalMbPath = mbPath1 ?: mbPath2 ?: mbPath3
-
-        Log.d(TAG, "Map availability check: mapId=$mapId")
-        Log.d(TAG, "  GeoJson: hasGeo=$hasGeo, path=$finalGeoPath")
-        Log.d(TAG, "  MBTiles: hasMb=$hasMb, path=$finalMbPath")
-        Log.d(TAG, "  Approaches: sub=$geoPath1/$mbPath1, root=$geoPath2/$mbPath2, full=$geoPath3/$mbPath3")
-
+        Log.i(TAG, "Map availability: mapId=$mapId, hasGeo=$hasGeo, hasMb=$hasMb, available=${hasGeo || hasMb}")
         return hasGeo || hasMb
     }
 
@@ -168,6 +154,35 @@ class IOSPlatformMapManager(
                     onProgress(p)
                 }
             }
+    }
+
+    /**
+     * Find resource using global extension search (same as ODRPaths.resolve()).
+     * This approach works reliably where pathForResource() fails.
+     */
+    @OptIn(ExperimentalForeignApi::class)
+    private fun findResourceByExtensionSearch(
+        eventId: String,
+        extension: String,
+    ): String? {
+        val bundle = NSBundle.mainBundle
+        val any = bundle.URLsForResourcesWithExtension(extension, null)
+        val urls = any?.mapNotNull { it as? NSURL } ?: emptyList()
+
+        val foundUrl =
+            urls.firstOrNull { url ->
+                val p = url.path ?: ""
+                p.endsWith("/$eventId.$extension") ||
+                    p.contains("/Maps/$eventId/")
+            }
+
+        if (foundUrl != null) {
+            Log.d(TAG, "Found $extension file for $eventId: ${foundUrl.path}")
+        } else {
+            Log.d(TAG, "No $extension file found for $eventId (searched ${urls.size} total $extension files)")
+        }
+
+        return foundUrl?.path
     }
 
     companion object {
