@@ -19,9 +19,13 @@ package com.worldwidewaves.shared.domain.usecases
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import platform.Foundation.NSBundleResourceRequest
+import platform.Foundation.NSOperationQueue
 
 /**
  * iOS ODR availability checker.
@@ -32,6 +36,8 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
     private val tracked = mutableSetOf<String>()
     private val _mapStates = MutableStateFlow<Map<String, Boolean>>(emptyMap())
     override val mapStates: StateFlow<Map<String, Boolean>> = _mapStates
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     // Prevent GC and allow pinning for explicitly requested maps
     private val pinnedRequests = mutableMapOf<String, NSBundleResourceRequest>() // long-lived, explicit downloads
@@ -52,12 +58,24 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
             fm.fileExistsAtPath("$root/$eventId.mbtiles")
     }
 
+    private fun onMain(block: () -> Unit) {
+        NSOperationQueue.mainQueue.addOperationWithBlock(block)
+    }
+
     override fun trackMaps(mapIds: Collection<String>) {
         if (mapIds.isEmpty()) return
         tracked += mapIds
+
         val updated = _mapStates.value.toMutableMap()
-        for (id in mapIds) updated[id] = isMapDownloaded(id) // non-downloading checks
+        for (id in mapIds) updated[id] = isMapDownloaded(id)
         _mapStates.value = updated
+
+        // Auto-mount ONLY initial tags, on main
+        val toAuto =
+            mapIds.filter { id ->
+                id in initialTags && !inPersistentCache(id) && !pinnedRequests.containsKey(id)
+            }
+        toAuto.forEach { id -> onMain { requestMapDownload(id) } }
     }
 
     override fun refreshAvailability() {
@@ -68,36 +86,42 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
     }
 
     override fun requestMapDownload(eventId: String) {
-        if (pinnedRequests.containsKey(eventId)) return
-        val req = NSBundleResourceRequest(setOf(eventId)).apply { loadingPriority = 1.0 }
-        pinnedRequests[eventId] = req
-        req.beginAccessingResourcesWithCompletionHandler { error ->
-            val ok = (error == null)
-            if (ok) {
-                com.worldwidewaves.shared.data.MapDownloadGate
-                    .allow(eventId)
-            }
-            val m = _mapStates.value.toMutableMap()
-            m[eventId] = ok || inPersistentCache(eventId)
-            _mapStates.value = m
-            if (!ok) {
-                try {
-                    req.endAccessingResources()
-                } catch (_: Throwable) {
+        onMain {
+            if (pinnedRequests.containsKey(eventId)) return@onMain
+            val req = NSBundleResourceRequest(setOf(eventId)).apply { loadingPriority = 1.0 }
+            pinnedRequests[eventId] = req
+            req.beginAccessingResourcesWithCompletionHandler { error ->
+                onMain {
+                    val ok = (error == null)
+                    if (ok) {
+                        com.worldwidewaves.shared.data.MapDownloadGate
+                            .allow(eventId)
+                    }
+                    val m = _mapStates.value.toMutableMap()
+                    m[eventId] = ok || inPersistentCache(eventId)
+                    _mapStates.value = m
+                    if (!ok) {
+                        try {
+                            req.endAccessingResources()
+                        } catch (_: Throwable) {
+                        }
+                        pinnedRequests.remove(eventId)
+                    }
                 }
-                pinnedRequests.remove(eventId)
             }
         }
     }
 
     // Call this when you want to allow purge:
     fun releaseDownloadedMap(eventId: String) {
-        com.worldwidewaves.shared.data.MapDownloadGate
-            .disallow(eventId)
-        pinnedRequests.remove(eventId)?.let {
-            try {
-                it.endAccessingResources()
-            } catch (_: Throwable) {
+        onMain {
+            com.worldwidewaves.shared.data.MapDownloadGate
+                .disallow(eventId)
+            pinnedRequests.remove(eventId)?.let {
+                try {
+                    it.endAccessingResources()
+                } catch (_: Throwable) {
+                }
             }
         }
     }

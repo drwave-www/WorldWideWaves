@@ -30,6 +30,7 @@ import platform.Foundation.NSApplicationSupportDirectory
 import platform.Foundation.NSBundle
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSLog
+import platform.Foundation.NSOperationQueue
 import platform.Foundation.NSString
 import platform.Foundation.NSTemporaryDirectory
 import platform.Foundation.NSURL
@@ -42,6 +43,11 @@ import platform.Foundation.writeToFile
 import kotlin.coroutines.resume
 
 // ---------- ODR lookup helpers (shared) ----------
+
+private fun onMain(block: () -> Unit) {
+    NSOperationQueue.mainQueue.addOperationWithBlock(block)
+}
+
 object ODRPaths {
     /** True if Bundle currently exposes either <id>.geojson or <id>.mbtiles without mounting. */
     fun bundleHas(eventId: String): Boolean = resolve(eventId, "geojson") != null || resolve(eventId, "mbtiles") != null
@@ -139,59 +145,25 @@ actual suspend fun platformFetchToFile(
     extension: String,
     destAbsolutePath: String,
 ): Boolean {
-    NSLog("platformFetchToFile: Fetching %@.%@ to %@", eventId, extension, destAbsolutePath)
-
-    val request =
-        platform.Foundation.NSBundleResourceRequest(setOf(eventId)).apply {
-            loadingPriority = 1.0
-        }
-
+    val request = platform.Foundation.NSBundleResourceRequest(setOf(eventId)).apply { loadingPriority = 1.0 }
     try {
         val mounted =
-            suspendCancellableCoroutine { cont ->
-                request.beginAccessingResourcesWithCompletionHandler { error ->
-                    if (error != null) {
-                        NSLog(
-                            "platformFetchToFile: ODR mount failed for '%@': code=%ld domain=%@ desc=%@",
-                            eventId,
-                            error.code,
-                            error.domain,
-                            error.localizedDescription,
-                        )
-                    } else {
-                        NSLog("platformFetchToFile: ODR mount succeeded for %@", eventId)
+            suspendCancellableCoroutine<Boolean> { cont ->
+                onMain {
+                    request.beginAccessingResourcesWithCompletionHandler { error ->
+                        cont.resume(error == null)
                     }
-                    cont.resume(error == null)
                 }
-                cont.invokeOnCancellation { request.endAccessingResources() }
+                cont.invokeOnCancellation { onMain { request.endAccessingResources() } }
             }
-        if (!mounted) {
-            NSLog("platformFetchToFile: Mount failed for %@, aborting", eventId)
-            return false
-        }
+        if (!mounted) return false
 
-        val src = ODRPaths.resolve(eventId, extension)
-        if (src == null) {
-            NSLog("platformFetchToFile: Could not resolve %@.%@ in bundle", eventId, extension)
-            return false
-        }
-
-        NSLog("platformFetchToFile: Resolved source path: %@", src)
-
+        val src = ODRPaths.resolve(eventId, extension) ?: return false
         val fm = NSFileManager.defaultManager
-        if (fm.fileExistsAtPath(destAbsolutePath)) {
-            fm.removeItemAtPath(destAbsolutePath, null)
-        }
-
-        val success = fm.copyItemAtPath(src, destAbsolutePath, null)
-        if (success) {
-            NSLog("platformFetchToFile: Successfully copied %@.%@ to cache", eventId, extension)
-        } else {
-            NSLog("platformFetchToFile: Failed to copy %@.%@ to %@", eventId, extension, destAbsolutePath)
-        }
-        return success
+        if (fm.fileExistsAtPath(destAbsolutePath)) fm.removeItemAtPath(destAbsolutePath, null)
+        return fm.copyItemAtPath(src, destAbsolutePath, null)
     } finally {
-        request.endAccessingResources()
+        onMain { request.endAccessingResources() }
     }
 }
 

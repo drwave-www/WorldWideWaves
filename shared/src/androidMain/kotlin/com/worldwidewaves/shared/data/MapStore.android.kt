@@ -35,23 +35,65 @@ import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileNotFoundException
+import java.io.FileOutputStream
 
 private const val TAG = "MapStore"
 
 private fun ctx(): Context = inject<Context>(Context::class.java).value
 
-object ODRDownloadGate {
-    private val allowed = mutableSetOf<String>()
+actual fun platformTryCopyInitialTagToCache(
+    eventId: String,
+    extension: String,
+    destAbsolutePath: String,
+): Boolean {
+    val base = ctx()
+    val assetName = "$eventId.$extension"
+    val maxRetries = 3
+    val retryDelayMs = 100L
 
-    fun allow(tag: String) {
-        allowed += tag
+    for (attempt in 0 until maxRetries) {
+        try {
+            val splitCtx =
+                if (Build.VERSION.SDK_INT >= 26) {
+                    runCatching { base.createContextForSplit(eventId) }.getOrElse { base }
+                } else {
+                    base
+                }
+
+            SplitCompat.install(splitCtx)
+
+            val dest = File(destAbsolutePath)
+            dest.parentFile?.mkdirs()
+
+            splitCtx.assets.open(assetName).use { input ->
+                BufferedInputStream(input, 64 * 1024).use { bin ->
+                    FileOutputStream(dest).use { fos ->
+                        BufferedOutputStream(fos, 64 * 1024).use { bout ->
+                            val buf = ByteArray(64 * 1024)
+                            var n: Int
+                            while (bin.read(buf).also { n = it } != -1) bout.write(buf, 0, n)
+                            bout.flush()
+                        }
+                    }
+                }
+            }
+            Log.d(TAG, "platformTryCopyInitialTagToCache: copied $assetName → $destAbsolutePath")
+            return true
+        } catch (e: java.io.FileNotFoundException) {
+            if (attempt < maxRetries - 1) {
+                try {
+                    Thread.sleep(retryDelayMs)
+                } catch (_: InterruptedException) {
+                }
+            }
+        } catch (e: Exception) {
+            Log.d(TAG, "platformTryCopyInitialTagToCache: error for $assetName: ${e.message}")
+            return false
+        }
     }
 
-    fun disallow(tag: String) {
-        allowed -= tag
-    }
-
-    fun isAllowed(tag: String) = tag in allowed
+    Log.d(TAG, "platformTryCopyInitialTagToCache: not found for $assetName")
+    return false
 }
 
 // ---- platform shims ----

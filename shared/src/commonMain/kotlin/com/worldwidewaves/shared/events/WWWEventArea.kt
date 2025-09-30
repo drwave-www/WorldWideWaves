@@ -346,11 +346,13 @@ data class WWWEventArea(
                 // Polygon loading errors are handled gracefully - empty polygon list is acceptable
             }
 
-            // Atomically assign the complete immutable list
-            cachedAreaPolygons = tempPolygons.toList()
+            if (tempPolygons.isNotEmpty()) {
+                // Atomically assign the complete immutable list
+                cachedAreaPolygons = tempPolygons.toList()
 
-            // Notify that polygon data is now available
-            _polygonsLoaded.value = true
+                // Notify that polygon data is now available
+                _polygonsLoaded.value = true
+            }
         }
 
         val result = cachedAreaPolygons ?: emptyList()
