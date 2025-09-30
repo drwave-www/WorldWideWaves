@@ -23,11 +23,11 @@ package com.worldwidewaves.shared.events.utils
 
 import com.worldwidewaves.shared.WWWGlobals.FileSystem
 import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.data.readGeoJson
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.format.DateTimeFormats
 import com.worldwidewaves.shared.generated.resources.Res
-import com.worldwidewaves.shared.readGeoJson
 import com.worldwidewaves.shared.utils.Log
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineDispatcher
@@ -250,14 +250,53 @@ interface GeoJsonDataProvider {
     fun clearCache()
 }
 
-class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
+@OptIn(ExperimentalTime::class)
+class DefaultGeoJsonDataProvider :
+    GeoJsonDataProvider,
+    KoinComponent {
     private val cache = mutableMapOf<String, JsonObject?>()
+    private val lastAttemptTime = mutableMapOf<String, Instant>()
+    private val attemptCount = mutableMapOf<String, Int>()
 
     override suspend fun getGeoJsonData(eventId: String): JsonObject? {
         // Check cache first
         if (cache.containsKey(eventId)) {
             return cache[eventId]
         }
+
+        // Rate limiting for ODR requests to prevent infinite loops
+        val now = Clock.System.now()
+        val lastAttempt = lastAttemptTime[eventId]
+        val attempts = attemptCount[eventId] ?: 0
+
+        if (lastAttempt != null && isODRUnavailable(eventId)) {
+            val timeSinceLastAttempt = now - lastAttempt
+            val minDelay =
+                when {
+                    attempts < 3 -> Duration.parse("1s") // First 3 attempts: 1 second apart
+                    attempts < 10 -> Duration.parse("5s") // Next 7 attempts: 5 seconds apart
+                    else -> Duration.parse("30s") // After that: 30 seconds apart
+                }
+
+            if (timeSinceLastAttempt < minDelay) {
+//                Log.v(
+//                    ::getGeoJsonData.name,
+//                    "Rate limiting $eventId: last attempt ${timeSinceLastAttempt.inWholeSeconds}s ago, need ${minDelay.inWholeSeconds}s (attempt $attempts)",
+//                )
+                return null // Return null without incrementing attempts
+            }
+
+            // Stop trying after many attempts
+            if (attempts >= 20) {
+                Log.w(::getGeoJsonData.name, "Giving up on $eventId after $attempts attempts")
+                cache[eventId] = null // Cache the failure to stop retrying
+                return null
+            }
+        }
+
+        // Update attempt tracking
+        lastAttemptTime[eventId] = now
+        attemptCount[eventId] = attempts + 1
 
         // Not in cache, load and cache the result
         val result =
@@ -291,20 +330,56 @@ class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
                 null
             }
 
-        // Cache the result (even if null) to avoid repeated attempts
-        cache[eventId] = result
+        // Reset attempt tracking on successful load
+        if (result != null) {
+            lastAttemptTime.remove(eventId)
+            attemptCount.remove(eventId)
+            Log.v(::getGeoJsonData.name, "Successfully loaded $eventId, reset attempt tracking")
+        }
+
+        // Cache successful results. For null results, only cache if it's not due to ODR unavailability
+        // This allows retry when ODR resources become available later
+        val shouldCache = result != null || !isODRUnavailable(eventId)
+        if (shouldCache) {
+            cache[eventId] = result
+            Log.v(::getGeoJsonData.name, "Cached GeoJSON result for $eventId (success=${result != null})")
+        } else {
+            Log.i(::getGeoJsonData.name, "Not caching null result for $eventId (ODR may become available)")
+        }
+
         return result
     }
+
+    /**
+     * Check if GeoJSON failure is due to ODR resources being unavailable.
+     * On iOS, this allows retry when ODR downloads complete.
+     */
+    private fun isODRUnavailable(eventId: String): Boolean =
+        try {
+            // This is a platform-specific check - only meaningful on iOS
+            val platform = get<WWWPlatform>()
+            platform.name.contains("iOS", ignoreCase = true)
+        } catch (e: Exception) {
+            // If we can't determine platform, err on the side of allowing retry
+            Log.v(::isODRUnavailable.name, "Could not determine platform for ODR check: ${e.message}")
+            true
+        }
 
     override fun invalidateCache(eventId: String) {
         if (cache.remove(eventId) != null) {
             Log.d(::invalidateCache.name, "Invalidated cache for event $eventId")
         }
+        // Also reset attempt tracking to allow immediate retry
+        lastAttemptTime.remove(eventId)
+        attemptCount.remove(eventId)
+        Log.d(::invalidateCache.name, "Reset attempt tracking for $eventId")
     }
 
     override fun clearCache() {
         val size = cache.size
         cache.clear()
+        lastAttemptTime.clear()
+        attemptCount.clear()
         Log.d(::clearCache.name, "Cleared GeoJSON cache ($size entries)")
     }
 }
