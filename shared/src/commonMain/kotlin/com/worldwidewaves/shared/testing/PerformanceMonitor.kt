@@ -216,7 +216,8 @@ open class PerformanceMonitor : IPerformanceMonitor {
         const val MAX_CPU_PERCENT = 15.0
         const val CPU_PERCENT_PER_MINUTE = 0.5
 
-        // Time conversion constants
+        // Time conversion constants (currently unused but kept for future performance calculations)
+        @Suppress("UnusedPrivateProperty") // Reserved for future timing calculations
         private const val MICROSECONDS_PER_SECOND = 1_000_000.0
     }
 

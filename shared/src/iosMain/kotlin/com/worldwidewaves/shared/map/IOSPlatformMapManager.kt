@@ -117,13 +117,19 @@ class IOSPlatformMapManager(
             scope.launch(callbackDispatcher) {
                 var p = 0
                 onProgress(0)
-                while (isActive && p < 90) {
-                    delay(1000) // visible but conservative tick
-                    p += 10
-                    if (p > 90) p = 90
+                while (isActive && p < PROGRESS_MAX_BEFORE_COMPLETION) {
+                    delay(PROGRESS_TICK_DELAY_MS)
+                    p += PROGRESS_INCREMENT
+                    if (p > PROGRESS_MAX_BEFORE_COMPLETION) p = PROGRESS_MAX_BEFORE_COMPLETION
                     onProgress(p)
                 }
             }
+    }
+
+    companion object {
+        private const val PROGRESS_TICK_DELAY_MS = 1000L
+        private const val PROGRESS_INCREMENT = 10
+        private const val PROGRESS_MAX_BEFORE_COMPLETION = 90
     }
 
     private suspend fun endRequest(mapId: String) {

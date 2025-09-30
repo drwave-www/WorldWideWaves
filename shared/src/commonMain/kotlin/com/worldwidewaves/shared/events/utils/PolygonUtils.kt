@@ -118,7 +118,9 @@ object PolygonUtils {
     /**
      * Ray-casting algorithm optimized with spatial indexing.
      * Only tests edges in the same grid cell as the query point.
+     * Note: Currently unused but kept for potential future optimization.
      */
+    @Suppress("UnusedPrivateMember")
     private fun Polygon.containsPositionWithSpatialIndex(
         tap: Position,
         spatialIndex: SpatialIndex,
@@ -131,7 +133,17 @@ object PolygonUtils {
             val (bx, by) = currentPoint.lat - tap.lat to currentPoint.lng - tap.lng
             val (ax, ay) = nextPoint.lat - tap.lat to nextPoint.lng - tap.lng
 
-            if ((ay < 0 && by < 0) || (ay > 0 && by > 0) || (ax < 0 && bx < 0)) {
+            val ayNegative = ay < 0
+            val byNegative = by < 0
+            val ayPositive = ay > 0
+            val byPositive = by > 0
+            val axNegative = ax < 0
+            val bxNegative = bx < 0
+
+            val bothYNegative = ayNegative && byNegative
+            val bothYPositive = ayPositive && byPositive
+            val bothXNegative = axNegative && bxNegative
+            if (bothYNegative || bothYPositive || bothXNegative) {
                 continue
             }
 
@@ -177,8 +189,8 @@ object PolygonUtils {
     fun Polygon.containsPosition(tap: Position): Boolean {
         require(isNotEmpty()) { return false }
 
-        // Handle simple polygons with less than 3 vertices
-        if (size < 3) {
+        val hasLessThanThreeVertices = size < 3
+        if (hasLessThanThreeVertices) {
             return false
         }
 
@@ -195,14 +207,17 @@ object PolygonUtils {
             val yj = points[j].lat
 
             // Check if point is exactly on a vertex
-            if (kotlin.math.abs(xi - tap.lng) < epsilon && kotlin.math.abs(yi - tap.lat) < epsilon) {
+            val isOnVertex = kotlin.math.abs(xi - tap.lng) < epsilon && kotlin.math.abs(yi - tap.lat) < epsilon
+            if (isOnVertex) {
                 return true
             }
 
             // Ray-casting algorithm
-            if (((yi > tap.lat) != (yj > tap.lat)) &&
-                (tap.lng < (xj - xi) * (tap.lat - yi) / (yj - yi) + xi)
-            ) {
+            val yiAboveTap = yi > tap.lat
+            val yjAboveTap = yj > tap.lat
+            val straddles = yiAboveTap != yjAboveTap
+            val tapLngIsLeft = tap.lng < (xj - xi) * (tap.lat - yi) / (yj - yi) + xi
+            if (straddles && tapLngIsLeft) {
                 inside = !inside
             }
 
@@ -241,205 +256,234 @@ object PolygonUtils {
         workingPolygon.addAll(polygon)
         workingPolygon.close().pop() // Ensure the polygon is closed and remove the last point
 
-        require(workingPolygon.isNotEmpty() && workingPolygon.size >= 3) {
+        val isInvalidPolygon = workingPolygon.isEmpty() || workingPolygon.size < 3
+        if (isInvalidPolygon) {
             return empty().also { workingPolygon.close() }
         }
 
         val minLongitude = workingPolygon.bbox().minLongitude
         val maxLongitude = workingPolygon.bbox().maxLongitude
-
         val lngBbox = lngToCut.bbox()
 
-        return when {
-            // Cut line completely EAST of the polygon – everything ends up on the LEFT side
-            lngBbox.minLongitude > maxLongitude -> {
-                val closed = workingPolygon.move().close()
-                SplitResult(listOf(closed), emptyList())
+        val cutCompletelyEast = lngBbox.minLongitude > maxLongitude
+        if (cutCompletelyEast) {
+            val closed = workingPolygon.move().close()
+            return SplitResult(listOf(closed), emptyList())
+        }
+
+        val cutCompletelyWest = lngBbox.maxLongitude < minLongitude
+        if (cutCompletelyWest) {
+            val closed = workingPolygon.move().close()
+            return SplitResult(emptyList(), listOf(closed))
+        }
+
+        val isSingleVerticalLine = lngToCut.size() == 1
+        if (isSingleVerticalLine) {
+            return splitByVerticalLine(workingPolygon, lngToCut.getPositions().first().lng)
+        }
+
+        return splitByComposedLongitude(workingPolygon, lngToCut, lngBbox)
+    }
+
+    private fun splitByVerticalLine(
+        workingPolygon: Polygon,
+        cutLng: Double,
+    ): SplitResult {
+        val leftPts = clipToHalfPlane(workingPolygon.toList(), cutLng, keepLeft = true)
+        val rightPts = clipToHalfPlane(workingPolygon.toList(), cutLng, keepLeft = false)
+
+        val leftPolys =
+            if (leftPts.size >= 3) {
+                listOf(leftPts.toPolygon.close())
+            } else {
+                emptyList()
             }
-            // Cut line completely WEST of the polygon – everything ends up on the RIGHT side
-            lngBbox.maxLongitude < minLongitude -> {
-                val closed = workingPolygon.move().close()
-                SplitResult(emptyList(), listOf(closed))
+        val rightPolys =
+            if (rightPts.size >= 3) {
+                listOf(rightPts.toPolygon.close())
+            } else {
+                emptyList()
             }
-            // --------------------------------------------------------------
-            // Simple vertical line (single position) – deterministic split
-            // --------------------------------------------------------------
-            lngToCut.size() == 1 -> {
-                val cutLng = lngToCut.getPositions().first().lng
 
-                // Run Sutherland–Hodgman half-plane clip once for each side
-                val leftPts = clipToHalfPlane(workingPolygon.toList(), cutLng, keepLeft = true)
-                val rightPts = clipToHalfPlane(workingPolygon.toList(), cutLng, keepLeft = false)
+        return SplitResult(leftPolys, rightPolys)
+    }
 
-                val leftPolys =
-                    if (leftPts.size >= 3) {
-                        listOf(leftPts.toPolygon.close())
-                    } else {
-                        emptyList()
-                    }
-                val rightPolys =
-                    if (rightPts.size >= 3) {
-                        listOf(rightPts.toPolygon.close())
-                    } else {
-                        emptyList()
-                    }
+    private fun splitByComposedLongitude(
+        workingPolygon: Polygon,
+        lngToCut: ComposedLongitude,
+        lngBbox: BoundingBox,
+    ): SplitResult {
+        val leftPoly = Polygon()
+        val rightPoly = Polygon()
+        val leftList = mutableListOf<Polygon>()
+        val rightList = mutableListOf<Polygon>()
 
-                return SplitResult(leftPolys, rightPolys)
+        var hasIntersection = false
+
+        val points = workingPolygon.toList()
+        for (i in points.indices) {
+            val start = points[i]
+            val end = points[(i + 1) % points.size]
+
+            val sideStart = lngToCut.isPointOnLine(start)
+            val sideEnd = lngToCut.isPointOnLine(end)
+            val intersection = lngToCut.intersectWithSegment(Segment(start, end))
+
+            addPointToSides(start, sideStart, leftPoly, rightPoly)
+
+            intersection?.let {
+                hasIntersection = true
+                addIntersectionPoint(it, leftPoly, rightPoly)
+
+                val crossingWestToEast = sideStart.isWest() && sideEnd.isEast()
+                val crossingEastToWest = sideStart.isEast() && sideEnd.isWest()
+                if (crossingWestToEast) {
+                    addPolygonPartIfNeeded(leftPoly, leftList)
+                } else if (crossingEastToWest) {
+                    addPolygonPartIfNeeded(rightPoly, rightList)
+                }
             }
-            else -> { // Separate the polygon into two parts based on the cut longitude
-                // ------------------------------------------------------------------
-                // New simple splitter : single pass, single polygon per side
-                // ------------------------------------------------------------------
 
-                // current builders
-                val leftPoly = Polygon()
-                val rightPoly = Polygon()
-                // final pieces lists
-                val leftList = mutableListOf<Polygon>()
-                val rightList = mutableListOf<Polygon>()
-
-                // Helper that closes & pushes a polygon when it currently contains
-                // at least three vertices, then starts a new part beginning with
-                // the last (intersection) vertex so that continuity is preserved.
-                fun addPolygonPartIfNeeded(
-                    poly: Polygon,
-                    list: MutableList<Polygon>,
-                ) {
-                    val keep = poly.last()
-                    if (poly.size >= 3) {
-                        list.add(poly.createNew().xferFrom(poly).close())
-                    } else {
-                        poly.clear()
-                    }
-                    keep?.let { poly.add(it) }
-                }
-
-                fun addPointToSides(
-                    point: Position,
-                    side: ComposedLongitude.Side,
-                ) {
-                    when {
-                        side.isWest() -> leftPoly.add(point)
-                        side.isEast() -> rightPoly.add(point)
-                        side.isOn() -> {
-                            // Add the raw point to both sides
-                            leftPoly.add(point)
-                            rightPoly.add(point)
-                        }
-                    }
-                }
-
-                // Track if any intersections are found
-                var hasIntersection = false
-
-                val points = workingPolygon.toList()
-                for (i in points.indices) {
-                    val start = points[i]
-                    val end = points[(i + 1) % points.size] // close ring
-
-                    val sideStart = lngToCut.isPointOnLine(start)
-                    val sideEnd = lngToCut.isPointOnLine(end)
-                    val intersection = lngToCut.intersectWithSegment(Segment(start, end))
-
-                    // Emit start point
-                    addPointToSides(start, sideStart)
-
-                    // Emit intersection if any
-                    intersection?.let {
-                        // Mark that we found an intersection
-                        hasIntersection = true
-
-                        // avoid consecutive duplicates
-                        if (leftPoly.last() != it) leftPoly.add(it)
-                        if (rightPoly.last() != it) rightPoly.add(it)
-
-                        // flush polygons when crossing occurs
-                        if (sideStart.isWest() && sideEnd.isEast()) {
-                            addPolygonPartIfNeeded(leftPoly, leftList)
-                        } else if (sideStart.isEast() && sideEnd.isWest()) {
-                            addPolygonPartIfNeeded(rightPoly, rightList)
-                        }
-                    }
-
-                    // If this is the last segment, also emit end (otherwise next loop will do)
-                    if (i == points.size - 1) {
-                        addPointToSides(end, sideEnd)
-                    }
-                }
-
-                // flush remaining current builders
-                addPolygonPartIfNeeded(leftPoly, leftList)
-                addPolygonPartIfNeeded(rightPoly, rightList)
-
-                // If no intersections were found but the bounding boxes overlap,
-                // determine which side the polygon lies on
-                if (!hasIntersection) {
-                    val polyBbox = workingPolygon.bbox()
-                    val centerLat = (polyBbox.sw.lat + polyBbox.ne.lat) / 2
-
-                    // Try to get longitude at center latitude
-                    val cutLngAtCenter = lngToCut.lngAt(centerLat)
-
-                    if (cutLngAtCenter != null) {
-                        // We have a longitude at this latitude, determine side
-                        val closedPoly = workingPolygon.move().close()
-
-                        if (polyBbox.minLongitude >= cutLngAtCenter) {
-                            // Polygon is entirely to the east of the cut
-                            return SplitResult(emptyList(), listOf(closedPoly))
-                        } else if (polyBbox.maxLongitude <= cutLngAtCenter) {
-                            // Polygon is entirely to the west of the cut
-                            return SplitResult(listOf(closedPoly), emptyList())
-                        } else {
-                            // Cut longitude runs inside polygon horizontally but no intersection
-                            // Use polygon center longitude to determine side
-                            val centerLng = (polyBbox.sw.lng + polyBbox.ne.lng) / 2
-                            if (centerLng >= cutLngAtCenter) {
-                                return SplitResult(emptyList(), listOf(closedPoly))
-                            } else {
-                                return SplitResult(listOf(closedPoly), emptyList())
-                            }
-                        }
-                    } else {
-                        // The composed longitude doesn't cover this latitude range
-                        // Fall back to comparing horizontal relation between bboxes
-                        val closedPoly = workingPolygon.move().close()
-
-                        if (polyBbox.minLongitude >= lngBbox.maxLongitude) {
-                            // Polygon is entirely to the east of the cut's bbox
-                            return SplitResult(emptyList(), listOf(closedPoly))
-                        } else if (polyBbox.maxLongitude <= lngBbox.minLongitude) {
-                            // Polygon is entirely to the west of the cut's bbox
-                            return SplitResult(listOf(closedPoly), emptyList())
-                        } else {
-                            // Use polygon center vs cut bbox center
-                            val centerLng = (polyBbox.sw.lng + polyBbox.ne.lng) / 2
-                            val cutCenterLng = (lngBbox.sw.lng + lngBbox.ne.lng) / 2
-                            if (centerLng >= cutCenterLng) {
-                                return SplitResult(emptyList(), listOf(closedPoly))
-                            } else {
-                                return SplitResult(listOf(closedPoly), emptyList())
-                            }
-                        }
-                    }
-                }
-
-                // Inject intermediate longitude points if needed
-                val completedLeft = completeLongitudePoints(lngToCut, leftList, workingPolygon, true)
-                val completedRight = completeLongitudePoints(lngToCut, rightList, workingPolygon, false)
-
-                // Filter out any degenerate polygons that could slip through
-                val filteredLeft = completedLeft.filter { it.size >= 3 }
-                val filteredRight = completedRight.filter { it.size >= 3 }
-
-                // Normalize polygons by removing consecutive duplicate vertices
-                val normLeft = filteredLeft.map { removeConsecutiveDuplicates(it) }
-                val normRight = filteredRight.map { removeConsecutiveDuplicates(it) }
-
-                return SplitResult(normLeft, normRight)
-                    .also { workingPolygon.close() }
+            val isLastSegment = i == points.size - 1
+            if (isLastSegment) {
+                addPointToSides(end, sideEnd, leftPoly, rightPoly)
             }
         }
+
+        addPolygonPartIfNeeded(leftPoly, leftList)
+        addPolygonPartIfNeeded(rightPoly, rightList)
+
+        if (!hasIntersection) {
+            return handleNoIntersectionCase(workingPolygon, lngToCut, lngBbox)
+        }
+
+        return finalizePolygonSplit(lngToCut, leftList, rightList, workingPolygon)
+    }
+
+    private fun addPointToSides(
+        point: Position,
+        side: ComposedLongitude.Side,
+        leftPoly: Polygon,
+        rightPoly: Polygon,
+    ) {
+        when {
+            side.isWest() -> leftPoly.add(point)
+            side.isEast() -> rightPoly.add(point)
+            side.isOn() -> {
+                leftPoly.add(point)
+                rightPoly.add(point)
+            }
+        }
+    }
+
+    private fun addIntersectionPoint(
+        intersection: Position,
+        leftPoly: Polygon,
+        rightPoly: Polygon,
+    ) {
+        if (leftPoly.last() != intersection) leftPoly.add(intersection)
+        if (rightPoly.last() != intersection) rightPoly.add(intersection)
+    }
+
+    private fun addPolygonPartIfNeeded(
+        poly: Polygon,
+        list: MutableList<Polygon>,
+    ) {
+        val keep = poly.last()
+        val hasEnoughVertices = poly.size >= 3
+        if (hasEnoughVertices) {
+            list.add(poly.createNew().xferFrom(poly).close())
+        } else {
+            poly.clear()
+        }
+        keep?.let { poly.add(it) }
+    }
+
+    private fun handleNoIntersectionCase(
+        workingPolygon: Polygon,
+        lngToCut: ComposedLongitude,
+        lngBbox: BoundingBox,
+    ): SplitResult {
+        val polyBbox = workingPolygon.bbox()
+        val centerLat = (polyBbox.sw.lat + polyBbox.ne.lat) / 2
+        val cutLngAtCenter = lngToCut.lngAt(centerLat)
+
+        if (cutLngAtCenter != null) {
+            return determinePolygonSideWithCutLng(workingPolygon, polyBbox, cutLngAtCenter)
+        }
+
+        return determinePolygonSideWithBbox(workingPolygon, polyBbox, lngBbox)
+    }
+
+    private fun determinePolygonSideWithCutLng(
+        workingPolygon: Polygon,
+        polyBbox: BoundingBox,
+        cutLngAtCenter: Double,
+    ): SplitResult {
+        val closedPoly = workingPolygon.move().close()
+
+        val entirelyEast = polyBbox.minLongitude >= cutLngAtCenter
+        if (entirelyEast) {
+            return SplitResult(emptyList(), listOf(closedPoly))
+        }
+
+        val entirelyWest = polyBbox.maxLongitude <= cutLngAtCenter
+        if (entirelyWest) {
+            return SplitResult(listOf(closedPoly), emptyList())
+        }
+
+        val centerLng = (polyBbox.sw.lng + polyBbox.ne.lng) / 2
+        val centerIsEast = centerLng >= cutLngAtCenter
+        return if (centerIsEast) {
+            SplitResult(emptyList(), listOf(closedPoly))
+        } else {
+            SplitResult(listOf(closedPoly), emptyList())
+        }
+    }
+
+    private fun determinePolygonSideWithBbox(
+        workingPolygon: Polygon,
+        polyBbox: BoundingBox,
+        lngBbox: BoundingBox,
+    ): SplitResult {
+        val closedPoly = workingPolygon.move().close()
+
+        val entirelyEastOfCutBbox = polyBbox.minLongitude >= lngBbox.maxLongitude
+        if (entirelyEastOfCutBbox) {
+            return SplitResult(emptyList(), listOf(closedPoly))
+        }
+
+        val entirelyWestOfCutBbox = polyBbox.maxLongitude <= lngBbox.minLongitude
+        if (entirelyWestOfCutBbox) {
+            return SplitResult(listOf(closedPoly), emptyList())
+        }
+
+        val centerLng = (polyBbox.sw.lng + polyBbox.ne.lng) / 2
+        val cutCenterLng = (lngBbox.sw.lng + lngBbox.ne.lng) / 2
+        val centerIsEast = centerLng >= cutCenterLng
+        return if (centerIsEast) {
+            SplitResult(emptyList(), listOf(closedPoly))
+        } else {
+            SplitResult(listOf(closedPoly), emptyList())
+        }
+    }
+
+    private fun finalizePolygonSplit(
+        lngToCut: ComposedLongitude,
+        leftList: MutableList<Polygon>,
+        rightList: MutableList<Polygon>,
+        workingPolygon: Polygon,
+    ): SplitResult {
+        val completedLeft = completeLongitudePoints(lngToCut, leftList, workingPolygon, true)
+        val completedRight = completeLongitudePoints(lngToCut, rightList, workingPolygon, false)
+
+        val filteredLeft = completedLeft.filter { it.size >= 3 }
+        val filteredRight = completedRight.filter { it.size >= 3 }
+
+        val normLeft = filteredLeft.map { removeConsecutiveDuplicates(it) }
+        val normRight = filteredRight.map { removeConsecutiveDuplicates(it) }
+
+        return SplitResult(normLeft, normRight).also { workingPolygon.close() }
     }
 
     // ------------------------------------------------------------------------
@@ -520,88 +564,88 @@ object PolygonUtils {
      *
      * For each polygon, finds ON-line anchor points and inserts intermediate points
      * from the composed longitude between them, but only if the midpoint between anchors
-     * lies inside the original polygon.  This prevents bridging concave “mouths” where
+     * lies inside the original polygon.  This prevents bridging concave "mouths" where
      * the composed longitude would otherwise connect regions outside the polygon.
      */
     private fun completeLongitudePoints(
-        lngToCut: ComposedLongitude, // the composed longitude used for the cut
-        polygons: List<Polygon>, // the polygons to process
-        source: Polygon, // the original polygon before splitting
-        forLeft: Boolean, // true if processing left side, false for right side
-    ): List<Polygon> =
-        if (lngToCut.size() > 1) { // nothing to add for a straight vertical line
-            polygons.map { polygon ->
-                // Anchor points already lying exactly on the composed longitude
-                val onLine =
-                    polygon
-                        .filter { lngToCut.isPointOnLine(it) == ComposedLongitude.Side.ON }
-
-                if (onLine.size < 2) return@map polygon
-
-                // Remove duplicate anchors and sort by latitude to get proper order along composed longitude
-                val uniqueAnchors = onLine.distinctBy { "${it.lat},${it.lng}" }.sortedBy { it.lat }
-
-                // Helper function to process anchor pair and insert intermediate points
-                fun processAnchorPair(
-                    anchor1: Position,
-                    anchor2: Position,
-                ) {
-                    // Calculate midpoint latitude
-                    val midLat = (anchor1.lat + anchor2.lat) / 2
-                    val midLng = lngToCut.lngAt(midLat) ?: return
-
-                    // Include intermediate points only when the composed-longitude
-                    // segment between anchors lies inside the source polygon.
-                    val insideMid = source.containsPosition(Position(midLat, midLng))
-                    if (!insideMid) return
-
-                    // Get intermediate points between anchors
-                    val between = lngToCut.positionsBetween(anchor1.lat, anchor2.lat)
-
-                    // Find the correct position in the polygon to insert intermediate points
-                    // We need to find where anchor1 and anchor2 appear consecutively in the polygon
-                    val anchor1Pos = polygon.indexOfFirst { it.lat == anchor1.lat && it.lng == anchor1.lng }
-                    val anchor2Pos = polygon.indexOfFirst { it.lat == anchor2.lat && it.lng == anchor2.lng }
-
-                    if (anchor1Pos != -1 && anchor2Pos != -1) {
-                        // Check if they are consecutive (considering wrap-around)
-                        val isConsecutive =
-                            (anchor2Pos == anchor1Pos + 1) ||
-                                (anchor1Pos == polygon.size - 1 && anchor2Pos == 0)
-
-                        if (isConsecutive) {
-                            // Insert intermediate points after anchor1
-                            var current = polygon.elementAt(anchor1Pos)
-                            for (p in between) {
-                                if (!polygon.any { it.lat == p.lat && it.lng == p.lng }) {
-                                    current = polygon.insertAfter(p, current.id)
-                                }
-                            }
-                        } else {
-                            // For non-consecutive anchors, we need a more sophisticated approach
-                            // to determine the correct insertion point based on the polygon's traversal order
-                            // For now, use a simple heuristic: insert after the first anchor found
-                            var current = polygon.elementAt(anchor1Pos)
-                            for (p in between) {
-                                if (!polygon.any { it.lat == p.lat && it.lng == p.lng }) {
-                                    current = polygon.insertAfter(p, current.id)
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Process consecutive anchors in latitude order (along composed longitude)
-                for (idx in 0 until uniqueAnchors.size - 1) {
-                    val anchor1 = uniqueAnchors[idx]
-                    val anchor2 = uniqueAnchors[idx + 1]
-                    processAnchorPair(anchor1, anchor2)
-                }
-                polygon
-            }
-        } else {
-            polygons
+        lngToCut: ComposedLongitude,
+        polygons: List<Polygon>,
+        source: Polygon,
+        @Suppress("UNUSED_PARAMETER") forLeft: Boolean,
+    ): List<Polygon> {
+        val needsIntermediatePoints = lngToCut.size() > 1
+        if (!needsIntermediatePoints) {
+            return polygons
         }
+
+        return polygons.map { polygon ->
+            processPolygonAnchors(polygon, lngToCut, source)
+        }
+    }
+
+    private fun processPolygonAnchors(
+        polygon: Polygon,
+        lngToCut: ComposedLongitude,
+        source: Polygon,
+    ): Polygon {
+        val onLine = polygon.filter { lngToCut.isPointOnLine(it) == ComposedLongitude.Side.ON }
+
+        val hasLessThanTwoAnchors = onLine.size < 2
+        if (hasLessThanTwoAnchors) {
+            return polygon
+        }
+
+        val uniqueAnchors = onLine.distinctBy { "${it.lat},${it.lng}" }.sortedBy { it.lat }
+
+        for (idx in 0 until uniqueAnchors.size - 1) {
+            val anchor1 = uniqueAnchors[idx]
+            val anchor2 = uniqueAnchors[idx + 1]
+            processAnchorPair(anchor1, anchor2, polygon, lngToCut, source)
+        }
+
+        return polygon
+    }
+
+    private fun processAnchorPair(
+        anchor1: Position,
+        anchor2: Position,
+        polygon: Polygon,
+        lngToCut: ComposedLongitude,
+        source: Polygon,
+    ) {
+        val midLat = (anchor1.lat + anchor2.lat) / 2
+        val midLng = lngToCut.lngAt(midLat) ?: return
+
+        val insideMid = source.containsPosition(Position(midLat, midLng))
+        if (!insideMid) return
+
+        val between = lngToCut.positionsBetween(anchor1.lat, anchor2.lat)
+
+        val anchor1Pos = polygon.indexOfFirst { it.lat == anchor1.lat && it.lng == anchor1.lng }
+        val anchor2Pos = polygon.indexOfFirst { it.lat == anchor2.lat && it.lng == anchor2.lng }
+
+        val anchorsNotFound = anchor1Pos == -1 || anchor2Pos == -1
+        if (anchorsNotFound) return
+
+        insertIntermediatePoints(polygon, anchor1Pos, anchor2Pos, between)
+    }
+
+    private fun insertIntermediatePoints(
+        polygon: Polygon,
+        anchor1Pos: Int,
+        anchor2Pos: Int,
+        between: List<Position>,
+    ) {
+        val isConsecutive = (anchor2Pos == anchor1Pos + 1) || (anchor1Pos == polygon.size - 1 && anchor2Pos == 0)
+
+        var current = polygon.elementAt(anchor1Pos)
+        for (p in between) {
+            val alreadyExists = polygon.any { it.lat == p.lat && it.lng == p.lng }
+            if (!alreadyExists) {
+                current = polygon.insertAfter(p, current.id)
+            }
+        }
+    }
 
     // ------------------------------------------------------------------------
 
@@ -638,23 +682,29 @@ object PolygonUtils {
             "Event area cannot be empty, cannot determine bounding box"
         }
 
-        val (minLat, minLng, maxLat, maxLng) =
-            polygons.fold(
-                Quad(
-                    Double.POSITIVE_INFINITY,
-                    Double.POSITIVE_INFINITY,
-                    Double.NEGATIVE_INFINITY,
-                    Double.NEGATIVE_INFINITY,
-                ),
-            ) { (minLat, minLng, maxLat, maxLng), polygon ->
+        val initialQuad =
+            Quad(
+                Double.POSITIVE_INFINITY,
+                Double.POSITIVE_INFINITY,
+                Double.NEGATIVE_INFINITY,
+                Double.NEGATIVE_INFINITY,
+            )
+
+        val result =
+            polygons.fold(initialQuad) { quad, polygon ->
                 val bbox = polygon.bbox()
                 Quad(
-                    minOf(minLat, bbox.sw.lat),
-                    minOf(minLng, bbox.sw.lng),
-                    maxOf(maxLat, bbox.ne.lat),
-                    maxOf(maxLng, bbox.ne.lng),
+                    minOf(quad.first, bbox.sw.lat),
+                    minOf(quad.second, bbox.sw.lng),
+                    maxOf(quad.third, bbox.ne.lat),
+                    maxOf(quad.fourth, bbox.ne.lng),
                 )
             }
+
+        val minLat = result.first
+        val minLng = result.second
+        val maxLat = result.third
+        val maxLng = result.fourth
 
         return BoundingBox.fromCorners(
             sw = Position(minLat, minLng),

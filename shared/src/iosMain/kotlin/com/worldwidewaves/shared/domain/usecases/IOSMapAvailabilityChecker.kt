@@ -21,45 +21,120 @@ package com.worldwidewaves.shared.domain.usecases
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import platform.Foundation.NSBundle
+import platform.Foundation.NSBundleResourceRequest
+import platform.Foundation.NSOperationQueue
 
 /**
- * Minimal iOS shim: ODR is mounted ad-hoc by platform code; this class only
- * fulfils the MapAvailabilityChecker interface so other modules compile.
+ * iOS ODR availability checker.
+ * No downloads occur unless requestMapDownload(...) is called,
+ * or assets are present as Initial Install Tags.
  */
 class IOSMapAvailabilityChecker : MapAvailabilityChecker {
     private val tracked = mutableSetOf<String>()
-
     private val _mapStates = MutableStateFlow<Map<String, Boolean>>(emptyMap())
     override val mapStates: StateFlow<Map<String, Boolean>> = _mapStates
+
+    // Prevent GC and allow pinning for explicitly requested maps
+    private val pinnedRequests = mutableMapOf<String, NSBundleResourceRequest>() // long-lived, explicit downloads
+
+    private val initialTags: Set<String> by lazy {
+        val obj =
+            platform.Foundation.NSBundle.mainBundle
+                .objectForInfoDictionaryKey("NSOnDemandResourcesInitialInstallTags")
+        (obj as? List<*>)?.mapNotNull { it as? String }?.toSet() ?: emptySet()
+    }
+
+    private fun inPersistentCache(eventId: String): Boolean {
+        val root =
+            com.worldwidewaves.shared.data
+                .platformCacheRoot()
+        val fm = platform.Foundation.NSFileManager.defaultManager
+        return fm.fileExistsAtPath("$root/$eventId.geojson") ||
+            fm.fileExistsAtPath("$root/$eventId.mbtiles")
+    }
+
+    private fun onMain(block: () -> Unit) {
+        NSOperationQueue.mainQueue.addOperationWithBlock(block)
+    }
 
     override fun trackMaps(mapIds: Collection<String>) {
         if (mapIds.isEmpty()) return
         tracked += mapIds
-        // best-effort state (true only if file is already in bundle as an initial tag)
+
         val updated = _mapStates.value.toMutableMap()
         for (id in mapIds) updated[id] = isMapDownloaded(id)
         _mapStates.value = updated
+
+        // Auto-mount ONLY initial tags, on main
+        val toAuto =
+            mapIds.filter { id ->
+                id in initialTags && !inPersistentCache(id) && !pinnedRequests.containsKey(id)
+            }
+        toAuto.forEach { id -> onMain { requestMapDownload(id) } }
     }
 
     override fun refreshAvailability() {
         if (tracked.isEmpty()) return
         val updated = mutableMapOf<String, Boolean>()
-        for (id in tracked) updated[id] = isMapDownloaded(id)
+        for (id in tracked) updated[id] = isMapDownloaded(id) // non-downloading checks
         _mapStates.value = updated
     }
 
     override fun requestMapDownload(eventId: String) {
-        // no-op — downloads/mounting are performed ad-hoc by platform code (NSBundleResourceRequest)
+        onMain {
+            if (pinnedRequests.containsKey(eventId)) return@onMain
+            val req = NSBundleResourceRequest(setOf(eventId)).apply { loadingPriority = 1.0 }
+            pinnedRequests[eventId] = req
+            req.beginAccessingResourcesWithCompletionHandler { error ->
+                onMain {
+                    val ok = (error == null)
+                    if (ok) {
+                        com.worldwidewaves.shared.data.MapDownloadGate
+                            .allow(eventId)
+                    }
+                    val m = _mapStates.value.toMutableMap()
+                    m[eventId] = ok || inPersistentCache(eventId)
+                    _mapStates.value = m
+                    if (!ok) {
+                        try {
+                            req.endAccessingResources()
+                        } catch (_: Throwable) {
+                        }
+                        pinnedRequests.remove(eventId)
+                    }
+                }
+            }
+        }
     }
 
-    override fun isMapDownloaded(eventId: String): Boolean {
-        // True only if resource is physically present in the app bundle
-        val sub = "Maps/$eventId"
-        val hasGeo = NSBundle.mainBundle.pathForResource(eventId, "geojson", sub) != null
-        val hasMbtiles = NSBundle.mainBundle.pathForResource(eventId, "mbtiles", sub) != null
-        return hasGeo || hasMbtiles
+    // Call this when you want to allow purge:
+    fun releaseDownloadedMap(eventId: String) {
+        onMain {
+            com.worldwidewaves.shared.data.MapDownloadGate
+                .disallow(eventId)
+            pinnedRequests.remove(eventId)?.let {
+                try {
+                    it.endAccessingResources()
+                } catch (_: Throwable) {
+                }
+            }
+        }
     }
+
+    // ---------- Non-downloading checks ----------
+
+    override fun isMapDownloaded(eventId: String): Boolean =
+        when {
+            inPersistentCache(eventId) -> true
+            pinnedRequests.containsKey(eventId) -> true
+            isInitialTagAvailable(eventId) -> true
+            else -> false
+        }
+
+    private fun isInitialTagAvailable(eventId: String): Boolean =
+        eventId in initialTags &&
+            com.worldwidewaves.shared.data.ODRPaths
+                .bundleHas(eventId)
 
     override fun getDownloadedMaps(): List<String> = tracked.filter { isMapDownloaded(it) }
 }

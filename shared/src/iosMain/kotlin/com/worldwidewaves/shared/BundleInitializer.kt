@@ -45,33 +45,48 @@ object BundleInitializer {
     fun initializeBundle(): Boolean =
         try {
             if (!_isInitialized) {
-                // Try to load the bundle with various identifiers using moko-resources utilities
-                _bundle =
-                    try {
-                        NSBundle.loadableBundle("com.worldwidewaves.shared.main")
-                    } catch (e: Exception) {
-                        Log.w(TAG, "Failed to load bundle with identifier 'com.worldwidewaves.shared.main'", e)
-                        try {
-                            NSBundle.loadableBundle("com.worldwidewaves.shared")
-                        } catch (e2: Exception) {
-                            Log.w(TAG, "Failed to load bundle with identifier 'com.worldwidewaves.shared', falling back to main bundle", e2)
-                            NSBundle.mainBundle
-                        }
-                    }
-
+                _bundle = loadBundleWithFallbacks()
                 _isInitialized = _bundle != null
-
-                if (_isInitialized) {
-                    Log.i(TAG, "BUNDLE_INIT: MokoRes bundle initialized successfully")
-                } else {
-                    Log.e(TAG, "BUNDLE_INIT: Failed to load MokoRes bundle")
-                }
+                logInitializationResult()
             }
             _isInitialized
         } catch (e: Exception) {
             Log.e(TAG, "BUNDLE_INIT: Exception during bundle initialization: ${e.message}")
             false
         }
+
+    /**
+     * Attempts to load the bundle using various identifiers with fallback mechanism.
+     */
+    private fun loadBundleWithFallbacks(): NSBundle =
+        try {
+            NSBundle.loadableBundle("com.worldwidewaves.shared.main")
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to load bundle with identifier 'com.worldwidewaves.shared.main'", e)
+            loadBundleSecondaryFallback()
+        }
+
+    /**
+     * Secondary fallback for bundle loading.
+     */
+    private fun loadBundleSecondaryFallback(): NSBundle =
+        try {
+            NSBundle.loadableBundle("com.worldwidewaves.shared")
+        } catch (e2: Exception) {
+            Log.w(TAG, "Failed to load bundle with identifier 'com.worldwidewaves.shared', falling back to main bundle", e2)
+            NSBundle.mainBundle
+        }
+
+    /**
+     * Logs the initialization result.
+     */
+    private fun logInitializationResult() {
+        if (_isInitialized) {
+            Log.i(TAG, "BUNDLE_INIT: MokoRes bundle initialized successfully")
+        } else {
+            Log.e(TAG, "BUNDLE_INIT: Failed to load MokoRes bundle")
+        }
+    }
 
     /**
      * Get the initialized bundle, ensuring it's loaded first.

@@ -53,13 +53,14 @@ data class Segment(
         if (t < 0 || t > 1) return null
 
         // Determine the direction and create the CutPosition
-        return when {
-            start.lng == cutLng && end.lng == cutLng ->
-                null // No intersection for a vertical line
-            (end.lng - start.lng) > 0 -> // Moving eastward
-                CutPosition(lat = lat, lng = cutLng, cutId = cutId, cutLeft = start, cutRight = end)
-            else -> // Moving westward
-                CutPosition(lat = lat, lng = cutLng, cutId = cutId, cutLeft = end, cutRight = start)
+        val isBothOnCutLng = start.lng == cutLng && end.lng == cutLng
+        if (isBothOnCutLng) return null // No intersection for a vertical line
+
+        val isMovingEastward = (end.lng - start.lng) > 0
+        return if (isMovingEastward) {
+            CutPosition(lat = lat, lng = cutLng, cutId = cutId, cutLeft = start, cutRight = end)
+        } else {
+            CutPosition(lat = lat, lng = cutLng, cutId = cutId, cutLeft = end, cutRight = start)
         }
     }
 
@@ -82,7 +83,9 @@ data class Segment(
         val ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denominator
         val ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denominator
 
-        if (ua < 0 || ua > 1 || ub < 0 || ub > 1) return null // Intersection point is outside of both line segments
+        val isUaOutOfRange = ua < 0 || ua > 1
+        val isUbOutOfRange = ub < 0 || ub > 1
+        if (isUaOutOfRange || isUbOutOfRange) return null // Intersection point is outside of both line segments
 
         val x = x1 + ua * (x2 - x1)
         val y = y1 + ua * (y2 - y1)
@@ -143,7 +146,10 @@ data class Segment(
 
         val ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denominator
         val ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denominator
-        if (ua < 0 || ua > 1 || ub < 0 || ub > 1) return null // outside segments
+
+        val isUaOutOfRange = ua < 0 || ua > 1
+        val isUbOutOfRange = ub < 0 || ub > 1
+        if (isUaOutOfRange || isUbOutOfRange) return null // outside segments
 
         val x = x1 + ua * (x2 - x1)
         val y = y1 + ua * (y2 - y1)

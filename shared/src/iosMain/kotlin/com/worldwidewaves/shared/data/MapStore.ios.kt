@@ -30,6 +30,7 @@ import platform.Foundation.NSApplicationSupportDirectory
 import platform.Foundation.NSBundle
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSLog
+import platform.Foundation.NSOperationQueue
 import platform.Foundation.NSString
 import platform.Foundation.NSTemporaryDirectory
 import platform.Foundation.NSURL
@@ -41,9 +42,59 @@ import platform.Foundation.stringWithContentsOfFile
 import platform.Foundation.writeToFile
 import kotlin.coroutines.resume
 
-private const val TAG = "MapStore.ios"
+// ---------- ODR lookup helpers (shared) ----------
 
-// ---- helpers ----
+private fun onMain(block: () -> Unit) {
+    NSOperationQueue.mainQueue.addOperationWithBlock(block)
+}
+
+object ODRPaths {
+    /** True if Bundle currently exposes either <id>.geojson or <id>.mbtiles without mounting. */
+    fun bundleHas(eventId: String): Boolean = resolve(eventId, "geojson") != null || resolve(eventId, "mbtiles") != null
+
+    /** Resolve absolute path for an ODR resource, being defensive about layout. */
+    fun resolve(
+        eventId: String,
+        extension: String,
+    ): String? {
+        val b = NSBundle.mainBundle
+
+        // Try standard subdirectories first
+        resolveFromStandardPaths(b, eventId, extension)?.let { return it }
+
+        // Fallback: search all resources with the extension
+        return resolveFromExtensionSearch(b, eventId, extension)
+    }
+
+    private fun resolveFromStandardPaths(
+        bundle: NSBundle,
+        eventId: String,
+        extension: String,
+    ): String? {
+        val subs = arrayOf("Maps/$eventId", "worldwidewaves/Maps/$eventId", null)
+        return subs.firstNotNullOfOrNull { sub ->
+            bundle.pathForResource(eventId, extension, sub)
+                ?: if (sub == null) bundle.URLForResource(eventId, extension)?.path else null
+        }
+    }
+
+    private fun resolveFromExtensionSearch(
+        bundle: NSBundle,
+        eventId: String,
+        extension: String,
+    ): String? {
+        val any = bundle.URLsForResourcesWithExtension(extension, null)
+        val urls = any?.mapNotNull { it as? NSURL } ?: emptyList()
+        return urls
+            .firstOrNull { url ->
+                val p = url.path ?: ""
+                p.endsWith("/$eventId.$extension") ||
+                    p.contains("/Maps/$eventId/")
+            }?.path
+    }
+}
+
+// ---------- helpers ----------
 @OptIn(ExperimentalForeignApi::class)
 private fun appSupportMapsDir(): String {
     val fm = NSFileManager.defaultManager
@@ -61,7 +112,18 @@ private fun appSupportMapsDir(): String {
     return mapsUrl.path ?: (NSTemporaryDirectory() + "/Maps")
 }
 
-// ---- platform shims ----
+actual fun platformTryCopyInitialTagToCache(
+    eventId: String,
+    extension: String,
+    destAbsolutePath: String,
+): Boolean {
+    val src = ODRPaths.resolve(eventId, extension) ?: return false // no mount, just visible?
+    val fm = NSFileManager.defaultManager
+    if (fm.fileExistsAtPath(destAbsolutePath)) fm.removeItemAtPath(destAbsolutePath, null)
+    return fm.copyItemAtPath(src, destAbsolutePath, null)
+}
+
+// ---------- platform shims ----------
 actual fun platformCacheRoot(): String = appSupportMapsDir()
 
 actual fun platformFileExists(path: String): Boolean = NSFileManager.defaultManager.fileExistsAtPath(path)
@@ -92,108 +154,56 @@ actual fun platformAppVersionStamp(): String {
     return "$short+$build"
 }
 
-// no-op in common; iOS in-memory provider is Kotlin-side; just expose a hook if you use one.
-actual fun platformInvalidateGeoJson(eventId: String) { /* nothing to do here */ }
+actual fun platformInvalidateGeoJson(eventId: String) { /* no-op */ }
 
 /**
- * Resolve the absolute path of an ODR resource for an event, being defensive
- * about how Xcode may lay out files inside the asset pack.
- *
- * Tries, in order:
- *  1) "Maps/<eventId>/<eventId>.<ext>"
- *  2) bundle root "<eventId>.<ext>"
- *  3) scan all *.<ext> and pick the one that matches name or expected folder
- */
-private fun resolveODRResourcePath(
-    eventId: String,
-    extension: String,
-): String? {
-    // 1) Expected subdirectory layout
-    val subdir = "Maps/$eventId"
-    NSBundle.mainBundle.pathForResource(eventId, extension, subdir)?.let { path ->
-        com.worldwidewaves.shared.utils.Log
-            .v(TAG, "[$eventId] found in '$subdir': $path")
-        return path
-    }
-
-    // 2) Flattened at bundle root
-    NSBundle.mainBundle.URLForResource(eventId, extension)?.path?.let { path ->
-        com.worldwidewaves.shared.utils.Log
-            .v(TAG, "[$eventId] found at bundle root: $path")
-        return path
-    }
-
-    // 3) Last-resort scan of all *.<ext>
-    val any = NSBundle.mainBundle.URLsForResourcesWithExtension(extension, null)
-    val urls: List<NSURL> =
-        when (any) {
-            is List<*> -> any.mapNotNull { it as? NSURL } // Kotlin/Native bridged collections
-            else -> emptyList() // (very rare fallback; bridged in practice)
-        }
-
-    val chosen =
-        urls
-            .firstOrNull { url ->
-                val last = url.lastPathComponent ?: ""
-                last == "$eventId.$extension" || (url.path ?: "").contains("/Maps/$eventId/")
-            }?.path
-
-    if (chosen == null) {
-        com.worldwidewaves.shared.utils.Log.d(
-            TAG,
-            "[$eventId] no path; bundle has ${urls.size} *.$extension files, none matched '$eventId'",
-        )
-    } else {
-        com.worldwidewaves.shared.utils.Log
-            .v(TAG, "[$eventId] found via scan: $chosen")
-    }
-    return chosen
-}
-
-/**
- * Mount the ODR tag for [eventId], resolve the resource path robustly, and copy it
- * to [destAbsolutePath]. Returns true on success.
+ * Mount the ODR tag for [eventId], resolve the resource path, and copy it to [destAbsolutePath].
+ * Returns true on success.
  */
 actual suspend fun platformFetchToFile(
     eventId: String,
     extension: String,
     destAbsolutePath: String,
 ): Boolean {
-    val request =
-        platform.Foundation.NSBundleResourceRequest(setOf(eventId)).apply {
-            loadingPriority = 1.0
-        }
-
+    val request = platform.Foundation.NSBundleResourceRequest(setOf(eventId)).apply { loadingPriority = 1.0 }
     try {
-        // Mount ODR tag
-        val mounted =
-            suspendCancellableCoroutine { cont ->
-                request.beginAccessingResourcesWithCompletionHandler { error ->
-                    if (error != null) {
-                        com.worldwidewaves.shared.utils.Log.e(
-                            TAG,
-                            "ODR mount failed for '$eventId': code=${error.code}, " +
-                                "domain=${error.domain}, desc=${error.localizedDescription}",
-                        )
-                    }
-                    cont.resume(error == null)
-                }
-                cont.invokeOnCancellation { request.endAccessingResources() }
-            }
-        if (!mounted) return false
-
-        // Resolve source inside mounted pack using the robust finder
-        val src = resolveODRResourcePath(eventId, extension) ?: return false
-
-        // Overwrite if already present, then copy
-        val fm = NSFileManager.defaultManager
-        if (fm.fileExistsAtPath(destAbsolutePath)) {
-            fm.removeItemAtPath(destAbsolutePath, null)
-        }
-        return fm.copyItemAtPath(src, destAbsolutePath, null)
+        return mountAndCopyResource(request, eventId, extension, destAbsolutePath)
     } finally {
-        request.endAccessingResources()
+        onMain { request.endAccessingResources() }
     }
+}
+
+private suspend fun mountAndCopyResource(
+    request: platform.Foundation.NSBundleResourceRequest,
+    eventId: String,
+    extension: String,
+    destAbsolutePath: String,
+): Boolean {
+    val mounted = mountODRResource(request)
+    if (!mounted) return false
+
+    return copyResourceToDestination(eventId, extension, destAbsolutePath)
+}
+
+private suspend fun mountODRResource(request: platform.Foundation.NSBundleResourceRequest): Boolean =
+    suspendCancellableCoroutine { cont ->
+        onMain {
+            request.beginAccessingResourcesWithCompletionHandler { error ->
+                cont.resume(error == null)
+            }
+        }
+        cont.invokeOnCancellation { onMain { request.endAccessingResources() } }
+    }
+
+private fun copyResourceToDestination(
+    eventId: String,
+    extension: String,
+    destAbsolutePath: String,
+): Boolean {
+    val src = ODRPaths.resolve(eventId, extension) ?: return false
+    val fm = NSFileManager.defaultManager
+    if (fm.fileExistsAtPath(destAbsolutePath)) fm.removeItemAtPath(destAbsolutePath, null)
+    return fm.copyItemAtPath(src, destAbsolutePath, null)
 }
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
@@ -203,11 +213,9 @@ actual fun cacheStringToFile(
 ): String {
     val root = platformCacheRoot()
     val path = "$root/$fileName"
-
     val nsPath = NSString.create(string = path)
     val parent = nsPath.stringByDeletingLastPathComponent
     NSFileManager.defaultManager.createDirectoryAtPath(parent, true, null, null)
-
     NSLog("cacheStringToFile: Caching data to %@", fileName)
     NSString
         .create(string = content)

@@ -40,14 +40,14 @@ import com.worldwidewaves.shared.utils.ImageResolver
 import com.worldwidewaves.shared.viewmodels.EventsViewModel
 import com.worldwidewaves.shared.viewmodels.IOSMapViewModel
 import com.worldwidewaves.shared.viewmodels.MapViewModel
+import org.jetbrains.compose.resources.DrawableResource
 import org.koin.dsl.module
 import platform.UIKit.UIDevice
-import platform.UIKit.UIImage
 
 val IOSModule =
     module {
         single<SoundPlayer> { IOSSoundPlayer() }
-        single<ImageResolver<UIImage>> { IOSImageResolver() }
+        single<ImageResolver<DrawableResource>> { IOSImageResolver() }
         single<WWWLocationProvider> { IOSWWWLocationProvider() }
 
         // Note: PlatformEnabler is injected into koin by Swift IOS
@@ -68,8 +68,8 @@ val IOSModule =
             )
         }
 
-        // ChoreographyManager for iOS
-        single(createdAtStart = true) { ChoreographyManager<UIImage>() }
+        // ChoreographyManager for iOS - using DrawableResource for cross-platform compatibility
+        single(createdAtStart = true) { ChoreographyManager<DrawableResource>() }
 
         // iOS Map Availability Checker (production-grade iOS implementation)
         single<MapAvailabilityChecker> { IOSMapAvailabilityChecker() }

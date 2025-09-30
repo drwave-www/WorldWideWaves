@@ -35,10 +35,129 @@ import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileNotFoundException
+import java.io.FileOutputStream
 
 private const val TAG = "MapStore"
 
+// File I/O Constants
+private const val BUFFER_SIZE_BYTES = 64 * 1024 // 64KB buffer for efficient file operations
+private const val MAX_FILE_COPY_RETRIES = 3
+private const val RETRY_DELAY_MS = 100L
+private const val FETCH_RETRY_DELAY_MS = 120L
+private const val MIN_ANDROID_VERSION_FOR_SPLIT_CONTEXT = 26 // Android 8.0 Oreo
+
 private fun ctx(): Context = inject<Context>(Context::class.java).value
+
+actual fun platformTryCopyInitialTagToCache(
+    eventId: String,
+    extension: String,
+    destAbsolutePath: String,
+): Boolean {
+    val base = ctx()
+    val assetName = "$eventId.$extension"
+
+    var finalResult: CopyResult? = null
+
+    repeat(MAX_FILE_COPY_RETRIES) { attempt ->
+        val result = attemptFileCopy(base, eventId, assetName, destAbsolutePath)
+        finalResult = result
+        when (result) {
+            CopyResult.Success, CopyResult.FatalError -> return@repeat
+            CopyResult.Retry ->
+                if (attempt < MAX_FILE_COPY_RETRIES - 1) {
+                    Thread.sleep(RETRY_DELAY_MS)
+                }
+        }
+    }
+
+    if (finalResult != CopyResult.Success) {
+        Log.d(TAG, "platformTryCopyInitialTagToCache: not found for $assetName")
+    }
+    return finalResult == CopyResult.Success
+}
+
+/**
+ * Result type for file copy operations.
+ */
+private enum class CopyResult {
+    Success,
+    Retry,
+    FatalError,
+}
+
+/**
+ * Attempts a single file copy operation from assets to cache.
+ */
+private fun attemptFileCopy(
+    baseContext: Context,
+    eventId: String,
+    assetName: String,
+    destAbsolutePath: String,
+): CopyResult =
+    try {
+        val splitCtx = createSplitContext(baseContext, eventId)
+        SplitCompat.install(splitCtx)
+
+        copyAssetToFile(splitCtx, assetName, destAbsolutePath)
+
+        Log.d(TAG, "platformTryCopyInitialTagToCache: copied $assetName → $destAbsolutePath")
+        CopyResult.Success
+    } catch (e: FileNotFoundException) {
+        CopyResult.Retry
+    } catch (e: Exception) {
+        Log.d(TAG, "platformTryCopyInitialTagToCache: error for $assetName: ${e.message}")
+        CopyResult.FatalError
+    }
+
+/**
+ * Creates a split context for the given event ID (Android 8.0+).
+ */
+private fun createSplitContext(
+    baseContext: Context,
+    eventId: String,
+): Context =
+    if (Build.VERSION.SDK_INT >= MIN_ANDROID_VERSION_FOR_SPLIT_CONTEXT) {
+        runCatching { baseContext.createContextForSplit(eventId) }.getOrElse { baseContext }
+    } else {
+        baseContext
+    }
+
+/**
+ * Copies an asset file to the specified destination path with buffering.
+ */
+private fun copyAssetToFile(
+    context: Context,
+    assetName: String,
+    destAbsolutePath: String,
+) {
+    val dest = File(destAbsolutePath)
+    dest.parentFile?.mkdirs()
+
+    context.assets.open(assetName).use { input ->
+        BufferedInputStream(input, BUFFER_SIZE_BYTES).use { bufferedInput ->
+            dest.outputStream().use { output ->
+                copyBufferedStream(bufferedInput, output)
+            }
+        }
+    }
+}
+
+/**
+ * Copies data from a buffered input stream to an output stream.
+ */
+private fun copyBufferedStream(
+    input: BufferedInputStream,
+    output: FileOutputStream,
+) {
+    BufferedOutputStream(output, BUFFER_SIZE_BYTES).use { bufferedOutput ->
+        val buffer = ByteArray(BUFFER_SIZE_BYTES)
+        var bytesRead: Int
+        while (input.read(buffer).also { bytesRead = it } != -1) {
+            bufferedOutput.write(buffer, 0, bytesRead)
+        }
+        bufferedOutput.flush()
+    }
+}
 
 // ---- platform shims ----
 actual fun platformCacheRoot(): String = ctx().cacheDir.absolutePath
@@ -83,58 +202,113 @@ actual suspend fun platformFetchToFile(
     destAbsolutePath: String,
 ): Boolean =
     withContext(Dispatchers.IO) {
-        val mapChecker: MapAvailabilityChecker by inject(MapAvailabilityChecker::class.java)
-        if (!mapChecker.isMapDownloaded(eventId)) return@withContext false
+        Log.d(TAG, "platformFetchToFile: Fetching $eventId.$extension to $destAbsolutePath")
+
+        if (!isMapAvailable(eventId)) {
+            return@withContext false
+        }
 
         val context: Context by inject(Context::class.java)
         val assetName = "$eventId.$extension"
 
-        var last: Exception? = null
-        var success = false
+        val result = attemptFetchWithRetries(context, eventId, assetName, destAbsolutePath)
 
-        for (attempt in 0 until 3) {
-            try {
-                val base = context
-                val splitCtx =
-                    if (Build.VERSION.SDK_INT >= 26) {
-                        runCatching { base.createContextForSplit(eventId) }.getOrElse { base }
-                    } else {
-                        base
-                    }
+        if (!result.success) {
+            val errorMsg =
+                "platformFetchToFile: Failed to fetch $eventId.$extension " +
+                    "after $MAX_FILE_COPY_RETRIES attempts: ${result.lastException?.message}"
+            Log.e(TAG, errorMsg)
+        }
+        result.success
+    }
 
-                SplitCompat.install(splitCtx)
+/**
+ * Result of fetch operation with retries.
+ */
+private data class FetchResult(
+    val success: Boolean,
+    val lastException: Exception? = null,
+)
 
-                val destFile = File(destAbsolutePath)
-                destFile.parentFile?.mkdirs()
+/**
+ * Checks if the map for the given event ID is downloaded.
+ */
+private fun isMapAvailable(eventId: String): Boolean {
+    val mapChecker: MapAvailabilityChecker by inject(MapAvailabilityChecker::class.java)
+    if (!mapChecker.isMapDownloaded(eventId)) {
+        Log.w(TAG, "platformFetchToFile: Map $eventId not downloaded, aborting")
+        return false
+    }
+    return true
+}
 
-                splitCtx.assets.open(assetName).use { input ->
-                    BufferedInputStream(input, 64 * 1024).use { bin ->
-                        destFile.outputStream().use { out ->
-                            BufferedOutputStream(out, 64 * 1024).use { bout ->
-                                val buf = ByteArray(64 * 1024)
-                                var n: Int
-                                while (bin.read(buf).also { n = it } != -1) {
-                                    bout.write(buf, 0, n)
-                                }
-                                bout.flush()
-                            }
-                        }
-                    }
-                }
+/**
+ * Attempts to fetch a file with retries.
+ */
+private suspend fun attemptFetchWithRetries(
+    context: Context,
+    eventId: String,
+    assetName: String,
+    destAbsolutePath: String,
+): FetchResult {
+    var lastException: Exception? = null
+    var fetchSucceeded = false
 
-                success = true
-                break
-            } catch (e: FileNotFoundException) {
-                last = e
-                if (attempt < 2) delay(120)
-            } catch (e: Exception) {
-                last = e
-                break
+    repeat(MAX_FILE_COPY_RETRIES) { attempt ->
+        val result = attemptSingleFetch(context, eventId, assetName, destAbsolutePath, attempt)
+        when {
+            result.success -> {
+                Log.i(TAG, "platformFetchToFile: Successfully fetched $assetName")
+                fetchSucceeded = true
+                return@repeat
+            }
+            result.shouldRetry && attempt < MAX_FILE_COPY_RETRIES - 1 -> {
+                lastException = result.exception
+                delay(FETCH_RETRY_DELAY_MS)
+            }
+            else -> {
+                lastException = result.exception
+                return@repeat
             }
         }
+    }
 
-        if (!success) Log.d(TAG, "platformFetchToFile($eventId.$extension) failed: ${last?.message}")
-        success
+    return FetchResult(fetchSucceeded, lastException)
+}
+
+/**
+ * Result of a single fetch attempt.
+ */
+private data class SingleFetchResult(
+    val success: Boolean,
+    val shouldRetry: Boolean = false,
+    val exception: Exception? = null,
+)
+
+/**
+ * Attempts a single file fetch operation.
+ */
+private fun attemptSingleFetch(
+    context: Context,
+    eventId: String,
+    assetName: String,
+    destAbsolutePath: String,
+    attempt: Int,
+): SingleFetchResult =
+    try {
+        Log.d(TAG, "platformFetchToFile: Attempt ${attempt + 1}/$MAX_FILE_COPY_RETRIES for $assetName")
+
+        val splitCtx = createSplitContext(context, eventId)
+        SplitCompat.install(splitCtx)
+
+        copyAssetToFile(splitCtx, assetName, destAbsolutePath)
+
+        SingleFetchResult(success = true)
+    } catch (e: FileNotFoundException) {
+        Log.w(TAG, "platformFetchToFile: Asset $assetName not found (attempt ${attempt + 1}/$MAX_FILE_COPY_RETRIES)")
+        SingleFetchResult(success = false, shouldRetry = true, exception = e)
+    } catch (e: Exception) {
+        SingleFetchResult(success = false, shouldRetry = false, exception = e)
     }
 
 actual fun cacheStringToFile(
