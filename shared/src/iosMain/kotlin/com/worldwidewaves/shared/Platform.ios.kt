@@ -181,20 +181,24 @@ actual suspend fun getMapFileAbsolutePath(
 
         Log.v("getMapFileAbsolutePath", "[$eventId] ODR confirmed available, resolving path: $fileName")
 
-        // CORRECT PATTERN: Use Bundle.main with name + extension only (no subdirectory)
+        // CORRECT PATTERN: Use 3-argument Bundle API for blue folder references (Maps/eventId/)
         // The NSBundleResourceRequest must be retained for this to work
         val bundle = NSBundle.mainBundle
-        val resourcePath = bundle.pathForResource(eventId, extension)
+        val subdirectory = "Maps/$eventId"
+        val resourcePath = bundle.pathForResource(eventId, extension, subdirectory)
 
         if (resourcePath != null && NSFileManager.defaultManager.fileExistsAtPath(resourcePath)) {
             Log.i("getMapFileAbsolutePath", "[$eventId] Found ODR file: $resourcePath")
             return resourcePath
         } else {
             // Debug: Log what Bundle actually sees
-            Log.w("getMapFileAbsolutePath", "[$eventId] Bundle.pathForResource returned: $resourcePath")
+            Log.w(
+                "getMapFileAbsolutePath",
+                "[$eventId] Bundle.pathForResource($eventId, $extension, $subdirectory) returned: $resourcePath",
+            )
 
             // Try URL-based approach as fallback
-            val resourceURL = bundle.URLForResource(eventId, extension)
+            val resourceURL = bundle.URLForResource(eventId, extension, subdirectory)
             if (resourceURL != null) {
                 val urlPath = resourceURL.path
                 Log.i("getMapFileAbsolutePath", "[$eventId] Found ODR file via URL: $urlPath")
@@ -237,18 +241,11 @@ actual fun cachedFileExists(fileName: String): Boolean {
             val extension = fileName.substringAfterLast('.')
             val bundle = NSBundle.mainBundle
 
-            val odrPaths =
-                listOf(
-                    bundle.pathForResource(eventId, extension, "Resources/Maps/$eventId"),
-                    bundle.pathForResource(eventId, extension, "Maps/$eventId"),
-                    bundle.pathForResource(eventId, extension, "Resources/Maps"),
-                    bundle.pathForResource(eventId, extension, "Maps"),
-                    bundle.pathForResource(eventId, extension),
-                )
+            // CORRECT: Use 3-argument Bundle API for blue folder references
+            val subdirectory = "Maps/$eventId"
+            val odrPath = bundle.pathForResource(eventId, extension, subdirectory)
 
-            return odrPaths.any { path ->
-                path != null && NSFileManager.defaultManager.fileExistsAtPath(path)
-            }
+            return odrPath != null && NSFileManager.defaultManager.fileExistsAtPath(odrPath)
         } catch (e: Exception) {
             Log.e("cachedFileExists", "Error checking ODR availability for: $fileName", throwable = e)
             return false
@@ -294,23 +291,15 @@ actual fun cachedFilePath(fileName: String): String? {
 
             Log.v("cachedFilePath", "ODR confirmed available for: $fileName")
 
-            // ONLY after ODR availability confirmed, resolve via Bundle APIs
-            val odrUrls: List<platform.Foundation.NSURL?> =
-                listOf(
-                    bundle.URLForResource(eventId, withExtension = extension, subdirectory = "Resources/Maps/$eventId"),
-                    bundle.URLForResource(eventId, withExtension = extension, subdirectory = "Maps/$eventId"),
-                    bundle.URLForResource(eventId, withExtension = extension, subdirectory = "Resources/Maps"),
-                    bundle.URLForResource(eventId, withExtension = extension, subdirectory = "Maps"),
-                    bundle.URLForResource(eventId, withExtension = extension, subdirectory = null),
-                )
+            // CORRECT: Use 3-argument Bundle API for blue folder references
+            val subdirectory = "Maps/$eventId"
+            val odrUrl = bundle.URLForResource(eventId, withExtension = extension, subdirectory = subdirectory)
 
-            for (url in odrUrls) {
-                if (url != null) {
-                    val absoluteString = url.absoluteString
-                    if (absoluteString != null) {
-                        Log.v("cachedFilePath", "Found ODR file after availability check: $absoluteString")
-                        return absoluteString
-                    }
+            if (odrUrl != null) {
+                val absoluteString = odrUrl.absoluteString
+                if (absoluteString != null) {
+                    Log.i("cachedFilePath", "Found ODR file after availability check: $absoluteString")
+                    return absoluteString
                 }
             }
 

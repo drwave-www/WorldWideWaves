@@ -192,25 +192,34 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
         try {
             val bundle = NSBundle.mainBundle
 
-            // Check what geojson files Bundle can see
-            val geojsonUrls = bundle.URLsForResourcesWithExtension("geojson", null)
-            Log.d("IOSMapAvailabilityChecker", "[$mapId] Bundle sees ${geojsonUrls?.count()} .geojson files total")
+            // CORRECT: Check what files Bundle can see in subdirectory (blue folder reference)
+            val subdirectory = "Maps/$mapId"
+            val geojsonUrls = bundle.URLsForResourcesWithExtension("geojson", subdirectory)
+            Log.i("IOSMapAvailabilityChecker", "[$mapId] Bundle sees ${geojsonUrls?.count()} .geojson files in $subdirectory")
 
-            val mbtileUrls = bundle.URLsForResourcesWithExtension("mbtiles", null)
-            Log.d("IOSMapAvailabilityChecker", "[$mapId] Bundle sees ${mbtileUrls?.count()} .mbtiles files total")
+            val mbtileUrls = bundle.URLsForResourcesWithExtension("mbtiles", subdirectory)
+            Log.i("IOSMapAvailabilityChecker", "[$mapId] Bundle sees ${mbtileUrls?.count()} .mbtiles files in $subdirectory")
 
-            // Try specific lookups
-            val geojsonPath = bundle.pathForResource(mapId, "geojson")
-            val geojsonURL = bundle.URLForResource(mapId, "geojson")
+            // CORRECT: Use 3-argument lookup for blue folder references
+            val geojsonPath = bundle.pathForResource(mapId, "geojson", subdirectory)
+            val geojsonURL = bundle.URLForResource(mapId, "geojson", subdirectory)
 
-            Log.d("IOSMapAvailabilityChecker", "[$mapId] pathForResource(geojson): $geojsonPath")
+            Log.i("IOSMapAvailabilityChecker", "[$mapId] pathForResource(subdirectory): $geojsonPath")
             Log.d("IOSMapAvailabilityChecker", "[$mapId] URLForResource(geojson): $geojsonURL")
 
-            val mbtilesPath = bundle.pathForResource(mapId, "mbtiles")
-            val mbtilesURL = bundle.URLForResource(mapId, "mbtiles")
+            // CORRECT: Use 3-argument lookup for mbtiles too
+            val mbtilesPath = bundle.pathForResource(mapId, "mbtiles", subdirectory)
+            val mbtilesURL = bundle.URLForResource(mapId, "mbtiles", subdirectory)
 
-            Log.d("IOSMapAvailabilityChecker", "[$mapId] pathForResource(mbtiles): $mbtilesPath")
-            Log.d("IOSMapAvailabilityChecker", "[$mapId] URLForResource(mbtiles): $mbtilesURL")
+            Log.i("IOSMapAvailabilityChecker", "[$mapId] pathForResource(mbtiles, subdirectory): $mbtilesPath")
+            Log.i("IOSMapAvailabilityChecker", "[$mapId] URLForResource(mbtiles, subdirectory): $mbtilesURL")
+
+            // Additional diagnostics as per ChatGPT recommendation
+            val allGeojsonUrls = bundle.URLsForResourcesWithExtension("geojson", subdirectory)
+            Log.i("IOSMapAvailabilityChecker", "[$mapId] All geojson files in $subdirectory: ${allGeojsonUrls?.count()}")
+
+            val topLevelGeojson = bundle.URLsForResourcesWithExtension("geojson", null)
+            Log.i("IOSMapAvailabilityChecker", "[$mapId] Top-level geojson files (should be 0): ${topLevelGeojson?.count()}")
         } catch (e: Exception) {
             Log.w("IOSMapAvailabilityChecker", "[$mapId] Debug bundle contents failed: ${e.message}")
         }
