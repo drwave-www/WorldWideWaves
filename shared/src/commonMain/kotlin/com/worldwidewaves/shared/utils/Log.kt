@@ -42,12 +42,18 @@ object Log {
     fun v(
         tag: String,
         message: String,
-        throwable: Throwable? = null,
+        throwable: Throwable?,
     ) {
         if (WWWGlobals.LogConfig.ENABLE_VERBOSE_LOGGING) {
             Napier.v(tag = tag, message = message, throwable = throwable)
         }
     }
+
+    @Throws(Throwable::class)
+    fun v(
+        tag: String,
+        message: String,
+    ) = v(tag, message, null)
 
     /**
      * Debug logging - disabled in release builds for performance.
@@ -63,6 +69,12 @@ object Log {
             Napier.d(tag = tag, message = message, throwable = throwable)
         }
     }
+
+    @Throws(Throwable::class)
+    fun d(
+        tag: String,
+        message: String,
+    ) = d(tag, message, null)
 
     /**
      * Performance logging - controlled by build configuration.
@@ -89,6 +101,12 @@ object Log {
         throwable: Throwable? = null,
     ) = Napier.i(tag = tag, message = message, throwable = throwable)
 
+    @Throws(Throwable::class)
+    fun i(
+        tag: String,
+        message: String,
+    ) = i(tag, message, null)
+
     /**
      * Warning logging - always enabled for production issue detection.
      * Use for recoverable errors and important warnings.
@@ -99,6 +117,12 @@ object Log {
         message: String,
         throwable: Throwable? = null,
     ) = Napier.w(tag = tag, message = message, throwable = throwable)
+
+    @Throws(Throwable::class)
+    fun w(
+        tag: String,
+        message: String,
+    ) = w(tag, message, null)
 
     /**
      * Error logging - always enabled for critical issue tracking.
@@ -111,6 +135,12 @@ object Log {
         throwable: Throwable? = null,
     ) = Napier.e(tag = tag, message = message, throwable = throwable)
 
+    @Throws(Throwable::class)
+    fun e(
+        tag: String,
+        message: String,
+    ) = e(tag, message, null)
+
     /**
      * Critical error logging - always enabled for catastrophic failures.
      * Use for errors that should never happen in production.
@@ -121,4 +151,10 @@ object Log {
         message: String,
         throwable: Throwable? = null,
     ) = Napier.wtf(tag = tag, message = message, throwable = throwable)
+
+    @Throws(Throwable::class)
+    fun wtf(
+        tag: String,
+        message: String,
+    ) = wtf(tag, message, null)
 }
