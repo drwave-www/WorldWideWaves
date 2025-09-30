@@ -48,6 +48,15 @@ kotlin {
             isStatic = false // Dynamic framework for iOS compatibility
             linkerOpts("-ObjC")
         }
+
+        // Configure cinterop for MapLibre wrapper
+        iosTarget.compilations.getByName("main") {
+            cinterops {
+                val MapLibreWrapper by creating {
+                    defFile = project.file("src/nativeInterop/cinterop/MapLibreWrapper.def")
+                }
+            }
+        }
     }
 
     /*
