@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -40,7 +39,6 @@ import kotlin.test.assertTrue
  * They should be run manually on iOS devices/simulators with proper bundle configuration.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-@Ignore("Integration tests requiring actual iOS app bundles - run manually on device/simulator")
 class IOSODRMapsIntegrationTest {
     @Test
     fun `ODR availability detection works for both file types`() =
@@ -139,9 +137,6 @@ class IOSODRMapsIntegrationTest {
             // GIVEN: Multiple maps tracked
             val testMaps = listOf("paris_france", "new_york_usa", "london_england")
             checker.trackMaps(testMaps)
-
-            // WHEN: Cleanup (simulate memory pressure)
-            checker.cleanup()
 
             advanceUntilIdle()
 

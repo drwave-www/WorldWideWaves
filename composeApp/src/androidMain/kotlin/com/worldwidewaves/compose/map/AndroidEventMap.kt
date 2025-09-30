@@ -39,6 +39,7 @@ import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -440,7 +441,7 @@ class AndroidEventMap(
         onRetry: () -> Unit,
         modifier: Modifier = Modifier,
     ) {
-        androidx.compose.foundation.layout.Column(
+        Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = modifier.padding(16.dp),
         ) {

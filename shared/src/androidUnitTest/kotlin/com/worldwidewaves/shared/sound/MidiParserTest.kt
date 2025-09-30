@@ -631,7 +631,6 @@ class MidiParserTest {
 
             // Test direct parsing first to ensure the bytes are valid
             val directTrack = MidiParser.parseMidiBytes(mockMidiBytes)
-            assertTrue(directTrack != null, "Direct parsing should work with valid MIDI bytes")
             assertEquals("Parsed MIDI Track", directTrack.name, "Should have default track name")
 
             // GIVEN: Mock MidiResources for file-based parsing test

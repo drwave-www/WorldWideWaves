@@ -37,7 +37,7 @@ import com.worldwidewaves.shared.viewmodels.MapViewModel
 import org.koin.mp.KoinPlatform
 import platform.UIKit.UIViewController
 
-const val TAG = "RootController"
+private const val TAG = "RootController"
 
 // ---------- Small helpers (DI + VC factory) ----------
 
