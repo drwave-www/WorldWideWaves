@@ -17,78 +17,160 @@ import com.worldwidewaves.shared.utils.WWWLogger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-private const val DEFAULT_IPHONE_WIDTH = 375.0
-private const val DEFAULT_IPHONE_HEIGHT = 812.0
+private const val TAG = "IOSMapLibreAdapter"
 
 /**
- * iOS implementation of MapLibreAdapter using iOS MapLibre SDK.
+ * iOS implementation of MapLibreAdapter using iOS MapLibre SDK via Swift wrapper.
  *
- * This adapter provides a bridge between the shared map logic and iOS MapLibre,
- * implementing all the map operations required by the WorldWideWaves application.
+ * This adapter bridges Kotlin shared logic to Swift MapLibreViewWrapper which wraps
+ * the native iOS MapLibre SDK (MLNMapView). The Swift wrapper is injected via setMap()
+ * and must conform to the expected interface (defined in MapLibreViewWrapper.swift).
  *
- * Note: Full MapLibre iOS SDK integration will be completed when MapLibre iOS
- * bindings are properly configured in the build system.
+ * Architecture:
+ * - Kotlin (this class) ← → Swift (MapLibreViewWrapper) ← → Objective-C/Swift (MapLibre SDK)
+ *
+ * Note: Swift classes are accessed via dynamic dispatch since Kotlin/Native can only directly
+ * interop with Objective-C (not Swift). The Swift wrapper uses @objc annotations to expose
+ * its interface.
  */
 class IOSMapLibreAdapter : MapLibreAdapter<Any> {
-    private var mapView: Any? = null
+    // Swift wrapper instance - accessed via dynamic member lookup
+    private var wrapper: dynamic = null
+
     private val _currentPosition = MutableStateFlow<Position?>(null)
     private val _currentZoom = MutableStateFlow(10.0)
 
     override val currentPosition: StateFlow<Position?> = _currentPosition
     override val currentZoom: StateFlow<Double> = _currentZoom
 
+    /**
+     * Sets the MapLibre wrapper (expects MapLibreViewWrapper Swift object).
+     * The wrapper should already have the MLNMapView configured.
+     */
     override fun setMap(map: Any) {
-        this.mapView = map
-        WWWLogger.d("IOSMapLibreAdapter", "Map view set")
+        this.wrapper = map as? dynamic
+        WWWLogger.d(TAG, "Map wrapper set")
 
-        // NOTE: Set up map listeners for position and zoom changes
-        // This will be implemented when iOS MapLibre SDK integration is completed
+        // Note: Camera position and zoom updates will be pushed from Swift delegate callbacks
+        // via updateCameraPosition() and updateZoom() methods
     }
 
     override fun setStyle(
         stylePath: String,
         callback: () -> Unit?,
     ) {
-        if (mapView != null) {
-            WWWLogger.d("IOSMapLibreAdapter", "Setting map style: $stylePath")
+        if (wrapper == null) {
+            WWWLogger.w(TAG, "Cannot set style - wrapper not initialized")
+            return
+        }
 
-            // NOTE: Implement iOS MapLibre style setting
-            // When MapLibre iOS bindings are available:
-            // (mapView as MLNMapView).styleURL = URL(string: stylePath)
+        WWWLogger.d(TAG, "Setting map style: $stylePath")
 
-            callback.invoke()
-        } else {
-            WWWLogger.w("IOSMapLibreAdapter", "Cannot set style - map view not initialized")
+        try {
+            // Call Swift wrapper via dynamic dispatch
+            wrapper.setStyleWithStyleURL(stylePath) {
+                WWWLogger.i(TAG, "Map style loaded successfully")
+                callback.invoke()
+            }
+        } catch (e: Exception) {
+            WWWLogger.e(TAG, "Error setting map style: ${e.message}")
+            callback.invoke() // Call anyway to prevent blocking
         }
     }
 
     override fun getWidth(): Double {
-        // NOTE: Implement with proper MapLibre iOS bindings
-        return DEFAULT_IPHONE_WIDTH
+        if (wrapper == null) return 375.0 // Default iPhone width
+
+        return try {
+            (wrapper.getWidth() as? Double) ?: 375.0
+        } catch (e: Exception) {
+            WWWLogger.w(TAG, "Error getting width: ${e.message}")
+            375.0
+        }
     }
 
     override fun getHeight(): Double {
-        // NOTE: Implement with proper MapLibre iOS bindings
-        return DEFAULT_IPHONE_HEIGHT
+        if (wrapper == null) return 812.0 // Default iPhone height
+
+        return try {
+            (wrapper.getHeight() as? Double) ?: 812.0
+        } catch (e: Exception) {
+            WWWLogger.w(TAG, "Error getting height: ${e.message}")
+            812.0
+        }
     }
 
     override fun getCameraPosition(): Position? {
-        // NOTE: Implement with proper MapLibre iOS bindings
-        // }
-        return null // Will be implemented with MapLibre bindings
+        if (wrapper == null) return null
+
+        return try {
+            val center = wrapper.getCameraCenter()
+            if (center != null) {
+                // Swift returns tuple - access via dynamic
+                val lat = center.latitude as? Double ?: return null
+                val lng = center.longitude as? Double ?: return null
+                Position(lat, lng)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            WWWLogger.w(TAG, "Error getting camera position: ${e.message}")
+            null
+        }
     }
 
     override fun getVisibleRegion(): BoundingBox {
-        // NOTE: Implement with proper MapLibre iOS bindings
-        // Will be implemented when MapLibre iOS SDK bindings are available
-        val sw = Position(0.0, 0.0)
-        val ne = Position(0.0, 0.0)
-        return BoundingBox.fromCorners(listOf(sw, ne)) ?: BoundingBox.fromCorners(
+        if (wrapper == null) {
+            return createFallbackBounds()
+        }
+
+        return try {
+            // Swift returns array [swLat, swLng, neLat, neLng]
+            val bounds = wrapper.getVisibleBounds() as? List<*>
+
+            if (bounds != null && bounds.size >= 4) {
+                val swLat = bounds[0] as? Double ?: return createFallbackBounds()
+                val swLng = bounds[1] as? Double ?: return createFallbackBounds()
+                val neLat = bounds[2] as? Double ?: return createFallbackBounds()
+                val neLng = bounds[3] as? Double ?: return createFallbackBounds()
+
+                val sw = Position(swLat, swLng)
+                val ne = Position(neLat, neLng)
+                BoundingBox.fromCorners(listOf(sw, ne)) ?: createFallbackBounds()
+            } else {
+                createFallbackBounds()
+            }
+        } catch (e: Exception) {
+            WWWLogger.w(TAG, "Error getting visible region: ${e.message}")
+            createFallbackBounds()
+        }
+    }
+
+    private fun createFallbackBounds(): BoundingBox =
+        BoundingBox.fromCorners(
             listOf(
                 Position(WWWGlobals.Geodetic.MIN_LATITUDE, WWWGlobals.Geodetic.MIN_LONGITUDE),
                 Position(WWWGlobals.Geodetic.MAX_LATITUDE, WWWGlobals.Geodetic.MAX_LONGITUDE),
             ),
         )!!
+
+    /**
+     * Update camera position from Swift delegate callback.
+     * Called by Swift code when map camera changes.
+     */
+    fun updateCameraPosition(
+        latitude: Double,
+        longitude: Double,
+    ) {
+        _currentPosition.value = Position(latitude, longitude)
+    }
+
+    /**
+     * Update zoom level from Swift delegate callback.
+     * Called by Swift code when map zoom changes.
+     */
+    fun updateZoom(zoom: Double) {
+        _currentZoom.value = zoom
     }
 
     override fun moveCamera(bounds: BoundingBox) {

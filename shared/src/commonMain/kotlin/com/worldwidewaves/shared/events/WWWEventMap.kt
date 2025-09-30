@@ -102,13 +102,21 @@ class WWWEventMap(
      *
      */
     suspend fun getStyleUri(): String? {
-        val mbtilesFilePath = getMbtilesFilePath() ?: return null
+        val mbtilesFilePath = getMbtilesFilePath()
+        if (mbtilesFilePath == null) {
+            return null
+        }
+
         val styleFilename = "style-${event.id}.json"
-        if (cachedFileExists(styleFilename) && !isCachedFileStale(styleFilename)) {
+        val isCacheValid = cachedFileExists(styleFilename) && !isCachedFileStale(styleFilename)
+        if (isCacheValid) {
             return cachedFilePath(styleFilename)
         }
 
-        val geojsonFilePath = event.area.getGeoJsonFilePath() ?: return null
+        val geojsonFilePath = event.area.getGeoJsonFilePath()
+        if (geojsonFilePath == null) {
+            return null
+        }
 
         val spriteAndGlyphsPath = cacheSpriteAndGlyphs()
         val newFileStr =

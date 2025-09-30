@@ -303,110 +303,186 @@ class WWWEventObserver(
                 Log.v("WWWEventObserver", "Starting unified observation for event ${event.id}")
 
                 try {
-                    // Initialize state with current values
-                    val currentStatus = getEventStatusSafely(event)
-                    val currentProgression = calculateProgressionSafely(event)
-
-                    Log.v("WWWEventObserver", "Initial state: status=$currentStatus, progression=$currentProgression")
-
-                    // Always initialize ALL state values
-                    updateStates(currentProgression, currentStatus)
-
-                    // Start unified observation that combines all trigger sources
-                    val mainObservationJob =
-                        createUnifiedObservationFlow()
-                            .flowOn(Dispatchers.Default)
-                            .catch { e ->
-                                Log.e("WWWEventObserver", "Error in unified observation flow for event ${event.id}: $e")
-                            }.onEach { observation ->
-                                try {
-                                    updateStates(observation.progression, observation.status)
-                                } catch (e: IllegalStateException) {
-                                    Log.e("WWWEventObserver", "State error updating states for event ${event.id}: $e")
-                                } catch (e: kotlinx.coroutines.CancellationException) {
-                                    handleCancellationException(e)
-                                } catch (e: Exception) {
-                                    Log.e("WWWEventObserver", "Unexpected error updating states for event ${event.id}: $e")
-                                }
-                            }.launchIn(coroutineScopeProvider.scopeDefault())
-
-                    // Use the dedicated position observer to handle position changes and area detection
-                    val positionObserverJob =
-                        positionObserver
-                            .observePositionForEvent(event)
-                            .catch { e ->
-                                Log.e("WWWEventObserver", "Error in position observation for event ${event.id}: $e")
-                            }.onEach { observation ->
-                                try {
-                                    _userIsInArea.updateIfChanged(observation.isInArea)
-                                } catch (e: IllegalStateException) {
-                                    Log.e("WWWEventObserver", "State error updating user area status for event ${event.id}: $e")
-                                } catch (e: kotlinx.coroutines.CancellationException) {
-                                    handleCancellationException(e)
-                                } catch (e: Exception) {
-                                    Log.e("WWWEventObserver", "Unexpected error updating user area status for event ${event.id}: $e")
-                                }
-                            }.launchIn(coroutineScopeProvider.scopeDefault())
-
-                    // Add immediate position change observer for backward compatibility and immediate response
-                    val directPositionObserverJob =
-                        positionManager.position
-                            .onEach { _ ->
-                                try {
-                                    Log.v("WWWEventObserver", "Direct position changed, updating area detection for event ${event.id}")
-                                    updateAreaDetection()
-                                } catch (e: IllegalStateException) {
-                                    Log.e("WWWEventObserver", "State error in updateAreaDetection for event ${event.id}: $e")
-                                } catch (e: kotlinx.coroutines.CancellationException) {
-                                    handleCancellationException(e)
-                                } catch (e: Exception) {
-                                    Log.e("WWWEventObserver", "Unexpected error in updateAreaDetection for event ${event.id}: $e")
-                                }
-                            }.launchIn(coroutineScopeProvider.scopeDefault())
-
-                    // Add polygon loading observer to trigger area detection when polygon data becomes available
-                    val polygonLoadingJob =
-                        event.area.polygonsLoaded
-                            .onEach { isLoaded ->
-                                try {
-                                    if (isLoaded) {
-                                        Log.v("WWWEventObserver", "Polygons loaded, updating area detection for event ${event.id}")
-                                        updateAreaDetection()
-                                    }
-                                } catch (e: IllegalStateException) {
-                                    Log.e("WWWEventObserver", "State error in polygon loading handler for event ${event.id}: $e")
-                                } catch (e: kotlinx.coroutines.CancellationException) {
-                                    handleCancellationException(e)
-                                } catch (e: Exception) {
-                                    Log.e("WWWEventObserver", "Unexpected error in polygon loading handler for event ${event.id}: $e")
-                                }
-                            }.launchIn(coroutineScopeProvider.scopeDefault())
-
-                    // Create a parent job that manages all child jobs
-                    // Fix for iOS: Avoid .join() calls which cause deadlocks
-                    unifiedObservationJob =
-                        coroutineScopeProvider.launchDefault {
-                            // Use invokeOnCompletion instead of blocking join
-                            mainObservationJob.invokeOnCompletion {
-                                // Cancel all observer jobs when main job completes
-                                positionObserverJob.cancel()
-                                directPositionObserverJob.cancel()
-                                polygonLoadingJob.cancel()
-                            }
-                        }
+                    initializeEventState()
+                    val observationJobs = startObservationJobs()
+                    setupParentObservationJob(observationJobs)
                 } catch (e: IllegalStateException) {
-                    // Common state error during initialization
-                    if (e.message?.contains("Flow context cannot contain job") == true) {
-                        Log.i("WWWEventObserver", "Feature map not yet downloaded for event ${event.id}")
-                    } else {
-                        Log.e("WWWEventObserver", "State error starting observation for event ${event.id}: ${e.message}")
-                    }
+                    handleInitializationStateError(e)
                 } catch (e: kotlinx.coroutines.CancellationException) {
                     handleCancellationException(e)
                 }
             }
         }
     }
+
+    /**
+     * Initializes event state with current values
+     */
+    private suspend fun initializeEventState() {
+        val currentStatus = getEventStatusSafely(event)
+        val currentProgression = calculateProgressionSafely(event)
+        Log.v("WWWEventObserver", "Initial state: status=$currentStatus, progression=$currentProgression")
+        updateStates(currentProgression, currentStatus)
+    }
+
+    /**
+     * Starts all observation jobs and returns them for management
+     */
+    private fun startObservationJobs(): ObservationJobs {
+        val mainObservationJob = startMainObservationFlow()
+        val positionObserverJob = startPositionObserverFlow()
+        val directPositionObserverJob = startDirectPositionObserverFlow()
+        val polygonLoadingJob = startPolygonLoadingFlow()
+
+        return ObservationJobs(
+            mainObservationJob,
+            positionObserverJob,
+            directPositionObserverJob,
+            polygonLoadingJob,
+        )
+    }
+
+    /**
+     * Starts the main unified observation flow
+     */
+    private fun startMainObservationFlow(): Job =
+        createUnifiedObservationFlow()
+            .flowOn(Dispatchers.Default)
+            .catch { e ->
+                Log.e("WWWEventObserver", "Error in unified observation flow for event ${event.id}: $e")
+            }.onEach { observation ->
+                handleMainObservationUpdate(observation)
+            }.launchIn(coroutineScopeProvider.scopeDefault())
+
+    /**
+     * Starts the position observer flow
+     */
+    private fun startPositionObserverFlow(): Job =
+        positionObserver
+            .observePositionForEvent(event)
+            .catch { e ->
+                Log.e("WWWEventObserver", "Error in position observation for event ${event.id}: $e")
+            }.onEach { observation ->
+                handlePositionObservationUpdate(observation)
+            }.launchIn(coroutineScopeProvider.scopeDefault())
+
+    /**
+     * Starts the direct position observer flow for immediate response
+     */
+    private fun startDirectPositionObserverFlow(): Job =
+        positionManager.position
+            .onEach { _ ->
+                handleDirectPositionUpdate()
+            }.launchIn(coroutineScopeProvider.scopeDefault())
+
+    /**
+     * Starts the polygon loading observer flow
+     */
+    private fun startPolygonLoadingFlow(): Job =
+        event.area.polygonsLoaded
+            .onEach { isLoaded ->
+                handlePolygonLoadingUpdate(isLoaded)
+            }.launchIn(coroutineScopeProvider.scopeDefault())
+
+    /**
+     * Sets up the parent job that manages all child observation jobs
+     */
+    private fun setupParentObservationJob(jobs: ObservationJobs) {
+        unifiedObservationJob =
+            coroutineScopeProvider.launchDefault {
+                // Use invokeOnCompletion instead of blocking join (iOS deadlock prevention)
+                jobs.mainObservationJob.invokeOnCompletion {
+                    jobs.positionObserverJob.cancel()
+                    jobs.directPositionObserverJob.cancel()
+                    jobs.polygonLoadingJob.cancel()
+                }
+            }
+    }
+
+    /**
+     * Handles updates from the main observation flow
+     */
+    private suspend fun handleMainObservationUpdate(observation: EventObservation) {
+        try {
+            updateStates(observation.progression, observation.status)
+        } catch (e: IllegalStateException) {
+            Log.e("WWWEventObserver", "State error updating states for event ${event.id}: $e")
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            handleCancellationException(e)
+        } catch (e: Exception) {
+            Log.e("WWWEventObserver", "Unexpected error updating states for event ${event.id}: $e")
+        }
+    }
+
+    /**
+     * Handles updates from the position observer flow
+     */
+    private suspend fun handlePositionObservationUpdate(observation: com.worldwidewaves.shared.domain.observation.PositionObservation) {
+        try {
+            _userIsInArea.updateIfChanged(observation.isInArea)
+        } catch (e: IllegalStateException) {
+            Log.e("WWWEventObserver", "State error updating user area status for event ${event.id}: $e")
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            handleCancellationException(e)
+        } catch (e: Exception) {
+            Log.e("WWWEventObserver", "Unexpected error updating user area status for event ${event.id}: $e")
+        }
+    }
+
+    /**
+     * Handles direct position updates for immediate area detection
+     */
+    private suspend fun handleDirectPositionUpdate() {
+        try {
+            Log.v("WWWEventObserver", "Direct position changed, updating area detection for event ${event.id}")
+            updateAreaDetection()
+        } catch (e: IllegalStateException) {
+            Log.e("WWWEventObserver", "State error in updateAreaDetection for event ${event.id}: $e")
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            handleCancellationException(e)
+        } catch (e: Exception) {
+            Log.e("WWWEventObserver", "Unexpected error in updateAreaDetection for event ${event.id}: $e")
+        }
+    }
+
+    /**
+     * Handles polygon loading updates
+     */
+    private suspend fun handlePolygonLoadingUpdate(isLoaded: Boolean) {
+        try {
+            if (isLoaded) {
+                Log.v("WWWEventObserver", "Polygons loaded, updating area detection for event ${event.id}")
+                updateAreaDetection()
+            }
+        } catch (e: IllegalStateException) {
+            Log.e("WWWEventObserver", "State error in polygon loading handler for event ${event.id}: $e")
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            handleCancellationException(e)
+        } catch (e: Exception) {
+            Log.e("WWWEventObserver", "Unexpected error in polygon loading handler for event ${event.id}: $e")
+        }
+    }
+
+    /**
+     * Handles initialization state errors
+     */
+    private fun handleInitializationStateError(e: IllegalStateException) {
+        if (e.message?.contains("Flow context cannot contain job") == true) {
+            Log.i("WWWEventObserver", "Feature map not yet downloaded for event ${event.id}")
+        } else {
+            Log.e("WWWEventObserver", "State error starting observation for event ${event.id}: ${e.message}")
+        }
+    }
+
+    /**
+     * Data class to hold all observation jobs
+     */
+    private data class ObservationJobs(
+        val mainObservationJob: Job,
+        val positionObserverJob: Job,
+        val directPositionObserverJob: Job,
+        val polygonLoadingJob: Job,
+    )
 
     fun stopObservation() {
         coroutineScopeProvider.launchDefault {

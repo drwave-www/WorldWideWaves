@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 48;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -17,6 +17,7 @@
 		14580D47AF68230DADEEE135 /* lima_peru.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 8C2661BBD38DACCD12314CBB /* lima_peru.geojson */; };
 		19F6347B33F0043FFAA34876 /* tehran_iran.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = E024FC952A1845AC065BEC3B /* tehran_iran.mbtiles */; };
 		1A256A4D69BA2C997078C31D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 01BC28CF91C3735EBA7CFF8F /* Assets.xcassets */; };
+		1C81D6F669B7BB6D2FFCCEB3 /* MapLibre in Frameworks */ = {isa = PBXBuildFile; productRef = B26BDE9F5B50F285C10A6766 /* MapLibre */; };
 		1E86D15BE6B80C3EEA566357 /* moscow_russia.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 000CD06835BE81866AD16966 /* moscow_russia.geojson */; };
 		238CD5B68CD2235B03E9ED9D /* buenos_aires_argentina.geojson in Resources */ = {isa = PBXBuildFile; fileRef = D07C91A96B01ADA03B2CB0D8 /* buenos_aires_argentina.geojson */; };
 		2C0B57FEFD820D5922A593C5 /* mumbai_india.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = 29AB54B84EF2F9778E29A90F /* mumbai_india.mbtiles */; };
@@ -190,6 +191,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4E77AFD5C2B00E927573D493 /* Shared.framework in Frameworks */,
+				1C81D6F669B7BB6D2FFCCEB3 /* MapLibre in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -658,6 +660,7 @@
 			);
 			name = iosApp;
 			packageProductDependencies = (
+				B26BDE9F5B50F285C10A6766 /* MapLibre */,
 			);
 			productName = iosApp;
 			productReference = 86038AE1032E284E79B32AD6 /* iosApp.app */;
@@ -687,6 +690,9 @@
 			);
 			mainGroup = 38B69C3F79CD97858CF7B609;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C45BF9F9A239D7373F125789 /* XCRemoteSwiftPackageReference "maplibre-native" */,
+			);
 			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
@@ -994,6 +1000,25 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C45BF9F9A239D7373F125789 /* XCRemoteSwiftPackageReference "maplibre-native" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/maplibre/maplibre-native";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.7.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B26BDE9F5B50F285C10A6766 /* MapLibre */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C45BF9F9A239D7373F125789 /* XCRemoteSwiftPackageReference "maplibre-native" */;
+			productName = MapLibre;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 242FB5348943441C388468CE /* Project object */;
 }

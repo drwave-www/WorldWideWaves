@@ -127,13 +127,16 @@ class DefaultPositionObserver(
         from: Position,
         to: Position,
     ): Double {
-        if (!isValidPosition(from) || !isValidPosition(to)) {
+        // Validate positions
+        val arePositionsValid = isValidPosition(from) && isValidPosition(to)
+        if (!arePositionsValid) {
             Log.w("DefaultPositionObserver", "Invalid positions for distance calculation: $from, $to")
             return Double.POSITIVE_INFINITY
         }
 
         // Handle same position case
-        if (from.lat == to.lat && from.lng == to.lng) {
+        val isSamePosition = from.lat == to.lat && from.lng == to.lng
+        if (isSamePosition) {
             return 0.0
         }
 
@@ -152,7 +155,8 @@ class DefaultPositionObserver(
         val clampedA = a.coerceIn(0.0, 1.0)
         val c = 2 * acos(sqrt(clampedA))
 
-        return EARTH_RADIUS_METERS * c
+        val distance = EARTH_RADIUS_METERS * c
+        return distance
     }
 
     override fun stopObservation() {
