@@ -29,7 +29,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import platform.AVFAudio.AVAudioEngine
-import platform.AVFAudio.AVAudioFormat
 import platform.AVFAudio.AVAudioMixerNode
 import platform.AVFAudio.AVAudioPCMBuffer
 import platform.AVFAudio.AVAudioPlayerNode
@@ -165,12 +164,8 @@ class IOSSoundPlayer :
                     )
 
                 if (samples.isNotEmpty()) {
-                    // Create PCM buffer and schedule for playback
-                    val format =
-                        AVAudioFormat(
-                            standardFormatWithSampleRate = sampleRate.toDouble(),
-                            channels = 1u,
-                        )
+                    // Use the mixer's output format to ensure compatibility
+                    val format = mixerNode.outputFormatForBus(0u)
 
                     val frameCapacity = samples.size.toUInt()
                     val buffer =
