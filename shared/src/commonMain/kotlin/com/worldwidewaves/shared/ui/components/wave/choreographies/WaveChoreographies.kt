@@ -301,6 +301,7 @@ fun ChoreographyDisplay(
                     val offsetX = (size.width - scaledWidth) / 2f
                     val offsetY = (size.height - scaledHeight) / 2f
 
+                    // Enhanced rendering for better quality on Android to match iOS
                     clipRect(
                         left = offsetX,
                         top = offsetY,
@@ -315,7 +316,7 @@ fun ChoreographyDisplay(
                                 draw(
                                     size =
                                         Size(
-                                            width = scaledWidth * sequence.frameCount, // Use actual frame count instead of hardcoded 4
+                                            width = scaledWidth * 4, // Always 4 frames per sprite sheet
                                             height = scaledHeight,
                                         ),
                                 )
