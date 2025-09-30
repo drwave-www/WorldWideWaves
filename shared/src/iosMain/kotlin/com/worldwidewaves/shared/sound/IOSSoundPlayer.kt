@@ -54,10 +54,12 @@ class IOSSoundPlayer :
     private val playerNode = AVAudioPlayerNode()
     private val playbackMutex = Mutex()
     private var isEngineStarted = false
+    private var isEngineSetupAttempted = false
 
     init {
         setupAudioSession()
-        setupAudioEngine()
+        // Defer engine setup to first playback attempt
+        // This prevents crashes on simulators without audio I/O
     }
 
     private fun setupAudioSession() {
@@ -75,14 +77,27 @@ class IOSSoundPlayer :
     }
 
     private fun setupAudioEngine() {
+        if (isEngineSetupAttempted) return
+        isEngineSetupAttempted = true
+
         try {
             audioEngine.attachNode(playerNode)
+
+            // Check if audio I/O is available before preparing
+            // This prevents crashes on simulators
+            val outputNode = audioEngine.outputNode
+            if (outputNode == null) {
+                Log.w(TAG, "No audio output available (likely simulator), audio disabled")
+                return
+            }
+
             audioEngine.prepare()
             audioEngine.startAndReturnError(null)
             isEngineStarted = true
             Log.v(TAG, "Audio engine setup completed")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to setup audio engine", e)
+            Log.e(TAG, "Failed to setup audio engine (simulator or hardware issue)", e)
+            isEngineStarted = false
         }
     }
 
@@ -99,9 +114,15 @@ class IOSSoundPlayer :
         waveform: SoundPlayer.Waveform,
     ) {
         playbackMutex.withLock {
+            // Lazy engine initialization on first playback
+            if (!isEngineSetupAttempted) {
+                setupAudioEngine()
+            }
+
             try {
                 if (!isEngineStarted) {
-                    Log.w(TAG, "Audio engine not started, cannot play tone")
+                    Log.w(TAG, "Audio engine not available (simulator mode), skipping playback")
+                    delay(duration) // Maintain timing even without audio
                     return@withLock
                 }
 
