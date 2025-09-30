@@ -20,7 +20,7 @@
 # limitations under the License.
 #
 
-DEST_DIR=../../maps/android/
+DEST_DIR=../../maps/
 GRADLE_SETTINGS=../../settings.gradle.kts
 IOS_INFO_PLIST=../../iosApp/worldwidewaves/Info.plist
 
@@ -169,15 +169,15 @@ else
 fi
 
 # ========================================================================
-# iOS Xcode Project ODR Configuration (Idempotent)
+# iOS Xcode Project ODR Configuration (Reference maps/* in place)
 # ========================================================================
 
-echo "Configuring iOS ODR tags in Xcode project..."
+echo "Configuring iOS ODR to reference maps/* files in place..."
 
 # Path to Xcode project
 IOS_XCODE_PROJECT="../../iosApp/worldwidewaves.xcodeproj/project.pbxproj"
 
-# Function to add ODR asset tags to Xcode project
+# Function to add ODR asset tags to Xcode project with direct file references
 add_odr_tags_to_xcode() {
     local project_file="$1"
     local temp_project="/tmp/worldwidewaves_project_temp.pbxproj"
@@ -190,13 +190,14 @@ add_odr_tags_to_xcode() {
     # Copy original project
     cp "$project_file" "$temp_project"
 
-    echo "Adding ODR asset tags for ${#VALID_EVENTS[@]} events to Xcode project..."
+    echo "Adding ODR asset tags for ${#VALID_EVENTS[@]} events to reference source files..."
 
-    # Generate asset tags by relative path entries
+    # Generate asset tags by relative path entries - reference source maps/* directly
     local asset_tags_entries=""
     for event in "${VALID_EVENTS[@]}"; do
-        asset_tags_entries="${asset_tags_entries}				Maps/${event}/${event}.geojson = (${event}, );\n"
-        asset_tags_entries="${asset_tags_entries}				Maps/${event}/${event}.mbtiles = (${event}, );\n"
+        # Reference files directly from maps/{event}/src/main/assets/
+        asset_tags_entries="${asset_tags_entries}				../maps/${event}/src/main/assets/${event}.geojson = (${event}, );\n"
+        asset_tags_entries="${asset_tags_entries}				../maps/${event}/src/main/assets/${event}.mbtiles = (${event}, );\n"
     done
 
     # Generate known asset tags entries
@@ -205,21 +206,9 @@ add_odr_tags_to_xcode() {
         known_tags_entries="${known_tags_entries}					${event},\n"
     done
 
-    # Check if ODR configuration already exists
-    if grep -q "assetTagsByRelativePath" "$temp_project"; then
-        echo "ODR asset tags already exist in Xcode project, updating..."
-
-        # Replace existing assetTagsByRelativePath section
-        awk -v new_entries="$asset_tags_entries" '
-        /assetTagsByRelativePath = {/ {
-            print
-            print new_entries
-            # Skip existing entries until closing brace
-            while (getline > 0 && !/^\t\t\t};$/) {}
-            print "\t\t\t};"
-            next
-        }
-        { print }' "$temp_project" > "${temp_project}.tmp" && mv "${temp_project}.tmp" "$temp_project"
+    # Check if KnownAssetTags exists (current project uses this approach)
+    if grep -q "KnownAssetTags" "$temp_project"; then
+        echo "Found KnownAssetTags in Xcode project, updating with new file references..."
 
         # Replace existing KnownAssetTags section
         awk -v new_entries="$known_tags_entries" '
@@ -233,8 +222,37 @@ add_odr_tags_to_xcode() {
         }
         { print }' "$temp_project" > "${temp_project}.tmp" && mv "${temp_project}.tmp" "$temp_project"
 
+        # Add assetTagsByRelativePath section if it doesn't exist
+        if ! grep -q "assetTagsByRelativePath" "$temp_project"; then
+            echo "Adding assetTagsByRelativePath section for direct file references..."
+
+            # Find the line with C17B46632E899ED40097A3A5 (the exception set) and add our section before it
+            awk -v asset_entries="$asset_tags_entries" '
+            /isa = PBXFileSystemSynchronizedBuildFileExceptionSet;/ {
+                # Add our assetTagsByRelativePath section before the existing exception set
+                print "\t\t\t\tassetTagsByRelativePath = {"
+                print asset_entries
+                print "\t\t\t};"
+                print $0
+                next
+            }
+            { print }' "$temp_project" > "${temp_project}.tmp" && mv "${temp_project}.tmp" "$temp_project"
+        else
+            # Update existing assetTagsByRelativePath section
+            awk -v new_entries="$asset_tags_entries" '
+            /assetTagsByRelativePath = {/ {
+                print
+                print new_entries
+                # Skip existing entries until closing brace
+                while (getline > 0 && !/^\t\t\t};$/) {}
+                print "\t\t\t};"
+                next
+            }
+            { print }' "$temp_project" > "${temp_project}.tmp" && mv "${temp_project}.tmp" "$temp_project"
+        fi
+
     else
-        echo "No existing ODR configuration found in Xcode project"
+        echo "No KnownAssetTags found in Xcode project"
         echo "Please add ODR configuration manually or ensure the project structure is correct"
         return 1
     fi

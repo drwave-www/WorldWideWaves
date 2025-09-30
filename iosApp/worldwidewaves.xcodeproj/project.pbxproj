@@ -32,6 +32,11 @@
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		C17B46632E899ED40097A3A5 /* Exceptions for "worldwidewaves" folder in "worldwidewaves" target */ = {
+				assetTagsByRelativePath = {
+				../maps/paris_france/src/main/assets/paris_france.geojson = (paris_france, );
+				../maps/paris_france/src/main/assets/paris_france.mbtiles = (paris_france, );
+
+			};
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -123,46 +128,8 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				KnownAssetTags = (
-					bangalore_india,
-					bangkok_thailand,
-					beijing_china,
-					berlin_germany,
-					bogota_colombia,
-					buenos_aires_argentina,
-					cairo_egypt,
-					chicago_usa,
-					delhi_india,
-					dubai_united_arab_emirates,
-					hong_kong_china,
-					istanbul_turkey,
-					jakarta_indonesia,
-					johannesburg_south_africa,
-					karachi_pakistan,
-					kinshasa_democratic_republic_of_the_congo,
-					lagos_nigeria,
-					lima_peru,
-					london_england,
-					los_angeles_usa,
-					madrid_spain,
-					manila_philippines,
-					melbourne_australia,
-					mexico_city_mexico,
-					moscow_russia,
-					mumbai_india,
-					nairobi_kenya,
-					new_york_usa,
 					paris_france,
-					rome_italy,
-					san_francisco_usa,
-					santiago_chile,
-					sao_paulo_brazil,
-					seoul_south_korea,
-					shanghai_china,
-					sydney_australia,
-					tehran_iran,
-					tokyo_japan,
-					toronto_canada,
-					vancouver_canada,
+
 				);
 				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1640;
