@@ -196,7 +196,7 @@ class AndroidSoundPlayer(
                 .setAudioAttributes(
                     AudioAttributes
                         .Builder()
-                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
                         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                         .build(),
                 ).setAudioFormat(
@@ -208,6 +208,7 @@ class AndroidSoundPlayer(
                         .build(),
                 ).setBufferSizeInBytes(bufferSizeInBytes)
                 .setTransferMode(AudioTrack.MODE_STATIC)
+                .setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
                 .build()
 
         synchronized(activeTracks) {

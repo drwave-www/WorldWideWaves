@@ -174,33 +174,29 @@ class IOSSoundPlayer :
                             frameCapacity = frameCapacity,
                         )
 
-                    if (buffer != null) {
-                        buffer.frameLength = frameCapacity
+                    buffer.frameLength = frameCapacity
 
-                        // Copy samples to buffer
-                        val floatChannelData = buffer.floatChannelData
-                        if (floatChannelData != null) {
-                            val channel0 = floatChannelData[0]
-                            if (channel0 != null) {
-                                samples.forEachIndexed { index, sample ->
-                                    channel0[index] = sample.toFloat()
-                                }
-
-                                // Schedule and play buffer
-                                playerNode.scheduleBuffer(buffer, null)
-                                playerNode.play()
-
-                                // Wait for playback to complete
-                                delay(duration + 50.milliseconds)
-                                Log.v(TAG, "iOS audio playback completed (${samples.size} samples)")
-                            } else {
-                                Log.w(TAG, "Failed to get channel 0 pointer")
+                    // Copy samples to buffer
+                    val floatChannelData = buffer.floatChannelData
+                    if (floatChannelData != null) {
+                        val channel0 = floatChannelData[0]
+                        if (channel0 != null) {
+                            samples.forEachIndexed { index, sample ->
+                                channel0[index] = sample.toFloat()
                             }
+
+                            // Schedule and play buffer
+                            playerNode.scheduleBuffer(buffer, null)
+                            playerNode.play()
+
+                            // Wait for playback to complete
+                            delay(duration + 50.milliseconds)
+                            Log.v(TAG, "iOS audio playback completed (${samples.size} samples)")
                         } else {
-                            Log.w(TAG, "Failed to get channel data from buffer")
+                            Log.w(TAG, "Failed to get channel 0 pointer")
                         }
                     } else {
-                        Log.w(TAG, "Failed to create PCM buffer")
+                        Log.w(TAG, "Failed to get channel data from buffer")
                     }
                 }
             } catch (e: Exception) {

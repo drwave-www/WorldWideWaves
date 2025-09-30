@@ -47,31 +47,20 @@ object ODRPaths {
     fun bundleHas(eventId: String): Boolean = resolve(eventId, "geojson") != null || resolve(eventId, "mbtiles") != null
 
     /** Resolve absolute path for an ODR resource, being defensive about layout. */
-    fun resolve(
-        eventId: String,
-        extension: String,
-    ): String? {
+    fun resolve(eventId: String, extension: String): String? {
         val b = NSBundle.mainBundle
-
-        // 1) Expected subdirectory layout (blue folder reference case)
-        val subdir = "Maps/$eventId"
-        b.pathForResource(eventId, extension, subdir)?.let { return it }
-
-        // 2) Flattened at bundle root
-        b.URLForResource(eventId, extension)?.path?.let { return it }
-
-        // 3) Scan all *.<ext> and pick by name or expected folder
+        val subs = arrayOf("Maps/$eventId", "worldwidewaves/Maps/$eventId", null)
+        for (sub in subs) {
+            b.pathForResource(eventId, extension, sub)?.let { return it }
+            if (sub == null) b.URLForResource(eventId, extension)?.path?.let { return it }
+        }
         val any = b.URLsForResourcesWithExtension(extension, null)
-        val urls: List<NSURL> =
-            when (any) {
-                is List<*> -> any.mapNotNull { it as? NSURL }
-                else -> emptyList()
-            }
-        return urls
-            .firstOrNull { url ->
-                val last = url.lastPathComponent ?: ""
-                last == "$eventId.$extension" || (url.path ?: "").contains("/Maps/$eventId/")
-            }?.path
+        val urls = any?.mapNotNull { it as? NSURL } ?: emptyList()
+        return urls.firstOrNull { url ->
+            val p = url.path ?: ""
+            p.endsWith("/$eventId.$extension") ||
+                    p.contains("/Maps/$eventId/")
+        }?.path
     }
 }
 
