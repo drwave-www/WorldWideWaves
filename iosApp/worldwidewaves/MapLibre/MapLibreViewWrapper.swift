@@ -19,13 +19,13 @@
  */
 
 import Foundation
-import MapLibre
+import Mapbox
 import UIKit
 
 /// Swift bridging layer for MapLibre Native iOS SDK
 /// Provides Kotlin-friendly API for IOSMapLibreAdapter
 @objc public class MapLibreViewWrapper: NSObject {
-    private weak var mapView: MLNMapView?
+    private weak var mapView: MGLMapView?
     private var onStyleLoaded: (() -> Void)?
     private var onMapClick: ((Double, Double) -> Void)?
     private var onCameraIdle: (() -> Void)?
@@ -41,7 +41,7 @@ import UIKit
 
     // MARK: - Map Setup
 
-    @objc public func setMapView(_ mapView: MLNMapView) {
+    @objc public func setMapView(_ mapView: MGLMapView) {
         self.mapView = mapView
         self.mapView?.delegate = self
 
@@ -157,7 +157,7 @@ import UIKit
 
         let southwest = CLLocationCoordinate2D(latitude: swLat, longitude: swLng)
         let northeast = CLLocationCoordinate2D(latitude: neLat, longitude: neLng)
-        let bounds = MLNCoordinateBounds(sw: southwest, ne: northeast)
+        let bounds = MGLCoordinateBounds(sw: southwest, ne: northeast)
 
         let edgePadding = UIEdgeInsets(
             top: CGFloat(padding),
@@ -182,7 +182,7 @@ import UIKit
 
         let southwest = CLLocationCoordinate2D(latitude: swLat, longitude: swLng)
         let northeast = CLLocationCoordinate2D(latitude: neLat, longitude: neLng)
-        let bounds = MLNCoordinateBounds(sw: southwest, ne: northeast)
+        let bounds = MGLCoordinateBounds(sw: southwest, ne: northeast)
 
         mapView.setVisibleCoordinateBounds(bounds, animated: false)
     }
@@ -227,14 +227,14 @@ import UIKit
             let layerId = "wave-polygons-layer-\(index)-\(UUID().uuidString)"
 
             // Create polygon shape
-            let polygon = MLNPolygon(coordinates: coordinates, count: UInt(coordinates.count))
+            let polygon = MGLPolygon(coordinates: coordinates, count: UInt(coordinates.count))
 
             // Create source
-            let source = MLNShapeSource(identifier: sourceId, shape: polygon, options: nil)
+            let source = MGLShapeSource(identifier: sourceId, shape: polygon, options: nil)
             style.addSource(source)
 
             // Create fill layer with wave styling
-            let fillLayer = MLNFillStyleLayer(identifier: layerId, source: source)
+            let fillLayer = MGLFillStyleLayer(identifier: layerId, source: source)
             fillLayer.fillColor = NSExpression(forConstantValue: UIColor(hex: "#00008B"))
             fillLayer.fillOpacity = NSExpression(forConstantValue: 0.20)
 
@@ -277,12 +277,12 @@ import UIKit
         let southeast = CLLocationCoordinate2D(latitude: swLat, longitude: neLng)
 
         var coordinates = [southwest, southeast, northeast, northwest, southwest]
-        let polyline = MLNPolyline(coordinates: &coordinates, count: UInt(coordinates.count))
+        let polyline = MGLPolyline(coordinates: &coordinates, count: UInt(coordinates.count))
 
-        let source = MLNShapeSource(identifier: "bbox-override-source", shape: polyline, options: nil)
+        let source = MGLShapeSource(identifier: "bbox-override-source", shape: polyline, options: nil)
         style.addSource(source)
 
-        let lineLayer = MLNLineStyleLayer(identifier: "bbox-override-line", source: source)
+        let lineLayer = MGLLineStyleLayer(identifier: "bbox-override-line", source: source)
         lineLayer.lineColor = NSExpression(forConstantValue: UIColor.red)
         lineLayer.lineWidth = NSExpression(forConstantValue: 1.0)
         lineLayer.lineOpacity = NSExpression(forConstantValue: 1.0)
@@ -309,21 +309,21 @@ import UIKit
     }
 }
 
-// MARK: - MLNMapViewDelegate
+// MARK: - MGLMapViewDelegate
 
-extension MapLibreViewWrapper: MLNMapViewDelegate {
-    public func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
+extension MapLibreViewWrapper: MGLMapViewDelegate {
+    public func mapView(_ mapView: MGLMapView, didFinishLoading style: MGLStyle) {
         print("✅ iOS MapLibre: Style loaded successfully")
         onStyleLoaded?()
         onStyleLoaded = nil
     }
 
-    public func mapView(_ mapView: MLNMapView, regionDidChangeAnimated animated: Bool) {
+    public func mapView(_ mapView: MGLMapView, regionDidChangeAnimated animated: Bool) {
         // Camera idle event
         onCameraIdle?()
     }
 
-    public func mapViewDidFailLoadingMap(_ mapView: MLNMapView, withError error: Error) {
+    public func mapViewDidFailLoadingMap(_ mapView: MGLMapView, withError error: Error) {
         print("❌ iOS MapLibre: Failed to load map: \(error.localizedDescription)")
     }
 }
