@@ -24,7 +24,8 @@ import UIKit
 
 /// Swift bridging layer for MapLibre Native iOS SDK
 /// Provides Kotlin-friendly API for IOSMapLibreAdapter
-@objc public class MapLibreViewWrapper: NSObject {
+@objc public class MapLibreViewWrapper: NSObject, MapLibreWrapperProtocol {
+    private static let tag = "MapLibreWrapper"
     private weak var mapView: MLNMapView?
     private var onStyleLoaded: (() -> Void)?
     private var onMapClick: ((Double, Double) -> Void)?
@@ -37,31 +38,36 @@ import UIKit
 
     @objc public override init() {
         super.init()
+        WWWLog.d(Self.tag, "Initializing MapLibreViewWrapper")
     }
 
     // MARK: - Map Setup
 
     @objc public func setMapView(_ mapView: MLNMapView) {
+        WWWLog.d(Self.tag, "setMapView called, bounds: \(mapView.bounds)")
         self.mapView = mapView
         self.mapView?.delegate = self
 
         // Add tap gesture recognizer for map clicks
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleMapTap(_:)))
         self.mapView?.addGestureRecognizer(tapGesture)
+        WWWLog.d(Self.tag, "Map view configured successfully")
     }
 
     @objc public func setStyle(styleURL: String, completion: @escaping () -> Void) {
+        WWWLog.d(Self.tag, "setStyle called with URL: \(styleURL)")
         guard let mapView = mapView else {
-            print("⚠️ iOS MapLibre: Cannot set style - mapView is nil")
+            WWWLog.e(Self.tag, "Cannot set style - mapView is nil")
             return
         }
 
         self.onStyleLoaded = completion
 
         if let url = URL(string: styleURL) {
+            WWWLog.d(Self.tag, "Setting style URL on map view")
             mapView.styleURL = url
         } else {
-            print("❌ iOS MapLibre: Invalid style URL: \(styleURL)")
+            WWWLog.e(Self.tag, "Invalid style URL: \(styleURL)")
         }
     }
 
@@ -214,13 +220,15 @@ import UIKit
     // MARK: - Wave Polygons
 
     @objc public func addWavePolygons(polygons: [[CLLocationCoordinate2D]], clearExisting: Bool) {
+        WWWLog.i(Self.tag, "addWavePolygons: \(polygons.count) polygons, clearExisting: \(clearExisting)")
         guard let mapView = mapView, let style = mapView.style else {
-            print("⚠️ iOS MapLibre: Cannot add polygons - style not loaded")
+            WWWLog.e(Self.tag, "Cannot add polygons - style not loaded (mapView: \(mapView != nil), style: \(mapView?.style != nil))")
             return
         }
 
         // Clear existing polygons if requested
         if clearExisting {
+            WWWLog.d(Self.tag, "Clearing existing wave polygons")
             clearWavePolygons()
         }
 
@@ -316,18 +324,19 @@ import UIKit
 
 extension MapLibreViewWrapper: MLNMapViewDelegate {
     public func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
-        print("✅ iOS MapLibre: Style loaded successfully")
+        WWWLog.i(Self.tag, "Style loaded successfully")
         onStyleLoaded?()
         onStyleLoaded = nil
     }
 
     public func mapView(_ mapView: MLNMapView, regionDidChangeAnimated animated: Bool) {
         // Camera idle event
+        WWWLog.v(Self.tag, "Region changed, camera idle")
         onCameraIdle?()
     }
 
     public func mapViewDidFailLoadingMap(_ mapView: MLNMapView, withError error: Error) {
-        print("❌ iOS MapLibre: Failed to load map: \(error.localizedDescription)")
+        WWWLog.e(Self.tag, "Failed to load map", error: error)
     }
 }
 

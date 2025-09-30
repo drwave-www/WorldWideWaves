@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.map
  */
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,18 +33,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,12 +53,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.position.PositionManager
+import com.worldwidewaves.shared.ui.components.DownloadProgressIndicator
+import com.worldwidewaves.shared.ui.components.LoadingIndicator
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import org.koin.mp.KoinPlatform
 import platform.UIKit.UIImage
 
@@ -118,38 +124,16 @@ class IOSEventMap(
         val positionManager = KoinPlatform.getKoin().get<PositionManager>()
         val platformMapManager = KoinPlatform.getKoin().get<PlatformMapManager>()
         val currentLocation by positionManager.position.collectAsState()
-        val scope = rememberCoroutineScope()
+
+        // Use shared MapDownloadCoordinator for download state management
+        val downloadCoordinator = remember { MapDownloadCoordinator(platformMapManager) }
+        val downloadState by downloadCoordinator.getDownloadState(event.id).collectAsState()
 
         var mapIsLoaded by remember { mutableStateOf(false) }
-        var mapIsAvailable by remember { mutableStateOf(false) }
-        var mapDownloadProgress by remember { mutableIntStateOf(0) }
-        var mapDownloadError by remember { mutableStateOf<String?>(null) }
 
-        // Check map availability and handle ODR downloads
-        LaunchedEffect(event.id) {
-            Log.d("IOSEventMap", "Checking map availability for: ${event.id}")
-            mapIsAvailable = platformMapManager.isMapAvailable(event.id)
-
-            if (!mapIsAvailable && autoMapDownload) {
-                Log.i("IOSEventMap", "Map not available, starting ODR download for: ${event.id}")
-                platformMapManager.downloadMap(
-                    mapId = event.id,
-                    onProgress = { progress: Int ->
-                        mapDownloadProgress = progress
-                        Log.v("IOSEventMap", "Map download progress: $progress%")
-                    },
-                    onSuccess = {
-                        Log.i("IOSEventMap", "Map downloaded successfully: ${event.id}")
-                        mapIsAvailable = true
-                        mapDownloadProgress = 100
-                    },
-                    onError = { code: Int, message: String? ->
-                        val errorMsg = "Map download failed (code: $code): $message"
-                        Log.e("IOSEventMap", errorMsg)
-                        mapDownloadError = message
-                    },
-                )
-            }
+        // Check map availability and trigger auto-download if needed
+        LaunchedEffect(event.id, autoMapDownload) {
+            downloadCoordinator.autoDownloadIfNeeded(event.id, autoMapDownload)
         }
 
         // Initialize position system integration (same as AbstractEventMap)
@@ -185,9 +169,7 @@ class IOSEventMap(
                 MapStatusCard(
                     event = event,
                     isLoaded = mapIsLoaded,
-                    isAvailable = mapIsAvailable,
-                    downloadProgress = mapDownloadProgress,
-                    downloadError = mapDownloadError,
+                    downloadState = downloadState,
                     polygonCount = currentPolygons.size,
                 )
 
@@ -215,6 +197,131 @@ class IOSEventMap(
                     }
                 }
             }
+
+            // Download overlay UI (matching Android behavior)
+            // Log current download state for debugging
+            Log.v(
+                "IOSEventMap",
+                "Overlay decision: ${event.id} | isAvailable=${downloadState.isAvailable}, " +
+                    "isDownloading=${downloadState.isDownloading}, error=${downloadState.error}, progress=${downloadState.progress}",
+            )
+
+            when {
+                downloadState.isDownloading && downloadState.error == null -> {
+                    Log.d("IOSEventMap", "Showing MapDownloadOverlay: ${event.id} progress=${downloadState.progress}%")
+                    MapDownloadOverlay(
+                        progress = downloadState.progress,
+                        onCancel = {
+                            Log.i("IOSEventMap", "Download cancelled by user: ${event.id}")
+                            downloadCoordinator.cancelDownload(event.id)
+                        },
+                    )
+                }
+
+                downloadState.error != null -> {
+                    Log.d("IOSEventMap", "Showing MapErrorOverlay: ${event.id} error=${downloadState.error}")
+                    MapErrorOverlay(
+                        errorMessage = downloadState.error!!,
+                        onRetry = {
+                            Log.i("IOSEventMap", "Retry clicked for: ${event.id}")
+                            MainScope().launch {
+                                downloadCoordinator.downloadMap(event.id)
+                            }
+                        },
+                    )
+                }
+
+                !downloadState.isAvailable && !downloadState.isDownloading -> {
+                    Log.d("IOSEventMap", "Showing MapDownloadButton for: ${event.id}")
+                    MapDownloadButton {
+                        Log.i("IOSEventMap", "Download button clicked for: ${event.id}")
+                        MainScope().launch {
+                            Log.i("IOSEventMap", "Launching download coroutine for: ${event.id}")
+                            downloadCoordinator.downloadMap(event.id)
+                        }
+                    }
+                }
+
+                else -> {
+                    Log.v("IOSEventMap", "No overlay shown: ${event.id} (map loaded or downloading)")
+                }
+            }
+        }
+    }
+
+    @Composable
+    @Suppress("FunctionName")
+    private fun MapDownloadOverlay(
+        progress: Int,
+        onCancel: () -> Unit,
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
+        ) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                if (progress > 0) {
+                    DownloadProgressIndicator(
+                        progress = progress,
+                        message = stringResource(MokoRes.strings.map_downloading),
+                        onCancel = onCancel,
+                    )
+                } else {
+                    LoadingIndicator(message = stringResource(MokoRes.strings.map_starting_download))
+                }
+            }
+        }
+    }
+
+    @Composable
+    @Suppress("FunctionName")
+    private fun MapErrorOverlay(
+        errorMessage: String,
+        onRetry: () -> Unit,
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background.copy(alpha = 0.9f),
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = "Download Failed",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = errorMessage,
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = onRetry) {
+                    Text("Retry")
+                }
+            }
+        }
+    }
+
+    @Composable
+    @Suppress("FunctionName")
+    private fun MapDownloadButton(onClick: () -> Unit) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
+        ) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Button(onClick = onClick) {
+                    Text(
+                        text = stringResource(MokoRes.strings.map_download),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
+            }
         }
     }
 
@@ -222,9 +329,7 @@ class IOSEventMap(
     private fun MapStatusCard(
         event: IWWWEvent,
         isLoaded: Boolean,
-        isAvailable: Boolean,
-        downloadProgress: Int,
-        downloadError: String?,
+        downloadState: MapDownloadCoordinator.DownloadState,
         polygonCount: Int,
     ) {
         Card(
@@ -255,8 +360,8 @@ class IOSEventMap(
                                 .clip(CircleShape)
                                 .background(
                                     when {
-                                        downloadError != null -> Color.Red
-                                        isAvailable && isLoaded -> Color.Green
+                                        downloadState.error != null -> Color.Red
+                                        downloadState.isAvailable && isLoaded -> Color.Green
                                         else -> LOADING_COLOR
                                     },
                                 ),
@@ -265,9 +370,9 @@ class IOSEventMap(
                     Text(
                         text =
                             when {
-                                downloadError != null -> "Error"
-                                !isAvailable && downloadProgress > 0 -> "Downloading: $downloadProgress%"
-                                !isAvailable -> "Map Not Available"
+                                downloadState.error != null -> "Error"
+                                downloadState.isDownloading -> "Downloading: ${downloadState.progress}%"
+                                !downloadState.isAvailable -> "Map Not Available"
                                 isLoaded -> "Map Ready"
                                 else -> "Loading..."
                             },
@@ -275,10 +380,10 @@ class IOSEventMap(
                     )
                 }
 
-                if (downloadError != null) {
+                if (downloadState.error != null) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Download failed: $downloadError",
+                        text = "Download failed: ${downloadState.error}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
                     )
