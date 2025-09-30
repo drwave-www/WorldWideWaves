@@ -21,6 +21,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import platform.Foundation.NSBundle
 import platform.Foundation.NSBundleResourceRequest
+import platform.Foundation.NSURL
 
 /**
  * Tiny, production-ready iOS map manager using On-Demand Resources (ODR).

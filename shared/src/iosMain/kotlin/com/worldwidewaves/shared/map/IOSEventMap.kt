@@ -40,10 +40,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -118,38 +116,16 @@ class IOSEventMap(
         val positionManager = KoinPlatform.getKoin().get<PositionManager>()
         val platformMapManager = KoinPlatform.getKoin().get<PlatformMapManager>()
         val currentLocation by positionManager.position.collectAsState()
-        val scope = rememberCoroutineScope()
+
+        // Use shared MapDownloadCoordinator for download state management
+        val downloadCoordinator = remember { MapDownloadCoordinator(platformMapManager) }
+        val downloadState by downloadCoordinator.getDownloadState(event.id).collectAsState()
 
         var mapIsLoaded by remember { mutableStateOf(false) }
-        var mapIsAvailable by remember { mutableStateOf(false) }
-        var mapDownloadProgress by remember { mutableIntStateOf(0) }
-        var mapDownloadError by remember { mutableStateOf<String?>(null) }
 
-        // Check map availability and handle ODR downloads
-        LaunchedEffect(event.id) {
-            Log.d("IOSEventMap", "Checking map availability for: ${event.id}")
-            mapIsAvailable = platformMapManager.isMapAvailable(event.id)
-
-            if (!mapIsAvailable && autoMapDownload) {
-                Log.i("IOSEventMap", "Map not available, starting ODR download for: ${event.id}")
-                platformMapManager.downloadMap(
-                    mapId = event.id,
-                    onProgress = { progress: Int ->
-                        mapDownloadProgress = progress
-                        Log.v("IOSEventMap", "Map download progress: $progress%")
-                    },
-                    onSuccess = {
-                        Log.i("IOSEventMap", "Map downloaded successfully: ${event.id}")
-                        mapIsAvailable = true
-                        mapDownloadProgress = 100
-                    },
-                    onError = { code: Int, message: String? ->
-                        val errorMsg = "Map download failed (code: $code): $message"
-                        Log.e("IOSEventMap", errorMsg)
-                        mapDownloadError = message
-                    },
-                )
-            }
+        // Check map availability and trigger auto-download if needed
+        LaunchedEffect(event.id, autoMapDownload) {
+            downloadCoordinator.autoDownloadIfNeeded(event.id, autoMapDownload)
         }
 
         // Initialize position system integration (same as AbstractEventMap)
@@ -185,9 +161,7 @@ class IOSEventMap(
                 MapStatusCard(
                     event = event,
                     isLoaded = mapIsLoaded,
-                    isAvailable = mapIsAvailable,
-                    downloadProgress = mapDownloadProgress,
-                    downloadError = mapDownloadError,
+                    downloadState = downloadState,
                     polygonCount = currentPolygons.size,
                 )
 
@@ -222,9 +196,7 @@ class IOSEventMap(
     private fun MapStatusCard(
         event: IWWWEvent,
         isLoaded: Boolean,
-        isAvailable: Boolean,
-        downloadProgress: Int,
-        downloadError: String?,
+        downloadState: MapDownloadCoordinator.DownloadState,
         polygonCount: Int,
     ) {
         Card(
@@ -255,8 +227,8 @@ class IOSEventMap(
                                 .clip(CircleShape)
                                 .background(
                                     when {
-                                        downloadError != null -> Color.Red
-                                        isAvailable && isLoaded -> Color.Green
+                                        downloadState.error != null -> Color.Red
+                                        downloadState.isAvailable && isLoaded -> Color.Green
                                         else -> LOADING_COLOR
                                     },
                                 ),
@@ -265,9 +237,9 @@ class IOSEventMap(
                     Text(
                         text =
                             when {
-                                downloadError != null -> "Error"
-                                !isAvailable && downloadProgress > 0 -> "Downloading: $downloadProgress%"
-                                !isAvailable -> "Map Not Available"
+                                downloadState.error != null -> "Error"
+                                downloadState.isDownloading -> "Downloading: ${downloadState.progress}%"
+                                !downloadState.isAvailable -> "Map Not Available"
                                 isLoaded -> "Map Ready"
                                 else -> "Loading..."
                             },
@@ -275,10 +247,10 @@ class IOSEventMap(
                     )
                 }
 
-                if (downloadError != null) {
+                if (downloadState.error != null) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Download failed: $downloadError",
+                        text = "Download failed: ${downloadState.error}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
                     )
