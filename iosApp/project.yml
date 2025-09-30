@@ -8,6 +8,10 @@ options:
     iOS: "15.0"
   xcodeVersion: "15.4"
   minimumXcodeGenVersion: "2.39.0"
+packages:
+  MapLibreNative:
+    url: https://github.com/maplibre/maplibre-native
+    from: 6.7.1
 targets:
   iosApp:
     type: application
@@ -193,6 +197,8 @@ targets:
     dependencies:
       - framework: ../shared/build/xcode-frameworks/$$(CONFIGURATION)/$$(SDK_NAME)/Shared.framework
         embed: false
+      - package: MapLibreNative
+        product: MapLibre
 schemes:
   iosApp:
     build:
