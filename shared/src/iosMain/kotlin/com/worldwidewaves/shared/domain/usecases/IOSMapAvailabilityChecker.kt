@@ -19,9 +19,6 @@ package com.worldwidewaves.shared.domain.usecases
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import platform.Foundation.NSBundleResourceRequest
@@ -36,8 +33,6 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
     private val tracked = mutableSetOf<String>()
     private val _mapStates = MutableStateFlow<Map<String, Boolean>>(emptyMap())
     override val mapStates: StateFlow<Map<String, Boolean>> = _mapStates
-
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     // Prevent GC and allow pinning for explicitly requested maps
     private val pinnedRequests = mutableMapOf<String, NSBundleResourceRequest>() // long-lived, explicit downloads
@@ -128,21 +123,18 @@ class IOSMapAvailabilityChecker : MapAvailabilityChecker {
 
     // ---------- Non-downloading checks ----------
 
-    override fun isMapDownloaded(eventId: String): Boolean {
-        // 1) persistent cache
-        if (inPersistentCache(eventId)) return true
-        // 2) explicitly pinned
-        if (pinnedRequests.containsKey(eventId)) return true
-        // 3) initial install tag currently visible in Bundle
-        if (eventId in initialTags &&
+    override fun isMapDownloaded(eventId: String): Boolean =
+        when {
+            inPersistentCache(eventId) -> true
+            pinnedRequests.containsKey(eventId) -> true
+            isInitialTagAvailable(eventId) -> true
+            else -> false
+        }
+
+    private fun isInitialTagAvailable(eventId: String): Boolean =
+        eventId in initialTags &&
             com.worldwidewaves.shared.data.ODRPaths
                 .bundleHas(eventId)
-        ) {
-            return true
-        }
-        // else not downloaded
-        return false
-    }
 
     override fun getDownloadedMaps(): List<String> = tracked.filter { isMapDownloaded(it) }
 }

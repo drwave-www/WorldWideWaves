@@ -83,6 +83,16 @@ class IOSEventMap(
 
     private var currentPolygons = mutableListOf<Polygon>()
 
+    private fun formatCoordinates(location: Position): String =
+        "${location.lat.toString().take(COORDINATE_DISPLAY_LAT_LENGTH)}, " +
+            location.lng.toString().take(COORDINATE_DISPLAY_LNG_LENGTH)
+
+    companion object {
+        private val LOADING_COLOR = Color(0xFFFFA500)
+        private const val COORDINATE_DISPLAY_LAT_LENGTH = 8
+        private const val COORDINATE_DISPLAY_LNG_LENGTH = 9
+    }
+
     override fun updateWavePolygons(
         wavePolygons: List<Polygon>,
         clearPolygons: Boolean,
@@ -99,7 +109,7 @@ class IOSEventMap(
 
     @Composable
     override fun Draw(
-        autoMapDownload: Boolean,
+        @Suppress("UNUSED_PARAMETER") autoMapDownload: Boolean,
         modifier: Modifier,
     ) {
         // Get unified position from PositionManager (same as Android)
@@ -141,7 +151,6 @@ class IOSEventMap(
                 MapStatusCard(
                     event = event,
                     isLoaded = mapIsLoaded,
-                    autoDownload = autoMapDownload,
                     polygonCount = currentPolygons.size,
                 )
 
@@ -176,7 +185,6 @@ class IOSEventMap(
     private fun MapStatusCard(
         event: IWWWEvent,
         isLoaded: Boolean,
-        autoDownload: Boolean,
         polygonCount: Int,
     ) {
         Card(
@@ -205,7 +213,7 @@ class IOSEventMap(
                             Modifier
                                 .size(12.dp)
                                 .clip(CircleShape)
-                                .background(if (isLoaded) Color.Green else Color(0xFFFFA500)),
+                                .background(if (isLoaded) Color.Green else LOADING_COLOR),
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -245,7 +253,7 @@ class IOSEventMap(
                 )
 
                 Text(
-                    text = "${location.lat.toString().take(8)}, ${location.lng.toString().take(9)}",
+                    text = formatCoordinates(location),
                     style = MaterialTheme.typography.bodySmall,
                     fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
                 )

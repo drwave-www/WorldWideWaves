@@ -58,12 +58,32 @@ object ODRPaths {
         extension: String,
     ): String? {
         val b = NSBundle.mainBundle
+
+        // Try standard subdirectories first
+        resolveFromStandardPaths(b, eventId, extension)?.let { return it }
+
+        // Fallback: search all resources with the extension
+        return resolveFromExtensionSearch(b, eventId, extension)
+    }
+
+    private fun resolveFromStandardPaths(
+        bundle: NSBundle,
+        eventId: String,
+        extension: String,
+    ): String? {
         val subs = arrayOf("Maps/$eventId", "worldwidewaves/Maps/$eventId", null)
-        for (sub in subs) {
-            b.pathForResource(eventId, extension, sub)?.let { return it }
-            if (sub == null) b.URLForResource(eventId, extension)?.path?.let { return it }
+        return subs.firstNotNullOfOrNull { sub ->
+            bundle.pathForResource(eventId, extension, sub)
+                ?: if (sub == null) bundle.URLForResource(eventId, extension)?.path else null
         }
-        val any = b.URLsForResourcesWithExtension(extension, null)
+    }
+
+    private fun resolveFromExtensionSearch(
+        bundle: NSBundle,
+        eventId: String,
+        extension: String,
+    ): String? {
+        val any = bundle.URLsForResourcesWithExtension(extension, null)
         val urls = any?.mapNotNull { it as? NSURL } ?: emptyList()
         return urls
             .firstOrNull { url ->
@@ -147,24 +167,43 @@ actual suspend fun platformFetchToFile(
 ): Boolean {
     val request = platform.Foundation.NSBundleResourceRequest(setOf(eventId)).apply { loadingPriority = 1.0 }
     try {
-        val mounted =
-            suspendCancellableCoroutine<Boolean> { cont ->
-                onMain {
-                    request.beginAccessingResourcesWithCompletionHandler { error ->
-                        cont.resume(error == null)
-                    }
-                }
-                cont.invokeOnCancellation { onMain { request.endAccessingResources() } }
-            }
-        if (!mounted) return false
-
-        val src = ODRPaths.resolve(eventId, extension) ?: return false
-        val fm = NSFileManager.defaultManager
-        if (fm.fileExistsAtPath(destAbsolutePath)) fm.removeItemAtPath(destAbsolutePath, null)
-        return fm.copyItemAtPath(src, destAbsolutePath, null)
+        return mountAndCopyResource(request, eventId, extension, destAbsolutePath)
     } finally {
         onMain { request.endAccessingResources() }
     }
+}
+
+private suspend fun mountAndCopyResource(
+    request: platform.Foundation.NSBundleResourceRequest,
+    eventId: String,
+    extension: String,
+    destAbsolutePath: String,
+): Boolean {
+    val mounted = mountODRResource(request)
+    if (!mounted) return false
+
+    return copyResourceToDestination(eventId, extension, destAbsolutePath)
+}
+
+private suspend fun mountODRResource(request: platform.Foundation.NSBundleResourceRequest): Boolean =
+    suspendCancellableCoroutine { cont ->
+        onMain {
+            request.beginAccessingResourcesWithCompletionHandler { error ->
+                cont.resume(error == null)
+            }
+        }
+        cont.invokeOnCancellation { onMain { request.endAccessingResources() } }
+    }
+
+private fun copyResourceToDestination(
+    eventId: String,
+    extension: String,
+    destAbsolutePath: String,
+): Boolean {
+    val src = ODRPaths.resolve(eventId, extension) ?: return false
+    val fm = NSFileManager.defaultManager
+    if (fm.fileExistsAtPath(destAbsolutePath)) fm.removeItemAtPath(destAbsolutePath, null)
+    return fm.copyItemAtPath(src, destAbsolutePath, null)
 }
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
