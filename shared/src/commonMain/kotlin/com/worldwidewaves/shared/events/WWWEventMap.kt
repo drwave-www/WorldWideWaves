@@ -22,18 +22,18 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.WWWGlobals.FileSystem
-import com.worldwidewaves.shared.cacheDeepFile
-import com.worldwidewaves.shared.cacheStringToFile
-import com.worldwidewaves.shared.cachedFileExists
-import com.worldwidewaves.shared.cachedFilePath
+import com.worldwidewaves.shared.data.cacheDeepFile
+import com.worldwidewaves.shared.data.cacheStringToFile
+import com.worldwidewaves.shared.data.cachedFileExists
+import com.worldwidewaves.shared.data.cachedFilePath
+import com.worldwidewaves.shared.data.getCacheDir
+import com.worldwidewaves.shared.data.getMapFileAbsolutePath
+import com.worldwidewaves.shared.data.isCachedFileStale
+import com.worldwidewaves.shared.data.updateCacheMetadata
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.MapDataProvider
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.Res
-import com.worldwidewaves.shared.getCacheDir
-import com.worldwidewaves.shared.getMapFileAbsolutePath
-import com.worldwidewaves.shared.isCachedFileStale
-import com.worldwidewaves.shared.updateCacheMetadata
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -121,6 +121,7 @@ class WWWEventMap(
 
         cacheStringToFile(styleFilename, newFileStr)
         updateCacheMetadata(styleFilename)
+
         // Return the direct path from cacheStringToFile instead of going through cachedFilePath
         // which might fail in development mode or have timing issues
         return getCacheDir() + "/" + styleFilename

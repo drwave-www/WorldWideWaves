@@ -109,36 +109,6 @@ expect fun localizeString(resource: StringResource): String
 
 // ---------------------------
 
-expect suspend fun readGeoJson(eventId: String): String?
-
-expect suspend fun getMapFileAbsolutePath(
-    eventId: String,
-    extension: String,
-): String?
-
-expect suspend fun cachedFileExists(fileName: String): Boolean
-
-expect suspend fun cachedFilePath(fileName: String): String?
-
-expect fun cacheStringToFile(
-    fileName: String,
-    content: String,
-): String
-
-expect suspend fun cacheDeepFile(fileName: String)
-
-expect fun getCacheDir(): String
-
-// ---------------------------------------------------------------------------
-//  Cache maintenance helpers (platform-specific actual implementations)
-// ---------------------------------------------------------------------------
-
-expect fun clearEventCache(eventId: String)
-
-expect fun isCachedFileStale(fileName: String): Boolean
-
-expect fun updateCacheMetadata(fileName: String)
-
 interface PlatformEnabler {
     // Open an event activity / screen
     fun openEventActivity(eventId: String)

@@ -22,420 +22,217 @@ package com.worldwidewaves.shared
  */
 
 import android.content.Context
-import android.os.Build
-import android.util.Log
-import com.google.android.play.core.splitcompat.SplitCompat
-import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker
-import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
-import com.worldwidewaves.shared.generated.resources.Res
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.desc.desc
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.koin.java.KoinJavaComponent.inject
 import org.koin.mp.KoinPlatform
-import java.io.BufferedInputStream
-import java.io.BufferedOutputStream
-import java.io.File
-import java.util.concurrent.ConcurrentHashMap
 
-// Session cache to remember unavailable geojson within the same app session
-private val unavailableGeoJsonCache = ConcurrentHashMap.newKeySet<String>()
-
-/**
- * Clear the unavailable cache for a specific event when a map is downloaded
- */
-fun clearUnavailableGeoJsonCache(eventId: String) {
-    unavailableGeoJsonCache.remove(eventId)
-
-    // Also invalidate GeoJSON cache in memory to force fresh load
-    try {
-        val geoJsonProvider: GeoJsonDataProvider by inject(
-            GeoJsonDataProvider::class.java,
-        )
-        geoJsonProvider.invalidateCache(eventId)
-    } catch (e: Exception) {
-        Log.w("clearUnavailableGeoJsonCache", "Failed to invalidate GeoJSON cache for $eventId: ${e.message}")
-    }
-
-    Log.d("clearUnavailableGeoJsonCache", "Cleared cache for event $eventId")
-}
-
-actual suspend fun readGeoJson(eventId: String): String? {
-    // Quick session cache check to avoid repeated calls for known unavailable maps
-    if (unavailableGeoJsonCache.contains(eventId)) {
-        return null
-    }
-    val filePath = getMapFileAbsolutePath(eventId, "geojson")
-
-    return if (filePath != null) {
-        withContext(Dispatchers.IO) {
-            Log.i(::readGeoJson.name, "Loading geojson data for event $eventId from $filePath")
-            File(filePath).readText()
-        }
-    } else {
-        Log.d(::readGeoJson.name, "GeoJSON file not available for event $eventId")
-        // Cache this unavailable result to avoid repeated attempts in the same session
-        unavailableGeoJsonCache.add(eventId)
-        null
-    }
-}
-
-// ---------------------------
-
-/**
- * Retrieves the absolute path of a map file for a given event.
- *
- * This function attempts to get the absolute path of a map file (e.g., MBTiles, GeoJSON) associated with the event.
- * It first checks if the file is already cached in the device's cache directory. If the file is not cached or the
- * cached file size does not match the expected size, it reads the file from the resources and caches it.
- *
- */
-actual suspend fun getMapFileAbsolutePath(
-    eventId: String,
-    extension: String,
-): String? {
-    val context: Context by inject(Context::class.java)
-    val mapChecker: MapAvailabilityChecker by inject(MapAvailabilityChecker::class.java)
-    val cachedFile = File(context.cacheDir, "$eventId.$extension")
-    val metadataFile = File(context.cacheDir, "$eventId.$extension.metadata")
-
-    // First check if we have a valid cached file that doesn't need updating
-    val needsUpdate =
-        when {
-            !cachedFile.exists() -> {
-                Log.d(::getMapFileAbsolutePath.name, "Cache file doesn't exist for $eventId.$extension")
-                true
-            }
-            !metadataFile.exists() -> {
-                Log.d(::getMapFileAbsolutePath.name, "Metadata file doesn't exist for $eventId.$extension")
-                true
-            }
-            else -> {
-                val lastCacheTime =
-                    try {
-                        metadataFile.readText().toLong()
-                    } catch (_: Exception) {
-                        0L
-                    }
-
-                // Check if the app was installed/updated after we cached the file
-                val appInstallTime =
-                    try {
-                        context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
-                    } catch (_: Exception) {
-                        System.currentTimeMillis()
-                    }
-
-                val isStale = appInstallTime > lastCacheTime
-                if (isStale) {
-                    Log.d(
-                        ::getMapFileAbsolutePath.name,
-                        "Cache is stale for $eventId.$extension (app: $appInstallTime, cache: $lastCacheTime)",
-                    )
-                } else {
-                    Log.d(
-                        ::getMapFileAbsolutePath.name,
-                        "Cache is up-to-date for $eventId.$extension",
-                    )
-                }
-                isStale
-            }
-        }
-
-    // If we have a valid cached file, return its path immediately
-    if (!needsUpdate) {
-        Log.i(::getMapFileAbsolutePath.name, "Using cached file for $eventId.$extension")
-        return cachedFile.absolutePath
-    }
-
-    // Check if the map is actually downloaded before attempting expensive operations
-    if (!mapChecker.isMapDownloaded(eventId)) {
-        Log.d(::getMapFileAbsolutePath.name, "Map feature not downloaded for $eventId.$extension, skipping file access attempts")
-        return null
-    }
-
-    // If we need to update the cache, try to open the asset from feature module
-    Log.i(::getMapFileAbsolutePath.name, "Fetching $eventId.$extension from feature module")
-
-    val assetPath = "$eventId.$extension"
-
-    /* ------------------------------------------------------------------
-     * Play Feature Delivery race mitigation:
-     * Immediately after SplitInstall reports INSTALLED the asset might
-     * not yet be visible to the running Activity/process. Retry a few
-     * times with a fresh split-aware context before giving up.
-     * ---------------------------------------------------------------- */
-
-    // Implement actual retry logic as mentioned in the comment above
-    var lastException: Exception? = null
-    val maxRetries = 3
-    val retryDelayMs = 100L
-
-    for (attempt in 1..maxRetries) {
-        try {
-            val ctx =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    try {
-                        context.createContextForSplit(eventId)
-                    } catch (_: Exception) {
-                        context
-                    }
-                } else {
-                    context
-                }
-
-            // Ensure split-compat hooks into this context
-            SplitCompat.install(ctx)
-
-            // Try to access the asset immediately
-            return cacheAssetFromContext(ctx, assetPath, cachedFile, metadataFile, eventId, extension)
-        } catch (e: java.io.FileNotFoundException) {
-            lastException = e
-            if (attempt < maxRetries) {
-                Log.d(::getMapFileAbsolutePath.name, "Asset not accessible on attempt $attempt for $eventId.$extension, retrying...")
-                kotlinx.coroutines.delay(retryDelayMs)
-            }
-        }
-    }
-
-    // If we get here, all retries failed - handle the final exception intelligently
-    if (lastException is java.io.FileNotFoundException) {
-        Log.d(::getMapFileAbsolutePath.name, "Map feature not available: $eventId.$extension (feature module not downloaded)")
-    } else {
-        Log.e(::getMapFileAbsolutePath.name, "Error loading map from feature module: ${lastException?.message}", lastException)
-    }
-    return null
-}
-
-/**
- * Helper function to cache asset from a given context.
- * Separated for the retry logic above.
- */
-private suspend fun cacheAssetFromContext(
-    ctx: Context,
-    assetPath: String,
-    cachedFile: File,
-    metadataFile: File,
-    @Suppress("UNUSED_PARAMETER") eventId: String,
-    @Suppress("UNUSED_PARAMETER") extension: String,
-): String {
-    withContext(Dispatchers.IO) {
-        // Use a buffered approach for better memory efficiency
-        ctx.assets.open(assetPath).use { input ->
-            BufferedInputStream(input, WWWGlobals.ByteProcessing.BUFFER_SIZE).use { bufferedInput ->
-                cachedFile.outputStream().use { fileOutput ->
-                    BufferedOutputStream(fileOutput, WWWGlobals.ByteProcessing.BUFFER_SIZE).use { bufferedOutput ->
-                        val buffer = ByteArray(WWWGlobals.ByteProcessing.BUFFER_SIZE)
-                        var bytesRead: Int
-
-                        while (bufferedInput.read(buffer).also { bytesRead = it } != -1) {
-                            bufferedOutput.write(buffer, 0, bytesRead)
-                        }
-
-                        bufferedOutput.flush()
-                    }
-                }
-            }
-        }
-
-        // Update metadata after successful copy
-        metadataFile.writeText(System.currentTimeMillis().toString())
-    }
-
-    return cachedFile.absolutePath
-}
-
-// ---------------------------
-
-/**
- * Checks if a cached file exists in the application's cache directory.
- *
- * This function determines whether a file with the specified name exists in the cache directory.
- * It also considers whether the application is running in development mode, in which case it always
- * returns `false` to simulate the absence of cached files.
- *
- */
-actual suspend fun cachedFileExists(fileName: String): Boolean {
-    val context: Context by inject(Context::class.java)
-    val isDevelopmentMode = Build.HARDWARE == "ranchu" || Build.HARDWARE == "goldfish"
-
-    return if (isDevelopmentMode) {
-        // Allow caching for generated style files to prevent performance issues
-        if (fileName.startsWith("style-") && fileName.endsWith(".json")) {
-            val fileExists = File(context.cacheDir, fileName).exists()
-            Log.i(::cachedFileExists.name, "Development mode (allowing style cache): $fileName -> $fileExists")
-            fileExists
-        } else {
-            Log.i(::cachedFileExists.name, "Development mode (not cached): $fileName")
-            false
-        }
-    } else {
-        File(context.cacheDir, fileName).exists()
-    }
-}
-
-/**
- * Retrieves the absolute path of a cached file if it exists.
- *
- * This function checks if a file with the given name exists in the cache directory of the Android context.
- * If the file exists, it returns the absolute path of the file as a string. If the file does not exist,
- * it returns `null`.
- *
- */
-actual suspend fun cachedFilePath(fileName: String): String? {
-    val context: Context by inject(Context::class.java)
-    return File(context.cacheDir, fileName).takeIf { it.exists() }?.toURI()?.path
-}
-
-/**
- * Caches a string content to a file in the application's cache directory.
- *
- * This function writes the provided string content to a file with the specified name
- * in the cache directory of the application. It logs the file name to which the data
- * is being cached.
- *
- */
-actual fun cacheStringToFile(
-    fileName: String,
-    content: String,
-): String {
-    val context: Context by inject(Context::class.java)
-    Log.v(::cacheStringToFile.name, "Caching data to $fileName")
-    File(context.cacheDir, fileName).writeText(content)
-    return fileName
-}
-
-/**
- * Caches a file from the application's resources to the device's cache directory.
- *
- * This function reads the bytes of a file from the application's resources and writes them to a file
- * in the device's cache directory. If the cache directory does not exist, it is created. If an error
- * occurs during the process, it is logged.
- *
- */
-@OptIn(ExperimentalResourceApi::class)
-actual suspend fun cacheDeepFile(fileName: String) {
-    try {
-        val context: Context by inject(Context::class.java)
-        val fileBytes = Res.readBytes(fileName)
-        val cacheFile = File(context.cacheDir, fileName)
-
-        cacheFile.parentFile?.mkdirs()
-        cacheFile.outputStream().use { it.write(fileBytes) }
-    } catch (e: java.io.FileNotFoundException) {
-        Log.w(::cacheDeepFile.name, "Cannot cache deep file: $fileName (resource not found)", e)
-    } catch (e: SecurityException) {
-        Log.e(::cacheDeepFile.name, "Security error caching file: $fileName", e)
-    } catch (e: java.io.IOException) {
-        Log.e(::cacheDeepFile.name, "IO error caching file: $fileName", e)
-    } catch (e: Exception) {
-        Log.e(::cacheDeepFile.name, "Unexpected error caching file: $fileName", e)
-    }
-}
-
-/**
- * Retrieves the absolute path to the cache directory on the Android platform.
- *
- * This function uses the Android context to access the cache directory and returns its absolute path.
- * The cache directory is a location where the application can store temporary files.
- *
- */
-actual fun getCacheDir(): String {
-    val context: Context by inject(Context::class.java)
-    return context.cacheDir.absolutePath
-}
-
-// ---------------------------------------------------------------------------
-//  Cache-maintenance helpers (Android actuals)
-// ---------------------------------------------------------------------------
-
-/**
- * Delete all cached artefacts (data + metadata files) that belong to a given map/event.
- */
-actual fun clearEventCache(eventId: String) {
-    val context: Context by inject(Context::class.java)
-    val cacheDir = context.cacheDir
-
-    // Also invalidate GeoJSON cache in memory
-    try {
-        val geoJsonProvider: GeoJsonDataProvider by inject(
-            GeoJsonDataProvider::class.java,
-        )
-        geoJsonProvider.invalidateCache(eventId)
-    } catch (e: Exception) {
-        Log.w(::clearEventCache.name, "Failed to invalidate GeoJSON cache for $eventId: ${e.message}")
-    }
-
-    val targets =
-        listOf(
-            "$eventId.mbtiles",
-            "$eventId.mbtiles.metadata",
-            "$eventId.geojson",
-            "$eventId.geojson.metadata",
-            "style-$eventId.json",
-            "style-$eventId.json.metadata",
-        )
-
-    for (name in targets) {
-        try {
-            val f = File(cacheDir, name)
-            if (f.exists()) {
-                if (f.delete()) {
-                    Log.i(::clearEventCache.name, "Deleted cached file $name")
-                } else {
-                    Log.e(::clearEventCache.name, "Failed to delete cached file $name")
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(::clearEventCache.name, "Error while deleting $name", e)
-        }
-    }
-}
-
-/**
- * Determine whether an already-cached file is stale with regard to the
- * application's lastUpdateTime (which also changes when dynamic-feature
- * splits are updated through the Play Store).
- */
-actual fun isCachedFileStale(fileName: String): Boolean {
-    val context: Context by inject(Context::class.java)
-    val cacheDir = context.cacheDir
-
-    val dataFile = File(cacheDir, fileName)
-    if (!dataFile.exists()) return true
-
-    val metadataFile = File(cacheDir, "$fileName.metadata")
-    val cachedTime =
-        try {
-            metadataFile.takeIf { it.exists() }?.readText()?.toLong() ?: 0L
-        } catch (_: Exception) {
-            0L
-        }
-
-    val appUpdateTime =
-        try {
-            context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
-        } catch (_: Exception) {
-            System.currentTimeMillis()
-        }
-
-    return appUpdateTime > cachedTime
-}
-
-/**
- * Force-update (or create) the metadata timestamp associated with a cached file.
- */
-actual fun updateCacheMetadata(fileName: String) {
-    val context: Context by inject(Context::class.java)
-    val metadataFile = File(context.cacheDir, "$fileName.metadata")
-    try {
-        metadataFile.writeText(System.currentTimeMillis().toString())
-    } catch (e: Exception) {
-        Log.e(::updateCacheMetadata.name, "Could not write metadata for $fileName", e)
-    }
-}
+// // Session cache to remember unavailable geojson within the same app session
+// private val unavailableGeoJsonCache = ConcurrentHashMap.newKeySet<String>()
+//
+// /**
+// * Clear the unavailable cache for a specific event when a map is downloaded
+// */
+// fun clearUnavailableGeoJsonCache(eventId: String) {
+//    unavailableGeoJsonCache.remove(eventId)
+//
+//    // Also invalidate GeoJSON cache in memory to force fresh load
+//    try {
+//        val geoJsonProvider: GeoJsonDataProvider by inject(
+//            GeoJsonDataProvider::class.java,
+//        )
+//        geoJsonProvider.invalidateCache(eventId)
+//    } catch (e: Exception) {
+//        Log.w("clearUnavailableGeoJsonCache", "Failed to invalidate GeoJSON cache for $eventId: ${e.message}")
+//    }
+//
+//    Log.d("clearUnavailableGeoJsonCache", "Cleared cache for event $eventId")
+// }
+//
+// actual suspend fun readGeoJson(eventId: String): String? {
+//    // Quick session cache check to avoid repeated calls for known unavailable maps
+//    if (unavailableGeoJsonCache.contains(eventId)) {
+//        return null
+//    }
+//    val filePath = getMapFileAbsolutePath(eventId, "geojson")
+//
+//    return if (filePath != null) {
+//        withContext(Dispatchers.IO) {
+//            Log.i(::readGeoJson.name, "Loading geojson data for event $eventId from $filePath")
+//            File(filePath).readText()
+//        }
+//    } else {
+//        Log.d(::readGeoJson.name, "GeoJSON file not available for event $eventId")
+//        // Cache this unavailable result to avoid repeated attempts in the same session
+//        unavailableGeoJsonCache.add(eventId)
+//        null
+//    }
+// }
+//
+// // ---------------------------
+//
+// /**
+// * Retrieves the absolute path of a map file for a given event.
+// *
+// * This function attempts to get the absolute path of a map file (e.g., MBTiles, GeoJSON) associated with the event.
+// * It first checks if the file is already cached in the device's cache directory. If the file is not cached or the
+// * cached file size does not match the expected size, it reads the file from the resources and caches it.
+// *
+// */
+// actual suspend fun getMapFileAbsolutePath(
+//    eventId: String,
+//    extension: String,
+// ): String? {
+//    val context: Context by inject(Context::class.java)
+//    val mapChecker: MapAvailabilityChecker by inject(MapAvailabilityChecker::class.java)
+//    val cachedFile = File(context.cacheDir, "$eventId.$extension")
+//    val metadataFile = File(context.cacheDir, "$eventId.$extension.metadata")
+//
+//    // First check if we have a valid cached file that doesn't need updating
+//    val needsUpdate =
+//        when {
+//            !cachedFile.exists() -> {
+//                Log.d(::getMapFileAbsolutePath.name, "Cache file doesn't exist for $eventId.$extension")
+//                true
+//            }
+//            !metadataFile.exists() -> {
+//                Log.d(::getMapFileAbsolutePath.name, "Metadata file doesn't exist for $eventId.$extension")
+//                true
+//            }
+//            else -> {
+//                val lastCacheTime =
+//                    try {
+//                        metadataFile.readText().toLong()
+//                    } catch (_: Exception) {
+//                        0L
+//                    }
+//
+//                // Check if the app was installed/updated after we cached the file
+//                val appInstallTime =
+//                    try {
+//                        context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
+//                    } catch (_: Exception) {
+//                        System.currentTimeMillis()
+//                    }
+//
+//                val isStale = appInstallTime > lastCacheTime
+//                if (isStale) {
+//                    Log.d(
+//                        ::getMapFileAbsolutePath.name,
+//                        "Cache is stale for $eventId.$extension (app: $appInstallTime, cache: $lastCacheTime)",
+//                    )
+//                } else {
+//                    Log.d(
+//                        ::getMapFileAbsolutePath.name,
+//                        "Cache is up-to-date for $eventId.$extension",
+//                    )
+//                }
+//                isStale
+//            }
+//        }
+//
+//    // If we have a valid cached file, return its path immediately
+//    if (!needsUpdate) {
+//        Log.i(::getMapFileAbsolutePath.name, "Using cached file for $eventId.$extension")
+//        return cachedFile.absolutePath
+//    }
+//
+//    // Check if the map is actually downloaded before attempting expensive operations
+//    if (!mapChecker.isMapDownloaded(eventId)) {
+//        Log.d(::getMapFileAbsolutePath.name, "Map feature not downloaded for $eventId.$extension, skipping file access attempts")
+//        return null
+//    }
+//
+//    // If we need to update the cache, try to open the asset from feature module
+//    Log.i(::getMapFileAbsolutePath.name, "Fetching $eventId.$extension from feature module")
+//
+//    val assetPath = "$eventId.$extension"
+//
+//    /* ------------------------------------------------------------------
+//     * Play Feature Delivery race mitigation:
+//     * Immediately after SplitInstall reports INSTALLED the asset might
+//     * not yet be visible to the running Activity/process. Retry a few
+//     * times with a fresh split-aware context before giving up.
+//     * ---------------------------------------------------------------- */
+//
+//    // Implement actual retry logic as mentioned in the comment above
+//    var lastException: Exception? = null
+//    val maxRetries = 3
+//    val retryDelayMs = 100L
+//
+//    for (attempt in 1..maxRetries) {
+//        try {
+//            val ctx =
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                    try {
+//                        context.createContextForSplit(eventId)
+//                    } catch (_: Exception) {
+//                        context
+//                    }
+//                } else {
+//                    context
+//                }
+//
+//            // Ensure split-compat hooks into this context
+//            SplitCompat.install(ctx)
+//
+//            // Try to access the asset immediately
+//            return cacheAssetFromContext(ctx, assetPath, cachedFile, metadataFile, eventId, extension)
+//        } catch (e: java.io.FileNotFoundException) {
+//            lastException = e
+//            if (attempt < maxRetries) {
+//                Log.d(::getMapFileAbsolutePath.name, "Asset not accessible on attempt $attempt for $eventId.$extension, retrying...")
+//                kotlinx.coroutines.delay(retryDelayMs)
+//            }
+//        }
+//    }
+//
+//    // If we get here, all retries failed - handle the final exception intelligently
+//    if (lastException is java.io.FileNotFoundException) {
+//        Log.d(::getMapFileAbsolutePath.name, "Map feature not available: $eventId.$extension (feature module not downloaded)")
+//    } else {
+//        Log.e(::getMapFileAbsolutePath.name, "Error loading map from feature module: ${lastException?.message}", lastException)
+//    }
+//    return null
+// }
+//
+// /**
+// * Helper function to cache asset from a given context.
+// * Separated for the retry logic above.
+// */
+// private suspend fun cacheAssetFromContext(
+//    ctx: Context,
+//    assetPath: String,
+//    cachedFile: File,
+//    metadataFile: File,
+//    @Suppress("UNUSED_PARAMETER") eventId: String,
+//    @Suppress("UNUSED_PARAMETER") extension: String,
+// ): String {
+//    withContext(Dispatchers.IO) {
+//        // Use a buffered approach for better memory efficiency
+//        ctx.assets.open(assetPath).use { input ->
+//            BufferedInputStream(input, WWWGlobals.ByteProcessing.BUFFER_SIZE).use { bufferedInput ->
+//                cachedFile.outputStream().use { fileOutput ->
+//                    BufferedOutputStream(fileOutput, WWWGlobals.ByteProcessing.BUFFER_SIZE).use { bufferedOutput ->
+//                        val buffer = ByteArray(WWWGlobals.ByteProcessing.BUFFER_SIZE)
+//                        var bytesRead: Int
+//
+//                        while (bufferedInput.read(buffer).also { bytesRead = it } != -1) {
+//                            bufferedOutput.write(buffer, 0, bytesRead)
+//                        }
+//
+//                        bufferedOutput.flush()
+//                    }
+//                }
+//            }
+//        }
+//
+//        // Update metadata after successful copy
+//        metadataFile.writeText(System.currentTimeMillis().toString())
+//    }
+//
+//    return cachedFile.absolutePath
+// }
+//
 
 // -----------------------------------------------------------
 

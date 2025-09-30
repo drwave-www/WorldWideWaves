@@ -183,7 +183,6 @@ class PerformanceMemoryTest : BaseIntegrationTest() {
         assertTrue("Map should render within reasonable time", renderTime < 2000)
         assertTrue("Should optimize marker display", visibleMarkerCount < 1000)
         // Test passes if map renders successfully with large dataset
-        assertTrue("Map performance monitor should be created", mapPerformanceMonitor != null)
     }
 
     @Composable

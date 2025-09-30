@@ -23,11 +23,11 @@ package com.worldwidewaves.shared.events.utils
 
 import com.worldwidewaves.shared.WWWGlobals.FileSystem
 import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.data.readGeoJson
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.format.DateTimeFormats
 import com.worldwidewaves.shared.generated.resources.Res
-import com.worldwidewaves.shared.readGeoJson
 import com.worldwidewaves.shared.utils.Log
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineDispatcher
@@ -250,12 +250,12 @@ interface GeoJsonDataProvider {
     fun clearCache()
 }
 
-@OptIn(kotlin.time.ExperimentalTime::class)
+@OptIn(ExperimentalTime::class)
 class DefaultGeoJsonDataProvider :
     GeoJsonDataProvider,
     KoinComponent {
     private val cache = mutableMapOf<String, JsonObject?>()
-    private val lastAttemptTime = mutableMapOf<String, kotlin.time.Instant>()
+    private val lastAttemptTime = mutableMapOf<String, Instant>()
     private val attemptCount = mutableMapOf<String, Int>()
 
     override suspend fun getGeoJsonData(eventId: String): JsonObject? {
