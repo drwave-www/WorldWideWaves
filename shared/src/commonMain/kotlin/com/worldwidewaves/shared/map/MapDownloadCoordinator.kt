@@ -130,6 +130,14 @@ class MapDownloadCoordinator(
         update: (DownloadState) -> DownloadState,
     ) {
         val flow = _downloadStates.getOrPut(mapId) { MutableStateFlow(DownloadState()) }
-        flow.value = update(flow.value)
+        val oldState = flow.value
+        val newState = update(oldState)
+        flow.value = newState
+        Log.v(
+            TAG,
+            "State updated: $mapId | isDownloading: ${oldState.isDownloading}->${newState.isDownloading}, " +
+                "progress: ${oldState.progress}->${newState.progress}, " +
+                "available: ${oldState.isAvailable}->${newState.isAvailable}",
+        )
     }
 }

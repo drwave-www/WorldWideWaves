@@ -199,29 +199,52 @@ class IOSEventMap(
             }
 
             // Download overlay UI (matching Android behavior)
+            // Log current download state for debugging
+            Log.v(
+                "IOSEventMap",
+                "Overlay decision: ${event.id} | isAvailable=${downloadState.isAvailable}, " +
+                    "isDownloading=${downloadState.isDownloading}, error=${downloadState.error}, progress=${downloadState.progress}",
+            )
+
             when {
-                downloadState.isDownloading && downloadState.error == null ->
+                downloadState.isDownloading && downloadState.error == null -> {
+                    Log.d("IOSEventMap", "Showing MapDownloadOverlay: ${event.id} progress=${downloadState.progress}%")
                     MapDownloadOverlay(
                         progress = downloadState.progress,
-                        onCancel = { downloadCoordinator.cancelDownload(event.id) },
+                        onCancel = {
+                            Log.i("IOSEventMap", "Download cancelled by user: ${event.id}")
+                            downloadCoordinator.cancelDownload(event.id)
+                        },
                     )
+                }
 
-                downloadState.error != null ->
+                downloadState.error != null -> {
+                    Log.d("IOSEventMap", "Showing MapErrorOverlay: ${event.id} error=${downloadState.error}")
                     MapErrorOverlay(
                         errorMessage = downloadState.error!!,
                         onRetry = {
+                            Log.i("IOSEventMap", "Retry clicked for: ${event.id}")
                             MainScope().launch {
                                 downloadCoordinator.downloadMap(event.id)
                             }
                         },
                     )
+                }
 
-                !downloadState.isAvailable && !downloadState.isDownloading ->
+                !downloadState.isAvailable && !downloadState.isDownloading -> {
+                    Log.d("IOSEventMap", "Showing MapDownloadButton for: ${event.id}")
                     MapDownloadButton {
-                        kotlinx.coroutines.MainScope().launch {
+                        Log.i("IOSEventMap", "Download button clicked for: ${event.id}")
+                        MainScope().launch {
+                            Log.i("IOSEventMap", "Launching download coroutine for: ${event.id}")
                             downloadCoordinator.downloadMap(event.id)
                         }
                     }
+                }
+
+                else -> {
+                    Log.v("IOSEventMap", "No overlay shown: ${event.id} (map loaded or downloading)")
+                }
             }
         }
     }
