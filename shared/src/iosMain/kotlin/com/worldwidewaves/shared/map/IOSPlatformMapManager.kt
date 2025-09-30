@@ -49,14 +49,30 @@ class IOSPlatformMapManager(
     @OptIn(ExperimentalForeignApi::class)
     override fun isMapAvailable(mapId: String): Boolean {
         Log.d(TAG, "Checking map availability for: $mapId")
-        // Consider either .geojson or .mbtiles as proof of availability.
+        // Try multiple approaches to locate the file
+        // Approach 1: Direct path in subdirectory
         val sub = "Maps/$mapId"
-        val geoPath = NSBundle.mainBundle.pathForResource(mapId, "geojson", sub)
-        val mbPath = NSBundle.mainBundle.pathForResource(mapId, "mbtiles", sub)
-        val hasGeo = geoPath != null
-        val hasMb = mbPath != null
+        val geoPath1 = NSBundle.mainBundle.pathForResource(mapId, "geojson", sub)
+        val mbPath1 = NSBundle.mainBundle.pathForResource(mapId, "mbtiles", sub)
 
-        Log.d(TAG, "Map availability check: mapId=$mapId, hasGeo=$hasGeo (path=$geoPath), hasMb=$hasMb (path=$mbPath)")
+        // Approach 2: Search in bundle without subdirectory
+        val geoPath2 = NSBundle.mainBundle.pathForResource(mapId, "geojson")
+        val mbPath2 = NSBundle.mainBundle.pathForResource(mapId, "mbtiles")
+
+        // Approach 3: Full path search
+        val geoPath3 = NSBundle.mainBundle.pathForResource("$mapId/$mapId", "geojson")
+        val mbPath3 = NSBundle.mainBundle.pathForResource("$mapId/$mapId", "mbtiles")
+
+        val hasGeo = geoPath1 != null || geoPath2 != null || geoPath3 != null
+        val hasMb = mbPath1 != null || mbPath2 != null || mbPath3 != null
+        val finalGeoPath = geoPath1 ?: geoPath2 ?: geoPath3
+        val finalMbPath = mbPath1 ?: mbPath2 ?: mbPath3
+
+        Log.d(TAG, "Map availability check: mapId=$mapId")
+        Log.d(TAG, "  GeoJson: hasGeo=$hasGeo, path=$finalGeoPath")
+        Log.d(TAG, "  MBTiles: hasMb=$hasMb, path=$finalMbPath")
+        Log.d(TAG, "  Approaches: sub=$geoPath1/$mbPath1, root=$geoPath2/$mbPath2, full=$geoPath3/$mbPath3")
+
         return hasGeo || hasMb
     }
 
