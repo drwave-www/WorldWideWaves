@@ -34,8 +34,8 @@ private const val TAG = "IOSMapLibreAdapter"
  * its interface.
  */
 class IOSMapLibreAdapter : MapLibreAdapter<Any> {
-    // Swift wrapper instance - accessed via dynamic member lookup
-    private var wrapper: dynamic = null
+    // Swift wrapper instance - accessed via runtime checks
+    private var wrapper: Any? = null
 
     private val _currentPosition = MutableStateFlow<Position?>(null)
     private val _currentZoom = MutableStateFlow(10.0)
@@ -48,7 +48,7 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
      * The wrapper should already have the MLNMapView configured.
      */
     override fun setMap(map: Any) {
-        this.wrapper = map as? dynamic
+        this.wrapper = map
         WWWLogger.d(TAG, "Map wrapper set")
 
         // Note: Camera position and zoom updates will be pushed from Swift delegate callbacks
@@ -66,57 +66,30 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
 
         WWWLogger.d(TAG, "Setting map style: $stylePath")
 
-        try {
-            // Call Swift wrapper via dynamic dispatch
-            wrapper.setStyleWithStyleURL(stylePath) {
-                WWWLogger.i(TAG, "Map style loaded successfully")
-                callback.invoke()
-            }
-        } catch (e: Exception) {
-            WWWLogger.e(TAG, "Error setting map style: ${e.message}")
-            callback.invoke() // Call anyway to prevent blocking
-        }
+        // NOTE: Swift wrapper call will be implemented via cinterop
+        // For now, just invoke callback to prevent blocking
+        callback.invoke()
     }
 
     override fun getWidth(): Double {
         if (wrapper == null) return 375.0 // Default iPhone width
 
-        return try {
-            (wrapper.getWidth() as? Double) ?: 375.0
-        } catch (e: Exception) {
-            WWWLogger.w(TAG, "Error getting width: ${e.message}")
-            375.0
-        }
+        // NOTE: Swift wrapper call will be implemented via cinterop
+        return 375.0
     }
 
     override fun getHeight(): Double {
         if (wrapper == null) return 812.0 // Default iPhone height
 
-        return try {
-            (wrapper.getHeight() as? Double) ?: 812.0
-        } catch (e: Exception) {
-            WWWLogger.w(TAG, "Error getting height: ${e.message}")
-            812.0
-        }
+        // NOTE: Swift wrapper call will be implemented via cinterop
+        return 812.0
     }
 
     override fun getCameraPosition(): Position? {
         if (wrapper == null) return null
 
-        return try {
-            val center = wrapper.getCameraCenter()
-            if (center != null) {
-                // Swift returns tuple - access via dynamic
-                val lat = center.latitude as? Double ?: return null
-                val lng = center.longitude as? Double ?: return null
-                Position(lat, lng)
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            WWWLogger.w(TAG, "Error getting camera position: ${e.message}")
-            null
-        }
+        // NOTE: Swift wrapper call will be implemented via cinterop
+        return null
     }
 
     override fun getVisibleRegion(): BoundingBox {
@@ -124,26 +97,8 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
             return createFallbackBounds()
         }
 
-        return try {
-            // Swift returns array [swLat, swLng, neLat, neLng]
-            val bounds = wrapper.getVisibleBounds() as? List<*>
-
-            if (bounds != null && bounds.size >= 4) {
-                val swLat = bounds[0] as? Double ?: return createFallbackBounds()
-                val swLng = bounds[1] as? Double ?: return createFallbackBounds()
-                val neLat = bounds[2] as? Double ?: return createFallbackBounds()
-                val neLng = bounds[3] as? Double ?: return createFallbackBounds()
-
-                val sw = Position(swLat, swLng)
-                val ne = Position(neLat, neLng)
-                BoundingBox.fromCorners(listOf(sw, ne)) ?: createFallbackBounds()
-            } else {
-                createFallbackBounds()
-            }
-        } catch (e: Exception) {
-            WWWLogger.w(TAG, "Error getting visible region: ${e.message}")
-            createFallbackBounds()
-        }
+        // NOTE: Swift wrapper call will be implemented via cinterop
+        return createFallbackBounds()
     }
 
     private fun createFallbackBounds(): BoundingBox =
@@ -174,11 +129,11 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
     }
 
     override fun moveCamera(bounds: BoundingBox) {
-        if (mapView != null) {
+        if (wrapper != null) {
             WWWLogger.d("IOSMapLibreAdapter", "Moving camera to bounds")
 
             // NOTE: Implement iOS MapLibre camera movement
-            // Will be implemented when MapLibre iOS SDK bindings are available
+            // Will be implemented via cinterop bindings
         }
     }
 
@@ -187,11 +142,11 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         zoom: Double?,
         callback: MapCameraCallback?,
     ) {
-        if (mapView != null) {
+        if (wrapper != null) {
             WWWLogger.d("IOSMapLibreAdapter", "Animating camera to position: ${position.lat}, ${position.lng}")
 
             // NOTE: Implement iOS MapLibre camera animation
-            // Will be implemented when MapLibre iOS SDK bindings are available
+            // Will be implemented via cinterop bindings
 
             callback?.onFinish()
         }
@@ -202,11 +157,11 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         padding: Int,
         callback: MapCameraCallback?,
     ) {
-        if (mapView != null) {
+        if (wrapper != null) {
             WWWLogger.d("IOSMapLibreAdapter", "Animating camera to bounds with padding: $padding")
 
             // NOTE: Implement iOS MapLibre bounds animation
-            // Will be implemented when MapLibre iOS SDK bindings are available
+            // Will be implemented via cinterop bindings
 
             callback?.onFinish()
         }
@@ -225,17 +180,17 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
     }
 
     override fun setMinZoomPreference(minZoom: Double) {
-        if (mapView != null) {
-            // NOTE: Implement with proper MapLibre iOS bindings
-            // (mapView as MLNMapView).minimumZoomLevel = minZoom
+        if (wrapper != null) {
+            // NOTE: Implement via cinterop bindings
+            // wrapper.minimumZoomLevel = minZoom
             WWWLogger.d("IOSMapLibreAdapter", "Set minimum zoom level: $minZoom")
         }
     }
 
     override fun setMaxZoomPreference(maxZoom: Double) {
-        if (mapView != null) {
-            // NOTE: Implement with proper MapLibre iOS bindings
-            // (mapView as MLNMapView).maximumZoomLevel = maxZoom
+        if (wrapper != null) {
+            // NOTE: Implement via cinterop bindings
+            // wrapper.maximumZoomLevel = maxZoom
             WWWLogger.d("IOSMapLibreAdapter", "Set maximum zoom level: $maxZoom")
         }
     }
@@ -256,11 +211,11 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         polygons: List<Any>,
         clearExisting: Boolean,
     ) {
-        if (mapView != null) {
+        if (wrapper != null) {
             WWWLogger.d("IOSMapLibreAdapter", "Adding ${polygons.size} wave polygons, clearExisting: $clearExisting")
 
             // NOTE: Implement iOS MapLibre polygon rendering
-            // Will be implemented when MapLibre iOS SDK bindings are available
+            // Will be implemented via cinterop bindings
             // Convert polygons to iOS MapLibre format and add to map
             // Handle clearExisting flag to remove previous polygons
         }

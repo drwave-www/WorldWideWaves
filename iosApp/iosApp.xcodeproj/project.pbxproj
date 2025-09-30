@@ -31,6 +31,7 @@
 		4111524551AF743484F28BAB /* bangalore_india.geojson in Resources */ = {isa = PBXBuildFile; fileRef = A4E1C78EA7354E8E81534AC5 /* bangalore_india.geojson */; };
 		423BF1ED1364BE8CA24D1A36 /* santiago_chile.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 7ED61228B47C8A0C812344E8 /* santiago_chile.geojson */; };
 		425619E908ACCFEA2CF0FF5E /* karachi_pakistan.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 93B13B0F2E713504EE592B3B /* karachi_pakistan.geojson */; };
+		45D995CA19585A95889AC3BE /* MapLibreViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F618FEF9BC1476BF7F8801EF /* MapLibreViewWrapper.swift */; };
 		49D1248AB28627E1F884C71D /* bangalore_india.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = C27441F76242B09AE68EC486 /* bangalore_india.mbtiles */; };
 		4A1B8484EA21FEA884B0A13E /* berlin_germany.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 702D5A27085E9A60729D4149 /* berlin_germany.geojson */; };
 		4BDCD41054971FFC5FD523D2 /* bangkok_thailand.geojson in Resources */ = {isa = PBXBuildFile; fileRef = 58CFAA3CE3442761A3089E5F /* bangkok_thailand.geojson */; };
@@ -114,6 +115,7 @@
 		38FAD55B99F21EA7191A2CB9 /* jakarta_indonesia.mbtiles */ = {isa = PBXFileReference; path = jakarta_indonesia.mbtiles; sourceTree = "<group>"; };
 		3965C7C92214E71DEBE9B71F /* madrid_spain.geojson */ = {isa = PBXFileReference; path = madrid_spain.geojson; sourceTree = "<group>"; };
 		3CEBDBD7B715092BF99AC5BC /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		3D376946CCF6188205469ABD /* MapLibreBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MapLibreBridge.h; sourceTree = "<group>"; };
 		45CA2169669FC7343A111220 /* berlin_germany.mbtiles */ = {isa = PBXFileReference; path = berlin_germany.mbtiles; sourceTree = "<group>"; };
 		4AA4B41105FC5B022BDBE849 /* madrid_spain.mbtiles */ = {isa = PBXFileReference; path = madrid_spain.mbtiles; sourceTree = "<group>"; };
 		4AE5DB61367E41231F64BA77 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -181,6 +183,7 @@
 		EBB33561FBE2B28A396FFD0E /* karachi_pakistan.mbtiles */ = {isa = PBXFileReference; path = karachi_pakistan.mbtiles; sourceTree = "<group>"; };
 		ED711D6B3FA2BE1261BC25A9 /* cairo_egypt.mbtiles */ = {isa = PBXFileReference; path = cairo_egypt.mbtiles; sourceTree = "<group>"; };
 		EDF732998F247BF53D07CFCB /* seoul_south_korea.geojson */ = {isa = PBXFileReference; path = seoul_south_korea.geojson; sourceTree = "<group>"; };
+		F618FEF9BC1476BF7F8801EF /* MapLibreViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapLibreViewWrapper.swift; sourceTree = "<group>"; };
 		F8EF667F3CCC345C2E50C4B2 /* los_angeles_usa.mbtiles */ = {isa = PBXFileReference; path = los_angeles_usa.mbtiles; sourceTree = "<group>"; };
 		FDEB6313B89EAD35BB4AF633 /* sydney_australia.mbtiles */ = {isa = PBXFileReference; path = sydney_australia.mbtiles; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -325,6 +328,15 @@
 			);
 			sourceTree = "<group>";
 		};
+		404004BC5D028A66FB5AE4F1 /* MapLibre */ = {
+			isa = PBXGroup;
+			children = (
+				3D376946CCF6188205469ABD /* MapLibreBridge.h */,
+				F618FEF9BC1476BF7F8801EF /* MapLibreViewWrapper.swift */,
+			);
+			path = MapLibre;
+			sourceTree = "<group>";
+		};
 		4DD55CC452683BB8077DA26B /* kinshasa_democratic_republic_of_the_congo */ = {
 			isa = PBXGroup;
 			children = (
@@ -387,6 +399,7 @@
 				1371E6F1EAC22011DA950686 /* Info.plist */,
 				DCBB4F8E3E5598E56A6085B5 /* IOSPlatformEnabler.swift */,
 				3CEBDBD7B715092BF99AC5BC /* SceneDelegate.swift */,
+				404004BC5D028A66FB5AE4F1 /* MapLibre */,
 				24C0DFE1778FDC9C22365836 /* Maps */,
 			);
 			path = worldwidewaves;
@@ -800,6 +813,7 @@
 			files = (
 				7DFA81B06437217B2DB09414 /* AppDelegate.swift in Sources */,
 				08FE2EF2DAED829688EE5665 /* IOSPlatformEnabler.swift in Sources */,
+				45D995CA19585A95889AC3BE /* MapLibreViewWrapper.swift in Sources */,
 				F626EB9F6921A7AD254A28CF /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
