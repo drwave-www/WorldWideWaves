@@ -221,7 +221,7 @@ fun ChoreographyDisplay(
 
     // iOS FIX: Removed dangerous object : KoinComponent pattern
 
-    var currentImageIndex by remember { mutableIntStateOf(0) }
+    var currentImageIndex by remember(sequence) { mutableIntStateOf(0) }
     val remainingTime by remember(sequence) { mutableStateOf(sequence.remainingDuration) }
 
     // Get the painter
@@ -315,7 +315,7 @@ fun ChoreographyDisplay(
                                 draw(
                                     size =
                                         Size(
-                                            width = scaledWidth * 4, // Always 4 frames per slide
+                                            width = scaledWidth * sequence.frameCount, // Use actual frame count instead of hardcoded 4
                                             height = scaledHeight,
                                         ),
                                 )
