@@ -81,15 +81,12 @@ class IOSSoundPlayer :
         isEngineSetupAttempted = true
 
         try {
-            audioEngine.attachNode(playerNode)
-
-            // Check if audio I/O is available before preparing
-            // This prevents crashes on simulators
             val outputNode = audioEngine.outputNode
-            if (outputNode == null) {
-                Log.w(TAG, "No audio output available (likely simulator), audio disabled")
-                return
-            }
+            val format = outputNode.outputFormatForBus(0u)
+
+            // Attach player node and connect to output
+            audioEngine.attachNode(playerNode)
+            audioEngine.connect(playerNode, outputNode, format)
 
             audioEngine.prepare()
             audioEngine.startAndReturnError(null)
