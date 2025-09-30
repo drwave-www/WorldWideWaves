@@ -221,7 +221,7 @@ fun ChoreographyDisplay(
 
     // iOS FIX: Removed dangerous object : KoinComponent pattern
 
-    var currentImageIndex by remember(sequence) { mutableIntStateOf(0) }
+    var currentImageIndex by remember { mutableIntStateOf(0) }
     val remainingTime by remember(sequence) { mutableStateOf(sequence.remainingDuration) }
 
     // Get the painter
@@ -267,9 +267,8 @@ fun ChoreographyDisplay(
         Box(
             modifier =
                 Modifier
-                    // Increase maximum size for better quality - frames are 450x900 natively
-                    .widthIn(max = 500.dp)
-                    .heightIn(max = 800.dp)
+                    .widthIn(max = 400.dp)
+                    .heightIn(max = 600.dp)
                     .padding(WorkingChoreographyConstants.CHOREOGRAPHY_PADDING.dp)
                     .shadow(8.dp)
                     .background(Color.Black.copy(alpha = 0.7f))
@@ -286,9 +285,7 @@ fun ChoreographyDisplay(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .weight(1f)
-                            // Maintain aspect ratio based on frame dimensions (450x900 = 1:2)
-                            .heightIn(min = 200.dp),
+                            .weight(1f),
                 ) {
                     val frameWidthPx = sequence.frameWidth.toFloat()
                     val frameHeightPx = sequence.frameHeight.toFloat()
@@ -317,8 +314,8 @@ fun ChoreographyDisplay(
                             with(painter) {
                                 draw(
                                     size =
-                                        androidx.compose.ui.geometry.Size(
-                                            width = scaledWidth * sequence.frameCount, // Use actual frame count instead of hardcoded 4
+                                        Size(
+                                            width = scaledWidth * 4, // Always 4 frames per slide
                                             height = scaledHeight,
                                         ),
                                 )
