@@ -192,9 +192,11 @@ class IOSEventMap(
             }
 
             if (styleURL != null) {
+                // Use styleURL as key to recreate map view when style changes (after download)
                 UIKitViewController(
+                    key = styleURL, // Force recreation when style URL changes
                     factory = {
-                        Log.i("IOSEventMap", "Creating native map view controller for: ${event.id}")
+                        Log.i("IOSEventMap", "Creating native map view controller for: ${event.id} with style: $styleURL")
                         createNativeMapViewController(event, styleURL!!) as UIViewController
                     },
                     modifier = Modifier.fillMaxSize(),
