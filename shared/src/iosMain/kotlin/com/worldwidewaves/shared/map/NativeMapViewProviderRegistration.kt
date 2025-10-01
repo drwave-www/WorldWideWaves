@@ -20,6 +20,7 @@ import org.koin.dsl.module
  * registerNativeMapViewProvider(provider: SwiftNativeMapViewProvider())
  * ```
  */
+@Throws(Throwable::class)
 fun registerNativeMapViewProvider(provider: NativeMapViewProvider) {
     Log.i("NativeMapViewProviderRegistration", "Registering NativeMapViewProvider: ${provider::class.simpleName}")
 
