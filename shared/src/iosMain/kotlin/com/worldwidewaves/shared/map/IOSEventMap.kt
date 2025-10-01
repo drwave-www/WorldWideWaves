@@ -196,9 +196,8 @@ class IOSEventMap(
                 key(styleURL) {
                     UIKitView<platform.UIKit.UIView>(
                         factory = {
-                            Log.i("IOSEventMap", "Creating native map view controller for: ${event.id} with style: $styleURL")
-                            val viewController = createNativeMapViewController(event, styleURL!!)
-                            viewController.view
+                            Log.i("IOSEventMap", "Creating native map view for: ${event.id} with style: $styleURL")
+                            createNativeMapViewController(event, styleURL!!) as platform.UIKit.UIView
                         },
                         modifier = Modifier.fillMaxSize(),
                     )
