@@ -14,10 +14,8 @@ import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.utils.WWWLogger
-import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import platform.darwin.NSObject
 
 private const val TAG = "IOSMapLibreAdapter"
 
@@ -37,10 +35,9 @@ private const val DEFAULT_HEIGHT = 812.0
  *
  * The wrapper must be an @objc Swift class with @objc methods to be callable from Kotlin.
  */
-@OptIn(ExperimentalForeignApi::class)
 class IOSMapLibreAdapter : MapLibreAdapter<Any> {
-    // Swift wrapper instance as NSObject (all @objc Swift classes inherit from NSObject)
-    private var wrapper: NSObject? = null
+    // Wrapper instance (currently not used - map rendering happens via SwiftUI in IOSEventMap)
+    private var wrapper: Any? = null
 
     private val _currentPosition = MutableStateFlow<Position?>(null)
     private val _currentZoom = MutableStateFlow(10.0)
@@ -49,34 +46,12 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
     override val currentZoom: StateFlow<Double> = _currentZoom
 
     /**
-     * Sets the MapLibre wrapper (expects @objc Swift MapLibreViewWrapper).
-     * The wrapper should already have the MLNMapView configured.
+     * Sets the map wrapper (not used in current hybrid architecture).
+     * Map rendering happens via SwiftUI EventMapView embedded in Compose.
      */
     override fun setMap(map: Any) {
-        this.wrapper = map as? NSObject
-        if (wrapper != null) {
-            WWWLogger.i(TAG, "Map wrapper set successfully (type: ${wrapper!!::class.simpleName})")
-            // Update initial camera state from wrapper
-            updateCameraStateFromWrapper()
-        } else {
-            WWWLogger.e(TAG, "Failed to cast map to NSObject")
-        }
-    }
-
-    /**
-     * Update camera state from wrapper's current values using performSelector
-     */
-    private fun updateCameraStateFromWrapper() {
-        wrapper?.let { w ->
-            try {
-                // Note: Actual method calls will need to use performSelector or
-                // the wrapper methods need to be accessible via platform imports
-                // For now, just log that wrapper is set
-                WWWLogger.d(TAG, "Wrapper ready for method calls")
-            } catch (e: Exception) {
-                WWWLogger.e(TAG, "Error updating camera state: ${e.message}")
-            }
-        }
+        this.wrapper = map
+        WWWLogger.d(TAG, "Map wrapper set (not used - rendering via SwiftUI)")
     }
 
     override fun setStyle(
@@ -95,38 +70,11 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         callback.invoke()
     }
 
-    override fun getWidth(): Double {
-        if (wrapper == null) {
-            WWWLogger.w(TAG, "getWidth() called with null wrapper, returning default")
-            return DEFAULT_WIDTH
-        }
+    override fun getWidth(): Double = DEFAULT_WIDTH
 
-        // TODO: Call wrapper.getWidth() via performSelector or ObjC runtime
-        // For now return default until method calling is implemented
-        return DEFAULT_WIDTH
-    }
+    override fun getHeight(): Double = DEFAULT_HEIGHT
 
-    override fun getHeight(): Double {
-        if (wrapper == null) {
-            WWWLogger.w(TAG, "getHeight() called with null wrapper, returning default")
-            return DEFAULT_HEIGHT
-        }
-
-        // TODO: Call wrapper.getHeight() via performSelector or ObjC runtime
-        // For now return default until method calling is implemented
-        return DEFAULT_HEIGHT
-    }
-
-    override fun getCameraPosition(): Position? {
-        if (wrapper == null) {
-            WWWLogger.w(TAG, "getCameraPosition() called with null wrapper")
-            return null
-        }
-
-        // TODO: Call wrapper.getCameraCenterLatitude/Longitude() via performSelector
-        // For now return current state
-        return _currentPosition.value
-    }
+    override fun getCameraPosition(): Position? = _currentPosition.value
 
     override fun getVisibleRegion(): BoundingBox {
         if (wrapper == null) {

@@ -50,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.interop.UIKitViewController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -62,10 +63,13 @@ import com.worldwidewaves.shared.ui.components.DownloadProgressIndicator
 import com.worldwidewaves.shared.ui.components.LoadingIndicator
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.koin.mp.KoinPlatform
 import platform.UIKit.UIImage
+import platform.UIKit.UIViewController
 
 /**
  * iOS implementation of EventMap providing functional map display.
@@ -115,6 +119,7 @@ class IOSEventMap(
         Log.v("IOSEventMap", "iOS map now tracking ${currentPolygons.size} wave polygons")
     }
 
+    @OptIn(ExperimentalForeignApi::class)
     @Composable
     override fun Draw(
         autoMapDownload: Boolean,
@@ -149,12 +154,19 @@ class IOSEventMap(
         }
 
         Box(modifier = modifier.fillMaxSize()) {
-            // iOS map background - use a solid color since resource handling is platform-specific
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
+            // Native SwiftUI map embedded in Compose
+            val styleURL =
+                remember(event.id) {
+                    // Get style URL synchronously (cached value)
+                    runBlocking { event.map.getStyleUri() } ?: "https://demotiles.maplibre.org/style.json"
+                }
+
+            UIKitViewController(
+                factory = {
+                    Log.i("IOSEventMap", "Creating native map view controller for: ${event.id}")
+                    createNativeMapViewController(event, styleURL) as UIViewController
+                },
+                modifier = Modifier.fillMaxSize(),
             )
 
             // Overlay with map information and controls
