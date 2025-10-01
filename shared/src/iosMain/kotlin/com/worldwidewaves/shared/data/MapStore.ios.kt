@@ -82,10 +82,22 @@ object ODRPaths {
         eventId: String,
         extension: String,
     ): String? {
+        Log.d("ODRPaths", "resolveFromStandardPaths: $eventId.$extension")
         val subs = arrayOf("Maps/$eventId", "worldwidewaves/Maps/$eventId", null)
         return subs.firstNotNullOfOrNull { sub ->
-            bundle.pathForResource(eventId, extension, sub)
-                ?: if (sub == null) bundle.URLForResource(eventId, extension)?.path else null
+            val path = bundle.pathForResource(eventId, extension, sub)
+            if (path != null) {
+                Log.d("ODRPaths", "  Found via pathForResource with sub=$sub -> $path")
+                return@firstNotNullOfOrNull path
+            }
+            if (sub == null) {
+                val url = bundle.URLForResource(eventId, extension)
+                if (url?.path != null) {
+                    Log.d("ODRPaths", "  Found via URLForResource -> ${url.path}")
+                    return@firstNotNullOfOrNull url.path
+                }
+            }
+            null
         }
     }
 
@@ -94,14 +106,29 @@ object ODRPaths {
         eventId: String,
         extension: String,
     ): String? {
+        Log.d("ODRPaths", "resolveFromExtensionSearch: $eventId.$extension")
         val any = bundle.URLsForResourcesWithExtension(extension, null)
         val urls = any?.mapNotNull { it as? NSURL } ?: emptyList()
-        return urls
-            .firstOrNull { url ->
-                val p = url.path ?: ""
-                p.endsWith("/$eventId.$extension") ||
-                    p.contains("/Maps/$eventId/")
-            }?.path
+        Log.d("ODRPaths", "  Found ${urls.size} resources with extension .$extension")
+
+        val result =
+            urls
+                .firstOrNull { url ->
+                    val p = url.path ?: ""
+                    val matches = p.endsWith("/$eventId.$extension") || p.contains("/Maps/$eventId/")
+                    if (matches) {
+                        Log.d("ODRPaths", "  Matched: $p")
+                    }
+                    matches
+                }?.path
+
+        if (result == null && urls.isNotEmpty()) {
+            Log.d("ODRPaths", "  Available .$extension files (first 5):")
+            urls.take(5).forEach { url ->
+                Log.d("ODRPaths", "    ${url.path}")
+            }
+        }
+        return result
     }
 }
 
