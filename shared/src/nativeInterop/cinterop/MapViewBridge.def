@@ -1,5 +1,0 @@
-language = Objective-C
-headers = WWWMapViewBridge.h
-headerFilter = WWWMapViewBridge.h
-
-compilerOpts.ios = -I/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/nativeInterop/objc

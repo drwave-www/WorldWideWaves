@@ -48,15 +48,6 @@ kotlin {
             isStatic = false // Dynamic framework for iOS compatibility
             linkerOpts("-ObjC")
         }
-
-        // Configure cinterop for MapViewBridge
-        iosTarget.compilations.getByName("main") {
-            cinterops {
-                val MapViewBridge by creating {
-                    defFile = project.file("src/nativeInterop/cinterop/MapViewBridge.def")
-                }
-            }
-        }
     }
 
     /*

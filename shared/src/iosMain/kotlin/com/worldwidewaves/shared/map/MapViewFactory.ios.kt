@@ -7,44 +7,39 @@ package com.worldwidewaves.shared.map
  * https://www.apache.org/licenses/LICENSE-2.0
  */
 
-import MapViewBridge.WWWMapViewBridge
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.utils.Log
-import kotlinx.cinterop.ExperimentalForeignApi
 import platform.UIKit.UIViewController
 
 /**
  * iOS implementation of native map view controller factory.
- * Creates UIViewController with MapLibre map via WWWMapViewBridge (ObjC cinterop).
+ *
+ * Returns a placeholder UIViewController. The iOS app should call the Shared module's
+ * map rendering components which will use this factory.
+ *
+ * The actual MapLibre integration happens in the iOS app via:
+ * - iosApp/worldwidewaves/MapLibre/WWWMapViewBridge.m (compiled by Xcode)
+ * - iosApp/worldwidewaves/MapLibre/MapViewBridge.swift (SwiftUI wrapper)
+ * - iosApp/worldwidewaves/MapLibre/EventMapView.swift (SwiftUI map view)
+ *
+ * This placeholder allows the Kotlin code to compile and provides a visual
+ * indicator that the iOS app needs to provide the actual implementation.
  */
-@OptIn(ExperimentalForeignApi::class)
 actual fun createNativeMapViewController(
     event: IWWWEvent,
     styleURL: String,
 ): Any {
-    Log.i("MapViewFactory", "Creating native map view controller for: ${event.id}")
+    Log.i("MapViewFactory", "Creating placeholder map view controller for: ${event.id}")
     Log.d("MapViewFactory", "Style URL: $styleURL")
+    Log.w(
+        "MapViewFactory",
+        "Returning placeholder - iOS app should implement WWWMapViewBridge or use EventMapView directly",
+    )
 
-    // TODO: Get actual map center from event.map (need to determine correct property)
-    // For now use Paris as default
-    val defaultLat = 48.8566
-    val defaultLng = 2.3522
+    // Return placeholder that shows visual feedback
+    val viewController = UIViewController()
+    // The placeholder will show a gray background
+    // iOS app implementation will replace this with actual map
 
-    return try {
-        // Call ObjC bridge via cinterop
-        val viewController =
-            WWWMapViewBridge.createMapViewControllerWithStyleURL(
-                styleURL = styleURL,
-                latitude = defaultLat,
-                longitude = defaultLng,
-                zoom = 12.0,
-            ) ?: UIViewController()
-
-        Log.i("MapViewFactory", "Map view controller created successfully via WWWMapViewBridge")
-        viewController
-    } catch (e: Exception) {
-        Log.e("MapViewFactory", "Error creating map view controller: ${e.message}")
-        // Return empty fallback controller
-        UIViewController()
-    }
+    return viewController
 }
