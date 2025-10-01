@@ -752,8 +752,9 @@ class WWWEventObserver(
      */
     private fun updateProgressionIfSignificant(newProgression: Double) {
         if (abs(newProgression - lastEmittedProgression) >= PROGRESSION_THRESHOLD ||
-            lastEmittedProgression < 0.0
-        ) { // Always emit first update
+            lastEmittedProgression < 0.0 ||
+            newProgression >= 100.0 // Always emit 100% completion
+        ) { // Always emit first update or completion
             _progression.updateIfChanged(newProgression)
             lastEmittedProgression = newProgression
         }
