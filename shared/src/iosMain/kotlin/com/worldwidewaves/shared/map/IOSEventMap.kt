@@ -204,7 +204,7 @@ class IOSEventMap(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
                 ) {
-                    LoadingIndicator()
+                    LoadingIndicator("Loading map...")
                 }
             }
 
