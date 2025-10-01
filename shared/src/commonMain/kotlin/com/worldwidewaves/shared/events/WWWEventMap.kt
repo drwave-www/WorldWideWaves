@@ -130,13 +130,18 @@ class WWWEventMap(
         val spriteAndGlyphsPath = cacheSpriteAndGlyphs()
         Log.d("WWWEventMap", "getStyleUri: Sprite and glyphs cached at: $spriteAndGlyphsPath")
 
+        Log.d("WWWEventMap", "getStyleUri: Loading style template...")
+        val templateData = mapDataProvider.geoMapStyleData()
+        Log.i("WWWEventMap", "getStyleUri: Template loaded, length=${templateData.length}")
+
         val newFileStr =
-            mapDataProvider
-                .geoMapStyleData()
+            templateData
                 .replace("__MBTILES_URI__", "mbtiles:///$mbtilesFilePath")
                 .replace("__GEOJSON_URI__", "file:///$geojsonFilePath")
                 .replace("__GLYPHS_URI__", "file:///$spriteAndGlyphsPath/files/style/glyphs")
                 .replace("__SPRITE_URI__", "file:///$spriteAndGlyphsPath/files/style/sprites")
+
+        Log.i("WWWEventMap", "getStyleUri: After replacements, length=${newFileStr.length}")
 
         Log.v("WWWEventMap", "getStyleUri: Style template replacements:")
         Log.v("WWWEventMap", "  __MBTILES_URI__ -> mbtiles:///$mbtilesFilePath")
