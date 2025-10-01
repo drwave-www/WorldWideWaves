@@ -399,20 +399,34 @@ class DefaultGeoJsonDataProvider :
     }
 
     /**
-     * Check if GeoJSON failure is due to ODR resources being unavailable.
+     * Check if GeoJSON failure is due to ODR resources being unavailable but will become available.
      * On iOS, this allows retry when ODR downloads complete.
+     * Returns true only if: platform is iOS AND (download explicitly requested OR initial install tag).
      */
-    private fun isODRUnavailable(
-        @Suppress("UNUSED_PARAMETER") eventId: String,
-    ): Boolean =
+    private fun isODRUnavailable(eventId: String): Boolean =
         try {
             // This is a platform-specific check - only meaningful on iOS
             val platform = get<WWWPlatform>()
-            platform.name.contains("iOS", ignoreCase = true)
+            val isIOS = platform.name.contains("iOS", ignoreCase = true)
+
+            if (!isIOS) {
+                false
+            } else {
+                // Retry if download was explicitly requested
+                val downloadRequested =
+                    com.worldwidewaves.shared.data.MapDownloadGate
+                        .isAllowed(eventId)
+
+                val shouldRetry = downloadRequested
+                if (!shouldRetry) {
+                    Log.v(::isODRUnavailable.name, "ODR not requested for $eventId, no retry")
+                }
+                shouldRetry
+            }
         } catch (e: Exception) {
-            // If we can't determine platform, err on the side of allowing retry
-            Log.v(::isODRUnavailable.name, "Could not determine platform for ODR check: ${e.message}")
-            true
+            // If we can't determine platform, don't retry to avoid log spam
+            Log.v(::isODRUnavailable.name, "Could not check ODR status: ${e.message}")
+            false
         }
 
     override fun invalidateCache(eventId: String) {
@@ -456,7 +470,11 @@ class DefaultMapDataProvider : MapDataProvider {
     @OptIn(ExperimentalResourceApi::class)
     override suspend fun geoMapStyleData(): String =
         withContext(Dispatchers.IO) {
-            Log.i(::geoMapStyleData.name, "Loading map style data from ${FileSystem.MAPS_STYLE}")
-            Res.readBytes(FileSystem.MAPS_STYLE).decodeToString()
+            Log.i(::geoMapStyleData.name, "Loading map style template from ${FileSystem.MAPS_STYLE}")
+            val bytes = Res.readBytes(FileSystem.MAPS_STYLE)
+            Log.d(::geoMapStyleData.name, "Read ${bytes.size} bytes from style template")
+            val result = bytes.decodeToString()
+            Log.i(::geoMapStyleData.name, "Style template decoded: ${result.length} chars")
+            result
         }
 }

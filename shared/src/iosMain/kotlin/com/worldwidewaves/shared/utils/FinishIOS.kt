@@ -11,7 +11,6 @@ package com.worldwidewaves.shared.utils
  */
 
 import com.worldwidewaves.shared.makeMainViewController
-import platform.Foundation.NSLog
 import platform.UIKit.UIViewController
 import platform.UIKit.navigationController
 
@@ -22,24 +21,24 @@ internal fun UIViewController.finishIOS() {
     when {
         this.presentingViewController != null -> {
             this.dismissViewControllerAnimated(true, completion = null)
-            NSLog("[$TAG] finishIOS: dismissed modal VC")
+            Log.d(TAG, "finishIOS: dismissed modal VC")
         }
         this.navigationController != null -> {
             this.navigationController?.popViewControllerAnimated(true)
-            NSLog("[$TAG] finishIOS: popped from navigation stack")
+            Log.d(TAG, "finishIOS: popped from navigation stack")
         }
         else -> {
-            // You can’t “close” an iOS app from code (App Store-rejected).
-            // The right fallback when there’s no presenter/nav is
+            // You can't "close" an iOS app from code (App Store-rejected).
+            // The right fallback when there's no presenter/nav is
             // to replace the root VC with your main screen.
             val newRoot = makeMainViewController()
             val win = this.view.window
             if (win != null) {
                 win.rootViewController = newRoot
                 win.makeKeyAndVisible()
-                NSLog("[finishIOS] replaced root with main VC")
+                Log.i(TAG, "finishIOS: replaced root with main VC")
             } else {
-                NSLog("[finishIOS] ⚠️ no window; cannot replace root")
+                Log.w(TAG, "finishIOS: no window; cannot replace root")
             }
         }
     }
