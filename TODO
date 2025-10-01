@@ -3,71 +3,58 @@ TODAY :
 
 - Langue système pas prise en compte ? -> tester en rebootant le smartphone
 
-- faire la liste des remarques sur Factory.ai et accepter la demande de contact
-   - pause
-   - interrompre pendant le travail pour preciser des choses
-   - tres lents lorsque la discussion prend de l'ampleur
-   - connecter auto au local
-   - existe p-e ? verifier : liste de contraintes / regles personnelles
-   - parfois change le local sans commit, parfois commit, parfois cree une branche, pas clair de savoir, parfois utilise feat, parfois feature, parfois chore, .. pas clair
-   - detection de l'acces local en corus de tache
-
----------------------------------------------
-
-- commencer une liste de personnes a contacter dans chacune des 40 villes
-    - influenceurs
-    - associations
-    - podcasteurs
-    - journalistes
-
 - RESILIER abonnements non necessaires : InDesign, Deepl, ...
 
 ---------------------------------------------
 
-- Sound even if on Wave Screen of full map screen
+
+IOS:
+- Terminer vagues / MapLibre
+- check translations
+- remove all remaining static texts
+- fonts
+- pousser sur Play Store
+
+
+-->
+  iOS_MAP_IMPLEMENTATION_STATUS.md (470 lines):
+  - Executive summary with completion percentages
+  - Detailed Android vs iOS feature comparison with line numbers
+  - Architecture deep dive with flow diagrams
+  - 4 critical issues with fix estimates
+  - 3-phase implementation plan (2-3 weeks total)
+  - Technical decisions, trade-offs, testing status
+
+  NEXT_SESSION_PROMPT.md (381 lines):
+  - Actionable continuation prompt for next session
+  - 3 high-priority tasks with acceptance criteria
+  - Step-by-step implementation guides
+  - File references with line counts
+  - Debug tips and common issues
+  - Critical constraint reminders (iOS deadlock rules)
+--
+
+
+ANDROID:
+- Virer Splashscreen ou trouver a le faire fonctionner sur Medium (taille image ?)
+- Virer Color/Theme/Type files (?)
+
+- toujours garder la place du header mobile (determiner la hauteur et descendre l'espace dessinable)
+- modifier l'image back windmill
+- Simulation do not work anymore
+- verifier les traductions
 - Add the 'message' to the app (cf PDF)
 - Add the link to events on event page
+- Check global for accessibility
+
+- Full human code review
 - Packaging :
     - configurer le "mandatory update" flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
-- UI Tests sur differents devices et langues
+- Tour complet de tests (Faire un cahier)
+- faire une campagne de tests sur multiples devices et langues
+- Static website to improve
 
 ---------------------------------------------
-
-- Common: Factorize somme additional commons : everything which is not pure UI and WWW related should be in core shared
-
-- languages of events :
-[
-"ar",--
-"de",--
-"en",--
-"es",--
-"fa",XX
-"fr",--
-"hi",XX
-"id",--
-"it",--
-"ja",--
-"ko",--
-"ph",XX
-"pt",--
-"ru",--
-"sw",XX
-"th",XX
-"tr",--
-"ur",XX
-"zh"--
-]
-
-fa, hi, ph, sw, th, ur : not supported by WWW yet
-
----------------------------------------------
-START IOS
---> Global tour of what can be put in commons
----------------------------------------------çàèâéê
-
-TODO:
-
-- Site statique genere avec Cloudflare Pages (maps, liens, infos events, ..)
 
 LATER:
 - Diamond: Deep wave for city streets (?)
@@ -87,5 +74,3 @@ Ideas:
     - par pays / events
 - Une association par event, avec un lien cagnotte et une video youtube de présentation
 - Realite augmentee pour "voir" la vague ? : https://www.openium.fr/expertises/realitee-augmentee/
-
-- jetpack compose test UI : https://medium.com/@myofficework000/exploring-jetpack-compose-ui-testing-a-comprehensive-guide-eb0c2d93e111
