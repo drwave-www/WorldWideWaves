@@ -104,12 +104,7 @@ suspend fun getMapFileAbsolutePath(
     extension: String,
 ): String? =
     lock.withLock {
-        Log.d("MapStore", "getMapFileAbsolutePath: eventId=$eventId, extension=$extension")
-
-        if (extension == "geojson" && unavailable.contains(eventId)) {
-            Log.w("MapStore", "getMapFileAbsolutePath: GeoJSON marked unavailable for $eventId")
-            return null
-        }
+        if (extension == "geojson" && unavailable.contains(eventId)) return null
 
         val root = platformCacheRoot().also { platformEnsureDir(it) }
         val fileName = "$eventId.$extension"
@@ -117,42 +112,32 @@ suspend fun getMapFileAbsolutePath(
         val meta = metaPath(root, fileName)
         val stamp = platformAppVersionStamp()
 
-        Log.d("MapStore", "getMapFileAbsolutePath: Checking cache at $dataPath")
-
         // cache hit
         if (platformFileExists(dataPath) &&
             platformFileExists(meta) &&
             runCatching { platformReadText(meta) }.getOrNull() == stamp
         ) {
-            Log.i("MapStore", "getMapFileAbsolutePath: Cache HIT for $eventId.$extension -> $dataPath")
             return dataPath
         }
-        Log.d("MapStore", "getMapFileAbsolutePath: Cache MISS for $eventId.$extension (exists=${platformFileExists(dataPath)})")
 
         // downloads disallowed → try copying from currently-visible bundle/split (no mount)
         if (!MapDownloadGate.isAllowed(eventId)) {
-            Log.d("MapStore", "getMapFileAbsolutePath: Download not allowed, trying bundle/ODR copy for $eventId.$extension")
             if (platformTryCopyInitialTagToCache(eventId, extension, dataPath)) {
                 platformWriteText(meta, stamp)
                 if (extension == "geojson") platformInvalidateGeoJson(eventId)
-                Log.i("MapStore", "getMapFileAbsolutePath: Copied from bundle/ODR -> $dataPath")
                 return dataPath
             }
-            Log.w("MapStore", "getMapFileAbsolutePath: Failed to copy from bundle/ODR for $eventId.$extension")
             return null
         }
 
         // explicit download
-        Log.d("MapStore", "getMapFileAbsolutePath: Attempting explicit download for $eventId.$extension")
         val ok = platformFetchToFile(eventId, extension, dataPath)
         if (!ok) {
             if (extension == "geojson") unavailable.add(eventId)
-            Log.w("MapStore", "getMapFileAbsolutePath: Download FAILED for $eventId.$extension")
             return null
         }
         platformWriteText(meta, stamp)
         if (extension == "geojson") platformInvalidateGeoJson(eventId)
-        Log.i("MapStore", "getMapFileAbsolutePath: Download SUCCESS -> $dataPath")
         return dataPath
     }
 

@@ -471,39 +471,3 @@ After Phase 2:
 **Status**: Ready to proceed with Phase 1, Task 1.1 (Swift↔Kotlin Bridge)
 **Blocker**: None - all dependencies resolved
 **Next Commit**: Complete iOS MapLibre integration with functional adapter
-
----
-
-## ✅ COMPLETED - Base MapLibre Integration (Oct 1, 2025)
-
-### Milestone Achieved: IOS_MAPLIBRE_INTEGRATION_BASE_WORKING_WITH_MAP
-
-**What's Working:**
-- ✅ Actual MapLibre map rendering on iOS (verified on simulator!)
-- ✅ Hybrid Compose+Native architecture
-- ✅ Koin-based NativeMapViewProvider pattern  
-- ✅ Complete integration chain
-- ✅ Download UI with progress/error/retry
-- ✅ ODR detection (cache-based, robust)
-- ✅ 917 tests passing (+21 new)
-
-**Remaining Tasks (In Priority Order):**
-
-### PHASE 2: Complete Feature Parity
-1. [ ] Implement wave polygon rendering on map (visible overlays)
-2. [ ] Add GPS location component (blue dot on map)
-3. [ ] Implement camera animations (moveToWave, targetUser, etc.)
-4. [ ] Add map click interactions
-5. [ ] Get actual event center coordinates (currently hardcoded Paris)
-
-### PHASE 3: Code Sharing & Optimization
-1. [ ] **Review and factorize AndroidEventMap / IOSEventMap**
-   - Extract shared download UI components (~240 lines savings)
-   - Unify state management patterns
-   - Share error handling components
-2. [ ] Migrate AndroidEventMap to use MapDownloadCoordinator
-3. [ ] Extract shared permission management (expect/actual)
-4. [ ] Performance optimization and testing
-
-**Branch**: `main`
-**Tag**: `IOS_MAPLIBRE_INTEGRATION_BASE_WORKING_WITH_MAP`

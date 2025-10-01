@@ -102,64 +102,37 @@ class WWWEventMap(
      *
      */
     suspend fun getStyleUri(): String? {
-        Log.d("WWWEventMap", "getStyleUri() called for event: ${event.id}")
-
         val mbtilesFilePath = getMbtilesFilePath()
         if (mbtilesFilePath == null) {
-            Log.w("WWWEventMap", "getStyleUri: MBTiles file path is null for event ${event.id}")
             return null
         }
-        Log.i("WWWEventMap", "getStyleUri: MBTiles path = $mbtilesFilePath")
 
         val styleFilename = "style-${event.id}.json"
         val isCacheValid = cachedFileExists(styleFilename) && !isCachedFileStale(styleFilename)
         if (isCacheValid) {
-            val cachedPath = cachedFilePath(styleFilename)
-            Log.i("WWWEventMap", "getStyleUri: Using cached style file: $cachedPath")
-            return cachedPath
+            return cachedFilePath(styleFilename)
         }
-        Log.d("WWWEventMap", "getStyleUri: Cache invalid or missing, generating new style file")
 
         val geojsonFilePath = event.area.getGeoJsonFilePath()
         if (geojsonFilePath == null) {
-            Log.w("WWWEventMap", "getStyleUri: GeoJSON file path is null for event ${event.id}")
             return null
         }
-        Log.i("WWWEventMap", "getStyleUri: GeoJSON path = $geojsonFilePath")
 
         val spriteAndGlyphsPath = cacheSpriteAndGlyphs()
-        Log.d("WWWEventMap", "getStyleUri: Sprite and glyphs cached at: $spriteAndGlyphsPath")
-
-        Log.d("WWWEventMap", "getStyleUri: Loading style template...")
-        val templateData = mapDataProvider.geoMapStyleData()
-        Log.i("WWWEventMap", "getStyleUri: Template loaded, length=${templateData.length}")
-
-        // Format URIs - mbtiles uses /// format, file uses // format
-        val mbtilesUri = "mbtiles:///$mbtilesFilePath"
-        val geojsonUri = "file://" + geojsonFilePath.removePrefix("/")
-        val glyphsUri = "file://" + spriteAndGlyphsPath.removePrefix("/") + "/files/style/glyphs"
-        val spriteUri = "file://" + spriteAndGlyphsPath.removePrefix("/") + "/files/style/sprites"
-
         val newFileStr =
-            templateData
-                .replace("__MBTILES_URI__", mbtilesUri)
-                .replace("__GEOJSON_URI__", geojsonUri)
-                .replace("__GLYPHS_URI__", glyphsUri)
-                .replace("__SPRITE_URI__", spriteUri)
+            mapDataProvider
+                .geoMapStyleData()
+                .replace("__MBTILES_URI__", "mbtiles:///$mbtilesFilePath")
+                .replace("__GEOJSON_URI__", "file:///$geojsonFilePath")
+                .replace("__GLYPHS_URI__", "file:///$spriteAndGlyphsPath/files/style/glyphs")
+                .replace("__SPRITE_URI__", "file:///$spriteAndGlyphsPath/files/style/sprites")
 
-        Log.i("WWWEventMap", "getStyleUri: After replacements, length=${newFileStr.length}")
-
-        Log.v("WWWEventMap", "getStyleUri: Style template replacements:")
-        Log.v("WWWEventMap", "  __MBTILES_URI__ -> $mbtilesUri")
-        Log.v("WWWEventMap", "  __GEOJSON_URI__ -> $geojsonUri")
-        Log.v("WWWEventMap", "  __GLYPHS_URI__ -> $glyphsUri")
-        Log.v("WWWEventMap", "  __SPRITE_URI__ -> $spriteUri")
-
-        val cachedPath = cacheStringToFile(styleFilename, newFileStr)
+        cacheStringToFile(styleFilename, newFileStr)
         updateCacheMetadata(styleFilename)
-        Log.d("WWWEventMap", "getStyleUri: Style file cached at: $cachedPath")
-        Log.i("WWWEventMap", "getStyleUri: Returning style path: $cachedPath")
-        return cachedPath
+
+        // Return the direct path from cacheStringToFile instead of going through cachedFilePath
+        // which might fail in development mode or have timing issues
+        return getCacheDir() + "/" + styleFilename
     }
 
     // ---------------------------

@@ -23,14 +23,13 @@ package com.worldwidewaves.shared.data
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
-import com.worldwidewaves.shared.utils.Log
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import platform.Foundation.NSApplicationSupportDirectory
 import platform.Foundation.NSBundle
 import platform.Foundation.NSFileManager
+import platform.Foundation.NSLog
 import platform.Foundation.NSOperationQueue
 import platform.Foundation.NSString
 import platform.Foundation.NSTemporaryDirectory
@@ -49,26 +48,6 @@ private fun onMain(block: () -> Unit) {
     NSOperationQueue.mainQueue.addOperationWithBlock(block)
 }
 
-/** Helper to invalidate GeoJsonDataProvider cache after files are downloaded - iOS safe pattern */
-private fun invalidateGeoJsonDataCache(eventId: String) {
-    try {
-        // iOS-safe: Get Koin instance directly, no object : KoinComponent
-        val koin =
-            org.koin.mp.KoinPlatform
-                .getKoin()
-
-        // Invalidate GeoJsonDataProvider cache (raw GeoJSON data)
-        val geoJsonDataProvider = koin.get<GeoJsonDataProvider>()
-        geoJsonDataProvider.invalidateCache(eventId)
-        Log.d("MapStore.ios", "Invalidated GeoJsonDataProvider cache for $eventId")
-
-        // Note: WWWEventArea.cachedAreaPolygons will be invalidated when polygonsLoaded changes
-        // after the next successful getGeoJsonData() call triggers polygon reload
-    } catch (e: Exception) {
-        Log.w("MapStore.ios", "Failed to invalidate caches for $eventId: ${e.message}")
-    }
-}
-
 object ODRPaths {
     /** True if Bundle currently exposes either <id>.geojson or <id>.mbtiles without mounting. */
     fun bundleHas(eventId: String): Boolean = resolve(eventId, "geojson") != null || resolve(eventId, "mbtiles") != null
@@ -78,23 +57,13 @@ object ODRPaths {
         eventId: String,
         extension: String,
     ): String? {
-        Log.d("ODRPaths", "resolve: eventId=$eventId, extension=$extension")
         val b = NSBundle.mainBundle
 
         // Try standard subdirectories first
-        resolveFromStandardPaths(b, eventId, extension)?.let {
-            Log.i("ODRPaths", "resolve: Found via standard paths -> $it")
-            return it
-        }
+        resolveFromStandardPaths(b, eventId, extension)?.let { return it }
 
         // Fallback: search all resources with the extension
-        val result = resolveFromExtensionSearch(b, eventId, extension)
-        if (result != null) {
-            Log.i("ODRPaths", "resolve: Found via extension search -> $result")
-        } else {
-            Log.w("ODRPaths", "resolve: NOT FOUND for $eventId.$extension")
-        }
-        return result
+        return resolveFromExtensionSearch(b, eventId, extension)
     }
 
     private fun resolveFromStandardPaths(
@@ -102,22 +71,10 @@ object ODRPaths {
         eventId: String,
         extension: String,
     ): String? {
-        Log.d("ODRPaths", "resolveFromStandardPaths: $eventId.$extension")
         val subs = arrayOf("Maps/$eventId", "worldwidewaves/Maps/$eventId", null)
         return subs.firstNotNullOfOrNull { sub ->
-            val path = bundle.pathForResource(eventId, extension, sub)
-            if (path != null) {
-                Log.d("ODRPaths", "  Found via pathForResource with sub=$sub -> $path")
-                return@firstNotNullOfOrNull path
-            }
-            if (sub == null) {
-                val url = bundle.URLForResource(eventId, extension)
-                if (url?.path != null) {
-                    Log.d("ODRPaths", "  Found via URLForResource -> ${url.path}")
-                    return@firstNotNullOfOrNull url.path
-                }
-            }
-            null
+            bundle.pathForResource(eventId, extension, sub)
+                ?: if (sub == null) bundle.URLForResource(eventId, extension)?.path else null
         }
     }
 
@@ -126,38 +83,18 @@ object ODRPaths {
         eventId: String,
         extension: String,
     ): String? {
-        Log.d("ODRPaths", "resolveFromExtensionSearch: $eventId.$extension")
         val any = bundle.URLsForResourcesWithExtension(extension, null)
         val urls = any?.mapNotNull { it as? NSURL } ?: emptyList()
-        Log.d("ODRPaths", "  Found ${urls.size} resources with extension .$extension")
-
-        val result =
-            urls
-                .firstOrNull { url ->
-                    val p = url.path ?: ""
-                    val matches = p.endsWith("/$eventId.$extension") || p.contains("/Maps/$eventId/")
-                    if (matches) {
-                        Log.d("ODRPaths", "  Matched: $p")
-                    }
-                    matches
-                }?.path
-
-        if (result == null && urls.isNotEmpty()) {
-            Log.d("ODRPaths", "  Available .$extension files (first 5):")
-            urls.take(5).forEach { url ->
-                Log.d("ODRPaths", "    ${url.path}")
-            }
-        }
-        return result
+        return urls
+            .firstOrNull { url ->
+                val p = url.path ?: ""
+                p.endsWith("/$eventId.$extension") ||
+                    p.contains("/Maps/$eventId/")
+            }?.path
     }
 }
 
 // ---------- helpers ----------
-private fun metaPath(
-    root: String,
-    name: String,
-) = "$root/$name.metadata"
-
 @OptIn(ExperimentalForeignApi::class)
 private fun appSupportMapsDir(): String {
     val fm = NSFileManager.defaultManager
@@ -180,43 +117,10 @@ actual fun platformTryCopyInitialTagToCache(
     extension: String,
     destAbsolutePath: String,
 ): Boolean {
-    Log.d("MapStore.ios", "platformTryCopyInitialTagToCache: $eventId.$extension")
-    val src = ODRPaths.resolve(eventId, extension)
-    if (src == null) {
-        Log.w("MapStore.ios", "platformTryCopyInitialTagToCache: Source not found for $eventId.$extension")
-        return false
-    }
-
+    val src = ODRPaths.resolve(eventId, extension) ?: return false // no mount, just visible?
     val fm = NSFileManager.defaultManager
     if (fm.fileExistsAtPath(destAbsolutePath)) fm.removeItemAtPath(destAbsolutePath, null)
-
-    val copied = fm.copyItemAtPath(src, destAbsolutePath, null)
-    if (!copied) {
-        Log.w("MapStore.ios", "platformTryCopyInitialTagToCache: Copy failed for $eventId.$extension")
-        return false
-    }
-
-    Log.i("MapStore.ios", "platformTryCopyInitialTagToCache: Cached $eventId.$extension")
-
-    // Since initial tag is visible (no mount needed), also cache the other file type
-    val otherExtension = if (extension == "geojson") "mbtiles" else "geojson"
-    val root = platformCacheRoot()
-    val otherPath = "$root/$eventId.$otherExtension"
-    val otherMeta = metaPath(root, "$eventId.$otherExtension")
-    val stamp = platformAppVersionStamp()
-
-    val otherSrc = ODRPaths.resolve(eventId, otherExtension)
-    if (otherSrc != null && !fm.fileExistsAtPath(otherPath)) {
-        if (fm.fileExistsAtPath(otherPath)) fm.removeItemAtPath(otherPath, null)
-        val otherCopied = fm.copyItemAtPath(otherSrc, otherPath, null)
-        if (otherCopied) {
-            platformWriteText(otherMeta, stamp)
-            if (otherExtension == "geojson") platformInvalidateGeoJson(eventId)
-            Log.i("MapStore.ios", "platformTryCopyInitialTagToCache: Also cached $eventId.$otherExtension")
-        }
-    }
-
-    return true
+    return fm.copyItemAtPath(src, destAbsolutePath, null)
 }
 
 // ---------- platform shims ----------
@@ -250,20 +154,7 @@ actual fun platformAppVersionStamp(): String {
     return "$short+$build"
 }
 
-actual fun platformInvalidateGeoJson(eventId: String) {
-    // Invalidate area polygon cache when geojson changes
-    try {
-        val koin =
-            org.koin.mp.KoinPlatform
-                .getKoin()
-        val wwwEvents = koin.get<com.worldwidewaves.shared.events.WWWEvents>()
-        // Note: WWWEvents doesn't expose allEvents publicly, so we use the invalidation through GeoJsonDataProvider
-        // The area cache will be cleared when getPolygons() is called again after GeoJsonDataProvider cache invalidation
-        Log.d("MapStore.ios", "platformInvalidateGeoJson called for $eventId")
-    } catch (e: Exception) {
-        Log.v("MapStore.ios", "platformInvalidateGeoJson: ${e.message}")
-    }
-}
+actual fun platformInvalidateGeoJson(eventId: String) { /* no-op */ }
 
 /**
  * Mount the ODR tag for [eventId], resolve the resource path, and copy it to [destAbsolutePath].
@@ -289,46 +180,9 @@ private suspend fun mountAndCopyResource(
     destAbsolutePath: String,
 ): Boolean {
     val mounted = mountODRResource(request)
-    if (!mounted) {
-        Log.w("MapStore.ios", "mountAndCopyResource: Failed to mount ODR tag for $eventId")
-        return false
-    }
+    if (!mounted) return false
 
-    Log.i("MapStore.ios", "mountAndCopyResource: ODR tag mounted for $eventId, caching all files")
-
-    // Cache the requested file first
-    val requestedSuccess = copyResourceToDestination(eventId, extension, destAbsolutePath)
-    if (!requestedSuccess) {
-        Log.w("MapStore.ios", "mountAndCopyResource: Failed to copy requested $eventId.$extension")
-        return false
-    }
-
-    // Invalidate geojson cache if we just cached geojson (triggers polygon reload)
-    if (extension == "geojson") {
-        invalidateGeoJsonDataCache(eventId)
-        Log.d("MapStore.ios", "mountAndCopyResource: Invalidated geojson cache for $eventId")
-    }
-
-    // Since ODR tag is mounted, cache the other file type as well (geojson OR mbtiles)
-    val otherExtension = if (extension == "geojson") "mbtiles" else "geojson"
-    val root = platformCacheRoot()
-    val otherPath = "$root/$eventId.$otherExtension"
-    val otherMeta = metaPath(root, "$eventId.$otherExtension")
-    val stamp = platformAppVersionStamp()
-
-    val otherSuccess = copyResourceToDestination(eventId, otherExtension, otherPath)
-    if (otherSuccess) {
-        platformWriteText(otherMeta, stamp)
-        if (otherExtension == "geojson") {
-            invalidateGeoJsonDataCache(eventId)
-            Log.d("MapStore.ios", "mountAndCopyResource: Invalidated geojson cache for $eventId")
-        }
-        Log.i("MapStore.ios", "mountAndCopyResource: Also cached $eventId.$otherExtension")
-    } else {
-        Log.d("MapStore.ios", "mountAndCopyResource: Could not cache $eventId.$otherExtension (may not exist in ODR)")
-    }
-
-    return true
+    return copyResourceToDestination(eventId, extension, destAbsolutePath)
 }
 
 private suspend fun mountODRResource(request: platform.Foundation.NSBundleResourceRequest): Boolean =
@@ -359,28 +213,12 @@ actual fun cacheStringToFile(
 ): String {
     val root = platformCacheRoot()
     val path = "$root/$fileName"
-    Log.d("MapStore.ios", "cacheStringToFile: root=$root, fileName=$fileName")
-    Log.d("MapStore.ios", "cacheStringToFile: full path=$path")
-    Log.d("MapStore.ios", "cacheStringToFile: content length=${content.length}")
-
     val nsPath = NSString.create(string = path)
     val parent = nsPath.stringByDeletingLastPathComponent
-    Log.d("MapStore.ios", "cacheStringToFile: parent dir=$parent")
-
-    val fm = NSFileManager.defaultManager
-    val dirCreated = fm.createDirectoryAtPath(parent, true, null, null)
-    Log.d("MapStore.ios", "cacheStringToFile: directory created=$dirCreated")
-
-    val nsContent = NSString.create(string = content)
-    val success = nsContent.writeToFile(path, atomically = true, encoding = NSUTF8StringEncoding, error = null)
-
-    if (success) {
-        Log.i("MapStore.ios", "cacheStringToFile: SUCCESS - File written to $path")
-        val exists = fm.fileExistsAtPath(path)
-        Log.d("MapStore.ios", "cacheStringToFile: File exists check=$exists")
-    } else {
-        Log.e("MapStore.ios", "cacheStringToFile: FAILED to write file to $path")
-    }
-
-    return path
+    NSFileManager.defaultManager.createDirectoryAtPath(parent, true, null, null)
+    NSLog("cacheStringToFile: Caching data to %@", fileName)
+    NSString
+        .create(string = content)
+        .writeToFile(path, atomically = true, encoding = NSUTF8StringEncoding, error = null)
+    return fileName
 }
