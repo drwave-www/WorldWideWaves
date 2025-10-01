@@ -98,13 +98,17 @@ import kotlin.time.Instant
  */
 class IOSDeadlockPreventionTest : KoinTest {
     private lateinit var testClock: TestClock
-    private lateinit var testPlatform: TestPlatform
+    private lateinit var testPlatform: WWWPlatform
     private lateinit var testModule: Module
 
     @BeforeTest
     fun setUp() {
         testClock = TestClock(currentTime = Instant.fromEpochMilliseconds(0))
-        testPlatform = TestPlatform()
+        testPlatform =
+            WWWPlatform(
+                name = "Test Platform (iOS Deadlock Prevention)",
+                positionManager = null,
+            )
 
         testModule =
             module {
@@ -754,12 +758,5 @@ class IOSDeadlockPreventionTest : KoinTest {
         fun advanceBy(duration: kotlin.time.Duration) {
             currentTime += duration
         }
-    }
-
-    /**
-     * Test implementation of WWWPlatform.
-     */
-    private class TestPlatform : WWWPlatform("Test Platform (iOS Deadlock Prevention)") {
-        // simulationChanged is already provided by parent class
     }
 }
