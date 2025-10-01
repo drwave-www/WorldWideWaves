@@ -66,7 +66,6 @@ import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.koin.mp.KoinPlatform
 import platform.UIKit.UIImage
 import platform.UIKit.UIViewController
@@ -182,20 +181,32 @@ class IOSEventMap(
         }
 
         Box(modifier = modifier.fillMaxSize()) {
-            // Native SwiftUI map embedded in Compose
-            val styleURL =
-                remember(event.id) {
-                    // Get style URL synchronously (cached value)
-                    runBlocking { event.map.getStyleUri() } ?: "https://demotiles.maplibre.org/style.json"
-                }
+            // Load style URL asynchronously to avoid blocking UI thread during ODR mount
+            var styleURL by remember { mutableStateOf<String?>(null) }
 
-            UIKitViewController(
-                factory = {
-                    Log.i("IOSEventMap", "Creating native map view controller for: ${event.id}")
-                    createNativeMapViewController(event, styleURL) as UIViewController
-                },
-                modifier = Modifier.fillMaxSize(),
-            )
+            LaunchedEffect(event.id) {
+                Log.d("IOSEventMap", "Loading style URL for: ${event.id}")
+                styleURL = event.map.getStyleUri() ?: "https://demotiles.maplibre.org/style.json"
+                Log.i("IOSEventMap", "Style URL loaded: $styleURL")
+            }
+
+            if (styleURL != null) {
+                UIKitViewController(
+                    factory = {
+                        Log.i("IOSEventMap", "Creating native map view controller for: ${event.id}")
+                        createNativeMapViewController(event, styleURL!!) as UIViewController
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            } else {
+                // Show loading indicator while style loads
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    LoadingIndicator()
+                }
+            }
 
             // Overlay with map information and controls
             Column(
