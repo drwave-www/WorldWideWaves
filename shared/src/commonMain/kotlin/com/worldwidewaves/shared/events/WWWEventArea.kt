@@ -398,11 +398,27 @@ data class WWWEventArea(
         val hasPolygons = tempPolygons.isNotEmpty()
 
         if (hasPolygons) {
+            // Check if polygons have actual coordinate data
+            val totalPoints = tempPolygons.sumOf { it.size }
+            Log.i("WWWEventArea", "cachePolygonsIfLoaded: ${event.id} caching ${tempPolygons.size} polygons with $totalPoints total points")
+
+            // Log first polygon details for debugging
+            if (tempPolygons.isNotEmpty()) {
+                val firstPolygon = tempPolygons[0]
+                Log.d("WWWEventArea", "  First polygon has ${firstPolygon.size} points")
+                if (firstPolygon.isNotEmpty()) {
+                    val firstPoint = firstPolygon[0]
+                    Log.d("WWWEventArea", "  First point: (${firstPoint.lat}, ${firstPoint.lng})")
+                }
+            }
+
             // Atomically assign the complete immutable list
             cachedAreaPolygons = tempPolygons.toList()
 
             // Notify that polygon data is now available
             _polygonsLoaded.value = true
+        } else {
+            Log.d("WWWEventArea", "cachePolygonsIfLoaded: ${event.id} has no polygons, not caching")
         }
     }
 
