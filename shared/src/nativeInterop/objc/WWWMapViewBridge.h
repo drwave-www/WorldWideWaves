@@ -11,13 +11,13 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-// Forward declarations
-@class MLNMapView;
-
 /**
  * Objective-C bridge to create map view controllers.
- * This class is accessible from Kotlin via cinterop and creates
- * UIViewControllers containing MapLibre maps.
+ * This class is accessible from Kotlin via cinterop.
+ *
+ * The implementation in shared module provides a placeholder.
+ * The iOS app should override this by implementing MapViewBridge.swift
+ * which creates UIHostingController with EventMapView (SwiftUI + MapLibre).
  */
 @interface WWWMapViewBridge : NSObject
 

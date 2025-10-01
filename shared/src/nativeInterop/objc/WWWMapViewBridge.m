@@ -6,7 +6,6 @@
  */
 
 #import "WWWMapViewBridge.h"
-#import <MapLibre/MapLibre.h>
 
 @implementation WWWMapViewBridge
 
@@ -14,27 +13,26 @@
                                                  latitude:(double)latitude
                                                 longitude:(double)longitude
                                                      zoom:(double)zoom {
-    // Create a simple UIViewController
+    // Return a placeholder UIViewController
+    // The iOS app will override this by providing MapViewBridge.swift implementation
+    // which creates UIHostingController with EventMapView
     UIViewController *viewController = [[UIViewController alloc] init];
 
-    // Create MapLibre map view
-    MLNMapView *mapView = [[MLNMapView alloc] initWithFrame:CGRectZero];
-    mapView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    // Set background color so we can see the placeholder
+    viewController.view.backgroundColor = [UIColor colorWithRed:0.2 green:0.2 blue:0.3 alpha:1.0];
 
-    // Set style URL
-    if (styleURL && styleURL.length > 0) {
-        NSURL *url = [NSURL URLWithString:styleURL];
-        if (url) {
-            mapView.styleURL = url;
-        }
-    }
+    // Add a label indicating this is a placeholder
+    UILabel *label = [[UILabel alloc] init];
+    label.text = @"Map Placeholder - Override in iOS App";
+    label.textColor = [UIColor whiteColor];
+    label.textAlignment = NSTextAlignmentCenter;
+    label.translatesAutoresizingMaskIntoConstraints = NO;
+    [viewController.view addSubview:label];
 
-    // Set initial camera position
-    CLLocationCoordinate2D center = CLLocationCoordinate2DMake(latitude, longitude);
-    [mapView setCenterCoordinate:center zoomLevel:zoom animated:NO];
-
-    // Add map view to view controller
-    viewController.view = mapView;
+    [NSLayoutConstraint activateConstraints:@[
+        [label.centerXAnchor constraintEqualToAnchor:viewController.view.centerXAnchor],
+        [label.centerYAnchor constraintEqualToAnchor:viewController.view.centerYAnchor]
+    ]];
 
     return viewController;
 }
