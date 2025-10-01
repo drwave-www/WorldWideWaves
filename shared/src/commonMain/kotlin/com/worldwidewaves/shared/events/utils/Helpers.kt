@@ -257,10 +257,6 @@ interface GeoJsonDataProvider {
 class DefaultGeoJsonDataProvider :
     GeoJsonDataProvider,
     KoinComponent {
-    private val cache = mutableMapOf<String, JsonObject?>()
-    private val lastAttemptTime = mutableMapOf<String, Instant>()
-    private val attemptCount = mutableMapOf<String, Int>()
-
     companion object {
         private const val MAX_CACHE_SIZE = 10
         private const val MAX_ODR_ATTEMPTS = 20
@@ -269,17 +265,25 @@ class DefaultGeoJsonDataProvider :
         private const val GEOJSON_PREVIEW_LENGTH = 80
     }
 
-    private fun evictOldestCacheEntry() {
-        if (cache.size > MAX_CACHE_SIZE) {
-            val oldestKey = cache.keys.firstOrNull()
-            if (oldestKey != null) {
-                cache.remove(oldestKey)
-                lastAttemptTime.remove(oldestKey)
-                attemptCount.remove(oldestKey)
-                Log.v("GeoJsonDataProvider", "Evicted cache entry for $oldestKey (LRU)")
+    private val cache =
+        object : LinkedHashMap<String, JsonObject?>(
+            MAX_CACHE_SIZE,
+            0.75f,
+            true, // access-order for LRU
+        ) {
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, JsonObject?>?): Boolean {
+                val shouldRemove = size > MAX_CACHE_SIZE
+                if (shouldRemove && eldest != null) {
+                    lastAttemptTime.remove(eldest.key)
+                    attemptCount.remove(eldest.key)
+                    Log.v("GeoJsonDataProvider", "Evicted cache entry for ${eldest.key} (LRU), cleaned up metadata")
+                }
+                return shouldRemove
             }
         }
-    }
+
+    private val lastAttemptTime = mutableMapOf<String, Instant>()
+    private val attemptCount = mutableMapOf<String, Int>()
 
     override suspend fun getGeoJsonData(eventId: String): JsonObject? {
         val cachedResult = getCachedResult(eventId)
@@ -333,8 +337,7 @@ class DefaultGeoJsonDataProvider :
         val maxAttemptsReached = attempts >= MAX_ODR_ATTEMPTS
         if (maxAttemptsReached) {
             Log.w(::getGeoJsonData.name, "Giving up on $eventId after $attempts attempts")
-            evictOldestCacheEntry()
-            cache[eventId] = null
+            cache[eventId] = null // LinkedHashMap auto-evicts if needed
             return null
         }
 
@@ -405,8 +408,7 @@ class DefaultGeoJsonDataProvider :
 
         val shouldCache = result != null || !isODRUnavailable(eventId)
         if (shouldCache) {
-            evictOldestCacheEntry()
-            cache[eventId] = result
+            cache[eventId] = result // LinkedHashMap auto-evicts LRU if size > MAX_CACHE_SIZE
             Log.v(::getGeoJsonData.name, "Cached GeoJSON result for $eventId (success=$loadSuccessful)")
         } else {
             Log.i(::getGeoJsonData.name, "Not caching null result for $eventId (ODR may become available)")
