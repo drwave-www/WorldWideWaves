@@ -25,4 +25,13 @@ interface NativeMapViewProvider {
         event: IWWWEvent,
         styleURL: String,
     ): Any
+
+    /**
+     * Gets the map wrapper instance for an event (iOS only).
+     * On Android, this returns null.
+     *
+     * @param eventId The event ID
+     * @return The map wrapper (MapLibreViewWrapper on iOS) or null
+     */
+    fun getMapWrapper(eventId: String): Any? = null
 }

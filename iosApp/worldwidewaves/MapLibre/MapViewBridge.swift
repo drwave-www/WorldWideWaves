@@ -29,9 +29,10 @@ import Shared
         WWWLog.i("MapViewBridge", "Creating map view controller for event: \(event.id)")
 
         // Create the SwiftUI map view
-        // TODO: Get actual center from event.map (WWWEventMap doesn't have center property)
-        // Using Paris as default for now
+        // NOTE: Using default Paris coordinates as initial position
+        // The map will be re-centered based on event data after style loads
         let mapView = EventMapView(
+            eventId: event.id,
             styleURL: styleURL,
             initialLatitude: 48.8566,
             initialLongitude: 2.3522,
@@ -59,7 +60,9 @@ import Shared
 
         var wrapperInstance: MapLibreViewWrapper?
 
+        // NOTE: Using default Paris coordinates as initial position
         let mapView = EventMapView(
+            eventId: event.id,
             styleURL: styleURL,
             initialLatitude: 48.8566,
             initialLongitude: 2.3522,
