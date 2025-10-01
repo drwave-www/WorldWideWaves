@@ -7,6 +7,7 @@ package com.worldwidewaves.shared.map
  * https://www.apache.org/licenses/LICENSE-2.0
  */
 
+import com.worldwidewaves.shared.data.isMapFileInCache
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CoroutineDispatcher
@@ -19,12 +20,8 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import platform.Foundation.NSApplicationSupportDirectory
 import platform.Foundation.NSBundle
 import platform.Foundation.NSBundleResourceRequest
-import platform.Foundation.NSFileManager
-import platform.Foundation.NSURL
-import platform.Foundation.NSUserDomainMask
 
 /**
  * Tiny, production-ready iOS map manager using On-Demand Resources (ODR).
@@ -62,29 +59,12 @@ class IOSPlatformMapManager(
     override fun isMapAvailable(mapId: String): Boolean {
         Log.d(TAG, "Checking map availability for: $mapId")
 
-        val fm = NSFileManager.defaultManager
-
-        // Get cache directory (Library/Application Support/Maps/)
-        val baseDirUrl =
-            fm.URLForDirectory(
-                directory = NSApplicationSupportDirectory,
-                inDomain = NSUserDomainMask,
-                appropriateForURL = null,
-                create = true,
-                error = null,
-            )
-        val cacheDir = baseDirUrl?.path?.let { "$it/Maps" } ?: return false
-
-        // Check if files exist in cache (where MapStore reads from)
-        val geoPath = "$cacheDir/$mapId.geojson"
-        val mbPath = "$cacheDir/$mapId.mbtiles"
-
-        val hasGeo = fm.fileExistsAtPath(geoPath)
-        val hasMb = fm.fileExistsAtPath(mbPath)
-
-        Log.i(TAG, "Map availability (cache check): mapId=$mapId, hasGeo=$hasGeo ($geoPath), hasMb=$hasMb ($mbPath)")
+        // Check cache first (where MapStore stores files after ODR copy)
+        val hasGeo = isMapFileInCache(mapId, "geojson")
+        val hasMb = isMapFileInCache(mapId, "mbtiles")
 
         if (hasGeo || hasMb) {
+            Log.i(TAG, "Map available in cache: $mapId, hasGeo=$hasGeo, hasMb=$hasMb")
             return true
         }
 
@@ -226,35 +206,6 @@ class IOSPlatformMapManager(
                     onProgress(p)
                 }
             }
-    }
-
-    /**
-     * Find resource using global extension search (same as ODRPaths.resolve()).
-     * This approach works reliably where pathForResource() fails.
-     */
-    @OptIn(ExperimentalForeignApi::class)
-    private fun findResourceByExtensionSearch(
-        eventId: String,
-        extension: String,
-    ): String? {
-        val bundle = NSBundle.mainBundle
-        val any = bundle.URLsForResourcesWithExtension(extension, null)
-        val urls = any?.mapNotNull { it as? NSURL } ?: emptyList()
-
-        val foundUrl =
-            urls.firstOrNull { url ->
-                val p = url.path ?: ""
-                p.endsWith("/$eventId.$extension") ||
-                    p.contains("/Maps/$eventId/")
-            }
-
-        if (foundUrl != null) {
-            Log.d(TAG, "Found $extension file for $eventId: ${foundUrl.path}")
-        } else {
-            Log.d(TAG, "No $extension file found for $eventId (searched ${urls.size} total $extension files)")
-        }
-
-        return foundUrl?.path
     }
 
     companion object {
