@@ -316,12 +316,28 @@ actual fun cacheStringToFile(
 ): String {
     val root = platformCacheRoot()
     val path = "$root/$fileName"
+    Log.d("MapStore.ios", "cacheStringToFile: root=$root, fileName=$fileName")
+    Log.d("MapStore.ios", "cacheStringToFile: full path=$path")
+    Log.d("MapStore.ios", "cacheStringToFile: content length=${content.length}")
+
     val nsPath = NSString.create(string = path)
     val parent = nsPath.stringByDeletingLastPathComponent
-    NSFileManager.defaultManager.createDirectoryAtPath(parent, true, null, null)
-    Log.d("MapStore.ios", "cacheStringToFile: Caching $fileName (${content.length} chars)")
-    NSString
-        .create(string = content)
-        .writeToFile(path, atomically = true, encoding = NSUTF8StringEncoding, error = null)
-    return fileName
+    Log.d("MapStore.ios", "cacheStringToFile: parent dir=$parent")
+
+    val fm = NSFileManager.defaultManager
+    val dirCreated = fm.createDirectoryAtPath(parent, true, null, null)
+    Log.d("MapStore.ios", "cacheStringToFile: directory created=$dirCreated")
+
+    val nsContent = NSString.create(string = content)
+    val success = nsContent.writeToFile(path, atomically = true, encoding = NSUTF8StringEncoding, error = null)
+
+    if (success) {
+        Log.i("MapStore.ios", "cacheStringToFile: SUCCESS - File written to $path")
+        val exists = fm.fileExistsAtPath(path)
+        Log.d("MapStore.ios", "cacheStringToFile: File exists check=$exists")
+    } else {
+        Log.e("MapStore.ios", "cacheStringToFile: FAILED to write file to $path")
+    }
+
+    return path
 }
