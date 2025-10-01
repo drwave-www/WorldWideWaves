@@ -48,19 +48,35 @@ class IOSPlatformMapManager(
 
     /**
      * Returns true if a typical file for this tag is visible in the bundle right now.
-     * Uses URLsForResourcesWithExtension (same as MapStore ODRPaths.resolve) which works reliably.
+     *
+     * Note: URLsForResourcesWithExtension() may return 0 results if ODR resources
+     * haven't been accessed yet. For initial install tags (like paris_france),
+     * we assume they're available. For other cities, trigger ODR download.
      */
     @OptIn(ExperimentalForeignApi::class)
     override fun isMapAvailable(mapId: String): Boolean {
         Log.d(TAG, "Checking map availability for: $mapId")
 
-        // Use the SAME successful approach as ODRPaths.resolve() from MapStore.ios.kt
-        // URLsForResourcesWithExtension() does a global search and actually WORKS
+        // Try URLsForResourcesWithExtension first
         val hasGeo = findResourceByExtensionSearch(mapId, "geojson") != null
         val hasMb = findResourceByExtensionSearch(mapId, "mbtiles") != null
 
-        Log.i(TAG, "Map availability: mapId=$mapId, hasGeo=$hasGeo, hasMb=$hasMb, available=${hasGeo || hasMb}")
-        return hasGeo || hasMb
+        // If found via search, we're done
+        if (hasGeo || hasMb) {
+            Log.i(TAG, "Map availability: mapId=$mapId, hasGeo=$hasGeo, hasMb=$hasMb, available=true")
+            return true
+        }
+
+        // If not found but this is an initial install tag, assume it's available
+        // (ODR resources may not show in URLsForResourcesWithExtension until accessed)
+        val initialInstallTags = setOf("paris_france") // From project configuration
+        if (initialInstallTags.contains(mapId)) {
+            Log.i(TAG, "Map availability: mapId=$mapId is initial install tag, assuming available=true")
+            return true
+        }
+
+        Log.i(TAG, "Map availability: mapId=$mapId, hasGeo=$hasGeo, hasMb=$hasMb, available=false")
+        return false
     }
 
     /**
