@@ -9,35 +9,26 @@ package com.worldwidewaves.shared.map
 
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.utils.Log
-import platform.UIKit.UIViewController
+import org.koin.mp.KoinPlatform
 
 /**
- * iOS implementation of native map view controller factory.
- *
- * NOTE: This returns a placeholder. The actual map is provided by the iOS app's
- * WWWMapViewBridge.m which is compiled by Xcode and called at runtime.
- *
- * The challenge: Kotlin/Native can't easily call ObjC class methods with complex
- * signatures via objc_msgSend. Instead, the iOS app should:
- * 1. Compile WWWMapViewBridge.m (which creates actual MapLibre maps)
- * 2. The Xcode linker will resolve the symbol at app link time
- * 3. At runtime, the bridge will be available
- *
- * For now, returning placeholder to allow development to continue.
- * Full integration requires either:
- * - Simplified bridge interface
- * - Or app-layer override of map creation
+ * iOS implementation using dependency injection.
+ * Gets NativeMapViewProvider from Koin (implementation provided by iOS app).
  */
 actual fun createNativeMapViewController(
     event: IWWWEvent,
     styleURL: String,
 ): Any {
-    Log.i("MapViewFactory", "Creating map view controller for: ${event.id}")
-    Log.d("MapViewFactory", "Style URL: $styleURL")
-    Log.w("MapViewFactory", "Placeholder mode - WWWMapViewBridge.m needs runtime integration")
+    Log.i("MapViewFactory", "Creating map view for: ${event.id} via Koin provider")
 
-    // Return placeholder
-    // iOS app's WWWMapViewBridge.m exists and compiles, but calling it from Kotlin
-    // requires complex objc_msgSend usage that's error-prone
-    return UIViewController()
+    val provider = KoinPlatform.getKoin().getOrNull<NativeMapViewProvider>()
+
+    return if (provider != null) {
+        Log.d("MapViewFactory", "Using NativeMapViewProvider from Koin")
+        provider.createMapView(event, styleURL)
+    } else {
+        Log.w("MapViewFactory", "NativeMapViewProvider not registered in Koin - using default implementation")
+        // Fallback: Use default iOS implementation
+        IOSNativeMapViewProvider().createMapView(event, styleURL)
+    }
 }
