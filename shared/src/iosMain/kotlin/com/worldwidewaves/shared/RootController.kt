@@ -67,6 +67,7 @@ private inline fun makeComposeVC(
 
 // ---------- Public factories ----------
 
+@Throws(Throwable::class)
 fun makeMainViewController(): UIViewController =
     makeComposeVC("IOS MAIN VIEW CONTROLLER") {
         val enabler = diEnabler()
@@ -74,6 +75,7 @@ fun makeMainViewController(): UIViewController =
     }
 
 @Suppress("unused")
+@Throws(Throwable::class)
 fun makeEventViewController(eventId: String): UIViewController =
     makeComposeVC("IOS EVENT VIEW CONTROLLER") { finish ->
         val enabler = diEnabler()
@@ -93,6 +95,7 @@ fun makeEventViewController(eventId: String): UIViewController =
     }
 
 @Suppress("unused")
+@Throws(Throwable::class)
 fun makeWaveViewController(eventId: String): UIViewController =
     makeComposeVC("IOS WAVE VIEW CONTROLLER") { finish ->
         val enabler = diEnabler()
@@ -111,6 +114,7 @@ fun makeWaveViewController(eventId: String): UIViewController =
     }
 
 @Suppress("unused")
+@Throws(Throwable::class)
 fun makeFullMapViewController(eventId: String): UIViewController =
     makeComposeVC("IOS FULL MAP VIEW CONTROLLER") { finish ->
         val enabler = diEnabler()

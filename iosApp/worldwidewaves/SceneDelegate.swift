@@ -74,8 +74,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     private func installPlatform() {
         NSLog("[\(tag)] 🎯 installPlatform: init platform (Koin/Moko/Logger)")
-        _ = try? Platform_iosKt.doInitPlatform()
-        NSLog("[\(tag)] ✅ doInitPlatform done")
+        do {
+            try Platform_iosKt.doInitPlatform()
+            NSLog("[\(tag)] ✅ doInitPlatform done")
+        } catch let error as NSError {
+            NSLog("[\(tag)] ❌ Platform init failed: \(error.localizedDescription)")
+            NSLog("[\(tag)] Details: \(error)")
+            // App cannot proceed without platform initialization
+            fatalError("Cannot proceed without platform initialization: \(error)")
+        }
+
         KnHookKt.installKNHook()
         NSLog("[\(tag)] ✅ K/N hook installed")
 

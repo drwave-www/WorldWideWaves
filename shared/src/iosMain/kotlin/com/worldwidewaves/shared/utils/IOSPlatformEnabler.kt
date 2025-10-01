@@ -26,6 +26,7 @@ import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
 
 // Called from Swift to install the Swift implementation in DI
+@Throws(Throwable::class)
 fun registerPlatformEnabler(enabler: PlatformEnabler) {
     loadKoinModules(
         module {

@@ -22,6 +22,7 @@ package com.worldwidewaves.shared
 import kotlin.experimental.ExperimentalNativeApi
 
 @OptIn(ExperimentalNativeApi::class)
+@Throws(Throwable::class)
 fun installKNHook() {
     setUnhandledExceptionHook { t ->
         println("K/N Unhandled: ${t::class.qualifiedName}: ${t.message}")
