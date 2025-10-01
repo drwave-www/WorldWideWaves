@@ -24,6 +24,7 @@ package com.worldwidewaves.shared.domain.scheduling
  */
 
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.WWWEventObserver
 import com.worldwidewaves.shared.events.WWWEventWave
 import com.worldwidewaves.shared.events.utils.IClock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -91,7 +92,7 @@ class DefaultObservationSchedulerTest {
     /**
      * Mock event for testing different scenarios.
      */
-    private class MockEvent(
+    private open class MockEvent(
         private val startDateTime: Instant,
         private val isRunning: Boolean = false,
         private val isDone: Boolean = false,
@@ -122,13 +123,34 @@ class DefaultObservationSchedulerTest {
 
         // Mock wave with timeBeforeUserHit
         override val wave: WWWEventWave =
-            object : WWWEventWave {
-                override fun timeBeforeUserHit(): Duration? = timeBeforeUserHit
+            object : WWWEventWave() {
+                override val speed: Double = 1.0
+                override val direction: Direction = Direction.EAST
+                override val approxDuration: Int = 60
 
-                override suspend fun propagate(ignoreSimulation: Boolean): Boolean = false
+                override suspend fun getWavePolygons(): WavePolygons? = null
+
+                override suspend fun getWaveDuration(): Duration = 60.minutes
+
+                override suspend fun hasUserBeenHitInCurrentPosition(): Boolean {
+                    // If timeBeforeUserHit is null or positive, user hasn't been hit yet
+                    val tbh = this@MockEvent.timeBeforeUserHit
+                    return tbh != null && tbh < Duration.ZERO
+                }
+
+                override suspend fun userHitDateTime(): Instant? {
+                    val tbh = this@MockEvent.timeBeforeUserHit ?: return null
+                    return clock.now() + tbh
+                }
+
+                override suspend fun closestWaveLongitude(latitude: Double): Double = 0.0
+
+                override suspend fun userPositionToWaveRatio(): Double? = null
+
+                override fun validationErrors(): List<String>? = null
             }
 
-        override suspend fun getStartDateTime(): Instant = startDateTime
+        override fun getStartDateTime(): Instant = startDateTime
 
         override suspend fun getStatus(): IWWWEvent.Status = IWWWEvent.Status.UNDEFINED
 
@@ -143,6 +165,42 @@ class DefaultObservationSchedulerTest {
         override fun getLocationImage(): Any? = null
 
         override fun getCommunityImage(): Any? = null
+
+        override fun getCountryImage(): Any? = null
+
+        override fun getMapImage(): Any? = null
+
+        override fun getLocation(): dev.icerock.moko.resources.StringResource = throw NotImplementedError("Mock method")
+
+        override fun getDescription(): dev.icerock.moko.resources.StringResource = throw NotImplementedError("Mock method")
+
+        override fun getLiteralCountry(): dev.icerock.moko.resources.StringResource = throw NotImplementedError("Mock method")
+
+        override fun getLiteralCommunity(): dev.icerock.moko.resources.StringResource = throw NotImplementedError("Mock method")
+
+        override fun getTZ(): kotlinx.datetime.TimeZone = kotlinx.datetime.TimeZone.UTC
+
+        override suspend fun getTotalTime(): Duration = 60.minutes
+
+        override suspend fun getEndDateTime(): Instant = startDateTime + 60.minutes
+
+        override fun getLiteralTimezone(): String = "UTC"
+
+        override fun getLiteralStartDateSimple(): String = "2025-01-01"
+
+        override fun getLiteralStartTime(): String = "12:00"
+
+        override suspend fun getLiteralEndTime(): String = "13:00"
+
+        override suspend fun getLiteralTotalTime(): String = "60m"
+
+        override fun getWaveStartDateTime(): Instant = startDateTime
+
+        override fun getWarmingDuration(): Duration = 5.minutes
+
+        override suspend fun getAllNumbers(): IWWWEvent.WaveNumbersLiterals = IWWWEvent.WaveNumbersLiterals()
+
+        override fun getEventObserver(): WWWEventObserver = throw NotImplementedError("Mock method")
 
         override fun validationErrors(): List<String>? = null
     }
@@ -490,14 +548,34 @@ class DefaultObservationSchedulerTest {
                     timeBeforeUserHit = 3.seconds,
                 ) {
                     override val wave: WWWEventWave =
-                        object : WWWEventWave {
-                            override fun timeBeforeUserHit(): Duration? {
-                                callCount++
-                                // Return negative time after first call to trigger infinite interval
-                                return if (callCount > 1) (-1).seconds else 3.seconds
+                        object : WWWEventWave() {
+                            override val speed: Double = 1.0
+                            override val direction: Direction = Direction.EAST
+                            override val approxDuration: Int = 60
+
+                            override suspend fun getWavePolygons(): WavePolygons? = null
+
+                            override suspend fun getWaveDuration(): Duration = 60.minutes
+
+                            override suspend fun hasUserBeenHitInCurrentPosition(): Boolean {
+                                val duration =
+                                    if (callCount > 1) (-1).seconds else 3.seconds
+                                return duration < Duration.ZERO
                             }
 
-                            override suspend fun propagate(ignoreSimulation: Boolean): Boolean = false
+                            override suspend fun userHitDateTime(): Instant? {
+                                callCount++
+                                // Return past time after first call to trigger infinite interval
+                                val duration =
+                                    if (callCount > 1) (-1).seconds else 3.seconds
+                                return clock.now() + duration
+                            }
+
+                            override suspend fun closestWaveLongitude(latitude: Double): Double = 0.0
+
+                            override suspend fun userPositionToWaveRatio(): Double? = null
+
+                            override fun validationErrors(): List<String>? = null
                         }
                 }
 
