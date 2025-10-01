@@ -134,20 +134,26 @@ class WWWEventMap(
         val templateData = mapDataProvider.geoMapStyleData()
         Log.i("WWWEventMap", "getStyleUri: Template loaded, length=${templateData.length}")
 
+        // Ensure URIs have correct format: scheme:// + path (remove leading slash from path to avoid ////)
+        val mbtilesUri = "mbtiles://" + mbtilesFilePath.removePrefix("/")
+        val geojsonUri = "file://" + geojsonFilePath.removePrefix("/")
+        val glyphsUri = "file://" + spriteAndGlyphsPath.removePrefix("/") + "/files/style/glyphs"
+        val spriteUri = "file://" + spriteAndGlyphsPath.removePrefix("/") + "/files/style/sprites"
+
         val newFileStr =
             templateData
-                .replace("__MBTILES_URI__", "mbtiles:///$mbtilesFilePath")
-                .replace("__GEOJSON_URI__", "file:///$geojsonFilePath")
-                .replace("__GLYPHS_URI__", "file:///$spriteAndGlyphsPath/files/style/glyphs")
-                .replace("__SPRITE_URI__", "file:///$spriteAndGlyphsPath/files/style/sprites")
+                .replace("__MBTILES_URI__", mbtilesUri)
+                .replace("__GEOJSON_URI__", geojsonUri)
+                .replace("__GLYPHS_URI__", glyphsUri)
+                .replace("__SPRITE_URI__", spriteUri)
 
         Log.i("WWWEventMap", "getStyleUri: After replacements, length=${newFileStr.length}")
 
         Log.v("WWWEventMap", "getStyleUri: Style template replacements:")
-        Log.v("WWWEventMap", "  __MBTILES_URI__ -> mbtiles:///$mbtilesFilePath")
-        Log.v("WWWEventMap", "  __GEOJSON_URI__ -> file:///$geojsonFilePath")
-        Log.v("WWWEventMap", "  __GLYPHS_URI__ -> file:///$spriteAndGlyphsPath/files/style/glyphs")
-        Log.v("WWWEventMap", "  __SPRITE_URI__ -> file:///$spriteAndGlyphsPath/files/style/sprites")
+        Log.v("WWWEventMap", "  __MBTILES_URI__ -> $mbtilesUri")
+        Log.v("WWWEventMap", "  __GEOJSON_URI__ -> $geojsonUri")
+        Log.v("WWWEventMap", "  __GLYPHS_URI__ -> $glyphsUri")
+        Log.v("WWWEventMap", "  __SPRITE_URI__ -> $spriteUri")
 
         val cachedPath = cacheStringToFile(styleFilename, newFileStr)
         updateCacheMetadata(styleFilename)
