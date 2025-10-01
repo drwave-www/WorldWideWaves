@@ -333,6 +333,7 @@ class DefaultGeoJsonDataProvider :
         val maxAttemptsReached = attempts >= MAX_ODR_ATTEMPTS
         if (maxAttemptsReached) {
             Log.w(::getGeoJsonData.name, "Giving up on $eventId after $attempts attempts")
+            evictOldestCacheEntry()
             cache[eventId] = null
             return null
         }
@@ -404,6 +405,7 @@ class DefaultGeoJsonDataProvider :
 
         val shouldCache = result != null || !isODRUnavailable(eventId)
         if (shouldCache) {
+            evictOldestCacheEntry()
             cache[eventId] = result
             Log.v(::getGeoJsonData.name, "Cached GeoJSON result for $eventId (success=$loadSuccessful)")
         } else {
