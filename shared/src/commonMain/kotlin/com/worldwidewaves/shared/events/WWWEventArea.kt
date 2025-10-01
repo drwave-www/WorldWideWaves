@@ -407,8 +407,8 @@ data class WWWEventArea(
                 val firstPolygon = tempPolygons[0]
                 Log.d("WWWEventArea", "  First polygon has ${firstPolygon.size} points")
                 if (firstPolygon.isNotEmpty()) {
-                    val firstPoint = firstPolygon[0]
-                    Log.d("WWWEventArea", "  First point: (${firstPoint.lat}, ${firstPoint.lng})")
+                    val firstPoint = firstPolygon.first()
+                    Log.d("WWWEventArea", "  First point: ($firstPoint)")
                 }
             }
 
