@@ -30,14 +30,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.worldwidewaves.map.AndroidMapLibreAdapter
+import com.worldwidewaves.map.MapLibreAdapterAndroid
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.testing.PerformanceMonitor
 import com.worldwidewaves.testing.UITestFactory
-import com.worldwidewaves.utils.AndroidWWWLocationProvider
+import com.worldwidewaves.utils.AndroidLocationProvider
 import com.worldwidewaves.viewmodels.AndroidMapViewModel
 import io.mockk.every
 import io.mockk.mockk
@@ -89,8 +89,8 @@ class MapIntegrationTest {
     val composeTestRule = createComposeRule()
 
     private lateinit var mockMapViewModel: AndroidMapViewModel
-    private lateinit var mockAndroidMapLibreAdapter: AndroidMapLibreAdapter
-    private lateinit var mockLocationProvider: AndroidWWWLocationProvider
+    private lateinit var mockAndroidMapLibreAdapter: MapLibreAdapterAndroid
+    private lateinit var mockLocationProvider: AndroidLocationProvider
     private lateinit var mockEvent: IWWWEvent
     private lateinit var performanceMonitor: PerformanceMonitor
 
@@ -114,7 +114,7 @@ class MapIntegrationTest {
     }
 
     private fun setupMockMapLibreAdapter() {
-        mockAndroidMapLibreAdapter = mockk<AndroidMapLibreAdapter>(relaxed = true)
+        mockAndroidMapLibreAdapter = mockk<MapLibreAdapterAndroid>(relaxed = true)
 
         val mockPositionFlow = MutableStateFlow<Position?>(null)
         val mockZoomFlow = MutableStateFlow(10.0)
@@ -127,7 +127,7 @@ class MapIntegrationTest {
     }
 
     private fun setupMockLocationProvider() {
-        mockLocationProvider = mockk<AndroidWWWLocationProvider>(relaxed = true)
+        mockLocationProvider = mockk<AndroidLocationProvider>(relaxed = true)
 
         val mockLocationFlow = MutableStateFlow<Position?>(null)
         every { mockLocationProvider.currentLocation } returns mockLocationFlow

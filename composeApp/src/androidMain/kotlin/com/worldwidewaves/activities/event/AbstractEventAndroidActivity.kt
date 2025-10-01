@@ -27,8 +27,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.ui.activities.WWWAbstractEventWaveActivity
-import com.worldwidewaves.utils.AndroidPlatformEnabler
+import com.worldwidewaves.shared.ui.activities.BaseWaveActivityScreen
+import com.worldwidewaves.utils.PlatformEnablerAndroid
 import kotlin.time.ExperimentalTime
 
 /**
@@ -42,10 +42,10 @@ import kotlin.time.ExperimentalTime
  * - Activity lifecycle delegation
  * - Common Compose setup patterns
  *
- * @param T The type of shared activity implementation (WWWEventActivity, WWWFullMapActivity, etc.)
+ * @param T The type of shared activity implementation (EventDetailScreen, FullMapScreen, etc.)
  */
 @OptIn(ExperimentalTime::class)
-abstract class AbstractEventAndroidActivity<T : WWWAbstractEventWaveActivity> : AppCompatActivity() {
+abstract class AbstractEventAndroidActivity<T : BaseWaveActivityScreen> : AppCompatActivity() {
     protected var activityImpl: T? = null
 
     /**
@@ -58,7 +58,7 @@ abstract class AbstractEventAndroidActivity<T : WWWAbstractEventWaveActivity> : 
      */
     protected abstract fun createActivityImpl(
         eventId: String,
-        platformEnabler: AndroidPlatformEnabler,
+        platformEnabler: PlatformEnablerAndroid,
     ): T
 
     /**
@@ -80,7 +80,7 @@ abstract class AbstractEventAndroidActivity<T : WWWAbstractEventWaveActivity> : 
         // Ensure dynamic-feature splits are available immediately
         SplitCompat.install(this)
 
-        val platformEnabler = AndroidPlatformEnabler(this)
+        val platformEnabler = PlatformEnablerAndroid(this)
         if (eventId != null) {
             activityImpl = createActivityImpl(eventId, platformEnabler)
             setContent {

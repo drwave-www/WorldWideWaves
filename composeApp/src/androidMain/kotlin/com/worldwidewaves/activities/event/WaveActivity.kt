@@ -22,14 +22,14 @@
 
 package com.worldwidewaves.activities.event
 
-import com.worldwidewaves.shared.ui.activities.WWWWaveActivity
-import com.worldwidewaves.utils.AndroidPlatformEnabler
+import com.worldwidewaves.shared.ui.activities.WaveParticipationScreen
+import com.worldwidewaves.utils.PlatformEnablerAndroid
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
-class WaveActivity : AbstractEventAndroidActivity<WWWWaveActivity>() {
+class WaveActivity : AbstractEventAndroidActivity<WaveParticipationScreen>() {
     override fun createActivityImpl(
         eventId: String,
-        platformEnabler: AndroidPlatformEnabler,
-    ): WWWWaveActivity = WWWWaveActivity(eventId, platformEnabler)
+        platformEnabler: PlatformEnablerAndroid,
+    ): WaveParticipationScreen = WaveParticipationScreen(eventId, platformEnabler)
 }
