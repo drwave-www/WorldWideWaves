@@ -48,35 +48,67 @@ class IOSPlatformMapManager(
 
     /**
      * Returns true if a typical file for this tag is visible in the bundle right now.
-     *
-     * Note: URLsForResourcesWithExtension() may return 0 results if ODR resources
-     * haven't been accessed yet. For initial install tags (like paris_france),
-     * we assume they're available. For other cities, trigger ODR download.
+     * Uses the SAME approach as MapStore.ODRPaths.resolve() which works reliably.
      */
     @OptIn(ExperimentalForeignApi::class)
     override fun isMapAvailable(mapId: String): Boolean {
         Log.d(TAG, "Checking map availability for: $mapId")
 
-        // Try URLsForResourcesWithExtension first
-        val hasGeo = findResourceByExtensionSearch(mapId, "geojson") != null
-        val hasMb = findResourceByExtensionSearch(mapId, "mbtiles") != null
+        // Try BOTH approaches like MapStore does:
+        // 1. Standard paths (pathForResource + URLForResource)
+        // 2. Extension search (URLsForResourcesWithExtension)
 
-        // If found via search, we're done
-        if (hasGeo || hasMb) {
-            Log.i(TAG, "Map availability: mapId=$mapId, hasGeo=$hasGeo, hasMb=$hasMb, available=true")
+        val bundle = NSBundle.mainBundle
+
+        // Approach 1: Try standard subdirectories (same as MapStore)
+        val standardGeo = resolveFromStandardPaths(bundle, mapId, "geojson")
+        val standardMb = resolveFromStandardPaths(bundle, mapId, "mbtiles")
+
+        if (standardGeo != null || standardMb != null) {
+            Log.i(TAG, "Map available via standard paths: $mapId, geo=$standardGeo, mb=$standardMb")
             return true
         }
 
-        // If not found but this is an initial install tag, assume it's available
-        // (ODR resources may not show in URLsForResourcesWithExtension until accessed)
-        val initialInstallTags = setOf("paris_france") // From project configuration
-        if (initialInstallTags.contains(mapId)) {
-            Log.i(TAG, "Map availability: mapId=$mapId is initial install tag, assuming available=true")
-            return true
+        // Approach 2: Extension search (fallback)
+        val searchGeo = findResourceByExtensionSearch(mapId, "geojson")
+        val searchMb = findResourceByExtensionSearch(mapId, "mbtiles")
+
+        val available = searchGeo != null || searchMb != null
+        Log.i(TAG, "Map availability: mapId=$mapId, available=$available (search: geo=$searchGeo, mb=$searchMb)")
+        return available
+    }
+
+    /**
+     * Try standard subdirectory paths (same logic as MapStore.resolveFromStandardPaths)
+     */
+    @OptIn(ExperimentalForeignApi::class)
+    private fun resolveFromStandardPaths(
+        bundle: NSBundle,
+        eventId: String,
+        extension: String,
+    ): String? {
+        // Try different subdirectory patterns
+        val subs = listOf("Maps/$eventId", "worldwidewaves/Maps/$eventId", null)
+
+        for (sub in subs) {
+            // Try pathForResource with subdirectory
+            val path = bundle.pathForResource(eventId, extension, sub)
+            if (path != null) {
+                Log.d(TAG, "Found via pathForResource: $eventId.$extension in $sub")
+                return path
+            }
+
+            // Try URLForResource (without subdirectory)
+            if (sub == null) {
+                val url = bundle.URLForResource(eventId, extension)
+                if (url?.path != null) {
+                    Log.d(TAG, "Found via URLForResource: $eventId.$extension")
+                    return url.path
+                }
+            }
         }
 
-        Log.i(TAG, "Map availability: mapId=$mapId, hasGeo=$hasGeo, hasMb=$hasMb, available=false")
-        return false
+        return null
     }
 
     /**
