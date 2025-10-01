@@ -32,6 +32,7 @@ import Shared
         // TODO: Get actual center from event.map (WWWEventMap doesn't have center property)
         // Using Paris as default for now
         let mapView = EventMapView(
+            eventId: event.id,
             styleURL: styleURL,
             initialLatitude: 48.8566,
             initialLongitude: 2.3522,
@@ -60,6 +61,7 @@ import Shared
         var wrapperInstance: MapLibreViewWrapper?
 
         let mapView = EventMapView(
+            eventId: event.id,
             styleURL: styleURL,
             initialLatitude: 48.8566,
             initialLongitude: 2.3522,

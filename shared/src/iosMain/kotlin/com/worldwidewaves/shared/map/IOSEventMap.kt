@@ -117,6 +117,26 @@ class IOSEventMap(
         currentPolygons.addAll(wavePolygons)
 
         Log.v("IOSEventMap", "iOS map now tracking ${currentPolygons.size} wave polygons")
+
+        // Store polygon data in registry for Swift to render
+        storePolygonsForRendering(wavePolygons, clearPolygons)
+    }
+
+    private fun storePolygonsForRendering(
+        polygons: List<Polygon>,
+        clearExisting: Boolean,
+    ) {
+        // Convert polygons to simple coordinate pairs (lat, lng)
+        val coordinates: List<List<Pair<Double, Double>>> =
+            polygons.map { polygon: Polygon ->
+                polygon.map { position: Position ->
+                    Pair(position.lat, position.lng)
+                }
+            }
+
+        // Store in registry - Swift will poll and render these
+        MapWrapperRegistry.setPendingPolygons(event.id, coordinates, clearExisting)
+        Log.i("IOSEventMap", "Stored ${polygons.size} polygons in registry for Swift to render")
     }
 
     @OptIn(ExperimentalForeignApi::class)

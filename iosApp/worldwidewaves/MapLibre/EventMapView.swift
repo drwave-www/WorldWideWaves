@@ -26,6 +26,7 @@ import MapLibre
 struct EventMapView: UIViewRepresentable {
     private static let tag = "EventMapView"
 
+    let eventId: String
     let styleURL: String
     let initialLatitude: Double
     let initialLongitude: Double
@@ -58,8 +59,13 @@ struct EventMapView: UIViewRepresentable {
 
         // Create wrapper and bind to the map view
         let mapWrapper = MapLibreViewWrapper()
+        mapWrapper.setEventId(eventId)
         mapWrapper.setMapView(mapView)
         WWWLog.d(Self.tag, "Wrapper bound to map view")
+
+        // Register wrapper in Kotlin registry for later access
+        MapWrapperRegistry.shared.registerWrapper(eventId: eventId, wrapper: mapWrapper)
+        WWWLog.d(Self.tag, "Wrapper registered in MapWrapperRegistry for event: \(eventId)")
 
         // Update binding
         DispatchQueue.main.async {
@@ -71,7 +77,8 @@ struct EventMapView: UIViewRepresentable {
     }
 
     func updateUIView(_ mapView: MLNMapView, context: Context) {
-        // Updates handled by wrapper methods called from Kotlin
+        // Check for pending polygons and render them
+        IOSMapBridge.renderPendingPolygons(eventId: eventId)
     }
 }
 
@@ -81,6 +88,7 @@ struct EventMapView_Previews: PreviewProvider {
 
     static var previews: some View {
         EventMapView(
+            eventId: "preview_event",
             styleURL: "https://demotiles.maplibre.org/style.json",
             initialLatitude: 48.8566,
             initialLongitude: 2.3522,

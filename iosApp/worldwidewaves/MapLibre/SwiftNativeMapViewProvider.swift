@@ -32,4 +32,9 @@ public class SwiftNativeMapViewProvider: NativeMapViewProvider {
         WWWLog.i("SwiftNativeMapViewProvider", "MapLibre view controller created successfully")
         return viewController
     }
+
+    public func getMapWrapper(eventId: String) -> Any? {
+        WWWLog.v("SwiftNativeMapViewProvider", "Getting map wrapper for event: \(eventId)")
+        return MapWrapperRegistry.shared.getWrapper(eventId: eventId)
+    }
 }

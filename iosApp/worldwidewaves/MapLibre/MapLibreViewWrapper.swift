@@ -43,6 +43,8 @@ import UIKit
 
     // MARK: - Map Setup
 
+    private var eventId: String?
+
     @objc public func setMapView(_ mapView: MLNMapView) {
         WWWLog.d(Self.tag, "setMapView called, bounds: \(mapView.bounds)")
         self.mapView = mapView
@@ -52,6 +54,11 @@ import UIKit
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleMapTap(_:)))
         self.mapView?.addGestureRecognizer(tapGesture)
         WWWLog.d(Self.tag, "Map view configured successfully")
+    }
+
+    @objc public func setEventId(_ eventId: String) {
+        self.eventId = eventId
+        WWWLog.d(Self.tag, "Event ID set: \(eventId)")
     }
 
     @objc public func setStyle(styleURL: String, completion: @escaping () -> Void) {
@@ -327,6 +334,12 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         WWWLog.i(Self.tag, "Style loaded successfully")
         onStyleLoaded?()
         onStyleLoaded = nil
+
+        // Check for pending polygons to render
+        if let eventId = eventId {
+            WWWLog.d(Self.tag, "Checking for pending polygons after style load for event: \(eventId)")
+            IOSMapBridge.renderPendingPolygons(eventId: eventId)
+        }
     }
 
     public func mapView(_ mapView: MLNMapView, regionDidChangeAnimated animated: Bool) {
