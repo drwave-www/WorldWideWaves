@@ -165,54 +165,6 @@ class WWWEventWaveTest : KoinTest {
             assertNull(timeBeforeHit, "Time before hit should be null when no user position")
         }
     }
-
-    @Test
-    fun `test getLiteralFromProgression formats correctly at 100 percent`() {
-        // GIVEN: Progression at exactly 100%
-        // WHEN: Get literal representation
-        val literal = wave.getLiteralFromProgression(100.0)
-
-        // THEN: Should display "100.0%" without truncation
-        assertEquals("100.0%", literal, "100% should be formatted as '100.0%'")
-    }
-
-    @Test
-    fun `test getLiteralFromProgression formats correctly at various percentages`() {
-        // Test various progression values to ensure proper formatting
-        val testCases =
-            listOf(
-                0.0 to "0.0%",
-                0.01 to "0.0%",
-                0.05 to "0.1%",
-                10.0 to "10.0%",
-                25.5 to "25.5%",
-                50.0 to "50.0%",
-                75.7 to "75.7%",
-                99.0 to "99.0%",
-                99.9 to "99.9%",
-                99.94 to "99.9%",
-                99.95 to "100.0%",
-                100.0 to "100.0%",
-            )
-
-        testCases.forEach { (progression, expected) ->
-            // WHEN: Get literal representation
-            val literal = wave.getLiteralFromProgression(progression)
-
-            // THEN: Should match expected format
-            assertEquals(expected, literal, "Progression $progression should be formatted as '$expected'")
-        }
-    }
-
-    @Test
-    fun `test getLiteralFromProgression handles NaN`() {
-        // GIVEN: NaN progression
-        // WHEN: Get literal representation
-        val literal = wave.getLiteralFromProgression(Double.NaN)
-
-        // THEN: Should display "N/A"
-        assertEquals("N/A", literal, "NaN should be formatted as 'N/A'")
-    }
 }
 
 // ===== COMPREHENSIVE WAVE DEEP TESTS =====

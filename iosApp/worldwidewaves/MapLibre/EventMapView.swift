@@ -50,13 +50,19 @@ struct EventMapView: UIViewRepresentable {
         mapView.setCenter(coordinate, zoomLevel: initialZoom, animated: false)
         WWWLog.d(Self.tag, "Camera position set")
 
-        // Set style URL
-        if let url = URL(string: styleURL) {
-            mapView.styleURL = url
-            WWWLog.d(Self.tag, "Style URL set on map view")
+        // Set style URL - use fileURLWithPath for local file paths
+        let url: URL
+        if styleURL.hasPrefix("http://") || styleURL.hasPrefix("https://") {
+            // Remote URL
+            url = URL(string: styleURL)!
+            WWWLog.d(Self.tag, "Using remote style URL")
         } else {
-            WWWLog.e(Self.tag, "Invalid style URL: \(styleURL)")
+            // Local file path - convert to file URL
+            url = URL(fileURLWithPath: styleURL)
+            WWWLog.d(Self.tag, "Converted file path to URL: \(url)")
         }
+        mapView.styleURL = url
+        WWWLog.d(Self.tag, "Style URL set on map view")
 
         // Create wrapper and bind to the map view
         let mapWrapper = MapLibreViewWrapper()
