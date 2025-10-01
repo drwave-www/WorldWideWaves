@@ -23,9 +23,8 @@ import MapLibre
 import UIKit
 
 /// Swift bridging layer for MapLibre Native iOS SDK
-/// Provides Kotlin-friendly API for IOSMapLibreAdapter
-/// Conforms to WWWMapLibreWrapperProtocol defined in shared module for cinterop
-@objc public class MapLibreViewWrapper: NSObject, WWWMapLibreWrapperProtocol {
+/// Provides @objc methods for controlling MapLibre from Kotlin or Swift
+@objc public class MapLibreViewWrapper: NSObject {
     private static let tag = "MapLibreWrapper"
     private weak var mapView: MLNMapView?
     private var onStyleLoaded: (() -> Void)?
