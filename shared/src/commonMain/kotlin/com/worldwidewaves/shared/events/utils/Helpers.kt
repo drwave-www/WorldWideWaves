@@ -257,6 +257,10 @@ interface GeoJsonDataProvider {
 class DefaultGeoJsonDataProvider :
     GeoJsonDataProvider,
     KoinComponent {
+    private val cache = mutableMapOf<String, JsonObject?>()
+    private val lastAttemptTime = mutableMapOf<String, Instant>()
+    private val attemptCount = mutableMapOf<String, Int>()
+
     companion object {
         private const val MAX_CACHE_SIZE = 10
         private const val MAX_ODR_ATTEMPTS = 20
@@ -265,29 +269,17 @@ class DefaultGeoJsonDataProvider :
         private const val GEOJSON_PREVIEW_LENGTH = 80
     }
 
-    private val cache =
-        object : LinkedHashMap<String, JsonObject?>(
-            MAX_CACHE_SIZE,
-            0.75f,
-            true, // access-order for LRU
-        ) {
-            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, JsonObject?>?): Boolean {
-                val shouldRemove = size > MAX_CACHE_SIZE
-                if (shouldRemove && eldest != null) {
-                    // Clean up metadata maps to prevent unbounded growth
-                    lastAttemptTime.remove(eldest.key)
-                    attemptCount.remove(eldest.key)
-                    Log.v(
-                        "GeoJsonDataProvider",
-                        "Evicted cache entry for ${eldest.key} (LRU), cleaned up metadata",
-                    )
-                }
-                return shouldRemove
+    private fun evictOldestCacheEntry() {
+        if (cache.size > MAX_CACHE_SIZE) {
+            val oldestKey = cache.keys.firstOrNull()
+            if (oldestKey != null) {
+                cache.remove(oldestKey)
+                lastAttemptTime.remove(oldestKey)
+                attemptCount.remove(oldestKey)
+                Log.v("GeoJsonDataProvider", "Evicted cache entry for $oldestKey (LRU)")
             }
         }
-
-    private val lastAttemptTime = mutableMapOf<String, Instant>()
-    private val attemptCount = mutableMapOf<String, Int>()
+    }
 
     override suspend fun getGeoJsonData(eventId: String): JsonObject? {
         val cachedResult = getCachedResult(eventId)

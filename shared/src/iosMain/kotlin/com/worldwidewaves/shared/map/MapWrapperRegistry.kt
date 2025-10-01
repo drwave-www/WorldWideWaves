@@ -11,7 +11,8 @@ package com.worldwidewaves.shared.map
  */
 
 import com.worldwidewaves.shared.utils.Log
-import kotlinx.datetime.Clock
+import platform.Foundation.NSDate
+import platform.Foundation.timeIntervalSince1970
 import kotlin.experimental.ExperimentalNativeApi
 import kotlin.native.ref.WeakReference
 
@@ -88,7 +89,7 @@ object MapWrapperRegistry {
         wrappers[eventId] =
             CacheEntry(
                 weakRef = WeakReference(wrapper),
-                lastAccessed = Clock.System.now().toEpochMilliseconds(),
+                lastAccessed = (NSDate().timeIntervalSince1970 * 1000).toLong(),
             )
 
         // If there are pending polygons, notify that they should be rendered
@@ -110,7 +111,7 @@ object MapWrapperRegistry {
         }
 
         // Update last accessed time for LRU
-        entry.lastAccessed = Clock.System.now().toEpochMilliseconds()
+        entry.lastAccessed = (NSDate().timeIntervalSince1970 * 1000).toLong()
 
         val wrapper = entry.weakRef.get()
         if (wrapper == null) {
