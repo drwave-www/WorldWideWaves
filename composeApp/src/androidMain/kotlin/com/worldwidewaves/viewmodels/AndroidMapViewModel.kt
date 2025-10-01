@@ -36,7 +36,7 @@ import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.data.clearEventCache
 import com.worldwidewaves.shared.utils.Log
-import com.worldwidewaves.shared.viewmodels.MapDownloadCoordinator
+import com.worldwidewaves.shared.viewmodels.MapDownloadManager
 import com.worldwidewaves.shared.viewmodels.MapDownloadUtils
 import com.worldwidewaves.shared.viewmodels.MapViewModel
 import com.worldwidewaves.shared.viewmodels.PlatformMapDownloadAdapter
@@ -47,14 +47,14 @@ import kotlinx.coroutines.launch
 
 /**
  * Android implementation of MapViewModel using pure business logic composition.
- * Handles Android-specific Play Core integration while delegating download logic to MapDownloadCoordinator.
+ * Handles Android-specific Play Core integration while delegating download logic to MapDownloadLogic.
  *
  * RESPONSIBILITIES:
  * • Android UI lifecycle management (AndroidViewModel)
  * • Play Core SplitInstallManager integration
  * • Android-specific error message localization
  * • Play Store listener management
- * • Delegates business logic to MapDownloadCoordinator
+ * • Delegates business logic to MapDownloadLogic
  */
 class AndroidMapViewModel(
     application: Application,
@@ -151,7 +151,7 @@ class AndroidMapViewModel(
         }
 
     // Pure business logic (no UI lifecycle concerns)
-    private val downloadManager: MapDownloadCoordinator = MapDownloadCoordinator(platformAdapter)
+    private val downloadManager: MapDownloadManager = MapDownloadManager(platformAdapter)
 
     // Delegate public interface to business logic
     override val featureState = downloadManager.featureState

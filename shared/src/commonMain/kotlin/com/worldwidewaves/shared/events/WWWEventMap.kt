@@ -30,8 +30,8 @@ import com.worldwidewaves.shared.data.getCacheDir
 import com.worldwidewaves.shared.data.getMapFileAbsolutePath
 import com.worldwidewaves.shared.data.isCachedFileStale
 import com.worldwidewaves.shared.data.updateCacheMetadata
-import com.worldwidewaves.shared.events.data.MapDataProvider
 import com.worldwidewaves.shared.events.utils.DataValidator
+import com.worldwidewaves.shared.events.utils.MapDataProvider
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.utils.Log

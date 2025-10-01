@@ -14,12 +14,12 @@ import io.github.aakira.napier.Napier
 
 /**
  * iOS implementation of Napier initialization.
- * Uses IosOSLogAdapter which outputs to Apple's Unified Logging system,
+ * Uses OSLogAntilog which outputs to Apple's Unified Logging system,
  * making logs visible via xcrun simctl log commands.
  */
 actual fun initNapier() {
     if (com.worldwidewaves.shared.WWWGlobals.LogConfig.ENABLE_DEBUG_LOGGING) {
-        Napier.base(IosOSLogAdapter())
+        Napier.base(OSLogAntilog())
     } else {
         Napier.takeLogarithm()
     }

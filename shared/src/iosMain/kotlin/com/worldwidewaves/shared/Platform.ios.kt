@@ -36,7 +36,7 @@ fun doInitPlatform() {
         koinApp =
             startKoin {
                 logger(PrintLogger(if (BuildKonfig.DEBUG) Level.INFO else Level.ERROR))
-                modules(com.worldwidewaves.shared.di.sharedModule + com.worldwidewaves.shared.di.IosModule)
+                modules(com.worldwidewaves.shared.di.sharedModule + com.worldwidewaves.shared.di.IOSModule)
             }
         if (BuildKonfig.DEBUG) {
             try {

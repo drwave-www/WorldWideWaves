@@ -22,9 +22,9 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.data.InitFavoriteEvent
-import com.worldwidewaves.shared.events.config.EventsConfigurationProvider
-import com.worldwidewaves.shared.events.decoding.EventsDecoder
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
+import com.worldwidewaves.shared.events.utils.EventsConfigurationProvider
+import com.worldwidewaves.shared.events.utils.EventsDecoder
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow

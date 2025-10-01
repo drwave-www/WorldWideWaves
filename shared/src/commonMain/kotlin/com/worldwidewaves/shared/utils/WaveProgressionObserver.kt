@@ -24,10 +24,12 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.map.AbstractEventMap
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -90,7 +92,7 @@ class WaveProgressionObserver(
 
         // Use Flow.sample() for efficient throttling instead of manual time tracking
         polygonsJob =
-            scope.launch {
+            scope.launch(Dispatchers.Default) {
                 event.observer.progression
                     .sample(250.milliseconds) // Built-in throttling for better performance
                     .collect {
@@ -104,7 +106,7 @@ class WaveProgressionObserver(
         eventMap: AbstractEventMap<*>?,
     ) {
         eventMap?.mapLibreAdapter?.onMapSet { mapLibre ->
-            scope.launch {
+            scope.launch(Dispatchers.Main) {
                 // Render all original polygons independently (no holes merge)
                 val polygons = event.area.getPolygons()
 
@@ -123,7 +125,7 @@ class WaveProgressionObserver(
     ) {
         statusJob?.cancel()
         statusJob =
-            scope.launch {
+            scope.launch(Dispatchers.Default) {
                 event.observer.eventStatus
                     .collect { status ->
                         when (status) {
@@ -164,10 +166,12 @@ class WaveProgressionObserver(
         if (!event.isRunning() && !event.isDone()) return
 
         val polygons =
-            event.wave
-                .getWavePolygons()
-                ?.traversedPolygons
-                ?: emptyList()
+            withContext(Dispatchers.Default) {
+                event.wave
+                    .getWavePolygons()
+                    ?.traversedPolygons
+                    ?: emptyList()
+            }
 
         if (polygons.isEmpty()) {
             if (lastWavePolygons.isNotEmpty()) {

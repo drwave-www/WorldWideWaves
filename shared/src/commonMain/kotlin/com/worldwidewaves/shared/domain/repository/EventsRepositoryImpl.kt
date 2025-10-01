@@ -27,7 +27,6 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -172,14 +171,5 @@ class EventsRepositoryImpl(
         cacheMutex.withLock {
             cacheValid = false
         }
-    }
-
-    /**
-     * Cleanup method to prevent memory leaks in long-lived components.
-     * Cancels the background coroutine scope and clears the cache.
-     */
-    suspend fun cleanup() {
-        backgroundScope.cancel()
-        clearCache()
     }
 }
