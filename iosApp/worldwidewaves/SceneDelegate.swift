@@ -82,7 +82,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         IOSPlatformEnablerKt.registerPlatformEnabler(enabler: IOSPlatformEnabler())
         NSLog("[\(tag)] ✅ PlatformEnabler (Swift) registered into Koin")
 
-        NativeMapViewProviderRegistration_iosKt.registerNativeMapViewProvider(provider: SwiftNativeMapViewProvider())
+        NativeMapViewProviderRegistrationKt.registerNativeMapViewProvider(provider: SwiftNativeMapViewProvider())
         NSLog("[\(tag)] ✅ NativeMapViewProvider (Swift) registered into Koin")
     }
 

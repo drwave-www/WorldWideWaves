@@ -11,7 +11,7 @@ import Shared
 
 /**
  * Swift implementation of NativeMapViewProvider.
- * This calls WWWMapViewBridge to create actual MapLibre map views.
+ * Uses MapViewBridge.swift instead of ObjC WWWMapViewBridge.
  *
  * Register this in Koin to override the default placeholder implementation.
  */
@@ -22,15 +22,14 @@ public class SwiftNativeMapViewProvider: NativeMapViewProvider {
         WWWLog.i("SwiftNativeMapViewProvider", "Creating MapLibre map view for: \(event.id)")
         WWWLog.d("SwiftNativeMapViewProvider", "Style URL: \(styleURL)")
 
-        // Call ObjC bridge to create actual MapLibre map
-        let viewController = WWWMapViewBridge.createMapViewController(
-            withStyleURL: styleURL,
-            latitude: 48.8566,  // TODO: Get from event
-            longitude: 2.3522,
-            zoom: 12.0
+        // Use Swift MapViewBridge instead of ObjC WWWMapViewBridge
+        let viewController = MapViewBridge.createMapViewController(
+            for: event,
+            styleURL: styleURL,
+            wrapperRef: nil
         )
 
         WWWLog.i("SwiftNativeMapViewProvider", "MapLibre view controller created successfully")
-        return viewController!
+        return viewController
     }
 }
