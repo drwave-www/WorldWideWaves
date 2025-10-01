@@ -1,3 +1,5 @@
+@file:OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+
 package com.worldwidewaves.shared.data
 
 /*
@@ -79,10 +81,12 @@ class MapStoreTest {
         every { mockContext.packageName } returns "com.worldwidewaves.test"
 
         val mockPackageManager = mockk<PackageManager>(relaxed = true)
-        val mockPackageInfo = mockk<PackageInfo>(relaxed = true)
+        val packageInfo =
+            PackageInfo().apply {
+                lastUpdateTime = 123456789L
+            }
         every { mockContext.packageManager } returns mockPackageManager
-        every { mockPackageManager.getPackageInfo(any<String>(), any<Int>()) } returns mockPackageInfo
-        every { mockPackageInfo.lastUpdateTime } returns 123456789L
+        every { mockPackageManager.getPackageInfo(any<String>(), any<Int>()) } returns packageInfo
 
         // Mock assets to throw FileNotFoundException for non-existent files
         val mockAssets = mockk<android.content.res.AssetManager>(relaxed = true)
