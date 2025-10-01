@@ -62,10 +62,10 @@ jobs:
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
-      - name: Select Xcode 15.4
+      - name: Select Xcode 16.0
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '15.4'
+          xcode-version: '16.0'
 
       - name: Build iOS Framework for App
         run: ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
