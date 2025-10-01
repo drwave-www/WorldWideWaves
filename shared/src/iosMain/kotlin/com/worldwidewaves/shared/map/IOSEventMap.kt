@@ -50,7 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.interop.UIKitView
+import androidx.compose.ui.interop.UIKitViewController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -186,12 +186,12 @@ class IOSEventMap(
                     "https://demotiles.maplibre.org/style.json" // Start with fallback
                 }
 
-            // TODO: Implement map reload after download completes
-            // For now, maps will show with fallback style until app restart
-            UIKitView<platform.UIKit.UIView>(
+            // Note: Map reload after download will require app restart for now
+            @Suppress("DEPRECATION")
+            UIKitViewController(
                 factory = {
-                    Log.i("IOSEventMap", "Creating native map view for: ${event.id}")
-                    createNativeMapViewController(event, styleURL) as platform.UIKit.UIView
+                    Log.i("IOSEventMap", "Creating native map view controller for: ${event.id}")
+                    createNativeMapViewController(event, styleURL) as platform.UIKit.UIViewController
                 },
                 modifier = Modifier.fillMaxSize(),
             )
