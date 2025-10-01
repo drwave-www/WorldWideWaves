@@ -25,6 +25,8 @@ import kotlin.experimental.ExperimentalNativeApi
 fun installKNHook() {
     setUnhandledExceptionHook { t ->
         println("K/N Unhandled: ${t::class.qualifiedName}: ${t.message}")
-        t.printStackTrace()
+        if (BuildKonfig.DEBUG) {
+            t.printStackTrace()
+        }
     }
 }
