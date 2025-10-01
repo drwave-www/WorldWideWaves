@@ -51,7 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.interop.UIKitViewController
+import androidx.compose.ui.interop.UIKitView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -69,7 +69,6 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.koin.mp.KoinPlatform
 import platform.UIKit.UIImage
-import platform.UIKit.UIViewController
 
 /**
  * iOS implementation of EventMap providing functional map display.
@@ -195,10 +194,10 @@ class IOSEventMap(
             if (styleURL != null) {
                 // Use key() to recreate map view when style URL changes (after download)
                 key(styleURL) {
-                    UIKitViewController(
+                    UIKitView(
                         factory = {
                             Log.i("IOSEventMap", "Creating native map view controller for: ${event.id} with style: $styleURL")
-                            createNativeMapViewController(event, styleURL!!) as UIViewController
+                            createNativeMapViewController(event, styleURL!!).view
                         },
                         modifier = Modifier.fillMaxSize(),
                     )
