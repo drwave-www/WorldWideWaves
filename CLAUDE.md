@@ -347,7 +347,10 @@ class MyComponent {
 
 ### Testing Requirements
 - **NEVER disable tests without permission**: Always ask user permission before disabling, skipping, or renaming any test files
-- **Test modifications**: Changing test logic requires explanation and user approval
+- **NEVER disable tests to make them pass**: Tests must be logical and business-oriented, not mirror current code implementation
+- **Test failure philosophy**: If tests fail, either there's a business logic issue in the code OR the business requirements changed and tests need adaptation
+- **Test-first thinking**: Tests validate business requirements, not implementation details
+- **Test modifications**: Changing test logic requires explanation and user approval - explain what business requirement changed
 - **Test deletion**: Absolutely forbidden without explicit user consent
 
 ### Security Patterns
