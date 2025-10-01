@@ -182,10 +182,11 @@ class IOSEventMap(
 
         Box(modifier = modifier.fillMaxSize()) {
             // Load style URL asynchronously to avoid blocking UI thread during ODR mount
+            // Reload when downloadState.isAvailable changes (after explicit downloads)
             var styleURL by remember { mutableStateOf<String?>(null) }
 
-            LaunchedEffect(event.id) {
-                Log.d("IOSEventMap", "Loading style URL for: ${event.id}")
+            LaunchedEffect(event.id, downloadState.isAvailable) {
+                Log.d("IOSEventMap", "Loading style URL for: ${event.id}, isAvailable=${downloadState.isAvailable}")
                 styleURL = event.map.getStyleUri() ?: "https://demotiles.maplibre.org/style.json"
                 Log.i("IOSEventMap", "Style URL loaded: $styleURL")
             }
