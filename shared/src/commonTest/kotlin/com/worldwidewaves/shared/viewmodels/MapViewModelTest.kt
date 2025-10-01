@@ -25,6 +25,7 @@ import com.worldwidewaves.shared.map.MapFeatureState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -71,6 +72,8 @@ class MapViewModelTest {
     fun setUp() {
         testPlatformAdapter = TestPlatformMapDownloadAdapter()
         downloadManager = MapDownloadManager(testPlatformAdapter)
+        // Give the adapter access to the manager so it can update state
+        testPlatformAdapter.downloadManager = downloadManager
     }
 
     @AfterTest
@@ -161,7 +164,11 @@ class MapViewModelTest {
         runTest(testScheduler) {
             testPlatformAdapter.simulateDelayedDownload = true
 
-            downloadManager.downloadMap("test_map")
+            // Launch in background scope like the real ViewModel does
+            val job =
+                launch {
+                    downloadManager.downloadMap("test_map")
+                }
             // Don't wait for completion - check immediate state
             delay(10)
 
@@ -172,6 +179,8 @@ class MapViewModelTest {
                     state is MapFeatureState.Downloading ||
                     state is MapFeatureState.Installing,
             )
+
+            job.cancel() // Clean up
         }
 
     @Test
@@ -225,13 +234,25 @@ class MapViewModelTest {
         runTest(testScheduler) {
             testPlatformAdapter.simulateDelayedDownload = true
 
-            downloadManager.downloadMap("map1")
+            // Launch first download in background like the real ViewModel does
+            val job1 =
+                launch {
+                    downloadManager.downloadMap("map1")
+                }
             delay(10) // Small delay to ensure first download starts
-            downloadManager.downloadMap("map2")
+
+            // Try to start second download while first is still running
+            val job2 =
+                launch {
+                    downloadManager.downloadMap("map2")
+                }
             advanceUntilIdle()
 
             // Should only have called startPlatformDownload once
             assertEquals(1, testPlatformAdapter.downloadCallCount)
+
+            job1.cancel()
+            job2.cancel()
         }
 
     // ========================================================================
@@ -440,6 +461,9 @@ class MapViewModelTest {
         var stateCallback: ((MapFeatureState) -> Unit)? = null
         var progressValues = listOf<Int>()
 
+        // Reference to the download manager so we can update its state
+        var downloadManager: MapDownloadManager? = null
+
         private val installedMaps = mutableSetOf<String>()
 
         fun setMapInstalled(
@@ -481,7 +505,10 @@ class MapViewModelTest {
             downloadCallCount++
 
             if (simulateException) {
-                throw Exception("Simulated platform exception")
+                // Simulate exception during download - manager should handle this
+                downloadManager?.handleDownloadFailure(errorCode, shouldRetry)
+                // Don't throw - just return after setting the failure state
+                return
             }
 
             if (simulateDelayedDownload) {
@@ -492,22 +519,29 @@ class MapViewModelTest {
                 val values = if (progressValues.isNotEmpty()) progressValues else listOf(25, 50, 75, 100)
                 values.forEach { progress ->
                     onProgressCallback?.invoke(progress)
+                    stateCallback?.invoke(downloadManager?.featureState?.value ?: MapFeatureState.NotChecked)
+                    // Simulate progress reporting like Android does
+                    downloadManager?.handleDownloadProgress(100, progress.toLong())
                     delay(1)
                 }
             }
 
             if (simulateSuccessfulDownload) {
                 delay(1)
+                // Simulate successful download completion
+                downloadManager?.handleDownloadSuccess()
                 onMapDownloaded?.invoke()
             } else {
                 delay(1)
-                // Failure handled by throwing or returning error
-                // In real implementation, this would call error callback
+                // Simulate download failure
+                downloadManager?.handleDownloadFailure(errorCode, shouldRetry)
             }
         }
 
         override suspend fun cancelPlatformDownload() {
             cancelPlatformDownloadCalled = true
+            // Simulate cancellation completion
+            downloadManager?.handleDownloadCancellation()
         }
 
         override fun getLocalizedErrorMessage(errorCode: Int): String = "$errorMessage (code: $errorCode)"
