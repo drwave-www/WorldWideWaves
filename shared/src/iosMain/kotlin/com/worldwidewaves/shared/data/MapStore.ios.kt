@@ -30,7 +30,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import platform.Foundation.NSApplicationSupportDirectory
 import platform.Foundation.NSBundle
 import platform.Foundation.NSFileManager
-import platform.Foundation.NSLog
 import platform.Foundation.NSOperationQueue
 import platform.Foundation.NSString
 import platform.Foundation.NSTemporaryDirectory
@@ -320,7 +319,7 @@ actual fun cacheStringToFile(
     val nsPath = NSString.create(string = path)
     val parent = nsPath.stringByDeletingLastPathComponent
     NSFileManager.defaultManager.createDirectoryAtPath(parent, true, null, null)
-    NSLog("cacheStringToFile: Caching data to %@", fileName)
+    Log.d("MapStore.ios", "cacheStringToFile: Caching $fileName (${content.length} chars)")
     NSString
         .create(string = content)
         .writeToFile(path, atomically = true, encoding = NSUTF8StringEncoding, error = null)
