@@ -346,9 +346,13 @@ data class WWWEventArea(
      */
     suspend fun getPolygons(): Area {
         // Fast path: if cache is already populated, return immediately
-        cachedAreaPolygons?.let { return it }
+        cachedAreaPolygons?.let {
+            Log.v("WWWEventArea", "getPolygons: ${event.id} returning ${it.size} cached polygons")
+            return it
+        }
 
         // Slow path: populate cache with mutex protection
+        Log.d("WWWEventArea", "getPolygons: ${event.id} cache empty, loading...")
         return loadAndCachePolygons()
     }
 
@@ -358,7 +362,10 @@ data class WWWEventArea(
     private suspend fun loadAndCachePolygons(): Area {
         polygonsCacheMutex.withLock {
             // Double-check pattern: another coroutine might have populated the cache
-            cachedAreaPolygons?.let { return it }
+            cachedAreaPolygons?.let {
+                Log.v("WWWEventArea", "loadAndCachePolygons: ${event.id} cache populated by another coroutine")
+                return it
+            }
 
             // Build polygons in a temporary mutable list
             val tempPolygons: MutableArea = mutableListOf()
@@ -367,6 +374,7 @@ data class WWWEventArea(
                 coroutineScopeProvider.withDefaultContext {
                     loadPolygonsFromGeoJson(tempPolygons)
                 }
+                Log.i("WWWEventArea", "loadAndCachePolygons: ${event.id} loaded ${tempPolygons.size} polygons from GeoJSON")
             } catch (e: kotlinx.serialization.SerializationException) {
                 Log.w("WWWEventArea", "GeoJSON parsing error for event ${event.id}: ${e.message}")
                 // Polygon loading errors are handled gracefully - empty polygon list is acceptable
@@ -378,7 +386,9 @@ data class WWWEventArea(
             cachePolygonsIfLoaded(tempPolygons)
         }
 
-        return cachedAreaPolygons ?: emptyList()
+        val result = cachedAreaPolygons ?: emptyList()
+        Log.d("WWWEventArea", "loadAndCachePolygons: ${event.id} returning ${result.size} polygons")
+        return result
     }
 
     /**
