@@ -399,9 +399,9 @@ class DefaultGeoJsonDataProvider :
     }
 
     /**
-     * Check if GeoJSON failure is due to ODR resources being unavailable but download is in progress.
+     * Check if GeoJSON failure is due to ODR resources being unavailable but will become available.
      * On iOS, this allows retry when ODR downloads complete.
-     * Returns true only if: platform is iOS AND download was explicitly requested for this event.
+     * Returns true only if: platform is iOS AND (download explicitly requested OR initial install tag).
      */
     private fun isODRUnavailable(eventId: String): Boolean =
         try {
@@ -411,15 +411,19 @@ class DefaultGeoJsonDataProvider :
 
             if (!isIOS) return false
 
-            // Only retry if download was explicitly requested (via MapDownloadGate)
-            // This prevents retrying for events that will never be downloaded
+            // Retry if download was explicitly requested OR it's an initial install tag
             val downloadRequested =
                 com.worldwidewaves.shared.data.MapDownloadGate
                     .isAllowed(eventId)
-            if (!downloadRequested) {
-                Log.v(::isODRUnavailable.name, "ODR not requested for $eventId, no retry")
+            val isInitialTag =
+                com.worldwidewaves.shared.data.ODRPaths
+                    .bundleHas(eventId)
+
+            val shouldRetry = downloadRequested || isInitialTag
+            if (!shouldRetry) {
+                Log.v(::isODRUnavailable.name, "ODR not requested and not initial tag for $eventId, no retry")
             }
-            return downloadRequested
+            return shouldRetry
         } catch (e: Exception) {
             // If we can't determine platform, don't retry to avoid log spam
             Log.v(::isODRUnavailable.name, "Could not check ODR status: ${e.message}")
