@@ -94,10 +94,10 @@ class EventsViewModelTest : KoinTest {
 
     @AfterTest
     fun tearDown() {
-        // Give a small delay to allow any running coroutines to complete
-        // This prevents UncaughtExceptionsBeforeTest errors
+        // Give enough time to allow any running coroutines to complete
+        // This prevents UncaughtExceptionsBeforeTest errors in subsequent tests
         kotlinx.coroutines.runBlocking {
-            delay(50)
+            delay(200) // Increased from 50ms to ensure all coroutines finish
         }
         stopKoin()
     }
@@ -757,13 +757,9 @@ class EventsViewModelTest : KoinTest {
             val newMockEvents = createMockEvents(3, favoriteIndices = setOf(0))
             repository.emitEvents(newMockEvents)
 
-            // Wait for events to be updated (this ensures the flow has processed)
-            // The events StateFlow emits first, then hasFavorites is calculated
-            waitForEvents(viewModel, 3)
-
-            // Give extra time for hasFavorites to be calculated after events are processed
-            delay(100)
-            advanceUntilIdle()
+            // Wait for hasFavorites to be updated (not just events count)
+            // This properly waits for the ViewModel's flow processing to complete
+            waitForState(viewModel.hasFavorites, true, timeoutMs = 2000)
 
             // Then - hasFavorites should be updated after the new events are processed
             assertTrue(viewModel.hasFavorites.value, "hasFavorites should update to true after emitting events with favorites")
