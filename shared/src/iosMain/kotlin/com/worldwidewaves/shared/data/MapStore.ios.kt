@@ -175,7 +175,7 @@ private fun appSupportMapsDir(): String {
     return mapsUrl.path ?: (NSTemporaryDirectory() + "/Maps")
 }
 
-actual fun platformTryCopyInitialTagToCache(
+actual suspend fun platformTryCopyInitialTagToCache(
     eventId: String,
     extension: String,
     destAbsolutePath: String,

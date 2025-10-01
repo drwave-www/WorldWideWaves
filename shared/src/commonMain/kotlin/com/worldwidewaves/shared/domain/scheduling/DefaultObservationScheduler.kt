@@ -67,12 +67,15 @@ class DefaultObservationScheduler(
         val timeBeforeHit = event.wave.timeBeforeUserHit()
 
         return when {
-            timeBeforeEvent > 1.hours + 5.minutes -> 1.hours
-            timeBeforeEvent > 5.minutes + 30.seconds -> 5.minutes
-            timeBeforeEvent > 35.seconds -> 1.seconds
+            // Check wave hit timing first (most critical for user experience)
             timeBeforeHit != null && timeBeforeHit < ZERO -> INFINITE
             timeBeforeHit != null && timeBeforeHit < 1.seconds -> 50.milliseconds
             timeBeforeHit != null && timeBeforeHit < 5.seconds -> 200.milliseconds
+
+            // Then check event timing (less critical)
+            timeBeforeEvent > 1.hours + 5.minutes -> 1.hours
+            timeBeforeEvent > 5.minutes + 30.seconds -> 5.minutes
+            timeBeforeEvent > 35.seconds -> 1.seconds
             timeBeforeEvent > 0.seconds || event.isRunning() -> 500.milliseconds
             else -> 30.seconds
         }

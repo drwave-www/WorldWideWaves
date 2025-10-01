@@ -257,7 +257,35 @@ interface GeoJsonDataProvider {
 class DefaultGeoJsonDataProvider :
     GeoJsonDataProvider,
     KoinComponent {
-    private val cache = mutableMapOf<String, JsonObject?>()
+    companion object {
+        private const val MAX_CACHE_SIZE = 10
+        private const val MAX_ODR_ATTEMPTS = 20
+        private const val ATTEMPTS_FAST_RETRY = 3
+        private const val ATTEMPTS_MEDIUM_RETRY = 10
+        private const val GEOJSON_PREVIEW_LENGTH = 80
+    }
+
+    private val cache =
+        object : LinkedHashMap<String, JsonObject?>(
+            MAX_CACHE_SIZE,
+            0.75f,
+            true, // access-order for LRU
+        ) {
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, JsonObject?>?): Boolean {
+                val shouldRemove = size > MAX_CACHE_SIZE
+                if (shouldRemove && eldest != null) {
+                    // Clean up metadata maps to prevent unbounded growth
+                    lastAttemptTime.remove(eldest.key)
+                    attemptCount.remove(eldest.key)
+                    Log.v(
+                        "GeoJsonDataProvider",
+                        "Evicted cache entry for ${eldest.key} (LRU), cleaned up metadata",
+                    )
+                }
+                return shouldRemove
+            }
+        }
+
     private val lastAttemptTime = mutableMapOf<String, Instant>()
     private val attemptCount = mutableMapOf<String, Int>()
 
@@ -389,13 +417,6 @@ class DefaultGeoJsonDataProvider :
         } else {
             Log.i(::getGeoJsonData.name, "Not caching null result for $eventId (ODR may become available)")
         }
-    }
-
-    companion object {
-        private const val MAX_ODR_ATTEMPTS = 20
-        private const val ATTEMPTS_FAST_RETRY = 3
-        private const val ATTEMPTS_MEDIUM_RETRY = 10
-        private const val GEOJSON_PREVIEW_LENGTH = 80
     }
 
     /**

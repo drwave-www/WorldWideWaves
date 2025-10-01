@@ -65,6 +65,19 @@ interface IOSObservable<T> {
      * Compatible with Swift AsyncSequence/AsyncStream
      */
     suspend fun observeAsync(callback: suspend (T) -> Unit)
+
+    /**
+     * Count of currently active subscriptions
+     * Used for testing and debugging
+     */
+    val activeSubscriptionCount: Int
+        get() = 0
+
+    /**
+     * Cleanup all active subscriptions
+     * Should be called when the observable is no longer needed
+     */
+    fun cleanup() {}
 }
 
 /**
