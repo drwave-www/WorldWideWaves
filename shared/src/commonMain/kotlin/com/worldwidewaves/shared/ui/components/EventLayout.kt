@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.ui.components.event.EventNumbers
 import com.worldwidewaves.shared.ui.components.event.EventOverlay
@@ -32,8 +31,6 @@ import com.worldwidewaves.shared.ui.components.event.NotifyAreaUserPosition
 import com.worldwidewaves.shared.ui.components.event.WWWEventSocialNetworks
 import com.worldwidewaves.shared.ui.components.shared.ButtonWave
 import com.worldwidewaves.shared.ui.components.shared.SimulationButton
-import com.worldwidewaves.shared.ui.components.shared.WaveNavigator
-import com.worldwidewaves.shared.ui.utils.getIOSSafeClock
 import com.worldwidewaves.shared.ui.utils.getIOSSafePlatform
 import com.worldwidewaves.shared.ui.utils.rememberEventState
 
@@ -58,8 +55,6 @@ fun EventLayout(
     additionalContent: @Composable () -> Unit = {},
     // iOS FIX: Dependencies passed as parameters to prevent deadlock
     platform: WWWPlatform = getIOSSafePlatform(),
-    @Suppress("UnusedParameter") // Kept for API consistency, may be needed for future timing features
-    clock: IClock = getIOSSafeClock(),
 ) {
     // iOS FIX: Removed dangerous object : KoinComponent pattern
     // Dependencies now resolved safely outside composition
@@ -84,7 +79,7 @@ fun EventLayout(
                     eventState.endDateTime,
                     eventState.isInArea,
                     onNavigateToWave =
-                        WaveNavigator { eventId ->
+                        { eventId ->
                             onNavigateToWave(eventId)
                         },
                     modifier = Modifier.align(Alignment.Center),

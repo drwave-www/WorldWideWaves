@@ -43,15 +43,6 @@ class EventStateManagerBasicTest {
         )
 
     @Test
-    fun `can create DefaultEventStateManager`() {
-        val manager =
-            DefaultEventStateManager(
-                mockWaveProgressionTracker,
-                mockClock,
-            )
-    }
-
-    @Test
     fun `validateState returns no issues for valid progression`() {
         val input =
             EventStateInput(

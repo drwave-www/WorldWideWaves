@@ -127,11 +127,7 @@ class EventsViewModelTest : KoinTest {
         override suspend fun delay(duration: Duration) {
             currentTime += duration
             // Use real coroutine delay to allow other coroutines to run
-            kotlinx.coroutines.delay(1)
-        }
-
-        fun advance(duration: Duration) {
-            currentTime += duration
+            delay(1)
         }
     }
     // ========================================================================
@@ -559,7 +555,7 @@ class EventsViewModelTest : KoinTest {
         runTest {
             // Given
             val mockEvents = createMockEvents(5, favoriteIndices = setOf(1, 3))
-            val (viewModel, repository, _) = createViewModel(events = mockEvents)
+            val (viewModel, _, _) = createViewModel(events = mockEvents)
 
             // When
             viewModel.loadEvents()
@@ -580,7 +576,7 @@ class EventsViewModelTest : KoinTest {
             // Given
             val mockEvents = createMockEvents(5)
             val downloadedMaps = setOf("event_0", "event_2", "event_4")
-            val (viewModel, repository, mapChecker) =
+            val (viewModel, _, mapChecker) =
                 createViewModel(
                     events = mockEvents,
                     downloadedMaps = downloadedMaps,
@@ -606,7 +602,7 @@ class EventsViewModelTest : KoinTest {
             // Given
             val mockEvents = createMockEvents(6, favoriteIndices = setOf(0, 2, 4))
             val downloadedMaps = setOf("event_0", "event_1", "event_2")
-            val (viewModel, repository, _) =
+            val (viewModel, _, _) =
                 createViewModel(
                     events = mockEvents,
                     downloadedMaps = downloadedMaps,
@@ -630,7 +626,7 @@ class EventsViewModelTest : KoinTest {
         runTest {
             // Given
             val mockEvents = createMockEvents(4, favoriteIndices = setOf(1))
-            val (viewModel, repository, _) = createViewModel(events = mockEvents)
+            val (viewModel, _, _) = createViewModel(events = mockEvents)
 
             // When
             viewModel.loadEvents()
@@ -648,7 +644,7 @@ class EventsViewModelTest : KoinTest {
         runTest {
             // Given
             val mockEvents = createMockEvents(5, favoriteIndices = setOf(0, 2))
-            val (viewModel, repository, _) = createViewModel(events = mockEvents)
+            val (viewModel, _, _) = createViewModel(events = mockEvents)
 
             // When - load and filter
             viewModel.loadEvents()
@@ -681,7 +677,7 @@ class EventsViewModelTest : KoinTest {
             val event3 = MockEvent(id = "event_3", startDateTime = now + 2.hours)
             val unsortedEvents = listOf(event1, event2, event3)
 
-            val (viewModel, repository, _) = createViewModel(events = unsortedEvents)
+            val (viewModel, _, _) = createViewModel(events = unsortedEvents)
 
             // When
             viewModel.loadEvents()
@@ -706,7 +702,7 @@ class EventsViewModelTest : KoinTest {
             val event3 = MockEvent(id = "event_3", favorite = true, startDateTime = now + 2.hours)
             val events = listOf(event1, event2, event3)
 
-            val (viewModel, repository, _) = createViewModel(events = events)
+            val (viewModel, _, _) = createViewModel(events = events)
 
             // When
             viewModel.loadEvents()
@@ -729,7 +725,7 @@ class EventsViewModelTest : KoinTest {
         runTest {
             // Given
             val mockEvents = createMockEvents(5, favoriteIndices = setOf(2))
-            val (viewModel, repository, _) = createViewModel(events = mockEvents)
+            val (viewModel, _, _) = createViewModel(events = mockEvents)
 
             // When
             viewModel.loadEvents()
@@ -744,7 +740,7 @@ class EventsViewModelTest : KoinTest {
         runTest {
             // Given
             val mockEvents = createMockEvents(5, favoriteIndices = emptySet())
-            val (viewModel, repository, _) = createViewModel(events = mockEvents)
+            val (viewModel, _, _) = createViewModel(events = mockEvents)
 
             // When
             viewModel.loadEvents()
@@ -809,7 +805,7 @@ class EventsViewModelTest : KoinTest {
         runTest {
             // Given
             val mockEvents = createMockEvents(2)
-            val (viewModel, repository, _) = createViewModel(events = mockEvents)
+            val (viewModel, _, _) = createViewModel(events = mockEvents)
 
             // When
             viewModel.loadEvents()
@@ -856,7 +852,7 @@ class EventsViewModelTest : KoinTest {
     fun `error state can be cleared by successful reload`() =
         runTest {
             // Given - start with error
-            val (viewModel, repository, _) = createViewModel(throwError = true)
+            val (viewModel, _, _) = createViewModel(throwError = true)
             viewModel.loadEvents()
             waitForState(viewModel.hasLoadingError, true)
             assertTrue(viewModel.hasLoadingError.value)
@@ -941,17 +937,10 @@ class EventsViewModelTest : KoinTest {
             viewModel.loadEvents()
             waitForEvents(viewModel, 1000)
 
-            val startTime =
-                kotlin.time.Clock.System
-                    .now()
             viewModel.filterEvents(onlyFavorites = true)
             waitForEvents(viewModel, 500)
-            val endTime =
-                kotlin.time.Clock.System
-                    .now()
 
             // Then
-            val duration = endTime - startTime
             assertEquals(500, viewModel.events.value.size)
             // Note: In test environment, timing assertions are unreliable
             // Just verify it completes without hanging
@@ -976,17 +965,10 @@ class EventsViewModelTest : KoinTest {
             val (viewModel, _, _) = createViewModel(events = largeEventList)
 
             // When
-            val startTime =
-                kotlin.time.Clock.System
-                    .now()
             viewModel.loadEvents()
             waitForEvents(viewModel, 1000)
-            val endTime =
-                kotlin.time.Clock.System
-                    .now()
 
             // Then
-            val duration = endTime - startTime
             assertEquals(1000, viewModel.events.value.size)
             // Verify sorting worked - first event should have earliest time
             assertEquals("event_999", viewModel.events.value[0].id)
