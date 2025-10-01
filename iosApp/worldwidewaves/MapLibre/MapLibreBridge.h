@@ -27,6 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MapLibreViewWrapper : NSObject
 - (instancetype)init;
+- (void)setEventId:(NSString *)eventId;
 - (void)setMapView:(id)mapView;
 - (void)setStyleWithStyleURL:(NSString *)styleURL completion:(void (^)(void))completion;
 - (double)getWidth;
@@ -58,6 +59,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithOnFinish:(void (^)(void))onFinish onCancel:(void (^)(void))onCancel;
 - (void)onFinish;
 - (void)onCancel;
+@end
+
+@interface IOSMapBridge : NSObject
++ (void)renderWavePolygons:(NSString *)eventId
+                  polygons:(NSArray<NSArray<id> *> *)polygons
+             clearExisting:(BOOL)clearExisting;
++ (void)clearWavePolygons:(NSString *)eventId;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -43,6 +43,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -50,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.interop.UIKitViewController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -62,6 +64,7 @@ import com.worldwidewaves.shared.ui.components.DownloadProgressIndicator
 import com.worldwidewaves.shared.ui.components.LoadingIndicator
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.koin.mp.KoinPlatform
@@ -113,27 +116,56 @@ class IOSEventMap(
         currentPolygons.addAll(wavePolygons)
 
         Log.v("IOSEventMap", "iOS map now tracking ${currentPolygons.size} wave polygons")
+
+        // Store polygon data in registry for Swift to render
+        storePolygonsForRendering(wavePolygons, clearPolygons)
     }
 
+    private fun storePolygonsForRendering(
+        polygons: List<Polygon>,
+        clearExisting: Boolean,
+    ) {
+        // Convert polygons to simple coordinate pairs (lat, lng)
+        val coordinates: List<List<Pair<Double, Double>>> =
+            polygons.map { polygon: Polygon ->
+                polygon.map { position: Position ->
+                    Pair(position.lat, position.lng)
+                }
+            }
+
+        // Store in registry - Swift will poll and render these
+        MapWrapperRegistry.setPendingPolygons(event.id, coordinates, clearExisting)
+        Log.i("IOSEventMap", "Stored ${polygons.size} polygons in registry for Swift to render")
+    }
+
+    @OptIn(ExperimentalForeignApi::class)
     @Composable
     override fun Draw(
         autoMapDownload: Boolean,
         modifier: Modifier,
     ) {
+        Log.i("IOSEventMap", "Draw() called for event: ${event.id}, autoMapDownload=$autoMapDownload")
+
         // Get unified position from PositionManager (same as Android)
         val positionManager = KoinPlatform.getKoin().get<PositionManager>()
         val platformMapManager = KoinPlatform.getKoin().get<PlatformMapManager>()
         val currentLocation by positionManager.position.collectAsState()
 
         // Use shared MapDownloadCoordinator for download state management
-        val downloadCoordinator = remember { MapDownloadCoordinator(platformMapManager) }
+        val downloadCoordinator =
+            remember {
+                Log.d("IOSEventMap", "Creating MapDownloadCoordinator for: ${event.id}")
+                MapDownloadCoordinator(platformMapManager)
+            }
         val downloadState by downloadCoordinator.getDownloadState(event.id).collectAsState()
 
         var mapIsLoaded by remember { mutableStateOf(false) }
 
         // Check map availability and trigger auto-download if needed
         LaunchedEffect(event.id, autoMapDownload) {
+            Log.i("IOSEventMap", "LaunchedEffect triggered: event=${event.id}, autoDownload=$autoMapDownload")
             downloadCoordinator.autoDownloadIfNeeded(event.id, autoMapDownload)
+            Log.d("IOSEventMap", "autoDownloadIfNeeded completed for: ${event.id}")
         }
 
         // Initialize position system integration (same as AbstractEventMap)
@@ -149,13 +181,40 @@ class IOSEventMap(
         }
 
         Box(modifier = modifier.fillMaxSize()) {
-            // iOS map background - use a solid color since resource handling is platform-specific
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-            )
+            // Load style URL asynchronously - don't block UI on fresh simulator
+            // Reload when download completes (downloadState.isAvailable changes)
+            var styleURL by remember { mutableStateOf<String?>(null) }
+
+            LaunchedEffect(event.id, downloadState.isAvailable) {
+                Log.d("IOSEventMap", "Loading style URL for: ${event.id}, isAvailable=${downloadState.isAvailable}")
+                styleURL = event.map.getStyleUri()
+                Log.i("IOSEventMap", "Style URL loaded: $styleURL")
+            }
+
+            // Show map or loading indicator based on style availability
+            if (styleURL != null) {
+                Log.d("IOSEventMap", "Using style URL for ${event.id}: ${styleURL!!.take(100)}...")
+
+                // Use key() to recreate map when styleURL changes (after download)
+                key("${event.id}-$styleURL") {
+                    @Suppress("DEPRECATION")
+                    UIKitViewController(
+                        factory = {
+                            Log.i("IOSEventMap", "Creating native map view controller for: ${event.id}")
+                            createNativeMapViewController(event, styleURL!!) as platform.UIKit.UIViewController
+                        },
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            } else {
+                // Show loading while waiting for files to download/cache
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    LoadingIndicator("Loading map...")
+                }
+            }
 
             // Overlay with map information and controls
             Column(

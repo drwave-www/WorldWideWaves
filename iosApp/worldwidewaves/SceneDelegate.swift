@@ -81,6 +81,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         IOSPlatformEnablerKt.registerPlatformEnabler(enabler: IOSPlatformEnabler())
         NSLog("[\(tag)] ✅ PlatformEnabler (Swift) registered into Koin")
+
+        NativeMapViewProviderRegistrationKt.registerNativeMapViewProvider(provider: SwiftNativeMapViewProvider())
+        NSLog("[\(tag)] ✅ NativeMapViewProvider (Swift) registered into Koin")
     }
 
     func setRoot(_ viewController: UIViewController, in windowScene: UIWindowScene) {

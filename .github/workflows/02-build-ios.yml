@@ -13,7 +13,7 @@ concurrency:
 jobs:
   build-framework:
     name: Build iOS Framework
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 30
     needs: []  # Removed dependency to run in parallel
 
@@ -43,7 +43,7 @@ jobs:
 
   build-app:
     name: Build iOS App
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 30
     needs: build-framework
 
