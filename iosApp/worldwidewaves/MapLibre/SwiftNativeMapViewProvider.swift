@@ -15,8 +15,10 @@ import Shared
  *
  * Register this in Koin to override the default placeholder implementation.
  */
-class SwiftNativeMapViewProvider: NativeMapViewProvider {
-    func createMapView(event: IWWWEvent, styleURL: String) -> Any {
+public class SwiftNativeMapViewProvider: NativeMapViewProvider {
+    public init() {}
+
+    public func createMapView(event: IWWWEvent, styleURL: String) -> Any {
         WWWLog.i("SwiftNativeMapViewProvider", "Creating MapLibre map view for: \(event.id)")
         WWWLog.d("SwiftNativeMapViewProvider", "Style URL: \(styleURL)")
 
@@ -29,6 +31,6 @@ class SwiftNativeMapViewProvider: NativeMapViewProvider {
         )
 
         WWWLog.i("SwiftNativeMapViewProvider", "MapLibre view controller created successfully")
-        return viewController
+        return viewController!
     }
 }
