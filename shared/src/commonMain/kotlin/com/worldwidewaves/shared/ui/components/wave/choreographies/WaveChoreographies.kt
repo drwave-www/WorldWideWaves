@@ -57,7 +57,7 @@ import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableS
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
-import com.worldwidewaves.shared.ui.utils.getIOSSafeClock
+import com.worldwidewaves.shared.ui.utils.getIosSafeClock
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.delay
@@ -86,7 +86,7 @@ fun WaveChoreographies(
     event: IWWWEvent,
     modifier: Modifier = Modifier,
     // iOS FIX: Clock dependency passed as parameter to prevent deadlock
-    clock: IClock = getIOSSafeClock(),
+    clock: IClock = getIosSafeClock(),
 ) {
     // iOS FIX: Removed dangerous object : KoinComponent pattern
     val isWarmingInProgress by event.observer.isUserWarmingInProgress.collectAsState()
@@ -215,7 +215,7 @@ fun ChoreographyDisplay(
     sequence: DisplayableSequence<DrawableResource>?,
     modifier: Modifier = Modifier,
     // iOS FIX: Clock dependency passed as parameter to prevent deadlock
-    clock: IClock = getIOSSafeClock(),
+    clock: IClock = getIosSafeClock(),
 ) {
     if (sequence == null || sequence.image == null) return
 

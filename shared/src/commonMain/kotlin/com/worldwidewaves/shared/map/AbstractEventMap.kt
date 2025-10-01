@@ -67,20 +67,20 @@ abstract class AbstractEventMap<T>(
 ) : KoinComponent {
     // Properties that must be implemented by platform-specific subclasses
     abstract val mapLibreAdapter: MapLibreAdapter<T> // MapLibre is native map library
-    abstract val locationProvider: WWWLocationProvider? // LocationProvider is native location provider
+    abstract val locationProvider: LocationProvider? // LocationProvider is native location provider
 
     // Dependencies
     private val positionManager: PositionManager by inject()
 
     // Class variables
-    private var constraintManager: MapConstraintManager? = null // Map constraint manager
+    private var constraintManager: MapBoundsEnforcer? = null // Map bounds enforcer
     private var screenHeight: Double = 800.0
     private var screenWidth: Double = 600.0
     private var userHasBeenLocated = false
     private var lastKnownPosition: Position? = null
     private var userInteracted = false
 
-    /** When true the MapConstraintManager is not allowed to move the camera. */
+    /** When true the MapBoundsEnforcer is not allowed to move the camera. */
     private var suppressCorrections = false
 
     // Camera position methods - shared logic for all platforms ---------------
@@ -145,9 +145,9 @@ abstract class AbstractEventMap<T>(
      * Adjusts the camera to fit the bounds of the event map with proper aspect ratio
      */
     suspend fun moveToWindowBounds(onComplete: () -> Unit = {}) {
-        // Prepare constraint manager – actual constraints will be applied
+        // Prepare bounds enforcer – actual constraints will be applied
         // after the initial animation finishes (see onFinish below).
-        constraintManager = MapConstraintManager(event.area.bbox(), mapLibreAdapter) { suppressCorrections }
+        constraintManager = MapBoundsEnforcer(event.area.bbox(), mapLibreAdapter) { suppressCorrections }
 
         val (sw, ne) = event.area.bbox()
         val eventMapWidth = ne.lng - sw.lng

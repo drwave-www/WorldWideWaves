@@ -42,7 +42,7 @@ import com.worldwidewaves.shared.WWWSimulation
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.ui.theme.onPrimaryLight
-import com.worldwidewaves.shared.ui.utils.getIOSSafePlatform
+import com.worldwidewaves.shared.ui.utils.getIosSafePlatform
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 import kotlin.time.Duration.Companion.minutes
@@ -62,7 +62,7 @@ fun BoxScope.SimulationButton(
     onError: (String, String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
     // iOS FIX: Platform dependency passed as parameter to prevent deadlock
-    platform: WWWPlatform = getIOSSafePlatform(),
+    platform: WWWPlatform = getIosSafePlatform(),
 ) {
     // iOS FIX: Removed dangerous object : KoinComponent pattern
     var simulationButtonState by remember { mutableStateOf("idle") }

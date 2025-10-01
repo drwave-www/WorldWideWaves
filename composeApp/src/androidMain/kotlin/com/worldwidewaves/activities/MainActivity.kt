@@ -33,8 +33,8 @@ import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.shared.WWWGlobals
-import com.worldwidewaves.shared.ui.activities.WWWMainActivity
-import com.worldwidewaves.utils.AndroidPlatformEnabler
+import com.worldwidewaves.shared.ui.activities.MainScreen
+import com.worldwidewaves.utils.PlatformEnablerAndroid
 import kotlinx.coroutines.launch
 
 // ----------------------------
@@ -43,7 +43,7 @@ open class MainActivity : AppCompatActivity() {
     /** Controls how long the *official* (system) splash stays on-screen (~10 ms). */
     private var isOfficialSplashDismissed = false
 
-    private var mainActivityImpl: WWWMainActivity? = null
+    private var mainActivityImpl: MainScreen? = null
 
     // ----------------------------
 
@@ -100,7 +100,7 @@ open class MainActivity : AppCompatActivity() {
 
         setContent {
             if (mainActivityImpl == null) {
-                mainActivityImpl = WWWMainActivity(AndroidPlatformEnabler(this))
+                mainActivityImpl = MainScreen(PlatformEnablerAndroid(this))
             }
 
             mainActivityImpl!!.Draw()
