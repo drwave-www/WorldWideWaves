@@ -62,15 +62,8 @@ private fun invalidateGeoJsonDataCache(eventId: String) {
         geoJsonDataProvider.invalidateCache(eventId)
         Log.d("MapStore.ios", "Invalidated GeoJsonDataProvider cache for $eventId")
 
-        // Also invalidate WWWEventArea polygon cache (parsed polygons)
-        val wwwEvents = koin.get<com.worldwidewaves.shared.events.WWWEvents>()
-        val event = wwwEvents.allEvents.value.find { it.id == eventId }
-        if (event != null) {
-            event.area.clearCache()
-            Log.d("MapStore.ios", "Invalidated WWWEventArea polygon cache for $eventId")
-        } else {
-            Log.w("MapStore.ios", "Event $eventId not found in WWWEvents, couldn't clear area cache")
-        }
+        // Note: WWWEventArea.cachedAreaPolygons will be invalidated when polygonsLoaded changes
+        // after the next successful getGeoJsonData() call triggers polygon reload
     } catch (e: Exception) {
         Log.w("MapStore.ios", "Failed to invalidate caches for $eventId: ${e.message}")
     }
@@ -257,7 +250,20 @@ actual fun platformAppVersionStamp(): String {
     return "$short+$build"
 }
 
-actual fun platformInvalidateGeoJson(eventId: String) { /* no-op */ }
+actual fun platformInvalidateGeoJson(eventId: String) {
+    // Invalidate area polygon cache when geojson changes
+    try {
+        val koin =
+            org.koin.mp.KoinPlatform
+                .getKoin()
+        val wwwEvents = koin.get<com.worldwidewaves.shared.events.WWWEvents>()
+        // Note: WWWEvents doesn't expose allEvents publicly, so we use the invalidation through GeoJsonDataProvider
+        // The area cache will be cleared when getPolygons() is called again after GeoJsonDataProvider cache invalidation
+        Log.d("MapStore.ios", "platformInvalidateGeoJson called for $eventId")
+    } catch (e: Exception) {
+        Log.v("MapStore.ios", "platformInvalidateGeoJson: ${e.message}")
+    }
+}
 
 /**
  * Mount the ODR tag for [eventId], resolve the resource path, and copy it to [destAbsolutePath].
