@@ -20,6 +20,7 @@
 
 import SwiftUI
 import MapLibre
+import Shared
 
 /// SwiftUI wrapper for MapLibre Native map view
 /// Integrates with Kotlin business logic from IOSEventMap
@@ -64,7 +65,7 @@ struct EventMapView: UIViewRepresentable {
         WWWLog.d(Self.tag, "Wrapper bound to map view")
 
         // Register wrapper in Kotlin registry for later access
-        MapWrapperRegistry.shared.registerWrapper(eventId: eventId, wrapper: mapWrapper)
+        Shared.MapWrapperRegistry.shared.registerWrapper(eventId: eventId, wrapper: mapWrapper)
         WWWLog.d(Self.tag, "Wrapper registered in MapWrapperRegistry for event: \(eventId)")
 
         // Update binding

@@ -35,6 +35,6 @@ public class SwiftNativeMapViewProvider: NativeMapViewProvider {
 
     public func getMapWrapper(eventId: String) -> Any? {
         WWWLog.v("SwiftNativeMapViewProvider", "Getting map wrapper for event: \(eventId)")
-        return MapWrapperRegistry.shared.getWrapper(eventId: eventId)
+        return Shared.MapWrapperRegistry.shared.getWrapper(eventId: eventId)
     }
 }

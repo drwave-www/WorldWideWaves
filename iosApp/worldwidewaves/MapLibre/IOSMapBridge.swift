@@ -25,7 +25,7 @@ import CoreLocation
         polygons: [[CLLocationCoordinate2D]],
         clearExisting: Bool
     ) {
-        guard let wrapper = MapWrapperRegistry.shared.getWrapper(eventId: eventId) as? MapLibreViewWrapper else {
+        guard let wrapper = Shared.MapWrapperRegistry.shared.getWrapper(eventId: eventId) as? MapLibreViewWrapper else {
             WWWLog.w("IOSMapBridge", "No wrapper found for event: \(eventId)")
             return
         }
@@ -39,26 +39,29 @@ import CoreLocation
      * This is called periodically after the map is loaded to render polygons stored by Kotlin.
      */
     @objc public static func renderPendingPolygons(eventId: String) {
-        guard let wrapper = MapWrapperRegistry.shared.getWrapper(eventId: eventId) as? MapLibreViewWrapper else {
+        guard let wrapper = Shared.MapWrapperRegistry.shared.getWrapper(eventId: eventId) as? MapLibreViewWrapper else {
             WWWLog.v("IOSMapBridge", "No wrapper found for event: \(eventId)")
             return
         }
 
-        guard MapWrapperRegistry.shared.hasPendingPolygons(eventId: eventId) else {
+        guard Shared.MapWrapperRegistry.shared.hasPendingPolygons(eventId: eventId) else {
             WWWLog.v("IOSMapBridge", "No pending polygons for event: \(eventId)")
             return
         }
 
-        guard let polygonData = MapWrapperRegistry.shared.getPendingPolygons(eventId: eventId) else {
+        guard let polygonData = Shared.MapWrapperRegistry.shared.getPendingPolygons(eventId: eventId) else {
             return
         }
 
         WWWLog.i("IOSMapBridge", "Rendering \(polygonData.coordinates.count) pending polygons for event: \(eventId)")
 
         // Convert coordinate pairs to CLLocationCoordinate2D arrays
-        let coordinateArrays = polygonData.coordinates.map { polygon in
-            polygon.map { coordPair in
-                CLLocationCoordinate2D(latitude: coordPair.component1().doubleValue, longitude: coordPair.component2().doubleValue)
+        let coordinateArrays: [[CLLocationCoordinate2D]] = polygonData.coordinates.map { polygon in
+            polygon.compactMap { coordPair -> CLLocationCoordinate2D? in
+                guard let lat = coordPair.first?.doubleValue, let lng = coordPair.second?.doubleValue else {
+                    return nil
+                }
+                return CLLocationCoordinate2D(latitude: lat, longitude: lng)
             }
         }
 
@@ -66,7 +69,7 @@ import CoreLocation
         wrapper.addWavePolygons(polygons: coordinateArrays, clearExisting: polygonData.clearExisting)
 
         // Clear pending polygons after successful rendering
-        MapWrapperRegistry.shared.clearPendingPolygons(eventId: eventId)
+        Shared.MapWrapperRegistry.shared.clearPendingPolygons(eventId: eventId)
         WWWLog.d("IOSMapBridge", "Successfully rendered and cleared pending polygons for event: \(eventId)")
     }
 
@@ -74,7 +77,7 @@ import CoreLocation
      * Clears all wave polygons from the map.
      */
     @objc public static func clearWavePolygons(eventId: String) {
-        guard let wrapper = MapWrapperRegistry.shared.getWrapper(eventId: eventId) as? MapLibreViewWrapper else {
+        guard let wrapper = Shared.MapWrapperRegistry.shared.getWrapper(eventId: eventId) as? MapLibreViewWrapper else {
             WWWLog.w("IOSMapBridge", "No wrapper found for event: \(eventId)")
             return
         }
