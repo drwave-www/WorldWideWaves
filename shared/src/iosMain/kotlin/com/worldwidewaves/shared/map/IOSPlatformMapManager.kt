@@ -19,9 +19,12 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import platform.Foundation.NSApplicationSupportDirectory
 import platform.Foundation.NSBundle
 import platform.Foundation.NSBundleResourceRequest
+import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
+import platform.Foundation.NSUserDomainMask
 
 /**
  * Tiny, production-ready iOS map manager using On-Demand Resources (ODR).
@@ -47,35 +50,55 @@ class IOSPlatformMapManager(
     private val mutex = Mutex()
 
     /**
-     * Returns true if a typical file for this tag is visible in the bundle right now.
-     * Uses the SAME approach as MapStore.ODRPaths.resolve() which works reliably.
+     * Returns true if map files are available (either in cache or bundle).
+     *
+     * Maps are stored in cache after ODR download/copy:
+     * Library/Application Support/Maps/{eventId}.geojson
+     * Library/Application Support/Maps/{eventId}.mbtiles
+     *
+     * This matches how MapStore.readGeoJson() actually accesses the files.
      */
     @OptIn(ExperimentalForeignApi::class)
     override fun isMapAvailable(mapId: String): Boolean {
         Log.d(TAG, "Checking map availability for: $mapId")
 
-        // Try BOTH approaches like MapStore does:
-        // 1. Standard paths (pathForResource + URLForResource)
-        // 2. Extension search (URLsForResourcesWithExtension)
+        val fm = NSFileManager.defaultManager
 
-        val bundle = NSBundle.mainBundle
+        // Get cache directory (Library/Application Support/Maps/)
+        val baseDirUrl =
+            fm.URLForDirectory(
+                directory = NSApplicationSupportDirectory,
+                inDomain = NSUserDomainMask,
+                appropriateForURL = null,
+                create = true,
+                error = null,
+            )
+        val cacheDir = baseDirUrl?.path?.let { "$it/Maps" } ?: return false
 
-        // Approach 1: Try standard subdirectories (same as MapStore)
-        val standardGeo = resolveFromStandardPaths(bundle, mapId, "geojson")
-        val standardMb = resolveFromStandardPaths(bundle, mapId, "mbtiles")
+        // Check if files exist in cache (where MapStore reads from)
+        val geoPath = "$cacheDir/$mapId.geojson"
+        val mbPath = "$cacheDir/$mapId.mbtiles"
 
-        if (standardGeo != null || standardMb != null) {
-            Log.i(TAG, "Map available via standard paths: $mapId, geo=$standardGeo, mb=$standardMb")
+        val hasGeo = fm.fileExistsAtPath(geoPath)
+        val hasMb = fm.fileExistsAtPath(mbPath)
+
+        Log.i(TAG, "Map availability (cache check): mapId=$mapId, hasGeo=$hasGeo ($geoPath), hasMb=$hasMb ($mbPath)")
+
+        if (hasGeo || hasMb) {
             return true
         }
 
-        // Approach 2: Extension search (fallback)
-        val searchGeo = findResourceByExtensionSearch(mapId, "geojson")
-        val searchMb = findResourceByExtensionSearch(mapId, "mbtiles")
+        // Fallback: Try bundle (for ODR resources not yet copied)
+        val bundleGeo = resolveFromStandardPaths(NSBundle.mainBundle, mapId, "geojson")
+        val bundleMb = resolveFromStandardPaths(NSBundle.mainBundle, mapId, "mbtiles")
 
-        val available = searchGeo != null || searchMb != null
-        Log.i(TAG, "Map availability: mapId=$mapId, available=$available (search: geo=$searchGeo, mb=$searchMb)")
-        return available
+        if (bundleGeo != null || bundleMb != null) {
+            Log.i(TAG, "Map available via bundle: $mapId, geo=$bundleGeo, mb=$bundleMb")
+            return true
+        }
+
+        Log.i(TAG, "Map NOT available: $mapId (not in cache or bundle)")
+        return false
     }
 
     /**
