@@ -64,11 +64,9 @@ import com.worldwidewaves.shared.ui.components.LoadingIndicator
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import org.koin.mp.KoinPlatform
 import platform.UIKit.UIImage
 import platform.UIKit.UIViewController
@@ -169,24 +167,6 @@ class IOSEventMap(
             Log.i("IOSEventMap", "LaunchedEffect triggered: event=${event.id}, autoDownload=$autoMapDownload")
             downloadCoordinator.autoDownloadIfNeeded(event.id, autoMapDownload)
             Log.d("IOSEventMap", "autoDownloadIfNeeded completed for: ${event.id}")
-        }
-
-        // Trigger polygon reload when map download completes
-        LaunchedEffect(downloadState.isAvailable) {
-            if (downloadState.isAvailable && downloadState.error == null) {
-                Log.i("IOSEventMap", "Map became available for ${event.id}, triggering polygon reload")
-                // Clear cached polygons to force reload from newly downloaded data
-                event.area.clearCache()
-                // Trigger polygon load which will now succeed with downloaded data
-                withContext(Dispatchers.Default) {
-                    try {
-                        val polygons = event.area.getPolygons()
-                        Log.i("IOSEventMap", "Reloaded ${polygons.size} polygons for ${event.id} after download")
-                    } catch (e: Exception) {
-                        Log.e("IOSEventMap", "Failed to reload polygons after download: ${e.message}")
-                    }
-                }
-            }
         }
 
         // Initialize position system integration (same as AbstractEventMap)
