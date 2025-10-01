@@ -4,227 +4,295 @@
 [![Quality & Security](https://github.com/mglcel/WorldWideWaves/actions/workflows/03-code-quality.yml/badge.svg)](https://github.com/mglcel/WorldWideWaves/actions/workflows/03-code-quality.yml)
 [![Android Build](https://github.com/mglcel/WorldWideWaves/actions/workflows/01-build-android.yml/badge.svg)](https://github.com/mglcel/WorldWideWaves/actions/workflows/01-build-android.yml)
 [![iOS Build](https://github.com/mglcel/WorldWideWaves/actions/workflows/02-build-ios.yml/badge.svg)](https://github.com/mglcel/WorldWideWaves/actions/workflows/02-build-ios.yml)
-[![Android UI Tests](https://github.com/mglcel/WorldWideWaves/actions/workflows/04-ui-tests-android.yml/badge.svg)](https://github.com/mglcel/WorldWideWaves/actions/workflows/04-ui-tests-android.yml)
-[![End-to-End Tests](https://github.com/mglcel/WorldWideWaves/actions/workflows/05-e2e-tests.yml/badge.svg)](https://github.com/mglcel/WorldWideWaves/actions/workflows/05-e2e-tests.yml)
-[![Performance Tests](https://github.com/mglcel/WorldWideWaves/actions/workflows/06-performance-tests.yml/badge.svg)](https://github.com/mglcel/WorldWideWaves/actions/workflows/06-performance-tests.yml)
 
-A Kotlin Multiplatform app for synchronized global wave events. Join people worldwide in coordinated "waves" through real-time mapping, location services, and choreographed animations.
+A Kotlin Multiplatform mobile application orchestrating synchronized human waves through cities worldwide, fostering unity and shared human experience through real-time coordination and location-based services.
 
-## What is WorldWideWaves?
+## Overview
 
-WorldWideWaves orchestrates human waves through cities globally. Users can:
-- View upcoming wave events on interactive offline maps
-- Join synchronized waves at specific times and locations
-- Experience real-time choreographed animations and audio
-- Connect with participants across 40+ major cities worldwide
+WorldWideWaves enables participants to join synchronized wave events at specific times and locations. The app leverages offline maps for 40+ major cities, real-time position tracking, and choreographed animations to create coordinated experiences across devices and geographies.
 
-## Quick Start
+## Key Features
 
-### Prerequisites
-- **Android Studio** (latest stable)
-- **JDK 11** or higher
-- **Xcode 15+** (for iOS development)
-- **Docker** (for map generation - optional)
-
-### Build & Run
-
-```bash
-# Build entire project
-./gradlew build
-
-# Run Android debug
-./gradlew :composeApp:assembleDebug
-
-# Run tests
-./gradlew test
-```
-
-### Git Hooks Setup (Recommended)
-
-Set up shared git hooks for enhanced development workflow:
-
-```bash
-# One-time setup for development workflow enhancements
-./dev/setup-git-hooks.sh
-```
-
-**Features enabled:**
-- 🚀 **Automatic Android emulator launch** for integration testing
-- 🔄 **Translation updates** (when `OPENAI_API_KEY` is set)
-- 🧪 **Critical integration tests** run before each push
-- 💾 **Automatic backup** of any existing custom hooks
-
-**Quick commands:**
-```bash
-# Skip integration tests temporarily
-SKIP_INTEGRATION_TESTS=1 git push
-
-# Update hooks after pulling latest changes
-./dev/setup-git-hooks.sh
-```
-
-### Development Commands
-See [CLAUDE.md](./CLAUDE.md) for complete development guide.
+- Offline maps for 40+ global cities using MapLibre
+- Real-time event loading with countdown timers
+- GPS position tracking with simulation mode for testing
+- Synchronized wave choreography with audio coordination
+- Cross-platform business logic sharing (70% code reuse)
+- Comprehensive CI/CD pipeline with multi-stage quality gates
 
 ## Project Structure
 
 ```
 WorldWideWaves/
-├── composeApp/          # Android app with Compose UI
-├── shared/              # Kotlin Multiplatform business logic
-├── iosApp/              # iOS SwiftUI application
-├── maps/                # 40+ city offline map modules
-├── scripts/             # Build tools and map generation
-└── gradle/              # Gradle configuration
+├── composeApp/              # Android app (Compose UI)
+├── shared/                  # Kotlin Multiplatform business logic
+├── iosApp/                  # iOS app (SwiftUI)
+├── maps/                    # 40+ city offline map modules
+│   ├── paris_france/
+│   ├── new_york_usa/
+│   └── ...
+├── scripts/                 # Build tools and map generation
+├── docs/                    # Documentation
+└── .github/workflows/       # CI/CD pipelines
 ```
 
 ### Key Modules
 
-| Module | Purpose | Technology |
-|--------|---------|------------|
-| **`composeApp/`** | Main Android application | Compose Multiplatform, Activities |
-| **`shared/`** | Cross-platform business logic | KMP, Coroutines, Koin DI |
-| **`iosApp/`** | iOS application entry point | SwiftUI, iOS frameworks |
-| **`maps/`** | City-specific offline map data | Android Dynamic Features |
-| **`scripts/`** | Development and build tools | Shell scripts, Node.js |
+| Module | Description |
+|--------|-------------|
+| `composeApp/` | Android app with Compose Multiplatform UI |
+| `shared/` | Cross-platform business logic, ViewModels, and domain layer |
+| `iosApp/` | iOS app with SwiftUI calling Kotlin business logic |
+| `maps/` | Android Dynamic Feature modules with offline map data |
 
-## Architecture Overview
+## Tech Stack
 
-**Flow**: SplashScreen → EventsList → EventDetails → FullMap → WaveChoreography
+**Core:**
+- Kotlin 2.2.0
+- Kotlin Multiplatform
+- Compose Multiplatform 1.8.2
+- Gradle 8.14.3
 
-- **Event System**: Load global events with countdowns and location data
-- **Offline Maps**: MapLibre-based offline maps for 40+ cities
-- **Choreography**: Frame-based synchronized animations with audio
-- **Location Services**: GPS tracking with simulation mode for testing
-- **Cross-platform**: Shared business logic, platform-specific UI
+**Android:**
+- Target SDK 36
+- Jetpack Compose
+- MapLibre Android 11.13.0
+- Koin 4.1.0
 
-## Key Features
+**iOS:**
+- Deployment target: iOS 14+
+- SwiftUI
+- MapLibre iOS (in progress)
 
-### 🌍 Global Events
-- Real-time event loading from remote sources
-- Countdown timers for upcoming waves
-- Location-based event filtering
+**Backend:**
+- Firebase Analytics & Crashlytics
 
-### 🗺️ Offline Maps
-- Self-contained city map modules (40+ cities)
-- On-demand loading to minimize app size
-- Custom map styles and wave radius visualization
+See [docs/architecture.md](docs/architecture.md) for detailed architecture.
 
-### 🎭 Wave Choreography
-- Synchronized animations across devices
-- Audio coordination with visual effects
-- Frame-based timing system
-- **Crowd Sound Simulation**: Test real audio playback for crowd choreography
+## CI/CD
 
-### 📱 Cross-Platform
-- Shared Kotlin business logic
-- Native UI: Android Compose + iOS SwiftUI
-- Platform-specific services (location, audio, maps)
+Multi-stage GitHub Actions workflows with quality gates:
+
+- **Build Pipelines:** Android and iOS compilation verification
+- **Quality Gates:** Linting (ktlint, detekt), unit tests (902+), security scanning
+- **UI Tests:** Emulator-based UI tests with screenshot capture
+- **E2E Tests:** Integration tests and Firebase Test Lab multi-device testing
+- **Performance Tests:** Nightly performance regression detection
+
+See [docs/ci-cd.md](docs/ci-cd.md) for pipeline details.
+
+## Requirements
+
+### Development Workstation
+
+| Tool | Minimum Version | Purpose |
+|------|----------------|---------|
+| JDK | 17 (Temurin) | Kotlin compilation |
+| Android Studio | 2024.1+ | Android development |
+| Xcode | 15.0+ (macOS only) | iOS development |
+| Node.js | 16+ | Map generation scripts |
+
+### Hardware
+
+- CPU: 4+ cores (8+ recommended)
+- RAM: 8 GB (16-32 GB recommended)
+- Disk: 20 GB free (50 GB on SSD recommended)
+
+See [docs/environment-setup.md](docs/environment-setup.md) for complete setup instructions.
+
+## Quick Setup
+
+### 1. Clone Repository
+
+```bash
+git clone https://github.com/mglcel/WorldWideWaves.git
+cd WorldWideWaves
+```
+
+### 2. Configure Firebase
+
+Create `local.properties` in project root:
+
+```properties
+sdk.dir=/path/to/android/sdk
+
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_PROJECT_NUMBER=123456789012
+FIREBASE_MOBILE_SDK_APP_ID=1:123456789012:android:abcdef1234567890
+FIREBASE_API_KEY=AIzaSyABCDEF1234567890
+```
+
+Generate Firebase configuration:
+
+```bash
+./gradlew generateFirebaseConfig
+```
+
+### 3. Build Project
+
+```bash
+./gradlew build
+```
+
+### 4. Run Android
+
+```bash
+# Launch emulator
+emulator -avd Pixel_3a_API_30 &
+
+# Install and run
+./gradlew :composeApp:installDebug
+```
+
+### 5. Run iOS (macOS only)
+
+```bash
+# Build framework
+./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
+
+# Open and run in Xcode
+open iosApp/iosApp.xcodeproj
+```
+
+### 6. Setup Git Hooks (Optional)
+
+```bash
+./dev/setup-git-hooks.sh
+```
+
+Enables automatic emulator launch, translation updates, and pre-push tests.
 
 ## Development
 
-### Adding a New City
-1. Generate map data with `scripts/maps/`
-2. Create new dynamic feature module in `maps/android/`
-3. Add city configuration to shared module
-4. Test offline map loading
+### Run Tests
 
-### iOS Development Status
-Currently implementing iOS version. See:
-- `IOS_ADAPTATION_PLAN.md` - Architecture roadmap
-- `NEXT_STEPS_ORDER.md` - Implementation steps
-
-### Testing
 ```bash
-# Unit tests (shared logic)
+# Unit tests (902+ tests)
 ./gradlew :shared:testDebugUnitTest
 
-# Android tests
-./gradlew :composeApp:testDebugUnitTest
+# Android UI tests
+./gradlew :composeApp:connectedDebugAndroidTest
 
-# Skip common tests (if needed)
-./gradlew :shared:testDebugUnitTest -PdisableCommonTest
+# Lint and static analysis
+./gradlew ktlintCheck detekt
 
-# Sound Choreography Tests
-./gradlew crowdSoundSimulation  # Mathematical crowd simulation
-ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.compose.choreographies.RealAudioCrowdSimulationTest
+# All quality checks
+./gradlew :shared:testDebugUnitTest ktlintCheck detekt
 ```
 
-## Sound Choreography Simulation
+### Local Dev Loop
 
-WorldWideWaves includes comprehensive sound choreography simulation to test how music sounds when played by large crowds.
+1. Make code changes in `shared/` or `composeApp/`
+2. Android: Compose hot reload applies changes instantly
+3. iOS: Rebuild framework with `./gradlew :shared:linkDebugFrameworkIosSimulatorArm64`
+4. Run tests to verify changes
+5. Commit using [Conventional Commits](https://www.conventionalcommits.org/)
 
-### 🎵 Features
-
-**Mathematical Simulation (`CrowdSoundChoreographySimulationTest`):**
-- Simulates 50 simultaneous people playing MIDI notes
-- Each person plays every 100ms along the full duration of the MIDI file
-- Analyzes pitch distribution and timing to ensure song recognizability
-- Validates that overlapping notes create harmonic richness without losing melody
-
-**Real Audio Testing (`RealAudioCrowdSimulationTest`):**
-- Plays actual sound through Android device speakers
-- Tests single notes, MIDI sequences, and full crowd simulation
-- Uses `AndroidSoundPlayer` with different waveforms (SINE, SQUARE, SAWTOOTH)
-- Simulates 5-person crowd with 500ms intervals for audible demonstration
-
-**Interactive Audio Demo (`AudioTestActivity`):**
-- Android Activity with Compose UI for real-time audio testing
-- Three test modes: single note, MIDI sequence, and crowd simulation
-- Loads real MIDI files or creates demo tracks as fallback
-- Real-time progress indicators and audio warnings
-
-### 🔧 Usage
-
-Run the mathematical simulation:
-```bash
-./gradlew crowdSoundSimulation
-```
-
-Test real audio on Android device:
-```bash
-# Make sure Android emulator/device has audio enabled
-ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.compose.choreographies.RealAudioCrowdSimulationTest
-```
-
-Launch interactive audio demo:
-```bash
-# Install and launch AudioTestActivity
-./gradlew :composeApp:assembleDebug
-adb install -r composeApp/build/outputs/apk/debug/composeApp-debug.apk
-adb shell am start -n com.worldwidewaves/.debug.AudioTestActivity
-```
-
-### 📊 Technical Implementation
-
-- **MIDI File Parsing**: Real MIDI file loading with `MidiParser.parseMidiFile()`
-- **Wave Progression**: Time-based progression through musical score
-- **Crowd Modeling**: Mathematical simulation of 50 people with timing variations
-- **Real Audio Output**: Android `AudioTrack` integration for speaker playback
-- **Multiple Waveforms**: Each simulated person uses different waveforms for variety
-
-The simulation proves that when 50 people play the same MIDI file with slight timing variations (every 100ms), the song remains recognizable and creates rich, layered sound - perfect for coordinated crowd events.
-
-```
+See [docs/development.md](docs/development.md) for detailed workflows and troubleshooting.
 
 ## Contributing
 
-1. Check existing issues or create new ones
-2. Follow the project's architectural patterns
-3. Add tests for new functionality
-4. Update relevant documentation
+We welcome contributions. Please follow these guidelines:
 
-## Technologies
+1. Read [docs/contributing.md](docs/contributing.md)
+2. Check existing [issues](https://github.com/mglcel/WorldWideWaves/issues)
+3. Fork repository and create feature branch
+4. Follow commit convention: `<type>(<scope>): <subject>`
+5. Add tests for new functionality
+6. Ensure all CI checks pass
+7. Submit pull request with clear description
 
-- **Kotlin Multiplatform** - Shared business logic
-- **Compose Multiplatform** - UI framework
-- **MapLibre** - Offline mapping
-- **Koin** - Dependency injection
-- **Coroutines** - Async programming
-- **DataStore/UserDefaults** - Settings persistence
-- **Firebase** - Analytics and crash reporting
+### Branch Naming
 
----
+```
+feat/add-feature-name
+fix/fix-bug-name
+docs/update-documentation
+test/add-test-coverage
+```
 
-**License**: See [LICENSE](./LICENSE)
-**Documentation**: [CLAUDE.md](./CLAUDE.md) | [iOS Plan](./IOS_ADAPTATION_PLAN.md)
+### Commit Convention
+
+```
+feat(maps): add Tokyo offline map module
+fix(position): prevent duplicate emissions
+docs: update environment setup guide
+test: add choreography integration tests
+```
+
+See [docs/contributing.md](docs/contributing.md) for complete guidelines.
+
+## Documentation
+
+### For Developers
+
+- [Environment Setup](docs/environment-setup.md) - Development environment configuration (macOS, Linux, Windows)
+- [Architecture](docs/architecture.md) - System design, component responsibilities, data flows
+- [Development Workflow](docs/development.md) - Local dev loop, testing, debugging
+- [Contributing](docs/contributing.md) - Contribution guidelines, code standards, review process
+- [CI/CD Pipeline](docs/ci-cd.md) - Workflow details, quality gates, release process
+
+### For Operations
+
+- [Operations Guide](docs/operations.md) - Runtime config, monitoring, deployment, incident response
+
+### Specialized Topics
+
+- [Firebase Setup](FIREBASE_SETUP.md) - Firebase project configuration and security
+- [Map Architecture](MAP_ARCHITECTURE_ANALYSIS.md) - Shared vs platform-specific map system design
+
+See [docs/README.md](docs/README.md) for complete documentation map.
+
+## Testing
+
+### Test Philosophy
+
+"Test Real Code, Not Mocks"
+
+- Focus on business logic and integration points
+- Use real implementations where possible
+- Mock only external dependencies (network, sensors)
+- Avoid testing framework internals
+
+### Test Coverage
+
+- **Unit Tests:** 902+ tests covering domain logic, position management, choreography
+- **UI Tests:** Critical paths, accessibility, edge cases, screenshots
+- **Integration Tests:** Firebase, MapLibre, real device coordination
+- **Performance Tests:** App launch, runtime performance, battery optimization
+
+### Running Tests
+
+```bash
+# Fast unit tests (<100ms budget)
+./gradlew testFast
+
+# Full test suite
+./gradlew :shared:testDebugUnitTest
+
+# UI tests
+./gradlew :composeApp:connectedDebugAndroidTest
+
+# Test quality checks
+./gradlew testQuality
+```
+
+## License
+
+```
+Copyright 2025 DrWave
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
+
+See [LICENSE](LICENSE) for full text.

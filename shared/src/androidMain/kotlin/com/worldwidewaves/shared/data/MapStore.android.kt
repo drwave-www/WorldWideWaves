@@ -36,6 +36,7 @@ import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val TAG = "MapStore"
 
@@ -48,7 +49,7 @@ private const val MIN_ANDROID_VERSION_FOR_SPLIT_CONTEXT = 26 // Android 8.0 Oreo
 
 private fun ctx(): Context = inject<Context>(Context::class.java).value
 
-actual fun platformTryCopyInitialTagToCache(
+actual suspend fun platformTryCopyInitialTagToCache(
     eventId: String,
     extension: String,
     destAbsolutePath: String,
@@ -65,7 +66,7 @@ actual fun platformTryCopyInitialTagToCache(
             CopyResult.Success, CopyResult.FatalError -> return@repeat
             CopyResult.Retry ->
                 if (attempt < MAX_FILE_COPY_RETRIES - 1) {
-                    Thread.sleep(RETRY_DELAY_MS)
+                    delay(RETRY_DELAY_MS.milliseconds)
                 }
         }
     }

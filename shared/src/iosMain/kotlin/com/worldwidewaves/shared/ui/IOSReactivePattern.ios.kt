@@ -41,16 +41,32 @@ actual fun <T> StateFlow<T>.toIOSObservable(): IOSObservable<T> = IOSStateFlowOb
 actual fun <T> Flow<T>.toIOSObservableFlow(): IOSObservable<T> = IOSFlowObservable(this)
 
 /**
- * iOS-specific StateFlow observable implementation
+ * iOS-specific StateFlow observable implementation with automatic cleanup
+ *
+ * Tracks all active subscriptions and provides cleanup mechanisms to prevent memory leaks.
+ * Each subscription creates a coroutine scope that is tracked until disposal.
+ *
+ * Note: iOS runs on a single-threaded event loop model, so synchronization is not needed
+ * for collection access as all operations happen on the main thread.
  */
 private class IOSStateFlowObservable<T>(
     private val stateFlow: StateFlow<T>,
 ) : IOSObservable<T> {
+    private val activeScopes = mutableSetOf<CoroutineScope>()
+
     override val value: T
         get() = stateFlow.value
 
+    /**
+     * Count of currently active subscriptions
+     */
+    override val activeSubscriptionCount: Int
+        get() = activeScopes.size
+
     override fun observe(callback: (T) -> Unit): IOSObservableSubscription {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
+        activeScopes.add(scope)
 
         val job =
             stateFlow
@@ -58,7 +74,13 @@ private class IOSStateFlowObservable<T>(
                     callback(value)
                 }.launchIn(scope)
 
-        return IOSSubscription(scope, job.isActive)
+        return IOSSubscription(
+            scope = scope,
+            isActiveParameter = job.isActive,
+            onDispose = {
+                activeScopes.remove(scope)
+            },
+        )
     }
 
     override suspend fun observeAsync(callback: suspend (T) -> Unit) {
@@ -66,21 +88,54 @@ private class IOSStateFlowObservable<T>(
             callback(value)
         }
     }
+
+    /**
+     * Cleanup all active subscriptions
+     * Called by GC or explicitly when the observable is no longer needed
+     */
+    override fun cleanup() {
+        activeScopes.forEach { it.cancel() }
+        activeScopes.clear()
+    }
+
+    /**
+     * Called by Kotlin/Native GC before object is deallocated
+     * Ensures all subscriptions are properly cleaned up
+     */
+    @Suppress("unused")
+    protected fun finalize() {
+        cleanup()
+    }
 }
 
 /**
- * iOS-specific Flow observable implementation
+ * iOS-specific Flow observable implementation with automatic cleanup
+ *
+ * Tracks all active subscriptions and provides cleanup mechanisms to prevent memory leaks.
+ * Each subscription creates a coroutine scope that is tracked until disposal.
+ *
+ * Note: iOS runs on a single-threaded event loop model, so synchronization is not needed
+ * for collection access as all operations happen on the main thread.
  */
 private class IOSFlowObservable<T>(
     private val flow: Flow<T>,
 ) : IOSObservable<T> {
     private var _cachedValue: T? = null
+    private val activeScopes = mutableSetOf<CoroutineScope>()
 
     override val value: T
         get() = _cachedValue ?: error("Flow has not emitted any values yet")
 
+    /**
+     * Count of currently active subscriptions
+     */
+    override val activeSubscriptionCount: Int
+        get() = activeScopes.size
+
     override fun observe(callback: (T) -> Unit): IOSObservableSubscription {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
+        activeScopes.add(scope)
 
         val job =
             flow
@@ -89,7 +144,13 @@ private class IOSFlowObservable<T>(
                     callback(value)
                 }.launchIn(scope)
 
-        return IOSSubscription(scope, job.isActive)
+        return IOSSubscription(
+            scope = scope,
+            isActiveParameter = job.isActive,
+            onDispose = {
+                activeScopes.remove(scope)
+            },
+        )
     }
 
     override suspend fun observeAsync(callback: suspend (T) -> Unit) {
@@ -98,14 +159,33 @@ private class IOSFlowObservable<T>(
             callback(value)
         }
     }
+
+    /**
+     * Cleanup all active subscriptions
+     * Called by GC or explicitly when the observable is no longer needed
+     */
+    override fun cleanup() {
+        activeScopes.forEach { it.cancel() }
+        activeScopes.clear()
+    }
+
+    /**
+     * Called by Kotlin/Native GC before object is deallocated
+     * Ensures all subscriptions are properly cleaned up
+     */
+    @Suppress("unused")
+    protected fun finalize() {
+        cleanup()
+    }
 }
 
 /**
- * iOS-specific subscription implementation
+ * iOS-specific subscription implementation with cleanup callback support
  */
 private class IOSSubscription(
     private val scope: CoroutineScope,
     private var isActiveParameter: Boolean,
+    private val onDispose: (() -> Unit)? = null,
 ) : IOSObservableSubscription {
     override val isActive: Boolean
         get() = isActiveParameter
@@ -114,6 +194,7 @@ private class IOSSubscription(
         if (isActiveParameter) {
             scope.cancel()
             isActiveParameter = false
+            onDispose?.invoke()
         }
     }
 }
