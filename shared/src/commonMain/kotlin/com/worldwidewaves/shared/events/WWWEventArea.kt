@@ -416,6 +416,11 @@ data class WWWEventArea(
             // Atomically assign the complete immutable list
             cachedAreaPolygons = tempPolygons.toList()
 
+            // Clear position check cache since polygon data changed
+            cachedPositionWithinResult = null
+            cachedBoundingBox = null
+            Log.d("WWWEventArea", "cachePolygonsIfLoaded: ${event.id} cleared position/bbox cache")
+
             // Notify that polygon data is now available
             _polygonsLoaded.value = true
         } else {
