@@ -136,18 +136,18 @@ class WWWEventMap(
 
         val newFileStr =
             templateData
-                .replace("__MBTILES_URI__", "mbtiles://$mbtilesFilePath")
-                .replace("__GEOJSON_URI__", "file://$geojsonFilePath")
-                .replace("__GLYPHS_URI__", "file://$spriteAndGlyphsPath/files/style/glyphs")
-                .replace("__SPRITE_URI__", "file://$spriteAndGlyphsPath/files/style/sprites")
+                .replace("__MBTILES_URI__", "mbtiles:///$mbtilesFilePath")
+                .replace("__GEOJSON_URI__", "file:///$geojsonFilePath")
+                .replace("__GLYPHS_URI__", "file:///$spriteAndGlyphsPath/files/style/glyphs")
+                .replace("__SPRITE_URI__", "file:///$spriteAndGlyphsPath/files/style/sprites")
 
         Log.i("WWWEventMap", "getStyleUri: After replacements, length=${newFileStr.length}")
 
         Log.v("WWWEventMap", "getStyleUri: Style template replacements:")
-        Log.v("WWWEventMap", "  __MBTILES_URI__ -> mbtiles://$mbtilesFilePath")
-        Log.v("WWWEventMap", "  __GEOJSON_URI__ -> file://$geojsonFilePath")
-        Log.v("WWWEventMap", "  __GLYPHS_URI__ -> file://$spriteAndGlyphsPath/files/style/glyphs")
-        Log.v("WWWEventMap", "  __SPRITE_URI__ -> file://$spriteAndGlyphsPath/files/style/sprites")
+        Log.v("WWWEventMap", "  __MBTILES_URI__ -> mbtiles:///$mbtilesFilePath")
+        Log.v("WWWEventMap", "  __GEOJSON_URI__ -> file:///$geojsonFilePath")
+        Log.v("WWWEventMap", "  __GLYPHS_URI__ -> file:///$spriteAndGlyphsPath/files/style/glyphs")
+        Log.v("WWWEventMap", "  __SPRITE_URI__ -> file:///$spriteAndGlyphsPath/files/style/sprites")
 
         cacheStringToFile(styleFilename, newFileStr)
         updateCacheMetadata(styleFilename)
