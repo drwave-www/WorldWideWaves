@@ -98,8 +98,9 @@ class MapWrapperRegistryTest {
         // Remove strong reference
         wrapper = null
 
-        // Force garbage collection (platform-specific, might not immediately work)
-        System.gc()
+        // Note: System.gc() is not available in Kotlin/Native
+        // GC timing is non-deterministic anyway, so we test the mechanism not the timing
+        // kotlin.native.internal.GC.collect() exists but is internal API
 
         // Prune stale references
         MapWrapperRegistry.pruneStaleReferences()
