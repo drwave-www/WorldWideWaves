@@ -149,15 +149,11 @@ class WWWEventMap(
         Log.v("WWWEventMap", "  __GLYPHS_URI__ -> file:///$spriteAndGlyphsPath/files/style/glyphs")
         Log.v("WWWEventMap", "  __SPRITE_URI__ -> file:///$spriteAndGlyphsPath/files/style/sprites")
 
-        cacheStringToFile(styleFilename, newFileStr)
+        val cachedPath = cacheStringToFile(styleFilename, newFileStr)
         updateCacheMetadata(styleFilename)
-        Log.d("WWWEventMap", "getStyleUri: Style file cached: $styleFilename")
-
-        // Return the direct path from cacheStringToFile instead of going through cachedFilePath
-        // which might fail in development mode or have timing issues
-        val finalPath = getCacheDir() + "/" + styleFilename
-        Log.i("WWWEventMap", "getStyleUri: Returning style path: $finalPath")
-        return finalPath
+        Log.d("WWWEventMap", "getStyleUri: Style file cached at: $cachedPath")
+        Log.i("WWWEventMap", "getStyleUri: Returning style path: $cachedPath")
+        return cachedPath
     }
 
     // ---------------------------
