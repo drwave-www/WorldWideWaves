@@ -57,13 +57,23 @@ object ODRPaths {
         eventId: String,
         extension: String,
     ): String? {
+        Log.d("ODRPaths", "resolve: eventId=$eventId, extension=$extension")
         val b = NSBundle.mainBundle
 
         // Try standard subdirectories first
-        resolveFromStandardPaths(b, eventId, extension)?.let { return it }
+        resolveFromStandardPaths(b, eventId, extension)?.let {
+            Log.i("ODRPaths", "resolve: Found via standard paths -> $it")
+            return it
+        }
 
         // Fallback: search all resources with the extension
-        return resolveFromExtensionSearch(b, eventId, extension)
+        val result = resolveFromExtensionSearch(b, eventId, extension)
+        if (result != null) {
+            Log.i("ODRPaths", "resolve: Found via extension search -> $result")
+        } else {
+            Log.w("ODRPaths", "resolve: NOT FOUND for $eventId.$extension")
+        }
+        return result
     }
 
     private fun resolveFromStandardPaths(
