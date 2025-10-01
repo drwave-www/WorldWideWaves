@@ -409,21 +409,20 @@ class DefaultGeoJsonDataProvider :
             val platform = get<WWWPlatform>()
             val isIOS = platform.name.contains("iOS", ignoreCase = true)
 
-            if (!isIOS) return false
+            if (!isIOS) {
+                false
+            } else {
+                // Retry if download was explicitly requested
+                val downloadRequested =
+                    com.worldwidewaves.shared.data.MapDownloadGate
+                        .isAllowed(eventId)
 
-            // Retry if download was explicitly requested OR it's an initial install tag
-            val downloadRequested =
-                com.worldwidewaves.shared.data.MapDownloadGate
-                    .isAllowed(eventId)
-            val isInitialTag =
-                com.worldwidewaves.shared.data.ODRPaths
-                    .bundleHas(eventId)
-
-            val shouldRetry = downloadRequested || isInitialTag
-            if (!shouldRetry) {
-                Log.v(::isODRUnavailable.name, "ODR not requested and not initial tag for $eventId, no retry")
+                val shouldRetry = downloadRequested
+                if (!shouldRetry) {
+                    Log.v(::isODRUnavailable.name, "ODR not requested for $eventId, no retry")
+                }
+                shouldRetry
             }
-            return shouldRetry
         } catch (e: Exception) {
             // If we can't determine platform, don't retry to avoid log spam
             Log.v(::isODRUnavailable.name, "Could not check ODR status: ${e.message}")
@@ -471,7 +470,11 @@ class DefaultMapDataProvider : MapDataProvider {
     @OptIn(ExperimentalResourceApi::class)
     override suspend fun geoMapStyleData(): String =
         withContext(Dispatchers.IO) {
-            Log.i(::geoMapStyleData.name, "Loading map style data from ${FileSystem.MAPS_STYLE}")
-            Res.readBytes(FileSystem.MAPS_STYLE).decodeToString()
+            Log.i(::geoMapStyleData.name, "Loading map style template from ${FileSystem.MAPS_STYLE}")
+            val bytes = Res.readBytes(FileSystem.MAPS_STYLE)
+            Log.d(::geoMapStyleData.name, "Read ${bytes.size} bytes from style template")
+            val result = bytes.decodeToString()
+            Log.i(::geoMapStyleData.name, "Style template decoded: ${result.length} chars")
+            result
         }
 }
