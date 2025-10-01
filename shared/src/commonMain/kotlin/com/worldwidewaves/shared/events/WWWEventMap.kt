@@ -134,8 +134,8 @@ class WWWEventMap(
         val templateData = mapDataProvider.geoMapStyleData()
         Log.i("WWWEventMap", "getStyleUri: Template loaded, length=${templateData.length}")
 
-        // Ensure URIs have correct format: scheme:// + path (remove leading slash from path to avoid ////)
-        val mbtilesUri = "mbtiles://" + mbtilesFilePath.removePrefix("/")
+        // Format URIs - mbtiles uses /// format, file uses // format
+        val mbtilesUri = "mbtiles:///$mbtilesFilePath"
         val geojsonUri = "file://" + geojsonFilePath.removePrefix("/")
         val glyphsUri = "file://" + spriteAndGlyphsPath.removePrefix("/") + "/files/style/glyphs"
         val spriteUri = "file://" + spriteAndGlyphsPath.removePrefix("/") + "/files/style/sprites"
