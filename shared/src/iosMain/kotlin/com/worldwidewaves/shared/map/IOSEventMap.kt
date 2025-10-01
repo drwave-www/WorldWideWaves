@@ -180,11 +180,16 @@ class IOSEventMap(
         }
 
         Box(modifier = modifier.fillMaxSize()) {
-            // Load initial style URL - use fallback if files not ready
+            // Load style URL - use runBlocking since files should be cached already
+            // Note: This will use fallback if files not available yet
             val styleURL =
                 remember(event.id) {
-                    "https://demotiles.maplibre.org/style.json" // Start with fallback
+                    runBlocking {
+                        event.map.getStyleUri() ?: "https://demotiles.maplibre.org/style.json"
+                    }
                 }
+
+            Log.d("IOSEventMap", "Using style URL for ${event.id}: ${styleURL.take(100)}...")
 
             // Note: Map reload after download will require app restart for now
             @Suppress("DEPRECATION")
