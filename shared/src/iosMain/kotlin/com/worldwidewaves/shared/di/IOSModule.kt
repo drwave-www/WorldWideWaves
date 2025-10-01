@@ -84,6 +84,8 @@ val IOSModule =
         single<PlatformMapManager> { IOSPlatformMapManager() }
         single<MapLibreAdapter<Any>> { IOSMapLibreAdapter() }
         single { MapStateManager(get()) }
+        // Note: NativeMapViewProvider is registered by iOS app (SwiftNativeMapViewProvider)
+        // If not registered, MapViewFactory will use IOSNativeMapViewProvider as fallback
 
         // iOS MapViewModel
         single<MapViewModel> { IOSMapViewModel(get()) }
