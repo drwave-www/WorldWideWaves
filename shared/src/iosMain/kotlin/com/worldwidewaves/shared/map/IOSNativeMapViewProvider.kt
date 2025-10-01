@@ -17,8 +17,10 @@ import kotlinx.cinterop.memScoped
 import platform.UIKit.UIViewController
 
 // External C function from iOS app (MapViewFactoryHelper.m)
+// The linker will resolve this symbol when the app is built
+@Suppress("FunctionNaming")
 @OptIn(ExperimentalForeignApi::class)
-private external fun WWW_createMapViewController(
+external fun WWW_createMapViewController(
     styleURL: CPointer<ByteVar>?,
     latitude: Double,
     longitude: Double,
