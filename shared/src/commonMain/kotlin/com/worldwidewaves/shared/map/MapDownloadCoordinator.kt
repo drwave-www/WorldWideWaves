@@ -116,20 +116,12 @@ class MapDownloadCoordinator(
         mapId: String,
         autoDownload: Boolean,
     ) {
-        Log.i(TAG, "autoDownloadIfNeeded called: mapId=$mapId, autoDownload=$autoDownload")
         checkAvailability(mapId)
         val state = getDownloadState(mapId).value
-
-        Log.d(TAG, "After checkAvailability: mapId=$mapId, isAvailable=${state.isAvailable}, isDownloading=${state.isDownloading}")
 
         if (!state.isAvailable && autoDownload && !state.isDownloading) {
             Log.i(TAG, "Auto-download triggered for: $mapId")
             downloadMap(mapId)
-        } else {
-            Log.d(
-                TAG,
-                "Auto-download NOT triggered: isAvailable=${state.isAvailable}, autoDownload=$autoDownload, isDownloading=${state.isDownloading}",
-            )
         }
     }
 

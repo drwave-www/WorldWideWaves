@@ -719,18 +719,11 @@ class WWWEventObserver(
             try {
                 // Check if polygon data is available first
                 val polygons = event.area.getPolygons()
-                Log.d(
-                    "WWWEventObserver",
-                    "updateAreaDetection: ${event.id} has ${polygons.size} polygons, position=(${userPosition.lat}, ${userPosition.lng})",
-                )
 
                 if (polygons.isNotEmpty()) {
                     // Now call the actual area detection
                     val isInArea = waveProgressionTracker.isUserInWaveArea(userPosition, event.area)
-                    Log.i("WWWEventObserver", "updateAreaDetection: ${event.id} isInArea=$isInArea")
                     _userIsInArea.updateIfChanged(isInArea)
-                } else {
-                    Log.d("WWWEventObserver", "updateAreaDetection: ${event.id} has no polygons yet")
                 }
                 // If polygon data not yet loaded, the PositionObserver will handle it when available
             } catch (e: IllegalStateException) {
@@ -744,7 +737,6 @@ class WWWEventObserver(
                 _userIsInArea.updateIfChanged(false)
             }
         } else {
-            Log.d("WWWEventObserver", "updateAreaDetection: ${event.id} no user position")
             _userIsInArea.updateIfChanged(false)
         }
     }
@@ -760,9 +752,8 @@ class WWWEventObserver(
      */
     private fun updateProgressionIfSignificant(newProgression: Double) {
         if (abs(newProgression - lastEmittedProgression) >= PROGRESSION_THRESHOLD ||
-            lastEmittedProgression < 0.0 ||
-            newProgression >= 100.0 // Always emit 100% completion
-        ) { // Always emit first update or completion
+            lastEmittedProgression < 0.0
+        ) { // Always emit first update
             _progression.updateIfChanged(newProgression)
             lastEmittedProgression = newProgression
         }

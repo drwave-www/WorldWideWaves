@@ -77,20 +77,13 @@ class DefaultWaveProgressionTracker(
         return try {
             // Check if polygon data is available first
             val polygons = waveArea.getPolygons()
-            Log.d(
-                "WaveProgressionTracker",
-                "isUserInWaveArea: checking (${userPosition.lat}, ${userPosition.lng}) against ${polygons.size} polygons",
-            )
 
             if (polygons.isEmpty()) {
-                Log.d("WaveProgressionTracker", "isUserInWaveArea: no polygons, returning false")
                 return false
             }
 
             // Use the area's optimized position checking
-            val result = waveArea.isPositionWithin(userPosition)
-            Log.i("WaveProgressionTracker", "isUserInWaveArea: isPositionWithin returned $result")
-            result
+            waveArea.isPositionWithin(userPosition)
         } catch (e: Exception) {
             Log.e("WaveProgressionTracker", "Error checking position in wave area: $e")
             // On error, assume user is not in area for safety

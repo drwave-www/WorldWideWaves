@@ -346,14 +346,9 @@ data class WWWEventArea(
      */
     suspend fun getPolygons(): Area {
         // Fast path: if cache is already populated, return immediately
-        cachedAreaPolygons?.let {
-            val totalPoints = it.sumOf { polygon -> polygon.size }
-            Log.v("WWWEventArea", "getPolygons: ${event.id} returning ${it.size} cached polygons with $totalPoints points")
-            return it
-        }
+        cachedAreaPolygons?.let { return it }
 
         // Slow path: populate cache with mutex protection
-        Log.d("WWWEventArea", "getPolygons: ${event.id} cache empty, loading...")
         return loadAndCachePolygons()
     }
 
@@ -363,10 +358,7 @@ data class WWWEventArea(
     private suspend fun loadAndCachePolygons(): Area {
         polygonsCacheMutex.withLock {
             // Double-check pattern: another coroutine might have populated the cache
-            cachedAreaPolygons?.let {
-                Log.v("WWWEventArea", "loadAndCachePolygons: ${event.id} cache populated by another coroutine")
-                return it
-            }
+            cachedAreaPolygons?.let { return it }
 
             // Build polygons in a temporary mutable list
             val tempPolygons: MutableArea = mutableListOf()
@@ -375,7 +367,6 @@ data class WWWEventArea(
                 coroutineScopeProvider.withDefaultContext {
                     loadPolygonsFromGeoJson(tempPolygons)
                 }
-                Log.i("WWWEventArea", "loadAndCachePolygons: ${event.id} loaded ${tempPolygons.size} polygons from GeoJSON")
             } catch (e: kotlinx.serialization.SerializationException) {
                 Log.w("WWWEventArea", "GeoJSON parsing error for event ${event.id}: ${e.message}")
                 // Polygon loading errors are handled gracefully - empty polygon list is acceptable
@@ -387,9 +378,7 @@ data class WWWEventArea(
             cachePolygonsIfLoaded(tempPolygons)
         }
 
-        val result = cachedAreaPolygons ?: emptyList()
-        Log.d("WWWEventArea", "loadAndCachePolygons: ${event.id} returning ${result.size} polygons")
-        return result
+        return cachedAreaPolygons ?: emptyList()
     }
 
     /**
@@ -399,32 +388,11 @@ data class WWWEventArea(
         val hasPolygons = tempPolygons.isNotEmpty()
 
         if (hasPolygons) {
-            // Check if polygons have actual coordinate data
-            val totalPoints = tempPolygons.sumOf { it.size }
-            Log.i("WWWEventArea", "cachePolygonsIfLoaded: ${event.id} caching ${tempPolygons.size} polygons with $totalPoints total points")
-
-            // Log first polygon details for debugging
-            if (tempPolygons.isNotEmpty()) {
-                val firstPolygon = tempPolygons[0]
-                Log.d("WWWEventArea", "  First polygon has ${firstPolygon.size} points")
-                if (firstPolygon.isNotEmpty()) {
-                    val firstPoint = firstPolygon.first()
-                    Log.d("WWWEventArea", "  First point: ($firstPoint)")
-                }
-            }
-
             // Atomically assign the complete immutable list
             cachedAreaPolygons = tempPolygons.toList()
 
-            // Clear position check cache since polygon data changed
-            cachedPositionWithinResult = null
-            cachedBoundingBox = null
-            Log.d("WWWEventArea", "cachePolygonsIfLoaded: ${event.id} cleared position/bbox cache")
-
             // Notify that polygon data is now available
             _polygonsLoaded.value = true
-        } else {
-            Log.d("WWWEventArea", "cachePolygonsIfLoaded: ${event.id} has no polygons, not caching")
         }
     }
 
