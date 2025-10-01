@@ -36,6 +36,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.dsl.module
+import org.koin.test.KoinTest
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -62,7 +68,33 @@ import kotlin.time.Instant
  * - Edge cases and error scenarios
  * - Performance and memory characteristics
  */
-class DefaultObservationSchedulerTest {
+class DefaultObservationSchedulerTest : KoinTest {
+    /**
+     * Test clock instance shared across test methods.
+     * Initialized in @BeforeTest and injected into Koin for WWWEventWave instances.
+     */
+    private lateinit var sharedTestClock: TestClock
+
+    @BeforeTest
+    fun setUp() {
+        // Initialize the shared test clock
+        sharedTestClock = TestClock(currentTime = Instant.fromEpochMilliseconds(0))
+
+        // Start Koin with the test clock so WWWEventWave can inject it
+        startKoin {
+            modules(
+                module {
+                    single<IClock> { sharedTestClock }
+                },
+            )
+        }
+    }
+
+    @AfterTest
+    fun tearDown() {
+        stopKoin()
+    }
+
     /**
      * Test implementation of IClock for controlled time progression in tests.
      */
@@ -93,6 +125,7 @@ class DefaultObservationSchedulerTest {
      * Mock event for testing different scenarios.
      */
     private open class MockEvent(
+        private val testClock: TestClock,
         private val startDateTime: Instant,
         private val isRunning: Boolean = false,
         private val isDone: Boolean = false,
@@ -122,6 +155,9 @@ class DefaultObservationSchedulerTest {
             get() = throw NotImplementedError("Mock property")
 
         // Mock wave with timeBeforeUserHit
+        // Note: WWWEventWave uses Koin-injected clock which we cannot override in tests
+        // We work around this by using TestClock in our mock event and relying on
+        // the test's control of time rather than trying to override WWWEventWave's clock
         override val wave: WWWEventWave =
             object : WWWEventWave() {
                 override val speed: Double = 1.0
@@ -140,7 +176,7 @@ class DefaultObservationSchedulerTest {
 
                 override suspend fun userHitDateTime(): Instant? {
                     val tbh = this@MockEvent.timeBeforeUserHit ?: return null
-                    return clock.now() + tbh
+                    return this@MockEvent.testClock.now() + tbh
                 }
 
                 override suspend fun closestWaveLongitude(latitude: Double): Double = 0.0
@@ -215,7 +251,7 @@ class DefaultObservationSchedulerTest {
             val clock = TestClock(currentTime = Instant.fromEpochMilliseconds(0))
             val scheduler = DefaultObservationScheduler(clock)
             val eventStartTime = clock.now() + 2.hours
-            val event = MockEvent(startDateTime = eventStartTime)
+            val event = MockEvent(clock, startDateTime = eventStartTime)
 
             // ACT: Calculate observation interval
             val interval = scheduler.calculateObservationInterval(event)
@@ -234,7 +270,7 @@ class DefaultObservationSchedulerTest {
             val clock = TestClock(currentTime = Instant.fromEpochMilliseconds(0))
             val scheduler = DefaultObservationScheduler(clock)
             val eventStartTime = clock.now() + 30.minutes
-            val event = MockEvent(startDateTime = eventStartTime)
+            val event = MockEvent(clock, startDateTime = eventStartTime)
 
             // ACT: Calculate observation interval
             val interval = scheduler.calculateObservationInterval(event)
@@ -253,7 +289,7 @@ class DefaultObservationSchedulerTest {
             val clock = TestClock(currentTime = Instant.fromEpochMilliseconds(0))
             val scheduler = DefaultObservationScheduler(clock)
             val eventStartTime = clock.now() + 2.minutes
-            val event = MockEvent(startDateTime = eventStartTime)
+            val event = MockEvent(clock, startDateTime = eventStartTime)
 
             // ACT: Calculate observation interval
             val interval = scheduler.calculateObservationInterval(event)
@@ -272,7 +308,7 @@ class DefaultObservationSchedulerTest {
             val clock = TestClock(currentTime = Instant.fromEpochMilliseconds(0))
             val scheduler = DefaultObservationScheduler(clock)
             val eventStartTime = clock.now() + 20.seconds
-            val event = MockEvent(startDateTime = eventStartTime)
+            val event = MockEvent(clock, startDateTime = eventStartTime)
 
             // ACT: Calculate observation interval
             val interval = scheduler.calculateObservationInterval(event)
@@ -293,6 +329,7 @@ class DefaultObservationSchedulerTest {
             val eventStartTime = clock.now() + 1.minutes
             val event =
                 MockEvent(
+                    clock,
                     startDateTime = eventStartTime,
                     timeBeforeUserHit = 500.milliseconds,
                 )
@@ -316,6 +353,7 @@ class DefaultObservationSchedulerTest {
             val eventStartTime = clock.now() + 1.minutes
             val event =
                 MockEvent(
+                    clock,
                     startDateTime = eventStartTime,
                     timeBeforeUserHit = 3.seconds,
                 )
@@ -333,14 +371,17 @@ class DefaultObservationSchedulerTest {
     @Test
     fun `should use infinite interval after wave has passed`() =
         runTest {
-            // ARRANGE: Wave has already passed (negative time before hit)
+            // ARRANGE: Wave has already passed (negative time before hit) AND event has started
+            // Event must have started for the wave-passed logic to take precedence
             val clock = TestClock(currentTime = Instant.fromEpochMilliseconds(0))
             val scheduler = DefaultObservationScheduler(clock)
-            val eventStartTime = clock.now() + 1.minutes
+            val eventStartTime = clock.now() - 10.seconds // Event has already started
             val event =
                 MockEvent(
+                    clock,
                     startDateTime = eventStartTime,
                     timeBeforeUserHit = (-5).seconds,
+                    isRunning = true, // Event is running
                 )
 
             // ACT: Calculate observation interval
@@ -362,6 +403,7 @@ class DefaultObservationSchedulerTest {
             val eventStartTime = clock.now() - 10.minutes
             val event =
                 MockEvent(
+                    clock,
                     startDateTime = eventStartTime,
                     isRunning = false,
                 )
@@ -385,6 +427,7 @@ class DefaultObservationSchedulerTest {
             val eventStartTime = clock.now() - 5.minutes // Started 5 min ago
             val event =
                 MockEvent(
+                    clock,
                     startDateTime = eventStartTime,
                     isRunning = true,
                 )
@@ -408,6 +451,7 @@ class DefaultObservationSchedulerTest {
             val eventStartTime = clock.now() - 1.minutes
             val event =
                 MockEvent(
+                    clock,
                     startDateTime = eventStartTime,
                     isRunning = true,
                 )
@@ -431,6 +475,7 @@ class DefaultObservationSchedulerTest {
             val eventStartTime = clock.now() + 30.seconds
             val event =
                 MockEvent(
+                    clock,
                     startDateTime = eventStartTime,
                     isSoon = true,
                     isNearTime = true,
@@ -455,6 +500,7 @@ class DefaultObservationSchedulerTest {
             val eventStartTime = clock.now() + 2.hours
             val event =
                 MockEvent(
+                    clock,
                     startDateTime = eventStartTime,
                     isSoon = false,
                     isNearTime = false,
@@ -480,6 +526,7 @@ class DefaultObservationSchedulerTest {
             val eventStartTime = clock.now() + 2.hours
             val event =
                 MockEvent(
+                    clock,
                     startDateTime = eventStartTime,
                     isSoon = false,
                     isNearTime = false,
@@ -510,6 +557,7 @@ class DefaultObservationSchedulerTest {
             var emissionCount = 0
             val event =
                 object : MockEvent(
+                    clock,
                     startDateTime = eventStartTime,
                     isRunning = true,
                 ) {
@@ -543,6 +591,7 @@ class DefaultObservationSchedulerTest {
             var callCount = 0
             val event =
                 object : MockEvent(
+                    clock,
                     startDateTime = eventStartTime,
                     isRunning = true,
                     timeBeforeUserHit = 3.seconds,
@@ -601,6 +650,7 @@ class DefaultObservationSchedulerTest {
             val eventStartTime = clock.now() + 20.seconds
             val event =
                 MockEvent(
+                    clock,
                     startDateTime = eventStartTime,
                     isRunning = true,
                 )
@@ -626,7 +676,7 @@ class DefaultObservationSchedulerTest {
             val clock = TestClock(currentTime = Instant.fromEpochMilliseconds(0))
             val scheduler = DefaultObservationScheduler(clock)
             val eventStartTime = clock.now() + 2.hours
-            val event = MockEvent(startDateTime = eventStartTime)
+            val event = MockEvent(clock, startDateTime = eventStartTime)
 
             // ACT: Get observation schedule
             val schedule = scheduler.getObservationSchedule(event)
@@ -645,7 +695,7 @@ class DefaultObservationSchedulerTest {
             val clock = TestClock(currentTime = Instant.fromEpochMilliseconds(0))
             val scheduler = DefaultObservationScheduler(clock)
             val eventStartTime = clock.now() + 30.minutes
-            val event = MockEvent(startDateTime = eventStartTime)
+            val event = MockEvent(clock, startDateTime = eventStartTime)
 
             // ACT: Get observation schedule
             val schedule = scheduler.getObservationSchedule(event)
@@ -664,7 +714,7 @@ class DefaultObservationSchedulerTest {
             val clock = TestClock(currentTime = Instant.fromEpochMilliseconds(0))
             val scheduler = DefaultObservationScheduler(clock)
             val eventStartTime = clock.now() + 2.minutes
-            val event = MockEvent(startDateTime = eventStartTime)
+            val event = MockEvent(clock, startDateTime = eventStartTime)
 
             // ACT: Get observation schedule
             val schedule = scheduler.getObservationSchedule(event)
@@ -683,7 +733,7 @@ class DefaultObservationSchedulerTest {
             val clock = TestClock(currentTime = Instant.fromEpochMilliseconds(0))
             val scheduler = DefaultObservationScheduler(clock)
             val eventStartTime = clock.now() + 20.seconds
-            val event = MockEvent(startDateTime = eventStartTime)
+            val event = MockEvent(clock, startDateTime = eventStartTime)
 
             // ACT: Get observation schedule
             val schedule = scheduler.getObservationSchedule(event)
@@ -704,6 +754,7 @@ class DefaultObservationSchedulerTest {
             val eventStartTime = clock.now() + 1.minutes
             val event =
                 MockEvent(
+                    clock,
                     startDateTime = eventStartTime,
                     timeBeforeUserHit = 3.seconds,
                 )
@@ -727,6 +778,7 @@ class DefaultObservationSchedulerTest {
             val eventStartTime = clock.now() - 1.hours
             val event =
                 MockEvent(
+                    clock,
                     startDateTime = eventStartTime,
                     isDone = true,
                 )
@@ -750,6 +802,7 @@ class DefaultObservationSchedulerTest {
             val eventStartTime = clock.now() + 20.seconds
             val event =
                 MockEvent(
+                    clock,
                     startDateTime = eventStartTime,
                     isRunning = true,
                 )
@@ -772,7 +825,7 @@ class DefaultObservationSchedulerTest {
             val clock = TestClock(currentTime = Instant.fromEpochMilliseconds(0))
             val scheduler = DefaultObservationScheduler(clock)
             val eventStartTime = clock.now() + 2.hours
-            val event = MockEvent(startDateTime = eventStartTime)
+            val event = MockEvent(clock, startDateTime = eventStartTime)
 
             // ACT: Get observation schedule
             val schedule = scheduler.getObservationSchedule(event)
@@ -793,22 +846,22 @@ class DefaultObservationSchedulerTest {
             val eventStartTime = clock.now() + 2.hours
 
             // ACT & ASSERT: Check intervals at different time points
-            val event1 = MockEvent(startDateTime = eventStartTime)
+            val event1 = MockEvent(clock, startDateTime = eventStartTime)
             assertEquals(1.hours, scheduler.calculateObservationInterval(event1))
 
             // Advance to 30 minutes before
             clock.advance(1.hours + 30.minutes)
-            val event2 = MockEvent(startDateTime = eventStartTime)
+            val event2 = MockEvent(clock, startDateTime = eventStartTime)
             assertEquals(5.minutes, scheduler.calculateObservationInterval(event2))
 
             // Advance to 2 minutes before
             clock.advance(28.minutes)
-            val event3 = MockEvent(startDateTime = eventStartTime)
+            val event3 = MockEvent(clock, startDateTime = eventStartTime)
             assertEquals(1.seconds, scheduler.calculateObservationInterval(event3))
 
             // Advance to 20 seconds before
             clock.advance(1.minutes + 40.seconds)
-            val event4 = MockEvent(startDateTime = eventStartTime)
+            val event4 = MockEvent(clock, startDateTime = eventStartTime)
             assertEquals(500.milliseconds, scheduler.calculateObservationInterval(event4))
         }
 
@@ -824,6 +877,7 @@ class DefaultObservationSchedulerTest {
             val eventStartTime = clock.now() - 1.minutes
             val event =
                 MockEvent(
+                    clock,
                     startDateTime = eventStartTime,
                     isRunning = true,
                 )
@@ -864,6 +918,7 @@ class DefaultObservationSchedulerTest {
             val eventStartTime = clock.now() + 1.minutes
             val event =
                 MockEvent(
+                    clock,
                     startDateTime = eventStartTime,
                     timeBeforeUserHit = 3.seconds,
                 )
@@ -886,7 +941,7 @@ class DefaultObservationSchedulerTest {
             val clock = TestClock(currentTime = Instant.fromEpochMilliseconds(0))
             val scheduler = DefaultObservationScheduler(clock)
             val eventStartTime = clock.now() + 30.minutes
-            val event = MockEvent(startDateTime = eventStartTime)
+            val event = MockEvent(clock, startDateTime = eventStartTime)
 
             // ACT: Measure calculation time
             val startTime =
@@ -911,9 +966,9 @@ class DefaultObservationSchedulerTest {
             val clock = TestClock(currentTime = Instant.fromEpochMilliseconds(0))
             val scheduler = DefaultObservationScheduler(clock)
 
-            val event1 = MockEvent(startDateTime = clock.now() + 2.hours)
-            val event2 = MockEvent(startDateTime = clock.now() + 30.minutes)
-            val event3 = MockEvent(startDateTime = clock.now() + 20.seconds, isRunning = true)
+            val event1 = MockEvent(clock, startDateTime = clock.now() + 2.hours)
+            val event2 = MockEvent(clock, startDateTime = clock.now() + 30.minutes)
+            val event3 = MockEvent(clock, startDateTime = clock.now() + 20.seconds, isRunning = true)
 
             // ACT: Calculate intervals concurrently
             val interval1 = scheduler.calculateObservationInterval(event1)
@@ -941,7 +996,7 @@ class DefaultObservationSchedulerTest {
             val intervals = mutableListOf<Duration>()
             for (i in 0 until 1000) {
                 val eventStartTime = baseTime + (i * 10).seconds
-                val event = MockEvent(startDateTime = eventStartTime)
+                val event = MockEvent(clock, startDateTime = eventStartTime)
                 intervals.add(scheduler.calculateObservationInterval(event))
             }
 
