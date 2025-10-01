@@ -133,6 +133,11 @@ object ODRPaths {
 }
 
 // ---------- helpers ----------
+private fun metaPath(
+    root: String,
+    name: String,
+) = "$root/$name.metadata"
+
 @OptIn(ExperimentalForeignApi::class)
 private fun appSupportMapsDir(): String {
     val fm = NSFileManager.defaultManager
@@ -155,10 +160,43 @@ actual fun platformTryCopyInitialTagToCache(
     extension: String,
     destAbsolutePath: String,
 ): Boolean {
-    val src = ODRPaths.resolve(eventId, extension) ?: return false // no mount, just visible?
+    Log.d("MapStore.ios", "platformTryCopyInitialTagToCache: $eventId.$extension")
+    val src = ODRPaths.resolve(eventId, extension)
+    if (src == null) {
+        Log.w("MapStore.ios", "platformTryCopyInitialTagToCache: Source not found for $eventId.$extension")
+        return false
+    }
+
     val fm = NSFileManager.defaultManager
     if (fm.fileExistsAtPath(destAbsolutePath)) fm.removeItemAtPath(destAbsolutePath, null)
-    return fm.copyItemAtPath(src, destAbsolutePath, null)
+
+    val copied = fm.copyItemAtPath(src, destAbsolutePath, null)
+    if (!copied) {
+        Log.w("MapStore.ios", "platformTryCopyInitialTagToCache: Copy failed for $eventId.$extension")
+        return false
+    }
+
+    Log.i("MapStore.ios", "platformTryCopyInitialTagToCache: Cached $eventId.$extension")
+
+    // Since initial tag is visible (no mount needed), also cache the other file type
+    val otherExtension = if (extension == "geojson") "mbtiles" else "geojson"
+    val root = platformCacheRoot()
+    val otherPath = "$root/$eventId.$otherExtension"
+    val otherMeta = metaPath(root, "$eventId.$otherExtension")
+    val stamp = platformAppVersionStamp()
+
+    val otherSrc = ODRPaths.resolve(eventId, otherExtension)
+    if (otherSrc != null && !fm.fileExistsAtPath(otherPath)) {
+        if (fm.fileExistsAtPath(otherPath)) fm.removeItemAtPath(otherPath, null)
+        val otherCopied = fm.copyItemAtPath(otherSrc, otherPath, null)
+        if (otherCopied) {
+            platformWriteText(otherMeta, stamp)
+            if (otherExtension == "geojson") platformInvalidateGeoJson(eventId)
+            Log.i("MapStore.ios", "platformTryCopyInitialTagToCache: Also cached $eventId.$otherExtension")
+        }
+    }
+
+    return true
 }
 
 // ---------- platform shims ----------
@@ -218,9 +256,37 @@ private suspend fun mountAndCopyResource(
     destAbsolutePath: String,
 ): Boolean {
     val mounted = mountODRResource(request)
-    if (!mounted) return false
+    if (!mounted) {
+        Log.w("MapStore.ios", "mountAndCopyResource: Failed to mount ODR tag for $eventId")
+        return false
+    }
 
-    return copyResourceToDestination(eventId, extension, destAbsolutePath)
+    Log.i("MapStore.ios", "mountAndCopyResource: ODR tag mounted for $eventId, caching all files")
+
+    // Cache the requested file first
+    val requestedSuccess = copyResourceToDestination(eventId, extension, destAbsolutePath)
+    if (!requestedSuccess) {
+        Log.w("MapStore.ios", "mountAndCopyResource: Failed to copy requested $eventId.$extension")
+        return false
+    }
+
+    // Since ODR tag is mounted, cache the other file type as well (geojson OR mbtiles)
+    val otherExtension = if (extension == "geojson") "mbtiles" else "geojson"
+    val root = platformCacheRoot()
+    val otherPath = "$root/$eventId.$otherExtension"
+    val otherMeta = metaPath(root, "$eventId.$otherExtension")
+    val stamp = platformAppVersionStamp()
+
+    val otherSuccess = copyResourceToDestination(eventId, otherExtension, otherPath)
+    if (otherSuccess) {
+        platformWriteText(otherMeta, stamp)
+        if (otherExtension == "geojson") platformInvalidateGeoJson(eventId)
+        Log.i("MapStore.ios", "mountAndCopyResource: Also cached $eventId.$otherExtension")
+    } else {
+        Log.d("MapStore.ios", "mountAndCopyResource: Could not cache $eventId.$otherExtension (may not exist in ODR)")
+    }
+
+    return true
 }
 
 private suspend fun mountODRResource(request: platform.Foundation.NSBundleResourceRequest): Boolean =
