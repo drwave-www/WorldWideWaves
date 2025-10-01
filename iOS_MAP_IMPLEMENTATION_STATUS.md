@@ -177,7 +177,191 @@ override fun addWavePolygons(polygons: List<Polygon>, clearExisting: Boolean) {
 
 ---
 
-## 🎯 Critical Issues to Fix
+## 🚨 CRITICAL & HIGH SEVERITY THREATS (From Deep Technical Analysis)
+
+*Added October 1, 2025 - Based on comprehensive codebase analysis*
+
+### BLOCKING iOS RELEASE (10 Critical Issues)
+
+#### Memory Leaks (5 CRITICAL)
+
+**1. MapWrapperRegistry Unbounded Growth** ⚠️ **CRITICAL - iOS SPECIFIC**
+- **File**: `MapWrapperRegistry.kt:27-30`
+- **Issue**: Singleton accumulates map wrappers (10-50MB each) + polygon data
+- **Impact**: 10 events = ~500MB leaked memory, app crashes on low-memory devices
+- **Evidence**: No cleanup mechanism, holds strong references preventing GC
+- **Fix**:
+  ```kotlin
+  // Implement LRU cache with max 3 wrappers
+  private val wrappers = object : LinkedHashMap<String, WeakReference<Any>>(...) {
+      override fun removeEldestEntry(...): Boolean = size > MAX_CACHED_WRAPPERS
+  }
+  ```
+- **Priority**: IMMEDIATE (blocks iOS release)
+- **Estimated Effort**: 1 day
+
+**2. IOSReactivePattern Subscription Leak** ⚠️ **CRITICAL - iOS SPECIFIC**
+- **File**: `IOSReactivePattern.ios.kt:53-62`
+- **Issue**: Creates CoroutineScope per subscription without guaranteed cleanup
+- **Impact**: Each iOS view creates leaked scope if dispose() not called from Swift
+- **Evidence**: `IOSSubscription.dispose()` relies on Swift caller (no auto-cleanup)
+- **Fix**: Add lifecycle tracking and auto-cleanup on finalize
+- **Priority**: IMMEDIATE
+- **Estimated Effort**: 1 day
+
+**3. AudioTestActivity Unscoped Coroutines** ⚠️ **CRITICAL**
+- **File**: `AudioTestActivity.kt:397`
+- **Issue**: Creates unbounded CoroutineScope in loops (1000+ in crowd simulation)
+- **Impact**: Severe memory leak, background thread accumulation, battery drain
+- **Fix**: Use `rememberCoroutineScope()` or `lifecycleScope`
+- **Priority**: HIGH (debug activity but affects testing)
+- **Estimated Effort**: 2 hours
+
+**4. DefaultGeoJsonDataProvider Unbounded Cache** ⚠️ **CRITICAL**
+- **File**: `Helpers.kt:260-262`
+- **Issue**: Three unbounded maps (cache, lastAttemptTime, attemptCount)
+- **Impact**: 50 events = 25-250MB of cached JSON never released
+- **Fix**: Implement LRU with MAX_CACHE_SIZE = 10
+- **Priority**: IMMEDIATE
+- **Estimated Effort**: 4 hours
+
+**5. PerformanceMonitor Metrics Accumulation** ⚠️ **HIGH**
+- **File**: `PerformanceMonitor.kt:225-227`
+- **Issue**: Unbounded metrics, traces, and events collections
+- **Impact**: 1 hour monitoring = 10,000+ entries, can cause OOM
+- **Fix**: Implement sliding window (MAX_METRIC_SAMPLES = 1000)
+- **Priority**: MEDIUM (performance monitoring feature)
+- **Estimated Effort**: 4 hours
+
+#### Threading & Deadlocks (2 CRITICAL)
+
+**6. Thread.sleep() in Production Code** ⚠️ **HIGH**
+- **File**: `MapStore.android.kt:68`
+- **Issue**: Blocks thread instead of suspending (up to 300ms UI freeze)
+- **Impact**: Main thread blocking during map file copy retries
+- **Fix**: Replace with `delay(RETRY_DELAY_MS)` in suspending context
+- **Priority**: HIGH (affects Android primarily, but bad practice)
+- **Estimated Effort**: 1 hour
+
+**7. IOSSafeDI Object Pattern** ⚠️ **HIGH - iOS SPECIFIC**
+- **File**: `IOSSafeDI.kt:24`
+- **Issue**: `object : KoinComponent` with `by inject()` at class level
+- **Impact**: iOS initialization deadlock if accessed before Koin setup
+- **Fix**: Document initialization order OR convert to function-based approach
+- **Priority**: MEDIUM-HIGH (intentional pattern but risky)
+- **Estimated Effort**: 2 hours
+
+#### Error Handling (3 CRITICAL - iOS SPECIFIC)
+
+**8. printStackTrace in Production (iOS)** ⚠️ **CRITICAL - iOS SPECIFIC**
+- **File**: `KnHook.kt:28`
+- **Issue**: Exposes internal architecture in production builds
+- **Impact**: Security risk - stack traces visible to users
+- **Fix**: Add `if (DEBUG_BUILD) { t.printStackTrace() }`
+- **Priority**: IMMEDIATE (security issue)
+- **Estimated Effort**: 15 minutes
+
+**9. Missing @Throws Annotations** ⚠️ **CRITICAL - iOS SPECIFIC**
+- **Files**: Multiple Kotlin functions called from Swift
+- **Issue**: Swift callers use `try?` suppressing errors silently
+- **Impact**: Silent failures, difficult debugging, potential crashes
+- **Evidence**: Only 17 @Throws annotations found, Swift uses try? everywhere
+- **Fix**: Audit all Swift-callable functions, add `@Throws(Throwable::class)`
+- **Priority**: IMMEDIATE (blocks proper iOS error handling)
+- **Estimated Effort**: 1-2 days
+
+**10. try? Silent Failure in Platform Init** ⚠️ **HIGH - iOS SPECIFIC**
+- **File**: `SceneDelegate.swift:77`
+- **Issue**: `_ = try? Platform_iosKt.doInitPlatform()` suppresses errors
+- **Impact**: App continues with undefined state if platform init fails
+- **Fix**: Replace with proper do-catch with error UI or fatalError
+- **Priority**: HIGH (critical path initialization)
+- **Estimated Effort**: 1 hour
+
+---
+
+### HIGH SEVERITY ISSUES (8 Additional)
+
+#### Memory Management
+
+**11. EventsRepositoryImpl Unmanaged Background Scope**
+- **File**: `EventsRepositoryImpl.kt:59`
+- **Issue**: Long-lived scope with no cleanup method
+- **Fix**: Add `cleanup()` method and register with Koin `onRelease`
+
+**12. IOSPlatformMapManager Job Accumulation**
+- **File**: `IOSPlatformMapManager.kt:46`
+- **Issue**: Progress jobs accumulate if `cancelProgressTicker()` not called
+- **Fix**: Add cleanup() method to cancel all jobs
+
+**13. GlobalSoundChoreographyManager Nested Launch**
+- **File**: `GlobalSoundChoreographyManager.kt:186-208`
+- **Issue**: Nested coroutine continues running after stop
+- **Fix**: Store Job reference and cancel explicitly
+
+**14. CityMapRegistry Unbounded Cache**
+- **File**: `CityMapRegistry.kt:85`
+- **Issue**: No size limit or eviction policy
+- **Fix**: Implement LRU cache with max 5-10 cities
+
+**15. MapDownloadCoordinator StateFlow Accumulation**
+- **File**: `MapDownloadCoordinator.kt:44`
+- **Issue**: One StateFlow per event ever accessed
+- **Fix**: Add cleanup method for completed downloads
+
+**16. DefaultWaveProgressionTracker History**
+- **File**: `DefaultWaveProgressionTracker.kt:46`
+- **Issue**: Progression history grows unbounded
+- **Fix**: Implement max history size (e.g., last 100 snapshots)
+
+#### Threading
+
+**17. Dispatchers.Main in Property Init** ⚠️ **iOS RISK**
+- **Files**: `CloseableCoroutineScope.kt:33`, `WWWAbstractEventBackActivity.kt:72`
+- **Issue**: Accessing Dispatchers.Main during class initialization (iOS risk)
+- **Fix**: Use `Dispatchers.Main.immediate` or defer assignment
+
+**18. synchronized() on Collection Directly**
+- **File**: `AndroidSoundPlayer.kt:220-242`
+- **Issue**: Synchronizing on mutable collection (anti-pattern)
+- **Fix**: Use separate lock object: `private val tracksLock = Any()`
+
+---
+
+### MEDIUM SEVERITY ISSUES (iOS-Specific)
+
+#### UI & Compose
+
+**19. Unstable Composable Parameters** (`EventNumbers.kt`)
+- **Issue**: `IWWWEvent` interface causes excessive recomposition
+- **Fix**: Pass only stable primitives or use `@Stable` annotation
+
+**20. derivedStateOf Misuse** (`EventNumbers.kt:87-104`)
+- **Issue**: Nested state observations cause double recomposition
+- **Fix**: Remove derivedStateOf, use direct `remember` with proper keys
+
+**21. Missing Accessibility** (CRITICAL GAP - Multiple files)
+- **Issue**: App unusable for screen reader users
+- **Evidence**: 143 contentDescription (mostly in tests), 109 semantics (mostly tests)
+- **Fix**: Add semantics, contentDescription, live regions throughout production code
+
+#### Performance
+
+**22. iOS MapWrapperRegistry Polling Pattern**
+- **File**: `MapWrapperRegistry.kt`
+- **Issue**: Swift polls for changes instead of callbacks
+- **Fix**: Add callback mechanism: `onPolygonsReady?.invoke(eventId)`
+- **Impact**: Eliminates polling overhead
+
+**23. Multiple StateFlow Collectors in UI**
+- **Files**: Multiple UI components
+- **Issue**: 4 separate collectors per event observer
+- **Fix**: Combine into single `EventUIState` data class
+- **Impact**: 75% reduction in recompositions
+
+---
+
+## 🎯 Critical Issues to Fix (Original Map Implementation)
 
 ### 1. AbstractEventMap Integration (HIGHEST PRIORITY)
 
