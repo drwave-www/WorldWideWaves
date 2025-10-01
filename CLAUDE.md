@@ -345,6 +345,11 @@ class MyComponent {
 - **Dependency changes**: Coordinate any dependency updates or additions
 - **Build script modifications**: Require explicit approval before altering build logic
 
+### Testing Requirements
+- **NEVER disable tests without permission**: Always ask user permission before disabling, skipping, or renaming any test files
+- **Test modifications**: Changing test logic requires explanation and user approval
+- **Test deletion**: Absolutely forbidden without explicit user consent
+
 ### Security Patterns
 - **NO credential exposure**: Never log, store, or transmit API keys, tokens, or secrets
 - **Input validation**: All user inputs must be validated and sanitized
