@@ -66,7 +66,6 @@ import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.koin.mp.KoinPlatform
 import platform.UIKit.UIImage
 
@@ -181,26 +180,37 @@ class IOSEventMap(
         }
 
         Box(modifier = modifier.fillMaxSize()) {
-            // Load style URL - use runBlocking since files should be cached already
-            // Note: This will use fallback if files not available yet
-            val styleURL =
-                remember(event.id) {
-                    runBlocking {
-                        event.map.getStyleUri() ?: "https://demotiles.maplibre.org/style.json"
-                    }
+            // Load style URL asynchronously - don't block UI on fresh simulator
+            var styleURL by remember { mutableStateOf<String?>(null) }
+
+            LaunchedEffect(event.id) {
+                Log.d("IOSEventMap", "Loading style URL for: ${event.id}")
+                styleURL = event.map.getStyleUri()
+                Log.i("IOSEventMap", "Style URL loaded: $styleURL")
+            }
+
+            // Show map or loading indicator based on style availability
+            if (styleURL != null) {
+                Log.d("IOSEventMap", "Using style URL for ${event.id}: ${styleURL!!.take(100)}...")
+
+                // Note: Map reload after download requires app restart
+                @Suppress("DEPRECATION")
+                UIKitViewController(
+                    factory = {
+                        Log.i("IOSEventMap", "Creating native map view controller for: ${event.id}")
+                        createNativeMapViewController(event, styleURL!!) as platform.UIKit.UIViewController
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            } else {
+                // Show loading while waiting for files to download/cache
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    LoadingIndicator("Loading map...")
                 }
-
-            Log.d("IOSEventMap", "Using style URL for ${event.id}: ${styleURL.take(100)}...")
-
-            // Note: Map reload after download will require app restart for now
-            @Suppress("DEPRECATION")
-            UIKitViewController(
-                factory = {
-                    Log.i("IOSEventMap", "Creating native map view controller for: ${event.id}")
-                    createNativeMapViewController(event, styleURL) as platform.UIKit.UIViewController
-                },
-                modifier = Modifier.fillMaxSize(),
-            )
+            }
 
             // Overlay with map information and controls
             Column(
