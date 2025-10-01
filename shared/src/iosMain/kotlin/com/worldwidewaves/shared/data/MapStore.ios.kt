@@ -56,11 +56,23 @@ private fun invalidateGeoJsonDataCache(eventId: String) {
         val koin =
             org.koin.mp.KoinPlatform
                 .getKoin()
+
+        // Invalidate GeoJsonDataProvider cache (raw GeoJSON data)
         val geoJsonDataProvider = koin.get<GeoJsonDataProvider>()
         geoJsonDataProvider.invalidateCache(eventId)
         Log.d("MapStore.ios", "Invalidated GeoJsonDataProvider cache for $eventId")
+
+        // Also invalidate WWWEventArea polygon cache (parsed polygons)
+        val wwwEvents = koin.get<com.worldwidewaves.shared.events.WWWEvents>()
+        val event = wwwEvents.allEvents.value.find { it.id == eventId }
+        if (event != null) {
+            event.area.clearCache()
+            Log.d("MapStore.ios", "Invalidated WWWEventArea polygon cache for $eventId")
+        } else {
+            Log.w("MapStore.ios", "Event $eventId not found in WWWEvents, couldn't clear area cache")
+        }
     } catch (e: Exception) {
-        Log.w("MapStore.ios", "Failed to invalidate GeoJson cache for $eventId: ${e.message}")
+        Log.w("MapStore.ios", "Failed to invalidate caches for $eventId: ${e.message}")
     }
 }
 
