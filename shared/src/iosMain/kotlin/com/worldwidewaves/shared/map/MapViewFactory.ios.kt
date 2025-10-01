@@ -9,37 +9,26 @@ package com.worldwidewaves.shared.map
 
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.utils.Log
-import platform.UIKit.UIViewController
+import org.koin.mp.KoinPlatform
 
 /**
- * iOS implementation of native map view controller factory.
- *
- * Returns a placeholder UIViewController. The iOS app should call the Shared module's
- * map rendering components which will use this factory.
- *
- * The actual MapLibre integration happens in the iOS app via:
- * - iosApp/worldwidewaves/MapLibre/WWWMapViewBridge.m (compiled by Xcode)
- * - iosApp/worldwidewaves/MapLibre/MapViewBridge.swift (SwiftUI wrapper)
- * - iosApp/worldwidewaves/MapLibre/EventMapView.swift (SwiftUI map view)
- *
- * This placeholder allows the Kotlin code to compile and provides a visual
- * indicator that the iOS app needs to provide the actual implementation.
+ * iOS implementation using dependency injection.
+ * Gets NativeMapViewProvider from Koin (implementation provided by iOS app).
  */
 actual fun createNativeMapViewController(
     event: IWWWEvent,
     styleURL: String,
 ): Any {
-    Log.i("MapViewFactory", "Creating placeholder map view controller for: ${event.id}")
-    Log.d("MapViewFactory", "Style URL: $styleURL")
-    Log.w(
-        "MapViewFactory",
-        "Returning placeholder - iOS app should implement WWWMapViewBridge or use EventMapView directly",
-    )
+    Log.i("MapViewFactory", "Creating map view for: ${event.id} via Koin provider")
 
-    // Return placeholder that shows visual feedback
-    val viewController = UIViewController()
-    // The placeholder will show a gray background
-    // iOS app implementation will replace this with actual map
+    val provider = KoinPlatform.getKoin().getOrNull<NativeMapViewProvider>()
 
-    return viewController
+    return if (provider != null) {
+        Log.d("MapViewFactory", "Using NativeMapViewProvider from Koin")
+        provider.createMapView(event, styleURL)
+    } else {
+        Log.w("MapViewFactory", "NativeMapViewProvider not registered in Koin - using default implementation")
+        // Fallback: Use default iOS implementation
+        IOSNativeMapViewProvider().createMapView(event, styleURL)
+    }
 }

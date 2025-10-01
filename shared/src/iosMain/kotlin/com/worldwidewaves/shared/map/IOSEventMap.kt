@@ -125,20 +125,28 @@ class IOSEventMap(
         autoMapDownload: Boolean,
         modifier: Modifier,
     ) {
+        Log.i("IOSEventMap", "Draw() called for event: ${event.id}, autoMapDownload=$autoMapDownload")
+
         // Get unified position from PositionManager (same as Android)
         val positionManager = KoinPlatform.getKoin().get<PositionManager>()
         val platformMapManager = KoinPlatform.getKoin().get<PlatformMapManager>()
         val currentLocation by positionManager.position.collectAsState()
 
         // Use shared MapDownloadCoordinator for download state management
-        val downloadCoordinator = remember { MapDownloadCoordinator(platformMapManager) }
+        val downloadCoordinator =
+            remember {
+                Log.d("IOSEventMap", "Creating MapDownloadCoordinator for: ${event.id}")
+                MapDownloadCoordinator(platformMapManager)
+            }
         val downloadState by downloadCoordinator.getDownloadState(event.id).collectAsState()
 
         var mapIsLoaded by remember { mutableStateOf(false) }
 
         // Check map availability and trigger auto-download if needed
         LaunchedEffect(event.id, autoMapDownload) {
+            Log.i("IOSEventMap", "LaunchedEffect triggered: event=${event.id}, autoDownload=$autoMapDownload")
             downloadCoordinator.autoDownloadIfNeeded(event.id, autoMapDownload)
+            Log.d("IOSEventMap", "autoDownloadIfNeeded completed for: ${event.id}")
         }
 
         // Initialize position system integration (same as AbstractEventMap)

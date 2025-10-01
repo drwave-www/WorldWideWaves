@@ -7,6 +7,7 @@ package com.worldwidewaves.shared.map
  * https://www.apache.org/licenses/LICENSE-2.0
  */
 
+import com.worldwidewaves.shared.data.isMapFileInCache
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CoroutineDispatcher
@@ -21,7 +22,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import platform.Foundation.NSBundle
 import platform.Foundation.NSBundleResourceRequest
-import platform.Foundation.NSURL
 
 /**
  * Tiny, production-ready iOS map manager using On-Demand Resources (ODR).
@@ -47,20 +47,71 @@ class IOSPlatformMapManager(
     private val mutex = Mutex()
 
     /**
-     * Returns true if a typical file for this tag is visible in the bundle right now.
-     * Uses URLsForResourcesWithExtension (same as MapStore ODRPaths.resolve) which works reliably.
+     * Returns true if map files are available (either in cache or bundle).
+     *
+     * Maps are stored in cache after ODR download/copy:
+     * Library/Application Support/Maps/{eventId}.geojson
+     * Library/Application Support/Maps/{eventId}.mbtiles
+     *
+     * This matches how MapStore.readGeoJson() actually accesses the files.
      */
     @OptIn(ExperimentalForeignApi::class)
     override fun isMapAvailable(mapId: String): Boolean {
         Log.d(TAG, "Checking map availability for: $mapId")
 
-        // Use the SAME successful approach as ODRPaths.resolve() from MapStore.ios.kt
-        // URLsForResourcesWithExtension() does a global search and actually WORKS
-        val hasGeo = findResourceByExtensionSearch(mapId, "geojson") != null
-        val hasMb = findResourceByExtensionSearch(mapId, "mbtiles") != null
+        // Check cache first (where MapStore stores files after ODR copy)
+        val hasGeo = isMapFileInCache(mapId, "geojson")
+        val hasMb = isMapFileInCache(mapId, "mbtiles")
 
-        Log.i(TAG, "Map availability: mapId=$mapId, hasGeo=$hasGeo, hasMb=$hasMb, available=${hasGeo || hasMb}")
-        return hasGeo || hasMb
+        if (hasGeo || hasMb) {
+            Log.i(TAG, "Map available in cache: $mapId, hasGeo=$hasGeo, hasMb=$hasMb")
+            return true
+        }
+
+        // Fallback: Try bundle (for ODR resources not yet copied)
+        val bundleGeo = resolveFromStandardPaths(NSBundle.mainBundle, mapId, "geojson")
+        val bundleMb = resolveFromStandardPaths(NSBundle.mainBundle, mapId, "mbtiles")
+
+        if (bundleGeo != null || bundleMb != null) {
+            Log.i(TAG, "Map available via bundle: $mapId, geo=$bundleGeo, mb=$bundleMb")
+            return true
+        }
+
+        Log.i(TAG, "Map NOT available: $mapId (not in cache or bundle)")
+        return false
+    }
+
+    /**
+     * Try standard subdirectory paths (same logic as MapStore.resolveFromStandardPaths)
+     */
+    @OptIn(ExperimentalForeignApi::class)
+    private fun resolveFromStandardPaths(
+        bundle: NSBundle,
+        eventId: String,
+        extension: String,
+    ): String? {
+        // Try different subdirectory patterns
+        val subs = listOf("Maps/$eventId", "worldwidewaves/Maps/$eventId", null)
+
+        for (sub in subs) {
+            // Try pathForResource with subdirectory
+            val path = bundle.pathForResource(eventId, extension, sub)
+            if (path != null) {
+                Log.d(TAG, "Found via pathForResource: $eventId.$extension in $sub")
+                return path
+            }
+
+            // Try URLForResource (without subdirectory)
+            if (sub == null) {
+                val url = bundle.URLForResource(eventId, extension)
+                if (url?.path != null) {
+                    Log.d(TAG, "Found via URLForResource: $eventId.$extension")
+                    return url.path
+                }
+            }
+        }
+
+        return null
     }
 
     /**
@@ -155,35 +206,6 @@ class IOSPlatformMapManager(
                     onProgress(p)
                 }
             }
-    }
-
-    /**
-     * Find resource using global extension search (same as ODRPaths.resolve()).
-     * This approach works reliably where pathForResource() fails.
-     */
-    @OptIn(ExperimentalForeignApi::class)
-    private fun findResourceByExtensionSearch(
-        eventId: String,
-        extension: String,
-    ): String? {
-        val bundle = NSBundle.mainBundle
-        val any = bundle.URLsForResourcesWithExtension(extension, null)
-        val urls = any?.mapNotNull { it as? NSURL } ?: emptyList()
-
-        val foundUrl =
-            urls.firstOrNull { url ->
-                val p = url.path ?: ""
-                p.endsWith("/$eventId.$extension") ||
-                    p.contains("/Maps/$eventId/")
-            }
-
-        if (foundUrl != null) {
-            Log.d(TAG, "Found $extension file for $eventId: ${foundUrl.path}")
-        } else {
-            Log.d(TAG, "No $extension file found for $eventId (searched ${urls.size} total $extension files)")
-        }
-
-        return foundUrl?.path
     }
 
     companion object {
