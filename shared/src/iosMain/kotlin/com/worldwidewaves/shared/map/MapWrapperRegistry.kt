@@ -74,8 +74,9 @@ object MapWrapperRegistry {
         coordinates: List<List<Pair<Double, Double>>>,
         clearExisting: Boolean,
     ) {
-        Log.d(TAG, "Storing ${coordinates.size} pending polygons for event: $eventId")
+        Log.i(TAG, "Storing ${coordinates.size} pending polygons for event: $eventId")
         pendingPolygons[eventId] = PendingPolygonData(coordinates, clearExisting)
+        Log.i(TAG, "After storing: hasPendingPolygons($eventId) = ${hasPendingPolygons(eventId)}, size=${pendingPolygons.size}")
     }
 
     /**

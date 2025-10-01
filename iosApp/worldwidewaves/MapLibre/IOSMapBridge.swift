@@ -39,12 +39,19 @@ import CoreLocation
      * This is called periodically after the map is loaded to render polygons stored by Kotlin.
      */
     @objc public static func renderPendingPolygons(eventId: String) {
+        WWWLog.d("IOSMapBridge", "renderPendingPolygons called for: \(eventId)")
+
         guard let wrapper = Shared.MapWrapperRegistry.shared.getWrapper(eventId: eventId) as? MapLibreViewWrapper else {
-            WWWLog.v("IOSMapBridge", "No wrapper found for event: \(eventId)")
+            WWWLog.w("IOSMapBridge", "No wrapper found for event: \(eventId)")
             return
         }
 
-        guard Shared.MapWrapperRegistry.shared.hasPendingPolygons(eventId: eventId) else {
+        WWWLog.d("IOSMapBridge", "Wrapper found for: \(eventId)")
+
+        let hasPending = Shared.MapWrapperRegistry.shared.hasPendingPolygons(eventId: eventId)
+        WWWLog.i("IOSMapBridge", "hasPendingPolygons(\(eventId)) = \(hasPending)")
+
+        guard hasPending else {
             WWWLog.v("IOSMapBridge", "No pending polygons for event: \(eventId)")
             return
         }
