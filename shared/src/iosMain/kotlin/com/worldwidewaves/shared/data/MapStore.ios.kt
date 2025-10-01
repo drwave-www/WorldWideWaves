@@ -28,8 +28,6 @@ import com.worldwidewaves.shared.utils.Log
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.suspendCancellableCoroutine
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import platform.Foundation.NSApplicationSupportDirectory
 import platform.Foundation.NSBundle
 import platform.Foundation.NSFileManager
@@ -51,17 +49,19 @@ private fun onMain(block: () -> Unit) {
     NSOperationQueue.mainQueue.addOperationWithBlock(block)
 }
 
-/** Helper to invalidate GeoJsonDataProvider cache after files are downloaded */
-private object GeoJsonCacheInvalidator : KoinComponent {
-    private val geoJsonDataProvider: GeoJsonDataProvider by inject()
-
-    fun invalidate(eventId: String) {
-        geoJsonDataProvider.invalidateCache(eventId)
-    }
-}
-
+/** Helper to invalidate GeoJsonDataProvider cache after files are downloaded - iOS safe pattern */
 private fun invalidateGeoJsonDataCache(eventId: String) {
-    GeoJsonCacheInvalidator.invalidate(eventId)
+    try {
+        // iOS-safe: Get Koin instance directly, no object : KoinComponent
+        val koin =
+            org.koin.mp.KoinPlatform
+                .getKoin()
+        val geoJsonDataProvider = koin.get<GeoJsonDataProvider>()
+        geoJsonDataProvider.invalidateCache(eventId)
+        Log.d("MapStore.ios", "Invalidated GeoJsonDataProvider cache for $eventId")
+    } catch (e: Exception) {
+        Log.w("MapStore.ios", "Failed to invalidate GeoJson cache for $eventId: ${e.message}")
+    }
 }
 
 object ODRPaths {
