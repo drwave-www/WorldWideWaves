@@ -43,7 +43,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -181,36 +180,21 @@ class IOSEventMap(
         }
 
         Box(modifier = modifier.fillMaxSize()) {
-            // Load style URL asynchronously to avoid blocking UI thread during ODR mount
-            // Reload when downloadState.isAvailable changes (after explicit downloads)
-            var styleURL by remember { mutableStateOf<String?>(null) }
-
-            LaunchedEffect(event.id, downloadState.isAvailable) {
-                Log.d("IOSEventMap", "Loading style URL for: ${event.id}, isAvailable=${downloadState.isAvailable}")
-                styleURL = event.map.getStyleUri() ?: "https://demotiles.maplibre.org/style.json"
-                Log.i("IOSEventMap", "Style URL loaded: $styleURL")
-            }
-
-            if (styleURL != null) {
-                // Use key() to recreate map view when style URL changes (after download)
-                key(styleURL) {
-                    UIKitView<platform.UIKit.UIView>(
-                        factory = {
-                            Log.i("IOSEventMap", "Creating native map view for: ${event.id} with style: $styleURL")
-                            createNativeMapViewController(event, styleURL!!) as platform.UIKit.UIView
-                        },
-                        modifier = Modifier.fillMaxSize(),
-                    )
+            // Load initial style URL - use fallback if files not ready
+            val styleURL =
+                remember(event.id) {
+                    "https://demotiles.maplibre.org/style.json" // Start with fallback
                 }
-            } else {
-                // Show loading indicator while style loads
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    LoadingIndicator("Loading map...")
-                }
-            }
+
+            // TODO: Implement map reload after download completes
+            // For now, maps will show with fallback style until app restart
+            UIKitView<platform.UIKit.UIView>(
+                factory = {
+                    Log.i("IOSEventMap", "Creating native map view for: ${event.id}")
+                    createNativeMapViewController(event, styleURL) as platform.UIKit.UIView
+                },
+                modifier = Modifier.fillMaxSize(),
+            )
 
             // Overlay with map information and controls
             Column(
