@@ -23,10 +23,13 @@ package com.worldwidewaves.shared.data
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.suspendCancellableCoroutine
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import platform.Foundation.NSApplicationSupportDirectory
 import platform.Foundation.NSBundle
 import platform.Foundation.NSFileManager
@@ -46,6 +49,19 @@ import kotlin.coroutines.resume
 
 private fun onMain(block: () -> Unit) {
     NSOperationQueue.mainQueue.addOperationWithBlock(block)
+}
+
+/** Helper to invalidate GeoJsonDataProvider cache after files are downloaded */
+private object GeoJsonCacheInvalidator : KoinComponent {
+    private val geoJsonDataProvider: GeoJsonDataProvider by inject()
+
+    fun invalidate(eventId: String) {
+        geoJsonDataProvider.invalidateCache(eventId)
+    }
+}
+
+private fun invalidateGeoJsonDataCache(eventId: String) {
+    GeoJsonCacheInvalidator.invalidate(eventId)
 }
 
 object ODRPaths {
@@ -269,6 +285,12 @@ private suspend fun mountAndCopyResource(
         return false
     }
 
+    // Invalidate geojson cache if we just cached geojson (triggers polygon reload)
+    if (extension == "geojson") {
+        invalidateGeoJsonDataCache(eventId)
+        Log.d("MapStore.ios", "mountAndCopyResource: Invalidated geojson cache for $eventId")
+    }
+
     // Since ODR tag is mounted, cache the other file type as well (geojson OR mbtiles)
     val otherExtension = if (extension == "geojson") "mbtiles" else "geojson"
     val root = platformCacheRoot()
@@ -279,7 +301,10 @@ private suspend fun mountAndCopyResource(
     val otherSuccess = copyResourceToDestination(eventId, otherExtension, otherPath)
     if (otherSuccess) {
         platformWriteText(otherMeta, stamp)
-        if (otherExtension == "geojson") platformInvalidateGeoJson(eventId)
+        if (otherExtension == "geojson") {
+            invalidateGeoJsonDataCache(eventId)
+            Log.d("MapStore.ios", "mountAndCopyResource: Invalidated geojson cache for $eventId")
+        }
         Log.i("MapStore.ios", "mountAndCopyResource: Also cached $eventId.$otherExtension")
     } else {
         Log.d("MapStore.ios", "mountAndCopyResource: Could not cache $eventId.$otherExtension (may not exist in ODR)")
