@@ -95,7 +95,7 @@ fun WaveProgressionBar(
             WaveProgressionFillArea(progression)
 
             Text(
-                text = event.wave.getLiteralFromProgression(progression),
+                text = "${progression.toString().take(4)}%",
                 style = sharedPrimaryColoredBoldTextStyle(WaveDisplay.PROGRESSION_FONTSIZE),
                 color = Color.Black,
                 textAlign = TextAlign.Center,
