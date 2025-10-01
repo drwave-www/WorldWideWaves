@@ -156,6 +156,7 @@ import UIKit
         )
     }
 
+    // swiftlint:disable:next function_parameter_count
     @objc public func animateCameraToBounds(
         swLat: Double,
         swLng: Double,
@@ -229,7 +230,9 @@ import UIKit
     @objc public func addWavePolygons(polygons: [[CLLocationCoordinate2D]], clearExisting: Bool) {
         WWWLog.i(Self.tag, "addWavePolygons: \(polygons.count) polygons, clearExisting: \(clearExisting)")
         guard let mapView = mapView, let style = mapView.style else {
-            WWWLog.e(Self.tag, "Cannot add polygons - style not loaded (mapView: \(mapView != nil), style: \(mapView?.style != nil))")
+            let hasMap = mapView != nil
+            let hasStyle = mapView?.style != nil
+            WWWLog.e(Self.tag, "Cannot add polygons - style not loaded (mapView: \(hasMap), style: \(hasStyle))")
             return
         }
 
