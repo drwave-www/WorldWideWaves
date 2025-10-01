@@ -31,212 +31,23 @@ import com.worldwidewaves.shared.ui.EventsListScreen
 import org.koin.dsl.module
 
 /**
- * DI module providing UI layer dependencies for shared Compose components.
+ * UI-related dependencies for shared components.
+ * This includes basic Use Cases and Repository implementations
+ * that are needed for shared UI components like EventsListScreen.
  *
- * ## Module Purpose
- * Provides UI-related dependencies including:
- * - Shared Compose screen components
- * - Domain layer (repositories, use cases)
- * - Business logic for event management
- *
- * ## Initialization
- * - **Load order**: Fourth (final) module loaded in sharedModule
- * - **Platform**: Common (shared between Android and iOS)
- * - **Required modules**: All previous modules (common, helpers, datastore)
- * - **UI Framework**: Compose Multiplatform (100% shared UI code)
- *
- * ## Scoping Strategy
- * - **Singletons**: All dependencies are singletons for consistent state
- *   - Screen components: Single instance per screen (lightweight, stateless)
- *   - Repositories: Single source of truth for data access
- *   - Use cases: Stateless business logic (safe as singletons)
- *
- * ## Platform Considerations
- * - **Android**: Uses AndroidX Compose
- * - **iOS**: Uses Compose Multiplatform via ComposeUIViewController
- * - **ViewModels**: Platform-specific (not in this module)
- *   - Android: AndroidViewModel with MapAvailabilityChecker
- *   - iOS: iOS-specific ViewModel with platform dependencies
- *
- * ## Architecture Notes
- * This module follows Clean Architecture principles:
- * - **Repository Layer**: Data access abstraction (EventsRepository)
- * - **Use Cases Layer**: Business logic operations
- * - **UI Layer**: Composable screens (stateless,ViewModel-driven)
- *
- * EventsViewModel is intentionally kept in platform-specific modules because it has
- * platform-specific dependencies (MapAvailabilityChecker, platform-specific lifecycle).
- *
- * @see EventsRepository for data access
- * @see EventsListScreen for shared events UI
- * @see AboutTabScreen for shared about UI
+ * Note: EventsViewModel is kept in platform-specific modules since it
+ * may have platform-specific dependencies like MapAvailabilityChecker.
  */
 val uiModule =
     module {
-        /**
-         * Provides [AboutTabScreen] as singleton Compose screen component.
-         *
-         * **Scope**: Singleton - single screen instance for the app
-         * **Thread-safety**: Yes - Compose is thread-safe
-         * **Lifecycle**: Lives for entire app lifecycle (lightweight, no state)
-         * **Dependencies**: Platform abstraction (injected)
-         *
-         * AboutTabScreen is a stateless Compose component showing:
-         * - App version and build information
-         * - Credits and acknowledgments
-         * - License information
-         * - Contact/support links
-         *
-         * Singleton scope is safe because:
-         * - Component is stateless (no mutable state)
-         * - Lightweight (just function references)
-         * - No per-instance resources to manage
-         *
-         * @see AboutTabScreen for screen implementation
-         */
         single { AboutTabScreen(get()) }
-
-        /**
-         * Provides [EventsListScreen] as singleton Compose screen component.
-         *
-         * **Scope**: Singleton - single screen instance for the app
-         * **Thread-safety**: Yes - Compose is thread-safe
-         * **Lifecycle**: Lives for entire app lifecycle (lightweight, no state)
-         * **Dependencies**: EventsViewModel, MapAvailabilityChecker, SetEventFavorite
-         *
-         * EventsListScreen is the main screen showing:
-         * - List of available wave events
-         * - Event filtering and sorting
-         * - Favorite events toggle
-         * - Event detail navigation
-         *
-         * The screen is stateless - all state is managed by EventsViewModel:
-         * - ViewModel is injected (platform-specific)
-         * - Screen observes ViewModel state via Compose State
-         * - User actions are delegated to ViewModel
-         *
-         * Singleton scope is safe because:
-         * - Component is stateless (state in ViewModel)
-         * - Lightweight (just Composable function)
-         * - No per-instance resources
-         *
-         * @see EventsListScreen for screen implementation
-         */
         single { EventsListScreen(viewModel = get(), mapChecker = get(), setEventFavorite = get()) }
 
-        // Repository layer -------------------------------------------------------
-
-        /**
-         * Provides [EventsRepository] as singleton for event data access.
-         *
-         * **Scope**: Singleton - single source of truth for event data
-         * **Thread-safety**: Yes - uses coroutines and StateFlow
-         * **Lifecycle**: Lives for entire app lifecycle
-         * **Dependencies**: WWWEvents (core event manager)
-         *
-         * EventsRepository abstracts event data access:
-         * - Loads events from Firebase/local storage
-         * - Provides reactive event streams
-         * - Caches event data in memory
-         * - Handles event updates and invalidation
-         *
-         * This is the data layer in Clean Architecture:
-         * - Domain layer (use cases) depends on this
-         * - UI layer accesses data via use cases
-         * - Provides platform-agnostic data access
-         *
-         * @see EventsRepository for repository interface
-         * @see EventsRepositoryImpl for implementation
-         */
+        // Repository layer
         single<EventsRepository> { EventsRepositoryImpl(get()) }
 
-        // Use cases layer --------------------------------------------------------
-
-        /**
-         * Provides [GetSortedEventsUseCase] for retrieving sorted events.
-         *
-         * **Scope**: Singleton - stateless business logic
-         * **Thread-safety**: Yes - stateless, thread-safe operations
-         * **Lifecycle**: Lives for entire app lifecycle
-         * **Dependencies**: EventsRepository
-         *
-         * GetSortedEventsUseCase encapsulates event sorting logic:
-         * - Sorts events by start time (chronological)
-         * - Filters out past events
-         * - Applies user preferences (if configured)
-         *
-         * Singleton scope is safe because:
-         * - Use case is stateless (no mutable state)
-         * - Pure business logic (deterministic)
-         * - Lightweight (no resources to manage)
-         *
-         * Usage pattern:
-         * ```kotlin
-         * val getSorted: GetSortedEventsUseCase = get()
-         * val sortedEvents = getSorted.execute()
-         * ```
-         *
-         * @see GetSortedEventsUseCase for sorting logic
-         */
+        // Use cases layer
         single { GetSortedEventsUseCase(get()) }
-
-        /**
-         * Provides [FilterEventsUseCase] for filtering events by criteria.
-         *
-         * **Scope**: Singleton - stateless business logic
-         * **Thread-safety**: Yes - stateless, thread-safe operations
-         * **Lifecycle**: Lives for entire app lifecycle
-         * **Dependencies**: EventsRepository
-         *
-         * FilterEventsUseCase encapsulates event filtering logic:
-         * - Filter by location proximity
-         * - Filter by event type
-         * - Filter by favorite status
-         * - Filter by time range
-         *
-         * Singleton scope is safe because:
-         * - Use case is stateless (filtering is pure function)
-         * - No mutable state to share
-         * - Lightweight operation
-         *
-         * Usage pattern:
-         * ```kotlin
-         * val filter: FilterEventsUseCase = get()
-         * val filtered = filter.execute(
-         *     events = allEvents,
-         *     criteria = FilterCriteria(onlyFavorites = true)
-         * )
-         * ```
-         *
-         * @see FilterEventsUseCase for filtering logic
-         */
         single { FilterEventsUseCase(get()) }
-
-        /**
-         * Provides [CheckEventFavoritesUseCase] for checking favorite status.
-         *
-         * **Scope**: Singleton - stateless business logic
-         * **Thread-safety**: Yes - stateless, thread-safe operations
-         * **Lifecycle**: Lives for entire app lifecycle
-         * **Dependencies**: None (accesses FavoriteEventsStore via repository)
-         *
-         * CheckEventFavoritesUseCase encapsulates favorite checking logic:
-         * - Checks if event is marked as favorite
-         * - Retrieves all favorite event IDs
-         * - Synchronizes favorite state
-         *
-         * Singleton scope is safe because:
-         * - Use case is stateless (reads from store)
-         * - No mutable state in use case
-         * - Lightweight read operation
-         *
-         * Usage pattern:
-         * ```kotlin
-         * val checkFavorites: CheckEventFavoritesUseCase = get()
-         * val isFavorite = checkFavorites.isEventFavorite(eventId)
-         * ```
-         *
-         * @see CheckEventFavoritesUseCase for favorite checking logic
-         */
         single { CheckEventFavoritesUseCase() }
     }

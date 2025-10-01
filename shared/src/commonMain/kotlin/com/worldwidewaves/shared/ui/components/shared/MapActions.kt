@@ -46,7 +46,7 @@ import com.worldwidewaves.shared.generated.resources.target_me_active
 import com.worldwidewaves.shared.generated.resources.target_me_inactive
 import com.worldwidewaves.shared.generated.resources.target_wave_active
 import com.worldwidewaves.shared.generated.resources.target_wave_inactive
-import com.worldwidewaves.shared.ui.utils.getIosSafeClock
+import com.worldwidewaves.shared.ui.utils.getIOSSafeClock
 import dev.icerock.moko.resources.compose.stringResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.ExperimentalTime
@@ -64,7 +64,7 @@ fun MapActions(
     onTargetWave: () -> Unit = {},
     onTargetUser: () -> Unit = {},
     // iOS FIX: Clock dependency passed as parameter to prevent deadlock
-    clock: IClock = getIosSafeClock(),
+    clock: IClock = getIOSSafeClock(),
 ) {
     val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
     val isInArea by event.observer.userIsInArea.collectAsState()

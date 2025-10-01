@@ -21,7 +21,7 @@ package com.worldwidewaves.shared.data
 
 import android.content.Context
 import android.os.Build
-import com.worldwidewaves.shared.events.data.GeoJsonDataProvider
+import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.utils.Log
 import org.jetbrains.compose.resources.ExperimentalResourceApi

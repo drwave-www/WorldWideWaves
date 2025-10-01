@@ -69,7 +69,7 @@ object MapDownloadGate {
     fun isAllowed(tag: String) = tag in allowed
 }
 
-expect suspend fun platformTryCopyInitialTagToCache(
+expect fun platformTryCopyInitialTagToCache(
     eventId: String,
     extension: String,
     destAbsolutePath: String,

@@ -276,4 +276,25 @@ class FilterEventsUseCaseTest {
             assertEquals(2, runningResult.size) // event1 and event2 are running
             assertEquals(2, favoriteResult.size) // event1 and event3 are favorites
         }
+
+    @Test
+    fun `EventFilterCriteria data class works correctly`() {
+        // Given & When
+        val defaultCriteria = EventFilterCriteria()
+        val customCriteria =
+            EventFilterCriteria(
+                onlyFavorites = true,
+                onlyDownloaded = true,
+                eventIds = listOf("event1", "event2"),
+            )
+
+        // Then
+        assertEquals(false, defaultCriteria.onlyFavorites)
+        assertEquals(false, defaultCriteria.onlyDownloaded)
+        assertEquals(null, defaultCriteria.eventIds)
+
+        assertEquals(true, customCriteria.onlyFavorites)
+        assertEquals(true, customCriteria.onlyDownloaded)
+        assertEquals(listOf("event1", "event2"), customCriteria.eventIds)
+    }
 }
