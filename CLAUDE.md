@@ -162,6 +162,35 @@ rg -n -A 5 "init\s*\{" shared/src/commonMain --type kotlin | rg "launch|get\(\)"
 - **Clean Architecture**: Maintain clear separation between data, domain, and presentation layers
 - **Testing**: Write comprehensive unit tests and maintain existing test coverage
 
+### Code Modification Best Practices
+
+#### Import Management (CRITICAL)
+- **ALWAYS check existing imports BEFORE modifying code**
+- When adding new function calls, classes, or language features:
+  1. First check if the required import exists in the file
+  2. Add missing imports immediately in the same change
+  3. Verify compilation before committing
+- This prevents compilation errors and reduces iteration cycles
+
+**Example workflow:**
+```bash
+# Plan to add runBlocking { } to code
+# 1. Check file imports first
+grep "^import kotlinx.coroutines" filename.kt
+
+# 2. Add missing import if needed
+import kotlinx.coroutines.runBlocking
+
+# 3. Make code change
+# 4. Verify compilation
+```
+
+**Common imports to check:**
+- Coroutines: `kotlinx.coroutines.runBlocking`, `kotlinx.coroutines.withContext`, etc.
+- Compose: `androidx.compose.runtime.key`, `androidx.compose.runtime.LaunchedEffect`, etc.
+- Platform: `platform.UIKit.*`, `platform.Foundation.*` for iOS
+- Logging: `com.worldwidewaves.shared.utils.Log`
+
 ### Position System Guidelines
 - **PositionManager**: Use centralized position management for all location-related operations
 - **Source Priority**: SIMULATION > GPS (simulation for testing, GPS for real device location)
