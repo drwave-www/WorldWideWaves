@@ -9,59 +9,29 @@ package com.worldwidewaves.shared.map
 
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.utils.Log
-import kotlinx.cinterop.ByteVar
-import kotlinx.cinterop.CPointer
-import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.cstr
-import kotlinx.cinterop.memScoped
 import platform.UIKit.UIViewController
 
-// External C function from iOS app (MapViewFactoryHelper.m)
-// The linker will resolve this symbol when the app is built
-@Suppress("FunctionNaming")
-@OptIn(ExperimentalForeignApi::class)
-external fun WWW_createMapViewController(
-    styleURL: CPointer<ByteVar>?,
-    latitude: Double,
-    longitude: Double,
-    zoom: Double,
-): UIViewController?
-
 /**
- * iOS implementation of NativeMapViewProvider.
- * Calls C function wrapper in iOS app to create MapLibre map views.
+ * Default iOS implementation of NativeMapViewProvider.
+ * Returns a placeholder UIViewController.
+ *
+ * The iOS app should override this by registering a custom implementation in Koin
+ * that calls WWWMapViewBridge.m or EventMapView.swift.
  */
 class IOSNativeMapViewProvider : NativeMapViewProvider {
-    @OptIn(ExperimentalForeignApi::class)
     override fun createMapView(
         event: IWWWEvent,
         styleURL: String,
     ): Any {
-        Log.i("IOSNativeMapViewProvider", "Creating map view for: ${event.id}")
+        Log.i("IOSNativeMapViewProvider", "Creating placeholder map view for: ${event.id}")
         Log.d("IOSNativeMapViewProvider", "Style URL: $styleURL")
+        Log.w(
+            "IOSNativeMapViewProvider",
+            "Default implementation - iOS app should register custom NativeMapViewProvider in Koin",
+        )
 
-        return try {
-            memScoped {
-                // Call C function from iOS app
-                val viewController =
-                    WWW_createMapViewController(
-                        styleURL = styleURL.cstr.ptr,
-                        latitude = 48.8566, // TODO: Get from event
-                        longitude = 2.3522,
-                        zoom = 12.0,
-                    )
-
-                if (viewController != null) {
-                    Log.i("IOSNativeMapViewProvider", "Map view created successfully")
-                    viewController
-                } else {
-                    Log.e("IOSNativeMapViewProvider", "WWW_createMapViewController returned null")
-                    UIViewController()
-                }
-            }
-        } catch (e: Exception) {
-            Log.e("IOSNativeMapViewProvider", "Error creating map view: ${e.message}")
-            UIViewController()
-        }
+        // Return placeholder
+        // iOS app registers custom provider that creates actual MapLibre views
+        return UIViewController()
     }
 }
