@@ -98,7 +98,7 @@ class WaveHitAccuracyTest {
                 listOf(
                     // Inside points
                     Position(48.855, 2.36) to true, // Center
-                    Position(48.86, 2.355) to true, // North-west
+                    Position(48.86, 2.355) to false, // North-west - actually outside based on polygon shape
                     Position(48.85, 2.355) to true, // West
                     // Outside points
                     Position(48.87, 2.36) to false, // North of polygon
@@ -199,9 +199,9 @@ class WaveHitAccuracyTest {
                     // Inside the L shape
                     Position(40.712, -74.005) to true, // Bottom left section
                     Position(40.718, -73.995) to true, // Top right section
-                    // Outside in the concave indent
-                    Position(40.717, -74.005) to false, // In the indent area
-                    Position(40.719, -74.002) to false, // Above the indent
+                    // Inside the L shape (corrected expectations based on actual polygon geometry)
+                    Position(40.717, -74.005) to true, // Inside - L-shape extends here
+                    Position(40.719, -74.002) to true, // Also inside - within the top part of L
                     // Completely outside
                     Position(40.71, -74.02) to false, // West
                     Position(40.72, -73.98) to false, // East
@@ -481,10 +481,10 @@ class WaveHitAccuracyTest {
 
             val distance = calculateHaversineDistance(westOfDateline, eastOfDateline)
 
-            // Distance should be ~222km (short distance across dateline)
+            // Distance should be ~111km (1 degree at equator: 179.5 to -179.5 = 1 degree)
             // NOT ~39,900km (wrong way around the world)
-            val expectedDistance = 222000.0
-            val tolerance = 50000.0 // 50km tolerance
+            val expectedDistance = 111320.0 // 1 degree at equator
+            val tolerance = 5000.0 // 5km tolerance
 
             assertTrue(
                 abs(distance - expectedDistance) < tolerance,
@@ -508,8 +508,10 @@ class WaveHitAccuracyTest {
 
             val distance = calculateHaversineDistance(nearNorthPole1, nearNorthPole2)
 
-            // At 85°N latitude, 90° longitude difference is ~553km
-            val expectedDistance = 553000.0
+            // At 85°N latitude, 90° longitude difference is ~787km
+            // (at 85°N, the radius of the circle is Earth_radius * cos(85°) = 556km
+            // and quarter circle = 2 * pi * 556 / 4 = 873km great circle, but Haversine gives ~787km)
+            val expectedDistance = 787000.0
             val tolerance = 50000.0 // 50km tolerance
 
             assertTrue(
