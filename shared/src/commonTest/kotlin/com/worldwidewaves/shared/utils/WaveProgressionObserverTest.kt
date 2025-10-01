@@ -108,14 +108,7 @@ class WaveProgressionObserverTest {
         // Setup area polygons
         val testPolygons =
             listOf(
-                Polygon(
-                    listOf(
-                        Position(40.0, -74.0),
-                        Position(40.1, -74.0),
-                        Position(40.1, -74.1),
-                        Position(40.0, -74.1),
-                    ),
-                ),
+                createPolygon(Position(40.0, -74.0), Position(40.1, -74.0), Position(40.1, -74.1), Position(40.0, -74.1)),
             )
         coEvery { mockArea.getPolygons() } returns testPolygons
 
@@ -129,14 +122,25 @@ class WaveProgressionObserverTest {
         progressionFlow.value = 0.0
     }
 
+    /**
+     * Helper function to create a Polygon from list of positions
+     */
+    private fun createPolygon(vararg positions: Position): Polygon =
+        Polygon().apply {
+            positions.forEach { add(it) }
+        }
+
     @Test
     fun `should not observe when event is null`() =
         runTest {
             // Arrange
+            val testEventMap = mockk<AbstractEventMap<*>>(relaxed = true)
+            every { testEventMap.updateWavePolygons(any(), any()) } just runs
+
             val observer =
                 WaveProgressionObserver(
                     scope = this,
-                    eventMap = mockEventMap,
+                    eventMap = testEventMap,
                     event = null,
                 )
 
@@ -145,7 +149,7 @@ class WaveProgressionObserverTest {
             testScheduler.advanceUntilIdle()
 
             // Assert - no interactions with map should occur
-            verify(exactly = 0) { mockEventMap.updateWavePolygons(any(), any()) }
+            verify(exactly = 0) { testEventMap.updateWavePolygons(any(), any()) }
         }
 
     @Test
@@ -158,16 +162,10 @@ class WaveProgressionObserverTest {
 
             val testPolygons =
                 listOf(
-                    Polygon(
-                        listOf(
-                            Position(40.0, -74.0),
-                            Position(40.1, -74.0),
-                            Position(40.1, -74.1),
-                        ),
-                    ),
+                    createPolygon(Position(40.0, -74.0), Position(40.1, -74.0), Position(40.1, -74.1)),
                 )
             coEvery { mockWave.getWavePolygons() } returns
-                mockk {
+                mockk<WWWEventWave.WavePolygons> {
                     every { traversedPolygons } returns testPolygons
                 }
 
@@ -257,16 +255,10 @@ class WaveProgressionObserverTest {
 
             val testPolygons =
                 listOf(
-                    Polygon(
-                        listOf(
-                            Position(40.0, -74.0),
-                            Position(40.1, -74.0),
-                            Position(40.1, -74.1),
-                        ),
-                    ),
+                    createPolygon(Position(40.0, -74.0), Position(40.1, -74.0), Position(40.1, -74.1)),
                 )
             coEvery { mockWave.getWavePolygons() } returns
-                mockk {
+                mockk<WWWEventWave.WavePolygons> {
                     every { traversedPolygons } returns testPolygons
                 }
 
@@ -307,16 +299,10 @@ class WaveProgressionObserverTest {
 
             val testPolygons =
                 listOf(
-                    Polygon(
-                        listOf(
-                            Position(40.0, -74.0),
-                            Position(40.1, -74.0),
-                            Position(40.1, -74.1),
-                        ),
-                    ),
+                    createPolygon(Position(40.0, -74.0), Position(40.1, -74.0), Position(40.1, -74.1)),
                 )
             coEvery { mockWave.getWavePolygons() } returns
-                mockk {
+                mockk<WWWEventWave.WavePolygons> {
                     every { traversedPolygons } returns testPolygons
                 }
 
@@ -353,19 +339,17 @@ class WaveProgressionObserverTest {
 
             val testPolygons =
                 listOf(
-                    Polygon(
-                        listOf(
-                            Position(40.0, -74.0),
-                            Position(40.1, -74.0),
-                            Position(40.1, -74.1),
-                        ),
-                    ),
+                    createPolygon(Position(40.0, -74.0), Position(40.1, -74.0), Position(40.1, -74.1)),
                 )
 
             // First return non-empty, then empty
             coEvery { mockWave.getWavePolygons() } returns
-                mockk { every { traversedPolygons } returns testPolygons } andThen
-                mockk { every { traversedPolygons } returns emptyList() }
+                mockk<WWWEventWave.WavePolygons> {
+                    every { traversedPolygons } returns testPolygons
+                } andThen
+                mockk<WWWEventWave.WavePolygons> {
+                    every { traversedPolygons } returns emptyList()
+                }
 
             val observer =
                 WaveProgressionObserver(
@@ -402,16 +386,10 @@ class WaveProgressionObserverTest {
 
             val testPolygons =
                 listOf(
-                    Polygon(
-                        listOf(
-                            Position(40.0, -74.0),
-                            Position(40.1, -74.0),
-                            Position(40.1, -74.1),
-                        ),
-                    ),
+                    createPolygon(Position(40.0, -74.0), Position(40.1, -74.0), Position(40.1, -74.1)),
                 )
             coEvery { mockWave.getWavePolygons() } returns
-                mockk {
+                mockk<WWWEventWave.WavePolygons> {
                     every { traversedPolygons } returns testPolygons
                 }
 
@@ -449,16 +427,10 @@ class WaveProgressionObserverTest {
 
             val testPolygons =
                 listOf(
-                    Polygon(
-                        listOf(
-                            Position(40.0, -74.0),
-                            Position(40.1, -74.0),
-                            Position(40.1, -74.1),
-                        ),
-                    ),
+                    createPolygon(Position(40.0, -74.0), Position(40.1, -74.0), Position(40.1, -74.1)),
                 )
             coEvery { mockWave.getWavePolygons() } returns
-                mockk {
+                mockk<WWWEventWave.WavePolygons> {
                     every { traversedPolygons } returns testPolygons
                 }
 
@@ -496,16 +468,10 @@ class WaveProgressionObserverTest {
 
             val testPolygons =
                 listOf(
-                    Polygon(
-                        listOf(
-                            Position(40.0, -74.0),
-                            Position(40.1, -74.0),
-                            Position(40.1, -74.1),
-                        ),
-                    ),
+                    createPolygon(Position(40.0, -74.0), Position(40.1, -74.0), Position(40.1, -74.1)),
                 )
             coEvery { mockWave.getWavePolygons() } returns
-                mockk {
+                mockk<WWWEventWave.WavePolygons> {
                     every { traversedPolygons } returns testPolygons
                 }
 
@@ -546,16 +512,10 @@ class WaveProgressionObserverTest {
 
             val testPolygons =
                 listOf(
-                    Polygon(
-                        listOf(
-                            Position(40.0, -74.0),
-                            Position(40.1, -74.0),
-                            Position(40.1, -74.1),
-                        ),
-                    ),
+                    createPolygon(Position(40.0, -74.0), Position(40.1, -74.0), Position(40.1, -74.1)),
                 )
             coEvery { mockWave.getWavePolygons() } returns
-                mockk {
+                mockk<WWWEventWave.WavePolygons> {
                     every { traversedPolygons } returns testPolygons
                 }
 
@@ -678,16 +638,10 @@ class WaveProgressionObserverTest {
 
             val testPolygons =
                 listOf(
-                    Polygon(
-                        listOf(
-                            Position(40.0, -74.0),
-                            Position(40.1, -74.0),
-                            Position(40.1, -74.1),
-                        ),
-                    ),
+                    createPolygon(Position(40.0, -74.0), Position(40.1, -74.0), Position(40.1, -74.1)),
                 )
             coEvery { mockWave.getWavePolygons() } returns
-                mockk {
+                mockk<WWWEventWave.WavePolygons> {
                     every { traversedPolygons } returns testPolygons
                 }
 
@@ -727,16 +681,10 @@ class WaveProgressionObserverTest {
 
             val testPolygons =
                 listOf(
-                    Polygon(
-                        listOf(
-                            Position(40.0, -74.0),
-                            Position(40.1, -74.0),
-                            Position(40.1, -74.1),
-                        ),
-                    ),
+                    createPolygon(Position(40.0, -74.0), Position(40.1, -74.0), Position(40.1, -74.1)),
                 )
             coEvery { mockWave.getWavePolygons() } returns
-                mockk {
+                mockk<WWWEventWave.WavePolygons> {
                     every { traversedPolygons } returns testPolygons
                 }
 
@@ -770,16 +718,10 @@ class WaveProgressionObserverTest {
 
             val testPolygons =
                 listOf(
-                    Polygon(
-                        listOf(
-                            Position(40.0, -74.0),
-                            Position(40.1, -74.0),
-                            Position(40.1, -74.1),
-                        ),
-                    ),
+                    createPolygon(Position(40.0, -74.0), Position(40.1, -74.0), Position(40.1, -74.1)),
                 )
             coEvery { mockWave.getWavePolygons() } returns
-                mockk {
+                mockk<WWWEventWave.WavePolygons> {
                     every { traversedPolygons } returns testPolygons
                 }
 
@@ -815,16 +757,10 @@ class WaveProgressionObserverTest {
 
             val testPolygons =
                 listOf(
-                    Polygon(
-                        listOf(
-                            Position(40.0, -74.0),
-                            Position(40.1, -74.0),
-                            Position(40.1, -74.1),
-                        ),
-                    ),
+                    createPolygon(Position(40.0, -74.0), Position(40.1, -74.0), Position(40.1, -74.1)),
                 )
             coEvery { mockWave.getWavePolygons() } returns
-                mockk {
+                mockk<WWWEventWave.WavePolygons> {
                     every { traversedPolygons } returns testPolygons
                 }
 
