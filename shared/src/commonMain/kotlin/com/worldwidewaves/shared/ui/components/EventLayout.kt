@@ -44,7 +44,7 @@ import com.worldwidewaves.shared.ui.utils.rememberEventState
  * Integrates button area logic directly with platform callbacks for navigation and feedback.
  */
 @Composable
-fun StandardEventLayout(
+fun EventLayout(
     event: IWWWEvent,
     mapFeatureState: MapFeatureState,
     onNavigateToWave: (String) -> Unit,

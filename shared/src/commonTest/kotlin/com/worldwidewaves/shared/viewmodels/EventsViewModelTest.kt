@@ -76,17 +76,25 @@ class EventsViewModelTest : KoinTest {
      */
     private lateinit var sharedTestClock: TestClock
 
+    /**
+     * Test-specific CoroutineScopeProvider that can be explicitly cancelled in tearDown.
+     */
+    private lateinit var testScopeProvider: CoroutineScopeProvider
+
     @BeforeTest
     fun setUp() {
         // Initialize the shared test clock
         sharedTestClock = TestClock(currentTime = Instant.fromEpochMilliseconds(0))
+
+        // Create a new scope provider for each test to ensure isolation
+        testScopeProvider = DefaultCoroutineScopeProvider()
 
         // Start Koin with the test clock and CoroutineScopeProvider so WWWEventObserver can access them
         startKoin {
             modules(
                 module {
                     single<IClock> { sharedTestClock }
-                    single<CoroutineScopeProvider> { DefaultCoroutineScopeProvider() }
+                    single<CoroutineScopeProvider> { testScopeProvider }
                 },
             )
         }
@@ -94,10 +102,16 @@ class EventsViewModelTest : KoinTest {
 
     @AfterTest
     fun tearDown() {
-        // Give enough time to allow any running coroutines to complete
+        // Cancel all coroutines from the scope provider and wait for completion
         // This prevents UncaughtExceptionsBeforeTest errors in subsequent tests
         kotlinx.coroutines.runBlocking {
-            delay(200) // Increased from 50ms to ensure all coroutines finish
+            // Cancel all coroutines in the CoroutineScopeProvider
+            testScopeProvider.cancelAllCoroutines()
+
+            // Give sufficient time for all cancellations to complete
+            // This includes: flow collection, filtering operations, WWWEventObserver tasks
+            // Tests with 1000 events need more time for cancellation to propagate
+            delay(500) // Delay after cancellation to ensure all cleanup completes
         }
         stopKoin()
     }
