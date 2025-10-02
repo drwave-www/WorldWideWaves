@@ -85,7 +85,7 @@ class MapBoundsEnforcerTest {
         private val _currentZoom = MutableStateFlow(initialZoom)
         override val currentZoom: StateFlow<Double> = _currentZoom
 
-        var visibleRegion: BoundingBox =
+        private var _visibleRegion: BoundingBox =
             BoundingBox(
                 swLat = 51.4900,
                 swLng = -0.1500,
@@ -104,6 +104,11 @@ class MapBoundsEnforcerTest {
             _currentPosition.value = position
         }
 
+        // Helper method to set visible region from tests
+        fun setVisibleRegion(region: BoundingBox) {
+            _visibleRegion = region
+        }
+
         override fun setMap(map: Unit) {}
 
         override fun setStyle(
@@ -119,7 +124,7 @@ class MapBoundsEnforcerTest {
 
         override fun getCameraPosition(): Position? = _currentPosition.value
 
-        override fun getVisibleRegion(): BoundingBox = visibleRegion
+        override fun getVisibleRegion(): BoundingBox = _visibleRegion
 
         override fun moveCamera(bounds: BoundingBox) {
             val center =
@@ -475,25 +480,29 @@ class MapBoundsEnforcerTest {
             val adapter = TestMapLibreAdapter()
             val enforcer = MapBoundsEnforcer(LONDON_BOUNDS, adapter)
 
-            // Create invalid bounds (northeast is southwest of southwest)
-            val invalidBounds =
+            // Set some padding first so we can test "too small" bounds
+            val padding = MapBoundsEnforcer.VisibleRegionPadding(0.01, 0.01)
+            enforcer.setVisibleRegionPadding(padding)
+
+            // Create bounds that are too small (smaller than 10% of padding = 0.001)
+            val tooSmallBounds =
                 BoundingBox(
-                    swLat = 51.5400,
-                    swLng = -0.0500,
-                    neLat = 51.4800,
-                    neLng = -0.2000,
+                    swLat = 51.5099,
+                    swLng = -0.1251,
+                    neLat = 51.5101, // Only 0.0002 height (< 0.001 threshold)
+                    neLng = -0.1249, // Only 0.0002 width (< 0.001 threshold)
                 )
 
             val currentPosition = Position(51.5100, -0.1250)
 
-            // Verify invalid bounds are detected
-            val isValid = enforcer.isValidBounds(invalidBounds, currentPosition)
+            // Verify too-small bounds are detected as invalid
+            val isValid = enforcer.isValidBounds(tooSmallBounds, currentPosition)
             assertFalse(
                 isValid,
-                "Should detect invalid bounds (inverted corners)",
+                "Should detect bounds that are too small (< 10% of padding)",
             )
 
-            println("✅ Invalid bounding box detected")
+            println("✅ Too-small bounding box detected as invalid")
         }
 
     @Test
@@ -522,9 +531,13 @@ class MapBoundsEnforcerTest {
             val adapter = TestMapLibreAdapter()
             val enforcer = MapBoundsEnforcer(LONDON_BOUNDS, adapter)
 
+            // Set padding so validation can check size thresholds
+            val padding = MapBoundsEnforcer.VisibleRegionPadding(0.01, 0.01)
+            enforcer.setVisibleRegionPadding(padding)
+
             val currentPosition = Position(51.5100, -0.1250)
 
-            // Test valid bounds
+            // Test valid bounds (large enough and contains position)
             val validBounds =
                 BoundingBox(
                     swLat = 51.4900,
@@ -537,20 +550,20 @@ class MapBoundsEnforcerTest {
                 "Should validate proper bounds containing current position",
             )
 
-            // Test bounds too small (smaller than padding)
+            // Test bounds too small (< 10% of padding threshold)
             val tinyBounds =
                 BoundingBox(
                     swLat = 51.5099,
                     swLng = -0.1251,
-                    neLat = 51.5101,
-                    neLng = -0.1249,
+                    neLat = 51.5101, // 0.0002 height < 0.001 threshold
+                    neLng = -0.1249, // 0.0002 width < 0.001 threshold
                 )
             assertFalse(
                 enforcer.isValidBounds(tinyBounds, currentPosition),
-                "Should reject bounds that are too small",
+                "Should reject bounds that are too small (< 10% of padding)",
             )
 
-            // Test bounds not containing current position
+            // Test bounds not containing current position (far away)
             val distantBounds =
                 BoundingBox(
                     swLat = 48.8000,

@@ -47,7 +47,6 @@ import org.koin.dsl.module
 import org.koin.test.KoinTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -981,7 +980,6 @@ class EventsViewModelTest : KoinTest {
     // ========================================================================
 
     @Test
-    @Ignore("Flaky timing test - filter operations have race conditions in test environment")
     fun `no memory leaks after multiple filter operations`() =
         runTest {
             // Given
@@ -992,15 +990,16 @@ class EventsViewModelTest : KoinTest {
             waitForEvents(viewModel, 100)
 
             // When - perform 100 filter operations
+            // Use smaller batches and wait for stabilization to avoid race conditions
             repeat(100) { i ->
                 val shouldFilter = (i % 2 == 0)
-                viewModel.filterEvents(onlyFavorites = shouldFilter)
-                delay(50) // Increased delay to ensure filter completes
-            }
+                val expectedSize = if (shouldFilter) 50 else 100
 
-            // Wait for the last filter to complete (i=99 is odd, so onlyFavorites=false)
-            delay(100) // Additional wait for final state stabilization
-            waitForEvents(viewModel, 100, timeoutMs = 5000)
+                viewModel.filterEvents(onlyFavorites = shouldFilter)
+
+                // Wait for this specific filter operation to complete before next
+                waitForEvents(viewModel, expectedSize, timeoutMs = 2000)
+            }
 
             // Then - verify final state is correct and no crashes
             // After 100 iterations, last was i=99 (odd), so onlyFavorites=false, showing all 100
