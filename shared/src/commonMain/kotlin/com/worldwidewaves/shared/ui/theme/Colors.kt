@@ -76,7 +76,7 @@ val onQuinaryContainerLight = Color(0xFF3A0905)
 /**
  * Shared ColorScheme - identical on both Android and iOS
  */
-val WWWLightColorScheme =
+val AppLightColorScheme =
     lightColorScheme(
         primary = primaryLight,
         onPrimary = onPrimaryLight,
