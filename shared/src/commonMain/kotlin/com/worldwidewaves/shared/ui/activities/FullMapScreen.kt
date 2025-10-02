@@ -23,8 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.ui.screens.FullMapScreen as FullMapScreenComposable
 import kotlin.time.ExperimentalTime
+import com.worldwidewaves.shared.ui.screens.FullMapScreen as FullMapScreenComposable
 
 @OptIn(ExperimentalTime::class)
 class FullMapScreen(
