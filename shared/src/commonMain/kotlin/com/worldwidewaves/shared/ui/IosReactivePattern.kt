@@ -39,7 +39,7 @@ import kotlinx.coroutines.flow.StateFlow
  * Usage Pattern for iOS:
  * ```kotlin
  * // In shared code
- * val stateFlowWrapper = eventsViewModel.events.toIOSObservable()
+ * val stateFlowWrapper = eventsViewModel.events.toIosObservable()
  *
  * // Consumed in iOS Swift code via bridging
  * stateFlowWrapper.observe { events in
@@ -47,7 +47,7 @@ import kotlinx.coroutines.flow.StateFlow
  * }
  * ```
  */
-interface IOSObservable<T> {
+interface IosObservable<T> {
     /**
      * Current value of the observable state
      * Compatible with iOS @State/@Published patterns
@@ -58,7 +58,7 @@ interface IOSObservable<T> {
      * Subscribe to state changes with iOS-compatible callback
      * Returns a subscription handle for cleanup
      */
-    fun observe(callback: (T) -> Unit): IOSObservableSubscription
+    fun observe(callback: (T) -> Unit): IosObservableSubscription
 
     /**
      * iOS-specific async observation
@@ -84,7 +84,7 @@ interface IOSObservable<T> {
  * Subscription handle for iOS-compatible cleanup
  * Follows iOS memory management patterns
  */
-interface IOSObservableSubscription {
+interface IosObservableSubscription {
     /**
      * Dispose/cancel the subscription
      * Should be called in iOS deinit/onDisappear
@@ -101,19 +101,19 @@ interface IOSObservableSubscription {
  * Convert Kotlin StateFlow to iOS-compatible observable
  * This will be implemented in iOS-specific code
  */
-expect fun <T> StateFlow<T>.toIOSObservable(): IOSObservable<T>
+expect fun <T> StateFlow<T>.toIosObservable(): IosObservable<T>
 
 /**
  * Convert Kotlin Flow to iOS-compatible observable stream
  * This will be implemented in iOS-specific code
  */
-expect fun <T> Flow<T>.toIOSObservableFlow(): IOSObservable<T>
+expect fun <T> Flow<T>.toIosObservableFlow(): IosObservable<T>
 
 /**
  * iOS-specific lifecycle observer for managing reactive subscriptions
  * Integrates with iOS ViewController/View lifecycle
  */
-interface IOSLifecycleObserver {
+interface IosLifecycleObserver {
     /**
      * Called when iOS View appears
      * Used to start reactive subscriptions
@@ -137,11 +137,11 @@ interface IOSLifecycleObserver {
  * iOS-specific reactive subscription manager
  * Handles automatic cleanup based on iOS lifecycle
  */
-interface IOSReactiveSubscriptionManager {
+interface IosReactiveSubscriptionManager {
     /**
      * Register a subscription for automatic lifecycle management
      */
-    fun addSubscription(subscription: IOSObservableSubscription)
+    fun addSubscription(subscription: IosObservableSubscription)
 
     /**
      * Clean up all managed subscriptions

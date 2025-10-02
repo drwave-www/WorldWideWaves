@@ -18,15 +18,15 @@ import platform.UIKit.UIViewController
  * The iOS app should override this by registering a custom implementation in Koin
  * that calls WWWMapViewBridge.m or EventMapView.swift.
  */
-class IOSNativeMapViewProvider : NativeMapViewProvider {
+class IosNativeMapViewProvider : NativeMapViewProvider {
     override fun createMapView(
         event: IWWWEvent,
         styleURL: String,
     ): Any {
-        Log.i("IOSNativeMapViewProvider", "Creating placeholder map view for: ${event.id}")
-        Log.d("IOSNativeMapViewProvider", "Style URL: $styleURL")
+        Log.i("IosNativeMapViewProvider", "Creating placeholder map view for: ${event.id}")
+        Log.d("IosNativeMapViewProvider", "Style URL: $styleURL")
         Log.w(
-            "IOSNativeMapViewProvider",
+            "IosNativeMapViewProvider",
             "Default implementation - iOS app should register custom NativeMapViewProvider in Koin",
         )
 

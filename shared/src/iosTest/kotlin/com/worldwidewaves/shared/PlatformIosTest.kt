@@ -37,7 +37,7 @@ import kotlin.test.assertTrue
  * iOS-specific platform cache function tests.
  * Tests the actual implementations in PlatformCache.ios.kt.
  */
-class PlatformIOSTest {
+class PlatformIosTest {
     @Test
     fun `getCacheDir returns valid iOS cache directory`() {
         val cacheDir = getCacheDir()

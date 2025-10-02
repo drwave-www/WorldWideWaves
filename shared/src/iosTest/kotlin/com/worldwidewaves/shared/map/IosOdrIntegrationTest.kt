@@ -19,8 +19,8 @@ package com.worldwidewaves.shared.map
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-import com.worldwidewaves.shared.domain.usecases.IOSMapAvailabilityChecker
-import com.worldwidewaves.shared.viewmodels.IOSMapViewModel
+import com.worldwidewaves.shared.domain.usecases.IosMapAvailabilityChecker
+import com.worldwidewaves.shared.viewmodels.IosMapViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceTimeBy
@@ -32,18 +32,18 @@ import kotlin.test.assertTrue
 
 /**
  * Comprehensive integration tests for iOS ODR (On-Demand Resources) functionality.
- * Tests the complete stack: IOSPlatformMapManager, IOSMapAvailabilityChecker, IOSMapViewModel.
+ * Tests the complete stack: IosPlatformMapManager, IosMapAvailabilityChecker, IosMapViewModel.
  *
  * NOTE: These tests require actual iOS application bundles with embedded ODR resources.
  * They are integration tests that cannot run in CI without a full iOS app bundle.
  * They should be run manually on iOS devices/simulators with proper bundle configuration.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class IOSODRMapsIntegrationTest {
+class IosOdrIntegrationTest {
     @Test
     fun `ODR availability detection works for both file types`() =
         runTest {
-            val checker = IOSMapAvailabilityChecker()
+            val checker = IosMapAvailabilityChecker()
 
             // GIVEN: Track test maps
             checker.trackMaps(listOf("paris_france", "new_york_usa"))
@@ -61,9 +61,9 @@ class IOSODRMapsIntegrationTest {
         }
 
     @Test
-    fun `IOSPlatformMapManager handles both geojson and mbtiles`() =
+    fun `IosPlatformMapManager handles both geojson and mbtiles`() =
         runTest {
-            val manager = IOSPlatformMapManager()
+            val manager = IosPlatformMapManager()
             var downloadCompleted = false
             var progressUpdates = mutableListOf<Int>()
 
@@ -85,10 +85,10 @@ class IOSODRMapsIntegrationTest {
         }
 
     @Test
-    fun `IOSMapViewModel integrates correctly with platform manager`() =
+    fun `IosMapViewModel integrates correctly with platform manager`() =
         runTest {
-            val platformManager = IOSPlatformMapManager()
-            val viewModel = IOSMapViewModel(platformManager)
+            val platformManager = IosPlatformMapManager()
+            val viewModel = IosMapViewModel(platformManager)
 
             // WHEN: Check map availability
             viewModel.checkIfMapIsAvailable("paris_france", autoDownload = false)
@@ -104,7 +104,7 @@ class IOSODRMapsIntegrationTest {
     @Test
     fun `concurrent ODR downloads are limited correctly`() =
         runTest {
-            val manager = IOSPlatformMapManager()
+            val manager = IosPlatformMapManager()
             val startedDownloads = mutableSetOf<String>()
 
             // Start multiple downloads concurrently
@@ -132,7 +132,7 @@ class IOSODRMapsIntegrationTest {
     @Test
     fun `ODR resource cleanup works on memory pressure`() =
         runTest {
-            val checker = IOSMapAvailabilityChecker()
+            val checker = IosMapAvailabilityChecker()
 
             // GIVEN: Multiple maps tracked
             val testMaps = listOf("paris_france", "new_york_usa", "london_england")
@@ -148,7 +148,7 @@ class IOSODRMapsIntegrationTest {
     @Test
     fun `ODR error handling covers download failures`() =
         runTest {
-            val manager = IOSPlatformMapManager()
+            val manager = IosPlatformMapManager()
             var errorReceived = false
             var errorCode = 0
 
@@ -174,7 +174,7 @@ class IOSODRMapsIntegrationTest {
     @Test
     fun `ODR state persistence across app lifecycle`() =
         runTest {
-            val checker = IOSMapAvailabilityChecker()
+            val checker = IosMapAvailabilityChecker()
 
             // GIVEN: Initial state
             checker.trackMaps(listOf("paris_france"))
@@ -184,7 +184,7 @@ class IOSODRMapsIntegrationTest {
             val initialStates = checker.mapStates.first()
 
             // WHEN: Simulate app restart (create new checker)
-            val newChecker = IOSMapAvailabilityChecker()
+            val newChecker = IosMapAvailabilityChecker()
             newChecker.trackMaps(listOf("paris_france"))
             newChecker.refreshAvailability()
             advanceUntilIdle()

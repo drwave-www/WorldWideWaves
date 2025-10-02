@@ -19,17 +19,17 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**
- * iOS-specific tests for IOSPlatformMapManager.
+ * iOS-specific tests for IosPlatformMapManager.
  *
  * These verify basic behavior without depending on real ODR downloads.
  * If the tag is not in any pack, completion should report failure,
  * but progress still reaches 100 (predictable UX).
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class IOSPlatformMapManagerTest {
+class IosPlatformMapManagerTest {
     @Test
     fun `isMapAvailable returns false for non-existent maps`() {
-        val manager = IOSPlatformMapManager()
+        val manager = IosPlatformMapManager()
         assertFalse(manager.isMapAvailable("non_existent_city"))
     }
 
@@ -38,7 +38,7 @@ class IOSPlatformMapManagerTest {
         runTest {
             val dispatcher = StandardTestDispatcher(testScheduler)
             val scope = TestScope(dispatcher)
-            val manager = IOSPlatformMapManager(scope = scope, callbackDispatcher = dispatcher)
+            val manager = IosPlatformMapManager(scope = scope, callbackDispatcher = dispatcher)
 
             val progress = mutableListOf<Int>()
             var success = false
@@ -64,7 +64,7 @@ class IOSPlatformMapManagerTest {
 
     @Test
     fun `cancelDownload is handled gracefully`() {
-        val manager = IOSPlatformMapManager()
+        val manager = IosPlatformMapManager()
         manager.cancelDownload("some_city") // should not throw
     }
 
@@ -73,7 +73,7 @@ class IOSPlatformMapManagerTest {
         runTest {
             val dispatcher = StandardTestDispatcher(testScheduler)
             val scope = TestScope(dispatcher)
-            val manager = IOSPlatformMapManager(scope = scope, callbackDispatcher = dispatcher)
+            val manager = IosPlatformMapManager(scope = scope, callbackDispatcher = dispatcher)
 
             var errorReceived = false
             var errorMessage: String? = null
@@ -100,7 +100,7 @@ class IOSPlatformMapManagerTest {
     fun `isMapAvailable uses URLsForResourcesWithExtension search`() {
         // This test verifies that isMapAvailable uses the same approach as MapStore ODRPaths.resolve()
         // The actual file detection is tested by checking it doesn't crash and returns a boolean
-        val manager = IOSPlatformMapManager()
+        val manager = IosPlatformMapManager()
 
         // Should not throw and should return a boolean (true or false depending on bundle contents)
         val result = manager.isMapAvailable("paris_france")
@@ -110,7 +110,7 @@ class IOSPlatformMapManagerTest {
 
     @Test
     fun `multiple consecutive availability checks work correctly`() {
-        val manager = IOSPlatformMapManager()
+        val manager = IosPlatformMapManager()
 
         // Multiple checks for the same map should not cause issues
         val result1 = manager.isMapAvailable("paris_france")

@@ -30,7 +30,7 @@ import kotlin.test.assertTrue
  * iOS-specific tests for MapStore functionality.
  * Tests iOS ODR (On-Demand Resources) integration and file system operations.
  */
-class IOSMapStoreTest {
+class IosMapStoreTest {
     @Test
     fun `platformCacheRoot returns iOS Application Support directory`() {
         val cacheRoot = platformCacheRoot()

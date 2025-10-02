@@ -59,7 +59,7 @@ import kotlin.test.assertTrue
  * TESTING STRATEGY:
  * Since MapViewModel interface methods are NOT suspend functions (they launch coroutines internally),
  * we test the underlying MapDownloadManager directly to ensure consistent behavior.
- * Platform-specific implementations (IOSMapViewModel, AndroidMapViewModel) are tested separately
+ * Platform-specific implementations (IosMapViewModel, AndroidMapViewModel) are tested separately
  * in their respective test files.
  */
 @OptIn(ExperimentalCoroutinesApi::class)

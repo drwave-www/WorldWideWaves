@@ -15,7 +15,7 @@ import kotlin.test.assertTrue
 /**
  * Tests for iOS file system utilities.
  */
-class IOSFileSystemUtilsTest {
+class IosFileSystemUtilsTest {
     @Test
     fun getAppSupportMapsDirectory_returnsValidPath() {
         // When

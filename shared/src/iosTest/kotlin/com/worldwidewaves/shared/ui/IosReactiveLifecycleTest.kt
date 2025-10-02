@@ -25,12 +25,12 @@ import kotlin.test.assertTrue
  * These tests verify that subscriptions are properly tracked and cleaned up
  * to prevent memory leaks on iOS.
  */
-class IOSReactiveLifecycleTest {
+class IosReactiveLifecycleTest {
     @Test
-    fun `IOSStateFlowObservable subscription is active after observe`() =
+    fun `IosStateFlowObservable subscription is active after observe`() =
         runTest {
             val stateFlow = MutableStateFlow("initial")
-            val observable = stateFlow.toIOSObservable()
+            val observable = stateFlow.toIosObservable()
 
             val subscription = observable.observe { }
 
@@ -38,10 +38,10 @@ class IOSReactiveLifecycleTest {
         }
 
     @Test
-    fun `IOSStateFlowObservable subscription is inactive after dispose`() =
+    fun `IosStateFlowObservable subscription is inactive after dispose`() =
         runTest {
             val stateFlow = MutableStateFlow("initial")
-            val observable = stateFlow.toIOSObservable()
+            val observable = stateFlow.toIosObservable()
 
             val subscription = observable.observe { }
             subscription.dispose()
@@ -50,10 +50,10 @@ class IOSReactiveLifecycleTest {
         }
 
     @Test
-    fun `IOSStateFlowObservable dispose is idempotent`() =
+    fun `IosStateFlowObservable dispose is idempotent`() =
         runTest {
             val stateFlow = MutableStateFlow("initial")
-            val observable = stateFlow.toIOSObservable()
+            val observable = stateFlow.toIosObservable()
 
             val subscription = observable.observe { }
             subscription.dispose()
@@ -64,10 +64,10 @@ class IOSReactiveLifecycleTest {
         }
 
     @Test
-    fun `IOSStateFlowObservable multiple subscriptions can coexist`() =
+    fun `IosStateFlowObservable multiple subscriptions can coexist`() =
         runTest {
             val stateFlow = MutableStateFlow("initial")
-            val observable = stateFlow.toIOSObservable()
+            val observable = stateFlow.toIosObservable()
 
             val subscription1 = observable.observe { }
             val subscription2 = observable.observe { }
@@ -79,10 +79,10 @@ class IOSReactiveLifecycleTest {
         }
 
     @Test
-    fun `IOSStateFlowObservable disposing one subscription does not affect others`() =
+    fun `IosStateFlowObservable disposing one subscription does not affect others`() =
         runTest {
             val stateFlow = MutableStateFlow("initial")
-            val observable = stateFlow.toIOSObservable()
+            val observable = stateFlow.toIosObservable()
 
             val subscription1 = observable.observe { }
             val subscription2 = observable.observe { }
@@ -96,10 +96,10 @@ class IOSReactiveLifecycleTest {
         }
 
     @Test
-    fun `IOSStateFlowObservable cleanup disposes all active subscriptions`() =
+    fun `IosStateFlowObservable cleanup disposes all active subscriptions`() =
         runTest {
             val stateFlow = MutableStateFlow("initial")
-            val observable = stateFlow.toIOSObservable()
+            val observable = stateFlow.toIosObservable()
 
             val subscription1 = observable.observe { }
             val subscription2 = observable.observe { }
@@ -113,10 +113,10 @@ class IOSReactiveLifecycleTest {
         }
 
     @Test
-    fun `IOSStateFlowObservable cleanup is idempotent`() =
+    fun `IosStateFlowObservable cleanup is idempotent`() =
         runTest {
             val stateFlow = MutableStateFlow("initial")
-            val observable = stateFlow.toIOSObservable()
+            val observable = stateFlow.toIosObservable()
 
             val subscription = observable.observe { }
 
@@ -128,10 +128,10 @@ class IOSReactiveLifecycleTest {
         }
 
     @Test
-    fun `IOSStateFlowObservable no leaks after multiple subscribe and unsubscribe cycles`() =
+    fun `IosStateFlowObservable no leaks after multiple subscribe and unsubscribe cycles`() =
         runTest {
             val stateFlow = MutableStateFlow("initial")
-            val observable = stateFlow.toIOSObservable()
+            val observable = stateFlow.toIosObservable()
 
             // Simulate multiple iOS view lifecycle cycles
             repeat(100) {
@@ -147,10 +147,10 @@ class IOSReactiveLifecycleTest {
         }
 
     @Test
-    fun `IOSStateFlowObservable callback receives updates after subscription`() =
+    fun `IosStateFlowObservable callback receives updates after subscription`() =
         runTest {
             val stateFlow = MutableStateFlow("initial")
-            val observable = stateFlow.toIOSObservable()
+            val observable = stateFlow.toIosObservable()
             val receivedValues = mutableListOf<String>()
 
             observable.observe { value -> receivedValues.add(value) }
@@ -165,10 +165,10 @@ class IOSReactiveLifecycleTest {
         }
 
     @Test
-    fun `IOSStateFlowObservable callback does not receive updates after dispose`() =
+    fun `IosStateFlowObservable callback does not receive updates after dispose`() =
         runTest {
             val stateFlow = MutableStateFlow("initial")
-            val observable = stateFlow.toIOSObservable()
+            val observable = stateFlow.toIosObservable()
             var callbackInvocations = 0
 
             val subscription = observable.observe { callbackInvocations++ }
@@ -186,14 +186,14 @@ class IOSReactiveLifecycleTest {
         }
 
     @Test
-    fun `IOSFlowObservable subscription is active after observe`() =
+    fun `IosFlowObservable subscription is active after observe`() =
         runTest {
             val flow =
                 flow {
                     emit("value1")
                     emit("value2")
                 }
-            val observable = flow.toIOSObservableFlow()
+            val observable = flow.toIosObservableFlow()
 
             val subscription = observable.observe { }
 
@@ -201,14 +201,14 @@ class IOSReactiveLifecycleTest {
         }
 
     @Test
-    fun `IOSFlowObservable subscription is inactive after dispose`() =
+    fun `IosFlowObservable subscription is inactive after dispose`() =
         runTest {
             val flow =
                 flow {
                     emit("value1")
                     emit("value2")
                 }
-            val observable = flow.toIOSObservableFlow()
+            val observable = flow.toIosObservableFlow()
 
             val subscription = observable.observe { }
             subscription.dispose()
@@ -217,14 +217,14 @@ class IOSReactiveLifecycleTest {
         }
 
     @Test
-    fun `IOSFlowObservable cleanup disposes all active subscriptions`() =
+    fun `IosFlowObservable cleanup disposes all active subscriptions`() =
         runTest {
             val flow =
                 flow {
                     emit("value1")
                     emit("value2")
                 }
-            val observable = flow.toIOSObservableFlow()
+            val observable = flow.toIosObservableFlow()
 
             val subscription1 = observable.observe { }
             val subscription2 = observable.observe { }
@@ -236,14 +236,14 @@ class IOSReactiveLifecycleTest {
         }
 
     @Test
-    fun `IOSFlowObservable no leaks after multiple subscribe and unsubscribe cycles`() =
+    fun `IosFlowObservable no leaks after multiple subscribe and unsubscribe cycles`() =
         runTest {
             val flow =
                 flow {
                     emit("value1")
                     emit("value2")
                 }
-            val observable = flow.toIOSObservableFlow()
+            val observable = flow.toIosObservableFlow()
 
             // Simulate multiple iOS view lifecycle cycles
             repeat(100) {
@@ -259,11 +259,11 @@ class IOSReactiveLifecycleTest {
         }
 
     @Test
-    fun `IOSReactiveSubscriptionManager tracks all added subscriptions`() =
+    fun `IosReactiveSubscriptionManager tracks all added subscriptions`() =
         runTest {
             val stateFlow = MutableStateFlow("initial")
-            val observable = stateFlow.toIOSObservable()
-            val manager = IOSReactiveSubscriptionManagerImpl()
+            val observable = stateFlow.toIosObservable()
+            val manager = IosReactiveSubscriptionManagerImpl()
 
             val subscription1 = observable.observe { }
             val subscription2 = observable.observe { }
@@ -281,11 +281,11 @@ class IOSReactiveLifecycleTest {
         }
 
     @Test
-    fun `IOSReactiveSubscriptionManager disposeAll cleans up all subscriptions`() =
+    fun `IosReactiveSubscriptionManager disposeAll cleans up all subscriptions`() =
         runTest {
             val stateFlow = MutableStateFlow("initial")
-            val observable = stateFlow.toIOSObservable()
-            val manager = IOSReactiveSubscriptionManagerImpl()
+            val observable = stateFlow.toIosObservable()
+            val manager = IosReactiveSubscriptionManagerImpl()
 
             val subscription1 = observable.observe { }
             val subscription2 = observable.observe { }
@@ -304,12 +304,12 @@ class IOSReactiveLifecycleTest {
         }
 
     @Test
-    fun `IOSLifecycleObserver onViewDeinit triggers cleanup`() =
+    fun `IosLifecycleObserver onViewDeinit triggers cleanup`() =
         runTest {
             val stateFlow = MutableStateFlow("initial")
-            val observable = stateFlow.toIOSObservable()
-            val manager = IOSReactiveSubscriptionManagerImpl()
-            val lifecycleObserver = IOSLifecycleObserverImpl(manager)
+            val observable = stateFlow.toIosObservable()
+            val manager = IosReactiveSubscriptionManagerImpl()
+            val lifecycleObserver = IosLifecycleObserverImpl(manager)
 
             val subscription1 = observable.observe { }
             val subscription2 = observable.observe { }

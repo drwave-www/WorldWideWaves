@@ -31,7 +31,7 @@ import com.worldwidewaves.shared.ui.components.event.NotifyAreaUserPosition
 import com.worldwidewaves.shared.ui.components.event.WWWEventSocialNetworks
 import com.worldwidewaves.shared.ui.components.shared.ButtonWave
 import com.worldwidewaves.shared.ui.components.shared.SimulationButton
-import com.worldwidewaves.shared.ui.utils.getIOSSafePlatform
+import com.worldwidewaves.shared.ui.utils.getIosSafePlatform
 import com.worldwidewaves.shared.ui.utils.rememberEventState
 
 /**
@@ -54,7 +54,7 @@ fun EventLayout(
     mapArea: @Composable () -> Unit = {},
     additionalContent: @Composable () -> Unit = {},
     // iOS FIX: Dependencies passed as parameters to prevent deadlock
-    platform: WWWPlatform = getIOSSafePlatform(),
+    platform: WWWPlatform = getIosSafePlatform(),
 ) {
     // iOS FIX: Removed dangerous object : KoinComponent pattern
     // Dependencies now resolved safely outside composition

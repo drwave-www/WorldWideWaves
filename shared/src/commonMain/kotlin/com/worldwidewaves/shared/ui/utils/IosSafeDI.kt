@@ -21,7 +21,7 @@ import org.koin.core.component.inject
  * ⚠️ CRITICAL: This object resolves dependencies ONCE and caches them,
  * preventing the dangerous pattern of calling inject() during Compose composition.
  */
-object IOSSafeDI : KoinComponent {
+object IosSafeDI : KoinComponent {
     // Pre-resolved dependencies to avoid inject() during composition
     val platform: WWWPlatform by inject()
     val clock: IClock by inject()
@@ -31,6 +31,6 @@ object IOSSafeDI : KoinComponent {
  * iOS-Safe dependency resolution functions for Composables.
  * These resolve dependencies outside of the composition phase.
  */
-fun getIOSSafePlatform(): WWWPlatform = IOSSafeDI.platform
+fun getIosSafePlatform(): WWWPlatform = IosSafeDI.platform
 
-fun getIOSSafeClock(): IClock = IOSSafeDI.clock
+fun getIosSafeClock(): IClock = IosSafeDI.clock

@@ -80,7 +80,7 @@ import platform.UIKit.UIImage
  * - User position and wave polygon information display
  * - Proper iOS integration using safe dependency injection
  */
-class IOSEventMap(
+class IosEventMap(
     event: IWWWEvent,
     private val onMapLoaded: () -> Unit = {},
     onLocationUpdate: (Position) -> Unit = {},
@@ -108,14 +108,14 @@ class IOSEventMap(
         wavePolygons: List<Polygon>,
         clearPolygons: Boolean,
     ) {
-        Log.d("IOSEventMap", "updateWavePolygons called with ${wavePolygons.size} polygons, clearPolygons=$clearPolygons")
+        Log.d("IosEventMap", "updateWavePolygons called with ${wavePolygons.size} polygons, clearPolygons=$clearPolygons")
 
         if (clearPolygons) {
             currentPolygons.clear()
         }
         currentPolygons.addAll(wavePolygons)
 
-        Log.v("IOSEventMap", "iOS map now tracking ${currentPolygons.size} wave polygons")
+        Log.v("IosEventMap", "iOS map now tracking ${currentPolygons.size} wave polygons")
 
         // Store polygon data in registry for Swift to render
         storePolygonsForRendering(wavePolygons, clearPolygons)
@@ -135,7 +135,7 @@ class IOSEventMap(
 
         // Store in registry - Swift will poll and render these
         MapWrapperRegistry.setPendingPolygons(event.id, coordinates, clearExisting)
-        Log.i("IOSEventMap", "Stored ${polygons.size} polygons in registry for Swift to render")
+        Log.i("IosEventMap", "Stored ${polygons.size} polygons in registry for Swift to render")
     }
 
     @OptIn(ExperimentalForeignApi::class)
@@ -144,7 +144,7 @@ class IOSEventMap(
         autoMapDownload: Boolean,
         modifier: Modifier,
     ) {
-        Log.i("IOSEventMap", "Draw() called for event: ${event.id}, autoMapDownload=$autoMapDownload")
+        Log.i("IosEventMap", "Draw() called for event: ${event.id}, autoMapDownload=$autoMapDownload")
 
         // Get unified position from PositionManager (same as Android)
         val positionManager = KoinPlatform.getKoin().get<PositionManager>()
@@ -154,7 +154,7 @@ class IOSEventMap(
         // Use shared MapDownloadCoordinator for download state management
         val downloadCoordinator =
             remember {
-                Log.d("IOSEventMap", "Creating MapDownloadCoordinator for: ${event.id}")
+                Log.d("IosEventMap", "Creating MapDownloadCoordinator for: ${event.id}")
                 MapDownloadCoordinator(platformMapManager)
             }
         val downloadState by downloadCoordinator.getDownloadState(event.id).collectAsState()
@@ -163,9 +163,9 @@ class IOSEventMap(
 
         // Check map availability and trigger auto-download if needed
         LaunchedEffect(event.id, autoMapDownload) {
-            Log.i("IOSEventMap", "LaunchedEffect triggered: event=${event.id}, autoDownload=$autoMapDownload")
+            Log.i("IosEventMap", "LaunchedEffect triggered: event=${event.id}, autoDownload=$autoMapDownload")
             downloadCoordinator.autoDownloadIfNeeded(event.id, autoMapDownload)
-            Log.d("IOSEventMap", "autoDownloadIfNeeded completed for: ${event.id}")
+            Log.d("IosEventMap", "autoDownloadIfNeeded completed for: ${event.id}")
         }
 
         // Initialize position system integration (same as AbstractEventMap)
@@ -186,21 +186,21 @@ class IOSEventMap(
             var styleURL by remember { mutableStateOf<String?>(null) }
 
             LaunchedEffect(event.id, downloadState.isAvailable) {
-                Log.d("IOSEventMap", "Loading style URL for: ${event.id}, isAvailable=${downloadState.isAvailable}")
+                Log.d("IosEventMap", "Loading style URL for: ${event.id}, isAvailable=${downloadState.isAvailable}")
                 styleURL = event.map.getStyleUri()
-                Log.i("IOSEventMap", "Style URL loaded: $styleURL")
+                Log.i("IosEventMap", "Style URL loaded: $styleURL")
             }
 
             // Show map or loading indicator based on style availability
             if (styleURL != null) {
-                Log.d("IOSEventMap", "Using style URL for ${event.id}: ${styleURL!!.take(100)}...")
+                Log.d("IosEventMap", "Using style URL for ${event.id}: ${styleURL!!.take(100)}...")
 
                 // Use key() to recreate map when styleURL changes (after download)
                 key("${event.id}-$styleURL") {
                     @Suppress("DEPRECATION")
                     UIKitViewController(
                         factory = {
-                            Log.i("IOSEventMap", "Creating native map view controller for: ${event.id}")
+                            Log.i("IosEventMap", "Creating native map view controller for: ${event.id}")
                             createNativeMapViewController(event, styleURL!!) as platform.UIKit.UIViewController
                         },
                         modifier = Modifier.fillMaxSize(),
@@ -260,29 +260,29 @@ class IOSEventMap(
             // Download overlay UI (matching Android behavior)
             // Log current download state for debugging
             Log.v(
-                "IOSEventMap",
+                "IosEventMap",
                 "Overlay decision: ${event.id} | isAvailable=${downloadState.isAvailable}, " +
                     "isDownloading=${downloadState.isDownloading}, error=${downloadState.error}, progress=${downloadState.progress}",
             )
 
             when {
                 downloadState.isDownloading && downloadState.error == null -> {
-                    Log.d("IOSEventMap", "Showing MapDownloadOverlay: ${event.id} progress=${downloadState.progress}%")
+                    Log.d("IosEventMap", "Showing MapDownloadOverlay: ${event.id} progress=${downloadState.progress}%")
                     MapDownloadOverlay(
                         progress = downloadState.progress,
                         onCancel = {
-                            Log.i("IOSEventMap", "Download cancelled by user: ${event.id}")
+                            Log.i("IosEventMap", "Download cancelled by user: ${event.id}")
                             downloadCoordinator.cancelDownload(event.id)
                         },
                     )
                 }
 
                 downloadState.error != null -> {
-                    Log.d("IOSEventMap", "Showing MapErrorOverlay: ${event.id} error=${downloadState.error}")
+                    Log.d("IosEventMap", "Showing MapErrorOverlay: ${event.id} error=${downloadState.error}")
                     MapErrorOverlay(
                         errorMessage = downloadState.error!!,
                         onRetry = {
-                            Log.i("IOSEventMap", "Retry clicked for: ${event.id}")
+                            Log.i("IosEventMap", "Retry clicked for: ${event.id}")
                             MainScope().launch {
                                 downloadCoordinator.downloadMap(event.id)
                             }
@@ -291,18 +291,18 @@ class IOSEventMap(
                 }
 
                 !downloadState.isAvailable && !downloadState.isDownloading -> {
-                    Log.d("IOSEventMap", "Showing MapDownloadButton for: ${event.id}")
+                    Log.d("IosEventMap", "Showing MapDownloadButton for: ${event.id}")
                     MapDownloadButton {
-                        Log.i("IOSEventMap", "Download button clicked for: ${event.id}")
+                        Log.i("IosEventMap", "Download button clicked for: ${event.id}")
                         MainScope().launch {
-                            Log.i("IOSEventMap", "Launching download coroutine for: ${event.id}")
+                            Log.i("IosEventMap", "Launching download coroutine for: ${event.id}")
                             downloadCoordinator.downloadMap(event.id)
                         }
                     }
                 }
 
                 else -> {
-                    Log.v("IOSEventMap", "No overlay shown: ${event.id} (map loaded or downloading)")
+                    Log.v("IosEventMap", "No overlay shown: ${event.id} (map loaded or downloading)")
                 }
             }
         }

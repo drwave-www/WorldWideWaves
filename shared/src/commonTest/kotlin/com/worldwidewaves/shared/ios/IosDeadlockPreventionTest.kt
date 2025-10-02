@@ -24,7 +24,7 @@ import com.worldwidewaves.shared.events.WWWEventWaveWarming
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.ui.utils.IOSSafeDI
+import com.worldwidewaves.shared.ui.utils.IosSafeDI
 import com.worldwidewaves.shared.viewmodels.EventsViewModel
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -70,7 +70,7 @@ import kotlin.time.Instant
  * ### Category 2: Runtime Initialization Tests
  * - ✅ WWWEventObserver initializes without deadlock
  * - ✅ EventsViewModel initializes without deadlock
- * - ✅ IOSSafeDI singleton initializes correctly
+ * - ✅ IosSafeDI singleton initializes correctly
  * - ✅ Koin DI resolution completes quickly
  * - ✅ No circular dependencies in DI module
  *
@@ -86,7 +86,7 @@ import kotlin.time.Instant
  * 3. NEVER: DI get() or inject() in init{} blocks
  * 4. NEVER: runBlocking before Compose initialization
  * 5. NEVER: Dispatchers.Main in constructors/static initializers
- * 6. ALWAYS: Use IOSSafeDI pattern for Composable DI
+ * 6. ALWAYS: Use IosSafeDI pattern for Composable DI
  * 7. ALWAYS: Initialize dependencies outside composition
  *
  * ## Related Documentation:
@@ -94,9 +94,9 @@ import kotlin.time.Instant
  * - iOS_VIOLATION_TRACKER.md: Historical violations and fixes
  * - iOS_SUCCESS_STATE.md: iOS success criteria
  *
- * @see com.worldwidewaves.shared.ui.utils.IOSSafeDI
+ * @see com.worldwidewaves.shared.ui.utils.IosSafeDI
  */
-class IOSDeadlockPreventionTest : KoinTest {
+class IosDeadlockPreventionTest : KoinTest {
     private lateinit var testClock: TestClock
     private lateinit var testPlatform: WWWPlatform
     private lateinit var testModule: Module
@@ -143,7 +143,7 @@ class IOSDeadlockPreventionTest : KoinTest {
      * - iOS Kotlin/Native has strict main thread requirements
      * - DI resolution during composition = deadlock
      *
-     * ✅ SAFE PATTERN: IOSSafeDI singleton or parameter injection
+     * ✅ SAFE PATTERN: IosSafeDI singleton or parameter injection
      * ❌ UNSAFE PATTERN: object : KoinComponent { val x by inject() }
      */
     @Test
@@ -154,7 +154,7 @@ class IOSDeadlockPreventionTest : KoinTest {
             if (violations.isNotEmpty()) {
                 fail(
                     "❌ CRITICAL iOS DEADLOCK RISK: Found ${violations.size} 'object : KoinComponent' patterns!\n" +
-                        "These MUST be replaced with IOSSafeDI or parameter injection.\n" +
+                        "These MUST be replaced with IosSafeDI or parameter injection.\n" +
                         "Violations:\n${violations.joinToString("\n")}",
                 )
             }
@@ -363,9 +363,9 @@ class IOSDeadlockPreventionTest : KoinTest {
         }
 
     /**
-     * 🔴 CRITICAL TEST 8: IOSSafeDI singleton initializes correctly
+     * 🔴 CRITICAL TEST 8: IosSafeDI singleton initializes correctly
      *
-     * IOSSafeDI is the approved pattern for iOS-safe dependency injection.
+     * IosSafeDI is the approved pattern for iOS-safe dependency injection.
      * It MUST:
      * - Initialize without deadlock
      * - Provide access to platform and clock
@@ -380,30 +380,30 @@ class IOSDeadlockPreventionTest : KoinTest {
                     .now()
 
             try {
-                // Access IOSSafeDI - this should NOT deadlock
+                // Access IosSafeDI - this should NOT deadlock
                 val platform =
                     withTimeout(1.seconds) {
-                        IOSSafeDI.platform
+                        IosSafeDI.platform
                     }
 
                 val clock =
                     withTimeout(1.seconds) {
-                        IOSSafeDI.clock
+                        IosSafeDI.clock
                     }
 
-                assertNotNull(platform, "IOSSafeDI.platform should be accessible")
-                assertNotNull(clock, "IOSSafeDI.clock should be accessible")
+                assertNotNull(platform, "IosSafeDI.platform should be accessible")
+                assertNotNull(clock, "IosSafeDI.clock should be accessible")
                 assertEquals(testPlatform, platform, "Platform should be the injected test platform")
                 assertEquals(testClock, clock, "Clock should be the injected test clock")
 
                 val duration =
                     kotlin.time.Clock.System
                         .now() - startTime
-                println("✅ PASSED: IOSSafeDI initialized in ${duration.inWholeMilliseconds}ms")
+                println("✅ PASSED: IosSafeDI initialized in ${duration.inWholeMilliseconds}ms")
             } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
-                fail("❌ DEADLOCK DETECTED: IOSSafeDI access timed out! iOS deadlock likely.")
+                fail("❌ DEADLOCK DETECTED: IosSafeDI access timed out! iOS deadlock likely.")
             } catch (e: Exception) {
-                fail("❌ INITIALIZATION FAILED: IOSSafeDI threw exception: ${e.message}")
+                fail("❌ INITIALIZATION FAILED: IosSafeDI threw exception: ${e.message}")
             }
         }
 

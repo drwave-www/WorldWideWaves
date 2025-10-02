@@ -31,18 +31,18 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * iOS-specific tests for IOSMapAvailabilityChecker.
+ * iOS-specific tests for IosMapAvailabilityChecker.
  *
  * These tests verify the iOS map bundling logic and StateFlow behavior.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class IOSMapAvailabilityCheckerTest {
+class IosMapAvailabilityCheckerTest {
     private val testScheduler = TestCoroutineScheduler()
 
     @Test
     fun `initial mapStates is empty`() =
         runTest(testScheduler) {
-            val checker = IOSMapAvailabilityChecker()
+            val checker = IosMapAvailabilityChecker()
 
             val initialState = checker.mapStates.first()
             assertTrue(initialState.isEmpty())
@@ -51,7 +51,7 @@ class IOSMapAvailabilityCheckerTest {
     @Test
     fun `isMapDownloaded checks ODR resource availability`() =
         runTest(testScheduler) {
-            val checker = IOSMapAvailabilityChecker()
+            val checker = IosMapAvailabilityChecker()
 
             // ODR resources may not be immediately available
             checker.isMapDownloaded("paris_france")
@@ -66,7 +66,7 @@ class IOSMapAvailabilityCheckerTest {
     @Test
     fun `getDownloadedMaps returns empty list initially`() =
         runTest(testScheduler) {
-            val checker = IOSMapAvailabilityChecker()
+            val checker = IosMapAvailabilityChecker()
 
             val downloadedMaps = checker.getDownloadedMaps()
             assertTrue(downloadedMaps.isEmpty())
@@ -75,7 +75,7 @@ class IOSMapAvailabilityCheckerTest {
     @Test
     fun `trackMaps adds maps to tracked set`() =
         runTest(testScheduler) {
-            val checker = IOSMapAvailabilityChecker()
+            val checker = IosMapAvailabilityChecker()
             val mapIds = listOf("paris_france", "london_uk", "tokyo_japan")
 
             checker.trackMaps(mapIds)
@@ -89,7 +89,7 @@ class IOSMapAvailabilityCheckerTest {
     @Test
     fun `trackMaps updates mapStates StateFlow`() =
         runTest(testScheduler) {
-            val checker = IOSMapAvailabilityChecker()
+            val checker = IosMapAvailabilityChecker()
             val mapIds = listOf("paris_france", "london_uk")
 
             checker.trackMaps(mapIds)
@@ -105,7 +105,7 @@ class IOSMapAvailabilityCheckerTest {
     @Test
     fun `trackMaps with duplicate maps does not duplicate tracking`() =
         runTest(testScheduler) {
-            val checker = IOSMapAvailabilityChecker()
+            val checker = IosMapAvailabilityChecker()
 
             checker.trackMaps(listOf("paris_france", "london_uk"))
             advanceUntilIdle()
@@ -123,7 +123,7 @@ class IOSMapAvailabilityCheckerTest {
     @Test
     fun `trackMaps with empty collection works correctly`() =
         runTest(testScheduler) {
-            val checker = IOSMapAvailabilityChecker()
+            val checker = IosMapAvailabilityChecker()
 
             checker.trackMaps(emptyList())
             advanceUntilIdle()
@@ -138,7 +138,7 @@ class IOSMapAvailabilityCheckerTest {
     @Test
     fun `refreshAvailability updates tracked maps state`() =
         runTest(testScheduler) {
-            val checker = IOSMapAvailabilityChecker()
+            val checker = IosMapAvailabilityChecker()
             val mapIds = listOf("paris_france", "london_uk")
 
             checker.trackMaps(mapIds)
@@ -160,7 +160,7 @@ class IOSMapAvailabilityCheckerTest {
     @Test
     fun `multiple trackMaps calls accumulate correctly`() =
         runTest(testScheduler) {
-            val checker = IOSMapAvailabilityChecker()
+            val checker = IosMapAvailabilityChecker()
 
             checker.trackMaps(listOf("paris_france"))
             advanceUntilIdle()
@@ -184,7 +184,7 @@ class IOSMapAvailabilityCheckerTest {
     @Test
     fun `trackMaps with single map works correctly`() =
         runTest(testScheduler) {
-            val checker = IOSMapAvailabilityChecker()
+            val checker = IosMapAvailabilityChecker()
 
             checker.trackMaps(listOf("single_map"))
             advanceUntilIdle()
@@ -201,7 +201,7 @@ class IOSMapAvailabilityCheckerTest {
     @Test
     fun `trackMaps with special characters in map IDs`() =
         runTest(testScheduler) {
-            val checker = IOSMapAvailabilityChecker()
+            val checker = IosMapAvailabilityChecker()
             val specialMapIds =
                 listOf(
                     "map-with-dashes",
@@ -225,7 +225,7 @@ class IOSMapAvailabilityCheckerTest {
     @Test
     fun `concurrent trackMaps calls are handled thread-safely`() =
         runTest(testScheduler) {
-            val checker = IOSMapAvailabilityChecker()
+            val checker = IosMapAvailabilityChecker()
             val mapCount = 100
             val mapIds = (1..mapCount).map { "map_$it" }
 
@@ -250,7 +250,7 @@ class IOSMapAvailabilityCheckerTest {
     @Test
     fun `StateFlow mapStates emits updates correctly`() =
         runTest(testScheduler) {
-            val checker = IOSMapAvailabilityChecker()
+            val checker = IosMapAvailabilityChecker()
             val emittedStates = mutableListOf<Map<String, Boolean>>()
 
             // Collect states (this would typically be done in a coroutine)
@@ -273,7 +273,7 @@ class IOSMapAvailabilityCheckerTest {
     @Test
     fun `refreshAvailability does not modify untracked maps`() =
         runTest(testScheduler) {
-            val checker = IOSMapAvailabilityChecker()
+            val checker = IosMapAvailabilityChecker()
 
             // Initially no maps tracked
             checker.refreshAvailability()
@@ -295,7 +295,7 @@ class IOSMapAvailabilityCheckerTest {
     @Test
     fun `cleanup clears all tracked maps and states`() =
         runTest(testScheduler) {
-            val checker = IOSMapAvailabilityChecker()
+            val checker = IosMapAvailabilityChecker()
 
             // Track some maps
             checker.trackMaps(listOf("paris_france", "london_uk"))
@@ -316,7 +316,7 @@ class IOSMapAvailabilityCheckerTest {
     @Test
     fun `ODR resource request handling works correctly`() =
         runTest(testScheduler) {
-            val checker = IOSMapAvailabilityChecker()
+            val checker = IosMapAvailabilityChecker()
 
             // This test verifies that ODR resource requests don't crash
             checker.trackMaps(listOf("test_odr_resource"))

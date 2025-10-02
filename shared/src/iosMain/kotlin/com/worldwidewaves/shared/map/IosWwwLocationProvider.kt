@@ -47,9 +47,9 @@ import platform.darwin.NSObject
  * with proper permission handling and error management.
  */
 @OptIn(ExperimentalForeignApi::class)
-class IOSWWWLocationProvider : WWWLocationProvider {
+class IosWwwLocationProvider : WWWLocationProvider {
     companion object {
-        private const val TAG = "IOSWWWLocationProvider"
+        private const val TAG = "IosWwwLocationProvider"
     }
 
     private val _currentLocation = MutableStateFlow<Position?>(null)
@@ -57,7 +57,7 @@ class IOSWWWLocationProvider : WWWLocationProvider {
 
     private val locationManager = CLLocationManager()
     private val locationDelegate =
-        IOSLocationDelegate { location ->
+        IosLocationDelegate { location ->
             updateLocation(location)
         }
 
@@ -202,11 +202,11 @@ class IOSWWWLocationProvider : WWWLocationProvider {
  * Core Location delegate implementation
  */
 @OptIn(ExperimentalForeignApi::class)
-private class IOSLocationDelegate(
+private class IosLocationDelegate(
     private val onLocationUpdate: (CLLocation) -> Unit,
 ) : NSObject(),
     CLLocationManagerDelegateProtocol {
-    private val tag = "IOSLocationDelegate"
+    private val tag = "IosLocationDelegate"
 
     override fun locationManager(
         manager: CLLocationManager,

@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
  * • iOS-specific error message localization
  * • Delegates business logic to MapDownloadLogic
  */
-class IOSMapViewModel(
+class IosMapViewModel(
     private val platformMapManager: PlatformMapManager,
 ) : BaseViewModel(),
     MapViewModel {
@@ -58,16 +58,16 @@ class IOSMapViewModel(
                         onSuccess = {
                             downloadManager.handleDownloadSuccess()
                             onMapDownloaded?.invoke()
-                            Log.i("IOSMapViewModel", "Map download completed successfully: $mapId")
+                            Log.i("IosMapViewModel", "Map download completed successfully: $mapId")
                         },
                         onError = { errorCode, message ->
                             downloadManager.handleDownloadFailure(errorCode, shouldRetry = false)
-                            Log.e("IOSMapViewModel", "Map download failed for $mapId: $message (code: $errorCode)")
+                            Log.e("IosMapViewModel", "Map download failed for $mapId: $message (code: $errorCode)")
                         },
                     )
                 } catch (e: Exception) {
                     downloadManager.handleDownloadFailure(-1, shouldRetry = false)
-                    Log.e("IOSMapViewModel", "Exception during map download: $mapId", throwable = e)
+                    Log.e("IosMapViewModel", "Exception during map download: $mapId", throwable = e)
                 }
             }
 
@@ -87,7 +87,7 @@ class IOSMapViewModel(
                 }
 
             override fun clearCacheForInstalledMaps(mapIds: List<String>) {
-                Log.d("IOSMapViewModel", "clearCacheForInstalledMaps for: ${mapIds.joinToString()}")
+                Log.d("IosMapViewModel", "clearCacheForInstalledMaps for: ${mapIds.joinToString()}")
                 // iOS: ODR manages its own cache, no manual clearing needed
             }
         }

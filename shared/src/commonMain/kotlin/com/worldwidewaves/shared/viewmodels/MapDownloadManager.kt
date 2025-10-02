@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
  * Manager for map download operations across platforms.
  *
  * Contains all platform-agnostic download workflow logic without UI lifecycle concerns.
- * Used by composition in platform-specific ViewModels (AndroidMapViewModel, IOSMapViewModel).
+ * Used by composition in platform-specific ViewModels (AndroidMapViewModel, IosMapViewModel).
  *
  * RESPONSIBILITIES:
  * • Download state management
@@ -44,7 +44,7 @@ import kotlinx.coroutines.flow.StateFlow
  *
  * USED BY:
  * • AndroidMapViewModel (composition)
- * • IOSMapViewModel (composition)
+ * • IosMapViewModel (composition)
  */
 class MapDownloadManager(
     private val platformAdapter: PlatformMapDownloadAdapter,
@@ -188,7 +188,7 @@ class MapDownloadManager(
  *
  * IMPLEMENTORS:
  * • AndroidMapViewModel (anonymous object)
- * • IOSMapViewModel (anonymous object)
+ * • IosMapViewModel (anonymous object)
  */
 interface PlatformMapDownloadAdapter {
     suspend fun isMapInstalled(mapId: String): Boolean

@@ -37,7 +37,7 @@ import platform.Foundation.NSBundleResourceRequest
  * - We endAccessingResources() on cancel. On success/failure we also end access so callers
  *   should mount again when they actually read (see PlatformIOS functions).
  */
-class IOSPlatformMapManager(
+class IosPlatformMapManager(
     private val scope: CoroutineScope =
         CoroutineScope(SupervisorJob() + Dispatchers.Default),
     private val callbackDispatcher: CoroutineDispatcher = Dispatchers.Default,
@@ -213,7 +213,7 @@ class IOSPlatformMapManager(
     }
 
     companion object {
-        private const val TAG = "IOSPlatformMapManager"
+        private const val TAG = "IosPlatformMapManager"
         private const val PROGRESS_TICK_DELAY_MS = 1000L
         private const val PROGRESS_INCREMENT = 10
         private const val PROGRESS_MAX_BEFORE_COMPLETION = 90

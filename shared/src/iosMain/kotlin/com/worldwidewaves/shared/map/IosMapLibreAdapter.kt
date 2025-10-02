@@ -17,7 +17,7 @@ import com.worldwidewaves.shared.utils.WWWLogger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-private const val TAG = "IOSMapLibreAdapter"
+private const val TAG = "IosMapLibreAdapter"
 
 // Default dimensions for iPhone (used when wrapper not available)
 private const val DEFAULT_WIDTH = 375.0
@@ -35,8 +35,8 @@ private const val DEFAULT_HEIGHT = 812.0
  *
  * The wrapper must be an @objc Swift class with @objc methods to be callable from Kotlin.
  */
-class IOSMapLibreAdapter : MapLibreAdapter<Any> {
-    // Wrapper instance (currently not used - map rendering happens via SwiftUI in IOSEventMap)
+class IosMapLibreAdapter : MapLibreAdapter<Any> {
+    // Wrapper instance (currently not used - map rendering happens via SwiftUI in IosEventMap)
     private var wrapper: Any? = null
 
     private val _currentPosition = MutableStateFlow<Position?>(null)
@@ -114,7 +114,7 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
 
     override fun moveCamera(bounds: BoundingBox) {
         if (wrapper != null) {
-            WWWLogger.d("IOSMapLibreAdapter", "Moving camera to bounds")
+            WWWLogger.d("IosMapLibreAdapter", "Moving camera to bounds")
 
             // NOTE: Implement iOS MapLibre camera movement
             // Will be implemented via cinterop bindings
@@ -127,7 +127,7 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         callback: MapCameraCallback?,
     ) {
         if (wrapper != null) {
-            WWWLogger.d("IOSMapLibreAdapter", "Animating camera to position: ${position.lat}, ${position.lng}")
+            WWWLogger.d("IosMapLibreAdapter", "Animating camera to position: ${position.lat}, ${position.lng}")
 
             // NOTE: Implement iOS MapLibre camera animation
             // Will be implemented via cinterop bindings
@@ -142,7 +142,7 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         callback: MapCameraCallback?,
     ) {
         if (wrapper != null) {
-            WWWLogger.d("IOSMapLibreAdapter", "Animating camera to bounds with padding: $padding")
+            WWWLogger.d("IosMapLibreAdapter", "Animating camera to bounds with padding: $padding")
 
             // NOTE: Implement iOS MapLibre bounds animation
             // Will be implemented via cinterop bindings
@@ -152,7 +152,7 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
     }
 
     override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
-        WWWLogger.d("IOSMapLibreAdapter", "Setting camera constraint bounds")
+        WWWLogger.d("IosMapLibreAdapter", "Setting camera constraint bounds")
 
         // NOTE: Implement iOS MapLibre camera constraints
         // Set bounds within which the camera can move
@@ -167,7 +167,7 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         if (wrapper != null) {
             // NOTE: Implement via cinterop bindings
             // wrapper.minimumZoomLevel = minZoom
-            WWWLogger.d("IOSMapLibreAdapter", "Set minimum zoom level: $minZoom")
+            WWWLogger.d("IosMapLibreAdapter", "Set minimum zoom level: $minZoom")
         }
     }
 
@@ -175,7 +175,7 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         if (wrapper != null) {
             // NOTE: Implement via cinterop bindings
             // wrapper.maximumZoomLevel = maxZoom
-            WWWLogger.d("IOSMapLibreAdapter", "Set maximum zoom level: $maxZoom")
+            WWWLogger.d("IosMapLibreAdapter", "Set maximum zoom level: $maxZoom")
         }
     }
 
@@ -185,7 +185,7 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         right: Int,
         bottom: Int,
     ) {
-        WWWLogger.d("IOSMapLibreAdapter", "Setting attribution margins: $left, $top, $right, $bottom")
+        WWWLogger.d("IosMapLibreAdapter", "Setting attribution margins: $left, $top, $right, $bottom")
 
         // NOTE: Implement iOS MapLibre attribution positioning
         // Set attribution view margins
@@ -196,7 +196,7 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         clearExisting: Boolean,
     ) {
         if (wrapper != null) {
-            WWWLogger.d("IOSMapLibreAdapter", "Adding ${polygons.size} wave polygons, clearExisting: $clearExisting")
+            WWWLogger.d("IosMapLibreAdapter", "Adding ${polygons.size} wave polygons, clearExisting: $clearExisting")
 
             // NOTE: Implement iOS MapLibre polygon rendering
             // Will be implemented via cinterop bindings
@@ -206,28 +206,28 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
     }
 
     override fun setOnMapClickListener(listener: ((Double, Double) -> Unit)?) {
-        WWWLogger.d("IOSMapLibreAdapter", "Setting map click listener")
+        WWWLogger.d("IosMapLibreAdapter", "Setting map click listener")
 
         // NOTE: Implement iOS MapLibre tap gesture handling
         // Add tap gesture recognizer and forward coordinates to listener
     }
 
     override fun addOnCameraIdleListener(callback: () -> Unit) {
-        WWWLogger.d("IOSMapLibreAdapter", "Adding camera idle listener")
+        WWWLogger.d("IosMapLibreAdapter", "Adding camera idle listener")
 
         // NOTE: Implement iOS MapLibre camera idle detection
         // Listen for camera movement completion and call callback
     }
 
     override fun drawOverridenBbox(bbox: BoundingBox) {
-        WWWLogger.d("IOSMapLibreAdapter", "Drawing override bounding box")
+        WWWLogger.d("IosMapLibreAdapter", "Drawing override bounding box")
 
         // NOTE: Implement iOS MapLibre bounding box overlay
         // Draw visual bounds overlay on map
     }
 
     override fun onMapSet(callback: (MapLibreAdapter<*>) -> Unit) {
-        WWWLogger.d("IOSMapLibreAdapter", "Map set callback")
+        WWWLogger.d("IosMapLibreAdapter", "Map set callback")
         // NOTE: Implement map ready callback for iOS
         callback(this)
     }

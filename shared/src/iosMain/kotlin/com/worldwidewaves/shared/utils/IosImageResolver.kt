@@ -34,7 +34,7 @@ import com.worldwidewaves.shared.generated.resources.transparent
 import io.github.aakira.napier.Napier
 import org.jetbrains.compose.resources.DrawableResource
 
-object IOSDrawableResources {
+object IosDrawableResources {
     // Mapping of path names to resource IDs - same as Android for cross-platform compatibility
     private val resourceMap =
         mapOf(
@@ -56,7 +56,7 @@ object IOSDrawableResources {
  * iOS implementation of ImageResolver using DrawableResource for cross-platform compatibility.
  * This matches the Android implementation to ensure choreography works consistently.
  */
-class IOSImageResolver : ImageResolver<DrawableResource> {
+class IosImageResolver : ImageResolver<DrawableResource> {
     /**
      * Resolves a resource path to a DrawableResource for cross-platform compatibility.
      *
@@ -65,7 +65,7 @@ class IOSImageResolver : ImageResolver<DrawableResource> {
      */
     override fun resolve(path: String): DrawableResource? {
         try {
-            val resource = IOSDrawableResources.getResource(path)
+            val resource = IosDrawableResources.getResource(path)
             if (resource == null) {
                 Napier.e("Failed to resolve choreography image: $path")
             } else {

@@ -20,15 +20,15 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
- * iOS-specific tests for IOSWWWLocationProvider.
+ * iOS-specific tests for IosWwwLocationProvider.
  *
  * These tests verify the iOS Core Location integration and StateFlow behavior.
  */
-class IOSWWWLocationProviderTest {
+class IosWwwLocationProviderTest {
     @Test
     fun `initial state has no location`() =
         runTest {
-            val locationProvider = IOSWWWLocationProvider()
+            val locationProvider = IosWwwLocationProvider()
 
             val initialLocation = locationProvider.currentLocation.first()
             assertNull(initialLocation)
@@ -37,7 +37,7 @@ class IOSWWWLocationProviderTest {
     @Test
     fun `startLocationUpdates sets up location tracking`() =
         runTest {
-            val locationProvider = IOSWWWLocationProvider()
+            val locationProvider = IosWwwLocationProvider()
             var receivedPosition: Position? = null
 
             locationProvider.startLocationUpdates { position ->
@@ -52,7 +52,7 @@ class IOSWWWLocationProviderTest {
     @Test
     fun `stopLocationUpdates stops tracking`() =
         runTest {
-            val locationProvider = IOSWWWLocationProvider()
+            val locationProvider = IosWwwLocationProvider()
             var updateCount = 0
 
             locationProvider.startLocationUpdates { position ->
@@ -68,7 +68,7 @@ class IOSWWWLocationProviderTest {
     @Test
     fun `default location is San Francisco coordinates`() =
         runTest {
-            val locationProvider = IOSWWWLocationProvider()
+            val locationProvider = IosWwwLocationProvider()
             var receivedPosition: Position? = null
 
             locationProvider.startLocationUpdates { position ->
@@ -85,7 +85,7 @@ class IOSWWWLocationProviderTest {
     @Test
     fun `multiple startLocationUpdates calls are handled gracefully`() =
         runTest {
-            val locationProvider = IOSWWWLocationProvider()
+            val locationProvider = IosWwwLocationProvider()
             var updateCount = 0
 
             locationProvider.startLocationUpdates { position ->
@@ -104,7 +104,7 @@ class IOSWWWLocationProviderTest {
     @Test
     fun `StateFlow currentLocation updates correctly`() =
         runTest {
-            val locationProvider = IOSWWWLocationProvider()
+            val locationProvider = IosWwwLocationProvider()
 
             locationProvider.startLocationUpdates { position ->
                 // Callback received

@@ -22,7 +22,7 @@ import kotlin.test.assertNotNull
  * These tests verify that StateFlow integration works correctly for iOS,
  * and that the reactive bridge can handle state updates properly.
  */
-class IOSReactiveIntegrationTest {
+class IosReactiveIntegrationTest {
     @Test
     fun `StateFlow holds initial value correctly`() =
         runTest {

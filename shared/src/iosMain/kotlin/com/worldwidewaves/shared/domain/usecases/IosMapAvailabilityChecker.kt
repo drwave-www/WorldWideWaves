@@ -29,7 +29,7 @@ import platform.Foundation.NSOperationQueue
  * No downloads occur unless requestMapDownload(...) is called,
  * or assets are present as Initial Install Tags.
  */
-class IOSMapAvailabilityChecker : MapAvailabilityChecker {
+class IosMapAvailabilityChecker : MapAvailabilityChecker {
     private val tracked = mutableSetOf<String>()
     private val _mapStates = MutableStateFlow<Map<String, Boolean>>(emptyMap())
     override val mapStates: StateFlow<Map<String, Boolean>> = _mapStates

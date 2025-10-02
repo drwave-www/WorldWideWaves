@@ -30,7 +30,7 @@ import kotlin.test.assertTrue
 /**
  * Tests for iOS event map implementation
  */
-class IOSEventMapTest {
+class IosEventMapTest {
     @Test
     fun `should handle wave polygon updates correctly`() {
         // Test polygon tracking functionality

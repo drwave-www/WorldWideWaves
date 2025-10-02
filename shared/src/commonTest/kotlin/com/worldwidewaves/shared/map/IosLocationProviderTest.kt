@@ -30,7 +30,7 @@ import kotlin.test.assertTrue
 /**
  * Tests for iOS location provider implementation
  */
-class IOSLocationProviderTest {
+class IosLocationProviderTest {
     @Test
     fun `should validate position coordinates correctly`() {
         // Test coordinate validation using WWWGlobals constants
@@ -90,7 +90,7 @@ class IOSLocationProviderTest {
     }
 
     /**
-     * Helper function to validate position (mimics IOSWWWLocationProvider logic)
+     * Helper function to validate position (mimics IosWwwLocationProvider logic)
      */
     private fun isValidTestPosition(position: Position): Boolean =
         position.lat in WWWGlobals.Geodetic.MIN_LATITUDE..WWWGlobals.Geodetic.MAX_LATITUDE &&

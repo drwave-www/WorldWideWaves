@@ -37,19 +37,19 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**
- * Comprehensive tests for IOSMapViewModel.
+ * Comprehensive tests for IosMapViewModel.
  * Tests the iOS-specific MapViewModel implementation with MapDownloadManager composition.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class IOSMapViewModelTest {
+class IosMapViewModelTest {
     private val testScheduler = TestCoroutineScheduler()
     private lateinit var mockPlatformMapManager: TestPlatformMapManager
-    private lateinit var viewModel: IOSMapViewModel
+    private lateinit var viewModel: IosMapViewModel
 
     @BeforeTest
     fun setUp() {
         mockPlatformMapManager = TestPlatformMapManager()
-        viewModel = IOSMapViewModel(mockPlatformMapManager)
+        viewModel = IosMapViewModel(mockPlatformMapManager)
     }
 
     @AfterTest

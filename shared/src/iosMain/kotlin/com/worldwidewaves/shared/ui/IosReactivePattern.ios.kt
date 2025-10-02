@@ -31,14 +31,14 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 /**
- * iOS implementation of StateFlow to IOSObservable conversion
+ * iOS implementation of StateFlow to IosObservable conversion
  */
-actual fun <T> StateFlow<T>.toIOSObservable(): IOSObservable<T> = IOSStateFlowObservable(this)
+actual fun <T> StateFlow<T>.toIosObservable(): IosObservable<T> = IosStateFlowObservable(this)
 
 /**
- * iOS implementation of Flow to IOSObservable conversion
+ * iOS implementation of Flow to IosObservable conversion
  */
-actual fun <T> Flow<T>.toIOSObservableFlow(): IOSObservable<T> = IOSFlowObservable(this)
+actual fun <T> Flow<T>.toIosObservableFlow(): IosObservable<T> = IosFlowObservable(this)
 
 /**
  * iOS-specific StateFlow observable implementation with automatic cleanup
@@ -49,9 +49,9 @@ actual fun <T> Flow<T>.toIOSObservableFlow(): IOSObservable<T> = IOSFlowObservab
  * Note: iOS runs on a single-threaded event loop model, so synchronization is not needed
  * for collection access as all operations happen on the main thread.
  */
-private class IOSStateFlowObservable<T>(
+private class IosStateFlowObservable<T>(
     private val stateFlow: StateFlow<T>,
-) : IOSObservable<T> {
+) : IosObservable<T> {
     private val activeScopes = mutableSetOf<CoroutineScope>()
 
     override val value: T
@@ -63,7 +63,7 @@ private class IOSStateFlowObservable<T>(
     override val activeSubscriptionCount: Int
         get() = activeScopes.size
 
-    override fun observe(callback: (T) -> Unit): IOSObservableSubscription {
+    override fun observe(callback: (T) -> Unit): IosObservableSubscription {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
         activeScopes.add(scope)
@@ -74,7 +74,7 @@ private class IOSStateFlowObservable<T>(
                     callback(value)
                 }.launchIn(scope)
 
-        return IOSSubscription(
+        return IosSubscription(
             scope = scope,
             isActiveParameter = job.isActive,
             onDispose = {
@@ -117,9 +117,9 @@ private class IOSStateFlowObservable<T>(
  * Note: iOS runs on a single-threaded event loop model, so synchronization is not needed
  * for collection access as all operations happen on the main thread.
  */
-private class IOSFlowObservable<T>(
+private class IosFlowObservable<T>(
     private val flow: Flow<T>,
-) : IOSObservable<T> {
+) : IosObservable<T> {
     private var _cachedValue: T? = null
     private val activeScopes = mutableSetOf<CoroutineScope>()
 
@@ -132,7 +132,7 @@ private class IOSFlowObservable<T>(
     override val activeSubscriptionCount: Int
         get() = activeScopes.size
 
-    override fun observe(callback: (T) -> Unit): IOSObservableSubscription {
+    override fun observe(callback: (T) -> Unit): IosObservableSubscription {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
         activeScopes.add(scope)
@@ -144,7 +144,7 @@ private class IOSFlowObservable<T>(
                     callback(value)
                 }.launchIn(scope)
 
-        return IOSSubscription(
+        return IosSubscription(
             scope = scope,
             isActiveParameter = job.isActive,
             onDispose = {
@@ -182,11 +182,11 @@ private class IOSFlowObservable<T>(
 /**
  * iOS-specific subscription implementation with cleanup callback support
  */
-private class IOSSubscription(
+private class IosSubscription(
     private val scope: CoroutineScope,
     private var isActiveParameter: Boolean,
     private val onDispose: (() -> Unit)? = null,
-) : IOSObservableSubscription {
+) : IosObservableSubscription {
     override val isActive: Boolean
         get() = isActiveParameter
 
@@ -202,10 +202,10 @@ private class IOSSubscription(
 /**
  * iOS-specific reactive subscription manager implementation
  */
-class IOSReactiveSubscriptionManagerImpl : IOSReactiveSubscriptionManager {
-    private val subscriptions = mutableListOf<IOSObservableSubscription>()
+class IosReactiveSubscriptionManagerImpl : IosReactiveSubscriptionManager {
+    private val subscriptions = mutableListOf<IosObservableSubscription>()
 
-    override fun addSubscription(subscription: IOSObservableSubscription) {
+    override fun addSubscription(subscription: IosObservableSubscription) {
         subscriptions.add(subscription)
     }
 
@@ -221,9 +221,9 @@ class IOSReactiveSubscriptionManagerImpl : IOSReactiveSubscriptionManager {
 /**
  * iOS-specific lifecycle observer implementation
  */
-class IOSLifecycleObserverImpl(
-    private val subscriptionManager: IOSReactiveSubscriptionManager,
-) : IOSLifecycleObserver {
+class IosLifecycleObserverImpl(
+    private val subscriptionManager: IosReactiveSubscriptionManager,
+) : IosLifecycleObserver {
     override fun onViewDidAppear() {
         // iOS View appeared - subscriptions should already be active
         // This can be used for logging or debugging

@@ -28,11 +28,11 @@ import kotlinx.coroutines.flow.StateFlow
  * Android stub implementation - iOS reactive patterns not needed on Android
  * Android uses native StateFlow/Flow with Compose directly
  */
-actual fun <T> StateFlow<T>.toIOSObservable(): IOSObservable<T> =
+actual fun <T> StateFlow<T>.toIosObservable(): IosObservable<T> =
     throw UnsupportedOperationException("iOS reactive patterns not available on Android platform")
 
 /**
  * Android stub implementation - iOS reactive patterns not needed on Android
  */
-actual fun <T> Flow<T>.toIOSObservableFlow(): IOSObservable<T> =
+actual fun <T> Flow<T>.toIosObservableFlow(): IosObservable<T> =
     throw UnsupportedOperationException("iOS reactive patterns not available on Android platform")
