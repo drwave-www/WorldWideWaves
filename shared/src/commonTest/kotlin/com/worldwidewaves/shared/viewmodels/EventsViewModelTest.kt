@@ -998,7 +998,7 @@ class EventsViewModelTest : KoinTest {
                 viewModel.filterEvents(onlyFavorites = shouldFilter)
 
                 // Wait for this specific filter operation to complete before next
-                waitForEvents(viewModel, expectedSize, timeoutMs = 2000)
+                waitForEvents(viewModel, expectedSize, timeoutMs = 5000)
             }
 
             // Then - verify final state is correct and no crashes

@@ -13,7 +13,7 @@ package com.worldwidewaves.shared.map
 import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.utils.WWWLogger
+import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -51,7 +51,7 @@ class IosMapLibreAdapter : MapLibreAdapter<Any> {
      */
     override fun setMap(map: Any) {
         this.wrapper = map
-        WWWLogger.d(TAG, "Map wrapper set (not used - rendering via SwiftUI)")
+        Log.d(TAG, "Map wrapper set (not used - rendering via SwiftUI)")
     }
 
     override fun setStyle(
@@ -59,11 +59,11 @@ class IosMapLibreAdapter : MapLibreAdapter<Any> {
         callback: () -> Unit?,
     ) {
         if (wrapper == null) {
-            WWWLogger.w(TAG, "Cannot set style - wrapper not initialized")
+            Log.w(TAG, "Cannot set style - wrapper not initialized")
             return
         }
 
-        WWWLogger.d(TAG, "Setting map style: $stylePath")
+        Log.d(TAG, "Setting map style: $stylePath")
 
         // NOTE: Swift wrapper call will be implemented via cinterop
         // For now, just invoke callback to prevent blocking
@@ -114,7 +114,7 @@ class IosMapLibreAdapter : MapLibreAdapter<Any> {
 
     override fun moveCamera(bounds: BoundingBox) {
         if (wrapper != null) {
-            WWWLogger.d("IosMapLibreAdapter", "Moving camera to bounds")
+            Log.d("IosMapLibreAdapter", "Moving camera to bounds")
 
             // NOTE: Implement iOS MapLibre camera movement
             // Will be implemented via cinterop bindings
@@ -127,7 +127,7 @@ class IosMapLibreAdapter : MapLibreAdapter<Any> {
         callback: MapCameraCallback?,
     ) {
         if (wrapper != null) {
-            WWWLogger.d("IosMapLibreAdapter", "Animating camera to position: ${position.lat}, ${position.lng}")
+            Log.d("IosMapLibreAdapter", "Animating camera to position: ${position.lat}, ${position.lng}")
 
             // NOTE: Implement iOS MapLibre camera animation
             // Will be implemented via cinterop bindings
@@ -142,7 +142,7 @@ class IosMapLibreAdapter : MapLibreAdapter<Any> {
         callback: MapCameraCallback?,
     ) {
         if (wrapper != null) {
-            WWWLogger.d("IosMapLibreAdapter", "Animating camera to bounds with padding: $padding")
+            Log.d("IosMapLibreAdapter", "Animating camera to bounds with padding: $padding")
 
             // NOTE: Implement iOS MapLibre bounds animation
             // Will be implemented via cinterop bindings
@@ -152,7 +152,7 @@ class IosMapLibreAdapter : MapLibreAdapter<Any> {
     }
 
     override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
-        WWWLogger.d("IosMapLibreAdapter", "Setting camera constraint bounds")
+        Log.d("IosMapLibreAdapter", "Setting camera constraint bounds")
 
         // NOTE: Implement iOS MapLibre camera constraints
         // Set bounds within which the camera can move
@@ -167,7 +167,7 @@ class IosMapLibreAdapter : MapLibreAdapter<Any> {
         if (wrapper != null) {
             // NOTE: Implement via cinterop bindings
             // wrapper.minimumZoomLevel = minZoom
-            WWWLogger.d("IosMapLibreAdapter", "Set minimum zoom level: $minZoom")
+            Log.d("IosMapLibreAdapter", "Set minimum zoom level: $minZoom")
         }
     }
 
@@ -175,7 +175,7 @@ class IosMapLibreAdapter : MapLibreAdapter<Any> {
         if (wrapper != null) {
             // NOTE: Implement via cinterop bindings
             // wrapper.maximumZoomLevel = maxZoom
-            WWWLogger.d("IosMapLibreAdapter", "Set maximum zoom level: $maxZoom")
+            Log.d("IosMapLibreAdapter", "Set maximum zoom level: $maxZoom")
         }
     }
 
@@ -185,7 +185,7 @@ class IosMapLibreAdapter : MapLibreAdapter<Any> {
         right: Int,
         bottom: Int,
     ) {
-        WWWLogger.d("IosMapLibreAdapter", "Setting attribution margins: $left, $top, $right, $bottom")
+        Log.d("IosMapLibreAdapter", "Setting attribution margins: $left, $top, $right, $bottom")
 
         // NOTE: Implement iOS MapLibre attribution positioning
         // Set attribution view margins
@@ -196,7 +196,7 @@ class IosMapLibreAdapter : MapLibreAdapter<Any> {
         clearExisting: Boolean,
     ) {
         if (wrapper != null) {
-            WWWLogger.d("IosMapLibreAdapter", "Adding ${polygons.size} wave polygons, clearExisting: $clearExisting")
+            Log.d("IosMapLibreAdapter", "Adding ${polygons.size} wave polygons, clearExisting: $clearExisting")
 
             // NOTE: Implement iOS MapLibre polygon rendering
             // Will be implemented via cinterop bindings
@@ -206,28 +206,28 @@ class IosMapLibreAdapter : MapLibreAdapter<Any> {
     }
 
     override fun setOnMapClickListener(listener: ((Double, Double) -> Unit)?) {
-        WWWLogger.d("IosMapLibreAdapter", "Setting map click listener")
+        Log.d("IosMapLibreAdapter", "Setting map click listener")
 
         // NOTE: Implement iOS MapLibre tap gesture handling
         // Add tap gesture recognizer and forward coordinates to listener
     }
 
     override fun addOnCameraIdleListener(callback: () -> Unit) {
-        WWWLogger.d("IosMapLibreAdapter", "Adding camera idle listener")
+        Log.d("IosMapLibreAdapter", "Adding camera idle listener")
 
         // NOTE: Implement iOS MapLibre camera idle detection
         // Listen for camera movement completion and call callback
     }
 
     override fun drawOverridenBbox(bbox: BoundingBox) {
-        WWWLogger.d("IosMapLibreAdapter", "Drawing override bounding box")
+        Log.d("IosMapLibreAdapter", "Drawing override bounding box")
 
         // NOTE: Implement iOS MapLibre bounding box overlay
         // Draw visual bounds overlay on map
     }
 
     override fun onMapSet(callback: (MapLibreAdapter<*>) -> Unit) {
-        WWWLogger.d("IosMapLibreAdapter", "Map set callback")
+        Log.d("IosMapLibreAdapter", "Map set callback")
         // NOTE: Implement map ready callback for iOS
         callback(this)
     }

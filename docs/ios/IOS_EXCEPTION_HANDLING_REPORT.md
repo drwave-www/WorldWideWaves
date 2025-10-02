@@ -54,13 +54,13 @@ Scanned all iOS-callable top-level functions and verified proper annotations:
 
 #### Platform Initialization Functions (4/4 ✅)
 - `doInitPlatform()` - ✅ @Throws(Throwable::class)
-- `installKNHook()` - ✅ @Throws(Throwable::class)
+- `installIosLifecycleHook()` - ✅ @Throws(Throwable::class)
 - `registerPlatformEnabler(enabler: PlatformEnabler)` - ✅ @Throws(Throwable::class)
 - `registerNativeMapViewProvider(provider: NativeMapViewProvider)` - ✅ @Throws(Throwable::class)
 
 **Locations**:
 - `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotlin/com/worldwidewaves/shared/Platform.ios.kt`
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotlin/com/worldwidewaves/shared/KnHook.kt`
+- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotlin/com/worldwidewaves/shared/IosLifecycleHook.kt`
 - `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotlin/com/worldwidewaves/shared/utils/IOSPlatformEnabler.kt`
 - `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotlin/com/worldwidewaves/shared/map/NativeMapViewProviderRegistration.kt`
 
@@ -86,7 +86,7 @@ Scanned all iOS-callable top-level functions and verified proper annotations:
 
 ### Test 2: Platform Initialization Functions
 **Purpose**: Verify platform setup functions are annotated
-**Coverage**: doInitPlatform, installKNHook, registerPlatformEnabler, registerNativeMapViewProvider
+**Coverage**: doInitPlatform, installIosLifecycleHook, registerPlatformEnabler, registerNativeMapViewProvider
 **Result**: All functions documented and verified callable
 
 ### Test 3: Exception Message Propagation
@@ -212,7 +212,7 @@ Common exceptions that can propagate from Kotlin to Swift:
 - `CancellationException` - Coroutine cancellations
 
 ### 4. Monitoring and Debugging
-- Use `installKNHook()` to catch unhandled exceptions
+- Use `installIosLifecycleHook()` to catch unhandled exceptions
 - Monitor Swift crash reports for Kotlin exceptions
 - Add logging at Kotlin-Swift boundaries
 - Test error paths during development

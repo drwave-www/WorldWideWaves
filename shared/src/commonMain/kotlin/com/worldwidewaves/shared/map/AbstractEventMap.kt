@@ -67,7 +67,7 @@ abstract class AbstractEventMap<T>(
 ) : KoinComponent {
     // Properties that must be implemented by platform-specific subclasses
     abstract val mapLibreAdapter: MapLibreAdapter<T> // MapLibre is native map library
-    abstract val locationProvider: WWWLocationProvider? // LocationProvider is native location provider
+    abstract val locationProvider: LocationProvider? // LocationProvider is native location provider
 
     // Dependencies
     private val positionManager: PositionManager by inject()

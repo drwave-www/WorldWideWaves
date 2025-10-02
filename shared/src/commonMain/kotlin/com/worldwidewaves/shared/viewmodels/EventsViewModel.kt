@@ -19,7 +19,7 @@ import com.worldwidewaves.shared.domain.usecases.FilterEventsUseCase
 import com.worldwidewaves.shared.domain.usecases.GetSortedEventsUseCase
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.ui.BaseViewModel
-import com.worldwidewaves.shared.utils.WWWLogger
+import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -89,7 +89,7 @@ class EventsViewModel(
         try {
             // Start loading events through repository
             eventsRepository.loadEvents { exception ->
-                WWWLogger.e("EventsViewModel", "Error loading events", exception)
+                Log.e("EventsViewModel", "Error loading events", throwable = exception)
                 _loadingError.value = true
             }
 
@@ -105,7 +105,7 @@ class EventsViewModel(
                 .onEach { error ->
                     _loadingError.value = error != null
                     error?.let {
-                        WWWLogger.e("EventsViewModel", "Repository error: ${it.message}", it)
+                        Log.e("EventsViewModel", "Repository error: ${it.message}", throwable = it)
                     }
                 }.launchIn(scope)
 
@@ -117,7 +117,7 @@ class EventsViewModel(
                 }.flowOn(Dispatchers.Default)
                 .launchIn(scope)
         } catch (e: Exception) {
-            WWWLogger.e("EventsViewModel", "Error in loadEvents", e)
+            Log.e("EventsViewModel", "Error in loadEvents", throwable = e)
             _loadingError.value = true
         }
     }
@@ -135,7 +135,7 @@ class EventsViewModel(
         // Start observing all events - multiple events can be active simultaneously
         // The user has a single position that needs to be checked against all event areas
         sortedEvents.forEach { event ->
-            WWWLogger.d("EventsViewModel", "Starting observation for event ${event.id}")
+            Log.d("EventsViewModel", "Starting observation for event ${event.id}")
 
             // Start event observation for all events
             event.observer.startObservation()
@@ -205,7 +205,7 @@ class EventsViewModel(
                         _events.value = filteredEvents
                     }.launchIn(scope)
             } catch (e: Exception) {
-                WWWLogger.e("EventsViewModel", "Error filtering events", e)
+                Log.e("EventsViewModel", "Error filtering events", throwable = e)
                 _loadingError.value = true
             }
         }

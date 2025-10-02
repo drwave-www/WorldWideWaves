@@ -84,8 +84,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             fatalError("Cannot proceed without platform initialization: \(error)")
         }
 
-        KnHookKt.installKNHook()
-        NSLog("[\(tag)] ✅ K/N hook installed")
+        IosLifecycleHookKt.installIosLifecycleHook()
+        NSLog("[\(tag)] ✅ iOS lifecycle hook installed")
 
         IOSPlatformEnablerKt.registerPlatformEnabler(enabler: IOSPlatformEnabler())
         NSLog("[\(tag)] ✅ PlatformEnabler (Swift) registered into Koin")
