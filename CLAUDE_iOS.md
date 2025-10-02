@@ -381,8 +381,8 @@ private func installPlatform() {
         NSLog("[SceneDelegate] ❌ Platform initialization failed: \(error)")
     }
 
-    // 2. Install Kotlin/Native hooks
-    KnHookKt.installKNHook()
+    // 2. Install iOS lifecycle hook
+    IosLifecycleHookKt.installIosLifecycleHook()
 
     // 3. Register platform enabler (Swift → Kotlin bridge)
     let enabler = IOSPlatformEnabler()
@@ -822,7 +822,7 @@ fun makeNewFeatureViewController(featureId: String): UIViewController =
             )
         }
 
-        BindIosLifecycle(host)
+        bindIosLifecycle(host)
 
         host.Draw(onFinish = finish)
     }

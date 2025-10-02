@@ -31,7 +31,7 @@ import platform.UIKit.UIApplicationWillResignActiveNotification
 import platform.darwin.NSObjectProtocol
 
 @Composable
-internal fun BindIosLifecycle(host: MainScreen) {
+internal fun bindIosLifecycle(host: MainScreen) {
     DisposableEffect(host) {
         val nc = NSNotificationCenter.defaultCenter
 

@@ -14,12 +14,12 @@ import io.github.aakira.napier.Antilog
 import io.github.aakira.napier.LogLevel
 
 /**
- * iOS Antilog implementation using NSLog that routes through Unified Logging.
+ * iOS OS Log adapter implementation using NSLog that routes through Unified Logging.
  * Logs are visible via:
  * - xcrun simctl spawn <UDID> log stream --level debug --predicate 'processImagePath CONTAINS[c] "WorldWideWaves"'
  * - xcrun simctl spawn <UDID> log show --style compact --last 2m --debug --info --predicate 'processImagePath CONTAINS[c] "WorldWideWaves"'
  */
-internal class OSLogAntilog : Antilog() {
+internal class IosOSLogAdapter : Antilog() {
     override fun isEnable(
         priority: LogLevel,
         tag: String?,

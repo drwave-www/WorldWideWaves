@@ -14,18 +14,18 @@ import com.worldwidewaves.shared.makeMainViewController
 import platform.UIKit.UIViewController
 import platform.UIKit.navigationController
 
-const val TAG = "IOS Helpers"
+const val TAG = "IosAppFinisher"
 
-internal fun UIViewController.finishIOS() {
+internal fun UIViewController.finishIosApp() {
     // If presented modally, dismiss; otherwise try to pop from a navigation stack.
     when {
         this.presentingViewController != null -> {
             this.dismissViewControllerAnimated(true, completion = null)
-            Log.d(TAG, "finishIOS: dismissed modal VC")
+            Log.d(TAG, "finishIosApp: dismissed modal VC")
         }
         this.navigationController != null -> {
             this.navigationController?.popViewControllerAnimated(true)
-            Log.d(TAG, "finishIOS: popped from navigation stack")
+            Log.d(TAG, "finishIosApp: popped from navigation stack")
         }
         else -> {
             // You can't "close" an iOS app from code (App Store-rejected).
@@ -36,9 +36,9 @@ internal fun UIViewController.finishIOS() {
             if (win != null) {
                 win.rootViewController = newRoot
                 win.makeKeyAndVisible()
-                Log.i(TAG, "finishIOS: replaced root with main VC")
+                Log.i(TAG, "finishIosApp: replaced root with main VC")
             } else {
-                Log.w(TAG, "finishIOS: no window; cannot replace root")
+                Log.w(TAG, "finishIosApp: no window; cannot replace root")
             }
         }
     }

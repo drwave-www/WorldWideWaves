@@ -23,7 +23,7 @@ import kotlin.experimental.ExperimentalNativeApi
 
 @OptIn(ExperimentalNativeApi::class)
 @Throws(Throwable::class)
-fun installKNHook() {
+fun installIosLifecycleHook() {
     setUnhandledExceptionHook { t ->
         println("K/N Unhandled: ${t::class.qualifiedName}: ${t.message}")
         if (BuildKonfig.DEBUG) {

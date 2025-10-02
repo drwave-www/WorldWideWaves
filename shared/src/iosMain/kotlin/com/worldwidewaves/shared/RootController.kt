@@ -30,9 +30,9 @@ import com.worldwidewaves.shared.ui.activities.EventDetailScreen
 import com.worldwidewaves.shared.ui.activities.FullMapScreen
 import com.worldwidewaves.shared.ui.activities.MainScreen
 import com.worldwidewaves.shared.ui.activities.WaveParticipationScreen
-import com.worldwidewaves.shared.utils.BindIosLifecycle
 import com.worldwidewaves.shared.utils.Log
-import com.worldwidewaves.shared.utils.finishIOS
+import com.worldwidewaves.shared.utils.bindIosLifecycle
+import com.worldwidewaves.shared.utils.finishIosApp
 import com.worldwidewaves.shared.viewmodels.MapViewModel
 import org.koin.mp.KoinPlatform
 import platform.UIKit.UIViewController
@@ -58,7 +58,7 @@ private inline fun makeComposeVC(
     val vc =
         ComposeUIViewController(configure = { enforceStrictPlistSanityCheck = false }) {
             Log.v(TAG, ">>> ENTERING $logLabel")
-            finish { box.vc?.finishIOS() }
+            finish { box.vc?.finishIosApp() }
         }
 
     box.vc = vc
@@ -86,7 +86,7 @@ fun makeEventViewController(eventId: String): UIViewController =
                 EventDetailScreen(eventId = eventId, platformEnabler = enabler, mapViewModel = mapVm)
             }
 
-        BindIosLifecycle(host)
+        bindIosLifecycle(host)
 
         host.asComponent(
             eventMapBuilder = { event -> IosEventMap(event) },
@@ -105,7 +105,7 @@ fun makeWaveViewController(eventId: String): UIViewController =
                 WaveParticipationScreen(eventId = eventId, platformEnabler = enabler)
             }
 
-        BindIosLifecycle(host)
+        bindIosLifecycle(host)
 
         host.asComponent(
             eventMapBuilder = { event -> IosEventMap(event) },
@@ -124,7 +124,7 @@ fun makeFullMapViewController(eventId: String): UIViewController =
                 FullMapScreen(eventId = eventId, platformEnabler = enabler)
             }
 
-        BindIosLifecycle(host)
+        bindIosLifecycle(host)
 
         host.asComponent(
             eventMapBuilder = { event ->

@@ -83,7 +83,7 @@ class IosExceptionHandlingTest {
         val requiredFunctions =
             listOf(
                 "doInitPlatform",
-                "installKNHook",
+                "installIosLifecycleHook",
                 "registerPlatformEnabler",
                 "registerNativeMapViewProvider",
             )
@@ -290,7 +290,7 @@ class IosExceptionHandlingTest {
                 "makeWaveViewController",
                 "makeFullMapViewController",
                 "doInitPlatform",
-                "installKNHook",
+                "installIosLifecycleHook",
                 "registerPlatformEnabler",
                 "registerNativeMapViewProvider",
             )
