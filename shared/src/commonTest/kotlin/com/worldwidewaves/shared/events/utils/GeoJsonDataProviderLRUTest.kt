@@ -21,6 +21,7 @@
 
 package com.worldwidewaves.shared.events.utils
 
+import com.worldwidewaves.shared.events.data.DefaultGeoJsonDataProvider
 import kotlinx.coroutines.test.runTest
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin

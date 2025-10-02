@@ -499,7 +499,9 @@ open class PerformanceMonitor : IPerformanceMonitor {
      */
     fun cleanup() {
         // Stop and clear all active traces
-        traces.values.forEach { it.stop() }
+        // Create a copy of traces to avoid ConcurrentModificationException
+        // since stop() modifies the traces map via onComplete callback
+        traces.values.toList().forEach { it.stop() }
         traces.clear()
 
         // Clear metrics and events

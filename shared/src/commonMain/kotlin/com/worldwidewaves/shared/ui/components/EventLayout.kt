@@ -31,8 +31,8 @@ import com.worldwidewaves.shared.ui.components.event.NotifyAreaUserPosition
 import com.worldwidewaves.shared.ui.components.event.WWWEventSocialNetworks
 import com.worldwidewaves.shared.ui.components.shared.ButtonWave
 import com.worldwidewaves.shared.ui.components.shared.SimulationButton
+import com.worldwidewaves.shared.ui.formatters.rememberEventState
 import com.worldwidewaves.shared.ui.utils.getIosSafePlatform
-import com.worldwidewaves.shared.ui.utils.rememberEventState
 
 /**
  * Standard event screen layout pattern used across multiple event activities.

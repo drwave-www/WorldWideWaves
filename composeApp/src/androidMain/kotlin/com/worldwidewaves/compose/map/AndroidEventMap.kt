@@ -85,13 +85,13 @@ import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.map.EventMapConfig
+import com.worldwidewaves.shared.map.LocationProvider
 import com.worldwidewaves.shared.map.MapCameraPosition
 import com.worldwidewaves.shared.map.MapFeatureState
-import com.worldwidewaves.shared.map.WWWLocationProvider
 import com.worldwidewaves.shared.toMapLibrePolygon
 import com.worldwidewaves.shared.ui.components.DownloadProgressIndicator
 import com.worldwidewaves.shared.ui.components.LoadingIndicator
-import com.worldwidewaves.utils.AndroidWWWLocationProvider
+import com.worldwidewaves.utils.AndroidLocationProvider
 import com.worldwidewaves.utils.CheckGPSEnable
 import com.worldwidewaves.utils.MapAvailabilityCheckerAndroid
 import com.worldwidewaves.utils.requestLocationPermission
@@ -160,7 +160,7 @@ class AndroidEventMap(
     }
 
     // Overrides properties from AbstractEventMap
-    override val locationProvider: WWWLocationProvider by inject(AndroidWWWLocationProvider::class.java)
+    override val locationProvider: LocationProvider by inject(AndroidLocationProvider::class.java)
     override val mapLibreAdapter: MapLibreAdapterAndroid by lazy { MapLibreAdapterAndroid() }
 
     /** Holds the last [MapLibreMap] provided by MapView so we can (re-)enable
@@ -760,7 +760,7 @@ class AndroidEventMap(
                     .foregroundTintColor(Color.BLACK)
                     .build(),
             ).useDefaultLocationEngine(false)
-            .locationEngine(LocationEngineProxy((locationProvider as AndroidWWWLocationProvider).locationEngine))
+            .locationEngine(LocationEngineProxy((locationProvider as AndroidLocationProvider).locationEngine))
             .locationEngineRequest(buildLocationEngineRequest())
             .build()
 

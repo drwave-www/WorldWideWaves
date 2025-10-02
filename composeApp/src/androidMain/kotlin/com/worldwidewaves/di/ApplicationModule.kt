@@ -28,10 +28,10 @@ import com.worldwidewaves.shared.ui.DebugTabScreen
 import com.worldwidewaves.shared.utils.CloseableCoroutineScope
 import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.viewmodels.EventsViewModel
-import com.worldwidewaves.utils.AndroidWWWLocationProvider
+import com.worldwidewaves.utils.AndroidLocationProvider
 import com.worldwidewaves.utils.MapAvailabilityCheckerAndroid
 import com.worldwidewaves.utils.PlatformEnablerAndroid
-import com.worldwidewaves.utils.WWWSimulationEnabledLocationEngine
+import com.worldwidewaves.utils.SimulationLocationEngine
 import com.worldwidewaves.viewmodels.AndroidMapViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
@@ -66,8 +66,8 @@ val applicationModule =
         viewModel { AndroidMapViewModel(get()) }
 
         // Location engine and provider for Android
-        single { WWWSimulationEnabledLocationEngine(get()) }
-        factory { AndroidWWWLocationProvider() }
+        single { SimulationLocationEngine(get()) }
+        factory { AndroidLocationProvider() }
 
         // Debug screen - only in debug builds
         single<DebugTabScreen?> {

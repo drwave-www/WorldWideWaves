@@ -21,18 +21,18 @@ package com.worldwidewaves.activities.event
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.ui.activities.WWWEventActivity
+import com.worldwidewaves.shared.ui.activities.EventDetailScreen
 import com.worldwidewaves.utils.PlatformEnablerAndroid
 import com.worldwidewaves.viewmodels.AndroidMapViewModel
 import org.koin.android.ext.android.inject
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
-class EventActivity : AbstractEventAndroidActivity<WWWEventActivity>() {
+class EventActivity : AbstractEventAndroidActivity<EventDetailScreen>() {
     private val mapViewModel: AndroidMapViewModel by inject()
 
     override fun createActivityImpl(
         eventId: String,
         platformEnabler: PlatformEnablerAndroid,
-    ): WWWEventActivity = WWWEventActivity(eventId, platformEnabler, mapViewModel)
+    ): EventDetailScreen = EventDetailScreen(eventId, platformEnabler, mapViewModel)
 }

@@ -23,7 +23,7 @@ package com.worldwidewaves.shared.data
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
+import com.worldwidewaves.shared.events.data.GeoJsonDataProvider
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi

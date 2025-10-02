@@ -25,13 +25,13 @@ import com.worldwidewaves.shared.data.FavoriteEventsStore
 import com.worldwidewaves.shared.data.IosFavoriteEventsStore
 import com.worldwidewaves.shared.domain.usecases.IosMapAvailabilityChecker
 import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker
+import com.worldwidewaves.shared.map.IosLocationProvider
 import com.worldwidewaves.shared.map.IosMapLibreAdapter
 import com.worldwidewaves.shared.map.IosPlatformMapManager
-import com.worldwidewaves.shared.map.IosWwwLocationProvider
+import com.worldwidewaves.shared.map.LocationProvider
 import com.worldwidewaves.shared.map.MapLibreAdapter
 import com.worldwidewaves.shared.map.MapStateHolder
 import com.worldwidewaves.shared.map.PlatformMapManager
-import com.worldwidewaves.shared.map.WWWLocationProvider
 import com.worldwidewaves.shared.sound.IosSoundPlayer
 import com.worldwidewaves.shared.sound.SoundPlayer
 import com.worldwidewaves.shared.ui.DebugTabScreen
@@ -48,7 +48,7 @@ val IosModule =
     module {
         single<SoundPlayer> { IosSoundPlayer() }
         single<ImageResolver<DrawableResource>> { IosImageResolver() }
-        single<WWWLocationProvider> { IosWwwLocationProvider() }
+        single<LocationProvider> { IosLocationProvider() }
 
         // Note: PlatformEnabler is injected into koin by Swift IOS
 

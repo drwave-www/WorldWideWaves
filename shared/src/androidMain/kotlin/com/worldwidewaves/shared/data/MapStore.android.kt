@@ -26,7 +26,7 @@ import android.os.Build
 import android.util.Log
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker
-import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
+import com.worldwidewaves.shared.events.data.GeoJsonDataProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
