@@ -21,12 +21,11 @@ package com.worldwidewaves.shared.utils
  * limitations under the License.
  */
 
-import kotlinx.coroutines.flow.MutableStateFlow
-
-fun <T> MutableStateFlow<T>.updateIfChanged(newValue: T) {
-    if (value != newValue) {
-        value = newValue
-    }
-}
-
+/**
+ * Retrieves an environment variable by name.
+ * Platform-specific implementations handle the actual retrieval.
+ *
+ * @param name The name of the environment variable to retrieve
+ * @return The value of the environment variable, or null if not found
+ */
 expect fun getEnvironmentVariable(name: String): String?
