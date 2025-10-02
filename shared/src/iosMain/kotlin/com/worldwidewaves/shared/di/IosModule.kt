@@ -22,7 +22,7 @@ package com.worldwidewaves.shared.di
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.choreographies.ChoreographyManager
 import com.worldwidewaves.shared.data.FavoriteEventsStore
-import com.worldwidewaves.shared.data.IOSFavoriteEventsStore
+import com.worldwidewaves.shared.data.IosFavoriteEventsStore
 import com.worldwidewaves.shared.domain.usecases.IOSMapAvailabilityChecker
 import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker
 import com.worldwidewaves.shared.map.IOSMapLibreAdapter
@@ -32,7 +32,7 @@ import com.worldwidewaves.shared.map.MapLibreAdapter
 import com.worldwidewaves.shared.map.MapStateManager
 import com.worldwidewaves.shared.map.PlatformMapManager
 import com.worldwidewaves.shared.map.WWWLocationProvider
-import com.worldwidewaves.shared.sound.IOSSoundPlayer
+import com.worldwidewaves.shared.sound.IosSoundPlayer
 import com.worldwidewaves.shared.sound.SoundPlayer
 import com.worldwidewaves.shared.ui.DebugTabScreen
 import com.worldwidewaves.shared.utils.IOSImageResolver
@@ -44,9 +44,9 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.koin.dsl.module
 import platform.UIKit.UIDevice
 
-val IOSModule =
+val IosModule =
     module {
-        single<SoundPlayer> { IOSSoundPlayer() }
+        single<SoundPlayer> { IosSoundPlayer() }
         single<ImageResolver<DrawableResource>> { IOSImageResolver() }
         single<WWWLocationProvider> { IOSWWWLocationProvider() }
 
@@ -78,7 +78,7 @@ val IOSModule =
         single<DebugTabScreen?> { DebugTabScreen() }
 
         // Data persistence
-        single<FavoriteEventsStore> { IOSFavoriteEventsStore() }
+        single<FavoriteEventsStore> { IosFavoriteEventsStore() }
 
         // Map services
         single<PlatformMapManager> { IOSPlatformMapManager() }

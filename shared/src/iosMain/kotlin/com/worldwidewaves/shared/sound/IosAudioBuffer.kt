@@ -31,7 +31,7 @@ private const val BYTE_SHIFT = 8
 /**
  * iOS-specific audio buffer implementation
  */
-class IOSAudioBuffer(
+class IosAudioBuffer(
     samples: DoubleArray,
     override val sampleRate: Int,
     bitsPerSample: Int,
@@ -91,5 +91,5 @@ actual object AudioBufferFactory {
         sampleRate: Int,
         bitsPerSample: Int,
         channels: Int,
-    ): AudioBuffer = IOSAudioBuffer(samples, sampleRate, bitsPerSample, channels)
+    ): AudioBuffer = IosAudioBuffer(samples, sampleRate, bitsPerSample, channels)
 }

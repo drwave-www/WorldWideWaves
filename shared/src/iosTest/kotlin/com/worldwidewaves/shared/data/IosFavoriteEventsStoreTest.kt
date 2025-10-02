@@ -32,19 +32,19 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * iOS-specific tests for IOSFavoriteEventsStore.
+ * iOS-specific tests for IosFavoriteEventsStore.
  *
  * These tests verify the NSUserDefaults-based persistence and thread-safe operations.
  */
-class IOSFavoriteEventsStoreTest {
-    private lateinit var favoriteEventsStore: IOSFavoriteEventsStore
+class IosFavoriteEventsStoreTest {
+    private lateinit var favoriteEventsStore: IosFavoriteEventsStore
     private val testEventId1 = "test_event_paris"
     private val testEventId2 = "test_event_london"
     private val testScheduler = TestCoroutineScheduler()
 
     @BeforeTest
     fun setUp() {
-        favoriteEventsStore = IOSFavoriteEventsStore()
+        favoriteEventsStore = IosFavoriteEventsStore()
 
         // Clean up any existing test data
         cleanupTestData()
@@ -107,7 +107,7 @@ class IOSFavoriteEventsStoreTest {
             favoriteEventsStore.setFavoriteStatus(testEventId1, true)
 
             // Create new instance (simulating app restart)
-            val newStore = IOSFavoriteEventsStore()
+            val newStore = IosFavoriteEventsStore()
 
             // Should still be favorite
             assertTrue(newStore.isFavorite(testEventId1))

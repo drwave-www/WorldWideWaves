@@ -47,11 +47,11 @@ import kotlin.time.Duration.Companion.milliseconds
  * while using iOS-safe APIs that compile correctly with Kotlin/Native.
  */
 @OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
-class IOSSoundPlayer :
+class IosSoundPlayer :
     SoundPlayer,
     VolumeController {
     companion object {
-        private const val TAG = "IOSSoundPlayer"
+        private const val TAG = "IosSoundPlayer"
     }
 
     private val audioSession = AVAudioSession.sharedInstance()

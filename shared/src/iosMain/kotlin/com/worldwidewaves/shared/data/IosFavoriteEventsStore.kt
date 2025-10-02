@@ -40,7 +40,7 @@ import platform.Foundation.NSUserDefaults
  * - Coroutine-based async operations
  * - Platform-native iOS persistence
  */
-class IOSFavoriteEventsStore(
+class IosFavoriteEventsStore(
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : FavoriteEventsStore {
     private val userDefaults = NSUserDefaults.standardUserDefaults
@@ -58,9 +58,9 @@ class IOSFavoriteEventsStore(
                 val key = favoriteKey(eventId)
                 userDefaults.setBool(isFavorite, key)
                 userDefaults.synchronize()
-                Log.d("IOSFavoriteEventsStore", "Successfully set favorite status for event $eventId: $isFavorite")
+                Log.d("IosFavoriteEventsStore", "Successfully set favorite status for event $eventId: $isFavorite")
             } catch (e: Exception) {
-                Log.e("IOSFavoriteEventsStore", "Failed to set favorite status for event $eventId", throwable = e)
+                Log.e("IosFavoriteEventsStore", "Failed to set favorite status for event $eventId", throwable = e)
                 throw DataStoreException("Failed to update favorite status for event $eventId: ${e.message}", e)
             }
         }
@@ -74,7 +74,7 @@ class IOSFavoriteEventsStore(
                     val key = favoriteKey(eventId)
                     userDefaults.boolForKey(key)
                 } catch (e: Exception) {
-                    Log.e("IOSFavoriteEventsStore", "Error reading favorite status for event $eventId", throwable = e)
+                    Log.e("IosFavoriteEventsStore", "Error reading favorite status for event $eventId", throwable = e)
                     false
                 }
             }

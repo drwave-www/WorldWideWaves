@@ -30,14 +30,14 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * Tests for iOS sound player implementation
  */
-class IOSSoundPlayerTest {
+class IosSoundPlayerTest {
     @Test
-    fun `should create IOSSoundPlayer without errors`() {
+    fun `should create IosSoundPlayer without errors`() {
         // Note: This test validates basic construction only since iOS audio APIs
         // require actual iOS runtime environment for full functionality testing
 
         // Test passes if no exceptions thrown during construction
-        assertTrue(true, "IOSSoundPlayer construction test placeholder")
+        assertTrue(true, "IosSoundPlayer construction test placeholder")
     }
 
     @Test
@@ -81,8 +81,8 @@ class IOSSoundPlayerTest {
     @Test
     fun `should provide meaningful error context`() {
         // Validate that error handling provides useful information
-        val errorContext = "IOSSoundPlayer error handling"
+        val errorContext = "IosSoundPlayer error handling"
         assertNotNull(errorContext, "Error context should be available")
-        assertTrue(errorContext.contains("IOSSoundPlayer"), "Error context should identify component")
+        assertTrue(errorContext.contains("IosSoundPlayer"), "Error context should identify component")
     }
 }
