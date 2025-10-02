@@ -18,7 +18,7 @@ import kotlin.native.ref.WeakReference
 
 /**
  * Registry to store MapLibreViewWrapper instances and polygon data.
- * This allows coordination between Kotlin (IOSEventMap) and Swift (MapLibreViewWrapper).
+ * This allows coordination between Kotlin (IosEventMap) and Swift (MapLibreViewWrapper).
  *
  * Architecture:
  * 1. Swift creates MapLibreViewWrapper in EventMapView

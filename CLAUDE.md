@@ -518,11 +518,77 @@ ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest
 ```
 
 ### Testing Requirements
-- All changes must pass existing test suite (902+ unit tests)
-- New functionality requires corresponding tests
-- Instrumented tests must pass before committing
-- Performance regressions must be addressed
-- iOS safety verification must pass for shared code changes
+
+**CRITICAL**: Always run ALL tests before ANY commit:
+```bash
+# MANDATORY before every commit
+./gradlew clean :shared:testDebugUnitTest :composeApp:assembleDebug
+
+# Verify all pass before committing
+# Expected: 535+ tests, 100% pass rate in ~22s
+```
+
+- **All changes must pass existing test suite** (535+ unit tests, 100% pass rate)
+- **New functionality requires corresponding tests** - No test debt allowed
+- **Run ALL tests before commit** - Not just the tests you think are relevant
+- **Instrumented tests must pass** before committing
+- **Performance regressions must be addressed** - Monitor test execution time
+- **iOS safety verification must pass** for shared code changes
+- **NEVER disable tests without permission** - Fix issues, don't hide them
+
+**Test Organization**:
+- `shared/src/commonTest`: Platform-independent tests (no MockK, no JVM-only APIs)
+- `shared/src/androidUnitTest`: Android-specific tests (can use MockK)
+- `shared/src/iosTest`: iOS-specific tests (no MockK, Kotlin/Native compatible)
+
+**Test coverage**: Comprehensive coverage across all phases (Phases 1-4 complete)
+  - Phase 1 (Critical): Wave detection, scheduling, accuracy ✅
+  - Phase 2 (Data/State): State management, persistence ✅
+  - Phase 3 (ViewModels): UI logic, download lifecycle ✅
+  - Phase 4 (iOS): Deadlock prevention, exception handling ✅
+
+### Test Patterns to Follow
+
+#### Testing Infinite Flows:
+```kotlin
+// ✅ CORRECT: Proper infinite flow testing
+observer.startObservation()
+testScheduler.runCurrent() // Don't use advanceUntilIdle()!
+// ... test logic ...
+observer.stopObservation() // Cancel infinite flow first
+testScheduler.advanceUntilIdle() // Now safe to wait
+```
+
+#### Testing ViewModels:
+```kotlin
+// ✅ CORRECT: Wait for async ViewModel state
+viewModel.loadEvents()
+waitForEvents(viewModel, expectedSize, timeoutMs = 3000)
+waitForState(viewModel.isLoading, false)
+```
+
+#### Test Isolation with Koin:
+```kotlin
+// ✅ CORRECT: Proper cleanup prevents test interference
+@AfterTest
+fun tearDown() {
+    runBlocking {
+        testScopeProvider.cancelAllCoroutines()
+        delay(500) // Wait for cleanup propagation
+    }
+    stopKoin()
+}
+```
+
+#### iOS Safety Testing:
+```kotlin
+// ✅ CORRECT: Validate no violations with code scanning
+@Test
+fun testNoDeadlockPatterns() {
+    val violations = Grep.search("object.*KoinComponent", "@Composable")
+    assertEquals(0, violations.size)
+}
+```
 
 ---
 

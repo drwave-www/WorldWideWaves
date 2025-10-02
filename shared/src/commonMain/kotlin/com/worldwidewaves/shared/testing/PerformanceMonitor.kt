@@ -216,6 +216,11 @@ open class PerformanceMonitor : IPerformanceMonitor {
         const val MAX_CPU_PERCENT = 15.0
         const val CPU_PERCENT_PER_MINUTE = 0.5
 
+        // Memory leak prevention: bounded storage limits
+        private const val MAX_METRICS_PER_KEY = 1000 // Keep last 1000 values per metric
+        private const val MAX_EVENTS = 500 // Keep last 500 events
+        private const val MAX_TRACES = 100 // Maximum concurrent traces
+
         // Time conversion constants (currently unused but kept for future performance calculations)
         @Suppress("UnusedPrivateProperty") // Reserved for future timing calculations
         private const val MICROSECONDS_PER_SECOND = 1_000_000.0
@@ -230,6 +235,15 @@ open class PerformanceMonitor : IPerformanceMonitor {
     override val performanceMetrics: StateFlow<PerformanceMetrics> = _performanceMetrics
 
     override fun startTrace(name: String): PerformanceTrace {
+        // Enforce maximum concurrent traces to prevent memory leaks
+        if (traces.size >= MAX_TRACES) {
+            // Remove oldest traces if limit exceeded
+            traces.entries.firstOrNull()?.let { oldest ->
+                oldest.value.stop()
+                traces.remove(oldest.key)
+            }
+        }
+
         val trace =
             PerformanceTraceImpl(name) { finishedTrace ->
                 recordMetric("trace_${name}_duration", finishedTrace.duration.inWholeMilliseconds.toDouble(), "ms")
@@ -244,7 +258,14 @@ open class PerformanceMonitor : IPerformanceMonitor {
         value: Double,
         unit: String,
     ) {
-        metrics.getOrPut(name) { mutableListOf() }.add(value)
+        val metricList = metrics.getOrPut(name) { mutableListOf() }
+        metricList.add(value)
+
+        // Enforce bounded storage: keep only last MAX_METRICS_PER_KEY values
+        if (metricList.size > MAX_METRICS_PER_KEY) {
+            metricList.removeAt(0) // Remove oldest value
+        }
+
         updateMetrics()
     }
 
@@ -254,6 +275,11 @@ open class PerformanceMonitor : IPerformanceMonitor {
         parameters: Map<String, Any>,
     ) {
         events.add(PerformanceEvent(name, parameters, Clock.System.now().toEpochMilliseconds()))
+
+        // Enforce bounded storage: keep only last MAX_EVENTS events
+        if (events.size > MAX_EVENTS) {
+            events.removeAt(0) // Remove oldest event
+        }
     }
 
     override fun recordWaveTimingAccuracy(
@@ -467,10 +493,48 @@ open class PerformanceMonitor : IPerformanceMonitor {
         return recommendations
     }
 
+    /**
+     * Cleanup method to clear all performance data and cancel ongoing traces.
+     * Useful for preventing memory leaks in long-running applications.
+     */
+    fun cleanup() {
+        // Stop and clear all active traces
+        traces.values.forEach { it.stop() }
+        traces.clear()
+
+        // Clear metrics and events
+        metrics.clear()
+        events.clear()
+
+        // Reset performance metrics
+        _performanceMetrics.value = PerformanceMetrics()
+    }
+
+    /**
+     * Get current memory usage statistics for monitoring.
+     */
+    fun getMemoryStats(): MemoryStats =
+        MemoryStats(
+            tracesCount = traces.size,
+            metricsCount = metrics.size,
+            totalMetricValues = metrics.values.sumOf { it.size },
+            eventsCount = events.size,
+        )
+
     private val platformName: String = "Unknown" // Platform-specific implementation needed
 
     private val deviceInfo: String = "Unknown" // Platform-specific implementation needed
 }
+
+/**
+ * Memory statistics for PerformanceMonitor
+ */
+data class MemoryStats(
+    val tracesCount: Int,
+    val metricsCount: Int,
+    val totalMetricValues: Int,
+    val eventsCount: Int,
+)
 
 /**
  * Performance trace implementation

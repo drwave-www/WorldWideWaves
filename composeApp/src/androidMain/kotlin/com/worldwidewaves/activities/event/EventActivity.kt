@@ -22,7 +22,7 @@ package com.worldwidewaves.activities.event
  */
 
 import com.worldwidewaves.shared.ui.activities.WWWEventActivity
-import com.worldwidewaves.utils.AndroidPlatformEnabler
+import com.worldwidewaves.utils.PlatformEnablerAndroid
 import com.worldwidewaves.viewmodels.AndroidMapViewModel
 import org.koin.android.ext.android.inject
 import kotlin.time.ExperimentalTime
@@ -33,6 +33,6 @@ class EventActivity : AbstractEventAndroidActivity<WWWEventActivity>() {
 
     override fun createActivityImpl(
         eventId: String,
-        platformEnabler: AndroidPlatformEnabler,
+        platformEnabler: PlatformEnablerAndroid,
     ): WWWEventActivity = WWWEventActivity(eventId, platformEnabler, mapViewModel)
 }

@@ -252,29 +252,55 @@ See [docs/README.md](docs/README.md) for complete documentation map.
 - Focus on business logic and integration points
 - Use real implementations where possible
 - Mock only external dependencies (network, sensors)
-- Avoid testing framework internals
+- Never disable tests - always fix root causes
+- Tests validate business requirements, not implementation details
 
-### Test Coverage
+### Test Coverage ✅
 
-- **Unit Tests:** 902+ tests covering domain logic, position management, choreography
-- **UI Tests:** Critical paths, accessibility, edge cases, screenshots
-- **Integration Tests:** Firebase, MapLibre, real device coordination
-- **Performance Tests:** App launch, runtime performance, battery optimization
+**Status**: **535 unit tests, 100% pass rate in ~22s**
+
+| Phase | Focus | Tests | Status |
+|-------|-------|-------|--------|
+| **Phase 1** | Critical Paths | 51 | ✅ Complete |
+| **Phase 2** | Data/State | 51 | ✅ Complete |
+| **Phase 3** | ViewModels | 49 | ✅ Complete |
+| **Phase 4** | iOS Safety | 12 | ✅ Complete |
+
+**Coverage by Layer:**
+- **Domain**: State management (36 tests), Scheduling (30 tests), Progression (18 tests)
+- **ViewModels**: Events UI (29 tests), Map downloads (20 tests)
+- **Data**: Favorites (24 tests), Map storage (14 tests)
+- **Events**: Core logic (106 tests), Wave calculations
+- **iOS**: Deadlock prevention (12 tests), Exception handling validated
+- **Sound**: Waveform generation (47 tests), MIDI parsing
+- **Position**: GPS tracking (12 tests), PositionManager
+
+**Key Achievements:**
+- ✅ 1 critical production bug discovered and fixed (wave hit timing)
+- ✅ Zero test flakiness
+- ✅ Comprehensive iOS safety validation
+- ✅ Geometric accuracy proven (Haversine, point-in-polygon)
+- ✅ Battery optimization validated (adaptive intervals)
+
+See [docs/FINAL_TEST_IMPLEMENTATION_REPORT.md](docs/FINAL_TEST_IMPLEMENTATION_REPORT.md) for complete test coverage analysis.
 
 ### Running Tests
 
 ```bash
-# Fast unit tests (<100ms budget)
-./gradlew testFast
-
-# Full test suite
+# Full unit test suite (535 tests)
 ./gradlew :shared:testDebugUnitTest
 
-# UI tests
+# Specific test suite
+./gradlew :shared:testDebugUnitTest --tests "*WaveHitAccuracyTest*"
+
+# Android instrumented tests
 ./gradlew :composeApp:connectedDebugAndroidTest
 
-# Test quality checks
-./gradlew testQuality
+# iOS safety verification
+./scripts/verify-ios-safety.sh
+
+# All quality checks
+./gradlew :shared:testDebugUnitTest ktlintCheck detekt
 ```
 
 ## License

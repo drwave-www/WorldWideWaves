@@ -37,7 +37,7 @@ class NativeMapViewProviderTest {
     @Test
     fun iosNativeMapViewProvider_returnsUIViewController() {
         // Given
-        val provider = IOSNativeMapViewProvider()
+        val provider = IosNativeMapViewProvider()
         val event = testEvent()
 
         // When
@@ -54,7 +54,7 @@ class NativeMapViewProviderTest {
         startKoin {
             modules(module {})
         }
-        val mockProvider = IOSNativeMapViewProvider()
+        val mockProvider = IosNativeMapViewProvider()
 
         // When
         registerNativeMapViewProvider(mockProvider)

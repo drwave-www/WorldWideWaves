@@ -24,7 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.window.ComposeUIViewController
 import com.worldwidewaves.shared.map.EventMapConfig
-import com.worldwidewaves.shared.map.IOSEventMap
+import com.worldwidewaves.shared.map.IosEventMap
 import com.worldwidewaves.shared.map.MapCameraPosition
 import com.worldwidewaves.shared.ui.activities.WWWEventActivity
 import com.worldwidewaves.shared.ui.activities.WWWFullMapActivity
@@ -89,7 +89,7 @@ fun makeEventViewController(eventId: String): UIViewController =
         BindIosLifecycle(host)
 
         host.asComponent(
-            eventMapBuilder = { event -> IOSEventMap(event) },
+            eventMapBuilder = { event -> IosEventMap(event) },
             onFinish = finish,
         )
     }
@@ -108,7 +108,7 @@ fun makeWaveViewController(eventId: String): UIViewController =
         BindIosLifecycle(host)
 
         host.asComponent(
-            eventMapBuilder = { event -> IOSEventMap(event) },
+            eventMapBuilder = { event -> IosEventMap(event) },
             onFinish = finish,
         )
     }
@@ -128,7 +128,7 @@ fun makeFullMapViewController(eventId: String): UIViewController =
 
         host.asComponent(
             eventMapBuilder = { event ->
-                IOSEventMap(
+                IosEventMap(
                     event,
                     mapConfig =
                         EventMapConfig(

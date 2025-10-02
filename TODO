@@ -7,8 +7,12 @@ TODAY :
 
 ---------------------------------------------
 
+prio 0: STRUCTURE TODO: (Run Claude under intellij terminal)
+docs/COMPREHENSIVE_PROJECT_ANALYSIS.md
+"ok, implement this, use agents, verify regularly that everything compiles and that all tests passes, do not stop until you resolved all the todo, do it on a branch"
 
-IOS:
+
+prios: IOS:
 - Terminer vagues / MapLibre
 - check translations
 - remove all remaining static texts
@@ -16,6 +20,7 @@ IOS:
 - pousser sur Play Store
 
 
+prio 1: terminaer vagues / MapLibre
 -->
   iOS_MAP_IMPLEMENTATION_STATUS.md (470 lines):
   - Executive summary with completion percentages

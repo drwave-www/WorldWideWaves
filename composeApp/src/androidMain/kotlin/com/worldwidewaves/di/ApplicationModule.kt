@@ -28,9 +28,9 @@ import com.worldwidewaves.shared.ui.DebugTabScreen
 import com.worldwidewaves.shared.utils.CloseableCoroutineScope
 import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.viewmodels.EventsViewModel
-import com.worldwidewaves.utils.AndroidMapAvailabilityChecker
-import com.worldwidewaves.utils.AndroidPlatformEnabler
 import com.worldwidewaves.utils.AndroidWWWLocationProvider
+import com.worldwidewaves.utils.MapAvailabilityCheckerAndroid
+import com.worldwidewaves.utils.PlatformEnablerAndroid
 import com.worldwidewaves.utils.WWWSimulationEnabledLocationEngine
 import com.worldwidewaves.viewmodels.AndroidMapViewModel
 import org.koin.android.ext.koin.androidContext
@@ -40,12 +40,12 @@ import org.koin.dsl.module
 val applicationModule =
     module {
 
-        single<PlatformEnabler> { AndroidPlatformEnabler() }
-        single<MapAvailabilityChecker> { get<AndroidMapAvailabilityChecker>() }
+        single<PlatformEnabler> { PlatformEnablerAndroid() }
+        single<MapAvailabilityChecker> { get<MapAvailabilityCheckerAndroid>() }
 
         // Map availability checker as a singleton
         single {
-            AndroidMapAvailabilityChecker(androidContext()).apply {
+            MapAvailabilityCheckerAndroid(androidContext()).apply {
                 // Register for cleanup when the app is terminated
                 get<CloseableCoroutineScope>().registerForCleanup {
                     this.destroy()

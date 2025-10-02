@@ -29,6 +29,6 @@ actual fun createNativeMapViewController(
     } else {
         Log.w("MapViewFactory", "NativeMapViewProvider not registered in Koin - using default implementation")
         // Fallback: Use default iOS implementation
-        IOSNativeMapViewProvider().createMapView(event, styleURL)
+        IosNativeMapViewProvider().createMapView(event, styleURL)
     }
 }

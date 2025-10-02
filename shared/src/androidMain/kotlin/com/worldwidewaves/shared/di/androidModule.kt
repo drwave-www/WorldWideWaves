@@ -24,15 +24,15 @@ package com.worldwidewaves.shared.di
 import android.os.Build
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.choreographies.ChoreographyManager
-import com.worldwidewaves.shared.data.AndroidFavoriteEventsStore
 import com.worldwidewaves.shared.data.DataStoreFactory
 import com.worldwidewaves.shared.data.DefaultDataStoreFactory
 import com.worldwidewaves.shared.data.FavoriteEventsStore
+import com.worldwidewaves.shared.data.FavoriteEventsStoreAndroid
 import com.worldwidewaves.shared.data.keyValueStorePath
-import com.worldwidewaves.shared.sound.AndroidSoundPlayer
 import com.worldwidewaves.shared.sound.SoundPlayer
-import com.worldwidewaves.shared.utils.AndroidImageResolver
+import com.worldwidewaves.shared.sound.SoundPlayerAndroid
 import com.worldwidewaves.shared.utils.ImageResolver
+import com.worldwidewaves.shared.utils.ImageResolverAndroid
 import org.jetbrains.compose.resources.DrawableResource
 import org.koin.dsl.module
 
@@ -41,12 +41,12 @@ val androidModule =
         single<WWWPlatform> {
             WWWPlatform("Android ${Build.VERSION.SDK_INT}", get())
         }
-        single<ImageResolver<DrawableResource>> { AndroidImageResolver() }
+        single<ImageResolver<DrawableResource>> { ImageResolverAndroid() }
         single(createdAtStart = true) { ChoreographyManager<DrawableResource>() }
 
-        single<SoundPlayer> { AndroidSoundPlayer(get()) }
+        single<SoundPlayer> { SoundPlayerAndroid(get()) }
 
         single<DataStoreFactory> { DefaultDataStoreFactory() }
         single { get<DataStoreFactory>().create { keyValueStorePath() } }
-        single<FavoriteEventsStore> { AndroidFavoriteEventsStore(get()) }
+        single<FavoriteEventsStore> { FavoriteEventsStoreAndroid(get()) }
     }
