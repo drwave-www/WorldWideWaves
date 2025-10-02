@@ -33,7 +33,7 @@ import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.utils.Log
 import org.koin.mp.KoinPlatform
 
-class AndroidPlatformEnabler(
+class PlatformEnablerAndroid(
     val context: Context? = null,
 ) : PlatformEnabler {
     override fun openEventActivity(eventId: String) {
@@ -73,7 +73,7 @@ class AndroidPlatformEnabler(
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         } catch (e: Exception) {
-            Log.e("AndroidPlatformEnabler", "Failed to open URL: $url", throwable = e)
+            Log.e("PlatformEnablerAndroid", "Failed to open URL: $url", throwable = e)
         }
     }
 }

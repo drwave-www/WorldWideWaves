@@ -64,7 +64,7 @@ import org.maplibre.geojson.Polygon
  * This adapter is strictly *glue* code – all high-level map logic remains in the
  * shared module so iOS can provide its own counterpart.
  */
-class AndroidMapLibreAdapter(
+class MapLibreAdapterAndroid(
     private var mapLibreMap: MapLibreMap? = null,
 ) : MapLibreAdapter<MapLibreMap> {
     // -- Public/Override properties
@@ -76,7 +76,7 @@ class AndroidMapLibreAdapter(
     override val currentZoom: StateFlow<Double> = _currentZoom
 
     companion object {
-        private const val TAG = "AndroidMapLibreAdapter"
+        private const val TAG = "MapLibreAdapterAndroid"
     }
 
     override fun getWidth(): Double {
@@ -101,7 +101,7 @@ class AndroidMapLibreAdapter(
     private val waveLayerIds = mutableListOf<String>()
     private val waveSourceIds = mutableListOf<String>()
 
-    private var onMapSetCallbacks = mutableListOf<(AndroidMapLibreAdapter) -> Unit>()
+    private var onMapSetCallbacks = mutableListOf<(MapLibreAdapterAndroid) -> Unit>()
 
     override fun setMap(map: MapLibreMap) {
         mapLibreMap = map

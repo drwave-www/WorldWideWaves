@@ -55,6 +55,6 @@ object DrawableResources {
  * Implementation of ImageResolver for Android platform.
  * Handles resolving drawable resources and extracting frames from sprite sheets.
  */
-class AndroidImageResolver : ImageResolver<DrawableResource> {
+class ImageResolverAndroid : ImageResolver<DrawableResource> {
     override fun resolve(path: String): DrawableResource? = DrawableResources.getResource(path)
 }

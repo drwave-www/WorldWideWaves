@@ -34,7 +34,7 @@ import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.ui.activities.WWWMainActivity
-import com.worldwidewaves.utils.AndroidPlatformEnabler
+import com.worldwidewaves.utils.PlatformEnablerAndroid
 import kotlinx.coroutines.launch
 
 // ----------------------------
@@ -100,7 +100,7 @@ open class MainActivity : AppCompatActivity() {
 
         setContent {
             if (mainActivityImpl == null) {
-                mainActivityImpl = WWWMainActivity(AndroidPlatformEnabler(this))
+                mainActivityImpl = WWWMainActivity(PlatformEnablerAndroid(this))
             }
 
             mainActivityImpl!!.Draw()

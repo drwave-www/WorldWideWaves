@@ -52,7 +52,7 @@ actual fun keyValueStorePath(): String {
         .absolutePath
 }
 
-class AndroidFavoriteEventsStore(
+class FavoriteEventsStoreAndroid(
     private val dataStore: DataStore<Preferences>,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : FavoriteEventsStore {

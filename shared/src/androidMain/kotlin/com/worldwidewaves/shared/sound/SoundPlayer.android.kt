@@ -43,7 +43,7 @@ actual object AudioBufferFactory {
         sampleRate: Int,
         bitsPerSample: Int,
         channels: Int,
-    ): AudioBuffer = AndroidAudioBuffer(samples, sampleRate, bitsPerSample, channels)
+    ): AudioBuffer = AudioBufferAndroid(samples, sampleRate, bitsPerSample, channels)
 }
 
 // ----------------------------------------------------------------------------
@@ -51,7 +51,7 @@ actual object AudioBufferFactory {
 /**
  * Android-specific audio buffer implementation
  */
-class AndroidAudioBuffer(
+class AudioBufferAndroid(
     samples: DoubleArray,
     override val sampleRate: Int,
     bitsPerSample: Int,
@@ -109,7 +109,7 @@ class AndroidAudioBuffer(
 /**
  * Android implementation of SoundPlayer using AudioTrack
  */
-class AndroidSoundPlayer(
+class SoundPlayerAndroid(
     private val context: Context,
 ) : SoundPlayer,
     VolumeController {

@@ -45,10 +45,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.WWWGlobals.FileSystem
-import com.worldwidewaves.shared.sound.AndroidSoundPlayer
 import com.worldwidewaves.shared.sound.MidiParser
 import com.worldwidewaves.shared.sound.MidiTrack
 import com.worldwidewaves.shared.sound.SoundPlayer
+import com.worldwidewaves.shared.sound.SoundPlayerAndroid
 import com.worldwidewaves.shared.sound.WaveformGenerator
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.delay
@@ -66,7 +66,7 @@ import kotlin.time.Instant
  *
  * This demonstrates:
  * - Real MIDI file parsing and playback
- * - AndroidSoundPlayer with actual audio output
+ * - SoundPlayerAndroid with actual audio output
  * - Crowd sound choreography simulation with audible results
  * - Wave progression timing with real sound feedback
  */
@@ -76,13 +76,13 @@ class AudioTestActivity : ComponentActivity() {
         private const val TAG = "AudioTest"
     }
 
-    private lateinit var soundPlayer: AndroidSoundPlayer
+    private lateinit var soundPlayer: SoundPlayerAndroid
     private var midiTrack: MidiTrack? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        soundPlayer = AndroidSoundPlayer(this)
+        soundPlayer = SoundPlayerAndroid(this)
 
         setContent {
             MaterialTheme {
