@@ -90,7 +90,7 @@ class IosLocationProviderTest {
     }
 
     /**
-     * Helper function to validate position (mimics IosWwwLocationProvider logic)
+     * Helper function to validate position (mimics IosLocationProvider logic)
      */
     private fun isValidTestPosition(position: Position): Boolean =
         position.lat in WWWGlobals.Geodetic.MIN_LATITUDE..WWWGlobals.Geodetic.MAX_LATITUDE &&

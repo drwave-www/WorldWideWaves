@@ -10,7 +10,7 @@ package com.worldwidewaves.shared.map
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-import com.worldwidewaves.shared.utils.WWWLogger
+import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -79,7 +79,7 @@ class MapStateHolder(
         mapId: String,
         autoDownload: Boolean = false,
     ) {
-        WWWLogger.d("MapStateHolder", "Checking availability for map: $mapId")
+        Log.d("MapStateHolder", "Checking availability for map: $mapId")
         currentMapId = mapId
 
         val isAvailable = platformMapManager.isMapAvailable(mapId)
@@ -101,7 +101,7 @@ class MapStateHolder(
      * Download/install a map using platform-specific implementation.
      */
     suspend fun downloadMap(mapId: String) {
-        WWWLogger.i("MapStateHolder", "Starting download for map: $mapId")
+        Log.i("MapStateHolder", "Starting download for map: $mapId")
         currentMapId = mapId
         _featureState.value = MapFeatureState.Pending
 
@@ -114,16 +114,16 @@ class MapStateHolder(
                 onSuccess = {
                     _featureState.value = MapFeatureState.Installed
                     updateMapState(mapId, true)
-                    WWWLogger.i("MapStateHolder", "Map download completed: $mapId")
+                    Log.i("MapStateHolder", "Map download completed: $mapId")
                 },
                 onError = { errorCode, errorMessage ->
                     _featureState.value = MapFeatureState.Failed(errorCode, errorMessage)
-                    WWWLogger.e("MapStateHolder", "Map download failed: $mapId, error: $errorMessage")
+                    Log.e("MapStateHolder", "Map download failed: $mapId, error: $errorMessage")
                 },
             )
         } catch (e: Exception) {
             _featureState.value = MapFeatureState.Failed(-1, e.message)
-            WWWLogger.e("MapStateHolder", "Exception during map download: $mapId", e)
+            Log.e("MapStateHolder", "Exception during map download: $mapId", e)
         }
     }
 
@@ -132,7 +132,7 @@ class MapStateHolder(
      */
     fun cancelDownload() {
         currentMapId?.let { mapId ->
-            WWWLogger.i("MapStateHolder", "Canceling download for: $mapId")
+            Log.i("MapStateHolder", "Canceling download for: $mapId")
             _featureState.value = MapFeatureState.Canceling
             platformMapManager.cancelDownload(mapId)
         }

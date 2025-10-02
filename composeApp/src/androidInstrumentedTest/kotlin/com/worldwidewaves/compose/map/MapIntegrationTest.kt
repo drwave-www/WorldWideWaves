@@ -37,7 +37,7 @@ import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.testing.PerformanceMonitor
 import com.worldwidewaves.testing.UITestFactory
-import com.worldwidewaves.utils.AndroidWWWLocationProvider
+import com.worldwidewaves.utils.AndroidLocationProvider
 import com.worldwidewaves.viewmodels.AndroidMapViewModel
 import io.mockk.every
 import io.mockk.mockk
@@ -90,7 +90,7 @@ class MapIntegrationTest {
 
     private lateinit var mockMapViewModel: AndroidMapViewModel
     private lateinit var mockAndroidMapLibreAdapter: MapLibreAdapterAndroid
-    private lateinit var mockLocationProvider: AndroidWWWLocationProvider
+    private lateinit var mockLocationProvider: AndroidLocationProvider
     private lateinit var mockEvent: IWWWEvent
     private lateinit var performanceMonitor: PerformanceMonitor
 
@@ -127,7 +127,7 @@ class MapIntegrationTest {
     }
 
     private fun setupMockLocationProvider() {
-        mockLocationProvider = mockk<AndroidWWWLocationProvider>(relaxed = true)
+        mockLocationProvider = mockk<AndroidLocationProvider>(relaxed = true)
 
         val mockLocationFlow = MutableStateFlow<Position?>(null)
         every { mockLocationProvider.currentLocation } returns mockLocationFlow

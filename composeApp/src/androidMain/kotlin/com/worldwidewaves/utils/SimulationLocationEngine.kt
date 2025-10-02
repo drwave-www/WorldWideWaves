@@ -36,7 +36,7 @@ import org.maplibre.android.location.engine.MapLibreFusedLocationEngineImpl
 import kotlin.time.ExperimentalTime
 
 /**
- * `WWWSimulationEnabledLocationEngine` is a custom implementation of `MapLibreFusedLocationEngineImpl`
+ * `SimulationLocationEngine` is a custom implementation of `MapLibreFusedLocationEngineImpl`
  * that provides simulated location data when the platform is in simulation mode.
  *
  * This class overrides the default location engine behavior to return simulated locations
@@ -45,7 +45,7 @@ import kotlin.time.ExperimentalTime
  *
  */
 @OptIn(ExperimentalTime::class)
-class WWWSimulationEnabledLocationEngine(
+class SimulationLocationEngine(
     context: Context,
 ) : MapLibreFusedLocationEngineImpl(context),
     KoinComponent {

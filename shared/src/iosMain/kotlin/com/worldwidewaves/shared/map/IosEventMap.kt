@@ -90,8 +90,8 @@ class IosEventMap(
     // Use safe iOS dependency injection pattern
     override val mapLibreAdapter: MapLibreAdapter<UIImage> =
         KoinPlatform.getKoin().get<MapLibreAdapter<UIImage>>()
-    override val locationProvider: WWWLocationProvider? =
-        KoinPlatform.getKoin().getOrNull<WWWLocationProvider>()
+    override val locationProvider: LocationProvider? =
+        KoinPlatform.getKoin().getOrNull<LocationProvider>()
 
     private var currentPolygons = mutableListOf<Polygon>()
 

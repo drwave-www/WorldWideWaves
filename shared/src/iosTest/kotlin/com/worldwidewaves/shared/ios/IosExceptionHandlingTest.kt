@@ -23,7 +23,7 @@ package com.worldwidewaves.shared.ios
 
 import com.worldwidewaves.shared.data.DataStoreException
 import com.worldwidewaves.shared.doInitPlatform
-import com.worldwidewaves.shared.map.IosWwwLocationProvider
+import com.worldwidewaves.shared.map.IosLocationProvider
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -117,13 +117,13 @@ class IosExceptionHandlingTest {
     /**
      * Test 4: GPS/Location errors propagate to iOS correctly
      *
-     * Verifies that location-related exceptions from IosWwwLocationProvider
+     * Verifies that location-related exceptions from IosLocationProvider
      * are catchable and contain proper error information.
      */
     @Test
     fun `GPS errors propagate to iOS correctly`() =
         runTest {
-            val locationProvider = IosWwwLocationProvider()
+            val locationProvider = IosLocationProvider()
 
             // Location provider should handle errors gracefully
             // Start location updates should not throw uncaught exceptions
@@ -262,7 +262,7 @@ class IosExceptionHandlingTest {
             assertTrue(true, "Exception handling completed without memory issues")
 
             // Test with location provider lifecycle
-            val locationProvider = IosWwwLocationProvider()
+            val locationProvider = IosLocationProvider()
             repeat(10) { iteration ->
                 try {
                     locationProvider.startLocationUpdates { }

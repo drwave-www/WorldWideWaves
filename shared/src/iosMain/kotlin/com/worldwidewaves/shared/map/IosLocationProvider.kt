@@ -47,9 +47,9 @@ import platform.darwin.NSObject
  * with proper permission handling and error management.
  */
 @OptIn(ExperimentalForeignApi::class)
-class IosWwwLocationProvider : WWWLocationProvider {
+class IosLocationProvider : LocationProvider {
     companion object {
-        private const val TAG = "IosWwwLocationProvider"
+        private const val TAG = "IosLocationProvider"
     }
 
     private val _currentLocation = MutableStateFlow<Position?>(null)
