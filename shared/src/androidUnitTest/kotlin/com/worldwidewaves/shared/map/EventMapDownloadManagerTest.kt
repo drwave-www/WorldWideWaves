@@ -18,14 +18,14 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class MapDownloadCoordinatorTest {
+class EventMapDownloadManagerTest {
     private lateinit var mockPlatformManager: MockPlatformMapManager
-    private lateinit var coordinator: MapDownloadCoordinator
+    private lateinit var coordinator: EventMapDownloadManager
 
     @BeforeTest
     fun setup() {
         mockPlatformManager = MockPlatformMapManager()
-        coordinator = MapDownloadCoordinator(mockPlatformManager)
+        coordinator = EventMapDownloadManager(mockPlatformManager)
     }
 
     @Test

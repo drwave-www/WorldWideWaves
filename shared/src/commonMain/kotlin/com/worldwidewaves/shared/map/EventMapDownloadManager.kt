@@ -13,22 +13,26 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Shared coordinator for map download operations across Android and iOS.
+ * EventMap-specific download manager for map resources.
  *
  * Provides unified download state management and orchestration logic:
  * - Availability checking
  * - Progress tracking (0-100%)
  * - Error handling
  * - Auto-download triggers
+ * - Multi-map state tracking and cache management
  *
  * Platform-specific download mechanisms (Play Dynamic Features vs ODR)
  * are delegated to PlatformMapManager implementations.
+ *
+ * NOTE: This is distinct from viewmodels.MapDownloadCoordinator which serves
+ * the ViewModel layer with adapter-based platform integration.
  */
-class MapDownloadCoordinator(
+class EventMapDownloadManager(
     private val platformMapManager: PlatformMapManager,
 ) {
     private companion object {
-        private const val TAG = "MapDownloadCoordinator"
+        private const val TAG = "EventMapDownloadManager"
     }
 
     /**

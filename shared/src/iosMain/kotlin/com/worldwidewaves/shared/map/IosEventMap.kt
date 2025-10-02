@@ -59,6 +59,7 @@ import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.map.EventMapDownloadManager
 import com.worldwidewaves.shared.position.PositionManager
 import com.worldwidewaves.shared.ui.components.DownloadProgressIndicator
 import com.worldwidewaves.shared.ui.components.LoadingIndicator
@@ -151,11 +152,11 @@ class IosEventMap(
         val platformMapManager = KoinPlatform.getKoin().get<PlatformMapManager>()
         val currentLocation by positionManager.position.collectAsState()
 
-        // Use shared MapDownloadCoordinator for download state management
+        // Use shared EventMapDownloadManager for download state management
         val downloadCoordinator =
             remember {
-                Log.d("IosEventMap", "Creating MapDownloadCoordinator for: ${event.id}")
-                MapDownloadCoordinator(platformMapManager)
+                Log.d("IosEventMap", "Creating EventMapDownloadManager for: ${event.id}")
+                EventMapDownloadManager(platformMapManager)
             }
         val downloadState by downloadCoordinator.getDownloadState(event.id).collectAsState()
 
@@ -388,7 +389,7 @@ class IosEventMap(
     private fun MapStatusCard(
         event: IWWWEvent,
         isLoaded: Boolean,
-        downloadState: MapDownloadCoordinator.DownloadState,
+        downloadState: EventMapDownloadManager.DownloadState,
         polygonCount: Int,
     ) {
         Card(

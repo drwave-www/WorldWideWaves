@@ -15,9 +15,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * Tests for MapDownloadCoordinator cleanup functionality to prevent memory leaks.
+ * Tests for EventMapDownloadManager cleanup functionality to prevent memory leaks.
  */
-class MapDownloadCoordinatorCleanupTest {
+class EventMapDownloadManagerCleanupTest {
     @Test
     fun `should remove completed downloads from cache`() =
         runTest {
@@ -26,7 +26,7 @@ class MapDownloadCoordinatorCleanupTest {
             coEvery { platformMapManager.isMapAvailable("completed-map-1") } returns true
             coEvery { platformMapManager.isMapAvailable("completed-map-2") } returns true
 
-            val coordinator = MapDownloadCoordinator(platformMapManager)
+            val coordinator = EventMapDownloadManager(platformMapManager)
 
             // Simulate completed downloads
             coEvery { platformMapManager.downloadMap(any(), any(), any(), any()) } answers {
@@ -56,7 +56,7 @@ class MapDownloadCoordinatorCleanupTest {
             val platformMapManager = mockk<PlatformMapManager>(relaxed = true)
             coEvery { platformMapManager.isMapAvailable(any()) } returns false
 
-            val coordinator = MapDownloadCoordinator(platformMapManager)
+            val coordinator = EventMapDownloadManager(platformMapManager)
 
             // Simulate active download (never completes)
             coEvery { platformMapManager.downloadMap(eq("active-map"), any(), any(), any()) } answers {
@@ -95,7 +95,7 @@ class MapDownloadCoordinatorCleanupTest {
             val platformMapManager = mockk<PlatformMapManager>(relaxed = true)
             coEvery { platformMapManager.isMapAvailable(any()) } returns false
 
-            val coordinator = MapDownloadCoordinator(platformMapManager)
+            val coordinator = EventMapDownloadManager(platformMapManager)
 
             // Simulate failed download
             coEvery { platformMapManager.downloadMap(eq("failed-map"), any(), any(), any()) } coAnswers {
@@ -132,7 +132,7 @@ class MapDownloadCoordinatorCleanupTest {
         runTest {
             // Given
             val platformMapManager = mockk<PlatformMapManager>(relaxed = true)
-            val coordinator = MapDownloadCoordinator(platformMapManager)
+            val coordinator = EventMapDownloadManager(platformMapManager)
 
             // When
             coordinator.clearCompletedDownloads()
@@ -149,7 +149,7 @@ class MapDownloadCoordinatorCleanupTest {
             val platformMapManager = mockk<PlatformMapManager>(relaxed = true)
             coEvery { platformMapManager.isMapAvailable(any()) } returns true
 
-            val coordinator = MapDownloadCoordinator(platformMapManager)
+            val coordinator = EventMapDownloadManager(platformMapManager)
 
             // Simulate completed download
             coEvery { platformMapManager.downloadMap(any(), any(), any(), any()) } answers {
@@ -176,7 +176,7 @@ class MapDownloadCoordinatorCleanupTest {
             val platformMapManager = mockk<PlatformMapManager>(relaxed = true)
             coEvery { platformMapManager.isMapAvailable(any()) } returns false
 
-            val coordinator = MapDownloadCoordinator(platformMapManager)
+            val coordinator = EventMapDownloadManager(platformMapManager)
 
             // Simulate completed download
             coEvery { platformMapManager.downloadMap(eq("completed-1"), any(), any(), any()) } coAnswers {
