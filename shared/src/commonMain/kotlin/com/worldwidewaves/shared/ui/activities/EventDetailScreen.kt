@@ -33,7 +33,7 @@ import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.ui.components.AlertMapNotDownloadedOnSimulationLaunch
 import com.worldwidewaves.shared.ui.components.EventLayout
-import com.worldwidewaves.shared.ui.utils.calculateEventMapHeight
+import com.worldwidewaves.shared.ui.formatters.calculateEventMapHeight
 import com.worldwidewaves.shared.viewmodels.MapViewModel
 import kotlin.time.ExperimentalTime
 

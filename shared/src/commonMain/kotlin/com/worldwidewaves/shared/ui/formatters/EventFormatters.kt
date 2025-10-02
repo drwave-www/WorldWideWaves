@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared.ui.utils
+package com.worldwidewaves.shared.ui.formatters
 
 /*
  * Copyright 2025 DrWave
