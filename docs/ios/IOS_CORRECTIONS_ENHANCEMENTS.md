@@ -257,7 +257,7 @@ Based on CLAUDE.md guidelines and observed patterns:
 When ready to implement these fixes, use this prompt for optimal results:
 
 ```
-Create a new branch `ios-platform-parity-fixes` and implement the iOS corrections and enhancements outlined in IOS_CORRECTIONS_ENHANCEMENTS.md.
+Create a new branch `ios-platform-parity-fixes` and implement the iOS corrections and enhancements outlined in this document.
 
 CRITICAL REQUIREMENTS:
 1. Start by creating a new branch: git checkout -b ios-platform-parity-fixes

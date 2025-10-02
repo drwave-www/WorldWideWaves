@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-After resolving the **10 CRITICAL + 8 HIGH + 5 MEDIUM iOS-specific issues** documented in `iOS_MAP_IMPLEMENTATION_STATUS.md`, the following threats remain in the codebase. These are primarily **code quality improvements**, **performance optimizations**, and **non-blocking technical debt**.
+After resolving the **10 CRITICAL + 8 HIGH + 5 MEDIUM iOS-specific issues** documented in `../ios/IOS_MAP_IMPLEMENTATION_STATUS.md`, the following threats remain in the codebase. These are primarily **code quality improvements**, **performance optimizations**, and **non-blocking technical debt**.
 
 **Total Remaining**: 45 issues
 - **LOW Severity**: 15 issues (minor optimizations, code quality)
@@ -171,13 +171,13 @@ After resolving the **10 CRITICAL + 8 HIGH + 5 MEDIUM iOS-specific issues** docu
 - **Issue**: 15+ methods return no-ops
 - **Impact**: Shared AbstractEventMap logic cannot run
 - **Fix**: Implement all methods (part of map implementation plan)
-- **Priority**: HIGH (already in iOS_MAP_IMPLEMENTATION_STATUS.md)
+- **Priority**: HIGH (already in ../ios/IOS_MAP_IMPLEMENTATION_STATUS.md)
 
 **CQ-5. AbstractEventMap.setupMap() Not Called on iOS**
 - **File**: `IOSEventMap.kt`
 - **Issue**: Bypasses shared camera logic
 - **Impact**: Code duplication, missed functionality
-- **Fix**: Already documented in iOS_MAP_IMPLEMENTATION_STATUS.md
+- **Fix**: Already documented in ../ios/IOS_MAP_IMPLEMENTATION_STATUS.md
 - **Priority**: HIGH (already tracked)
 
 **CQ-6. MapWrapperRegistry Polling (Not Callback)**

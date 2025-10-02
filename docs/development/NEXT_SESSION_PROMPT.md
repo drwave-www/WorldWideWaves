@@ -4,7 +4,7 @@
 
 You're continuing work on the **iOS map implementation** for WorldWideWaves. The project uses **Kotlin Multiplatform Mobile (KMM)** with ~70% code sharing between Android and iOS.
 
-**Current Status**: Core features working (rendering, polygons, downloads) but **missing critical Android feature parity**. See `iOS_MAP_IMPLEMENTATION_STATUS.md` for full details.
+**Current Status**: Core features working (rendering, polygons, downloads) but **missing critical Android feature parity**. See `../ios/IOS_MAP_IMPLEMENTATION_STATUS.md` for full details.
 
 ---
 
@@ -300,10 +300,10 @@ grep "^import androidx.compose.runtime" IOSEventMap.kt
 ## 📖 Background Reading (If Needed)
 
 **Understand the Architecture**:
-1. Read `iOS_MAP_IMPLEMENTATION_STATUS.md` (comprehensive overview)
-2. Read `CLAUDE.md` (project rules and iOS constraints)
-3. Read `iOS_MAP_TODO.md` (detailed TODO list with context)
-4. Read `POSITION_SYSTEM_REFACTOR.md` (position management details)
+1. Read `../ios/IOS_MAP_IMPLEMENTATION_STATUS.md` (comprehensive overview)
+2. Read `../../CLAUDE.md` (project rules and iOS constraints)
+3. Read `../ios/IOS_MAP_TODO.md` (detailed TODO list with context)
+4. Read `../../POSITION_SYSTEM_REFACTOR.md` (position management details)
 
 **Understand Android Implementation**:
 1. Read `AndroidEventMap.kt` lines 1-300 (initialization)
@@ -335,9 +335,9 @@ grep "^import androidx.compose.runtime" IOSEventMap.kt
 Before ending the session:
 
 1. **Update Documentation**:
-   - [ ] Update `iOS_MAP_TODO.md` with completed items
+   - [ ] Update `../ios/IOS_MAP_TODO.md` with completed items
    - [ ] Update `NEXT_SESSION_PROMPT.md` with new context
-   - [ ] Add any learnings to `iOS_MAP_IMPLEMENTATION_STATUS.md`
+   - [ ] Add any learnings to `../ios/IOS_MAP_IMPLEMENTATION_STATUS.md`
 
 2. **Commit Changes**:
    - [ ] Run tests: `./gradlew :shared:testDebugUnitTest`
@@ -345,7 +345,7 @@ Before ending the session:
    - [ ] DO NOT push (per CLAUDE.md - local build/test first)
 
 3. **Document Issues**:
-   - [ ] Add any new bugs found to `iOS_MAP_TODO.md`
+   - [ ] Add any new bugs found to `../ios/IOS_MAP_TODO.md`
    - [ ] Note any blockers or questions
 
 ---
@@ -376,5 +376,5 @@ rg "updateWavePolygons" --type kotlin
 ---
 
 **Ready to Start**: Focus on Tasks 1-3 (static fallback, wave progression, memory leaks)
-**Documentation**: See `iOS_MAP_IMPLEMENTATION_STATUS.md` for comprehensive details
+**Documentation**: See `../ios/IOS_MAP_IMPLEMENTATION_STATUS.md` for comprehensive details
 **Help**: All context is in the markdown files - read before asking questions!

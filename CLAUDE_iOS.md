@@ -954,7 +954,7 @@ fun EventScreen() {
 - [docs/iOS_VIOLATION_TRACKER.md](docs/iOS_VIOLATION_TRACKER.md) - Historical violations
 - [docs/iOS_SUCCESS_STATE.md](docs/iOS_SUCCESS_STATE.md) - Success criteria
 - [docs/iOS_DEBUGGING_GUIDE.md](docs/iOS_DEBUGGING_GUIDE.md) - Advanced debugging
-- [iOS_MAP_IMPLEMENTATION_STATUS.md](iOS_MAP_IMPLEMENTATION_STATUS.md) - Map status
+- [iOS_MAP_IMPLEMENTATION_STATUS.md](docs/ios/IOS_MAP_IMPLEMENTATION_STATUS.md) - Map status
 
 ### External Resources
 - [Kotlin Multiplatform Mobile](https://kotlinlang.org/docs/multiplatform-mobile-getting-started.html)

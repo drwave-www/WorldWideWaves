@@ -230,7 +230,7 @@ Common exceptions that can propagate from Kotlin to Swift:
 ### Project Documentation References
 - **CLAUDE.md** - Section: "KOTLIN-SWIFT EXCEPTION HANDLING - MANDATORY"
 - **iOS_VIOLATION_TRACKER.md** - Exception handling violations tracking
-- **iOS_MAP_IMPLEMENTATION_STATUS.md** - iOS-specific implementation notes
+- **IOS_MAP_IMPLEMENTATION_STATUS.md** - iOS-specific implementation notes
 
 ### Code References
 - **RootController.kt** - Lines 70, 78, 98, 117 (@Throws annotations)

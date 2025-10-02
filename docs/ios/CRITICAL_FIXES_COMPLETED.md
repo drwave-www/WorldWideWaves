@@ -293,8 +293,8 @@ All critical issues resolved, 410/425 tests passing (15 failures are in WaveProg
 
 ### Documentation Files (3 files):
 1. `docs/CLAUDE_EVALUATION.md` - Deep technical analysis added
-2. `iOS_MAP_IMPLEMENTATION_STATUS.md` - Critical threats section added
-3. `REMAINING_THREATS_AFTER_iOS_FIXES.md` - New analysis document
+2. `IOS_MAP_IMPLEMENTATION_STATUS.md` - Critical threats section added
+3. `../architecture/REMAINING_THREATS_AFTER_iOS_FIXES.md` - New analysis document
 
 ---
 
