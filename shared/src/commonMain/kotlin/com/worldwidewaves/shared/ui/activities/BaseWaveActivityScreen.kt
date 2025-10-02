@@ -36,11 +36,11 @@ import org.koin.core.component.inject
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
-abstract class WWWAbstractEventWaveActivity(
+abstract class BaseWaveActivityScreen(
     eventId: String,
     platformEnabler: PlatformEnabler,
     showSplash: Boolean = false,
-) : WWWAbstractEventBackActivity(eventId, platformEnabler, showSplash) {
+) : BaseEventBackgroundScreen(eventId, platformEnabler, showSplash) {
     /**
      * Application-level CoroutineScope (stays alive as long as the process lives)
      * Injected from DI to avoid cancelling jobs when the Composable scope disappears.

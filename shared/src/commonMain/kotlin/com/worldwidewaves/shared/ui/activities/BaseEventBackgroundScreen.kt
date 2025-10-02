@@ -59,11 +59,11 @@ import org.jetbrains.compose.resources.painterResource
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
-abstract class WWWAbstractEventBackActivity(
+abstract class BaseEventBackgroundScreen(
     val eventId: String,
     platformEnabler: PlatformEnabler,
     showSplash: Boolean = false,
-) : WWWMainActivity(platformEnabler, showSplash) {
+) : MainScreen(platformEnabler, showSplash) {
     /**
      * Controls whether the event screen should be scrollable.
      * Set to false for full-screen content like maps that shouldn't scroll.

@@ -38,12 +38,12 @@ import com.worldwidewaves.shared.viewmodels.MapViewModel
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
-class WWWEventActivity(
+class EventDetailScreen(
     eventId: String,
     platformEnabler: PlatformEnabler,
     val mapViewModel: MapViewModel,
     showSplash: Boolean = false,
-) : WWWAbstractEventWaveActivity(eventId, platformEnabler, showSplash) {
+) : BaseWaveActivityScreen(eventId, platformEnabler, showSplash) {
     @Composable
     override fun Event(
         event: IWWWEvent,

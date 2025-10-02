@@ -22,7 +22,7 @@ package com.worldwidewaves.shared.utils
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import com.worldwidewaves.shared.ui.activities.WWWMainActivity
+import com.worldwidewaves.shared.ui.activities.MainScreen
 import platform.Foundation.NSNotificationCenter
 import platform.UIKit.UIApplicationDidBecomeActiveNotification
 import platform.UIKit.UIApplicationDidEnterBackgroundNotification
@@ -31,7 +31,7 @@ import platform.UIKit.UIApplicationWillResignActiveNotification
 import platform.darwin.NSObjectProtocol
 
 @Composable
-internal fun BindIosLifecycle(host: WWWMainActivity) {
+internal fun BindIosLifecycle(host: MainScreen) {
     DisposableEffect(host) {
         val nc = NSNotificationCenter.defaultCenter
 

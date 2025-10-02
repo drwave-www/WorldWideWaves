@@ -26,10 +26,10 @@ import androidx.compose.ui.window.ComposeUIViewController
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.IosEventMap
 import com.worldwidewaves.shared.map.MapCameraPosition
-import com.worldwidewaves.shared.ui.activities.WWWEventActivity
-import com.worldwidewaves.shared.ui.activities.WWWFullMapActivity
-import com.worldwidewaves.shared.ui.activities.WWWMainActivity
-import com.worldwidewaves.shared.ui.activities.WWWWaveActivity
+import com.worldwidewaves.shared.ui.activities.EventDetailScreen
+import com.worldwidewaves.shared.ui.activities.FullMapScreen
+import com.worldwidewaves.shared.ui.activities.MainScreen
+import com.worldwidewaves.shared.ui.activities.WaveParticipationScreen
 import com.worldwidewaves.shared.utils.BindIosLifecycle
 import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.utils.finishIOS
@@ -71,7 +71,7 @@ private inline fun makeComposeVC(
 fun makeMainViewController(): UIViewController =
     makeComposeVC("IOS MAIN VIEW CONTROLLER") {
         val enabler = diEnabler()
-        WWWMainActivity(platformEnabler = enabler).Draw()
+        MainScreen(platformEnabler = enabler).Draw()
     }
 
 @Suppress("unused")
@@ -83,7 +83,7 @@ fun makeEventViewController(eventId: String): UIViewController =
 
         val host =
             remember(eventId) {
-                WWWEventActivity(eventId = eventId, platformEnabler = enabler, mapViewModel = mapVm)
+                EventDetailScreen(eventId = eventId, platformEnabler = enabler, mapViewModel = mapVm)
             }
 
         BindIosLifecycle(host)
@@ -102,7 +102,7 @@ fun makeWaveViewController(eventId: String): UIViewController =
 
         val host =
             remember(eventId) {
-                WWWWaveActivity(eventId = eventId, platformEnabler = enabler)
+                WaveParticipationScreen(eventId = eventId, platformEnabler = enabler)
             }
 
         BindIosLifecycle(host)
@@ -121,7 +121,7 @@ fun makeFullMapViewController(eventId: String): UIViewController =
 
         val host =
             remember(eventId) {
-                WWWFullMapActivity(eventId = eventId, platformEnabler = enabler)
+                FullMapScreen(eventId = eventId, platformEnabler = enabler)
             }
 
         BindIosLifecycle(host)

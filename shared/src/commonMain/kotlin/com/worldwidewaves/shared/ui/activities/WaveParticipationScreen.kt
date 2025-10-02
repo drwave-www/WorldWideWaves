@@ -23,29 +23,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.ui.screens.FullMapScreen
+import com.worldwidewaves.shared.ui.screens.WaveScreen
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
-class WWWFullMapActivity(
+class WaveParticipationScreen(
     eventId: String,
     platformEnabler: PlatformEnabler,
     showSplash: Boolean = false,
-) : WWWAbstractEventWaveActivity(eventId, platformEnabler, showSplash) {
-    // Disable scrolling for full map screen to allow map to take full height
-    override val isScrollable: Boolean = false
-
+) : BaseWaveActivityScreen(eventId, platformEnabler, showSplash) {
     @Composable
     override fun Event(
         event: IWWWEvent,
         modifier: Modifier,
     ) {
-        // Use the shared full map screen implementation
-        FullMapScreen(
+        // Use the complete shared wave screen with exact working behavior
+        WaveScreen(
             event = event,
             eventMap = eventMap,
             modifier = modifier,
-            onNavigateToWave = { eventId -> platformEnabler.openWaveActivity(eventId) },
         )
     }
 }

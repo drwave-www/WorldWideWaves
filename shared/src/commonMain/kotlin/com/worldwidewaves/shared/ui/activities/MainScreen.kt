@@ -75,7 +75,7 @@ private object UIConstants {
  * iOS-safe UI properties structure using basic types
  */
 @OptIn(ExperimentalTime::class)
-open class WWWMainActivity
+open class MainScreen
     @Throws(Throwable::class)
     constructor(
         val platformEnabler: PlatformEnabler,
@@ -103,18 +103,18 @@ open class WWWMainActivity
         // Events loading and initialization now must be triggered from @Composable LaunchedEffect
 
         /**
-         * ⚠️ iOS CRITICAL: Initialize main activity by loading events and starting sound choreography.
+         * ⚠️ iOS CRITICAL: Initialize main screen by loading events and starting sound choreography.
          * Must be called from @Composable LaunchedEffect, never from init{} or constructor.
          */
         suspend fun initialize() {
-            Log.i("WWWMainActivity", "Initializing WWWMainActivity")
+            Log.i("MainScreen", "Initializing MainScreen")
 
             // Load the sound choreography
             soundChoreographyPlayer.initialize()
 
             // Begin loading events – when done, flag so splash can disappear
             events.loadEvents(onTermination = {
-                Log.i("WWWMainActivity", "Events loading completed")
+                Log.i("MainScreen", "Events loading completed")
                 isDataLoaded = true
                 checkSplashFinished(startTime)
 
@@ -222,11 +222,11 @@ open class WWWMainActivity
          */
         private fun startGlobalSoundChoreographyForAllEvents() {
             try {
-                Log.d("WWWMainActivity", "Starting global sound choreography for all events")
+                Log.d("MainScreen", "Starting global sound choreography for all events")
                 globalSoundChoreography.startObservingAllEvents()
-                Log.d("WWWMainActivity", "Global sound choreography started successfully")
+                Log.d("MainScreen", "Global sound choreography started successfully")
             } catch (e: Exception) {
-                Log.e("WWWMainActivity", "Error starting global sound choreography: ${e.message}", e)
+                Log.e("MainScreen", "Error starting global sound choreography: ${e.message}", e)
                 // Don't crash the app if sound choreography fails
             }
         }
@@ -250,12 +250,12 @@ open class WWWMainActivity
         /** Updates [isSplashFinished] once both data and min duration requirements are met. */
         private fun checkSplashFinished(startTime: Long) {
             val elapsed = Clock.System.now().toEpochMilliseconds() - startTime
-            Log.d("WWWMainActivity", "Checking splash finished: dataLoaded=$isDataLoaded, elapsed=${elapsed}ms")
+            Log.d("MainScreen", "Checking splash finished: dataLoaded=$isDataLoaded, elapsed=${elapsed}ms")
 
             if (isDataLoaded &&
                 elapsed >= WWWGlobals.Timing.SPLASH_MIN_DURATION.inWholeMilliseconds
             ) {
-                Log.i("WWWMainActivity", "Splash conditions met, dismissing splash screen")
+                Log.i("MainScreen", "Splash conditions met, dismissing splash screen")
                 isSplashFinished.update { true }
             }
         }
