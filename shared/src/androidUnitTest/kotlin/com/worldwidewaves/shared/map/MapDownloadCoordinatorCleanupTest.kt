@@ -98,14 +98,14 @@ class MapDownloadCoordinatorCleanupTest {
             val coordinator = MapDownloadCoordinator(platformMapManager)
 
             // Simulate failed download
-            coEvery { platformMapManager.downloadMap(eq("failed-map"), any(), any(), any()) } answers {
-                val onError = lastArg<(Int, String?) -> Unit>()
+            coEvery { platformMapManager.downloadMap(eq("failed-map"), any(), any(), any()) } coAnswers {
+                val onError = arg<(Int, String?) -> Unit>(3) // 4th parameter (0-indexed)
                 onError(500, "Download failed")
             }
 
             // Simulate completed download
-            coEvery { platformMapManager.downloadMap(eq("completed-map"), any(), any(), any()) } answers {
-                val onSuccess = thirdArg<() -> Unit>()
+            coEvery { platformMapManager.downloadMap(eq("completed-map"), any(), any(), any()) } coAnswers {
+                val onSuccess = arg<() -> Unit>(2) // 3rd parameter (0-indexed)
                 onSuccess()
             }
 
@@ -179,26 +179,26 @@ class MapDownloadCoordinatorCleanupTest {
             val coordinator = MapDownloadCoordinator(platformMapManager)
 
             // Simulate completed download
-            coEvery { platformMapManager.downloadMap(eq("completed-1"), any(), any(), any()) } answers {
-                val onSuccess = thirdArg<() -> Unit>()
+            coEvery { platformMapManager.downloadMap(eq("completed-1"), any(), any(), any()) } coAnswers {
+                val onSuccess = arg<() -> Unit>(2) // 3rd parameter (0-indexed)
                 onSuccess()
             }
 
             // Simulate active download
-            coEvery { platformMapManager.downloadMap(eq("active-1"), any(), any(), any()) } answers {
-                val onProgress = secondArg<(Int) -> Unit>()
+            coEvery { platformMapManager.downloadMap(eq("active-1"), any(), any(), any()) } coAnswers {
+                val onProgress = arg<(Int) -> Unit>(1) // 2nd parameter (0-indexed)
                 onProgress(30)
             }
 
             // Simulate failed download
-            coEvery { platformMapManager.downloadMap(eq("failed-1"), any(), any(), any()) } answers {
-                val onError = lastArg<(Int, String?) -> Unit>()
+            coEvery { platformMapManager.downloadMap(eq("failed-1"), any(), any(), any()) } coAnswers {
+                val onError = arg<(Int, String?) -> Unit>(3) // 4th parameter (0-indexed)
                 onError(404, "Not found")
             }
 
             // Simulate another completed download
-            coEvery { platformMapManager.downloadMap(eq("completed-2"), any(), any(), any()) } answers {
-                val onSuccess = thirdArg<() -> Unit>()
+            coEvery { platformMapManager.downloadMap(eq("completed-2"), any(), any(), any()) } coAnswers {
+                val onSuccess = arg<() -> Unit>(2) // 3rd parameter (0-indexed)
                 onSuccess()
             }
 
