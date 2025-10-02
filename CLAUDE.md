@@ -518,12 +518,30 @@ ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest
 ```
 
 ### Testing Requirements
+
+**CRITICAL**: Always run ALL tests before ANY commit:
+```bash
+# MANDATORY before every commit
+./gradlew clean :shared:testDebugUnitTest :composeApp:assembleDebug
+
+# Verify all pass before committing
+# Expected: 535+ tests, 100% pass rate in ~22s
+```
+
 - **All changes must pass existing test suite** (535+ unit tests, 100% pass rate)
 - **New functionality requires corresponding tests** - No test debt allowed
+- **Run ALL tests before commit** - Not just the tests you think are relevant
 - **Instrumented tests must pass** before committing
 - **Performance regressions must be addressed** - Monitor test execution time
 - **iOS safety verification must pass** for shared code changes
-- **Test coverage**: Comprehensive coverage across all phases (Phases 1-4 complete)
+- **NEVER disable tests without permission** - Fix issues, don't hide them
+
+**Test Organization**:
+- `shared/src/commonTest`: Platform-independent tests (no MockK, no JVM-only APIs)
+- `shared/src/androidUnitTest`: Android-specific tests (can use MockK)
+- `shared/src/iosTest`: iOS-specific tests (no MockK, Kotlin/Native compatible)
+
+**Test coverage**: Comprehensive coverage across all phases (Phases 1-4 complete)
   - Phase 1 (Critical): Wave detection, scheduling, accuracy ✅
   - Phase 2 (Data/State): State management, persistence ✅
   - Phase 3 (ViewModels): UI logic, download lifecycle ✅
