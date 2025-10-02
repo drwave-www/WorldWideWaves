@@ -133,6 +133,36 @@ class MapDownloadCoordinator(
         }
     }
 
+    /**
+     * Clear completed downloads from the cache to prevent memory accumulation.
+     * Preserves active downloads and failed downloads that may be retried.
+     */
+    fun clearCompletedDownloads() {
+        Log.d(TAG, "Clearing completed downloads from cache")
+        val iterator = _downloadStates.iterator()
+        var clearedCount = 0
+
+        while (iterator.hasNext()) {
+            val entry = iterator.next()
+            val state = entry.value.value
+
+            // Remove only completed successful downloads (not downloading, no error)
+            if (!state.isDownloading && state.error == null && state.isAvailable) {
+                iterator.remove()
+                clearedCount++
+                Log.v(TAG, "Removed completed download: ${entry.key}")
+            }
+        }
+
+        Log.i(TAG, "Cleared $clearedCount completed downloads from cache")
+    }
+
+    /**
+     * Get the current number of tracked download states.
+     * Useful for monitoring cache size and memory usage.
+     */
+    fun getTrackedDownloadCount(): Int = _downloadStates.size
+
     private fun updateState(
         mapId: String,
         update: (DownloadState) -> DownloadState,

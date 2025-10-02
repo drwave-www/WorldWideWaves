@@ -27,14 +27,14 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
 import com.worldwidewaves.shared.ui.activities.WWWFullMapActivity
-import com.worldwidewaves.utils.AndroidPlatformEnabler
+import com.worldwidewaves.utils.PlatformEnablerAndroid
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 class EventFullMapActivity : AbstractEventAndroidActivity<WWWFullMapActivity>() {
     override fun createActivityImpl(
         eventId: String,
-        platformEnabler: AndroidPlatformEnabler,
+        platformEnabler: PlatformEnablerAndroid,
     ): WWWFullMapActivity = WWWFullMapActivity(eventId, platformEnabler)
 
     override fun createEventMapBuilder(): (IWWWEvent) -> AndroidEventMap =

@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.worldwidewaves.map.AndroidMapLibreAdapter
+import com.worldwidewaves.map.MapLibreAdapterAndroid
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
@@ -89,7 +89,7 @@ class MapIntegrationTest {
     val composeTestRule = createComposeRule()
 
     private lateinit var mockMapViewModel: AndroidMapViewModel
-    private lateinit var mockAndroidMapLibreAdapter: AndroidMapLibreAdapter
+    private lateinit var mockAndroidMapLibreAdapter: MapLibreAdapterAndroid
     private lateinit var mockLocationProvider: AndroidWWWLocationProvider
     private lateinit var mockEvent: IWWWEvent
     private lateinit var performanceMonitor: PerformanceMonitor
@@ -114,7 +114,7 @@ class MapIntegrationTest {
     }
 
     private fun setupMockMapLibreAdapter() {
-        mockAndroidMapLibreAdapter = mockk<AndroidMapLibreAdapter>(relaxed = true)
+        mockAndroidMapLibreAdapter = mockk<MapLibreAdapterAndroid>(relaxed = true)
 
         val mockPositionFlow = MutableStateFlow<Position?>(null)
         val mockZoomFlow = MutableStateFlow(10.0)

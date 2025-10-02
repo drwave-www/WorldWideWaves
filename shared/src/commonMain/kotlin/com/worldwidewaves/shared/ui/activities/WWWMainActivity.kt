@@ -48,7 +48,7 @@ import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.choreographies.SoundChoreographyPlayer
 import com.worldwidewaves.shared.events.WWWEvents
-import com.worldwidewaves.shared.sound.GlobalSoundChoreographyManager
+import com.worldwidewaves.shared.sound.SoundChoreographyCoordinator
 import com.worldwidewaves.shared.ui.AboutTabScreen
 import com.worldwidewaves.shared.ui.DebugTabScreen
 import com.worldwidewaves.shared.ui.EventsListScreen
@@ -83,7 +83,7 @@ open class WWWMainActivity
     ) : KoinComponent {
         private val platform: WWWPlatform by inject()
         protected val events: WWWEvents by inject()
-        private val globalSoundChoreography: GlobalSoundChoreographyManager by inject()
+        private val globalSoundChoreography: SoundChoreographyCoordinator by inject()
         private val soundChoreographyPlayer: SoundChoreographyPlayer by inject()
 
         private val eventsListScreen: EventsListScreen by inject()
