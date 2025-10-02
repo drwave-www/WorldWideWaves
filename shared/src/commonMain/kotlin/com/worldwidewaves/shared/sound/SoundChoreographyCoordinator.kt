@@ -35,10 +35,11 @@ import org.koin.core.component.inject
 import kotlin.time.ExperimentalTime
 
 /**
- * Global sound choreography manager that handles sound playback throughout the app
- * when the user is in an event area, regardless of which screen is currently displayed.
+ * Coordinates sound choreography across all events throughout the app,
+ * handling sound playback when the user is in an event area, regardless
+ * of which screen is currently displayed.
  *
- * This manager:
+ * This coordinator:
  * - Observes user's area status globally for all loaded events
  * - Automatically detects which event the user is currently in
  * - Starts sound choreography when user enters area and event is active
@@ -46,7 +47,7 @@ import kotlin.time.ExperimentalTime
  * - Manages background audio permissions and lifecycle
  */
 @OptIn(ExperimentalTime::class)
-class GlobalSoundChoreographyManager(
+class SoundChoreographyCoordinator(
     private val coroutineScopeProvider: CoroutineScopeProvider = DefaultCoroutineScopeProvider(),
 ) : KoinComponent {
     @Suppress("UnusedPrivateProperty", "UnusedPrivateMember") // Injected for future clock-based features
@@ -58,7 +59,7 @@ class GlobalSoundChoreographyManager(
     private var isObservingAllEvents = false
 
     companion object {
-        private const val TAG = "GlobalSoundChoreography"
+        private const val TAG = "SoundChoreographyCoordinator"
     }
 
     /**

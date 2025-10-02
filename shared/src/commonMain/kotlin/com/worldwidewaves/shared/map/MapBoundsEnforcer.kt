@@ -30,14 +30,14 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * Platform-independent map constraint management that handles the logic
+ * Platform-independent map bounds enforcement that handles the logic
  * for keeping the map view within bounds.
  */
-class MapConstraintManager(
+class MapBoundsEnforcer(
     private val mapBounds: BoundingBox,
     private val mapLibreAdapter: MapLibreAdapter<*>,
     /**
-     * When this lambda returns true the manager will not attempt to correct /
+     * When this lambda returns true the enforcer will not attempt to correct /
      * move the camera.  Used while a user-initiated or automatic animation is
      * already running to avoid fighting with it.
      */

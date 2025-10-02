@@ -32,16 +32,16 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
- * Tests for MapDownloadManager core business logic.
+ * Tests for MapDownloadCoordinator core business logic.
  */
-class MapDownloadManagerTest {
+class MapDownloadCoordinatorTest {
     private lateinit var mockAdapter: TestPlatformMapDownloadAdapter
-    private lateinit var manager: MapDownloadManager
+    private lateinit var manager: MapDownloadCoordinator
 
     @BeforeTest
     fun setUp() {
         mockAdapter = TestPlatformMapDownloadAdapter()
-        manager = MapDownloadManager(mockAdapter)
+        manager = MapDownloadCoordinator(mockAdapter)
     }
 
     @Test

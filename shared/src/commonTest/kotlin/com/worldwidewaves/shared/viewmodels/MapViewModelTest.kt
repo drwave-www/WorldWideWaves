@@ -58,7 +58,7 @@ import kotlin.test.assertTrue
  *
  * TESTING STRATEGY:
  * Since MapViewModel interface methods are NOT suspend functions (they launch coroutines internally),
- * we test the underlying MapDownloadManager directly to ensure consistent behavior.
+ * we test the underlying MapDownloadCoordinator directly to ensure consistent behavior.
  * Platform-specific implementations (IosMapViewModel, AndroidMapViewModel) are tested separately
  * in their respective test files.
  */
@@ -66,12 +66,12 @@ import kotlin.test.assertTrue
 class MapViewModelTest {
     private val testScheduler = TestCoroutineScheduler()
     private lateinit var testPlatformAdapter: TestPlatformMapDownloadAdapter
-    private lateinit var downloadManager: MapDownloadManager
+    private lateinit var downloadManager: MapDownloadCoordinator
 
     @BeforeTest
     fun setUp() {
         testPlatformAdapter = TestPlatformMapDownloadAdapter()
-        downloadManager = MapDownloadManager(testPlatformAdapter)
+        downloadManager = MapDownloadCoordinator(testPlatformAdapter)
         // Give the adapter access to the manager so it can update state
         testPlatformAdapter.downloadManager = downloadManager
     }
@@ -462,7 +462,7 @@ class MapViewModelTest {
         var progressValues = listOf<Int>()
 
         // Reference to the download manager so we can update its state
-        var downloadManager: MapDownloadManager? = null
+        var downloadManager: MapDownloadCoordinator? = null
 
         private val installedMaps = mutableSetOf<String>()
 

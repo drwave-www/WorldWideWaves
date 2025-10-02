@@ -23,12 +23,12 @@ package com.worldwidewaves.shared.di
 
 import com.worldwidewaves.shared.choreographies.SoundChoreographyPlayer
 import com.worldwidewaves.shared.events.WWWEvents
-import com.worldwidewaves.shared.sound.GlobalSoundChoreographyManager
+import com.worldwidewaves.shared.sound.SoundChoreographyCoordinator
 import org.koin.dsl.module
 
 val commonModule =
     module {
         single { WWWEvents() }
         single(createdAtStart = true) { SoundChoreographyPlayer() }
-        single { GlobalSoundChoreographyManager() }
+        single { SoundChoreographyCoordinator() }
     }

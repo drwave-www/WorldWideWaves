@@ -38,7 +38,7 @@ import kotlin.test.assertTrue
 
 /**
  * Comprehensive tests for IosMapViewModel.
- * Tests the iOS-specific MapViewModel implementation with MapDownloadManager composition.
+ * Tests the iOS-specific MapViewModel implementation with MapDownloadCoordinator composition.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class IosMapViewModelTest {
@@ -73,7 +73,7 @@ class IosMapViewModelTest {
     // ------------------------------------------------------------------------
 
     @Test
-    fun `checkIfMapIsAvailable delegates to MapDownloadManager correctly`() =
+    fun `checkIfMapIsAvailable delegates to MapDownloadCoordinator correctly`() =
         runTest(testScheduler) {
             mockPlatformMapManager.setMapAvailable("test_map", true)
 

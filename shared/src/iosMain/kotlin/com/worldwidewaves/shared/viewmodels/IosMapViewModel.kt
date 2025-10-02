@@ -93,7 +93,7 @@ class IosMapViewModel(
         }
 
     // Pure business logic (no UI lifecycle concerns)
-    private val downloadManager: MapDownloadManager = MapDownloadManager(platformAdapter)
+    private val downloadManager: MapDownloadCoordinator = MapDownloadCoordinator(platformAdapter)
 
     // Delegate public interface to business logic (same pattern as AndroidMapViewModel)
     override val featureState = downloadManager.featureState

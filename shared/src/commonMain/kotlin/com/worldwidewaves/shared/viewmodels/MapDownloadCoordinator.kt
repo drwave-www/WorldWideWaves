@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Manager for map download operations across platforms.
+ * Coordinates map download operations across platforms.
  *
  * Contains all platform-agnostic download workflow logic without UI lifecycle concerns.
  * Used by composition in platform-specific ViewModels (AndroidMapViewModel, IosMapViewModel).
@@ -46,7 +46,7 @@ import kotlinx.coroutines.flow.StateFlow
  * • AndroidMapViewModel (composition)
  * • IosMapViewModel (composition)
  */
-class MapDownloadManager(
+class MapDownloadCoordinator(
     private val platformAdapter: PlatformMapDownloadAdapter,
 ) : IMapDownloadManager {
     private val _featureState = MutableStateFlow<MapFeatureState>(MapFeatureState.NotChecked)
@@ -56,7 +56,7 @@ class MapDownloadManager(
     val retryManager = MapDownloadUtils.RetryManager()
 
     companion object {
-        private const val TAG = "MapDownloadManager"
+        private const val TAG = "MapDownloadCoordinator"
     }
 
     // ------------------------------------------------------------------------
@@ -177,7 +177,7 @@ class MapDownloadManager(
 }
 
 /**
- * Platform adapter interface for MapDownloadLogic.
+ * Platform adapter interface for MapDownloadCoordinator.
  *
  * RESPONSIBILITIES:
  * • Platform-specific map installation checks

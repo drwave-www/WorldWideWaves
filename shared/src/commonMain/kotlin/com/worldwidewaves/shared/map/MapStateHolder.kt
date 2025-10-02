@@ -59,9 +59,9 @@ sealed class MapFeatureState {
 }
 
 /**
- * Shared map state manager that coordinates map availability across platforms.
+ * Holds map state and coordinates map availability across platforms.
  */
-class MapStateManager(
+class MapStateHolder(
     private val platformMapManager: PlatformMapManager,
 ) {
     private val _featureState = MutableStateFlow<MapFeatureState>(MapFeatureState.NotChecked)
@@ -79,7 +79,7 @@ class MapStateManager(
         mapId: String,
         autoDownload: Boolean = false,
     ) {
-        WWWLogger.d("MapStateManager", "Checking availability for map: $mapId")
+        WWWLogger.d("MapStateHolder", "Checking availability for map: $mapId")
         currentMapId = mapId
 
         val isAvailable = platformMapManager.isMapAvailable(mapId)
@@ -101,7 +101,7 @@ class MapStateManager(
      * Download/install a map using platform-specific implementation.
      */
     suspend fun downloadMap(mapId: String) {
-        WWWLogger.i("MapStateManager", "Starting download for map: $mapId")
+        WWWLogger.i("MapStateHolder", "Starting download for map: $mapId")
         currentMapId = mapId
         _featureState.value = MapFeatureState.Pending
 
@@ -114,16 +114,16 @@ class MapStateManager(
                 onSuccess = {
                     _featureState.value = MapFeatureState.Installed
                     updateMapState(mapId, true)
-                    WWWLogger.i("MapStateManager", "Map download completed: $mapId")
+                    WWWLogger.i("MapStateHolder", "Map download completed: $mapId")
                 },
                 onError = { errorCode, errorMessage ->
                     _featureState.value = MapFeatureState.Failed(errorCode, errorMessage)
-                    WWWLogger.e("MapStateManager", "Map download failed: $mapId, error: $errorMessage")
+                    WWWLogger.e("MapStateHolder", "Map download failed: $mapId, error: $errorMessage")
                 },
             )
         } catch (e: Exception) {
             _featureState.value = MapFeatureState.Failed(-1, e.message)
-            WWWLogger.e("MapStateManager", "Exception during map download: $mapId", e)
+            WWWLogger.e("MapStateHolder", "Exception during map download: $mapId", e)
         }
     }
 
@@ -132,7 +132,7 @@ class MapStateManager(
      */
     fun cancelDownload() {
         currentMapId?.let { mapId ->
-            WWWLogger.i("MapStateManager", "Canceling download for: $mapId")
+            WWWLogger.i("MapStateHolder", "Canceling download for: $mapId")
             _featureState.value = MapFeatureState.Canceling
             platformMapManager.cancelDownload(mapId)
         }

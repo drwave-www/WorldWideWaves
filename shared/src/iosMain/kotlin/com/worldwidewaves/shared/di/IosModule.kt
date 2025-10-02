@@ -29,7 +29,7 @@ import com.worldwidewaves.shared.map.IosMapLibreAdapter
 import com.worldwidewaves.shared.map.IosPlatformMapManager
 import com.worldwidewaves.shared.map.IosWwwLocationProvider
 import com.worldwidewaves.shared.map.MapLibreAdapter
-import com.worldwidewaves.shared.map.MapStateManager
+import com.worldwidewaves.shared.map.MapStateHolder
 import com.worldwidewaves.shared.map.PlatformMapManager
 import com.worldwidewaves.shared.map.WWWLocationProvider
 import com.worldwidewaves.shared.sound.IosSoundPlayer
@@ -83,7 +83,7 @@ val IosModule =
         // Map services
         single<PlatformMapManager> { IosPlatformMapManager() }
         single<MapLibreAdapter<Any>> { IosMapLibreAdapter() }
-        single { MapStateManager(get()) }
+        single { MapStateHolder(get()) }
         // Note: NativeMapViewProvider is registered by iOS app (SwiftNativeMapViewProvider)
         // If not registered, MapViewFactory will use IosNativeMapViewProvider as fallback
 

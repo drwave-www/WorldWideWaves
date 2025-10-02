@@ -24,11 +24,11 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * Test for GlobalSoundChoreographyManager sound timing logic.
+ * Test for SoundChoreographyCoordinator sound timing logic.
  * Verifies that sounds only play at the exact moment of user hit transition,
  * not when entering activities for already-finished events.
  */
-class GlobalSoundChoreographyManagerTest {
+class SoundChoreographyCoordinatorTest {
     @Test
     fun `sound transition logic only triggers on false to true transition`() {
         // Test the core logic that was fixed
@@ -41,7 +41,7 @@ class GlobalSoundChoreographyManagerTest {
             isActive: Boolean = true,
             isEventRunning: Boolean = true,
         ) {
-            // This is the fixed logic from GlobalSoundChoreographyManager
+            // This is the fixed logic from SoundChoreographyCoordinator
             if (hasBeenHit && !previousHitState && isActive && isEventRunning) {
                 soundPlayed = true
             }
