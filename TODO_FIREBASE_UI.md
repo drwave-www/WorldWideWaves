@@ -1,9 +1,43 @@
-# WorldWideWaves - Firebase Test Lab UI Testing TODO
+# WorldWideWaves - Firebase Test Lab UI Testing Implementation
 
-> **Purpose**: Comprehensive end-to-end UI testing for Android and iOS on Firebase Test Lab
-> **Scope**: Complete user journey from app launch to wave participation
-> **Target**: Automated testing on real devices with screenshots
-> **Estimated Total Effort**: 60-80 hours
+> **PROMPT FOR NEXT CLAUDE SESSION**
+>
+> Use this document as your implementation guide. Follow the phases sequentially, use agents for parallel work, verify compilation and tests after each step, commit frequently.
+
+---
+
+## 🚀 Quick Start Prompt
+
+```
+Implement comprehensive Firebase Test Lab E2E UI tests for WorldWideWaves Android and iOS.
+
+Follow TODO_FIREBASE_UI.md:
+- Phase 1: Preparation (8-10h) - Add testTags, debug config, Firebase setup
+- Phase 2: Android Test (16-20h) - Implement 21-step E2E test with helpers
+- Phase 3: iOS Test (20-24h) - XCUITest implementation
+- Phase 4-6: Simulator testing, Firebase integration, reporting
+
+Test Scenario: Complete wave participation journey (21 steps)
+- App launch → Events browse → Favorites → Map download
+- Event details → Wave participation → Choreography
+- About navigation → FAQ interaction
+
+Use agents for parallel implementation.
+Create branch: feature/firebase-ui-tests
+Verify after each phase.
+Estimated: 60-80 hours total.
+
+All details, code references, and step-by-step instructions below.
+```
+
+---
+
+## 📋 Implementation Overview
+
+**Purpose**: Comprehensive end-to-end UI testing for Android and iOS on Firebase Test Lab
+**Scope**: Complete user journey from app launch to wave participation
+**Target**: Automated testing on real devices with screenshots
+**Estimated Total Effort**: 60-80 hours
 
 ---
 
@@ -68,9 +102,9 @@ As a user, I want to discover events, mark favorites, download maps, join a wave
 **Screenshot**: `02_events_list_initial_state.png`
 
 **Code References**:
-- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/screens/EventsScreen.kt:89` - Events screen
-- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/components/EventCard.kt` - Event card component
-- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/viewmodels/EventsViewModel.kt:89` - Events ViewModel
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/screens/EventsScreen.kt:111` - EventsScreen composable
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/screens/EventsScreen.kt:340` - Event() composable (event card rendering)
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/viewmodels/EventsViewModel.kt:88` - Events ViewModel
 
 ---
 
@@ -135,7 +169,7 @@ As a user, I want to discover events, mark favorites, download maps, join a wave
 - `05b_after_favorite_click.png`
 
 **Code References**:
-- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/components/EventCard.kt:87` - Favorite button
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/screens/EventsScreen.kt:492` - EventOverlayFavorite() composable (favorite button)
 - `shared/src/commonMain/kotlin/com/worldwidewaves/shared/viewmodels/EventsViewModel.kt:188` - Toggle favorite
 - `shared/src/commonMain/kotlin/com/worldwidewaves/shared/data/FavoriteEventsStore.kt:45` - Persistence
 
@@ -350,7 +384,7 @@ As a user, I want to discover events, mark favorites, download maps, join a wave
 
 **Code References**:
 - `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/screens/AboutScreen.kt:45` - About screen
-- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/screens/AboutInfoScreen.kt:34` - Info tab
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/screens/about/AboutInfoScreen.kt:60` - Info tab
 
 ---
 
@@ -376,7 +410,7 @@ As a user, I want to discover events, mark favorites, download maps, join a wave
 - `15b_about_info_bottom.png`
 
 **Code References**:
-- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/screens/AboutInfoScreen.kt:56` - Info content
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/screens/about/AboutInfoScreen.kt:100` - Info content
 
 ---
 
@@ -398,7 +432,7 @@ As a user, I want to discover events, mark favorites, download maps, join a wave
 **Screenshot**: `16_about_faq_collapsed.png`
 
 **Code References**:
-- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/screens/AboutFaqScreen.kt:45` - FAQ screen
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/screens/about/AboutFaqScreen.kt:90` - FAQ screen
 
 ---
 
@@ -440,7 +474,7 @@ As a user, I want to discover events, mark favorites, download maps, join a wave
 - `18b_faq_item_collapsed.png`
 
 **Code References**:
-- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/screens/AboutFaqScreen.kt:89` - FAQ expansion logic
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/screens/about/AboutFaqScreen.kt:120` - FAQ expansion logic
 
 ---
 
@@ -558,11 +592,9 @@ As a user, I want to discover events, mark favorites, download maps, join a wave
 
 **Critical Components**:
 ```kotlin
-// EventCard.kt
-Modifier.testTag("EventCard_$eventId")
-Modifier.testTag("EventCard_FavoriteButton_$eventId")
-
-// EventsScreen.kt
+// EventsScreen.kt - Event() composable (event card is inline)
+Modifier.testTag("Event_$eventId")
+Modifier.testTag("EventFavoriteButton_$eventId")
 Modifier.testTag("EventsList")
 Modifier.testTag("FilterButton_All")
 Modifier.testTag("FilterButton_Favorites")
@@ -577,11 +609,11 @@ Modifier.testTag("AboutTab_FAQ")
 ```
 
 **Files to Modify**:
-- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/components/EventCard.kt`
-- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/screens/EventsScreen.kt`
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/screens/EventsScreen.kt` (Event() composable - event card is inline)
 - `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/components/shared/ButtonWave.kt`
 - `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/screens/AboutScreen.kt`
-- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/screens/AboutFaqScreen.kt`
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/screens/about/AboutFaqScreen.kt`
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/screens/about/AboutInfoScreen.kt`
 
 **Effort**: 3-4 hours
 
