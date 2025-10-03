@@ -23,7 +23,7 @@ package com.worldwidewaves.shared.di
 
 import android.os.Build
 import com.worldwidewaves.shared.WWWPlatform
-import com.worldwidewaves.shared.choreographies.ChoreographyManager
+import com.worldwidewaves.shared.choreographies.ChoreographySequenceBuilder
 import com.worldwidewaves.shared.data.DataStoreFactory
 import com.worldwidewaves.shared.data.DefaultDataStoreFactory
 import com.worldwidewaves.shared.data.FavoriteEventsStore
@@ -42,7 +42,7 @@ val AndroidModule =
             WWWPlatform("Android ${Build.VERSION.SDK_INT}", get())
         }
         single<ImageResolver<DrawableResource>> { ImageResolverAndroid() }
-        single(createdAtStart = true) { ChoreographyManager<DrawableResource>() }
+        single(createdAtStart = true) { ChoreographySequenceBuilder<DrawableResource>() }
 
         single<SoundPlayer> { SoundPlayerAndroid(get()) }
 
