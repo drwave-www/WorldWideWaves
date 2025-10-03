@@ -92,8 +92,9 @@ WorldWideWaves iOS uses **Compose Multiplatform** with native UIKit integration:
 │  └──────────────────────────────────────────┘   │
 │                                                   │
 │  ┌──────────────────────────────────────────┐   │
-│  │  WWWMainActivity, WWWEventActivity        │   │
-│  │  - Activity wrappers (Android pattern)    │   │
+│  │  Screen Classes (activities/)             │   │
+│  │  - MainScreen, EventDetailScreen          │   │
+│  │  - WaveParticipationScreen, FullMapScreen │   │
 │  │  - Compose UI content                     │   │
 │  └──────────────────────────────────────────┘   │
 │                                                   │

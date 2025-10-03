@@ -25,6 +25,8 @@ import com.worldwidewaves.shared.events.data.DefaultGeoJsonDataProvider
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
@@ -305,32 +307,43 @@ class GeoJsonPerformanceTest : KoinTest {
             put("type", "FeatureCollection")
             putJsonArray("features") {
                 repeat(5) { index ->
-                    addJsonObject {
-                        put("type", "Feature")
-                        putJsonObject("properties") {
-                            put("name", "Area_$index")
-                            put("eventId", "test_event")
-                        }
-                        putJsonObject("geometry") {
-                            put("type", "Polygon")
-                            putJsonArray("coordinates") {
-                                addJsonArray {
-                                    // Simple polygon with 10 vertices
-                                    repeat(10) { i ->
-                                        addJsonArray {
-                                            add(10.0 + i * 0.1) // longitude
-                                            add(45.0 + i * 0.1) // latitude
-                                        }
-                                    }
-                                    // Close the polygon
-                                    addJsonArray {
-                                        add(10.0)
-                                        add(45.0)
-                                    }
-                                }
+                    add(
+                        buildJsonObject {
+                            put("type", "Feature")
+                            putJsonObject("properties") {
+                                put("name", "Area_$index")
+                                put("eventId", "test_event")
                             }
-                        }
-                    }
+                            putJsonObject("geometry") {
+                                put("type", "Polygon")
+                                put(
+                                    "coordinates",
+                                    buildJsonArray {
+                                        add(
+                                            buildJsonArray {
+                                                // Simple polygon with 10 vertices
+                                                repeat(10) { i ->
+                                                    add(
+                                                        buildJsonArray {
+                                                            add(JsonPrimitive(10.0 + i * 0.1)) // longitude
+                                                            add(JsonPrimitive(45.0 + i * 0.1)) // latitude
+                                                        },
+                                                    )
+                                                }
+                                                // Close the polygon
+                                                add(
+                                                    buildJsonArray {
+                                                        add(JsonPrimitive(10.0))
+                                                        add(JsonPrimitive(45.0))
+                                                    },
+                                                )
+                                            },
+                                        )
+                                    },
+                                )
+                            }
+                        },
+                    )
                 }
             }
         }
@@ -353,35 +366,46 @@ class GeoJsonPerformanceTest : KoinTest {
             }
             putJsonArray("features") {
                 repeat(20) { index ->
-                    addJsonObject {
-                        put("type", "Feature")
-                        put("id", "feature_$index")
-                        putJsonObject("properties") {
-                            put("name", "Complex_Area_$index")
-                            put("population", 10000 + index * 500)
-                            putJsonArray("tags") {
-                                add("urban")
-                                add("event_zone")
-                            }
-                        }
-                        putJsonObject("geometry") {
-                            put("type", "Polygon")
-                            putJsonArray("coordinates") {
-                                addJsonArray {
-                                    repeat(20) { i ->
-                                        addJsonArray {
-                                            add(10.0 + i * 0.05)
-                                            add(45.0 + i * 0.05)
-                                        }
-                                    }
-                                    addJsonArray {
-                                        add(10.0)
-                                        add(45.0)
-                                    }
+                    add(
+                        buildJsonObject {
+                            put("type", "Feature")
+                            put("id", "feature_$index")
+                            putJsonObject("properties") {
+                                put("name", "Complex_Area_$index")
+                                put("population", 10000 + index * 500)
+                                putJsonArray("tags") {
+                                    add(JsonPrimitive("urban"))
+                                    add(JsonPrimitive("event_zone"))
                                 }
                             }
-                        }
-                    }
+                            putJsonObject("geometry") {
+                                put("type", "Polygon")
+                                put(
+                                    "coordinates",
+                                    buildJsonArray {
+                                        add(
+                                            buildJsonArray {
+                                                repeat(20) { i ->
+                                                    add(
+                                                        buildJsonArray {
+                                                            add(JsonPrimitive(10.0 + i * 0.05))
+                                                            add(JsonPrimitive(45.0 + i * 0.05))
+                                                        },
+                                                    )
+                                                }
+                                                add(
+                                                    buildJsonArray {
+                                                        add(JsonPrimitive(10.0))
+                                                        add(JsonPrimitive(45.0))
+                                                    },
+                                                )
+                                            },
+                                        )
+                                    },
+                                )
+                            }
+                        },
+                    )
                 }
             }
         }
@@ -394,31 +418,42 @@ class GeoJsonPerformanceTest : KoinTest {
             put("type", "FeatureCollection")
             putJsonArray("features") {
                 repeat(featureCount) { index ->
-                    addJsonObject {
-                        put("type", "Feature")
-                        put("id", "feature_$index")
-                        putJsonObject("properties") {
-                            put("name", "Area_$index")
-                            put("type", if (index % 2 == 0) "urban" else "rural")
-                        }
-                        putJsonObject("geometry") {
-                            put("type", "Polygon")
-                            putJsonArray("coordinates") {
-                                addJsonArray {
-                                    repeat(15) { i ->
-                                        addJsonArray {
-                                            add(10.0 + (index * 0.1) + (i * 0.01))
-                                            add(45.0 + (index * 0.1) + (i * 0.01))
-                                        }
-                                    }
-                                    addJsonArray {
-                                        add(10.0 + (index * 0.1))
-                                        add(45.0 + (index * 0.1))
-                                    }
-                                }
+                    add(
+                        buildJsonObject {
+                            put("type", "Feature")
+                            put("id", "feature_$index")
+                            putJsonObject("properties") {
+                                put("name", "Area_$index")
+                                put("type", if (index % 2 == 0) "urban" else "rural")
                             }
-                        }
-                    }
+                            putJsonObject("geometry") {
+                                put("type", "Polygon")
+                                put(
+                                    "coordinates",
+                                    buildJsonArray {
+                                        add(
+                                            buildJsonArray {
+                                                repeat(15) { i ->
+                                                    add(
+                                                        buildJsonArray {
+                                                            add(JsonPrimitive(10.0 + (index * 0.1) + (i * 0.01)))
+                                                            add(JsonPrimitive(45.0 + (index * 0.1) + (i * 0.01)))
+                                                        },
+                                                    )
+                                                }
+                                                add(
+                                                    buildJsonArray {
+                                                        add(JsonPrimitive(10.0 + (index * 0.1)))
+                                                        add(JsonPrimitive(45.0 + (index * 0.1)))
+                                                    },
+                                                )
+                                            },
+                                        )
+                                    },
+                                )
+                            }
+                        },
+                    )
                 }
             }
         }
@@ -430,32 +465,43 @@ class GeoJsonPerformanceTest : KoinTest {
         buildJsonObject {
             put("type", "FeatureCollection")
             putJsonArray("features") {
-                addJsonObject {
-                    put("type", "Feature")
-                    putJsonObject("properties") {
-                        put("name", "Complex_Polygon")
-                        put("vertices", vertexCount)
-                    }
-                    putJsonObject("geometry") {
-                        put("type", "Polygon")
-                        putJsonArray("coordinates") {
-                            addJsonArray {
-                                repeat(vertexCount) { i ->
-                                    val angle = 2.0 * kotlin.math.PI * i / vertexCount
-                                    addJsonArray {
-                                        add(10.0 + kotlin.math.cos(angle) * 0.1)
-                                        add(45.0 + kotlin.math.sin(angle) * 0.1)
-                                    }
-                                }
-                                // Close polygon
-                                addJsonArray {
-                                    add(10.0 + 0.1)
-                                    add(45.0)
-                                }
-                            }
+                add(
+                    buildJsonObject {
+                        put("type", "Feature")
+                        putJsonObject("properties") {
+                            put("name", "Complex_Polygon")
+                            put("vertices", vertexCount)
                         }
-                    }
-                }
+                        putJsonObject("geometry") {
+                            put("type", "Polygon")
+                            put(
+                                "coordinates",
+                                buildJsonArray {
+                                    add(
+                                        buildJsonArray {
+                                            repeat(vertexCount) { i ->
+                                                val angle = 2.0 * kotlin.math.PI * i / vertexCount
+                                                add(
+                                                    buildJsonArray {
+                                                        add(JsonPrimitive(10.0 + kotlin.math.cos(angle) * 0.1))
+                                                        add(JsonPrimitive(45.0 + kotlin.math.sin(angle) * 0.1))
+                                                    },
+                                                )
+                                            }
+                                            // Close polygon
+                                            add(
+                                                buildJsonArray {
+                                                    add(JsonPrimitive(10.0 + 0.1))
+                                                    add(JsonPrimitive(45.0))
+                                                },
+                                            )
+                                        },
+                                    )
+                                },
+                            )
+                        }
+                    },
+                )
             }
         }
 }

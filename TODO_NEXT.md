@@ -33,6 +33,8 @@ Create branch: optimization/phase-3-large-files
 Verify compilation and tests after each file split.
 Commit frequently with descriptive messages.
 Reference: COMPREHENSIVE_OPTIMIZATION_TODO.md for detailed instructions.
+Update CLAUDE.md and related files at each step
+Always update the documentation when you change a file
 
 When complete, rebase main onto the new branch.
 ```

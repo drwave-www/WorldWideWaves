@@ -130,10 +130,11 @@ class WaveformGenerationPerformanceTest {
         // THEN: Square wave should be faster (or at least not slower)
         // Note: On very fast machines, both might be so fast that the difference is negligible
         val speedup = if (squareMs > 0) sineMs.toDouble() / squareMs.toDouble() else 1.0
+        val speedupFormatted = ((speedup * 100).toInt() / 100.0)
 
         println(
             "✅ Performance: Sine=${sineMs}ms, Square=${squareMs}ms " +
-                "(speedup: ${String.format("%.2f", speedup)}x, " +
+                "(speedup: ${speedupFormatted}x, " +
                 "expected: >=1.5x on most hardware)",
         )
 
@@ -325,9 +326,10 @@ class WaveformGenerationPerformanceTest {
             )
 
             val avgTimePerWaveform = totalMs.toDouble() / concurrentCount
+            val avgFormatted = ((avgTimePerWaveform * 10).toInt() / 10.0)
             println(
                 "✅ Performance: $concurrentCount concurrent generations in ${totalMs}ms " +
-                    "(${String.format("%.1f", avgTimePerWaveform)}ms avg per waveform, budget: 100ms total)",
+                    "(${avgFormatted}ms avg per waveform, budget: 100ms total)",
             )
         }
 
@@ -368,9 +370,10 @@ class WaveformGenerationPerformanceTest {
         println("✅ Performance summary for all waveform types:")
         results.forEach { (waveform, ms) ->
             val ratio = ms.toDouble() / 1000.0
+            val ratioFormatted = ((ratio * 10000).toInt() / 10000.0)
             println(
                 "   ${waveform.name.padEnd(10)}: ${ms}ms " +
-                    "(real-time ratio: ${String.format("%.4f", ratio)}x)",
+                    "(real-time ratio: ${ratioFormatted}x)",
             )
         }
 
@@ -385,8 +388,9 @@ class WaveformGenerationPerformanceTest {
                 } else {
                     1.0
                 }
+            val variabilityFormatted = ((variability * 100).toInt() / 100.0)
             println(
-                "   Variability: ${String.format("%.2f", variability)}x " +
+                "   Variability: ${variabilityFormatted}x " +
                     "(slowest=${slowest.key.name}, fastest=${fastest.key.name})",
             )
         }
