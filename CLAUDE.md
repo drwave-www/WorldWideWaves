@@ -92,8 +92,9 @@ WorldWideWaves iOS uses **Compose Multiplatform** with native UIKit integration:
 │  └──────────────────────────────────────────┘   │
 │                                                   │
 │  ┌──────────────────────────────────────────┐   │
-│  │  WWWMainActivity, WWWEventActivity        │   │
-│  │  - Activity wrappers (Android pattern)    │   │
+│  │  Screen Classes (activities/)             │   │
+│  │  - MainScreen, EventDetailScreen          │   │
+│  │  - WaveParticipationScreen, FullMapScreen │   │
 │  │  - Compose UI content                     │   │
 │  └──────────────────────────────────────────┘   │
 │                                                   │
@@ -291,7 +292,107 @@ For complete iOS setup, debugging, and troubleshooting:
 
 ---
 
+## Accessibility Requirements [MANDATORY]
+
+> **Status**: ✅ WCAG 2.1 Level AA Compliant | **Last Updated**: October 2025
+
+### All UI Components Must:
+
+- ✅ **Have contentDescription**: All images/icons must have meaningful descriptions (localized via MokoRes.strings when available)
+- ✅ **Use semantics blocks**: All interactive elements need `Modifier.semantics { role, contentDescription, stateDescription }`
+- ✅ **Meet touch target minimums**: 48dp (Android) / 44pt (iOS) on all interactive elements
+- ✅ **Support text scaling**: Use `.sp` units for all text sizes (respects system font size)
+- ✅ **Announce state changes**: Use live regions for dynamic content (`liveRegion = LiveRegionMode.Polite`)
+- ✅ **Work with screen readers**: TalkBack (Android) and VoiceOver (iOS) must fully function
+- ✅ **Meet color contrast**: 4.5:1 minimum ratio for all text (WCAG AA standard)
+- ✅ **Include heading hierarchy**: Mark screen titles with `semantics { heading = true }`
+
+### Code Pattern Examples
+
+```kotlin
+// Button with semantics
+Button(
+    onClick = { action() },
+    modifier = Modifier.semantics {
+        role = Role.Button
+        contentDescription = "Clear action description"
+    }
+)
+
+// Touch target compliance (48dp minimum)
+Box(
+    modifier = Modifier
+        .size(48.dp)  // Minimum touch target
+        .clickable { action() }
+        .semantics { role = Role.Button },
+    contentAlignment = Alignment.Center
+) {
+    Icon(
+        modifier = Modifier.size(24.dp),  // Visual size smaller
+        imageVector = icon,
+        contentDescription = description
+    )
+}
+
+// iOS VoiceOver announcement
+val platformEnabler = getIosSafePlatformEnabler()
+platformEnabler.announceForAccessibility("Wave starting in 5 seconds")
+platformEnabler.triggerHapticWarning()
+```
+
+### Testing Requirements
+
+**Before each PR**:
+```bash
+# Run accessibility test suite
+./scripts/test_accessibility.sh
+
+# Manual testing
+# Android: Enable TalkBack, navigate entire app
+# iOS: Enable VoiceOver, test with Dynamic Type at max size
+```
+
+**Required validations**:
+- [ ] All 27+ accessibility tests pass
+- [ ] TalkBack navigation works without manual mode
+- [ ] VoiceOver announces all critical events
+- [ ] Touch targets verified ≥ 48dp/44pt
+- [ ] Color contrast verified ≥ 4.5:1
+- [ ] Text scales properly (Android: 200%, iOS: 300%)
+
+### Platform-Specific Requirements
+
+**Android**:
+- Semantics: `Role.Button`, `Role.Tab`, `Role.Checkbox`
+- State descriptions for all toggles/selections
+- Live regions for progress indicators
+- Focus indicators for keyboard navigation
+
+**iOS**:
+- VoiceOver announcements for wave timing
+- Haptic feedback (success/warning/impact)
+- Dynamic Type support (12 text size levels)
+- Map accessibility (VoiceOver can navigate map)
+- Toast announcements via accessibility API
+
+### Documentation
+
+- **[Accessibility Guide](./docs/ACCESSIBILITY_GUIDE.md)** - Complete implementation patterns
+- **[iOS Map Accessibility](./docs/iOS_MAP_ACCESSIBILITY.md)** - Map-specific implementation
+- **Test Script**: `./scripts/test_accessibility.sh`
+
+**⚠️ CRITICAL**: Accessibility is not optional. All new UI components must follow these patterns before merging.
+
+---
+
 ## Recent Major Updates
+
+### Accessibility Implementation (October 2025)
+Comprehensive WCAG 2.1 Level AA compliance achieved:
+- **Android**: Complete semantics, touch targets, color contrast, live regions
+- **iOS**: VoiceOver, haptics, Dynamic Type (0.8x-3.0x), map accessibility
+- **Testing**: 27+ automated tests, manual TalkBack/VoiceOver procedures
+- **Wave Coordination**: Fully accessible to blind users via audio + haptics
 
 ### Position System Refactor (September 2025)
 A comprehensive position system refactor has been completed to improve performance, maintainability, and reliability:
@@ -346,12 +447,14 @@ class MyComponent {
 - **Build script modifications**: Require explicit approval before altering build logic
 
 ### Testing Requirements
+- **ALWAYS run tests after commits**: Ensure no regressions were introduced
 - **NEVER disable tests without permission**: Always ask user permission before disabling, skipping, or renaming any test files
 - **NEVER disable tests to make them pass**: Tests must be logical and business-oriented, not mirror current code implementation
 - **Test failure philosophy**: If tests fail, either there's a business logic issue in the code OR the business requirements changed and tests need adaptation
 - **Test-first thinking**: Tests validate business requirements, not implementation details
 - **Test modifications**: Changing test logic requires explanation and user approval - explain what business requirement changed
 - **Test deletion**: Absolutely forbidden without explicit user consent
+- **Always run tests before pushing**: Verify all tests pass locally before pushing to origin
 
 ### Security Patterns
 - **NO credential exposure**: Never log, store, or transmit API keys, tokens, or secrets
@@ -366,6 +469,18 @@ class MyComponent {
 - **State Management**: Use StateFlow for reactive state management
 - **Clean Architecture**: Maintain clear separation between data, domain, and presentation layers
 - **Testing**: Write comprehensive unit tests and maintain existing test coverage
+
+### Development Workflow Requirements
+
+#### Critical Rules
+- **Use agents for complex tasks**: Create specialized agents when needed for specific tasks
+- **Check all implications**: When making changes, analyze callers, documentation, signatures
+- **Always clean temporary files**: Remove files created during development if not required
+- **Git push has costs**: GitHub Actions workflows are not free - only push when asked or required
+- **Search for similar patterns**: When fixing bugs, search for similar error patterns in other parts of codebase
+- **Never bypass hooks**: Never bypass git commit and push hooks
+- **Use short names**: Don't call objects/classes by long names (use imports for readability)
+- **Fix warnings immediately**: Don't keep build or lint warnings - correct them to prevent accumulation
 
 ### Code Modification Best Practices
 
@@ -495,6 +610,125 @@ catch (e: Exception) {
 - Include examples in documentation where helpful
 - Maintain up-to-date README files
 
+### Class Organization Standards
+
+**Standard Class Structure** (top to bottom):
+```kotlin
+class MyClass {
+    // 1. COMPANION OBJECT (always first)
+    companion object {
+        private const val TAG = "MyClass"
+        fun create(): MyClass = MyClass()
+    }
+
+    // 2. PROPERTIES
+    // Public properties first
+    val publicProperty: String
+
+    // Private properties second
+    private val privateProperty: Int
+
+    // 3. INIT BLOCKS
+    init {
+        // Initialization logic
+    }
+
+    // 4. PUBLIC API METHODS
+    fun publicMethod() {
+        // Implementation
+    }
+
+    // 5. INTERNAL/PROTECTED METHODS
+    internal fun internalMethod() {
+        // Implementation
+    }
+
+    // 6. PRIVATE HELPER METHODS
+    private fun helperMethod() {
+        // Implementation
+    }
+
+    // 7. NESTED CLASSES/OBJECTS
+    data class NestedData(val value: String)
+}
+```
+
+**Section Comments for Large Files** (>200 lines):
+```kotlin
+// ============================================================
+// PUBLIC API
+// ============================================================
+
+fun publicMethod1() { }
+fun publicMethod2() { }
+
+// ============================================================
+// PRIVATE HELPERS
+// ============================================================
+
+private fun helper1() { }
+private fun helper2() { }
+
+// ============================================================
+// DATA CLASSES
+// ============================================================
+
+data class Result(val value: String)
+```
+
+**Method Grouping Principles**:
+- Group related methods together
+- Keep public API methods near the top
+- Place lifecycle methods (onCreate, onDestroy) in logical order
+- Group by feature/responsibility, not alphabetically
+- Use section comments for files >200 lines
+
+**File Size Guidelines**:
+- Target: <300 lines per file
+- Warning: >500 lines (consider splitting)
+- Maximum: <600 lines (must split if exceeded)
+
+### Code Quality Best Practices
+
+**Detekt Warnings**:
+- Fix all unused properties and variables (remove dead code)
+- Use specific exception types (avoid `catch (e: Exception)` when possible)
+- Add logging for swallowed exceptions
+- Use `check()` or `error()` instead of throwing IllegalStateException
+- Create data classes for functions with >6 parameters
+- Break long lines (keep under max line length)
+- Extract magic numbers to named constants
+
+**Acceptable Detekt Suppressions** (when justified):
+- `@Suppress("ReturnCount")` - Multiple returns OK for guard clauses and early exits
+- `@Suppress("TooGenericExceptionCaught")` - When catching specific exception like IndexOutOfBoundsException that detekt considers generic
+- `@Suppress("MatchingDeclarationName")` - For expect/actual files (BaseViewModel.android.kt, etc.)
+- `@Suppress("ThrowsCount")` - For validation functions that need multiple throw types
+- `@Suppress("UnusedParameter")` - For API consistency or future use (document why)
+- `@Suppress("USELESS_IS_CHECK")` - For intentional runtime type verification in tests
+
+**Suppression Rules**:
+- Always add comment explaining WHY suppression is needed
+- Place suppression close to the violation (function/file level)
+- Document in commit message when adding suppressions
+
+**Import Management**:
+- Run `./gradlew :shared:ktlintFormat` to organize imports
+- Remove unused imports regularly
+- Group imports: stdlib → KMM/Compose → project → platform
+
+**Git Best Practices**:
+- Use `git mv` for file renames/moves (preserves history)
+- Commit frequently with descriptive messages
+- Run tests before every commit
+- Update documentation when changing files
+
+**Refactoring Patterns**:
+- Use delegation/facade patterns for large file splits
+- Maintain backward compatibility (no breaking changes)
+- Preserve all tests (don't disable to make them pass)
+- Document decisions in commit messages
+
 ---
 
 ## Build and Testing Commands
@@ -602,6 +836,7 @@ When working on WorldWideWaves:
 4. **Document Changes**: Update documentation for significant changes
 5. **Performance First**: Consider performance implications of all changes
 6. **Security Always**: Never compromise on security requirements
+7. **Documentation update**: When you change a file then scan it to keep its documentation up-to-date once finished
 
 ---
 

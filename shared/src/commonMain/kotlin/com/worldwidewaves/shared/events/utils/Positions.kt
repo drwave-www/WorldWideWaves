@@ -35,20 +35,16 @@ open class Position(
     internal var prev: Position? = null,
     internal var next: Position? = null,
 ) {
+    companion object {
+        internal var nextId = 42
+    }
+
     var id: Int = -1
         internal set // Cannot be set outside of the module
         get() { // Cannot be read before being initialized (added to a Polygon)
             check(field != -1) { "ID has not been initialized" }
             return field
         }
-
-    // ------------------------
-
-    companion object {
-        internal var nextId = 42
-    }
-
-    // ------------------------
 
     val latitude: Double get() = lat
     val longitude: Double get() = lng

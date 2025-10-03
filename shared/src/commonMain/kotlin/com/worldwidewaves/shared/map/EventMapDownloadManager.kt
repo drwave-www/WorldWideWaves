@@ -132,7 +132,10 @@ class EventMapDownloadManager(
         } else {
             Log.d(
                 TAG,
-                "Auto-download NOT triggered: isAvailable=${state.isAvailable}, autoDownload=$autoDownload, isDownloading=${state.isDownloading}",
+                "Auto-download NOT triggered: " +
+                    "isAvailable=${state.isAvailable}, " +
+                    "autoDownload=$autoDownload, " +
+                    "isDownloading=${state.isDownloading}",
             )
         }
     }

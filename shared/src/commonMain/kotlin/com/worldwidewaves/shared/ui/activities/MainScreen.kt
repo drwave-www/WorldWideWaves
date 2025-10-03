@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.WWWPlatform
@@ -52,13 +53,14 @@ import com.worldwidewaves.shared.sound.SoundChoreographyCoordinator
 import com.worldwidewaves.shared.ui.AboutTabScreen
 import com.worldwidewaves.shared.ui.DebugTabScreen
 import com.worldwidewaves.shared.ui.EventsListScreen
-import com.worldwidewaves.shared.ui.TabManager
+import com.worldwidewaves.shared.ui.TabNavigationCoordinator
 import com.worldwidewaves.shared.ui.components.global.SimulationModeChip
 import com.worldwidewaves.shared.ui.components.global.SplashScreen
 import com.worldwidewaves.shared.ui.components.navigation.ConfigurableTabBarItem
 import com.worldwidewaves.shared.ui.screens.DebugScreen
 import com.worldwidewaves.shared.ui.theme.WorldWideWavesTheme
 import com.worldwidewaves.shared.utils.Log
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -131,7 +133,7 @@ open class MainScreen
                 )
             // Debug screen removed from tab bar - will be accessed via floating icon
 
-            TabManager(
+            TabNavigationCoordinator(
                 platformEnabler,
                 screens.toList(),
             ) { isSelected, tabIndex, contentDescription ->
@@ -201,7 +203,7 @@ open class MainScreen
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.BugReport,
-                                    contentDescription = "Debug Screen",
+                                    contentDescription = stringResource(MokoRes.strings.accessibility_debug_screen),
                                     tint = Color.White,
                                 )
                             }

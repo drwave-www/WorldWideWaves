@@ -28,6 +28,16 @@ import Shared
 final class IOSPlatformEnabler: PlatformEnabler {
     private let tag = "IOSPlatformEnabler"
 
+    // Haptic feedback generators
+    private let notificationFeedback = UINotificationFeedbackGenerator()
+    private let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+
+    init() {
+        // Prepare haptic generators for low-latency responses
+        notificationFeedback.prepare()
+        impactFeedback.prepare()
+    }
+
     func openEventActivity(eventId: String) {
         let url = "worldwidewaves://event?id=\(eventId)"
         NSLog("[\(tag)] 🎯 openEventActivity(eventId=\(eventId)) -> \(url)")
@@ -41,12 +51,14 @@ final class IOSPlatformEnabler: PlatformEnabler {
     }
 
     func toast(message: String) {
-        NSLog("[\(tag)] 🔔 toast: “\(message)”")
+        NSLog("[\(tag)] 🔔 toast: \"\(message)\"")
         guard let hostView = Self.topViewController()?.view else {
             NSLog("[\(tag)] ⚠️ toast: no top VC/view; dropping message")
             return
         }
         Self.showToast(message: message, in: hostView)
+        // Also announce to VoiceOver
+        UIAccessibility.post(notification: .announcement, argument: message)
     }
 
     func openUrl(url: String) {
@@ -69,6 +81,32 @@ final class IOSPlatformEnabler: PlatformEnabler {
             NSLog("[\(tag)] → non-http scheme (\(scheme)); using UIApplication.open()")
             UIApplication.shared.open(targetUrl)
         }
+    }
+
+    // MARK: - Accessibility
+
+    /// Announces a message to VoiceOver users.
+    @objc public func announceForAccessibility(message: String) {
+        NSLog("[\(tag)] 📣 VoiceOver announcement: \(message)")
+        UIAccessibility.post(notification: .announcement, argument: message)
+    }
+
+    /// Triggers a haptic success notification.
+    @objc public func triggerHapticSuccess() {
+        NSLog("[\(tag)] ✅ Haptic: success")
+        notificationFeedback.notificationOccurred(.success)
+    }
+
+    /// Triggers a haptic warning notification.
+    @objc public func triggerHapticWarning() {
+        NSLog("[\(tag)] ⚠️ Haptic: warning")
+        notificationFeedback.notificationOccurred(.warning)
+    }
+
+    /// Triggers a haptic impact feedback.
+    @objc public func triggerHapticImpact() {
+        NSLog("[\(tag)] 💥 Haptic: impact")
+        impactFeedback.impactOccurred()
     }
 
     // MARK: - Helpers

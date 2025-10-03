@@ -35,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
@@ -42,7 +43,7 @@ import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.TabBar
 import com.worldwidewaves.shared.WWWPlatform
-import com.worldwidewaves.shared.ui.TabManager
+import com.worldwidewaves.shared.ui.TabNavigationCoordinator
 import com.worldwidewaves.shared.ui.TabScreen
 import com.worldwidewaves.shared.ui.screens.about.AboutFaqScreen
 import com.worldwidewaves.shared.ui.screens.about.AboutInfoScreen
@@ -59,7 +60,7 @@ private val tabInfo =
 /**
  * Shared About root screen that aggregates the Info and FAQ sub-sections.
  *
- * Uses an internal TabManager to switch between the two sub-screens
+ * Uses an internal TabNavigationCoordinator to switch between the two sub-screens
  * and provides a tiny tab-bar implementation.
  * Works identically on both Android and iOS platforms.
  */
@@ -74,7 +75,7 @@ fun AboutScreen(
 ) {
     // Create tab manager with shared sub-screens
     val tabManager =
-        TabManager(
+        TabNavigationCoordinator(
             platformEnabler,
             screens =
                 listOf(
@@ -123,9 +124,17 @@ private fun TabBarItem(
     isSelected: Boolean,
     tabIndex: Int,
 ) {
+    val testTag =
+        when (tabIndex) {
+            0 -> "AboutTab_Info"
+            1 -> "AboutTab_FAQ"
+            else -> "AboutTab_$tabIndex"
+        }
+
     Box(
         modifier =
             Modifier
+                .testTag(testTag)
                 .height(TabBar.INT_HEIGHT.dp)
                 .width(TabBar.INT_ITEM_WIDTH.dp),
         contentAlignment = Alignment.Center,

@@ -35,16 +35,16 @@ import kotlinx.coroutines.flow.StateFlow
 abstract class BaseMapDownloadViewModel :
     BaseViewModel(),
     IMapDownloadManager {
+    companion object {
+        private const val TAG = "BaseMapDownloadViewModel"
+    }
+
     private val featureStateMutable = MutableStateFlow<MapFeatureState>(MapFeatureState.NotChecked)
 
     override val featureState: StateFlow<MapFeatureState> = featureStateMutable
 
     var currentMapId: String? = null
     val retryManager = MapDownloadUtils.RetryManager()
-
-    companion object {
-        private const val TAG = "BaseMapDownloadViewModel"
-    }
 
     // ------------------------------------------------------------------------
     // Abstract methods for platform-specific implementation

@@ -33,17 +33,6 @@ class BoundingBox private constructor(
     val sw: Position,
     val ne: Position,
 ) {
-    operator fun component1(): Position = sw
-
-    operator fun component2(): Position = ne
-
-    constructor(swLat: Double, swLng: Double, neLat: Double, neLng: Double) : this(
-        sw = Position(minOf(swLat, neLat), minOf(swLng, neLng)).init(),
-        ne = Position(maxOf(swLat, neLat), maxOf(swLng, neLng)).init(),
-    )
-
-    // --- Companion object
-
     companion object {
         private const val LONGITUDE_HALF_RANGE = 180.0
 
@@ -75,6 +64,15 @@ class BoundingBox private constructor(
             return BoundingBox(minLat, swLng, maxLat, neLng)
         }
     }
+
+    constructor(swLat: Double, swLng: Double, neLat: Double, neLng: Double) : this(
+        sw = Position(minOf(swLat, neLat), minOf(swLng, neLng)).init(),
+        ne = Position(maxOf(swLat, neLat), maxOf(swLng, neLng)).init(),
+    )
+
+    operator fun component1(): Position = sw
+
+    operator fun component2(): Position = ne
 
     // --- Properties
 

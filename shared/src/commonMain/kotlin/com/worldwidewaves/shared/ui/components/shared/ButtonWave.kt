@@ -30,6 +30,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
@@ -37,6 +43,7 @@ import com.worldwidewaves.shared.WWWGlobals.Event
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
+import com.worldwidewaves.shared.ui.utils.focusIndicator
 import com.worldwidewaves.shared.ui.utils.getIosSafeClock
 import dev.icerock.moko.resources.compose.stringResource
 import kotlin.time.Duration.Companion.hours
@@ -83,23 +90,34 @@ fun ButtonWave(
         label = "alpha",
     )
 
+    val buttonText = stringResource(MokoRes.strings.wave_now)
+    val activeStateDesc = stringResource(MokoRes.strings.accessibility_active)
+    val disabledStateDesc = stringResource(MokoRes.strings.accessibility_disabled)
+
     Surface(
         color = if (isEnabled) MaterialTheme.colorScheme.primary else Color.Gray,
         modifier =
             modifier
+                .testTag("JoinWaveButton")
                 .width(Event.WAVEBUTTON_WIDTH.dp)
                 .height(Event.WAVEBUTTON_HEIGHT.dp)
                 .alpha(if (isEnabled) alpha else 1f) // Apply blinking only when enabled
+                .focusIndicator()
                 .clickable(enabled = isEnabled, onClick = {
                     onNavigateToWave.navigateToWave(eventId)
-                }),
+                })
+                .semantics {
+                    role = Role.Button
+                    contentDescription = buttonText
+                    stateDescription = if (isEnabled) activeStateDesc else disabledStateDesc
+                },
     ) {
         Text(
             modifier =
                 Modifier
                     .fillMaxSize()
                     .wrapContentHeight(align = Alignment.CenterVertically),
-            text = stringResource(MokoRes.strings.wave_now),
+            text = buttonText,
             style =
                 sharedExtraBoldTextStyle(Event.WAVEBUTTON_FONTSIZE).copy(
                     color = if (isEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,

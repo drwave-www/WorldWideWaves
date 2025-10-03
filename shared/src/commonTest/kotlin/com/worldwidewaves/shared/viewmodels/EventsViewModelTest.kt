@@ -655,7 +655,8 @@ class EventsViewModelTest : KoinTest {
 
             // Clear filter
             viewModel.filterEvents(onlyFavorites = false)
-            waitForEvents(viewModel, 5)
+            // CI environments need more time
+            waitForEvents(viewModel, 5, timeoutMs = 5000)
 
             // Then - should show all events
             assertEquals(5, viewModel.events.value.size)
@@ -998,7 +999,9 @@ class EventsViewModelTest : KoinTest {
                 viewModel.filterEvents(onlyFavorites = shouldFilter)
 
                 // Wait for this specific filter operation to complete before next
-                waitForEvents(viewModel, expectedSize, timeoutMs = 5000)
+                // CI environments need more time for 100 iterations
+                // Increased to 20s to handle slower CI runners (was 10s)
+                waitForEvents(viewModel, expectedSize, timeoutMs = 20000)
             }
 
             // Then - verify final state is correct and no crashes

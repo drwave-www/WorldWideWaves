@@ -23,8 +23,8 @@ package com.worldwidewaves.shared.events
 
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWPlatform
-import com.worldwidewaves.shared.choreographies.ChoreographyManager
-import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
+import com.worldwidewaves.shared.choreographies.ChoreographySequenceBuilder
+import com.worldwidewaves.shared.choreographies.ChoreographySequenceBuilder.DisplayableSequence
 import com.worldwidewaves.shared.events.utils.Area
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.DataValidator
@@ -100,7 +100,7 @@ abstract class WWWEventWave :
     // ---------------------------
 
     protected val clock: IClock by inject()
-    private val choreographyManager: ChoreographyManager<DrawableResource> by inject()
+    private val choreographyManager: ChoreographySequenceBuilder<DrawableResource> by inject()
 
     // ---------------------------
 

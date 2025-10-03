@@ -42,6 +42,7 @@ import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.instagram_icon
 import com.worldwidewaves.shared.ui.theme.sharedCommonBoldStyle
 import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
+import com.worldwidewaves.shared.ui.utils.focusIndicator
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 import org.jetbrains.compose.resources.painterResource
@@ -72,14 +73,16 @@ fun WWWSocialNetworks(
         ) {
             Text(
                 modifier =
-                    Modifier.clickable(onClick = {
-                        try {
-                            val uri = "https://www.instagram.com/${instagramAccount.removePrefix("@")}"
-                            onUrlOpen(uri)
-                        } catch (e: Exception) {
-                            Log.e("WWWSocialNetworks", "Error opening Instagram URI", throwable = e)
-                        }
-                    }),
+                    Modifier
+                        .focusIndicator()
+                        .clickable(onClick = {
+                            try {
+                                val uri = "https://www.instagram.com/${instagramAccount.removePrefix("@")}"
+                                onUrlOpen(uri)
+                            } catch (e: Exception) {
+                                Log.e("WWWSocialNetworks", "Error opening Instagram URI", throwable = e)
+                            }
+                        }),
                 text = instagramAccount,
                 style =
                     sharedCommonBoldStyle(Common.SOCIALNETWORKS_ACCOUNT_FONTSIZE).copy(

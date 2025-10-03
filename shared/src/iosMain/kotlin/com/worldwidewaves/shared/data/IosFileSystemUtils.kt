@@ -33,8 +33,8 @@ internal fun getAppSupportMapsDirectory(): String {
             create = true,
             error = null,
         )
-    return baseUrl?.path?.let { "$it/Maps" }
-        ?: throw IllegalStateException("Cannot access Application Support directory")
+    val path = baseUrl?.path ?: error("Cannot access Application Support directory")
+    return "$path/Maps"
 }
 
 /**

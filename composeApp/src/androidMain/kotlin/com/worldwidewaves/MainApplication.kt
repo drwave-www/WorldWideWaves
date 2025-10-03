@@ -26,8 +26,10 @@ import android.content.Context
 import androidx.work.Configuration
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.di.applicationModule
+import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.WWWShutdownHandler
 import com.worldwidewaves.shared.di.androidModule
+import com.worldwidewaves.shared.di.initializeSimulationMode
 import com.worldwidewaves.shared.di.sharedModule
 import com.worldwidewaves.shared.utils.CloseableCoroutineScope
 import com.worldwidewaves.shared.utils.initNapier
@@ -76,6 +78,12 @@ class MainApplication :
             androidLogger()
             modules(sharedModule + androidModule + applicationModule)
         }
+
+        // -------------------------------------------------------------------- //
+        //  Simulation mode initialization for Firebase Test Lab UI testing
+        // -------------------------------------------------------------------- //
+        val platform = get<WWWPlatform>()
+        initializeSimulationMode(platform, BuildConfig.ENABLE_SIMULATION_MODE)
 
         // -------------------------------------------------------------------- //
         //  Default simulation initialization (runs after Koin properties are ready)

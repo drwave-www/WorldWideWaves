@@ -22,8 +22,8 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.WWWGlobals.WaveTiming
-import com.worldwidewaves.shared.choreographies.ChoreographyManager
-import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
+import com.worldwidewaves.shared.choreographies.ChoreographySequenceBuilder
+import com.worldwidewaves.shared.choreographies.ChoreographySequenceBuilder.DisplayableSequence
 import com.worldwidewaves.shared.choreographies.SoundChoreographyPlayer
 import com.worldwidewaves.shared.events.utils.IClock
 import io.github.aakira.napier.Napier
@@ -39,7 +39,7 @@ class WWWEventWaveWarming(
     val event: IWWWEvent,
 ) : KoinComponent {
     private val clock: IClock by inject()
-    private val choreographyManager: ChoreographyManager<DrawableResource> by inject()
+    private val choreographyManager: ChoreographySequenceBuilder<DrawableResource> by inject()
     val soundChoreographyPlayer: SoundChoreographyPlayer by inject()
 
     fun getWarmingDuration(): Duration = WaveTiming.WARMING_DURATION

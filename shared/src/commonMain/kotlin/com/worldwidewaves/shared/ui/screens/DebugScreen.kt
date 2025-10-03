@@ -39,7 +39,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
+import dev.icerock.moko.resources.compose.stringResource
 
 /**
  * Shared debug screen that contains development tools and system information.
@@ -58,7 +60,7 @@ fun DebugScreen(
         ) {
             item {
                 Text(
-                    text = "Debug Information",
+                    text = stringResource(MokoRes.strings.debug_information),
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                 )
@@ -67,12 +69,12 @@ fun DebugScreen(
             // Platform Information
             item {
                 DebugInfoCard(
-                    title = "Platform Information",
+                    title = stringResource(MokoRes.strings.debug_platform_information),
                     items =
                         listOf(
-                            "Platform" to "Multiplatform",
-                            "Version" to "1.0.0", // Could be dynamic from BuildConfig
-                            "Build Type" to "Debug",
+                            stringResource(MokoRes.strings.debug_platform) to stringResource(MokoRes.strings.debug_multiplatform),
+                            stringResource(MokoRes.strings.debug_version) to "1.0.0", // Could be dynamic from BuildConfig
+                            stringResource(MokoRes.strings.debug_build_type) to stringResource(MokoRes.strings.debug_build_type_debug),
                         ),
                 )
             }
@@ -80,12 +82,15 @@ fun DebugScreen(
             // Application State
             item {
                 DebugInfoCard(
-                    title = "Application State",
+                    title = stringResource(MokoRes.strings.debug_application_state),
                     items =
                         listOf(
-                            "Simulation Mode" to "Disabled", // Could be dynamic
-                            "Location Provider" to "GPS", // Could be dynamic
-                            "Network Status" to "Connected", // Could be dynamic
+                            stringResource(MokoRes.strings.debug_simulation_mode) to
+                                stringResource(MokoRes.strings.debug_simulation_disabled), // Could be dynamic
+                            stringResource(MokoRes.strings.debug_location_provider) to
+                                stringResource(MokoRes.strings.debug_location_gps), // Could be dynamic
+                            stringResource(MokoRes.strings.debug_network_status) to
+                                stringResource(MokoRes.strings.debug_network_connected), // Could be dynamic
                         ),
                 )
             }
@@ -93,12 +98,15 @@ fun DebugScreen(
             // System Information
             item {
                 DebugInfoCard(
-                    title = "System Resources",
+                    title = stringResource(MokoRes.strings.debug_system_resources),
                     items =
                         listOf(
-                            "Memory Usage" to "Calculating...", // Could show actual memory
-                            "Storage Available" to "Available", // Could show actual storage
-                            "Device Orientation" to "Portrait", // Could be dynamic
+                            stringResource(MokoRes.strings.debug_memory_usage) to
+                                stringResource(MokoRes.strings.debug_memory_calculating), // Could show actual memory
+                            stringResource(MokoRes.strings.debug_storage_available) to
+                                stringResource(MokoRes.strings.debug_storage_available_value), // Could show actual storage
+                            stringResource(MokoRes.strings.debug_device_orientation) to
+                                stringResource(MokoRes.strings.debug_device_orientation_portrait), // Could be dynamic
                         ),
                 )
             }

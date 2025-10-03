@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.WWWGlobals.FileSystem
+import com.worldwidewaves.shared.data.MapFileExtension
 import com.worldwidewaves.shared.data.cacheDeepFile
 import com.worldwidewaves.shared.data.cacheStringToFile
 import com.worldwidewaves.shared.data.cachedFileExists
@@ -89,7 +90,7 @@ class WWWEventMap(
 
     // ---------------------------
 
-    private suspend fun getMbtilesFilePath(): String? = getMapFileAbsolutePath(event.id, "mbtiles")
+    private suspend fun getMbtilesFilePath(): String? = getMapFileAbsolutePath(event.id, MapFileExtension.MBTILES)
 
     // ---------------------------
 
@@ -100,6 +101,7 @@ class WWWEventMap(
      * It retrieves MBTiles, GeoJSON, sprites, and glyphs, fills a template with the data,
      * and returns the URI of the cached style JSON.
      *
+     * **Performance**: Result is cached on disk to avoid redundant generation.
      */
     suspend fun getStyleUri(): String? {
         Log.d("WWWEventMap", "getStyleUri() called for event: ${event.id}")

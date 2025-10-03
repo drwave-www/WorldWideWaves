@@ -155,26 +155,31 @@ abstract class BaseEventBackgroundScreen(
                         ),
             ) {
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    Row(
+                    Box(
                         modifier =
                             Modifier
                                 .align(Alignment.BottomStart)
+                                .size(48.dp)
                                 .clickable { onFinish?.invoke() },
-                        verticalAlignment = Alignment.CenterVertically,
+                        contentAlignment = Alignment.Center,
                     ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_arrow_back),
-                            contentDescription = stringResource(MokoRes.strings.back),
-                            modifier =
-                                Modifier
-                                    .size(20.dp)
-                                    .padding(end = 4.dp),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                        Text(
-                            text = stringResource(MokoRes.strings.back),
-                            style = sharedPrimaryColoredTextStyle(BackNav.FONTSIZE),
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_arrow_back),
+                                contentDescription = stringResource(MokoRes.strings.back),
+                                modifier =
+                                    Modifier
+                                        .size(20.dp)
+                                        .padding(end = 4.dp),
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                            Text(
+                                text = stringResource(MokoRes.strings.back),
+                                style = sharedPrimaryColoredTextStyle(BackNav.FONTSIZE),
+                            )
+                        }
                     }
                     if (selectedEvent != null) {
                         Text(

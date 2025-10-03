@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.Info
-import com.worldwidewaves.shared.infos_core
+import com.worldwidewaves.shared.resources.infos_core
 import com.worldwidewaves.shared.ui.components.about.AboutDividerLine
 import com.worldwidewaves.shared.ui.components.about.AboutWWWLogo
 import com.worldwidewaves.shared.ui.components.about.AboutWWWSocialNetworks

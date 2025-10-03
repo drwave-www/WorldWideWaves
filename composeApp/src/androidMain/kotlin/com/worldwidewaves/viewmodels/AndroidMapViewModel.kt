@@ -60,6 +60,11 @@ class AndroidMapViewModel(
     application: Application,
 ) : AndroidViewModel(application),
     MapViewModel {
+    private companion object {
+        private const val TAG = "MapViewModel"
+        private const val PLAY_STORE_AUTH_ERROR_CODE = -100
+    }
+
     // Android-specific Play Core components
     private val splitInstallManager: SplitInstallManager = SplitInstallManagerFactory.create(application)
     private var currentSessionId = 0
@@ -155,11 +160,6 @@ class AndroidMapViewModel(
 
     // Delegate public interface to business logic
     override val featureState = downloadManager.featureState
-
-    private companion object Companion {
-        private const val TAG = "MapViewModel"
-        private const val PLAY_STORE_AUTH_ERROR_CODE = -100
-    }
 
     init {
         registerAndroidListeners()
