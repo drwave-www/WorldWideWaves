@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared
+package com.worldwidewaves.shared.ui
 
 /*
  * Copyright 2025 DrWave
@@ -20,6 +20,8 @@ package com.worldwidewaves.shared
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import com.worldwidewaves.shared.MokoRes
 
 val rules_hierarchy =
     mapOf(

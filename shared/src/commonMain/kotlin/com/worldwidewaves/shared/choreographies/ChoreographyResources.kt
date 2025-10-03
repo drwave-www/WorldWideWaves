@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared
+package com.worldwidewaves.shared.choreographies
 
 /*
  * Copyright 2025 DrWave
@@ -21,6 +21,7 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.MokoRes
 import dev.icerock.moko.resources.StringResource
 
 private object ChoreographyConstants {

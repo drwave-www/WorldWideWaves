@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared
+package com.worldwidewaves.shared.events
 
 /*
  * Copyright 2025 DrWave
@@ -21,6 +21,7 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.e_community_africa
 import com.worldwidewaves.shared.generated.resources.e_community_asia
