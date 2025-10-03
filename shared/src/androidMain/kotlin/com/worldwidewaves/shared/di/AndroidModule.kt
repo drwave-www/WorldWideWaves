@@ -36,7 +36,7 @@ import com.worldwidewaves.shared.utils.ImageResolverAndroid
 import org.jetbrains.compose.resources.DrawableResource
 import org.koin.dsl.module
 
-val androidModule =
+val AndroidModule =
     module {
         single<WWWPlatform> {
             WWWPlatform("Android ${Build.VERSION.SDK_INT}", get())

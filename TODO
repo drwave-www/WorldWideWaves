@@ -39,7 +39,7 @@ prios: IOS:
   - Critical constraint reminders (iOS deadlock rules)
 --
 
-===> prio 2: implement TODO_FIREBASE_UI.md
+===> prio 2: implement TODO_ACCESSIBILITY.md + TODO_FIREBASE_UI.md
 
 
 

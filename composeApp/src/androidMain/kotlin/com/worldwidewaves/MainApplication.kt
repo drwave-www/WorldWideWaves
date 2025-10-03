@@ -27,7 +27,7 @@ import androidx.work.Configuration
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.di.applicationModule
 import com.worldwidewaves.shared.WWWShutdownHandler
-import com.worldwidewaves.shared.di.androidModule
+import com.worldwidewaves.shared.di.AndroidModule
 import com.worldwidewaves.shared.di.sharedModule
 import com.worldwidewaves.shared.utils.CloseableCoroutineScope
 import com.worldwidewaves.shared.utils.initNapier
@@ -74,7 +74,7 @@ class MainApplication :
         startKoin {
             androidContext(this@MainApplication)
             androidLogger()
-            modules(sharedModule + androidModule + applicationModule)
+            modules(sharedModule + AndroidModule + applicationModule)
         }
 
         // -------------------------------------------------------------------- //
