@@ -110,27 +110,42 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 NSLog("[\(tag)] ❌ event route missing id")
                 return nil
             }
-            let viewController = RootControllerKt.makeEventViewController(eventId: id)
-            NSLog("[\(tag)] ✅ routed -> EventViewController(id=\(id))")
-            return viewController
+            do {
+                let viewController = try RootControllerKt.makeEventViewController(eventId: id)
+                NSLog("[\(tag)] ✅ routed -> EventViewController(id=\(id))")
+                return viewController
+            } catch {
+                NSLog("[\(tag)] ❌ Error creating EventViewController: \(error)")
+                return nil
+            }
 
         case "wave":
             guard let id = id else {
                 NSLog("[\(tag)] ❌ wave route missing id")
                 return nil
             }
-            let viewController = RootControllerKt.makeWaveViewController(eventId: id)
-            NSLog("[\(tag)] ✅ routed -> WaveViewController(id=\(id))")
-            return viewController
+            do {
+                let viewController = try RootControllerKt.makeWaveViewController(eventId: id)
+                NSLog("[\(tag)] ✅ routed -> WaveViewController(id=\(id))")
+                return viewController
+            } catch {
+                NSLog("[\(tag)] ❌ Error creating WaveViewController: \(error)")
+                return nil
+            }
 
         case "fullmap":
             guard let id = id else {
                 NSLog("[\(tag)] ❌ full map route missing id")
                 return nil
             }
-            let viewController = RootControllerKt.makeFullMapViewController(eventId: id)
-            NSLog("[\(tag)] ✅ routed -> FullMapViewController(id=\(id))")
-            return viewController
+            do {
+                let viewController = try RootControllerKt.makeFullMapViewController(eventId: id)
+                NSLog("[\(tag)] ✅ routed -> FullMapViewController(id=\(id))")
+                return viewController
+            } catch {
+                NSLog("[\(tag)] ❌ Error creating FullMapViewController: \(error)")
+                return nil
+            }
 
         default:
             NSLog("[\(tag)] ❓ unknown host: \(host ?? "nil")")
@@ -185,14 +200,19 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             fatalError("Cannot proceed without platform initialization: \(error)")
         }
 
-        IosLifecycleHookKt.installIosLifecycleHook()
-        NSLog("[\(tag)] ✅ iOS lifecycle hook installed")
+        do {
+            try IosLifecycleHookKt.installIosLifecycleHook()
+            NSLog("[\(tag)] ✅ iOS lifecycle hook installed")
 
-        IOSPlatformEnablerKt.registerPlatformEnabler(enabler: IOSPlatformEnabler())
-        NSLog("[\(tag)] ✅ PlatformEnabler (Swift) registered into Koin")
+            try IosPlatformEnablerKt.registerPlatformEnabler(enabler: IOSPlatformEnabler())
+            NSLog("[\(tag)] ✅ PlatformEnabler (Swift) registered into Koin")
 
-        NativeMapViewProviderRegistrationKt.registerNativeMapViewProvider(provider: SwiftNativeMapViewProvider())
-        NSLog("[\(tag)] ✅ NativeMapViewProvider (Swift) registered into Koin")
+            try NativeMapViewProviderRegistrationKt.registerNativeMapViewProvider(provider: SwiftNativeMapViewProvider())
+            NSLog("[\(tag)] ✅ NativeMapViewProvider (Swift) registered into Koin")
+        } catch {
+            NSLog("[\(tag)] ❌ Error during registration: \(error)")
+            fatalError("Cannot proceed without registration: \(error)")
+        }
     }
 
     /// Sets the root view controller and makes the window visible.
@@ -317,8 +337,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             NSLog("[\(tag)] ℹ️ no deep link; launching main")
         }
 
-        let mainVC = RootControllerKt.makeMainViewController()
-        setRoot(mainVC, in: windowScene)
+        do {
+            let mainVC = try RootControllerKt.makeMainViewController()
+            setRoot(mainVC, in: windowScene)
+        } catch {
+            NSLog("[\(tag)] ❌ Error creating MainViewController: \(error)")
+            fatalError("Cannot create main view controller: \(error)")
+        }
     }
 
     /// UISceneDelegate method called when the app receives a deep link URL while running.
