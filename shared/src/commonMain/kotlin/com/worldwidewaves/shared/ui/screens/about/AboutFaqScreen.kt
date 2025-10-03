@@ -48,6 +48,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -56,8 +59,8 @@ import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.FAQ
 import com.worldwidewaves.shared.WWWPlatform
-import com.worldwidewaves.shared.faq_contents
-import com.worldwidewaves.shared.rules_hierarchy
+import com.worldwidewaves.shared.resources.faq_contents
+import com.worldwidewaves.shared.resources.rules_hierarchy
 import com.worldwidewaves.shared.ui.components.about.AboutDividerLine
 import com.worldwidewaves.shared.ui.components.about.AboutWWWLogo
 import com.worldwidewaves.shared.ui.components.about.AboutWWWSocialNetworks
@@ -68,6 +71,7 @@ import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedExtraPrimaryColoredBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
+import com.worldwidewaves.shared.ui.utils.focusIndicator
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
@@ -104,7 +108,7 @@ fun AboutFaqScreen(
 
     Box(modifier = modifier) {
         Column(
-            modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
+            modifier = Modifier.fillMaxSize().verticalScroll(scrollState).testTag("FaqList"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             AboutWWWLogo()
@@ -126,10 +130,11 @@ fun AboutFaqScreen(
             Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
             Text(
                 modifier =
-                    Modifier.onGloballyPositioned { coordinates ->
-                        // Save the position of the FAQ section
-                        scrollToFAQPosition = coordinates.positionInRoot().y
-                    },
+                    Modifier
+                        .onGloballyPositioned { coordinates ->
+                            // Save the position of the FAQ section
+                            scrollToFAQPosition = coordinates.positionInRoot().y
+                        }.semantics { heading() },
                 text = stringResource(MokoRes.strings.faq),
                 style = sharedExtraBoldTextStyle(FAQ.TITLE_FONTSIZE),
             )
@@ -164,7 +169,10 @@ private const val SPACER_SMALL_SIZE = 10f
 private fun FAQTitle(scrollToFAQPosition: () -> Unit) {
     Row(modifier = Modifier.fillMaxWidth()) {
         Text(
-            modifier = Modifier.fillMaxWidth(LAYOUT_HALF_WIDTH),
+            modifier =
+                Modifier
+                    .fillMaxWidth(LAYOUT_HALF_WIDTH)
+                    .semantics { heading() },
             text = stringResource(MokoRes.strings.warn_rules_security_title),
             style =
                 sharedExtraPrimaryColoredBoldTextStyle(FAQ.SECTION_TITLE_FONTSIZE).copy(
@@ -175,6 +183,7 @@ private fun FAQTitle(scrollToFAQPosition: () -> Unit) {
             modifier =
                 Modifier
                     .fillMaxWidth()
+                    .focusIndicator()
                     .clickable(onClick = scrollToFAQPosition),
             text = stringResource(MokoRes.strings.faq_access),
             style =
@@ -235,6 +244,7 @@ private fun FAQItem(
     Column(
         modifier =
             Modifier
+                .testTag("FaqItem_$itemIndex")
                 .fillMaxWidth()
                 .padding(Dimensions.DEFAULT_INT_PADDING.dp)
                 .clickable {

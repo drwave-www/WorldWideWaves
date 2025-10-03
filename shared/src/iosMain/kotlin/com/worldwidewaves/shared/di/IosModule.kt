@@ -20,7 +20,7 @@ package com.worldwidewaves.shared.di
  * limitations under the License. */
 
 import com.worldwidewaves.shared.WWWPlatform
-import com.worldwidewaves.shared.choreographies.ChoreographyManager
+import com.worldwidewaves.shared.choreographies.ChoreographySequenceBuilder
 import com.worldwidewaves.shared.data.FavoriteEventsStore
 import com.worldwidewaves.shared.data.IosFavoriteEventsStore
 import com.worldwidewaves.shared.domain.usecases.IosMapAvailabilityChecker
@@ -68,8 +68,8 @@ val IosModule =
             )
         }
 
-        // ChoreographyManager for iOS - using DrawableResource for cross-platform compatibility
-        single(createdAtStart = true) { ChoreographyManager<DrawableResource>() }
+        // ChoreographySequenceBuilder for iOS - using DrawableResource for cross-platform compatibility
+        single(createdAtStart = true) { ChoreographySequenceBuilder<DrawableResource>() }
 
         // iOS Map Availability Checker (production-grade iOS implementation)
         single<MapAvailabilityChecker> { IosMapAvailabilityChecker() }

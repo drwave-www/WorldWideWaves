@@ -18,12 +18,14 @@ import androidx.compose.runtime.Composable
  *
  * This ensures perfect UI parity by using the exact same colors,
  * typography, and styling on both platforms.
+ *
+ * Typography includes iOS Dynamic Type support for accessibility (12 text size levels).
  */
 @Composable
 fun WorldWideWavesTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = AppLightColorScheme,
-        typography = AppTypography,
+        typography = AppTypography(),
         content = content,
     )
 }

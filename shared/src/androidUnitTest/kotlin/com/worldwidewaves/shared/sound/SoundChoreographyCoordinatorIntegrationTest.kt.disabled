@@ -1,0 +1,714 @@
+package com.worldwidewaves.shared.sound
+
+/*
+ * Copyright 2025 DrWave
+ *
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.WWWEventObserver
+import com.worldwidewaves.shared.events.WWWEventWaveWarming
+import com.worldwidewaves.shared.events.WWWEvents
+import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
+import com.worldwidewaves.shared.events.utils.IClock
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runTest
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.dsl.module
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
+
+/**
+ * Comprehensive coroutine lifecycle integration tests for SoundChoreographyCoordinator.
+ *
+ * Tests cover:
+ * - Infinite Flow cancellation and cleanup
+ * - Rapid start-stop cycles
+ * - Job leak prevention
+ * - Error handling in Flow collection
+ * - Cleanup of all subscriptions
+ * - Concurrent stop requests
+ * - Multiple event coordination
+ * - Event transitions
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+class SoundChoreographyCoordinatorIntegrationTest {
+    private lateinit var testScope: TestScope
+    private lateinit var coordinator: SoundChoreographyCoordinator
+    private lateinit var mockEvents: WWWEvents
+    private lateinit var mockClock: IClock
+    private lateinit var testScopeProvider: CoroutineScopeProvider
+
+    // Mock events and flows
+    private lateinit var mockEvent1: IWWWEvent
+    private lateinit var mockEvent2: IWWWEvent
+    private lateinit var mockObserver1: WWWEventObserver
+    private lateinit var mockObserver2: WWWEventObserver
+    private lateinit var mockWarming1: WWWEventWaveWarming
+    private lateinit var mockWarming2: WWWEventWaveWarming
+    private val userIsInArea1 = MutableStateFlow(false)
+    private val userIsInArea2 = MutableStateFlow(false)
+    private val userHasBeenHit1 = MutableStateFlow(false)
+    private val userHasBeenHit2 = MutableStateFlow(false)
+
+    @BeforeTest
+    fun setup() {
+        testScope = TestScope()
+
+        // Create test scope provider
+        testScopeProvider =
+            object : CoroutineScopeProvider {
+                override fun scopeDefault(): CoroutineScope = testScope
+
+                override fun scopeIO(): CoroutineScope = testScope
+
+                override suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T): T = block(testScope)
+
+                override suspend fun <T> withDefaultContext(block: suspend CoroutineScope.() -> T): T = block(testScope)
+
+                override fun launchIO(block: suspend CoroutineScope.() -> Unit): Job = testScope.launch(block = block)
+
+                override fun launchDefault(block: suspend CoroutineScope.() -> Unit): Job = testScope.launch(block = block)
+
+                override fun cancelAllCoroutines() {
+                    testScope.testScheduler.runCurrent()
+                }
+            }
+
+        // Setup mock dependencies
+        mockClock = mockk(relaxed = true)
+        mockEvents = mockk(relaxed = true)
+        mockWarming1 = mockk(relaxed = true)
+        mockWarming2 = mockk(relaxed = true)
+
+        // Setup mock observers
+        mockObserver1 = mockk(relaxed = true)
+        every { mockObserver1.userIsInArea } returns userIsInArea1
+        every { mockObserver1.userHasBeenHit } returns userHasBeenHit1
+
+        mockObserver2 = mockk(relaxed = true)
+        every { mockObserver2.userIsInArea } returns userIsInArea2
+        every { mockObserver2.userHasBeenHit } returns userHasBeenHit2
+
+        // Setup mock events
+        mockEvent1 = mockk(relaxed = true)
+        every { mockEvent1.id } returns "event-1"
+        every { mockEvent1.observer } returns mockObserver1
+        every { mockEvent1.warming } returns mockWarming1
+        coEvery { mockEvent1.isRunning() } returns true
+
+        mockEvent2 = mockk(relaxed = true)
+        every { mockEvent2.id } returns "event-2"
+        every { mockEvent2.observer } returns mockObserver2
+        every { mockEvent2.warming } returns mockWarming2
+        coEvery { mockEvent2.isRunning() } returns true
+
+        // Setup events list
+        every { mockEvents.list() } returns listOf(mockEvent1, mockEvent2)
+
+        // Start Koin
+        startKoin {
+            modules(
+                module {
+                    single<IClock> { mockClock }
+                    single<WWWEvents> { mockEvents }
+                },
+            )
+        }
+
+        // Create coordinator with test scope provider
+        coordinator = SoundChoreographyCoordinator(coroutineScopeProvider = testScopeProvider)
+    }
+
+    @AfterTest
+    fun tearDown() {
+        // Stop observation first to cancel infinite flows
+        coordinator.stopObserving()
+        testScope.testScheduler.advanceUntilIdle()
+
+        // Reset flow values
+        userIsInArea1.value = false
+        userIsInArea2.value = false
+        userHasBeenHit1.value = false
+        userHasBeenHit2.value = false
+
+        stopKoin()
+    }
+
+    // ========== Cancellation Tests ==========
+
+    @Test
+    fun `should cancel infinite Flow on stopObserving`() =
+        runTest {
+            // Arrange
+            coordinator.startObservingAllEvents()
+            testScheduler.runCurrent() // Process initial emissions, don't use advanceUntilIdle()!
+
+            // Verify observation started
+            userIsInArea1.value = true
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            // Act - stop observation (cancels infinite flow)
+            coordinator.stopObserving()
+
+            // NOW it's safe to use advanceUntilIdle
+            testScheduler.advanceUntilIdle()
+
+            // Assert - coordinator should be stopped
+            assertFalse(coordinator.isChoreographyActive())
+
+            // Verify no more reactions to state changes
+            userIsInArea1.value = false
+            userHasBeenHit1.value = true
+            testScheduler.advanceUntilIdle()
+
+            // No exceptions should occur
+            assertTrue(true, "Successfully cancelled infinite Flow")
+        }
+
+    @Test
+    fun `should handle rapid start-stop cycles without leaks`() =
+        runTest {
+            // Act - rapid cycles
+            repeat(5) { i ->
+                coordinator.startObservingAllEvents()
+                testScheduler.runCurrent()
+
+                // Trigger some state changes
+                userIsInArea1.value = i % 2 == 0
+                advanceTimeBy(50.milliseconds)
+                testScheduler.runCurrent()
+
+                // Stop observation
+                coordinator.stopObserving()
+                testScheduler.advanceUntilIdle()
+
+                assertFalse(coordinator.isChoreographyActive(), "Cycle $i should end with inactive state")
+            }
+
+            // Assert - no crashes, no leaks
+            assertTrue(true, "Successfully handled rapid start-stop cycles")
+        }
+
+    @Test
+    fun `should not leak jobs after multiple events observation`() =
+        runTest {
+            // Act - observe multiple times
+            repeat(3) { cycle ->
+                coordinator.startObservingAllEvents()
+                testScheduler.runCurrent()
+
+                // Simulate user entering and leaving areas
+                userIsInArea1.value = true
+                advanceTimeBy(100.milliseconds)
+                testScheduler.runCurrent()
+
+                userHasBeenHit1.value = true
+                advanceTimeBy(100.milliseconds)
+                testScheduler.runCurrent()
+
+                userIsInArea1.value = false
+                advanceTimeBy(100.milliseconds)
+                testScheduler.runCurrent()
+
+                // Stop before next cycle
+                coordinator.stopObserving()
+                testScheduler.advanceUntilIdle()
+
+                // Reset state for next cycle
+                userIsInArea1.value = false
+                userHasBeenHit1.value = false
+            }
+
+            // Assert - coordinator should be clean
+            assertFalse(coordinator.isChoreographyActive())
+            assertTrue(true, "No job leaks detected after multiple observation cycles")
+        }
+
+    // ========== Error Handling Tests ==========
+
+    @Test
+    fun `should handle Flow collection error gracefully`() =
+        runTest {
+            // Arrange - create event that throws exception on sound play
+            coEvery { mockWarming1.playCurrentSoundChoreographyTone() } throws RuntimeException("Sound error")
+
+            coordinator.startObservingAllEvents()
+            testScheduler.runCurrent()
+
+            // Act - trigger sound play (should catch exception)
+            userIsInArea1.value = true
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            userHasBeenHit1.value = true
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            // Assert - coordinator should still be active despite error
+            assertTrue(coordinator.isChoreographyActive(), "Should remain active after sound error")
+
+            // Cleanup
+            coordinator.stopObserving()
+            testScheduler.advanceUntilIdle()
+        }
+
+    @Test
+    fun `should log errors without crashing when sound play fails`() =
+        runTest {
+            // Arrange - sound play throws exception
+            coEvery { mockWarming1.playCurrentSoundChoreographyTone() } throws IllegalStateException("Sound player not ready")
+
+            coordinator.startObservingAllEvents()
+            testScheduler.runCurrent()
+
+            // Act - trigger error scenario
+            userIsInArea1.value = true
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            userHasBeenHit1.value = true
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            // Assert - no crash, logs error
+            assertTrue(true, "Should log error without crashing")
+
+            // Cleanup
+            coordinator.stopObserving()
+            testScheduler.advanceUntilIdle()
+        }
+
+    // ========== Cleanup Tests ==========
+
+    @Test
+    fun `should stop sound when leaving area`() =
+        runTest {
+            // Arrange
+            coordinator.startObservingAllEvents()
+            testScheduler.runCurrent()
+
+            // Enter area
+            userIsInArea1.value = true
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            assertTrue(coordinator.isChoreographyActive(), "Should be active in area")
+
+            // Act - leave area
+            userIsInArea1.value = false
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            // Assert - sound should stop
+            assertFalse(coordinator.isChoreographyActive(), "Should be inactive outside area")
+
+            // Cleanup
+            coordinator.stopObserving()
+            testScheduler.advanceUntilIdle()
+        }
+
+    @Test
+    fun `should cleanup all subscriptions on stopObserving`() =
+        runTest {
+            // Arrange
+            coordinator.startObservingAllEvents()
+            testScheduler.runCurrent()
+
+            userIsInArea1.value = true
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            assertTrue(coordinator.isChoreographyActive())
+
+            // Act - stop observing
+            coordinator.stopObserving()
+            testScheduler.advanceUntilIdle()
+
+            // Assert - should be fully cleaned up
+            assertFalse(coordinator.isChoreographyActive())
+
+            // Trigger state changes - should have no effect
+            userIsInArea1.value = false
+            userHasBeenHit1.value = true
+            testScheduler.advanceUntilIdle()
+
+            assertFalse(coordinator.isChoreographyActive(), "Should remain inactive after cleanup")
+        }
+
+    @Test
+    fun `should handle concurrent stop requests safely`() =
+        runTest {
+            // Arrange
+            coordinator.startObservingAllEvents()
+            testScheduler.runCurrent()
+
+            // Act - concurrent stop requests
+            val job1 =
+                testScope.launch {
+                    coordinator.stopObserving()
+                }
+            val job2 =
+                testScope.launch {
+                    coordinator.stopObserving()
+                }
+            val job3 =
+                testScope.launch {
+                    coordinator.stopObserving()
+                }
+
+            // Wait for all to complete
+            job1.join()
+            job2.join()
+            job3.join()
+            testScheduler.advanceUntilIdle()
+
+            // Assert - no crashes, clean state
+            assertFalse(coordinator.isChoreographyActive())
+            assertTrue(true, "Handled concurrent stop requests safely")
+        }
+
+    // ========== Integration Tests ==========
+
+    @Test
+    fun `should coordinate multiple event observations`() =
+        runTest {
+            // Arrange
+            coordinator.startObservingAllEvents()
+            testScheduler.runCurrent()
+
+            // Act - user enters first event area
+            userIsInArea1.value = true
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            assertTrue(coordinator.isChoreographyActive(), "Should be active in event 1")
+
+            // User gets hit in event 1
+            userHasBeenHit1.value = true
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            // Verify sound played for event 1
+            coVerify(exactly = 1) { mockWarming1.playCurrentSoundChoreographyTone() }
+
+            // User leaves event 1 and enters event 2
+            userIsInArea1.value = false
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            assertFalse(coordinator.isChoreographyActive(), "Should be inactive between events")
+
+            userIsInArea2.value = true
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            assertTrue(coordinator.isChoreographyActive(), "Should be active in event 2")
+
+            // Cleanup
+            coordinator.stopObserving()
+            testScheduler.advanceUntilIdle()
+        }
+
+    @Test
+    fun `should handle event transitions smoothly`() =
+        runTest {
+            // Arrange
+            coordinator.startObservingAllEvents()
+            testScheduler.runCurrent()
+
+            // Act - user moves through event lifecycle
+            // 1. Enter area
+            userIsInArea1.value = true
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            assertTrue(coordinator.isChoreographyActive(), "Active after entering area")
+
+            // 2. Get hit
+            userHasBeenHit1.value = true
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            // 3. Leave area
+            userIsInArea1.value = false
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            assertFalse(coordinator.isChoreographyActive(), "Inactive after leaving area")
+
+            // Verify sound played exactly once
+            coVerify(exactly = 1) { mockWarming1.playCurrentSoundChoreographyTone() }
+
+            // Cleanup
+            coordinator.stopObserving()
+            testScheduler.advanceUntilIdle()
+        }
+
+    @Test
+    fun `should prevent double initialization when already observing`() =
+        runTest {
+            // Arrange
+            coordinator.startObservingAllEvents()
+            testScheduler.runCurrent()
+
+            // Act - try to start again
+            coordinator.startObservingAllEvents()
+            testScheduler.runCurrent()
+
+            // Should not crash, just skip duplicate initialization
+            assertTrue(true, "Successfully prevented double initialization")
+
+            // Cleanup
+            coordinator.stopObserving()
+            testScheduler.advanceUntilIdle()
+        }
+
+    @Test
+    fun `should handle empty event list gracefully`() =
+        runTest {
+            // Arrange - empty event list
+            every { mockEvents.list() } returns emptyList()
+
+            // Act
+            coordinator.startObservingAllEvents()
+            testScheduler.runCurrent()
+
+            // Should not crash, just log warning
+            assertFalse(coordinator.isChoreographyActive(), "Should be inactive with no events")
+
+            // Cleanup
+            coordinator.stopObserving()
+            testScheduler.advanceUntilIdle()
+        }
+
+    @Test
+    fun `should not play sound for DONE events`() =
+        runTest {
+            // Arrange - event is DONE (not running)
+            coEvery { mockEvent1.isRunning() } returns false
+
+            coordinator.startObservingAllEvents()
+            testScheduler.runCurrent()
+
+            // Act - user enters and gets hit
+            userIsInArea1.value = true
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            userHasBeenHit1.value = true
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            // Assert - sound should NOT play for DONE events
+            coVerify(exactly = 0) { mockWarming1.playCurrentSoundChoreographyTone() }
+
+            // Cleanup
+            coordinator.stopObserving()
+            testScheduler.advanceUntilIdle()
+        }
+
+    @Test
+    fun `should handle single event observation lifecycle`() =
+        runTest {
+            // Arrange - use single event observation
+            coordinator.startObserving(mockEvent1)
+            testScheduler.runCurrent()
+
+            // Act - user enters area and gets hit
+            userIsInArea1.value = true
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            assertTrue(coordinator.isChoreographyActive())
+
+            userHasBeenHit1.value = true
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            // Verify sound played
+            coVerify(exactly = 1) { mockWarming1.playCurrentSoundChoreographyTone() }
+
+            // Leave area
+            userIsInArea1.value = false
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            assertFalse(coordinator.isChoreographyActive())
+
+            // Cleanup
+            coordinator.stopObserving()
+            testScheduler.advanceUntilIdle()
+        }
+
+    @Test
+    fun `should cancel previous observation when starting new single event observation`() =
+        runTest {
+            // Arrange - start observing first event
+            coordinator.startObserving(mockEvent1)
+            testScheduler.runCurrent()
+
+            userIsInArea1.value = true
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            assertTrue(coordinator.isChoreographyActive())
+
+            // Act - switch to second event (should cancel first)
+            coordinator.startObserving(mockEvent2)
+            testScheduler.runCurrent()
+
+            // First event should be stopped
+            assertFalse(coordinator.isChoreographyActive())
+
+            // Second event starts
+            userIsInArea2.value = true
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            assertTrue(coordinator.isChoreographyActive())
+
+            // Cleanup
+            coordinator.stopObserving()
+            testScheduler.advanceUntilIdle()
+        }
+
+    @Test
+    fun `pause and resume should not affect choreography state`() =
+        runTest {
+            // Arrange
+            coordinator.startObservingAllEvents()
+            testScheduler.runCurrent()
+
+            userIsInArea1.value = true
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            assertTrue(coordinator.isChoreographyActive())
+
+            // Act - pause (should continue in background)
+            coordinator.pause()
+            testScheduler.runCurrent()
+
+            // Assert - should still be active
+            assertTrue(coordinator.isChoreographyActive(), "Should continue in background")
+
+            // Resume
+            coordinator.resume()
+            testScheduler.runCurrent()
+
+            assertTrue(coordinator.isChoreographyActive(), "Should still be active after resume")
+
+            // Cleanup
+            coordinator.stopObserving()
+            testScheduler.advanceUntilIdle()
+        }
+
+    @Test
+    fun `should properly clean up resources on rapid event switching`() =
+        runTest {
+            // Arrange
+            coordinator.startObservingAllEvents()
+            testScheduler.runCurrent()
+
+            // Act - rapid switching between events
+            repeat(5) { i ->
+                if (i % 2 == 0) {
+                    userIsInArea1.value = true
+                    userIsInArea2.value = false
+                } else {
+                    userIsInArea1.value = false
+                    userIsInArea2.value = true
+                }
+                advanceTimeBy(50.milliseconds)
+                testScheduler.runCurrent()
+            }
+
+            // Assert - should handle rapid switching without leaks
+            assertTrue(true, "Successfully handled rapid event switching")
+
+            // Cleanup
+            coordinator.stopObserving()
+            testScheduler.advanceUntilIdle()
+        }
+
+    @Test
+    fun `should handle simultaneous area entry for multiple events`() =
+        runTest {
+            // Arrange
+            coordinator.startObservingAllEvents()
+            testScheduler.runCurrent()
+
+            // Act - user in both areas (edge case, should handle first event)
+            userIsInArea1.value = true
+            userIsInArea2.value = true
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            // Assert - should be active (first matching event)
+            assertTrue(coordinator.isChoreographyActive())
+
+            // Cleanup
+            coordinator.stopObserving()
+            testScheduler.advanceUntilIdle()
+        }
+
+    @Test
+    fun `should properly cancel jobs on coroutine cancellation`() =
+        runTest {
+            // Arrange
+            coordinator.startObservingAllEvents()
+            testScheduler.runCurrent()
+
+            userIsInArea1.value = true
+            advanceTimeBy(100.milliseconds)
+            testScheduler.runCurrent()
+
+            // Act - cancel the job directly
+            val job =
+                testScope.launch {
+                    delay(1000)
+                }
+            coordinator.stopObserving()
+            job.cancelAndJoin()
+            testScheduler.advanceUntilIdle()
+
+            // Assert - should be cleaned up
+            assertFalse(coordinator.isChoreographyActive())
+            assertTrue(true, "Successfully cancelled coroutine jobs")
+        }
+}

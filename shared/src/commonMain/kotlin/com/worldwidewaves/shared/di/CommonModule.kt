@@ -26,9 +26,91 @@ import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.sound.SoundChoreographyCoordinator
 import org.koin.dsl.module
 
+/**
+ * DI module providing core event and sound choreography dependencies.
+ *
+ * ## Module Purpose
+ * Provides essential global components for the WorldWideWaves application:
+ * - Event management and lifecycle
+ * - Sound choreography playback and coordination
+ * - Core audio-visual synchronization infrastructure
+ *
+ * ## Initialization
+ * - **Load order**: First module loaded in sharedModule list (loads before helpers, datastore, ui)
+ * - **Platform**: Common (shared between Android and iOS)
+ * - **Required modules**: None (no dependencies on other modules)
+ * - **Initialization timing**: SoundChoreographyPlayer is eagerly initialized at app startup
+ *
+ * ## Scoping Strategy
+ * - **Singletons**: All dependencies are singletons to ensure consistent state across the app
+ *   - WWWEvents: Single source of truth for event data
+ *   - SoundChoreographyPlayer: Single audio playback instance (eager initialization)
+ *   - SoundChoreographyCoordinator: Single coordinator for synchronized audio playback
+ *
+ * ## Platform Considerations
+ * - **Android**: Uses Android MIDI API for sound playback
+ * - **iOS**: Uses iOS CoreMIDI for sound playback
+ * - **Thread-safety**: All components handle thread-safety internally using coroutines
+ *
+ * @see WWWEvents for event data management
+ * @see SoundChoreographyPlayer for audio playback
+ * @see SoundChoreographyCoordinator for synchronization
+ */
 val commonModule =
     module {
+        /**
+         * Provides [WWWEvents] as singleton for managing event data and lifecycle.
+         *
+         * **Scope**: Singleton - single source of truth for all event data in the application
+         * **Thread-safety**: Yes - internally uses coroutines and StateFlow for thread-safe updates
+         * **Lifecycle**: Created on first access, lives for entire app lifecycle
+         * **Dependencies**: None
+         *
+         * WWWEvents manages the global list of wave events, including:
+         * - Loading events from Firebase/local storage
+         * - Providing reactive streams of event data
+         * - Managing event state changes
+         *
+         * @see WWWEvents for detailed API documentation
+         */
         single { WWWEvents() }
+
+        /**
+         * Provides [SoundChoreographyPlayer] as eager singleton for MIDI-based sound playback.
+         *
+         * **Scope**: Singleton - single audio player instance for the entire application
+         * **Thread-safety**: Yes - thread-safe MIDI API usage
+         * **Lifecycle**: Created immediately at app startup (createdAtStart = true)
+         * **Dependencies**: None
+         * **Eager initialization**: Required to prepare MIDI subsystem before first wave event
+         *
+         * The SoundChoreographyPlayer is created eagerly to:
+         * 1. Initialize platform-specific MIDI subsystems early
+         * 2. Avoid latency on first sound playback
+         * 3. Ensure audio is ready when first wave event triggers
+         *
+         * Platform implementations:
+         * - Android: Uses MediaPlayer with MIDI soundfont
+         * - iOS: Uses AVAudioEngine with MIDI synthesis
+         *
+         * @see SoundChoreographyPlayer for audio playback API
+         */
         single(createdAtStart = true) { SoundChoreographyPlayer() }
+
+        /**
+         * Provides [SoundChoreographyCoordinator] as singleton for synchronized audio-visual coordination.
+         *
+         * **Scope**: Singleton - single coordinator for all wave events
+         * **Thread-safety**: Yes - uses coroutine-based synchronization
+         * **Lifecycle**: Created on first access, lives for entire app lifecycle
+         * **Dependencies**: None (but typically used with SoundChoreographyPlayer)
+         *
+         * The SoundChoreographyCoordinator ensures:
+         * - Synchronized audio playback across multiple devices
+         * - Timing coordination between sound and visual wave effects
+         * - Proper scheduling of sound cues relative to wave progression
+         *
+         * @see SoundChoreographyCoordinator for coordination API
+         */
         single { SoundChoreographyCoordinator() }
     }

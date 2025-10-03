@@ -32,6 +32,7 @@ import kotlinx.coroutines.cancel
  * This implementation provides iOS-compatible lifecycle management
  * with proper coroutine scope handling for iOS UI patterns.
  */
+@Suppress("MatchingDeclarationName") // Platform-specific actual implementation matches expect declaration
 actual abstract class BaseViewModel actual constructor() {
     /**
      * iOS-compatible coroutine scope

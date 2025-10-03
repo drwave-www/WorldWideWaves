@@ -21,9 +21,11 @@
 import Foundation
 import MapLibre
 import UIKit
+import CoreLocation
 
 /// Swift bridging layer for MapLibre Native iOS SDK
 /// Provides @objc methods for controlling MapLibre from Kotlin or Swift
+// swiftlint:disable type_body_length file_length
 @objc public class MapLibreViewWrapper: NSObject {
     private static let tag = "MapLibreWrapper"
     private weak var mapView: MLNMapView?
@@ -35,6 +37,15 @@ import UIKit
     // Track layer and source IDs for cleanup
     private var waveLayerIds: [String] = []
     private var waveSourceIds: [String] = []
+
+    // MARK: - Accessibility State
+
+    /// Accessibility state tracking for VoiceOver
+    private var currentUserPosition: CLLocationCoordinate2D?
+    private var currentEventCenter: CLLocationCoordinate2D?
+    private var currentEventRadius: Double = 0
+    private var currentEventName: String?
+    private var currentWavePolygons: [[CLLocationCoordinate2D]] = []
 
     @objc public override init() {
         super.init()
@@ -49,6 +60,9 @@ import UIKit
         WWWLog.d(Self.tag, "setMapView called, bounds: \(mapView.bounds)")
         self.mapView = mapView
         self.mapView?.delegate = self
+
+        // Configure accessibility for VoiceOver
+        configureMapAccessibility()
 
         // Add tap gesture recognizer for map clicks
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleMapTap(_:)))
@@ -265,6 +279,10 @@ import UIKit
             waveSourceIds.append(sourceId)
             waveLayerIds.append(layerId)
         }
+
+        // Update accessibility state with new polygons
+        currentWavePolygons = polygons
+        updateMapAccessibility()
     }
 
     @objc public func clearWavePolygons() {
@@ -285,6 +303,10 @@ import UIKit
 
         waveLayerIds.removeAll()
         waveSourceIds.removeAll()
+
+        // Update accessibility state (no more polygons)
+        currentWavePolygons.removeAll()
+        updateMapAccessibility()
     }
 
     // MARK: - Override BBox Drawing
@@ -328,6 +350,219 @@ import UIKit
         let coordinate = mapView.convert(point, toCoordinateFrom: mapView)
         onMapClick?(coordinate.latitude, coordinate.longitude)
     }
+
+    // MARK: - Accessibility Configuration
+
+    /// Configures the map container for VoiceOver accessibility.
+    /// The map itself is not an accessibility element, but a container for accessible elements.
+    private func configureMapAccessibility() {
+        guard let mapView = mapView else { return }
+
+        // Map container is not a leaf element (contains accessible elements)
+        mapView.isAccessibilityElement = false
+        mapView.accessibilityNavigationStyle = .combined
+
+        WWWLog.d(Self.tag, "Map accessibility configured")
+    }
+
+    /// Updates accessibility elements based on current map state.
+    /// Called when user position, wave polygons, or event data changes.
+    private func updateMapAccessibility() {
+        guard let mapView = mapView else { return }
+
+        var accessibilityElements: [Any] = []
+
+        // Map summary element (always first)
+        let summaryElement = createMapSummaryElement()
+        accessibilityElements.append(summaryElement)
+
+        // User position marker (if available)
+        if let userElement = createUserPositionElement() {
+            accessibilityElements.append(userElement)
+        }
+
+        // Event area boundary (if available)
+        if let areaElement = createEventAreaElement() {
+            accessibilityElements.append(areaElement)
+        }
+
+        // Wave progression circles (if available)
+        let waveElements = createWaveProgressionElements()
+        accessibilityElements.append(contentsOf: waveElements)
+
+        // Update map view accessibility elements
+        mapView.accessibilityElements = accessibilityElements
+
+        WWWLog.v(Self.tag, "Map accessibility updated with \(accessibilityElements.count) elements")
+    }
+
+    /// Creates a summary element describing the overall map state.
+    private func createMapSummaryElement() -> UIAccessibilityElement {
+        guard let mapView = mapView else {
+            return UIAccessibilityElement(accessibilityContainer: self)
+        }
+
+        let summaryElement = UIAccessibilityElement(accessibilityContainer: mapView)
+        summaryElement.accessibilityTraits = .staticText
+
+        // Build summary text
+        var summaryText = "Map showing "
+
+        if let eventName = currentEventName {
+            summaryText += "\(eventName) event area"
+        } else {
+            summaryText += "event area"
+        }
+
+        if let userPos = currentUserPosition, let eventCenter = currentEventCenter {
+            let distance = calculateDistance(from: userPos, to: eventCenter)
+            let distanceMeters = Int(distance)
+            summaryText += ". You are \(distanceMeters) meters from event center"
+        }
+
+        if !currentWavePolygons.isEmpty {
+            summaryText += ". \(currentWavePolygons.count) wave progression circle"
+            if currentWavePolygons.count > 1 {
+                summaryText += "s"
+            }
+            summaryText += " visible"
+        }
+
+        summaryElement.accessibilityLabel = summaryText
+
+        // Position at top of map
+        summaryElement.accessibilityFrame = CGRect(
+            x: mapView.frame.origin.x,
+            y: mapView.frame.origin.y,
+            width: mapView.frame.width,
+            height: 44
+        )
+
+        return summaryElement
+    }
+
+    /// Creates accessibility element for user position marker.
+    private func createUserPositionElement() -> UIAccessibilityElement? {
+        guard let mapView = mapView, let userPos = currentUserPosition else {
+            return nil
+        }
+
+        let userElement = UIAccessibilityElement(accessibilityContainer: mapView)
+        userElement.accessibilityLabel = "Your current position"
+        userElement.accessibilityTraits = .updatesFrequently
+
+        // Calculate screen position for coordinate
+        userElement.accessibilityFrame = calculateFrameForCoordinate(userPos, in: mapView)
+
+        return userElement
+    }
+
+    /// Creates accessibility element for event area boundary.
+    private func createEventAreaElement() -> UIAccessibilityElement? {
+        guard let mapView = mapView, let eventCenter = currentEventCenter else {
+            return nil
+        }
+
+        let areaElement = UIAccessibilityElement(accessibilityContainer: mapView)
+
+        var label = "Event area boundary"
+        if let eventName = currentEventName {
+            label += " for \(eventName)"
+        }
+        if currentEventRadius > 0 {
+            let radiusKm = currentEventRadius / 1000.0
+            label += ", radius \(String(format: "%.1f", radiusKm)) kilometers"
+        }
+
+        areaElement.accessibilityLabel = label
+        areaElement.accessibilityTraits = .staticText
+
+        // Position at event center
+        areaElement.accessibilityFrame = calculateFrameForCoordinate(eventCenter, in: mapView)
+
+        return areaElement
+    }
+
+    /// Creates accessibility elements for wave progression circles.
+    private func createWaveProgressionElements() -> [UIAccessibilityElement] {
+        guard let mapView = mapView else { return [] }
+
+        var elements: [UIAccessibilityElement] = []
+
+        for (index, polygon) in currentWavePolygons.enumerated() {
+            guard let centerCoord = calculatePolygonCenter(polygon) else { continue }
+
+            let circleElement = UIAccessibilityElement(accessibilityContainer: mapView)
+            circleElement.accessibilityLabel = "Wave progression circle \(index + 1) of \(currentWavePolygons.count)"
+            circleElement.accessibilityTraits = .updatesFrequently
+
+            circleElement.accessibilityFrame = calculateFrameForCoordinate(centerCoord, in: mapView)
+
+            elements.append(circleElement)
+        }
+
+        return elements
+    }
+
+    // MARK: - Accessibility Helpers
+
+    /// Calculates the screen frame for a geographic coordinate.
+    /// Returns a 44x44pt frame centered on the coordinate (iOS touch target size).
+    private func calculateFrameForCoordinate(_ coordinate: CLLocationCoordinate2D, in mapView: MLNMapView) -> CGRect {
+        let point = mapView.convert(coordinate, toPointTo: mapView)
+        return CGRect(x: point.x - 22, y: point.y - 22, width: 44, height: 44)
+    }
+
+    /// Calculates distance in meters between two coordinates.
+    private func calculateDistance(from: CLLocationCoordinate2D, to: CLLocationCoordinate2D) -> Double {
+        let fromLocation = CLLocation(latitude: from.latitude, longitude: from.longitude)
+        let toLocation = CLLocation(latitude: to.latitude, longitude: to.longitude)
+        return fromLocation.distance(from: toLocation)
+    }
+
+    /// Calculates the center coordinate of a polygon.
+    private func calculatePolygonCenter(_ polygon: [CLLocationCoordinate2D]) -> CLLocationCoordinate2D? {
+        guard !polygon.isEmpty else { return nil }
+
+        var totalLat: Double = 0
+        var totalLng: Double = 0
+
+        for coord in polygon {
+            totalLat += coord.latitude
+            totalLng += coord.longitude
+        }
+
+        let count = Double(polygon.count)
+        return CLLocationCoordinate2D(
+            latitude: totalLat / count,
+            longitude: totalLng / count
+        )
+    }
+
+    // MARK: - Accessibility State Updates
+
+    /// Updates user position for accessibility.
+    /// Call this when user location changes.
+    @objc public func setUserPosition(latitude: Double, longitude: Double) {
+        currentUserPosition = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        updateMapAccessibility()
+        WWWLog.v(Self.tag, "User position updated for accessibility: \(latitude), \(longitude)")
+    }
+
+    /// Updates event metadata for accessibility.
+    /// Call this when event data is loaded.
+    @objc public func setEventInfo(
+        centerLatitude: Double,
+        centerLongitude: Double,
+        radius: Double,
+        eventName: String?
+    ) {
+        currentEventCenter = CLLocationCoordinate2D(latitude: centerLatitude, longitude: centerLongitude)
+        currentEventRadius = radius
+        currentEventName = eventName
+        updateMapAccessibility()
+        WWWLog.v(Self.tag, "Event info updated for accessibility: \(eventName ?? "unknown")")
+    }
 }
 
 // MARK: - MLNMapViewDelegate
@@ -349,6 +584,9 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         // Camera idle event
         WWWLog.v(Self.tag, "Region changed, camera idle")
         onCameraIdle?()
+
+        // Update accessibility when map region changes
+        updateMapAccessibility()
     }
 
     public func mapViewDidFailLoadingMap(_ mapView: MLNMapView, withError error: Error) {

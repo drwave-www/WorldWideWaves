@@ -19,6 +19,7 @@ package com.worldwidewaves.shared
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
+import com.worldwidewaves.shared.data.MapFileExtension
 import com.worldwidewaves.shared.data.cacheDeepFile
 import com.worldwidewaves.shared.data.cachedFileExists
 import com.worldwidewaves.shared.data.cachedFilePath
@@ -120,7 +121,7 @@ class PlatformIosTest {
     fun `getMapFileAbsolutePath handles iOS ODR lifecycle correctly`() =
         runTest {
             val eventId = "ios_odr_lifecycle_test"
-            val extension = "mbtiles"
+            val extension = MapFileExtension.MBTILES
 
             // Note: Will return null in test environment as no actual ODR resources exist
             val path = getMapFileAbsolutePath(eventId, extension)
@@ -128,7 +129,7 @@ class PlatformIosTest {
             // Verify function doesn't crash and handles missing ODR resources gracefully
             if (path != null) {
                 assertTrue(path.startsWith("/"), "If path exists, should be absolute")
-                assertTrue(path.endsWith(".$extension"), "If path exists, should have correct extension")
+                assertTrue(path.endsWith(".${extension.value}"), "If path exists, should have correct extension")
             }
         }
 

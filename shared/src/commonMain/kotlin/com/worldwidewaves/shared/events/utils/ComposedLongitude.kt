@@ -31,14 +31,13 @@ import kotlin.math.sign
 open class ComposedLongitude(
     position: Position? = null,
 ) : Iterable<Position> {
-    private val positions = mutableListOf<Position>()
-    private var swLat: Double = Double.POSITIVE_INFINITY
-    private var swLng: Double = Double.POSITIVE_INFINITY
-    private var neLat: Double = Double.NEGATIVE_INFINITY
-    private var neLng: Double = Double.NEGATIVE_INFINITY
+    companion object {
+        fun fromPositions(vararg positions: Position): ComposedLongitude = ComposedLongitude().apply { addAll(positions.toList()) }
 
-    var orientation: Orientation = Orientation.NORTH
-        private set
+        fun fromPositions(positions: List<Position>): ComposedLongitude = ComposedLongitude().apply { addAll(positions.toList()) }
+
+        fun fromLongitude(longitude: Double) = ComposedLongitude(Position(0.0, longitude))
+    }
 
     // --- Nested classes and enums
 
@@ -57,18 +56,21 @@ open class ComposedLongitude(
         fun isWest(): Boolean = this == WEST
     }
 
+    // --- Properties
+
+    private val positions = mutableListOf<Position>()
+    private var swLat: Double = Double.POSITIVE_INFINITY
+    private var swLng: Double = Double.POSITIVE_INFINITY
+    private var neLat: Double = Double.NEGATIVE_INFINITY
+    private var neLng: Double = Double.NEGATIVE_INFINITY
+
+    var orientation: Orientation = Orientation.NORTH
+        private set
+
     // ------------------------
 
     init {
         position?.let { add(it) }
-    }
-
-    companion object {
-        fun fromPositions(vararg positions: Position): ComposedLongitude = ComposedLongitude().apply { addAll(positions.toList()) }
-
-        fun fromPositions(positions: List<Position>): ComposedLongitude = ComposedLongitude().apply { addAll(positions.toList()) }
-
-        fun fromLongitude(longitude: Double) = ComposedLongitude(Position(0.0, longitude))
     }
 
     // --- Public methods -----

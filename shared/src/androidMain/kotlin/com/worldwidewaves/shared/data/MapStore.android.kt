@@ -104,6 +104,7 @@ private fun attemptFileCopy(
         Log.d(TAG, "platformTryCopyInitialTagToCache: copied $assetName → $destAbsolutePath")
         CopyResult.Success
     } catch (e: FileNotFoundException) {
+        Log.d(TAG, "platformTryCopyInitialTagToCache: file not found for $assetName, will retry: ${e.message}")
         CopyResult.Retry
     } catch (e: Exception) {
         Log.d(TAG, "platformTryCopyInitialTagToCache: error for $assetName: ${e.message}")

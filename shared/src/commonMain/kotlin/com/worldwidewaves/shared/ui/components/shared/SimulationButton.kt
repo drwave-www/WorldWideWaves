@@ -34,6 +34,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Wave
@@ -42,6 +47,7 @@ import com.worldwidewaves.shared.WWWSimulation
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.ui.theme.onPrimaryLight
+import com.worldwidewaves.shared.ui.utils.focusIndicator
 import com.worldwidewaves.shared.ui.utils.getIosSafePlatform
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
@@ -77,6 +83,23 @@ fun BoxScope.SimulationButton(
             else -> false
         }
 
+    // Determine content description and state based on current state
+    val contentDescriptionText =
+        when (simulationButtonState) {
+            "idle" -> "Start simulation"
+            "loading" -> "Simulation loading"
+            "active" -> "Stop simulation"
+            else -> "Simulation"
+        }
+
+    val stateDescriptionText =
+        when (simulationButtonState) {
+            "idle" -> "Ready to start"
+            "loading" -> "Loading"
+            "active" -> "Running"
+            else -> "Unknown"
+        }
+
     Box(
         modifier =
             modifier
@@ -86,6 +109,7 @@ fun BoxScope.SimulationButton(
                 .size(48.dp)
                 .clip(CircleShape)
                 .background(onPrimaryLight)
+                .focusIndicator()
                 .clickable(enabled = simulationButtonState != "loading") {
                     val action =
                         handleSimulationClick(
@@ -100,6 +124,10 @@ fun BoxScope.SimulationButton(
                             onError = onError,
                         )
                     pendingAction = action
+                }.semantics {
+                    role = Role.Button
+                    contentDescription = contentDescriptionText
+                    stateDescription = stateDescriptionText
                 },
         contentAlignment = Alignment.Center,
     ) {
@@ -122,7 +150,7 @@ fun BoxScope.SimulationButton(
             "active" -> {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Stop simulation",
+                    contentDescription = stringResource(MokoRes.strings.accessibility_stop_simulation),
                     tint = Color.Red,
                     modifier = Modifier.size(24.dp),
                 )

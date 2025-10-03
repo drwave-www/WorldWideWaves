@@ -24,12 +24,12 @@ package com.worldwidewaves.shared.events
 import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.IWWWEvent.WaveNumbersLiterals
+import com.worldwidewaves.shared.events.resources.getCommunityText
+import com.worldwidewaves.shared.events.resources.getCountryText
+import com.worldwidewaves.shared.events.resources.getEventImage
+import com.worldwidewaves.shared.events.resources.getEventText
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.getCommunityText
-import com.worldwidewaves.shared.getCountryText
-import com.worldwidewaves.shared.getEventImage
-import com.worldwidewaves.shared.getEventText
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.StringResource
 import kotlinx.datetime.LocalDate

@@ -272,8 +272,8 @@
   <string name="faq_answer_5">হ্যাঁ, স্বেচ্ছাসেবকদের সবসময় স্বাগতম। অ্যাপটির কোড GitHub-এ ওপেন-সোর্স, এবং worldwidewaves@proton.me ঠিকানায় নির্মাতাদের সঙ্গে যোগাযোগ করতে পারেন (জবাব নিশ্চিত নয়)। সহায়তার সেরা উপায় হলো খবর ছড়িয়ে দেওয়া: প্রস্তাবিত হ্যাশট্যাগ ব্যবহার করে ইভেন্টের ছবি ও ভিডিও শেয়ার করুন, বার্তাটি আরও জোরালো করতে স্থানীয় ইনফ্লুয়েন্সারদের সঙ্গে যোগাযোগ করুন, আপনার কমিউনিটিতে এ নিয়ে কথা বলুন, আর সবচেয়ে জরুরি, ওয়েভে যোগ দিন!</string>
   <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
   <string name="faq_question_6">আমি কীভাবে একটি ওয়েভ সিমুলেট করতে পারি?</string>
-  <!-- src_hash: 27df94d0a489449a5eefab0f67b96460cca1d2d2 -->
-  <string name="faq_answer_6">সিমুলেশন মোড সক্রিয় করতে নিচের বোতামটি ট্যাপ করুন। ইভেন্ট স্ক্রিনে "Join the wave" বোতামের পাশে থাকা টাইমার বোতামটি ব্যবহার করে এই ইভেন্টের বিবরণ (তারিখ, সময়, অবস্থান) অনুযায়ী সিমুলেশন শুরু করুন। সিমুলেশন থামাতে একই বোতাম ব্যবহার করুন। কাজ শেষ হলে উপরের স্থায়ী লেয়ারে থাকা স্টপ আইকন দিয়ে সিমুলেশন মোড বন্ধ করুন।</string>
+  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
+  <string name="faq_answer_6">সিমুলেশন মোড সক্রিয় করতে নিচের বোতামটি ট্যাপ করুন। ইভেন্ট স্ক্রিনে, এই ইভেন্টের বৈশিষ্ট্য (তারিখ, সময়, অবস্থান) দিয়ে সিমুলেশন শুরু করতে "তরঙ্গে যোগ দিন" বোতামের পাশে থাকা টাইমার বোতামটি ব্যবহার করুন। সিমুলেশন থামাতে একই বোতামটি ব্যবহার করুন। কাজ শেষ হলে, স্থায়ী ওভারলে-তে থাকা স্টপ আইকন দিয়ে সিমুলেশন মোড বন্ধ করুন।</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">যুক্তরাষ্ট্র</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -524,6 +524,80 @@
   <string name="choreography_warming_seq_6">হাত ক্রস করুন!</string>
   <!-- src_hash: 6e3fac340680de97285b8d870ac379a4735dca1a -->
   <string name="choreography_waiting">লাফানোর প্রস্তুতি নিন!</string>
-  <!-- src_hash: 6b959edcc7ff8f64aaa68f1eed65e84913eadc7a -->
+  <!-- src_hash: fd887adfdfd5856a244cc07e2d26574b1418f405 -->
   <string name="choreography_hit">লাফ দিন!</string>
+  <!-- src_hash: 0ecaeb68c350353a89945950ac403ed7c9fe9da5 -->
+  <string name="accessibility_selected">নির্বাচিত</string>
+  <!-- src_hash: 21bcb28321fb7c845c2382edbc03219b6a6cadd0 -->
+  <string name="accessibility_not_selected">নির্বাচিত নয়</string>
+  <!-- src_hash: 8ac93835021276f8d2c9fa9ea7e7cbea8b16baa6 -->
+  <string name="accessibility_active">সক্রিয়</string>
+  <!-- src_hash: 4a12493de42c4ad47ce214ce8e33f0e7d81ccffd -->
+  <string name="accessibility_disabled">নিষ্ক্রিয়</string>
+  <!-- src_hash: 7e20c73198c6958f0808201eb8f53c937568a6c1 -->
+  <string name="accessibility_favorited">পছন্দে যোগ হয়েছে</string>
+  <!-- src_hash: a27ab66e9c4c9acdcd3b3eecc0a8e49a1375f89a -->
+  <string name="accessibility_not_favorited">পছন্দে যোগ হয়নি</string>
+  <!-- src_hash: 1a1b19d9666fd557edee32ccbeac1cb3c41a9a18 -->
+  <string name="accessibility_favorite_button">পছন্দে যোগ করুন</string>
+  <!-- src_hash: b5cb76f3e76cb55118b89724310964f3ebbe7be9 -->
+  <string name="accessibility_stop_simulation">সিমুলেশন বন্ধ করুন</string>
+  <!-- src_hash: 7341343eee92624db9f068469a19c3e722cc7caa -->
+  <string name="accessibility_debug_screen">ডিবাগ স্ক্রিন</string>
+  <!-- src_hash: 54456cc2f9e01e0f46ab4401ad51cf00f2dc5848 -->
+  <string name="accessibility_event_in">ইভেন্ট %1$s পরে</string>
+  <!-- src_hash: ad2b3bec6b5fd123a89ec44b8e77f90ecac91aa8 -->
+  <string name="accessibility_download_starting">ডাউনলোড শুরু হচ্ছে</string>
+  <!-- src_hash: 2a14ccbd15410e204f2b5156b28e426b2f0c11af -->
+  <string name="accessibility_download_25_percent">ডাউনলোড ২৫ শতাংশ সম্পন্ন</string>
+  <!-- src_hash: a3c9f6249492cb13e13c2f5b5f1b044f6e0e29be -->
+  <string name="accessibility_download_50_percent">ডাউনলোড ৫০ শতাংশ সম্পন্ন</string>
+  <!-- src_hash: 45c67d48b096f74fba02ea4b4fa0377499856a4c -->
+  <string name="accessibility_download_75_percent">ডাউনলোড ৭৫ শতাংশ সম্পন্ন</string>
+  <!-- src_hash: 790e5ad24754eb222a1c46b05faa3f5a85a63ad6 -->
+  <string name="accessibility_download_complete">ডাউনলোড সম্পন্ন</string>
+  <!-- src_hash: b3e627fdf3b75974ca299e48c6f99db792993fd4 -->
+  <string name="accessibility_download_percent">%1$d শতাংশ</string>
+  <!-- src_hash: 33d10d42eaf1874427e9cb4f67ed96760b48e76f -->
+  <string name="debug_information">ডিবাগ তথ্য</string>
+  <!-- src_hash: 3209bfd9e317615ab4b6ad88e04791327fb6bf5f -->
+  <string name="debug_platform_information">প্ল্যাটফর্ম তথ্য</string>
+  <!-- src_hash: 318c41d32009b2d13a5bb40998be6c614537438f -->
+  <string name="debug_application_state">অ্যাপ্লিকেশন অবস্থা</string>
+  <!-- src_hash: f9b4ae7ff91a24038e3f73270f417b11fc59c13a -->
+  <string name="debug_system_resources">সিস্টেম রিসোর্স</string>
+  <!-- src_hash: 5d0e8e91b1c146d9cf2da0414516f8727da6eed3 -->
+  <string name="debug_platform">প্ল্যাটফর্ম</string>
+  <!-- src_hash: 22e4c1cb1483f9f305136ede43d75d09a97b66c0 -->
+  <string name="debug_multiplatform">মাল্টিপ্ল্যাটফর্ম</string>
+  <!-- src_hash: 404f0ef31826923ac9aa1f7ca9b23dedcb930bbf -->
+  <string name="debug_version">সংস্করণ</string>
+  <!-- src_hash: 36a3bbb2e56ce92daee3a8d7c3c16ba26b8a2d99 -->
+  <string name="debug_build_type">বিল্ডের ধরন</string>
+  <!-- src_hash: 7e2e19f1fa0a9b3665611d5553b280f2ec9eade4 -->
+  <string name="debug_build_type_debug">ডিবাগ</string>
+  <!-- src_hash: 08d0beee99b85152de67a8e499a9f0535ef27f65 -->
+  <string name="debug_simulation_mode">সিমুলেশন মোড</string>
+  <!-- src_hash: 142e7fff6f40f21e3d0c51e450586c90f1552dff -->
+  <string name="debug_simulation_disabled">নিষ্ক্রিয়</string>
+  <!-- src_hash: 36e3f44c6c5e91e4d000da35b6dcb1cf670b26da -->
+  <string name="debug_location_provider">অবস্থান প্রদানকারী</string>
+  <!-- src_hash: 0fa2f58f4443eff27cbf61693974de43392d1507 -->
+  <string name="debug_location_gps">GPS</string>
+  <!-- src_hash: 0b59786456a09cb49ff6230948e85305afc50bd5 -->
+  <string name="debug_network_status">নেটওয়ার্ক অবস্থা</string>
+  <!-- src_hash: 890c071ff06abd153c38d06123a3daad689c8159 -->
+  <string name="debug_network_connected">সংযুক্ত</string>
+  <!-- src_hash: 66bf2054972480015012048be3f211b8906cc2f9 -->
+  <string name="debug_memory_usage">মেমরি ব্যবহার</string>
+  <!-- src_hash: 65a9fcf91b70fae12dac291d332a9335a3597614 -->
+  <string name="debug_memory_calculating">গণনা করা হচ্ছে...</string>
+  <!-- src_hash: 1a9b622d826fccce575643cd600ca28b35330aae -->
+  <string name="debug_storage_available">স্টোরেজ উপলভ্য</string>
+  <!-- src_hash: 858302e07d3c3ffdc639039da3b13023ff5e60a3 -->
+  <string name="debug_storage_available_value">উপলভ্য</string>
+  <!-- src_hash: 5bb65df8e40b98916bd9a110898c9e7f7ff60c72 -->
+  <string name="debug_device_orientation">ডিভাইসের অভিমুখ</string>
+  <!-- src_hash: a8319bed2e56d59cfebb5b8d7abc61f9eeb725cc -->
+  <string name="debug_device_orientation_portrait">পোর্ট্রেট</string>
 </resources>

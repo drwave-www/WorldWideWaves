@@ -50,6 +50,10 @@ import kotlin.time.ExperimentalTime
 class SoundChoreographyCoordinator(
     private val coroutineScopeProvider: CoroutineScopeProvider = DefaultCoroutineScopeProvider(),
 ) : KoinComponent {
+    companion object {
+        private const val TAG = "SoundChoreographyCoordinator"
+    }
+
     @Suppress("UnusedPrivateProperty", "UnusedPrivateMember") // Injected for future clock-based features
     private val clock: IClock by inject()
     private val events: WWWEvents by inject()
@@ -57,10 +61,6 @@ class SoundChoreographyCoordinator(
     private var observationJob: Job? = null
     private var isActive = false
     private var isObservingAllEvents = false
-
-    companion object {
-        private const val TAG = "SoundChoreographyCoordinator"
-    }
 
     /**
      * Start observing all loaded events for area status and sound choreography.

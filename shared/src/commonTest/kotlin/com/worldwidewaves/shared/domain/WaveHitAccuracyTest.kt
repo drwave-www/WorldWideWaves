@@ -23,9 +23,9 @@
 
 package com.worldwidewaves.shared.domain
 
+import com.worldwidewaves.shared.events.geometry.PolygonOperations.containsPosition
 import com.worldwidewaves.shared.events.utils.GeoUtils.toRadians
 import com.worldwidewaves.shared.events.utils.Polygon
-import com.worldwidewaves.shared.events.utils.PolygonUtils.containsPosition
 import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.coroutines.test.runTest
 import kotlin.math.PI
@@ -258,6 +258,7 @@ class WaveHitAccuracyTest {
             testCases.forEach { (point, _) ->
                 val result = selfIntersectingPolygon.containsPosition(point)
                 // We just verify it doesn't crash and returns a boolean
+                @Suppress("USELESS_IS_CHECK")
                 assertTrue(result is Boolean, "Should return valid boolean for self-intersecting polygon")
             }
 
@@ -383,11 +384,13 @@ class WaveHitAccuracyTest {
             // Test with position at polygon boundary
             val boundaryPoint = Position(48.85, 2.35) // Vertex
             val boundaryResult = wavePolygon.containsPosition(boundaryPoint)
+            @Suppress("USELESS_IS_CHECK")
             assertTrue(boundaryResult is Boolean, "Boundary point should return valid boolean")
 
             // Test with position exactly on edge
             val edgePoint = Position(48.855, 2.35) // Midpoint of south edge
             val edgeResult = wavePolygon.containsPosition(edgePoint)
+            @Suppress("USELESS_IS_CHECK")
             assertTrue(edgeResult is Boolean, "Edge point should return valid boolean")
 
             println("✅ GPS signal loss scenarios handled correctly")

@@ -36,6 +36,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
@@ -50,12 +54,18 @@ private object IndicatorConstants {
 /**
  * Shared generic circular loading indicator with a message.
  * Works identically on both Android and iOS.
+ * Includes live region for accessibility announcements.
  */
 @Composable
 fun LoadingIndicator(message: String) {
     Column(
         horizontalAlignment = CenterHorizontally,
-        modifier = Modifier.padding(16.dp),
+        modifier =
+            Modifier
+                .padding(16.dp)
+                .semantics {
+                    liveRegion = LiveRegionMode.Polite
+                },
     ) {
         CircularProgressIndicator(
             modifier = Modifier.size(48.dp),
@@ -76,6 +86,7 @@ fun LoadingIndicator(message: String) {
 /**
  * Shared download progress indicator showing percentage, progress bar and cancel button.
  * Works identically on both Android and iOS.
+ * Includes live region for accessibility announcements at progress milestones (0%, 25%, 50%, 75%, 100%).
  */
 @Composable
 fun DownloadProgressIndicator(
@@ -83,15 +94,36 @@ fun DownloadProgressIndicator(
     message: String,
     onCancel: () -> Unit = {},
 ) {
+    // Determine announcement text for screen readers at key milestones
+    val announcementText =
+        when (progress) {
+            0 -> stringResource(MokoRes.strings.accessibility_download_starting)
+            25 -> stringResource(MokoRes.strings.accessibility_download_25_percent)
+            50 -> stringResource(MokoRes.strings.accessibility_download_50_percent)
+            75 -> stringResource(MokoRes.strings.accessibility_download_75_percent)
+            100 -> stringResource(MokoRes.strings.accessibility_download_complete)
+            else -> stringResource(MokoRes.strings.accessibility_download_percent, progress)
+        }
+
     Column(
         horizontalAlignment = CenterHorizontally,
-        modifier = Modifier.padding(16.dp),
+        modifier =
+            Modifier
+                .padding(16.dp)
+                .semantics {
+                    liveRegion = LiveRegionMode.Polite
+                },
     ) {
         // Show progress percentage
         Text(
             text = "$progress%",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary,
+            modifier =
+                Modifier.semantics {
+                    // Provide meaningful announcement text at milestones
+                    contentDescription = announcementText
+                },
         )
 
         Spacer(modifier = Modifier.height(8.dp))

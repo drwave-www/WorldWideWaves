@@ -7,10 +7,10 @@ TODAY :
 
 ---------------------------------------------
 
-prio 0: STRUCTURE TODO: (Run Claude under intellij terminal)
-docs/COMPREHENSIVE_PROJECT_ANALYSIS.md
-"ok, implement this, use agents, verify regularly that everything compiles and that all tests passes, do not stop until you resolved all the todo, do it on a branch"
-
+- ISSUE: MAP LOADING TIME
+- CEHCK INTENTs stacks, no need to stack all screens..
+- ICONE iOS size
+- size of drawable area top/bottom
 
 prios: IOS:
 - Terminer vagues / MapLibre
@@ -20,7 +20,7 @@ prios: IOS:
 - pousser sur Play Store
 
 
-prio 1: terminaer vagues / MapLibre
+==> prio 1: terminer vagues / MapLibre
 -->
   iOS_MAP_IMPLEMENTATION_STATUS.md (470 lines):
   - Executive summary with completion percentages
@@ -38,6 +38,10 @@ prio 1: terminaer vagues / MapLibre
   - Debug tips and common issues
   - Critical constraint reminders (iOS deadlock rules)
 --
+
+===> prio 2: implement TODO_ACCESSIBILITY.md + TODO_FIREBASE_UI.md
+
+
 
 
 ANDROID:
