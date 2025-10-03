@@ -36,7 +36,7 @@ import kotlin.time.Instant
 import kotlin.time.Instant.Companion.DISTANT_FUTURE
 
 /**
- * Default implementation of EventStateManager.
+ * Default implementation of EventStateHolder.
  *
  * This implementation encapsulates the complex state calculation logic that was previously
  * scattered throughout WWWEventObserver, providing:
@@ -45,11 +45,11 @@ import kotlin.time.Instant.Companion.DISTANT_FUTURE
  * - Consistent state validation
  * - Proper error handling and logging
  */
-class DefaultEventStateManager(
+class DefaultEventStateHolder(
     private val waveProgressionTracker: WaveProgressionTracker,
     @Suppress("UnusedPrivateProperty") // Injected for timing-critical state calculations
     private val clock: IClock,
-) : EventStateManager {
+) : EventStateHolder {
     override suspend fun calculateEventState(
         event: IWWWEvent,
         input: EventStateInput,
@@ -72,7 +72,7 @@ class DefaultEventStateManager(
         try {
             waveProgressionTracker.recordProgressionSnapshot(event, input.userPosition)
         } catch (e: Exception) {
-            Log.e("DefaultEventStateManager", "Error recording progression snapshot: $e")
+            Log.e("DefaultEventStateHolder", "Error recording progression snapshot: $e")
         }
 
         return EventState(
@@ -247,7 +247,7 @@ class DefaultEventStateManager(
         try {
             event.warming.isUserWarmingStarted()
         } catch (e: Exception) {
-            Log.e("DefaultEventStateManager", "Error checking warming phase: $e")
+            Log.e("DefaultEventStateHolder", "Error checking warming phase: $e")
             false
         }
 
@@ -261,7 +261,7 @@ class DefaultEventStateManager(
         try {
             currentTime > event.getStartDateTime() && currentTime < event.getWaveStartDateTime()
         } catch (e: Exception) {
-            Log.e("DefaultEventStateManager", "Error checking start warming phase: $e")
+            Log.e("DefaultEventStateHolder", "Error checking start warming phase: $e")
             false
         }
 

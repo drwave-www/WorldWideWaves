@@ -26,8 +26,8 @@ import com.worldwidewaves.shared.domain.observation.PositionObserver
 import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
 import com.worldwidewaves.shared.domain.scheduling.ObservationScheduler
 import com.worldwidewaves.shared.domain.state.EventState
+import com.worldwidewaves.shared.domain.state.EventStateHolder
 import com.worldwidewaves.shared.domain.state.EventStateInput
-import com.worldwidewaves.shared.domain.state.EventStateManager
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
@@ -200,7 +200,7 @@ class WWWEventObserver(
 
     private val positionObserver: PositionObserver by inject()
 
-    private val eventStateManager: EventStateManager by inject()
+    private val eventStateHolder: EventStateHolder by inject()
 
     private val observationScheduler: ObservationScheduler by inject()
 
@@ -636,23 +636,23 @@ class WWWEventObserver(
             )
 
         try {
-            // Calculate event state using EventStateManager
+            // Calculate event state using EventStateHolder
             val calculatedState =
-                eventStateManager.calculateEventState(
+                eventStateHolder.calculateEventState(
                     event = event,
                     input = stateInput,
                     userIsInArea = userIsInArea,
                 )
 
             // Validate the calculated state
-            val validationIssues = eventStateManager.validateState(stateInput, calculatedState)
+            val validationIssues = eventStateHolder.validateState(stateInput, calculatedState)
             if (validationIssues.isNotEmpty()) {
                 Log.w("WWWEventObserver", "State validation issues found: ${validationIssues.joinToString(", ")}")
             }
 
             // Validate state transitions
             val currentState = getCurrentEventState()
-            val transitionIssues = eventStateManager.validateStateTransition(currentState, calculatedState)
+            val transitionIssues = eventStateHolder.validateStateTransition(currentState, calculatedState)
             if (transitionIssues.isNotEmpty()) {
                 Log.w("WWWEventObserver", "State transition issues found: ${transitionIssues.joinToString(", ")}")
             }

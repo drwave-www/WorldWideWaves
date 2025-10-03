@@ -28,8 +28,8 @@ import com.worldwidewaves.shared.domain.progression.DefaultWaveProgressionTracke
 import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
 import com.worldwidewaves.shared.domain.scheduling.DefaultObservationScheduler
 import com.worldwidewaves.shared.domain.scheduling.ObservationScheduler
-import com.worldwidewaves.shared.domain.state.DefaultEventStateManager
-import com.worldwidewaves.shared.domain.state.EventStateManager
+import com.worldwidewaves.shared.domain.state.DefaultEventStateHolder
+import com.worldwidewaves.shared.domain.state.EventStateHolder
 import com.worldwidewaves.shared.events.config.DefaultEventsConfigurationProvider
 import com.worldwidewaves.shared.events.config.EventsConfigurationProvider
 import com.worldwidewaves.shared.events.data.DefaultGeoJsonDataProvider
@@ -142,13 +142,13 @@ val helpersModule =
          * **Scope**: Singleton - single observer for all position-based logic
          * **Thread-safety**: Yes - uses coroutine-based observation
          * **Lifecycle**: Lives for entire app lifecycle
-         * **Dependencies**: PositionManager, WaveProgressionTracker, EventStateManager
+         * **Dependencies**: PositionManager, WaveProgressionTracker, EventStateHolder
          *
          * PositionObserver is the core of wave detection logic:
          * - Monitors user position via PositionManager.positionFlow
          * - Detects when user crosses wave boundaries
          * - Triggers events when user "catches" a wave
-         * - Coordinates with EventStateManager for state updates
+         * - Coordinates with EventStateHolder for state updates
          *
          * This is the unified observer replacing multiple separate observation streams.
          *
@@ -157,21 +157,21 @@ val helpersModule =
         single<PositionObserver> { DefaultPositionObserver(get(), get(), get()) }
 
         /**
-         * Provides [EventStateManager] for managing event lifecycle state.
+         * Provides [EventStateHolder] for managing event lifecycle state.
          *
-         * **Scope**: Singleton - single state manager for all events
+         * **Scope**: Singleton - single state holder for all events
          * **Thread-safety**: Yes - uses StateFlow for state updates
          * **Lifecycle**: Lives for entire app lifecycle
          * **Dependencies**: WaveProgressionTracker, ObservationScheduler
          *
-         * EventStateManager coordinates event state transitions:
+         * EventStateHolder coordinates event state transitions:
          * - Scheduled -> Observing -> Active -> Completed
          * - Manages observation start/stop scheduling
          * - Coordinates cleanup of completed events
          *
-         * @see EventStateManager for state management API
+         * @see EventStateHolder for state management API
          */
-        single<EventStateManager> { DefaultEventStateManager(get(), get()) }
+        single<EventStateHolder> { DefaultEventStateHolder(get(), get()) }
 
         /**
          * Provides [ObservationScheduler] for scheduling observation windows.
