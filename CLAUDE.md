@@ -602,6 +602,7 @@ When working on WorldWideWaves:
 4. **Document Changes**: Update documentation for significant changes
 5. **Performance First**: Consider performance implications of all changes
 6. **Security Always**: Never compromise on security requirements
+7. **Documentation update**: When you change a file then scan it to keep its documentation up-to-date once finished
 
 ---
 
