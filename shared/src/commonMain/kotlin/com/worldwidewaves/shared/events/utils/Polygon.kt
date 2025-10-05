@@ -31,6 +31,12 @@ open class Polygon(
     position: Position? = null,
 ) : Iterable<Position> { // Not thread-safe
 
+    companion object {
+        fun fromPositions(vararg positions: Position): Polygon = Polygon().apply { positions.forEach { add(it) } }
+
+        fun fromPositions(positions: List<Position>): Polygon = Polygon().apply { positions.forEach { add(it) } }
+    }
+
     internal var head: Position? = null
     internal var tail: Position? = null
     internal val cutPositions = mutableSetOf<CutPosition>()
@@ -55,12 +61,6 @@ open class Polygon(
     // --------------------------------
 
     open fun createNew(): Polygon = Polygon() // Ensure the right type is created
-
-    companion object {
-        fun fromPositions(vararg positions: Position): Polygon = Polygon().apply { positions.forEach { add(it) } }
-
-        fun fromPositions(positions: List<Position>): Polygon = Polygon().apply { positions.forEach { add(it) } }
-    }
 
     // --------------------------------
 
