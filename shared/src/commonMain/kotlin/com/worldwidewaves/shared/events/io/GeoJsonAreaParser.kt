@@ -242,6 +242,7 @@ object GeoJsonAreaParser {
         }
     }
 
+    @Suppress("UnusedParameter") // eventId reserved for future logging/debugging
     private fun processRing(
         eventId: String,
         ring: JsonElement,

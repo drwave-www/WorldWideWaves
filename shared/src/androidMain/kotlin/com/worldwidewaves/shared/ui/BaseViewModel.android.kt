@@ -25,6 +25,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
 
+@Suppress("MatchingDeclarationName") // Platform-specific actual implementation matches expect declaration
 actual abstract class BaseViewModel : ViewModel() {
     protected actual val scope: CoroutineScope = viewModelScope
 

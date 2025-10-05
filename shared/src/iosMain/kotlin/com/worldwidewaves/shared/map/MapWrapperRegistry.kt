@@ -35,6 +35,7 @@ import kotlin.native.ref.WeakReference
 object MapWrapperRegistry {
     private const val TAG = "MapWrapperRegistry"
     private const val MAX_CACHED_WRAPPERS = 3
+    private const val MILLISECONDS_PER_SECOND = 1000
 
     /**
      * Entry in the LRU cache with timestamp for tracking access order.
@@ -111,7 +112,7 @@ object MapWrapperRegistry {
         }
 
         // Update last accessed time for LRU
-        entry.lastAccessed = (NSDate().timeIntervalSince1970 * 1000).toLong()
+        entry.lastAccessed = (NSDate().timeIntervalSince1970 * MILLISECONDS_PER_SECOND).toLong()
 
         val wrapper = entry.weakRef.get()
         if (wrapper == null) {

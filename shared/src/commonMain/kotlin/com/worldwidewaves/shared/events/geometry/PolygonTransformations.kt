@@ -707,6 +707,7 @@ object PolygonTransformations {
         insertIntermediatePoints(polygon, anchor1Pos, anchor2Pos, between)
     }
 
+    @Suppress("UnusedParameter") // anchor2Pos used for validation but not in insertion logic
     private fun insertIntermediatePoints(
         polygon: Polygon,
         anchor1Pos: Int,

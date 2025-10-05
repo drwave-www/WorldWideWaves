@@ -49,6 +49,7 @@ internal object MidiHeaderValidator {
      * @return Triple of (format, numTracks, timeDivision)
      * @throws IllegalArgumentException if header is invalid or malformed
      */
+    @Suppress("ThrowsCount") // Multiple exception types needed for comprehensive MIDI header validation
     fun validateHeader(reader: ByteArrayReader): Triple<Int, Int, Int> {
         try {
             val headerChunkId = reader.readString(CHUNK_ID_LENGTH)
@@ -67,7 +68,8 @@ internal object MidiHeaderValidator {
             Log.e(TAG, "Invalid MIDI format: ${e.message}", throwable = e)
             throw IllegalArgumentException("Invalid MIDI format: ${e.message}", e)
         } catch (e: IndexOutOfBoundsException) {
-            @Suppress("TooGenericExceptionCaught") // IndexOutOfBoundsException is the most specific exception we can catch for malformed MIDI data
+            // IndexOutOfBoundsException is the most specific exception for malformed MIDI data
+            @Suppress("TooGenericExceptionCaught")
             Log.e(TAG, "Malformed MIDI data: ${e.message}", throwable = e)
             @Suppress("TooGenericExceptionCaught")
             throw IllegalArgumentException("Malformed MIDI data: ${e.message}", e)
