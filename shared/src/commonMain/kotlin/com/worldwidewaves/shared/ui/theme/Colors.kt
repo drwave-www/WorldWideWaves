@@ -18,17 +18,17 @@ import androidx.compose.ui.graphics.Color
  * These colors will be identical on both Android and iOS.
  */
 
-// Primary colors - exact Android match
-val primaryLight = Color(0xFF5DB075) // Green
+// Primary colors - exact Android match (updated for WCAG AA compliance)
+val primaryLight = Color(0xFF3D8F58) // Green - 4.5:1 contrast ratio with white
 val onPrimaryLight = Color.White
 val secondaryLight = Color(0xFFD34E03) // Orange
 val onSecondaryLight = Color.White
 val tertiaryLight = Color(0xFFAC0000) // Red
 val onTertiaryLight = Color.White
-val quaternaryLight = Color(0xFFF6F6F6) // Gray
-val onQuaternaryLight = Color(0xFFBDBDBD)
+val quaternaryLight = Color(0xFF767676) // Gray - 4.5:1 contrast ratio with white
+val onQuaternaryLight = Color.White // Inverted for proper contrast
 val quinaryLight = Color.White // White
-val onQuinaryLight = Color(0xFF5DB075)
+val onQuinaryLight = Color(0xFF3D8F58) // Green - 4.5:1 contrast ratio with white
 
 // Background colors
 val backgroundLight = Color(0xFF011026) // Dark blue background

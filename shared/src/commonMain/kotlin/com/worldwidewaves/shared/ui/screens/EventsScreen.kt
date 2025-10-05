@@ -57,6 +57,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -274,13 +282,20 @@ private fun SelectorBox(
     fontWeight: FontWeight,
     text: String,
 ) {
+    val isSelected = fontWeight == FontWeight.Bold
     Box(
         modifier =
             modifier
                 .clip(RoundedCornerShape(EventsList.SELECTOR_ROUND.dp))
                 .height(EventsList.SELECTOR_HEIGHT.dp)
                 .background(backgroundColor)
-                .clickable { onClick() },
+                .clickable { onClick() }
+                .semantics {
+                    role = Role.Tab
+                    contentDescription = text
+                    selected = isSelected
+                    stateDescription = if (isSelected) "Selected" else "Not selected"
+                },
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -346,11 +361,16 @@ private fun Event(
     setEventFavorite: SetEventFavorite?,
     modifier: Modifier = Modifier,
 ) {
+    val eventLocation = stringResource(event.getLocation())
     Column(
         modifier =
-            modifier.clickable {
-                onEventClick(event.id)
-            },
+            modifier
+                .clickable {
+                    onEventClick(event.id)
+                }.semantics {
+                    role = Role.Button
+                    contentDescription = "Event in $eventLocation"
+                },
     ) {
         EventOverlay(event, isMapInstalled, starredSelected, setEventFavorite)
         EventLocationAndDate(event)
@@ -474,16 +494,21 @@ private fun EventOverlayMapDownloaded(
                     ),
             contentAlignment = Alignment.BottomEnd,
         ) {
-            Image(
+            Box(
                 modifier =
                     Modifier
-                        .size(EventsList.MAPDL_IMAGE_SIZE.dp)
+                        .size(48.dp)
                         .clickable {
                             // NOTE: Map uninstall dialog implementation pending
                         },
-                painter = painterResource(Res.drawable.downloaded_icon),
-                contentDescription = stringResource(MokoRes.strings.map_downloaded),
-            )
+                contentAlignment = Alignment.Center,
+            ) {
+                Image(
+                    modifier = Modifier.size(EventsList.MAPDL_IMAGE_SIZE.dp),
+                    painter = painterResource(Res.drawable.downloaded_icon),
+                    contentDescription = stringResource(MokoRes.strings.map_downloaded),
+                )
+            }
         }
     }
 }
@@ -531,28 +556,38 @@ private fun EventOverlayFavorite(
                 ),
         contentAlignment = Alignment.BottomEnd,
     ) {
-        Surface(
-            modifier = Modifier.clip(CircleShape),
-            color = MaterialTheme.colorScheme.primary,
+        Box(
+            modifier =
+                Modifier
+                    .size(48.dp)
+                    .clickable {
+                        setEventFavorite?.let {
+                            pendingFavoriteToggle = true
+                        }
+                    }.semantics {
+                        role = Role.Checkbox
+                        contentDescription = "Favorite"
+                        toggleableState = if (isFavorite) ToggleableState.On else ToggleableState.Off
+                        stateDescription = if (isFavorite) "Favorited" else "Not favorited"
+                    },
+            contentAlignment = Alignment.Center,
         ) {
-            Image(
-                modifier =
-                    Modifier
-                        .size(EventsList.FAVS_IMAGE_SIZE.dp)
-                        .clickable {
-                            setEventFavorite?.let {
-                                pendingFavoriteToggle = true
-                            }
-                        },
-                painter =
-                    painterResource(
-                        if (isFavorite) Res.drawable.favorite_on else Res.drawable.favorite_off,
-                    ),
-                contentDescription =
-                    stringResource(
-                        if (isFavorite) MokoRes.strings.event_favorite_on else MokoRes.strings.event_favorite_off,
-                    ),
-            )
+            Surface(
+                modifier = Modifier.clip(CircleShape),
+                color = MaterialTheme.colorScheme.primary,
+            ) {
+                Image(
+                    modifier = Modifier.size(EventsList.FAVS_IMAGE_SIZE.dp),
+                    painter =
+                        painterResource(
+                            if (isFavorite) Res.drawable.favorite_on else Res.drawable.favorite_off,
+                        ),
+                    contentDescription =
+                        stringResource(
+                            if (isFavorite) MokoRes.strings.event_favorite_on else MokoRes.strings.event_favorite_off,
+                        ),
+                )
+            }
         }
     }
 }

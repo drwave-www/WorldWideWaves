@@ -30,6 +30,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
@@ -83,6 +88,7 @@ fun ButtonWave(
         label = "alpha",
     )
 
+    val buttonText = stringResource(MokoRes.strings.wave_now)
     Surface(
         color = if (isEnabled) MaterialTheme.colorScheme.primary else Color.Gray,
         modifier =
@@ -92,14 +98,19 @@ fun ButtonWave(
                 .alpha(if (isEnabled) alpha else 1f) // Apply blinking only when enabled
                 .clickable(enabled = isEnabled, onClick = {
                     onNavigateToWave.navigateToWave(eventId)
-                }),
+                })
+                .semantics {
+                    role = Role.Button
+                    contentDescription = buttonText
+                    stateDescription = if (isEnabled) "Active" else "Disabled"
+                },
     ) {
         Text(
             modifier =
                 Modifier
                     .fillMaxSize()
                     .wrapContentHeight(align = Alignment.CenterVertically),
-            text = stringResource(MokoRes.strings.wave_now),
+            text = buttonText,
             style =
                 sharedExtraBoldTextStyle(Event.WAVEBUTTON_FONTSIZE).copy(
                     color = if (isEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,

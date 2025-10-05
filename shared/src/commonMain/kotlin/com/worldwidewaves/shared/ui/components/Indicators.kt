@@ -36,6 +36,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
@@ -50,12 +54,18 @@ private object IndicatorConstants {
 /**
  * Shared generic circular loading indicator with a message.
  * Works identically on both Android and iOS.
+ * Includes live region for accessibility announcements.
  */
 @Composable
 fun LoadingIndicator(message: String) {
     Column(
         horizontalAlignment = CenterHorizontally,
-        modifier = Modifier.padding(16.dp),
+        modifier =
+            Modifier
+                .padding(16.dp)
+                .semantics {
+                    liveRegion = LiveRegionMode.Polite
+                },
     ) {
         CircularProgressIndicator(
             modifier = Modifier.size(48.dp),
@@ -76,6 +86,7 @@ fun LoadingIndicator(message: String) {
 /**
  * Shared download progress indicator showing percentage, progress bar and cancel button.
  * Works identically on both Android and iOS.
+ * Includes live region for accessibility announcements at progress milestones (0%, 25%, 50%, 75%, 100%).
  */
 @Composable
 fun DownloadProgressIndicator(
@@ -83,15 +94,36 @@ fun DownloadProgressIndicator(
     message: String,
     onCancel: () -> Unit = {},
 ) {
+    // Determine announcement text for screen readers at key milestones
+    val announcementText =
+        when (progress) {
+            0 -> "Download starting"
+            25 -> "Download 25 percent complete"
+            50 -> "Download 50 percent complete"
+            75 -> "Download 75 percent complete"
+            100 -> "Download complete"
+            else -> "$progress percent"
+        }
+
     Column(
         horizontalAlignment = CenterHorizontally,
-        modifier = Modifier.padding(16.dp),
+        modifier =
+            Modifier
+                .padding(16.dp)
+                .semantics {
+                    liveRegion = LiveRegionMode.Polite
+                },
     ) {
         // Show progress percentage
         Text(
             text = "$progress%",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary,
+            modifier =
+                Modifier.semantics {
+                    // Provide meaningful announcement text at milestones
+                    contentDescription = announcementText
+                },
         )
 
         Spacer(modifier = Modifier.height(8.dp))

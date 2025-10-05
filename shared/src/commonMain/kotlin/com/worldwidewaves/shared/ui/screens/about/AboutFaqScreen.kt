@@ -48,6 +48,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -126,10 +128,11 @@ fun AboutFaqScreen(
             Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
             Text(
                 modifier =
-                    Modifier.onGloballyPositioned { coordinates ->
-                        // Save the position of the FAQ section
-                        scrollToFAQPosition = coordinates.positionInRoot().y
-                    },
+                    Modifier
+                        .onGloballyPositioned { coordinates ->
+                            // Save the position of the FAQ section
+                            scrollToFAQPosition = coordinates.positionInRoot().y
+                        }.semantics { heading() },
                 text = stringResource(MokoRes.strings.faq),
                 style = sharedExtraBoldTextStyle(FAQ.TITLE_FONTSIZE),
             )
@@ -164,7 +167,10 @@ private const val SPACER_SMALL_SIZE = 10f
 private fun FAQTitle(scrollToFAQPosition: () -> Unit) {
     Row(modifier = Modifier.fillMaxWidth()) {
         Text(
-            modifier = Modifier.fillMaxWidth(LAYOUT_HALF_WIDTH),
+            modifier =
+                Modifier
+                    .fillMaxWidth(LAYOUT_HALF_WIDTH)
+                    .semantics { heading() },
             text = stringResource(MokoRes.strings.warn_rules_security_title),
             style =
                 sharedExtraPrimaryColoredBoldTextStyle(FAQ.SECTION_TITLE_FONTSIZE).copy(
