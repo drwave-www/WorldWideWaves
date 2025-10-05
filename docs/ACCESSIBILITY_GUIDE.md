@@ -491,6 +491,7 @@ actual fun rememberDynamicTypeScale(): Float {
 
 ### Internal Documentation
 - [iOS Map Accessibility](./iOS_MAP_ACCESSIBILITY.md)
+- [iOS Semantic Bridging](./IOS_SEMANTIC_BRIDGING.md) - Compose → iOS accessibility mapping
 - [Testing Strategy](./TESTING_STRATEGY.md)
 - [UI Testing Guide](./UI_TESTING_GUIDE.md)
 
