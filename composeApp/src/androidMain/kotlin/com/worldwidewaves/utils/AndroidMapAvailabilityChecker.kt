@@ -41,7 +41,7 @@ import kotlin.coroutines.resume
  * Uses a reactive approach with StateFlow to notify observers of changes.
  * Automatically listens for module installation events.
  */
-class MapAvailabilityCheckerAndroid(
+class AndroidMapAvailabilityChecker(
     val context: Context,
 ) : MapAvailabilityChecker {
     /** Log tag used throughout this helper for easy filtering. */
@@ -78,7 +78,7 @@ class MapAvailabilityCheckerAndroid(
             SplitInstallStateUpdatedListener { state ->
                 when (state.status()) {
                     SplitInstallSessionStatus.INSTALLED -> {
-                        Log.d(::MapAvailabilityCheckerAndroid.name, "Module installation completed")
+                        Log.d(::AndroidMapAvailabilityChecker.name, "Module installation completed")
                         Log.d(
                             TAG,
                             "session=${state.sessionId()} INSTALLED modules=${state.moduleNames()}",
@@ -94,7 +94,7 @@ class MapAvailabilityCheckerAndroid(
                         refreshAvailability()
                     }
                     SplitInstallSessionStatus.FAILED -> {
-                        Log.d(::MapAvailabilityCheckerAndroid.name, "Module installation failed: ${state.errorCode()}")
+                        Log.d(::AndroidMapAvailabilityChecker.name, "Module installation failed: ${state.errorCode()}")
                         Log.w(
                             TAG,
                             "session=${state.sessionId()} FAILED code=${state.errorCode()}",
@@ -102,7 +102,7 @@ class MapAvailabilityCheckerAndroid(
                         refreshAvailability()
                     }
                     SplitInstallSessionStatus.CANCELED -> {
-                        Log.d(::MapAvailabilityCheckerAndroid.name, "Module installation canceled")
+                        Log.d(::AndroidMapAvailabilityChecker.name, "Module installation canceled")
                         Log.i(TAG, "session=${state.sessionId()} CANCELED")
                         refreshAvailability()
                     }
@@ -133,7 +133,7 @@ class MapAvailabilityCheckerAndroid(
      */
     override fun refreshAvailability() {
         val installedModules = splitInstallManager.installedModules
-        Log.d(::MapAvailabilityCheckerAndroid.name, "Refreshing availability. Installed modules: $installedModules")
+        Log.d(::AndroidMapAvailabilityChecker.name, "Refreshing availability. Installed modules: $installedModules")
         Log.d(TAG, "queried=$queriedMaps forcedUnavailable=$forcedUnavailable")
 
         // Build updated state map

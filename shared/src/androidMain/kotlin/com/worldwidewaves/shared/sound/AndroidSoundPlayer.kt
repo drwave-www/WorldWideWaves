@@ -109,7 +109,7 @@ class AudioBufferAndroid(
 /**
  * Android implementation of SoundPlayer using AudioTrack
  */
-class SoundPlayerAndroid(
+class AndroidSoundPlayer(
     private val context: Context,
 ) : SoundPlayer,
     VolumeController {

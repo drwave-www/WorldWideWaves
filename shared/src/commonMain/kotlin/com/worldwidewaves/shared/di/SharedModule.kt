@@ -41,7 +41,7 @@ package com.worldwidewaves.shared.di
  * - **iOS**: Loaded in SceneDelegate via initKoin(modules = sharedModule)
  *
  * Platform-specific modules are loaded separately:
- * - Android: AndroidModule (added via modules(...) after startKoin)
+ * - Android: androidModule (added via modules(...) after startKoin)
  * - iOS: IosModule (added via modules(...) after initKoin)
  *
  * ## Thread Safety

@@ -77,7 +77,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.R
 import com.worldwidewaves.activities.event.EventFullMapActivity
-import com.worldwidewaves.map.MapLibreAdapterAndroid
+import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Timing
 import com.worldwidewaves.shared.events.IWWWEvent
@@ -92,8 +92,8 @@ import com.worldwidewaves.shared.toMapLibrePolygon
 import com.worldwidewaves.shared.ui.components.DownloadProgressIndicator
 import com.worldwidewaves.shared.ui.components.LoadingIndicator
 import com.worldwidewaves.utils.AndroidLocationProvider
+import com.worldwidewaves.utils.AndroidMapAvailabilityChecker
 import com.worldwidewaves.utils.CheckGPSEnable
-import com.worldwidewaves.utils.MapAvailabilityCheckerAndroid
 import com.worldwidewaves.utils.requestLocationPermission
 import com.worldwidewaves.viewmodels.AndroidMapViewModel
 import dev.icerock.moko.resources.compose.stringResource
@@ -161,14 +161,14 @@ class AndroidEventMap(
 
     // Overrides properties from AbstractEventMap
     override val locationProvider: LocationProvider by inject(AndroidLocationProvider::class.java)
-    override val mapLibreAdapter: MapLibreAdapterAndroid by lazy { MapLibreAdapterAndroid() }
+    override val mapLibreAdapter: AndroidMapLibreAdapter by lazy { AndroidMapLibreAdapter() }
 
     /** Holds the last [MapLibreMap] provided by MapView so we can (re-)enable
      *  the location component whenever permission or provider state changes. */
     private var currentMap: MapLibreMap? = null
 
     // Map availability and download state tracking
-    private val mapAvailabilityChecker: MapAvailabilityCheckerAndroid by inject(MapAvailabilityCheckerAndroid::class.java)
+    private val mapAvailabilityChecker: AndroidMapAvailabilityChecker by inject(AndroidMapAvailabilityChecker::class.java)
 
     /**
      * Setup map state variables and return them as a data class
