@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.domain.observation.PositionObserver
 import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
 import com.worldwidewaves.shared.domain.scheduling.ObservationScheduler
@@ -33,30 +32,15 @@ import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.position.PositionManager
 import com.worldwidewaves.shared.utils.Log
-import com.worldwidewaves.shared.utils.extensions.updateIfChanged
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
 import kotlin.coroutines.cancellation.CancellationException
-import kotlin.math.abs
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.INFINITE
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
-import kotlin.time.Instant.Companion.DISTANT_FUTURE
 
 // ---------------------------
 
@@ -191,73 +175,243 @@ class WWWEventObserver(
     )
 
     private val clock: IClock by inject()
-
     private val coroutineScopeProvider: CoroutineScopeProvider by inject()
-
     private val positionManager: PositionManager by inject()
-
     private val waveProgressionTracker: WaveProgressionTracker by inject()
-
     private val positionObserver: PositionObserver by inject()
-
     private val eventStateHolder: EventStateHolder by inject()
-
     private val observationScheduler: ObservationScheduler by inject()
 
-    private val _eventStatus = MutableStateFlow(Status.UNDEFINED)
-    val eventStatus: StateFlow<Status> = _eventStatus.asStateFlow()
-
-    private val _progression = MutableStateFlow(0.0)
-    val progression: StateFlow<Double> = _progression.asStateFlow()
-
-    private val _isUserWarmingInProgress = MutableStateFlow(false)
-    val isUserWarmingInProgress: StateFlow<Boolean> = _isUserWarmingInProgress.asStateFlow()
-
-    private val _isStartWarmingInProgress = MutableStateFlow(false)
-    val isStartWarmingInProgress: StateFlow<Boolean> = _isStartWarmingInProgress.asStateFlow()
-
-    private val _userIsGoingToBeHit = MutableStateFlow(false)
-    val userIsGoingToBeHit: StateFlow<Boolean> = _userIsGoingToBeHit.asStateFlow()
-
-    private val _userHasBeenHit = MutableStateFlow(false)
-    val userHasBeenHit: StateFlow<Boolean> = _userHasBeenHit.asStateFlow()
-
-    private val _userPositionRatio = MutableStateFlow(0.0)
-    val userPositionRatio: StateFlow<Double> = _userPositionRatio.asStateFlow()
-
-    private val _timeBeforeHit = MutableStateFlow(INFINITE)
-    val timeBeforeHit: StateFlow<Duration> = _timeBeforeHit.asStateFlow()
-
-    private val _hitDateTime = MutableStateFlow(DISTANT_FUTURE)
-    val hitDateTime: StateFlow<Instant> = _hitDateTime.asStateFlow()
-
-    private val _userIsInArea = MutableStateFlow(false)
-    val userIsInArea: StateFlow<Boolean> = _userIsInArea.asStateFlow()
-
-    // -- Performance optimization: Area detection optimization (cache variables removed for test compatibility)
-
-    // -- Performance optimization: Smart throttling for state updates
+    // -- Specialized Components (Facade Pattern) --
 
     /**
-     * Thresholds for smart state update throttling.
-     * Only emit updates when changes exceed these thresholds to reduce unnecessary UI updates.
+     * Core observation lifecycle manager.
+     * Handles observation flow creation and coordination.
      */
-    private companion object {
-        const val PROGRESSION_THRESHOLD = 0.1 // Only update progression if change is > 0.1%
-        const val POSITION_RATIO_THRESHOLD = 0.01 // Only update position ratio if change is > 1%
-
-        // Normal phase: update time if change is > 1 second (adaptive to 50ms during critical hit phase)
-        const val TIME_THRESHOLD_MS = 1000L
+    private val eventObserver: com.worldwidewaves.shared.domain.observation.EventObserver by lazy {
+        com.worldwidewaves.shared.domain.observation.EventObserver(
+            event = event,
+            clock = clock,
+            coroutineScopeProvider = coroutineScopeProvider,
+            positionManager = positionManager,
+            waveProgressionTracker = waveProgressionTracker,
+            positionObserver = positionObserver,
+            observationScheduler = observationScheduler,
+        )
     }
 
-    // Cache last emitted values for throttling
-    private var lastEmittedProgression: Double = -1.0
-    private var lastEmittedPositionRatio: Double = -1.0
-    private var lastEmittedTimeBeforeHit: Duration = INFINITE
+    /**
+     * Wave hit detection and state calculation.
+     * Uses EventStateHolder for all calculations.
+     */
+    private val waveHitDetector: com.worldwidewaves.shared.domain.detection.WaveHitDetector by lazy {
+        com.worldwidewaves.shared.domain.detection.WaveHitDetector(
+            eventStateHolder = eventStateHolder,
+            clock = clock,
+            positionManager = positionManager,
+        )
+    }
+
+    /**
+     * StateFlow management with smart throttling.
+     * Reduces state updates by ~80%.
+     */
+    private val progressionState =
+        com.worldwidewaves.shared.domain.state
+            .EventProgressionState()
+
+    /**
+     * Position tracking for events.
+     * Handles area detection logic.
+     */
+    private val positionTracker: com.worldwidewaves.shared.domain.observation.EventPositionTracker by lazy {
+        com.worldwidewaves.shared.domain.observation.EventPositionTracker(
+            positionManager = positionManager,
+            waveProgressionTracker = waveProgressionTracker,
+        )
+    }
+
+    // -- Public StateFlow API (unchanged) --
+
+    val eventStatus: StateFlow<Status> = progressionState.eventStatus
+    val progression: StateFlow<Double> = progressionState.progression
+    val isUserWarmingInProgress: StateFlow<Boolean> = progressionState.isUserWarmingInProgress
+    val isStartWarmingInProgress: StateFlow<Boolean> = progressionState.isStartWarmingInProgress
+    val userIsGoingToBeHit: StateFlow<Boolean> = progressionState.userIsGoingToBeHit
+    val userHasBeenHit: StateFlow<Boolean> = progressionState.userHasBeenHit
+    val userPositionRatio: StateFlow<Double> = progressionState.userPositionRatio
+    val timeBeforeHit: StateFlow<Duration> = progressionState.timeBeforeHit
+    val hitDateTime: StateFlow<Instant> = progressionState.hitDateTime
+    val userIsInArea: StateFlow<Boolean> = progressionState.userIsInArea
 
     private var unifiedObservationJob: Job? = null
 
-    // ---------------------------
+    /**
+     * Starts observing the wave event if not already started.
+     *
+     * This method delegates to specialized components:
+     * 1. EventObserver - manages observation lifecycle
+     * 2. WaveHitDetector - calculates event state
+     * 3. EventProgressionState - manages StateFlow with throttling
+     * 4. EventPositionTracker - handles area detection
+     */
+    fun startObservation() {
+        if (unifiedObservationJob == null) {
+            coroutineScopeProvider.launchDefault {
+                Log.v("WWWEventObserver", "Starting unified observation for event ${event.id}")
+
+                try {
+                    // Initialize state immediately
+                    initializeEventState()
+
+                    // Start observation using EventObserver component
+                    eventObserver.startObservation(
+                        onStateUpdate = { observation ->
+                            updateStates(observation.progression, observation.status)
+                        },
+                        onAreaUpdate = { isInArea ->
+                            progressionState.updateUserIsInArea(isInArea)
+                        },
+                        onPositionUpdate = {
+                            updateAreaDetection()
+                        },
+                        onPolygonLoad = { isLoaded ->
+                            if (isLoaded) {
+                                Log.v("WWWEventObserver", "Polygons loaded, updating area detection for event ${event.id}")
+                                updateAreaDetection()
+                            }
+                        },
+                    )
+                } catch (e: IllegalStateException) {
+                    handleInitializationStateError(e)
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    handleCancellationException(e)
+                }
+            }
+        }
+    }
+
+    /**
+     * Initializes event state with current values using WaveHitDetector
+     */
+    private suspend fun initializeEventState() {
+        val currentStatus = getEventStatusSafely(event)
+        val currentProgression = calculateProgressionSafely(event)
+        Log.v("WWWEventObserver", "Initial state: status=$currentStatus, progression=$currentProgression")
+        updateStates(currentProgression, currentStatus)
+    }
+
+    /**
+     * Handles initialization state errors
+     */
+    private fun handleInitializationStateError(e: IllegalStateException) {
+        if (e.message?.contains("Flow context cannot contain job") == true) {
+            Log.i("WWWEventObserver", "Feature map not yet downloaded for event ${event.id}")
+        } else {
+            Log.e("WWWEventObserver", "State error starting observation for event ${event.id}: ${e.message}")
+        }
+    }
+
+    fun stopObservation() {
+        eventObserver.stopObservation()
+    }
+
+    /**
+     * Updates all state flows based on the current event state.
+     * Delegates to WaveHitDetector for state calculation and EventProgressionState for updates.
+     */
+    private suspend fun updateStates(
+        progression: Double,
+        status: Status,
+    ) {
+        // User in area - ensure immediate detection alongside PositionObserver
+        updateAreaDetection()
+        val userIsInArea = progressionState.userIsInArea.value
+
+        try {
+            // Calculate event state using WaveHitDetector
+            val calculatedState =
+                waveHitDetector.calculateEventState(
+                    event = event,
+                    progression = progression,
+                    status = status,
+                    userIsInArea = userIsInArea,
+                )
+
+            if (calculatedState != null) {
+                // Validate the calculated state
+                val stateInput =
+                    EventStateInput(
+                        progression = progression,
+                        status = status,
+                        userPosition = positionManager.getCurrentPosition(),
+                        currentTime = clock.now(),
+                    )
+                val validationIssues = waveHitDetector.validateState(stateInput, calculatedState)
+                if (validationIssues.isNotEmpty()) {
+                    Log.w("WWWEventObserver", "State validation issues found: ${validationIssues.joinToString(", ")}")
+                }
+
+                // Validate state transitions
+                val currentState = getCurrentEventState()
+                val transitionIssues = waveHitDetector.validateStateTransition(currentState, calculatedState)
+                if (transitionIssues.isNotEmpty()) {
+                    Log.w("WWWEventObserver", "State transition issues found: ${transitionIssues.joinToString(", ")}")
+                }
+
+                // Update state flows with calculated values using smart throttling (via EventProgressionState)
+                progressionState.updateFromEventState(calculatedState)
+            } else {
+                // Fall back to basic state updates for safety
+                progressionState.updateProgressionAndStatus(progression, status)
+            }
+        } catch (e: IllegalStateException) {
+            Log.e("WWWEventObserver", "State error calculating event state: $e")
+            // Fall back to basic state updates for safety
+            progressionState.updateProgressionAndStatus(progression, status)
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            handleCancellationException(e)
+        } catch (e: Exception) {
+            Log.e("WWWEventObserver", "Unexpected error calculating event state: $e")
+            // Fall back to basic state updates for safety
+            progressionState.updateProgressionAndStatus(progression, status)
+        }
+    }
+
+    /**
+     * Gets the current EventState from the StateFlow values.
+     * Delegates to WaveHitDetector for state creation.
+     */
+    private fun getCurrentEventState(): EventState? =
+        waveHitDetector.createEventState(
+            progression = progressionState.progression.value,
+            status = progressionState.eventStatus.value,
+            isUserWarmingInProgress = progressionState.isUserWarmingInProgress.value,
+            isStartWarmingInProgress = progressionState.isStartWarmingInProgress.value,
+            userIsGoingToBeHit = progressionState.userIsGoingToBeHit.value,
+            userHasBeenHit = progressionState.userHasBeenHit.value,
+            userPositionRatio = progressionState.userPositionRatio.value,
+            timeBeforeHit = progressionState.timeBeforeHit.value,
+            hitDateTime = progressionState.hitDateTime.value,
+            userIsInArea = progressionState.userIsInArea.value,
+        )
+
+    /**
+     * Updates area detection state (isInArea) based on current user position.
+     * Delegates to EventPositionTracker for area detection logic.
+     */
+    private suspend fun updateAreaDetection() {
+        try {
+            val isInArea = positionTracker.isUserInArea(event)
+            progressionState.updateUserIsInArea(isInArea)
+        } catch (e: IllegalStateException) {
+            Log.e("WWWEventObserver", "State error in updateAreaDetection for event ${event.id}: $e")
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            handleCancellationException(e)
+        } catch (e: Exception) {
+            Log.e("WWWEventObserver", "Unexpected error in updateAreaDetection for event ${event.id}: $e")
+        }
+    }
 
     /**
      * Helper function to safely calculate wave progression with error handling.
@@ -281,252 +435,6 @@ class WWWEventObserver(
         }
 
     /**
-     * Helper function to handle cancellation exceptions with proper re-throwing.
-     * Consolidates cancellation handling to reduce throw statements.
-     */
-    private fun handleCancellationException(e: kotlinx.coroutines.CancellationException): Nothing {
-        // Expected during cancellation, re-throw to maintain coroutine semantics
-        throw e
-    }
-
-    /**
-     * Starts observing the wave event if not already started.
-     *
-     * This method has been simplified to reduce state management complexity:
-     * 1. Always initializes state immediately
-     * 2. Starts continuous observation for active events
-     * 3. Provides better error handling and logging
-     */
-    fun startObservation() {
-        if (unifiedObservationJob == null) {
-            coroutineScopeProvider.launchDefault {
-                Log.v("WWWEventObserver", "Starting unified observation for event ${event.id}")
-
-                try {
-                    initializeEventState()
-                    val observationJobs = startObservationJobs()
-                    setupParentObservationJob(observationJobs)
-                } catch (e: IllegalStateException) {
-                    handleInitializationStateError(e)
-                } catch (e: kotlinx.coroutines.CancellationException) {
-                    handleCancellationException(e)
-                }
-            }
-        }
-    }
-
-    /**
-     * Initializes event state with current values
-     */
-    private suspend fun initializeEventState() {
-        val currentStatus = getEventStatusSafely(event)
-        val currentProgression = calculateProgressionSafely(event)
-        Log.v("WWWEventObserver", "Initial state: status=$currentStatus, progression=$currentProgression")
-        updateStates(currentProgression, currentStatus)
-    }
-
-    /**
-     * Starts all observation jobs and returns them for management
-     */
-    private fun startObservationJobs(): ObservationJobs {
-        val mainObservationJob = startMainObservationFlow()
-        val positionObserverJob = startPositionObserverFlow()
-        val directPositionObserverJob = startDirectPositionObserverFlow()
-        val polygonLoadingJob = startPolygonLoadingFlow()
-
-        return ObservationJobs(
-            mainObservationJob,
-            positionObserverJob,
-            directPositionObserverJob,
-            polygonLoadingJob,
-        )
-    }
-
-    /**
-     * Starts the main unified observation flow
-     */
-    private fun startMainObservationFlow(): Job =
-        createUnifiedObservationFlow()
-            .flowOn(Dispatchers.Default)
-            .catch { e ->
-                Log.e("WWWEventObserver", "Error in unified observation flow for event ${event.id}: $e")
-            }.onEach { observation ->
-                handleMainObservationUpdate(observation)
-            }.launchIn(coroutineScopeProvider.scopeDefault())
-
-    /**
-     * Starts the position observer flow
-     */
-    private fun startPositionObserverFlow(): Job =
-        positionObserver
-            .observePositionForEvent(event)
-            .catch { e ->
-                Log.e("WWWEventObserver", "Error in position observation for event ${event.id}: $e")
-            }.onEach { observation ->
-                handlePositionObservationUpdate(observation)
-            }.launchIn(coroutineScopeProvider.scopeDefault())
-
-    /**
-     * Starts the direct position observer flow for immediate response
-     */
-    private fun startDirectPositionObserverFlow(): Job =
-        positionManager.position
-            .onEach { _ ->
-                handleDirectPositionUpdate()
-            }.launchIn(coroutineScopeProvider.scopeDefault())
-
-    /**
-     * Starts the polygon loading observer flow
-     */
-    private fun startPolygonLoadingFlow(): Job =
-        event.area.polygonsLoaded
-            .onEach { isLoaded ->
-                handlePolygonLoadingUpdate(isLoaded)
-            }.launchIn(coroutineScopeProvider.scopeDefault())
-
-    /**
-     * Sets up the parent job that manages all child observation jobs
-     */
-    private fun setupParentObservationJob(jobs: ObservationJobs) {
-        unifiedObservationJob =
-            coroutineScopeProvider.launchDefault {
-                // Use invokeOnCompletion instead of blocking join (iOS deadlock prevention)
-                jobs.mainObservationJob.invokeOnCompletion {
-                    jobs.positionObserverJob.cancel()
-                    jobs.directPositionObserverJob.cancel()
-                    jobs.polygonLoadingJob.cancel()
-                }
-            }
-    }
-
-    /**
-     * Handles updates from the main observation flow
-     */
-    private suspend fun handleMainObservationUpdate(observation: EventObservation) {
-        try {
-            updateStates(observation.progression, observation.status)
-        } catch (e: IllegalStateException) {
-            Log.e("WWWEventObserver", "State error updating states for event ${event.id}: $e")
-        } catch (e: kotlinx.coroutines.CancellationException) {
-            handleCancellationException(e)
-        } catch (e: Exception) {
-            Log.e("WWWEventObserver", "Unexpected error updating states for event ${event.id}: $e")
-        }
-    }
-
-    /**
-     * Handles updates from the position observer flow
-     */
-    private suspend fun handlePositionObservationUpdate(observation: com.worldwidewaves.shared.domain.observation.PositionObservation) {
-        try {
-            _userIsInArea.updateIfChanged(observation.isInArea)
-        } catch (e: IllegalStateException) {
-            Log.e("WWWEventObserver", "State error updating user area status for event ${event.id}: $e")
-        } catch (e: kotlinx.coroutines.CancellationException) {
-            handleCancellationException(e)
-        } catch (e: Exception) {
-            Log.e("WWWEventObserver", "Unexpected error updating user area status for event ${event.id}: $e")
-        }
-    }
-
-    /**
-     * Handles direct position updates for immediate area detection
-     */
-    private suspend fun handleDirectPositionUpdate() {
-        try {
-            Log.v("WWWEventObserver", "Direct position changed, updating area detection for event ${event.id}")
-            updateAreaDetection()
-        } catch (e: IllegalStateException) {
-            Log.e("WWWEventObserver", "State error in updateAreaDetection for event ${event.id}: $e")
-        } catch (e: kotlinx.coroutines.CancellationException) {
-            handleCancellationException(e)
-        } catch (e: Exception) {
-            Log.e("WWWEventObserver", "Unexpected error in updateAreaDetection for event ${event.id}: $e")
-        }
-    }
-
-    /**
-     * Handles polygon loading updates
-     */
-    private suspend fun handlePolygonLoadingUpdate(isLoaded: Boolean) {
-        try {
-            if (isLoaded) {
-                Log.v("WWWEventObserver", "Polygons loaded, updating area detection for event ${event.id}")
-                updateAreaDetection()
-            }
-        } catch (e: IllegalStateException) {
-            Log.e("WWWEventObserver", "State error in polygon loading handler for event ${event.id}: $e")
-        } catch (e: kotlinx.coroutines.CancellationException) {
-            handleCancellationException(e)
-        } catch (e: Exception) {
-            Log.e("WWWEventObserver", "Unexpected error in polygon loading handler for event ${event.id}: $e")
-        }
-    }
-
-    /**
-     * Handles initialization state errors
-     */
-    private fun handleInitializationStateError(e: IllegalStateException) {
-        if (e.message?.contains("Flow context cannot contain job") == true) {
-            Log.i("WWWEventObserver", "Feature map not yet downloaded for event ${event.id}")
-        } else {
-            Log.e("WWWEventObserver", "State error starting observation for event ${event.id}: ${e.message}")
-        }
-    }
-
-    /**
-     * Data class to hold all observation jobs
-     */
-    private data class ObservationJobs(
-        val mainObservationJob: Job,
-        val positionObserverJob: Job,
-        val directPositionObserverJob: Job,
-        val polygonLoadingJob: Job,
-    )
-
-    fun stopObservation() {
-        coroutineScopeProvider.launchDefault {
-            try {
-                unifiedObservationJob?.cancelAndJoin()
-            } catch (_: CancellationException) {
-                // Expected exception during cancellation
-            } catch (e: IllegalStateException) {
-                Log.e("stopObservation", "State error stopping unified observation: $e")
-            } catch (e: Exception) {
-                Log.e("stopObservation", "Unexpected error stopping unified observation: $e")
-            } finally {
-                unifiedObservationJob = null
-            }
-        }
-    }
-
-    /**
-     * Creates a unified observation flow that combines periodic ticks and simulation changes.
-     * Position changes are handled by both the PositionObserver and direct observation for reliability.
-     * Ensures area detection is triggered on every observation update.
-     */
-    private fun createUnifiedObservationFlow() =
-        combine(
-            createPeriodicObservationFlow(),
-            createSimulationFlow(),
-        ) { periodicObservation, _ ->
-            // Return the latest periodic observation (progression and status)
-            // Position observation and area detection are handled by multiple observers for reliability
-            periodicObservation
-        }.onEach { _ ->
-            // Ensure area detection is called on every unified observation update for immediate response
-            try {
-                updateAreaDetection()
-            } catch (e: IllegalStateException) {
-                Log.e("WWWEventObserver", "State error in area detection from unified flow for event ${event.id}: $e")
-            } catch (e: kotlinx.coroutines.CancellationException) {
-                handleCancellationException(e)
-            } catch (e: Exception) {
-                Log.e("WWWEventObserver", "Unexpected error in area detection from unified flow for event ${event.id}: $e")
-            }
-        }
-
-    /**
      * Helper function to safely get event status with error handling.
      * Consolidates all status retrieval exceptions into one place.
      */
@@ -542,271 +450,11 @@ class WWWEventObserver(
         }
 
     /**
-     * Creates a flow that periodically emits wave observations when the event should be observed.
-     * Now uses the extracted ObservationScheduler for timing logic.
+     * Helper function to handle cancellation exceptions with proper re-throwing.
+     * Consolidates cancellation handling to reduce throw statements.
      */
-    private fun createPeriodicObservationFlow() =
-        callbackFlow {
-            try {
-                Log.v("WWWEventObserver", "Starting periodic observation flow for event ${event.id}")
-
-                // Use the ObservationScheduler to create the observation flow
-                observationScheduler.createObservationFlow(event).collect { _ ->
-                    // Get current state and emit it using helper functions
-                    val progression = calculateProgressionSafely(event)
-                    val status = getEventStatusSafely(event)
-                    val eventObservation = EventObservation(progression, status)
-                    send(eventObservation)
-                }
-            } catch (e: IllegalStateException) {
-                Log.e("periodicObservationFlow", "State error in periodic observation flow: $e")
-            } catch (e: kotlinx.coroutines.CancellationException) {
-                handleCancellationException(e)
-            } catch (e: Exception) {
-                Log.e("periodicObservationFlow", "Unexpected error in periodic observation flow: $e")
-            }
-
-            awaitClose {
-                Log.v("WWWEventObserver", "Closing periodic observation flow for event ${event.id}")
-            }
-        }
-
-    /**
-     * Creates a flow that emits when simulation changes.
-     */
-    private fun createSimulationFlow() =
-        callbackFlow {
-            try {
-                val platform =
-                    try {
-                        get<WWWPlatform>()
-                    } catch (e: IllegalStateException) {
-                        Log.w("WWWEventObserver", "State error - Platform not available for simulation observation: $e")
-                        send(Unit) // Emit once to allow combine to work
-                        awaitClose()
-                        return@callbackFlow
-                    } catch (e: Exception) {
-                        Log.w("WWWEventObserver", "Unexpected error - Platform not available for simulation observation: $e")
-                        send(Unit) // Emit once to allow combine to work
-                        awaitClose()
-                        return@callbackFlow
-                    }
-
-                // Emit initial value
-                send(Unit)
-
-                // Then collect simulation changes
-                platform.simulationChanged.collect {
-                    Log.v("WWWEventObserver", "Simulation change detected for event ${event.id}")
-                    send(Unit)
-                }
-            } catch (e: kotlinx.coroutines.CancellationException) {
-                Log.v("WWWEventObserver", "Simulation observation cancelled for event ${event.id}")
-                handleCancellationException(e)
-            } catch (e: IllegalStateException) {
-                Log.e("WWWEventObserver", "State error in simulation observation for event ${event.id}: $e")
-            } catch (e: Exception) {
-                Log.e("WWWEventObserver", "Unexpected error in simulation observation for event ${event.id}: $e")
-            }
-
-            awaitClose()
-        }
-
-    /**
-     * Updates all state flows based on the current event state.
-     *
-     * This method validates state transitions and provides detailed logging
-     * to help diagnose state management issues.
-     */
-    private suspend fun updateStates(
-        progression: Double,
-        status: Status,
-    ) {
-        // User in area - ensure immediate detection alongside PositionObserver
-        updateAreaDetection()
-        val userIsInArea = _userIsInArea.value
-
-        // Create input for state calculation
-        val stateInput =
-            EventStateInput(
-                progression = progression,
-                status = status,
-                userPosition = positionManager.getCurrentPosition(),
-                currentTime = clock.now(),
-            )
-
-        try {
-            // Calculate event state using EventStateHolder
-            val calculatedState =
-                eventStateHolder.calculateEventState(
-                    event = event,
-                    input = stateInput,
-                    userIsInArea = userIsInArea,
-                )
-
-            // Validate the calculated state
-            val validationIssues = eventStateHolder.validateState(stateInput, calculatedState)
-            if (validationIssues.isNotEmpty()) {
-                Log.w("WWWEventObserver", "State validation issues found: ${validationIssues.joinToString(", ")}")
-            }
-
-            // Validate state transitions
-            val currentState = getCurrentEventState()
-            val transitionIssues = eventStateHolder.validateStateTransition(currentState, calculatedState)
-            if (transitionIssues.isNotEmpty()) {
-                Log.w("WWWEventObserver", "State transition issues found: ${transitionIssues.joinToString(", ")}")
-            }
-
-            // Update state flows with calculated values using smart throttling
-            updateProgressionIfSignificant(calculatedState.progression)
-            _eventStatus.updateIfChanged(calculatedState.status)
-            _isUserWarmingInProgress.updateIfChanged(calculatedState.isUserWarmingInProgress)
-            _isStartWarmingInProgress.updateIfChanged(calculatedState.isStartWarmingInProgress)
-            _userIsGoingToBeHit.updateIfChanged(calculatedState.userIsGoingToBeHit)
-            _userHasBeenHit.updateIfChanged(calculatedState.userHasBeenHit)
-            updatePositionRatioIfSignificant(calculatedState.userPositionRatio)
-            updateTimeBeforeHitIfSignificant(calculatedState.timeBeforeHit)
-            _hitDateTime.updateIfChanged(calculatedState.hitDateTime)
-        } catch (e: IllegalStateException) {
-            Log.e("WWWEventObserver", "State error calculating event state: $e")
-            // Fall back to basic state updates for safety
-        } catch (e: kotlinx.coroutines.CancellationException) {
-            handleCancellationException(e)
-        } catch (e: Exception) {
-            Log.e("WWWEventObserver", "Unexpected error calculating event state: $e")
-            // Fall back to basic state updates for safety
-            updateProgressionIfSignificant(progression)
-            _eventStatus.updateIfChanged(status)
-        }
-    }
-
-    /**
-     * Gets the current EventState from the StateFlow values.
-     * This allows for state transition validation by EventStateManager.
-     */
-    private fun getCurrentEventState(): EventState? =
-        try {
-            EventState(
-                progression = _progression.value,
-                status = _eventStatus.value,
-                isUserWarmingInProgress = _isUserWarmingInProgress.value,
-                isStartWarmingInProgress = _isStartWarmingInProgress.value,
-                userIsGoingToBeHit = _userIsGoingToBeHit.value,
-                userHasBeenHit = _userHasBeenHit.value,
-                userPositionRatio = _userPositionRatio.value,
-                timeBeforeHit = _timeBeforeHit.value,
-                hitDateTime = _hitDateTime.value,
-                userIsInArea = _userIsInArea.value,
-                timestamp = clock.now(),
-            )
-        } catch (e: IllegalStateException) {
-            Log.e("WWWEventObserver", "State error creating current EventState: $e")
-            null
-        } catch (e: Exception) {
-            Log.e("WWWEventObserver", "Unexpected error creating current EventState: $e")
-            null
-        }
-
-    /**
-     * Updates area detection state (isInArea) based on current user position.
-     * This provides immediate area detection alongside the PositionObserver Flow.
-     * Ensures backward compatibility and immediate area detection response.
-     */
-    private suspend fun updateAreaDetection() {
-        val userPosition = positionManager.getCurrentPosition()
-
-        if (userPosition != null) {
-            try {
-                // Check if polygon data is available first
-                val polygons = event.area.getPolygons()
-                Log.d(
-                    "WWWEventObserver",
-                    "updateAreaDetection: ${event.id} has ${polygons.size} polygons, position=(${userPosition.lat}, ${userPosition.lng})",
-                )
-
-                if (polygons.isNotEmpty()) {
-                    // Now call the actual area detection
-                    val isInArea = waveProgressionTracker.isUserInWaveArea(userPosition, event.area)
-                    Log.i("WWWEventObserver", "updateAreaDetection: ${event.id} isInArea=$isInArea")
-                    _userIsInArea.updateIfChanged(isInArea)
-                } else {
-                    Log.d("WWWEventObserver", "updateAreaDetection: ${event.id} has no polygons yet")
-                }
-                // If polygon data not yet loaded, the PositionObserver will handle it when available
-            } catch (e: IllegalStateException) {
-                Log.e("WWWEventObserver", "updateAreaDetection: State exception $e, eventId=${event.id}")
-                // On error, assume user is not in area for safety
-            } catch (e: kotlinx.coroutines.CancellationException) {
-                handleCancellationException(e)
-            } catch (e: Exception) {
-                Log.e("WWWEventObserver", "updateAreaDetection: Unexpected exception $e, eventId=${event.id}")
-                // On error, assume user is not in area for safety
-                _userIsInArea.updateIfChanged(false)
-            }
-        } else {
-            Log.d("WWWEventObserver", "updateAreaDetection: ${event.id} no user position")
-            _userIsInArea.updateIfChanged(false)
-        }
-    }
-
-    /**
-     * Smart throttling functions to reduce unnecessary state updates and improve performance.
-     * These functions only emit updates when changes exceed predefined thresholds.
-     */
-
-    /**
-     * Updates progression only if the change is significant enough to matter for UI.
-     * Reduces state flow emissions by ~80% for smooth progression updates.
-     */
-    private fun updateProgressionIfSignificant(newProgression: Double) {
-        if (abs(newProgression - lastEmittedProgression) >= PROGRESSION_THRESHOLD ||
-            lastEmittedProgression < 0.0 ||
-            newProgression >= 100.0 // Always emit 100% completion
-        ) { // Always emit first update or completion
-            _progression.updateIfChanged(newProgression)
-            lastEmittedProgression = newProgression
-        }
-    }
-
-    /**
-     * Updates position ratio only if the change is significant enough to matter for UI.
-     * Reduces unnecessary updates for small position movements.
-     */
-    private fun updatePositionRatioIfSignificant(newRatio: Double) {
-        if (abs(newRatio - lastEmittedPositionRatio) >= POSITION_RATIO_THRESHOLD ||
-            lastEmittedPositionRatio < 0.0
-        ) { // Always emit first update
-            _userPositionRatio.updateIfChanged(newRatio)
-            lastEmittedPositionRatio = newRatio
-        }
-    }
-
-    /**
-     * Updates time before hit with adaptive throttling for critical timing accuracy.
-     *
-     * Critical timing requirements:
-     * - During hit phase (< 2s): Updates every 50ms for sound synchronization
-     * - Normal phase (> 2s): Updates every 1000ms to reduce UI churn
-     */
-    private fun updateTimeBeforeHitIfSignificant(newTime: Duration) {
-        // Handle infinite durations to prevent arithmetic errors
-        if (newTime == INFINITE || lastEmittedTimeBeforeHit == INFINITE) {
-            if (newTime != lastEmittedTimeBeforeHit) {
-                _timeBeforeHit.updateIfChanged(newTime)
-                lastEmittedTimeBeforeHit = newTime
-            }
-            return
-        }
-
-        val timeDifference = abs((newTime - lastEmittedTimeBeforeHit).inWholeMilliseconds)
-
-        // Critical timing phase: Need sub-50ms accuracy for wave synchronization
-        val isCriticalPhase = newTime.inWholeSeconds <= 2 && newTime > Duration.ZERO
-        val threshold = if (isCriticalPhase) 50L else TIME_THRESHOLD_MS // 50ms vs 1000ms
-
-        if (timeDifference >= threshold) {
-            _timeBeforeHit.updateIfChanged(newTime)
-            lastEmittedTimeBeforeHit = newTime
-        }
+    private fun handleCancellationException(e: kotlinx.coroutines.CancellationException): Nothing {
+        // Expected during cancellation, re-throw to maintain coroutine semantics
+        throw e
     }
 }
