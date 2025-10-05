@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.domain.detection.EventStateParams
 import com.worldwidewaves.shared.domain.observation.PositionObserver
 import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
 import com.worldwidewaves.shared.domain.scheduling.ObservationScheduler
@@ -191,7 +192,6 @@ class WWWEventObserver(
     private val eventObserver: com.worldwidewaves.shared.domain.observation.EventObserver by lazy {
         com.worldwidewaves.shared.domain.observation.EventObserver(
             event = event,
-            clock = clock,
             coroutineScopeProvider = coroutineScopeProvider,
             positionManager = positionManager,
             waveProgressionTracker = waveProgressionTracker,
@@ -384,16 +384,18 @@ class WWWEventObserver(
      */
     private fun getCurrentEventState(): EventState? =
         waveHitDetector.createEventState(
-            progression = progressionState.progression.value,
-            status = progressionState.eventStatus.value,
-            isUserWarmingInProgress = progressionState.isUserWarmingInProgress.value,
-            isStartWarmingInProgress = progressionState.isStartWarmingInProgress.value,
-            userIsGoingToBeHit = progressionState.userIsGoingToBeHit.value,
-            userHasBeenHit = progressionState.userHasBeenHit.value,
-            userPositionRatio = progressionState.userPositionRatio.value,
-            timeBeforeHit = progressionState.timeBeforeHit.value,
-            hitDateTime = progressionState.hitDateTime.value,
-            userIsInArea = progressionState.userIsInArea.value,
+            EventStateParams(
+                progression = progressionState.progression.value,
+                status = progressionState.eventStatus.value,
+                isUserWarmingInProgress = progressionState.isUserWarmingInProgress.value,
+                isStartWarmingInProgress = progressionState.isStartWarmingInProgress.value,
+                userIsGoingToBeHit = progressionState.userIsGoingToBeHit.value,
+                userHasBeenHit = progressionState.userHasBeenHit.value,
+                userPositionRatio = progressionState.userPositionRatio.value,
+                timeBeforeHit = progressionState.timeBeforeHit.value,
+                hitDateTime = progressionState.hitDateTime.value,
+                userIsInArea = progressionState.userIsInArea.value,
+            ),
         )
 
     /**

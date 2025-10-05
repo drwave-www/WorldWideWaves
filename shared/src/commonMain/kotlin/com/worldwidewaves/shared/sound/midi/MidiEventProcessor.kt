@@ -34,10 +34,6 @@ import com.worldwidewaves.shared.utils.ByteArrayReader
  */
 internal object MidiEventProcessor {
     // MIDI event constants
-    private const val NOTE_ON = 0x90
-    private const val NOTE_OFF = 0x80
-    private const val RUNNING_STATUS_MASK = 0x80
-    private const val STATUS_MASK_F0 = 0xF0
     private const val STATUS_MASK_0F = 0x0F
     private const val STATUS_MASK_E0 = 0xE0
     private const val PROGRAM_CHANGE_STATUS = 0xC0

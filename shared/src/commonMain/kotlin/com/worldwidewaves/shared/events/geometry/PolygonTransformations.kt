@@ -713,8 +713,6 @@ object PolygonTransformations {
         anchor2Pos: Int,
         between: List<Position>,
     ) {
-        val isConsecutive = (anchor2Pos == anchor1Pos + 1) || (anchor1Pos == polygon.size - 1 && anchor2Pos == 0)
-
         var current = polygon.elementAt(anchor1Pos)
         for (p in between) {
             val alreadyExists = polygon.any { it.lat == p.lat && it.lng == p.lng }

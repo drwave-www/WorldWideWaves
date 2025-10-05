@@ -27,7 +27,6 @@ import com.worldwidewaves.shared.domain.scheduling.ObservationScheduler
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
-import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.position.PositionManager
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.Dispatchers
@@ -69,7 +68,6 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalTime::class)
 class EventObserver(
     private val event: IWWWEvent,
-    private val clock: IClock,
     private val coroutineScopeProvider: CoroutineScopeProvider,
     private val positionManager: PositionManager,
     private val waveProgressionTracker: WaveProgressionTracker,

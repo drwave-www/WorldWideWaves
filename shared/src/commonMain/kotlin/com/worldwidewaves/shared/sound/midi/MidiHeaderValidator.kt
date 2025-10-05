@@ -67,9 +67,15 @@ internal object MidiHeaderValidator {
             Log.e(TAG, "Invalid MIDI format: ${e.message}", throwable = e)
             throw IllegalArgumentException("Invalid MIDI format: ${e.message}", e)
         } catch (e: IndexOutOfBoundsException) {
-            @Suppress("TooGenericExceptionCaught") // Catch IndexOutOfBounds as specific MIDI parsing error
+            @Suppress("TooGenericExceptionCaught") // IndexOutOfBoundsException is the most specific exception we can catch for malformed MIDI data
             Log.e(TAG, "Malformed MIDI data: ${e.message}", throwable = e)
+            @Suppress("TooGenericExceptionCaught")
             throw IllegalArgumentException("Malformed MIDI data: ${e.message}", e)
+        } catch (e: Exception) {
+            @Suppress("TooGenericExceptionCaught") // Catch-all for any unexpected parsing errors
+            Log.e(TAG, "Unexpected error parsing MIDI header: ${e.message}", throwable = e)
+            @Suppress("TooGenericExceptionCaught")
+            throw IllegalArgumentException("Unexpected error parsing MIDI header: ${e.message}", e)
         }
     }
 

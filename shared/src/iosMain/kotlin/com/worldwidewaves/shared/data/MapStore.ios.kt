@@ -252,13 +252,9 @@ actual fun platformAppVersionStamp(): String {
 
 actual fun platformInvalidateGeoJson(eventId: String) {
     // Invalidate area polygon cache when geojson changes
+    // Note: WWWEvents doesn't expose allEvents publicly, so we use the invalidation through GeoJsonDataProvider
+    // The area cache will be cleared when getPolygons() is called again after GeoJsonDataProvider cache invalidation
     try {
-        val koin =
-            org.koin.mp.KoinPlatform
-                .getKoin()
-        val wwwEvents = koin.get<com.worldwidewaves.shared.events.WWWEvents>()
-        // Note: WWWEvents doesn't expose allEvents publicly, so we use the invalidation through GeoJsonDataProvider
-        // The area cache will be cleared when getPolygons() is called again after GeoJsonDataProvider cache invalidation
         Log.d("MapStore.ios", "platformInvalidateGeoJson called for $eventId")
     } catch (e: Exception) {
         Log.v("MapStore.ios", "platformInvalidateGeoJson: ${e.message}")

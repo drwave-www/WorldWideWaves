@@ -34,6 +34,24 @@ import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.ExperimentalTime
 
 /**
+ * Parameters for creating an EventState.
+ * Groups related parameters to reduce function parameter count.
+ */
+@OptIn(ExperimentalTime::class)
+data class EventStateParams(
+    val progression: Double,
+    val status: Status,
+    val isUserWarmingInProgress: Boolean,
+    val isStartWarmingInProgress: Boolean,
+    val userIsGoingToBeHit: Boolean,
+    val userHasBeenHit: Boolean,
+    val userPositionRatio: Double,
+    val timeBeforeHit: kotlin.time.Duration,
+    val hitDateTime: kotlin.time.Instant,
+    val userIsInArea: Boolean,
+)
+
+/**
  * Wave hit detection algorithms and state calculation.
  *
  * This class is responsible for:
@@ -147,42 +165,22 @@ class WaveHitDetector(
      * Creates an EventState from current StateFlow values.
      * Used for state transition validation.
      *
-     * @param progression Current wave progression
-     * @param status Current event status
-     * @param isUserWarmingInProgress Whether user warming is in progress
-     * @param isStartWarmingInProgress Whether start warming is in progress
-     * @param userIsGoingToBeHit Whether user is going to be hit
-     * @param userHasBeenHit Whether user has been hit
-     * @param userPositionRatio User's position ratio in the wave area
-     * @param timeBeforeHit Time remaining before hit
-     * @param hitDateTime Expected hit date/time
-     * @param userIsInArea Whether user is in the event area
+     * @param params Parameters for creating the event state
      * @return The created EventState, or null if creation fails
      */
-    fun createEventState(
-        progression: Double,
-        status: Status,
-        isUserWarmingInProgress: Boolean,
-        isStartWarmingInProgress: Boolean,
-        userIsGoingToBeHit: Boolean,
-        userHasBeenHit: Boolean,
-        userPositionRatio: Double,
-        timeBeforeHit: kotlin.time.Duration,
-        hitDateTime: kotlin.time.Instant,
-        userIsInArea: Boolean,
-    ): EventState? =
+    fun createEventState(params: EventStateParams): EventState? =
         try {
             EventState(
-                progression = progression,
-                status = status,
-                isUserWarmingInProgress = isUserWarmingInProgress,
-                isStartWarmingInProgress = isStartWarmingInProgress,
-                userIsGoingToBeHit = userIsGoingToBeHit,
-                userHasBeenHit = userHasBeenHit,
-                userPositionRatio = userPositionRatio,
-                timeBeforeHit = timeBeforeHit,
-                hitDateTime = hitDateTime,
-                userIsInArea = userIsInArea,
+                progression = params.progression,
+                status = params.status,
+                isUserWarmingInProgress = params.isUserWarmingInProgress,
+                isStartWarmingInProgress = params.isStartWarmingInProgress,
+                userIsGoingToBeHit = params.userIsGoingToBeHit,
+                userHasBeenHit = params.userHasBeenHit,
+                userPositionRatio = params.userPositionRatio,
+                timeBeforeHit = params.timeBeforeHit,
+                hitDateTime = params.hitDateTime,
+                userIsInArea = params.userIsInArea,
                 timestamp = clock.now(),
             )
         } catch (e: IllegalStateException) {

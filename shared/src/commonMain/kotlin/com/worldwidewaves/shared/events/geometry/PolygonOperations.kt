@@ -53,8 +53,6 @@ import kotlin.math.min
 // ----------------------------------------------------------------------------
 
 object PolygonOperations {
-    private const val FLOATING_POINT_EPSILON = 1e-12
-
     data class Quad<A, B, C, D>(
         val first: A,
         val second: B,
