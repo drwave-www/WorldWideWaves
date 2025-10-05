@@ -23,10 +23,10 @@
 
 package com.worldwidewaves.shared.events
 
+import com.worldwidewaves.shared.events.geometry.PolygonOperations.containsPosition
+import com.worldwidewaves.shared.events.geometry.PolygonTransformations
 import com.worldwidewaves.shared.events.utils.ComposedLongitude
 import com.worldwidewaves.shared.events.utils.Polygon
-import com.worldwidewaves.shared.events.utils.PolygonUtils
-import com.worldwidewaves.shared.events.utils.PolygonUtils.containsPosition
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.testing.CIEnvironment
 import kotlinx.coroutines.test.runTest
@@ -121,7 +121,7 @@ class WavePolygonRelevancyTest {
                 polygon.bbox()
 
                 // Test polygon splitting accuracy
-                val splitResult = PolygonUtils.splitByLongitude(polygon, cutLongitude)
+                val splitResult = PolygonTransformations.splitByLongitude(polygon, cutLongitude)
 
                 // Verify split result integrity
                 assertTrue(
@@ -169,7 +169,7 @@ class WavePolygonRelevancyTest {
             val cutPositions = listOf(-0.5, 0.0, 0.25, 0.5, 0.75, 1.0, 1.5)
 
             cutPositions.forEach { cutLng ->
-                val splitResult = PolygonUtils.splitByLongitude(testPolygon, cutLng)
+                val splitResult = PolygonTransformations.splitByLongitude(testPolygon, cutLng)
 
                 // Verify split behavior based on cut position
                 when {
@@ -291,7 +291,7 @@ class WavePolygonRelevancyTest {
                     SQUARE_POINTS.forEach { add(it) }
                 }
 
-            val middleSplit = PolygonUtils.splitByLongitude(unitSquare, 0.5)
+            val middleSplit = PolygonTransformations.splitByLongitude(unitSquare, 0.5)
 
             // Verify both sides exist for middle cut
             assertTrue(middleSplit.left.isNotEmpty(), "Middle split should produce left polygon")
@@ -301,7 +301,7 @@ class WavePolygonRelevancyTest {
             val boundaryCuts = listOf(-0.1, 0.0, 1.0, 1.1)
 
             boundaryCuts.forEach { cutLng ->
-                val edgeSplit = PolygonUtils.splitByLongitude(unitSquare, cutLng)
+                val edgeSplit = PolygonTransformations.splitByLongitude(unitSquare, cutLng)
                 val hasLeft = edgeSplit.left.isNotEmpty()
                 val hasRight = edgeSplit.right.isNotEmpty()
 
@@ -338,7 +338,7 @@ class WavePolygonRelevancyTest {
 
             // Test 4: Composed longitude handling
             val composedLongitude = ComposedLongitude.fromLongitude(0.5)
-            val composedSplit = PolygonUtils.splitByLongitude(unitSquare, composedLongitude)
+            val composedSplit = PolygonTransformations.splitByLongitude(unitSquare, composedLongitude)
 
             assertTrue(
                 (composedSplit.left.isNotEmpty() && composedSplit.right.isNotEmpty()) ||
@@ -390,7 +390,7 @@ class WavePolygonRelevancyTest {
                     val cutLongitude =
                         polygon.bbox().sw.lng +
                             (polygon.bbox().ne.lng - polygon.bbox().sw.lng) * 0.5
-                    PolygonUtils.splitByLongitude(polygon, cutLongitude)
+                    PolygonTransformations.splitByLongitude(polygon, cutLongitude)
 
                     // Test point-in-polygon performance
                     val centerPoint =

@@ -23,9 +23,9 @@
 
 package com.worldwidewaves.shared.domain
 
+import com.worldwidewaves.shared.events.geometry.PolygonOperations.containsPosition
 import com.worldwidewaves.shared.events.utils.GeoUtils.toRadians
 import com.worldwidewaves.shared.events.utils.Polygon
-import com.worldwidewaves.shared.events.utils.PolygonUtils.containsPosition
 import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.coroutines.test.runTest
 import kotlin.math.PI

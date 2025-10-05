@@ -1,5 +1,27 @@
 package com.worldwidewaves.shared.events.utils
 
+/* * Copyright 2025 DrWave
+ *
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. */
+
+
+import com.worldwidewaves.shared.events.geometry.PolygonOperations
+import com.worldwidewaves.shared.events.geometry.PolygonTransformations
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonArray
@@ -34,7 +56,7 @@ class SplitByLongitudeLondonTest {
         if (allPolygons.isEmpty()) return
 
         // Combined bounding-box of every ring to keep scaling identical
-        val bbox = PolygonUtils.polygonsBbox(allPolygons)
+        val bbox = PolygonOperations.polygonsBbox(allPolygons)
 
         val steps = 50
         val lngStep = (bbox.ne.lng - bbox.sw.lng) / steps
@@ -46,7 +68,7 @@ class SplitByLongitudeLondonTest {
             val rightAgg = mutableListOf<Polygon>()
             // Split every polygon independently and aggregate
             allPolygons.forEach { poly ->
-                val split = PolygonUtils.splitByLongitude(poly, composed)
+                val split = PolygonTransformations.splitByLongitude(poly, composed)
                 leftAgg.addAll(split.left)
                 rightAgg.addAll(split.right)
             }
