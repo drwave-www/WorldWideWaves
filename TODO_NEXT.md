@@ -17,12 +17,14 @@ Phase 1-2 (40 hours) are COMPLETE:
 ✅ All 623 tests passing
 ✅ All targets compile
 
-Remaining work (68 hours):
+Remaining work (52 hours):
 
-NEXT PRIORITIES - Large File Splits (38 hours):
-1. CRIT-3: Split WWWEventArea.kt (900 lines → 5 files, 16h)
-2. CRIT-4: Split WWWEventObserver.kt (812 lines → 5 files, 12h)
-3. CRIT-6: Split PolygonUtils.kt (738 lines → 4 files, 10h)
+COMPLETED:
+✅ CRIT-3: Split WWWEventArea.kt (900 lines → 4 files, 16h) - October 5, 2025
+
+NEXT PRIORITIES - Large File Splits (22 hours):
+1. CRIT-4: Split WWWEventObserver.kt (812 lines → 5 files, 12h)
+2. CRIT-6: Split PolygonUtils.kt (738 lines → 4 files, 10h)
 
 Then continue with:
 - MEDIUM priority items (16h): Package organization, root cleanup
@@ -70,16 +72,20 @@ When complete, rebase main onto the new branch.
 
 ### CRITICAL - Large Files (38 hours)
 
-#### CRIT-3: WWWEventArea.kt (900 lines → 5 files, 16h)
-**Current**: Monolithic file combining area geometry, polygon operations, wave progression
+#### ✅ CRIT-3: WWWEventArea.kt (900 lines → 4 files, COMPLETED)
+**Status**: COMPLETED - October 5, 2025
+**Previous**: Monolithic file combining area geometry, polygon operations, wave progression
 **Split into**:
-1. `events/geometry/EventAreaGeometry.kt` (300 lines)
-2. `events/geometry/EventAreaSplitting.kt` (250 lines)
-3. `events/wave/EventWaveProgression.kt` (200 lines)
-4. `events/io/GeoJsonAreaParser.kt` (150 lines)
-5. `events/EventArea.kt` (150 lines - core class)
+1. `events/geometry/EventAreaGeometry.kt` (299 lines) - Bounding box and center calculations
+2. `events/geometry/EventAreaPositionTesting.kt` (147 lines) - Position testing and random generation
+3. `events/io/GeoJsonAreaParser.kt` (403 lines) - GeoJSON parsing logic
+4. `events/WWWEventArea.kt` (307 lines - core class) - Main class delegating to modules
 
-**Impact**: ~20 files will need import updates
+**Results**:
+- All compilation targets pass (Android + iOS)
+- All tests pass (902+ tests)
+- No iOS violations detected
+- Total: 1,156 lines (from 900 - refactored with better separation)
 
 ---
 
