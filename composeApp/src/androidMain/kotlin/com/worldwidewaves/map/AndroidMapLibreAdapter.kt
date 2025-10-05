@@ -67,6 +67,10 @@ import org.maplibre.geojson.Polygon
 class AndroidMapLibreAdapter(
     private var mapLibreMap: MapLibreMap? = null,
 ) : MapLibreAdapter<MapLibreMap> {
+    companion object {
+        private const val TAG = "AndroidMapLibreAdapter"
+    }
+
     // -- Public/Override properties
 
     private val _currentPosition = MutableStateFlow<Position?>(null)
@@ -74,10 +78,6 @@ class AndroidMapLibreAdapter(
 
     private val _currentZoom = MutableStateFlow(0.0)
     override val currentZoom: StateFlow<Double> = _currentZoom
-
-    companion object {
-        private const val TAG = "AndroidMapLibreAdapter"
-    }
 
     override fun getWidth(): Double {
         require(mapLibreMap != null)
