@@ -271,6 +271,7 @@ class DefaultWaveProgressionTrackerTest {
             // Act & Assert - None should crash
             positions.forEach { position ->
                 val result = tracker.isUserInWaveArea(position, area)
+                @Suppress("USELESS_IS_CHECK")
                 assertTrue(result is Boolean, "Position check should return boolean for position $position")
             }
         }

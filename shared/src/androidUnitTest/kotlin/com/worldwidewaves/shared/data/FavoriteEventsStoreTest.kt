@@ -292,6 +292,8 @@ class FavoriteEventsStoreTest {
 
             // Should not crash and should have a consistent final state
             val finalState = store.isFavorite(eventId)
+            // Verify finalState is a valid boolean (no corruption)
+            @Suppress("USELESS_IS_CHECK")
             assertTrue(finalState is Boolean, "Final state should be a boolean")
         }
 

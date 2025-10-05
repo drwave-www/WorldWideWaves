@@ -447,12 +447,14 @@ class MyComponent {
 - **Build script modifications**: Require explicit approval before altering build logic
 
 ### Testing Requirements
+- **ALWAYS run tests after commits**: Ensure no regressions were introduced
 - **NEVER disable tests without permission**: Always ask user permission before disabling, skipping, or renaming any test files
 - **NEVER disable tests to make them pass**: Tests must be logical and business-oriented, not mirror current code implementation
 - **Test failure philosophy**: If tests fail, either there's a business logic issue in the code OR the business requirements changed and tests need adaptation
 - **Test-first thinking**: Tests validate business requirements, not implementation details
 - **Test modifications**: Changing test logic requires explanation and user approval - explain what business requirement changed
 - **Test deletion**: Absolutely forbidden without explicit user consent
+- **Always run tests before pushing**: Verify all tests pass locally before pushing to origin
 
 ### Security Patterns
 - **NO credential exposure**: Never log, store, or transmit API keys, tokens, or secrets
@@ -467,6 +469,18 @@ class MyComponent {
 - **State Management**: Use StateFlow for reactive state management
 - **Clean Architecture**: Maintain clear separation between data, domain, and presentation layers
 - **Testing**: Write comprehensive unit tests and maintain existing test coverage
+
+### Development Workflow Requirements
+
+#### Critical Rules
+- **Use agents for complex tasks**: Create specialized agents when needed for specific tasks
+- **Check all implications**: When making changes, analyze callers, documentation, signatures
+- **Always clean temporary files**: Remove files created during development if not required
+- **Git push has costs**: GitHub Actions workflows are not free - only push when asked or required
+- **Search for similar patterns**: When fixing bugs, search for similar error patterns in other parts of codebase
+- **Never bypass hooks**: Never bypass git commit and push hooks
+- **Use short names**: Don't call objects/classes by long names (use imports for readability)
+- **Fix warnings immediately**: Don't keep build or lint warnings - correct them to prevent accumulation
 
 ### Code Modification Best Practices
 

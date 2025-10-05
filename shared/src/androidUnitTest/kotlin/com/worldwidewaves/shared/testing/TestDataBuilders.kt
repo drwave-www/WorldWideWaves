@@ -19,17 +19,19 @@
  * limitations under the License.
  */
 
+@file:Suppress("DEPRECATION")
+
 package com.worldwidewaves.shared.testing
 
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Position
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.datetime.Instant
 import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Instant
 
 /**
  * Test data builders for consistent, reusable test fixtures.
@@ -161,15 +163,15 @@ object TestDataBuilders {
      * Builder for creating test clocks with deterministic time
      */
     class ClockBuilder {
-        private var baseTime: Instant = kotlinx.datetime.Instant.fromEpochMilliseconds(BASE_TIMESTAMP)
+        private var baseTime: Instant = Instant.fromEpochMilliseconds(BASE_TIMESTAMP)
         private var autoAdvance: Boolean = false
         private var advanceStep: kotlin.time.Duration = 1.minutes
 
-        fun baseTime(time: kotlinx.datetime.Instant) = apply { this.baseTime = time }
+        fun baseTime(time: Instant) = apply { this.baseTime = time }
 
         fun baseTime(epochMillis: Long) =
             apply {
-                this.baseTime = kotlinx.datetime.Instant.fromEpochMilliseconds(epochMillis)
+                this.baseTime = Instant.fromEpochMilliseconds(epochMillis)
             }
 
         fun autoAdvance(enabled: Boolean = true) = apply { this.autoAdvance = enabled }
@@ -205,7 +207,7 @@ object TestDataBuilders {
         private var id: String = "test-event"
         private var name: String = "Test Event"
         private var polygon: List<Position> = PolygonBuilder().centralPark().build()
-        private var startTime: kotlinx.datetime.Instant = kotlinx.datetime.Instant.fromEpochMilliseconds(BASE_TIMESTAMP)
+        private var startTime: Instant = Instant.fromEpochMilliseconds(BASE_TIMESTAMP)
         private var waveSpeedKmh: Double = 50.0
         private var clock: IClock = ClockBuilder().fixedAt2022().build()
 
@@ -215,7 +217,7 @@ object TestDataBuilders {
 
         fun polygon(coords: List<Position>) = apply { this.polygon = coords }
 
-        fun startTime(time: kotlinx.datetime.Instant) = apply { this.startTime = time }
+        fun startTime(time: Instant) = apply { this.startTime = time }
 
         fun waveSpeed(kmh: Double) =
             apply {
@@ -234,17 +236,17 @@ object TestDataBuilders {
 
         fun runningEvent() =
             apply {
-                startTime(kotlinx.datetime.Instant.fromEpochMilliseconds(BASE_TIMESTAMP - 30.minutes.inWholeMilliseconds))
+                startTime(Instant.fromEpochMilliseconds(BASE_TIMESTAMP - 30.minutes.inWholeMilliseconds))
             }
 
         fun futureEvent() =
             apply {
-                startTime(kotlinx.datetime.Instant.fromEpochMilliseconds(BASE_TIMESTAMP + 2.hours.inWholeMilliseconds))
+                startTime(Instant.fromEpochMilliseconds(BASE_TIMESTAMP + 2.hours.inWholeMilliseconds))
             }
 
         fun soonEvent() =
             apply {
-                startTime(kotlinx.datetime.Instant.fromEpochMilliseconds(BASE_TIMESTAMP + 10.minutes.inWholeMilliseconds))
+                startTime(Instant.fromEpochMilliseconds(BASE_TIMESTAMP + 10.minutes.inWholeMilliseconds))
             }
 
         // Note: Actual build() would need to use real WWWEvent API
@@ -319,7 +321,7 @@ object TestDataBuilders {
         val id: String,
         val name: String,
         val polygon: List<Position>,
-        val startTime: kotlinx.datetime.Instant,
+        val startTime: Instant,
         val waveSpeedKmh: Double,
         val clock: IClock,
     )
