@@ -87,8 +87,10 @@ fun DebugScreen(
                         listOf(
                             stringResource(MokoRes.strings.debug_simulation_mode) to
                                 stringResource(MokoRes.strings.debug_simulation_disabled), // Could be dynamic
-                            stringResource(MokoRes.strings.debug_location_provider) to stringResource(MokoRes.strings.debug_location_gps), // Could be dynamic
-                            stringResource(MokoRes.strings.debug_network_status) to stringResource(MokoRes.strings.debug_network_connected), // Could be dynamic
+                            stringResource(MokoRes.strings.debug_location_provider) to
+                                stringResource(MokoRes.strings.debug_location_gps), // Could be dynamic
+                            stringResource(MokoRes.strings.debug_network_status) to
+                                stringResource(MokoRes.strings.debug_network_connected), // Could be dynamic
                         ),
                 )
             }
@@ -99,7 +101,8 @@ fun DebugScreen(
                     title = stringResource(MokoRes.strings.debug_system_resources),
                     items =
                         listOf(
-                            stringResource(MokoRes.strings.debug_memory_usage) to stringResource(MokoRes.strings.debug_memory_calculating), // Could show actual memory
+                            stringResource(MokoRes.strings.debug_memory_usage) to
+                                stringResource(MokoRes.strings.debug_memory_calculating), // Could show actual memory
                             stringResource(MokoRes.strings.debug_storage_available) to
                                 stringResource(MokoRes.strings.debug_storage_available_value), // Could show actual storage
                             stringResource(MokoRes.strings.debug_device_orientation) to
