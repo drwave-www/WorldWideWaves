@@ -52,7 +52,7 @@ import com.worldwidewaves.shared.sound.SoundChoreographyCoordinator
 import com.worldwidewaves.shared.ui.AboutTabScreen
 import com.worldwidewaves.shared.ui.DebugTabScreen
 import com.worldwidewaves.shared.ui.EventsListScreen
-import com.worldwidewaves.shared.ui.TabManager
+import com.worldwidewaves.shared.ui.TabNavigationCoordinator
 import com.worldwidewaves.shared.ui.components.global.SimulationModeChip
 import com.worldwidewaves.shared.ui.components.global.SplashScreen
 import com.worldwidewaves.shared.ui.components.navigation.ConfigurableTabBarItem
@@ -131,7 +131,7 @@ open class MainScreen
                 )
             // Debug screen removed from tab bar - will be accessed via floating icon
 
-            TabManager(
+            TabNavigationCoordinator(
                 platformEnabler,
                 screens.toList(),
             ) { isSelected, tabIndex, contentDescription ->

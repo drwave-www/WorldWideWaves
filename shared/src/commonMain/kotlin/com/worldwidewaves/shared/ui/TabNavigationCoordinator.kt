@@ -76,7 +76,7 @@ interface TabScreen {
  * 3. Persists the selected tab via `remember` so configuration changes keep the
  *    current selection.
  */
-class TabManager(
+class TabNavigationCoordinator(
     private val platformEnabler: PlatformEnabler,
     private val screens: List<TabScreen>, // List of tab screens
     val tabBarItem: @Composable ( // How to draw a tab item

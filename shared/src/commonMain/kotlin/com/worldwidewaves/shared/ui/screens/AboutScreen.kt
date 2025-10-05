@@ -42,7 +42,7 @@ import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.TabBar
 import com.worldwidewaves.shared.WWWPlatform
-import com.worldwidewaves.shared.ui.TabManager
+import com.worldwidewaves.shared.ui.TabNavigationCoordinator
 import com.worldwidewaves.shared.ui.TabScreen
 import com.worldwidewaves.shared.ui.screens.about.AboutFaqScreen
 import com.worldwidewaves.shared.ui.screens.about.AboutInfoScreen
@@ -59,7 +59,7 @@ private val tabInfo =
 /**
  * Shared About root screen that aggregates the Info and FAQ sub-sections.
  *
- * Uses an internal TabManager to switch between the two sub-screens
+ * Uses an internal TabNavigationCoordinator to switch between the two sub-screens
  * and provides a tiny tab-bar implementation.
  * Works identically on both Android and iOS platforms.
  */
@@ -74,7 +74,7 @@ fun AboutScreen(
 ) {
     // Create tab manager with shared sub-screens
     val tabManager =
-        TabManager(
+        TabNavigationCoordinator(
             platformEnabler,
             screens =
                 listOf(
