@@ -215,4 +215,76 @@ import CoreLocation
         WWWLog.d("IOSMapBridge", "Clearing wave polygons for event: \(eventId)")
         wrapper.clearWavePolygons()
     }
+
+    // MARK: - Accessibility Support
+
+    /// Updates user position for VoiceOver accessibility.
+    ///
+    /// ## Purpose
+    /// Enables VoiceOver users to know their current position relative to the event.
+    /// Creates accessible elements showing user location and distance from event center.
+    ///
+    /// ## Threading Model
+    /// Main thread only (UIKit requirement)
+    ///
+    /// ## Use Cases
+    /// - User location updates (GPS changes)
+    /// - Simulation position updates (testing)
+    /// - Initial map load with known user position
+    ///
+    /// - Parameters:
+    ///   - eventId: Unique event identifier (registry key)
+    ///   - latitude: User latitude coordinate
+    ///   - longitude: User longitude coordinate
+    /// - Important: Must be called on main thread
+    /// - Note: Called from Kotlin via @objc bridge
+    @objc public static func setUserPosition(eventId: String, latitude: Double, longitude: Double) {
+        guard let wrapper = Shared.MapWrapperRegistry.shared.getWrapper(eventId: eventId) as? MapLibreViewWrapper else {
+            WWWLog.w("IOSMapBridge", "No wrapper found for event: \(eventId)")
+            return
+        }
+
+        wrapper.setUserPosition(latitude: latitude, longitude: longitude)
+    }
+
+    /// Updates event metadata for VoiceOver accessibility.
+    ///
+    /// ## Purpose
+    /// Enables VoiceOver users to understand event boundaries and area information.
+    /// Creates accessible elements describing event area, radius, and location.
+    ///
+    /// ## Threading Model
+    /// Main thread only (UIKit requirement)
+    ///
+    /// ## Use Cases
+    /// - Event data loads (initial screen setup)
+    /// - Event data updates (real-time changes)
+    ///
+    /// - Parameters:
+    ///   - eventId: Unique event identifier (registry key)
+    ///   - centerLatitude: Event center latitude coordinate
+    ///   - centerLongitude: Event center longitude coordinate
+    ///   - radius: Event area radius in meters
+    ///   - eventName: Optional human-readable event name
+    /// - Important: Must be called on main thread
+    /// - Note: Called from Kotlin via @objc bridge
+    @objc public static func setEventInfo(
+        eventId: String,
+        centerLatitude: Double,
+        centerLongitude: Double,
+        radius: Double,
+        eventName: String?
+    ) {
+        guard let wrapper = Shared.MapWrapperRegistry.shared.getWrapper(eventId: eventId) as? MapLibreViewWrapper else {
+            WWWLog.w("IOSMapBridge", "No wrapper found for event: \(eventId)")
+            return
+        }
+
+        wrapper.setEventInfo(
+            centerLatitude: centerLatitude,
+            centerLongitude: centerLongitude,
+            radius: radius,
+            eventName: eventName
+        )
+    }
 }

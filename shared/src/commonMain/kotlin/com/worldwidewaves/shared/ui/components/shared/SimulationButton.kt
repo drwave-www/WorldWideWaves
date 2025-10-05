@@ -47,6 +47,7 @@ import com.worldwidewaves.shared.WWWSimulation
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.ui.theme.onPrimaryLight
+import com.worldwidewaves.shared.ui.utils.focusIndicator
 import com.worldwidewaves.shared.ui.utils.getIosSafePlatform
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
@@ -108,6 +109,7 @@ fun BoxScope.SimulationButton(
                 .size(48.dp)
                 .clip(CircleShape)
                 .background(onPrimaryLight)
+                .focusIndicator()
                 .clickable(enabled = simulationButtonState != "loading") {
                     val action =
                         handleSimulationClick(

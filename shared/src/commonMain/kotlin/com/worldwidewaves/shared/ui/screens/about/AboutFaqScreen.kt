@@ -70,6 +70,7 @@ import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedExtraPrimaryColoredBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
+import com.worldwidewaves.shared.ui.utils.focusIndicator
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
@@ -181,6 +182,7 @@ private fun FAQTitle(scrollToFAQPosition: () -> Unit) {
             modifier =
                 Modifier
                     .fillMaxWidth()
+                    .focusIndicator()
                     .clickable(onClick = scrollToFAQPosition),
             text = stringResource(MokoRes.strings.faq_access),
             style =

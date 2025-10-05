@@ -19,7 +19,6 @@ package com.worldwidewaves.shared.ui.theme
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import platform.UIKit.UIApplication

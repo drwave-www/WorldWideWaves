@@ -85,6 +85,7 @@ import com.worldwidewaves.shared.ui.theme.sharedExtendedLight
 import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedQuaternaryColoredTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredTextStyle
+import com.worldwidewaves.shared.ui.utils.focusIndicator
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 import org.jetbrains.compose.resources.DrawableResource
@@ -289,6 +290,7 @@ private fun SelectorBox(
                 .clip(RoundedCornerShape(EventsList.SELECTOR_ROUND.dp))
                 .height(EventsList.SELECTOR_HEIGHT.dp)
                 .background(backgroundColor)
+                .focusIndicator()
                 .clickable { onClick() }
                 .semantics {
                     role = Role.Tab
@@ -365,6 +367,7 @@ private fun Event(
     Column(
         modifier =
             modifier
+                .focusIndicator()
                 .clickable {
                     onEventClick(event.id)
                 }.semantics {
@@ -560,6 +563,7 @@ private fun EventOverlayFavorite(
             modifier =
                 Modifier
                     .size(48.dp)
+                    .focusIndicator()
                     .clickable {
                         setEventFavorite?.let {
                             pendingFavoriteToggle = true

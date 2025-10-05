@@ -42,6 +42,7 @@ import com.worldwidewaves.shared.WWWGlobals.Event
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
+import com.worldwidewaves.shared.ui.utils.focusIndicator
 import com.worldwidewaves.shared.ui.utils.getIosSafeClock
 import dev.icerock.moko.resources.compose.stringResource
 import kotlin.time.Duration.Companion.hours
@@ -96,6 +97,7 @@ fun ButtonWave(
                 .width(Event.WAVEBUTTON_WIDTH.dp)
                 .height(Event.WAVEBUTTON_HEIGHT.dp)
                 .alpha(if (isEnabled) alpha else 1f) // Apply blinking only when enabled
+                .focusIndicator()
                 .clickable(enabled = isEnabled, onClick = {
                     onNavigateToWave.navigateToWave(eventId)
                 })

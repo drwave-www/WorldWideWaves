@@ -25,6 +25,7 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.isHeading
+import androidx.test.espresso.accessibility.AccessibilityChecks
 import org.junit.Assert.assertTrue
 
 /**
@@ -119,5 +120,15 @@ abstract class BaseAccessibilityTest : BaseComponentTest() {
         const val ACCESSIBILITY_TIMEOUT = 5000L
         const val SCREEN_READER_TIMEOUT = 3000L
         const val FOCUS_TIMEOUT = 2000L
+
+        init {
+            // Enable Espresso accessibility checks for automated scanning
+            // This runs on all Espresso interactions automatically
+            // Note: Compose UI tests don't trigger Espresso view matchers,
+            // so these checks primarily apply when mixing Compose with traditional Views
+            AccessibilityChecks
+                .enable()
+                .setRunChecksFromRootView(true)
+        }
     }
 }

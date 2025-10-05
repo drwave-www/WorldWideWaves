@@ -75,6 +75,7 @@ kotlin {
         androidInstrumentedTest.dependencies {
             implementation(libs.androidx.junit)
             implementation(libs.androidx.espresso.core)
+            implementation(libs.androidx.espresso.accessibility)
             implementation(libs.androidx.compose.ui.test.junit4)
             implementation(libs.mockk.android.v1120)
             implementation(projects.shared)

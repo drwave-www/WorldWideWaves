@@ -292,7 +292,107 @@ For complete iOS setup, debugging, and troubleshooting:
 
 ---
 
+## Accessibility Requirements [MANDATORY]
+
+> **Status**: ✅ WCAG 2.1 Level AA Compliant | **Last Updated**: October 2025
+
+### All UI Components Must:
+
+- ✅ **Have contentDescription**: All images/icons must have meaningful descriptions (localized via MokoRes.strings when available)
+- ✅ **Use semantics blocks**: All interactive elements need `Modifier.semantics { role, contentDescription, stateDescription }`
+- ✅ **Meet touch target minimums**: 48dp (Android) / 44pt (iOS) on all interactive elements
+- ✅ **Support text scaling**: Use `.sp` units for all text sizes (respects system font size)
+- ✅ **Announce state changes**: Use live regions for dynamic content (`liveRegion = LiveRegionMode.Polite`)
+- ✅ **Work with screen readers**: TalkBack (Android) and VoiceOver (iOS) must fully function
+- ✅ **Meet color contrast**: 4.5:1 minimum ratio for all text (WCAG AA standard)
+- ✅ **Include heading hierarchy**: Mark screen titles with `semantics { heading = true }`
+
+### Code Pattern Examples
+
+```kotlin
+// Button with semantics
+Button(
+    onClick = { action() },
+    modifier = Modifier.semantics {
+        role = Role.Button
+        contentDescription = "Clear action description"
+    }
+)
+
+// Touch target compliance (48dp minimum)
+Box(
+    modifier = Modifier
+        .size(48.dp)  // Minimum touch target
+        .clickable { action() }
+        .semantics { role = Role.Button },
+    contentAlignment = Alignment.Center
+) {
+    Icon(
+        modifier = Modifier.size(24.dp),  // Visual size smaller
+        imageVector = icon,
+        contentDescription = description
+    )
+}
+
+// iOS VoiceOver announcement
+val platformEnabler = getIosSafePlatformEnabler()
+platformEnabler.announceForAccessibility("Wave starting in 5 seconds")
+platformEnabler.triggerHapticWarning()
+```
+
+### Testing Requirements
+
+**Before each PR**:
+```bash
+# Run accessibility test suite
+./scripts/test_accessibility.sh
+
+# Manual testing
+# Android: Enable TalkBack, navigate entire app
+# iOS: Enable VoiceOver, test with Dynamic Type at max size
+```
+
+**Required validations**:
+- [ ] All 27+ accessibility tests pass
+- [ ] TalkBack navigation works without manual mode
+- [ ] VoiceOver announces all critical events
+- [ ] Touch targets verified ≥ 48dp/44pt
+- [ ] Color contrast verified ≥ 4.5:1
+- [ ] Text scales properly (Android: 200%, iOS: 300%)
+
+### Platform-Specific Requirements
+
+**Android**:
+- Semantics: `Role.Button`, `Role.Tab`, `Role.Checkbox`
+- State descriptions for all toggles/selections
+- Live regions for progress indicators
+- Focus indicators for keyboard navigation
+
+**iOS**:
+- VoiceOver announcements for wave timing
+- Haptic feedback (success/warning/impact)
+- Dynamic Type support (12 text size levels)
+- Map accessibility (VoiceOver can navigate map)
+- Toast announcements via accessibility API
+
+### Documentation
+
+- **[Accessibility Guide](./docs/ACCESSIBILITY_GUIDE.md)** - Complete implementation patterns
+- **[iOS Map Accessibility](./docs/iOS_MAP_ACCESSIBILITY.md)** - Map-specific implementation
+- **Test Script**: `./scripts/test_accessibility.sh`
+
+**⚠️ CRITICAL**: Accessibility is not optional. All new UI components must follow these patterns before merging.
+
+---
+
 ## Recent Major Updates
+
+### Accessibility Implementation (October 2025)
+Comprehensive WCAG 2.1 Level AA compliance achieved:
+- **Android**: Complete semantics, touch targets, color contrast, live regions
+- **iOS**: VoiceOver, haptics, Dynamic Type (0.8x-3.0x), map accessibility
+- **Testing**: 27+ automated tests, manual TalkBack/VoiceOver procedures
+- **Wave Coordination**: Fully accessible to blind users via audio + haptics
 
 ### Position System Refactor (September 2025)
 A comprehensive position system refactor has been completed to improve performance, maintainability, and reliability:
