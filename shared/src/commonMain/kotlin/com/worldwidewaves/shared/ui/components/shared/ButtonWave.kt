@@ -90,6 +90,9 @@ fun ButtonWave(
     )
 
     val buttonText = stringResource(MokoRes.strings.wave_now)
+    val activeStateDesc = stringResource(MokoRes.strings.accessibility_active)
+    val disabledStateDesc = stringResource(MokoRes.strings.accessibility_disabled)
+
     Surface(
         color = if (isEnabled) MaterialTheme.colorScheme.primary else Color.Gray,
         modifier =
@@ -104,7 +107,7 @@ fun ButtonWave(
                 .semantics {
                     role = Role.Button
                     contentDescription = buttonText
-                    stateDescription = if (isEnabled) "Active" else "Disabled"
+                    stateDescription = if (isEnabled) activeStateDesc else disabledStateDesc
                 },
     ) {
         Text(

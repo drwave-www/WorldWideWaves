@@ -44,6 +44,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.EventsList
 import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.events.IWWWEvent
@@ -67,6 +68,7 @@ fun EventCard(
     modifier: Modifier = Modifier,
 ) {
     val eventLocation = stringResource(event.getLocation())
+    val accessibilityDescription = stringResource(MokoRes.strings.accessibility_event_in, eventLocation)
     Column(
         modifier =
             modifier
@@ -75,7 +77,7 @@ fun EventCard(
                     onEventClick(event.id)
                 }.semantics {
                     role = Role.Button
-                    contentDescription = "Event in $eventLocation"
+                    contentDescription = accessibilityDescription
                 },
     ) {
         EventOverlay(event, isMapInstalled, starredSelected, setEventFavorite)

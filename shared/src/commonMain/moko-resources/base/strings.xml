@@ -370,4 +370,49 @@
     <string name="choreography_waiting">Prepare to jump!</string>
     <string name="choreography_hit">Jump!</string>
 
+    <!-- Context: Accessibility state descriptions for UI elements, Size: Short -->
+    <string name="accessibility_selected">Selected</string>
+    <string name="accessibility_not_selected">Not selected</string>
+    <string name="accessibility_active">Active</string>
+    <string name="accessibility_disabled">Disabled</string>
+    <string name="accessibility_favorited">Favorited</string>
+    <string name="accessibility_not_favorited">Not favorited</string>
+
+    <!-- Context: Accessibility content descriptions for UI elements, Size: Short -->
+    <string name="accessibility_favorite_button">Favorite</string>
+    <string name="accessibility_stop_simulation">Stop simulation</string>
+    <string name="accessibility_debug_screen">Debug Screen</string>
+    <string name="accessibility_event_in">Event in %1$s</string>
+
+    <!-- Context: Download progress announcements for screen readers, Size: Medium -->
+    <string name="accessibility_download_starting">Download starting</string>
+    <string name="accessibility_download_25_percent">Download 25 percent complete</string>
+    <string name="accessibility_download_50_percent">Download 50 percent complete</string>
+    <string name="accessibility_download_75_percent">Download 75 percent complete</string>
+    <string name="accessibility_download_complete">Download complete</string>
+    <string name="accessibility_download_percent">%1$d percent</string>
+
+    <!-- Context: Debug screen titles and labels, Size: Short/Medium -->
+    <string name="debug_information">Debug Information</string>
+    <string name="debug_platform_information">Platform Information</string>
+    <string name="debug_application_state">Application State</string>
+    <string name="debug_system_resources">System Resources</string>
+    <string name="debug_platform">Platform</string>
+    <string name="debug_multiplatform">Multiplatform</string>
+    <string name="debug_version">Version</string>
+    <string name="debug_build_type">Build Type</string>
+    <string name="debug_build_type_debug">Debug</string>
+    <string name="debug_simulation_mode">Simulation Mode</string>
+    <string name="debug_simulation_disabled">Disabled</string>
+    <string name="debug_location_provider">Location Provider</string>
+    <string name="debug_location_gps">GPS</string>
+    <string name="debug_network_status">Network Status</string>
+    <string name="debug_network_connected">Connected</string>
+    <string name="debug_memory_usage">Memory Usage</string>
+    <string name="debug_memory_calculating">Calculating...</string>
+    <string name="debug_storage_available">Storage Available</string>
+    <string name="debug_storage_available_value">Available</string>
+    <string name="debug_device_orientation">Device Orientation</string>
+    <string name="debug_device_orientation_portrait">Portrait</string>
+
 </resources>

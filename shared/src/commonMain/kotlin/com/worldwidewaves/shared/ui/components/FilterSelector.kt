@@ -123,6 +123,9 @@ private fun SelectorBox(
     text: String,
 ) {
     val isSelected = fontWeight == FontWeight.Bold
+    val selectedStateDesc = stringResource(MokoRes.strings.accessibility_selected)
+    val notSelectedStateDesc = stringResource(MokoRes.strings.accessibility_not_selected)
+
     Box(
         modifier =
             modifier
@@ -135,7 +138,7 @@ private fun SelectorBox(
                     role = Role.Tab
                     contentDescription = text
                     selected = isSelected
-                    stateDescription = if (isSelected) "Selected" else "Not selected"
+                    stateDescription = if (isSelected) selectedStateDesc else notSelectedStateDesc
                 },
         contentAlignment = Alignment.Center,
     ) {

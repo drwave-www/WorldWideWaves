@@ -167,6 +167,10 @@ fun EventOverlayFavorite(
         isFavorite = event.favorite
     }
 
+    val favoriteContentDesc = stringResource(MokoRes.strings.accessibility_favorite_button)
+    val favoritedStateDesc = stringResource(MokoRes.strings.accessibility_favorited)
+    val notFavoritedStateDesc = stringResource(MokoRes.strings.accessibility_not_favorited)
+
     Box(
         modifier =
             modifier
@@ -188,9 +192,9 @@ fun EventOverlayFavorite(
                         }
                     }.semantics {
                         role = Role.Checkbox
-                        contentDescription = "Favorite"
+                        contentDescription = favoriteContentDesc
                         toggleableState = if (isFavorite) ToggleableState.On else ToggleableState.Off
-                        stateDescription = if (isFavorite) "Favorited" else "Not favorited"
+                        stateDescription = if (isFavorite) favoritedStateDesc else notFavoritedStateDesc
                     },
             contentAlignment = Alignment.Center,
         ) {

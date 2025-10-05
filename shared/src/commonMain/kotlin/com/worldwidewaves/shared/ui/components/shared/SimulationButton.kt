@@ -150,7 +150,7 @@ fun BoxScope.SimulationButton(
             "active" -> {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Stop simulation",
+                    contentDescription = stringResource(MokoRes.strings.accessibility_stop_simulation),
                     tint = Color.Red,
                     modifier = Modifier.size(24.dp),
                 )

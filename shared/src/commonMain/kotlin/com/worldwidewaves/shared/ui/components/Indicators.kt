@@ -97,12 +97,12 @@ fun DownloadProgressIndicator(
     // Determine announcement text for screen readers at key milestones
     val announcementText =
         when (progress) {
-            0 -> "Download starting"
-            25 -> "Download 25 percent complete"
-            50 -> "Download 50 percent complete"
-            75 -> "Download 75 percent complete"
-            100 -> "Download complete"
-            else -> "$progress percent"
+            0 -> stringResource(MokoRes.strings.accessibility_download_starting)
+            25 -> stringResource(MokoRes.strings.accessibility_download_25_percent)
+            50 -> stringResource(MokoRes.strings.accessibility_download_50_percent)
+            75 -> stringResource(MokoRes.strings.accessibility_download_75_percent)
+            100 -> stringResource(MokoRes.strings.accessibility_download_complete)
+            else -> stringResource(MokoRes.strings.accessibility_download_percent, progress)
         }
 
     Column(
