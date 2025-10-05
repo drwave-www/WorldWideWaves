@@ -22,7 +22,7 @@ package com.worldwidewaves.shared.choreographies
  */
 
 import com.worldwidewaves.shared.WWWGlobals.FileSystem
-import com.worldwidewaves.shared.choreographies.getChoreographyText
+import com.worldwidewaves.shared.choreographies.resources.getChoreographyText
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.utils.ImageResolver

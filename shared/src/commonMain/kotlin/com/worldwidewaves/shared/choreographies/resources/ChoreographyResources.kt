@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared.choreographies
+package com.worldwidewaves.shared.choreographies.resources
 
 /*
  * Copyright 2025 DrWave

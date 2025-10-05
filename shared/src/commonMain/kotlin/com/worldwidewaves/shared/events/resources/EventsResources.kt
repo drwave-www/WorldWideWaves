@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared.events
+package com.worldwidewaves.shared.events.resources
 
 /*
  * Copyright 2025 DrWave

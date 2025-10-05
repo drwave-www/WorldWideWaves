@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared.testing
+package com.worldwidewaves.shared.testing.ui
 
 /* * Copyright 2025 DrWave
  *
