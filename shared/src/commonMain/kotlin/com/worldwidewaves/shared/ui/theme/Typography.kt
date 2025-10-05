@@ -11,16 +11,19 @@ package com.worldwidewaves.shared.ui.theme
  */
 
 import androidx.compose.material3.Typography
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 /**
- * Shared typography system - IDENTICAL on both Android and iOS.
+ * Shared typography system supporting iOS Dynamic Type accessibility.
  *
- * This ensures perfect font matching across platforms using the same
- * typography specification as Android.
+ * On iOS: Scales text based on UIContentSizeCategory (12 levels from 0.8x to 3.0x)
+ * On Android: Uses native sp scaling (automatic via system font size settings)
+ *
+ * This ensures perfect font matching across platforms with proper accessibility support.
  */
 
 // Font families - expect/actual for platform-specific font loading
@@ -29,58 +32,66 @@ expect val AppDisplayFontFamily: FontFamily
 expect val AppExtraFontFamily: FontFamily
 
 /**
- * Shared Typography - exact same text styles on both platforms
+ * Creates typography with dynamic scaling for accessibility.
+ *
+ * Base sizes match Android specification exactly, then scaled by platform:
+ * - iOS: Multiplies by Dynamic Type scale factor (0.8x - 3.0x)
+ * - Android: Returns base sizes (sp units handle scaling automatically)
  */
-val AppTypography =
-    Typography(
+@Composable
+fun AppTypography(): Typography {
+    val scale = rememberDynamicTypeScale()
+
+    return Typography(
         // Event-specific text styles matching Android exactly
         headlineLarge =
             TextStyle(
                 fontFamily = AppDisplayFontFamily,
-                fontSize = 32.sp,
+                fontSize = (32 * scale).sp,
                 fontWeight = FontWeight.Bold,
-                lineHeight = 40.sp,
+                lineHeight = (40 * scale).sp,
             ),
         headlineMedium =
             TextStyle(
                 fontFamily = AppDisplayFontFamily,
-                fontSize = 28.sp,
+                fontSize = (28 * scale).sp,
                 fontWeight = FontWeight.Bold,
-                lineHeight = 36.sp,
+                lineHeight = (36 * scale).sp,
             ),
         titleLarge =
             TextStyle(
                 fontFamily = AppBodyFontFamily,
-                fontSize = 26.sp, // EVENT_LOCATION_FONTSIZE = 26
+                fontSize = (26 * scale).sp, // EVENT_LOCATION_FONTSIZE = 26
                 fontWeight = FontWeight.Medium,
-                lineHeight = 32.sp,
+                lineHeight = (32 * scale).sp,
             ),
         titleMedium =
             TextStyle(
                 fontFamily = AppBodyFontFamily,
-                fontSize = 30.sp, // EVENT_DATE_FONTSIZE = 30
+                fontSize = (30 * scale).sp, // EVENT_DATE_FONTSIZE = 30
                 fontWeight = FontWeight.Bold,
-                lineHeight = 36.sp,
+                lineHeight = (36 * scale).sp,
             ),
         bodyLarge =
             TextStyle(
                 fontFamily = AppBodyFontFamily,
-                fontSize = 18.sp, // EVENT_COUNTRY_FONTSIZE = 18 (MEDIUM)
+                fontSize = (18 * scale).sp, // EVENT_COUNTRY_FONTSIZE = 18 (MEDIUM)
                 fontWeight = FontWeight.Normal,
-                lineHeight = 24.sp,
+                lineHeight = (24 * scale).sp,
             ),
         bodyMedium =
             TextStyle(
                 fontFamily = AppBodyFontFamily,
-                fontSize = 16.sp, // EVENT_COMMUNITY_FONTSIZE = 16 (DEFAULT)
+                fontSize = (16 * scale).sp, // EVENT_COMMUNITY_FONTSIZE = 16 (DEFAULT)
                 fontWeight = FontWeight.Normal,
-                lineHeight = 20.sp,
+                lineHeight = (20 * scale).sp,
             ),
         labelSmall =
             TextStyle(
                 fontFamily = AppBodyFontFamily,
-                fontSize = 12.sp, // SOONRUNNING_FONTSIZE for badges
+                fontSize = (12 * scale).sp, // SOONRUNNING_FONTSIZE for badges
                 fontWeight = FontWeight.Bold,
-                lineHeight = 16.sp,
+                lineHeight = (16 * scale).sp,
             ),
     )
+}

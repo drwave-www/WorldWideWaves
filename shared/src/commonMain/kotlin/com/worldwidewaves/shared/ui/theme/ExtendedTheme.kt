@@ -100,12 +100,13 @@ fun sharedExtraPrimaryColoredBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_D
 
 /**
  * Shared Material Theme with extended colors - IDENTICAL to Android
+ * Includes iOS Dynamic Type support for accessibility.
  */
 @Composable
 fun SharedWorldWideWavesThemeWithExtended(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = AppLightColorScheme,
-        typography = AppTypography,
+        typography = AppTypography(),
         content = content,
     )
 }
