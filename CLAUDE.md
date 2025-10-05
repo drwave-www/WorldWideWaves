@@ -596,6 +596,84 @@ catch (e: Exception) {
 - Include examples in documentation where helpful
 - Maintain up-to-date README files
 
+### Class Organization Standards
+
+**Standard Class Structure** (top to bottom):
+```kotlin
+class MyClass {
+    // 1. COMPANION OBJECT (always first)
+    companion object {
+        private const val TAG = "MyClass"
+        fun create(): MyClass = MyClass()
+    }
+
+    // 2. PROPERTIES
+    // Public properties first
+    val publicProperty: String
+
+    // Private properties second
+    private val privateProperty: Int
+
+    // 3. INIT BLOCKS
+    init {
+        // Initialization logic
+    }
+
+    // 4. PUBLIC API METHODS
+    fun publicMethod() {
+        // Implementation
+    }
+
+    // 5. INTERNAL/PROTECTED METHODS
+    internal fun internalMethod() {
+        // Implementation
+    }
+
+    // 6. PRIVATE HELPER METHODS
+    private fun helperMethod() {
+        // Implementation
+    }
+
+    // 7. NESTED CLASSES/OBJECTS
+    data class NestedData(val value: String)
+}
+```
+
+**Section Comments for Large Files** (>200 lines):
+```kotlin
+// ============================================================
+// PUBLIC API
+// ============================================================
+
+fun publicMethod1() { }
+fun publicMethod2() { }
+
+// ============================================================
+// PRIVATE HELPERS
+// ============================================================
+
+private fun helper1() { }
+private fun helper2() { }
+
+// ============================================================
+// DATA CLASSES
+// ============================================================
+
+data class Result(val value: String)
+```
+
+**Method Grouping Principles**:
+- Group related methods together
+- Keep public API methods near the top
+- Place lifecycle methods (onCreate, onDestroy) in logical order
+- Group by feature/responsibility, not alphabetically
+- Use section comments for files >200 lines
+
+**File Size Guidelines**:
+- Target: <300 lines per file
+- Warning: >500 lines (consider splitting)
+- Maximum: <600 lines (must split if exceeded)
+
 ---
 
 ## Build and Testing Commands
