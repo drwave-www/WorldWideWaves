@@ -674,6 +674,33 @@ data class Result(val value: String)
 - Warning: >500 lines (consider splitting)
 - Maximum: <600 lines (must split if exceeded)
 
+### Code Quality Best Practices
+
+**Detekt Warnings**:
+- Fix all unused properties and variables (remove dead code)
+- Use specific exception types (avoid `catch (e: Exception)` when possible)
+- Add logging for swallowed exceptions
+- Use `check()` or `error()` instead of throwing IllegalStateException
+- Create data classes for functions with >6 parameters
+- Break long lines (keep under max line length)
+
+**Import Management**:
+- Run `./gradlew :shared:ktlintFormat` to organize imports
+- Remove unused imports regularly
+- Group imports: stdlib → KMM/Compose → project → platform
+
+**Git Best Practices**:
+- Use `git mv` for file renames/moves (preserves history)
+- Commit frequently with descriptive messages
+- Run tests before every commit
+- Update documentation when changing files
+
+**Refactoring Patterns**:
+- Use delegation/facade patterns for large file splits
+- Maintain backward compatibility (no breaking changes)
+- Preserve all tests (don't disable to make them pass)
+- Document decisions in commit messages
+
 ---
 
 ## Build and Testing Commands
