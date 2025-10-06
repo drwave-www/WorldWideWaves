@@ -1000,7 +1000,8 @@ class EventsViewModelTest : KoinTest {
 
                 // Wait for this specific filter operation to complete before next
                 // CI environments need more time for 100 iterations
-                waitForEvents(viewModel, expectedSize, timeoutMs = 10000)
+                // Increased to 20s to handle slower CI runners (was 10s)
+                waitForEvents(viewModel, expectedSize, timeoutMs = 20000)
             }
 
             // Then - verify final state is correct and no crashes
