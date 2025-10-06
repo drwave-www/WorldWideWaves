@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -92,6 +93,7 @@ fun FavoritesSelector(
                 textColor = allColor.onColor,
                 fontWeight = allWeight,
                 text = stringResource(MokoRes.strings.events_select_all),
+                testTag = "FilterButton_All",
             )
             SelectorBox(
                 modifier = Modifier.fillMaxWidth(favoritesButtonWidth),
@@ -100,6 +102,7 @@ fun FavoritesSelector(
                 textColor = starredColor.onColor,
                 fontWeight = starredWeight,
                 text = stringResource(MokoRes.strings.events_select_starred),
+                testTag = "FilterButton_Favorites",
             )
             SelectorBox(
                 modifier = Modifier.fillMaxWidth(1f),
@@ -108,6 +111,7 @@ fun FavoritesSelector(
                 textColor = downloadedColor.onColor,
                 fontWeight = downloadedWeight,
                 text = stringResource(MokoRes.strings.events_select_downloaded),
+                testTag = "FilterButton_Downloaded",
             )
         }
     }
@@ -121,6 +125,7 @@ private fun SelectorBox(
     textColor: Color,
     fontWeight: FontWeight,
     text: String,
+    testTag: String,
 ) {
     val isSelected = fontWeight == FontWeight.Bold
     val selectedStateDesc = stringResource(MokoRes.strings.accessibility_selected)
@@ -129,6 +134,7 @@ private fun SelectorBox(
     Box(
         modifier =
             modifier
+                .testTag(testTag)
                 .clip(RoundedCornerShape(EventsList.SELECTOR_ROUND.dp))
                 .height(EventsList.SELECTOR_HEIGHT.dp)
                 .background(backgroundColor)

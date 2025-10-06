@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -107,7 +108,7 @@ fun AboutFaqScreen(
 
     Box(modifier = modifier) {
         Column(
-            modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
+            modifier = Modifier.fillMaxSize().verticalScroll(scrollState).testTag("FaqList"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             AboutWWWLogo()
@@ -243,6 +244,7 @@ private fun FAQItem(
     Column(
         modifier =
             Modifier
+                .testTag("FaqItem_$itemIndex")
                 .fillMaxWidth()
                 .padding(Dimensions.DEFAULT_INT_PADDING.dp)
                 .clickable {

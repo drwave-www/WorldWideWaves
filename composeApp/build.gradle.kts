@@ -150,6 +150,16 @@ android {
         )
     }
     buildTypes {
+        debug {
+            // Debug build type for Firebase Test Lab UI testing
+            isDebuggable = true
+
+            // Enable simulation mode by default for UI testing
+            buildConfigField("boolean", "ENABLE_SIMULATION_MODE", "true")
+            buildConfigField("boolean", "ENABLE_VERBOSE_LOGGING", "true")
+            buildConfigField("boolean", "ENABLE_DEBUG_LOGGING", "true")
+            buildConfigField("boolean", "ENABLE_PERFORMANCE_LOGGING", "true")
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
@@ -162,6 +172,7 @@ android {
             }
 
             // Production logging configuration - disable verbose/debug logging for performance and security
+            buildConfigField("boolean", "ENABLE_SIMULATION_MODE", "false")
             buildConfigField("boolean", "ENABLE_VERBOSE_LOGGING", "false")
             buildConfigField("boolean", "ENABLE_DEBUG_LOGGING", "false")
             buildConfigField("boolean", "ENABLE_PERFORMANCE_LOGGING", "false")

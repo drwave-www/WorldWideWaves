@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -97,6 +98,7 @@ fun ButtonWave(
         color = if (isEnabled) MaterialTheme.colorScheme.primary else Color.Gray,
         modifier =
             modifier
+                .testTag("JoinWaveButton")
                 .width(Event.WAVEBUTTON_WIDTH.dp)
                 .height(Event.WAVEBUTTON_HEIGHT.dp)
                 .alpha(if (isEnabled) alpha else 1f) // Apply blinking only when enabled

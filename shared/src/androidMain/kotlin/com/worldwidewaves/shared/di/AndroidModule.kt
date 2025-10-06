@@ -50,3 +50,16 @@ val androidModule =
         single { get<DataStoreFactory>().create { keyValueStorePath() } }
         single<FavoriteEventsStore> { AndroidFavoriteEventsStore(get()) }
     }
+
+/**
+ * Initialize simulation mode based on build configuration.
+ * Call this after Koin initialization with the BuildConfig flag.
+ */
+fun initializeSimulationMode(
+    platform: WWWPlatform,
+    enableSimulation: Boolean,
+) {
+    if (enableSimulation) {
+        platform.enableSimulationMode()
+    }
+}

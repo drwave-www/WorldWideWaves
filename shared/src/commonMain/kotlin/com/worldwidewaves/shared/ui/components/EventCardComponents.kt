@@ -47,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -184,6 +185,7 @@ fun EventOverlayFavorite(
         Box(
             modifier =
                 Modifier
+                    .testTag("EventFavoriteButton_${event.id}")
                     .size(48.dp)
                     .focusIndicator()
                     .clickable {

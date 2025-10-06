@@ -67,26 +67,12 @@ See archived optimization reports in docs/archive/ for complete history.
 
 ## Active TODO Files
 
-### TODO_ACCESSIBILITY.md (29KB)
-**Status**: Partially complete
-- Android semantics: Mostly implemented
-- iOS accessibility: Implemented (VoiceOver, Dynamic Type, haptics)
-- Testing infrastructure: Complete
-- Remaining: Some Android components may need semantics review
-
 ### TODO_FIREBASE_UI.md (48KB)
 **Status**: Not started
 - Firebase authentication UI
 - Firestore integration
 - Storage integration
 - Real-time data sync
-
-### TODO (User's personal notes)
-**Status**: Active personal todo list
-- iOS wave/MapLibre completion
-- Translations
-- Play Store deployment
-- Future feature ideas
 
 ---
 

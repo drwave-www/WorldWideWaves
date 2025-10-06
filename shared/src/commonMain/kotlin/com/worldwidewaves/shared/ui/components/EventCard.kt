@@ -39,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -72,6 +73,7 @@ fun EventCard(
     Column(
         modifier =
             modifier
+                .testTag("Event_${event.id}")
                 .focusIndicator()
                 .clickable {
                     onEventClick(event.id)
