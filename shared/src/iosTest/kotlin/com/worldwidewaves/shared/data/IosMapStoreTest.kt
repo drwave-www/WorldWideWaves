@@ -98,7 +98,7 @@ class IosMapStoreTest {
     fun `getMapFileAbsolutePath cache invalidation works correctly`() =
         runTest {
             val eventId = "test_cache_invalidation"
-            val extension = "geojson"
+            val extension = MapFileExtension.GEOJSON
 
             // Clear any existing cache state
             clearUnavailableGeoJsonCache(eventId)

@@ -282,7 +282,7 @@ class MapStoreErrorTest {
         testScope.runTest {
             // Given: Event marked as unavailable
             val eventId = "test_event_unavailable"
-            val extension = "geojson"
+            val extension = MapFileExtension.GEOJSON
 
             // Simulate unavailability by failing download
             MapDownloadGate.disallow(eventId)

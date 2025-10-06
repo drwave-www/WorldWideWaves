@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.data.MapFileExtension
 import com.worldwidewaves.shared.data.getMapFileAbsolutePath
 import com.worldwidewaves.shared.events.data.GeoJsonDataProvider
 import com.worldwidewaves.shared.events.geometry.EventAreaGeometry
@@ -128,7 +129,7 @@ data class WWWEventArea(
      * This function attempts to get the absolute path of the GeoJSON file associated with the event.
      * It uses the event's ID to locate the file within the cache directory.
      */
-    internal suspend fun getGeoJsonFilePath(): String? = getMapFileAbsolutePath(event.id, "geojson")
+    internal suspend fun getGeoJsonFilePath(): String? = getMapFileAbsolutePath(event.id, MapFileExtension.GEOJSON)
 
     // ---------------------------
 
