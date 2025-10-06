@@ -697,6 +697,20 @@ data class Result(val value: String)
 - Use `check()` or `error()` instead of throwing IllegalStateException
 - Create data classes for functions with >6 parameters
 - Break long lines (keep under max line length)
+- Extract magic numbers to named constants
+
+**Acceptable Detekt Suppressions** (when justified):
+- `@Suppress("ReturnCount")` - Multiple returns OK for guard clauses and early exits
+- `@Suppress("TooGenericExceptionCaught")` - When catching specific exception like IndexOutOfBoundsException that detekt considers generic
+- `@Suppress("MatchingDeclarationName")` - For expect/actual files (BaseViewModel.android.kt, etc.)
+- `@Suppress("ThrowsCount")` - For validation functions that need multiple throw types
+- `@Suppress("UnusedParameter")` - For API consistency or future use (document why)
+- `@Suppress("USELESS_IS_CHECK")` - For intentional runtime type verification in tests
+
+**Suppression Rules**:
+- Always add comment explaining WHY suppression is needed
+- Place suppression close to the violation (function/file level)
+- Document in commit message when adding suppressions
 
 **Import Management**:
 - Run `./gradlew :shared:ktlintFormat` to organize imports
