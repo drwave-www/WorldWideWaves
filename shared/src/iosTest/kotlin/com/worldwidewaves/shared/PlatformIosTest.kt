@@ -19,6 +19,7 @@ package com.worldwidewaves.shared
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
+import com.worldwidewaves.shared.data.MapFileExtension
 import com.worldwidewaves.shared.data.cacheDeepFile
 import com.worldwidewaves.shared.data.cachedFileExists
 import com.worldwidewaves.shared.data.cachedFilePath
