@@ -263,12 +263,20 @@ object EventAreaGeometry {
                 return false
             }
 
-            val hasValidSize = element.size == 2
-            val hasValidFirstElement = element.firstOrNull() is JsonElement
-            val isFirstPrimitive = element.first() is kotlinx.serialization.json.JsonPrimitive
-            val isNotString = element[0].jsonPrimitive.isString.not()
+            if (element.size != 2) {
+                return false
+            }
 
-            return hasValidSize && hasValidFirstElement && isFirstPrimitive && isNotString
+            val firstElement = element.firstOrNull() ?: return false
+            if (firstElement !is kotlinx.serialization.json.JsonPrimitive) {
+                return false
+            }
+
+            if (firstElement.isString) {
+                return false
+            }
+
+            return true
         }
 
         private fun processCoordinatePair(element: kotlinx.serialization.json.JsonArray) {

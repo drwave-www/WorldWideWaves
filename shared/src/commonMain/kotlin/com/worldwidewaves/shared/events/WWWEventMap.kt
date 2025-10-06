@@ -82,16 +82,10 @@ class WWWEventMap(
 
     private val mapDataProvider: MapDataProvider by inject()
 
-    // Cache for style URI to avoid redundant file I/O
-    @Transient
-    private var cachedStyleUri: String? = null
-
     // ---------------------------
 
     fun setRelatedEvent(event: WWWEvent) {
         this.event = event
-        // Clear cache when event changes
-        cachedStyleUri = null
     }
 
     // ---------------------------
@@ -107,22 +101,9 @@ class WWWEventMap(
      * It retrieves MBTiles, GeoJSON, sprites, and glyphs, fills a template with the data,
      * and returns the URI of the cached style JSON.
      *
-     * **Performance**: Result is cached in memory to avoid redundant file I/O on repeated calls.
+     * **Performance**: Result is cached on disk to avoid redundant generation.
      */
     suspend fun getStyleUri(): String? {
-        // Return cached URI if available AND file still exists
-        cachedStyleUri?.let { cached ->
-            val styleFilename = "style-${event.id}.json"
-            if (cachedFileExists(styleFilename) && !isCachedFileStale(styleFilename)) {
-                Log.d("WWWEventMap", "getStyleUri: Using cached style URI for event ${event.id}")
-                return cached
-            } else {
-                // Cache invalid - file was deleted or became stale
-                Log.d("WWWEventMap", "getStyleUri: Cached URI invalid, regenerating for event ${event.id}")
-                cachedStyleUri = null
-            }
-        }
-
         Log.d("WWWEventMap", "getStyleUri() called for event: ${event.id}")
 
         val mbtilesFilePath = getMbtilesFilePath()
@@ -136,7 +117,6 @@ class WWWEventMap(
         val isCacheValid = cachedFileExists(styleFilename) && !isCachedFileStale(styleFilename)
         if (isCacheValid) {
             val cachedPath = cachedFilePath(styleFilename)
-            cachedStyleUri = cachedPath // Cache in memory
             Log.i("WWWEventMap", "getStyleUri: Using cached style file: $cachedPath")
             return cachedPath
         }
@@ -180,10 +160,6 @@ class WWWEventMap(
         val cachedPath = cacheStringToFile(styleFilename, newFileStr)
         updateCacheMetadata(styleFilename)
         Log.d("WWWEventMap", "getStyleUri: Style file cached at: $cachedPath")
-
-        // Cache the URI in memory for subsequent calls
-        cachedStyleUri = cachedPath
-
         Log.i("WWWEventMap", "getStyleUri: Returning style path: $cachedPath")
         return cachedPath
     }
