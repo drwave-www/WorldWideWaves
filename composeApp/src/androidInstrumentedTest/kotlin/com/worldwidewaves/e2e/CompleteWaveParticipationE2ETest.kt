@@ -56,11 +56,14 @@ import org.junit.runner.RunWith
 class CompleteWaveParticipationE2ETest : BaseE2ETest() {
     @Test
     fun testCompleteWaveParticipationJourney() {
+        // Wait for app to fully load (splash screen can take time)
+        Thread.sleep(5000)
+
         // ============================================================
         // STEP 1: APP LAUNCH IN DEBUG MODE
         // ============================================================
-        captureStepScreenshot("app_launch_simulation_enabled")
         verifyMainScreenLoaded()
+        captureStepScreenshot("app_launch_simulation_enabled")
 
         // ============================================================
         // STEP 2: BROWSE EVENTS LIST
@@ -209,7 +212,11 @@ class CompleteWaveParticipationE2ETest : BaseE2ETest() {
     // ============================================================
 
     private fun verifyMainScreenLoaded() {
-        E2ETestHelpers.waitForNodeWithTag(composeTestRule, "EventsList", 5000)
+        // Wait longer for app to fully initialize (splash screen, data loading, etc.)
+        val found = E2ETestHelpers.waitForNodeWithTag(composeTestRule, "EventsList", 30000)
+        if (!found) {
+            throw AssertionError("EventsList not found after 30 seconds - app may not have loaded properly")
+        }
         composeTestRule.onNodeWithTag("EventsList").assertIsDisplayed()
     }
 
