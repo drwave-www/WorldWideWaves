@@ -272,8 +272,8 @@
   <string name="faq_answer_5">Sim, os voluntários são sempre bem-vindos. O código da aplicação é de código aberto no GitHub, e pode contactar os criadores através de worldwidewaves@proton.me (respostas não garantidas). A melhor forma de ajudar é divulgar: partilhe fotos e vídeos dos eventos com as hashtags sugeridas, contacte influenciadores locais para amplificar a mensagem, fale sobre isto com a sua comunidade e, acima de tudo, junte-se à onda!</string>
   <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
   <string name="faq_question_6">Como posso simular uma onda?</string>
-  <!-- src_hash: 27df94d0a489449a5eefab0f67b96460cca1d2d2 -->
-  <string name="faq_answer_6">Toque no botão abaixo para ativar o modo de simulação. Nos ecrãs dos eventos, use o botão do temporizador junto do botão "Juntar-se à onda" para iniciar a simulação com as propriedades deste evento (data, hora, local). Para parar a simulação, use o mesmo botão. E, por fim, termine o modo de simulação usando o ícone de parar na sobreposição persistente quando terminar.</string>
+  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
+  <string name="faq_answer_6">Toque no botão abaixo para ativar o modo de simulação. Nos ecrãs do evento, use o botão do temporizador junto ao botão "Junta-te à onda" para iniciar a simulação com as propriedades deste evento (data, hora, local). Para parar a simulação, use o mesmo botão. E, por fim, termine o modo de simulação usando o ícone de parar na sobreposição persistente quando terminar.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">Estados Unidos</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

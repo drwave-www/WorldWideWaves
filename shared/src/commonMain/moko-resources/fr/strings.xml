@@ -272,8 +272,8 @@
   <string name="faq_answer_5">Oui, les bénévoles sont toujours les bienvenus. Le code de l’application est open source sur GitHub, et vous pouvez contacter les créateurs à worldwidewaves@proton.me (réponses non garanties). Le meilleur moyen d’aider est de faire passer le mot : partagez des photos et des vidéos des événements avec les hashtags suggérés, contactez des influenceurs locaux pour amplifier le message, parlez-en avec votre communauté et, surtout, rejoignez la vague !</string>
   <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
   <string name="faq_question_6">Comment simuler une vague ?</string>
-  <!-- src_hash: 27df94d0a489449a5eefab0f67b96460cca1d2d2 -->
-  <string name="faq_answer_6">Appuyez sur le bouton ci-dessous pour activer le mode simulation. Sur les écrans d’événement, utilisez le bouton minuteur à côté du bouton "Rejoindre la vague" pour lancer la simulation en utilisant les propriétés de cet événement (date, heure, lieu). Pour arrêter la simulation, utilisez le même bouton. Enfin, désactivez le mode simulation à l’aide de l’icône d’arrêt sur la couche persistante une fois que vous avez fini.</string>
+  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
+  <string name="faq_answer_6">Appuyez sur le bouton ci-dessous pour activer le mode simulation. Sur les écrans de l’événement, utilisez le bouton chronomètre, près du bouton "Rejoindre la vague", pour lancer la simulation avec les paramètres de cet événement (date, heure, lieu). Pour arrêter la simulation, utilisez le même bouton. Enfin, quittez le mode simulation via l’icône d’arrêt sur le bandeau persistant quand vous avez terminé.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">États-Unis</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

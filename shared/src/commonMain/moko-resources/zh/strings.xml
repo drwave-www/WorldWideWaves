@@ -272,8 +272,8 @@
   <string name="faq_answer_5">是的，我们随时欢迎志愿者。应用的代码已在 GitHub 开源，你也可以通过 worldwidewaves@proton.me 联系创作者（不保证回复）。最好的支持方式是传播这个项目：按建议的标签分享活动的照片和视频，联系本地意见领袖扩大声量，在你的社区里交流，最重要的是，亲自加入这场人浪！</string>
   <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
   <string name="faq_question_6">如何模拟一场人浪？</string>
-  <!-- src_hash: 27df94d0a489449a5eefab0f67b96460cca1d2d2 -->
-  <string name="faq_answer_6">点击下方按钮启用模拟模式。在活动页面，使用靠近“加入人浪”按钮的计时器按钮，以该活动的属性（日期、时间、位置）开始模拟。停止模拟时，使用同一个按钮。完成后，在悬浮层上点按停止图标以退出模拟模式。</string>
+  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
+  <string name="faq_answer_6">点击下方按钮以开启模拟模式。在活动页面，使用“加入人浪”按钮旁的计时器按钮，按该活动的属性（日期、时间、地点）开始模拟。要停止模拟，再次点击同一按钮。完成后，点击常驻悬浮层上的停止图标以退出模拟模式。</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">美国</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

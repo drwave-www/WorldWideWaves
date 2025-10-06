@@ -272,8 +272,8 @@
   <string name="faq_answer_5">Sì, i volontari sono sempre i benvenuti. Il codice dell'app è open source su GitHub e puoi contattare i creatori a worldwidewaves@proton.me (risposte non garantite). Il modo migliore per aiutare è spargere la voce: condividi foto e video dagli eventi usando gli hashtag suggeriti, contatta influencer locali per amplificare il messaggio, parlane con la tua comunità e, soprattutto, unisciti all'onda!</string>
   <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
   <string name="faq_question_6">Come posso simulare un'onda?</string>
-  <!-- src_hash: 27df94d0a489449a5eefab0f67b96460cca1d2d2 -->
-  <string name="faq_answer_6">Tocca il pulsante qui sotto per attivare la modalità simulazione. Nelle schermate dell'evento usa il pulsante del timer vicino al pulsante "Unisciti all'onda" per avviare la simulazione usando le proprietà di questo evento (data, ora, luogo). Per interrompere la simulazione usa lo stesso pulsante. Infine, disattiva la modalità simulazione usando l'icona di stop sull'overlay persistente quando hai finito.</string>
+  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
+  <string name="faq_answer_6">Tocca il pulsante qui sotto per attivare la modalità simulazione. Nelle schermate dell’evento usa il pulsante del timer vicino a “Unisciti all’onda” per avviare la simulazione usando le proprietà di quell’evento (data, ora, luogo). Per interrompere la simulazione usa lo stesso pulsante. Infine, quando hai finito, disattiva la modalità simulazione con l’icona di stop nel livello persistente.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

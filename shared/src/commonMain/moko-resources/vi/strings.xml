@@ -272,8 +272,8 @@
   <string name="faq_answer_5">Có, chúng tôi luôn chào đón tình nguyện viên. Mã của ứng dụng là mã nguồn mở trên GitHub, và bạn có thể liên hệ nhóm phát triển tại worldwidewaves@proton.me (không đảm bảo phản hồi). Cách hỗ trợ tốt nhất là lan tỏa: chia sẻ ảnh và video từ các sự kiện bằng các hashtag được gợi ý, liên hệ những người ảnh hưởng địa phương để khuếch đại thông điệp, nói về việc này với cộng đồng của bạn, và quan trọng nhất là tham gia làn sóng!</string>
   <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
   <string name="faq_question_6">Làm sao để mô phỏng một làn sóng?</string>
-  <!-- src_hash: 27df94d0a489449a5eefab0f67b96460cca1d2d2 -->
-  <string name="faq_answer_6">Chạm nút bên dưới để bật chế độ mô phỏng. Trên màn hình sự kiện, dùng nút hẹn giờ gần nút "Tham gia làn sóng" để bắt đầu mô phỏng theo thuộc tính của sự kiện này (ngày, giờ, địa điểm). Để dừng mô phỏng, dùng lại chính nút đó. Cuối cùng, tắt chế độ mô phỏng bằng biểu tượng dừng trên lớp nổi luôn hiển thị khi bạn hoàn tất.</string>
+  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
+  <string name="faq_answer_6">Nhấn nút bên dưới để bật chế độ mô phỏng. Ở màn hình sự kiện, dùng nút hẹn giờ cạnh nút "Tham gia làn sóng" để bắt đầu mô phỏng với các thuộc tính của sự kiện này (ngày, giờ, địa điểm). Để dừng mô phỏng, dùng lại nút đó. Khi xong, thoát chế độ mô phỏng bằng biểu tượng dừng trên lớp phủ luôn hiển thị.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">Hoa Kỳ</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

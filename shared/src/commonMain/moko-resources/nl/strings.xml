@@ -272,8 +272,8 @@
   <string name="faq_answer_5">Ja, vrijwilligers zijn altijd welkom. De code van de app is open source op GitHub, en je kunt de makers bereiken via worldwidewaves@proton.me (zonder garantie op antwoord). De beste manier om te helpen is het woord te verspreiden: deel foto’s en video’s van evenementen met de voorgestelde hashtags, benader lokale influencers om de boodschap te versterken, praat erover met je community en vooral: doe mee met de golf!</string>
   <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
   <string name="faq_question_6">Hoe simuleer ik een golf?</string>
-  <!-- src_hash: 27df94d0a489449a5eefab0f67b96460cca1d2d2 -->
-  <string name="faq_answer_6">Tik op de knop hieronder om de simulatiemodus te activeren. Op de evenementenschermen gebruik je de timerknop naast de knop "Doe mee met de golf" om de simulatie te starten met de eigenschappen van dit evenement (datum, tijd, locatie). Om de simulatie te stoppen gebruik je dezelfde knop. Schakel tot slot de simulatiemodus uit met het stop-icoon op de permanente overlay wanneer je klaar bent.</string>
+  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
+  <string name="faq_answer_6">Tik op de knop hieronder om de simulatiemodus te activeren. Gebruik op de schermen van het evenement de timerknop naast de knop "Doe mee met de wave" om de simulatie te starten met de eigenschappen van dit evenement (datum, tijd, locatie). Gebruik dezelfde knop om de simulatie te stoppen. Stop tot slot de simulatiemodus via het stop-icoon op de blijvende overlay wanneer je klaar bent.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">VS</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

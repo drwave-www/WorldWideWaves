@@ -272,8 +272,8 @@
   <string name="faq_answer_5">Tak, zawsze zapraszamy wolontariuszy i wolontariuszki. Kod aplikacji jest otwartoźródłowy na GitHubie, a z twórcami można skontaktować się pod adresem worldwidewaves@proton.me (odpowiedzi nie są gwarantowane). Najlepiej pomożesz, nagłaśniając inicjatywę: udostępniaj zdjęcia i filmy z wydarzeń z sugerowanymi hashtagami, skontaktuj się z lokalnymi influencerami, rozmawiaj o tym w swojej społeczności, a co najważniejsze — dołącz do fali!</string>
   <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
   <string name="faq_question_6">Jak zasymulować falę?</string>
-  <!-- src_hash: 27df94d0a489449a5eefab0f67b96460cca1d2d2 -->
-  <string name="faq_answer_6">Stuknij przycisk poniżej, aby włączyć tryb symulacji. Na ekranach wydarzenia użyj przycisku timera obok przycisku „Dołącz do fali”, aby uruchomić symulację z parametrami tego wydarzenia (data, godzina, lokalizacja). Aby zatrzymać symulację, użyj tego samego przycisku. Na koniec wyłącz tryb symulacji, korzystając z ikony Stop na stałej nakładce, gdy skończysz.</string>
+  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
+  <string name="faq_answer_6">Stuknij przycisk poniżej, aby włączyć tryb symulacji. Na ekranach wydarzeń użyj przycisku zegara obok przycisku "Dołącz do fali", aby uruchomić symulację z użyciem parametrów tego wydarzenia (data, godzina, lokalizacja). Aby zatrzymać symulację, użyj tego samego przycisku. Na koniec wyłącz tryb symulacji, korzystając z ikony stop na stałej nakładce, gdy skończysz.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

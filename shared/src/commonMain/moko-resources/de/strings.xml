@@ -272,8 +272,8 @@
   <string name="faq_answer_5">Ja, Freiwillige sind immer willkommen. Der Code der App ist auf GitHub Open Source, und du kannst die Macher unter worldwidewaves@proton.me erreichen (Antworten sind nicht garantiert). Am besten hilfst du, indem du es weitersagst: Teile Fotos und Videos von Events mit den vorgeschlagenen Hashtags, kontaktiere lokale Influencer, um die Botschaft zu verstärken, sprich in deiner Community darüber – und vor allem: Mach bei der Welle mit!</string>
   <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
   <string name="faq_question_6">Wie kann ich eine Welle simulieren?</string>
-  <!-- src_hash: 27df94d0a489449a5eefab0f67b96460cca1d2d2 -->
-  <string name="faq_answer_6">Tippe unten auf die Schaltfläche, um den Simulationsmodus zu aktivieren. Auf den Veranstaltungsseiten startest du die Simulation mit dem Timer-Button neben dem "An der Welle teilnehmen"-Button; dabei werden die Eigenschaften dieses Events (Datum, Uhrzeit, Ort) verwendet. Zum Stoppen der Simulation denselben Button nutzen. Und zum Schluss den Simulationsmodus über das Stopp-Symbol in der dauerhaft eingeblendeten Leiste beenden, wenn du fertig bist.</string>
+  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
+  <string name="faq_answer_6">Tippe unten auf den Button, um den Simulationsmodus zu aktivieren. Auf den Event-Seiten startest du die Simulation mit dem Timer-Button neben „An der Welle teilnehmen“; dabei werden die Eigenschaften des Events (Datum, Uhrzeit, Ort) verwendet. Zum Stoppen der Simulation nutze denselben Button. Und beende zum Schluss den Simulationsmodus über das Stopp-Symbol in der permanenten Einblendung, wenn du fertig bist.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

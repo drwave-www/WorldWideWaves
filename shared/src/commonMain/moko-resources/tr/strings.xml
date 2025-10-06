@@ -272,8 +272,8 @@
   <string name="faq_answer_5">Evet, gönüllüler her zaman hoş karşılanır. Uygulamanın kodu GitHub'da açık kaynak ve geliştiricilere worldwidewaves@proton.me adresinden ulaşabilirsiniz (yanıt garantisi yoktur). Yardım etmenin en iyi yolu duyurmaktır: önerilen hashtag'leri kullanarak etkinliklerden fotoğraf ve videolar paylaşın, mesajı büyütmek için yerel influencer’larla iletişime geçin, topluluğunuzda konuşun ve en önemlisi, dalgaya katılın!</string>
   <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
   <string name="faq_question_6">Bir dalgayı nasıl simüle ederim?</string>
-  <!-- src_hash: 27df94d0a489449a5eefab0f67b96460cca1d2d2 -->
-  <string name="faq_answer_6">Simülasyon modunu etkinleştirmek için aşağıdaki düğmeye dokunun. Etkinlik ekranlarında, bu etkinliğin özelliklerini (tarih, saat, konum) kullanarak simülasyonu başlatmak için "Dalgaya katıl" düğmesinin yanındaki zamanlayıcı düğmesini kullanın. Simülasyonu durdurmak için aynı düğmeyi kullanın. Son olarak, işiniz bittiğinde ekranda sürekli görünen katmandaki durdur simgesiyle simülasyon modunu kapatın.</string>
+  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
+  <string name="faq_answer_6">Aşağıdaki düğmeye dokunarak simülasyon modunu etkinleştirin. Etkinlik ekranlarında, bu etkinliğin özellikleriyle (tarih, saat, konum) simülasyonu başlatmak için "Dalgaya katıl" düğmesinin yanındaki zamanlayıcı düğmesini kullanın. Durdurmak için aynı düğmeyi kullanın. İşiniz bittiğinde simülasyon modunu, kalıcı katmandaki durdurma simgesiyle kapatın.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">ABD</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

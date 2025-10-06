@@ -272,8 +272,8 @@
   <string name="faq_answer_5">Ndiyo, wajitolea wanakaribishwa wakati wowote. Msimbo wa programu ni chanzo huria kwenye GitHub, na unaweza kuwafikia watengenezaji kupitia worldwidewaves@proton.me (majibu hayahakikishwi). Njia bora ya kusaidia ni kusambaza habari: shiriki picha na video za matukio ukitumia hashtags zilizopendekezwa, wasiliana na washawishi wa eneo lako ili kueneza ujumbe, zungumzia na jamii yako, na muhimu zaidi, jiunge na wimbi!</string>
   <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
   <string name="faq_question_6">Ninawezaje kuiga wimbi?</string>
-  <!-- src_hash: 27df94d0a489449a5eefab0f67b96460cca1d2d2 -->
-  <string name="faq_answer_6">Gusa kitufe kilicho chini ili kuwasha hali ya kuiga. Kwenye skrini za tukio, tumia kitufe cha kipima muda kilicho karibu na kitufe cha "Jiunge na wimbi" kuanzisha uigaji ukitumia sifa za tukio hili (tarehe, saa, eneo). Ili kusimamisha uigaji, tumia kitufe hicho hicho. Hatimaye, zima hali ya kuiga kwa kutumia ikoni ya kusitisha iliyo kwenye safu inayoendelea kuonekana unapomaliza.</string>
+  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
+  <string name="faq_answer_6">Gusa kitufe kilicho hapa chini ili kuwasha hali ya uigaji. Kwenye skrini za tukio, tumia kitufe cha kipima muda kilicho karibu na kitufe la "Jiunge na wimbi" kuanzisha uigaji ukitumia sifa za tukio hili (tarehe, saa, eneo). Ili kusitisha uigaji, tumia kitufe hicho hicho. Na mwisho, zima hali ya uigaji ukitumia ikoni ya kusitisha kwenye safu inayoendelea kuonekana unapomaliza.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">Marekani</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

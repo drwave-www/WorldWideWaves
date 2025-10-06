@@ -272,8 +272,8 @@
   <string name="faq_answer_5">Ya, sukarelawan sentiasa dialu-alukan. Kod aplikasi ini adalah sumber terbuka di GitHub, dan anda boleh menghubungi penciptanya di worldwidewaves@proton.me (balasan tidak dijamin). Cara terbaik untuk membantu ialah sebarkan maklumat: kongsi foto dan video dari acara menggunakan hashtag yang dicadangkan, hubungi pempengaruh tempatan untuk menguatkan mesej, bincangkan bersama komuniti anda, dan yang paling penting, sertai gelombang!</string>
   <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
   <string name="faq_question_6">Bagaimana saya boleh menjalankan simulasi gelombang?</string>
-  <!-- src_hash: 27df94d0a489449a5eefab0f67b96460cca1d2d2 -->
-  <string name="faq_answer_6">Ketik butang di bawah untuk mengaktifkan mod simulasi. Pada skrin acara, gunakan butang pemasa berhampiran butang "Sertai gelombang" untuk memulakan simulasi menggunakan butiran acara ini (tarikh, masa, lokasi). Untuk menghentikan simulasi, gunakan butang yang sama. Akhir sekali, hentikan mod simulasi menggunakan ikon henti pada lapisan kekal apabila selesai.</string>
+  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
+  <string name="faq_answer_6">Ketik butang di bawah untuk mengaktifkan mod simulasi. Pada skrin acara, gunakan butang pemasa berdekatan dengan butang "Sertai gelombang" untuk memulakan simulasi menggunakan butiran acara ini (tarikh, masa, lokasi). Untuk menghentikan simulasi, gunakan butang yang sama. Akhir sekali, hentikan mod simulasi menggunakan ikon berhenti pada lapisan yang kekal apabila anda selesai.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">Amerika Syarikat</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

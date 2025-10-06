@@ -272,8 +272,8 @@
   <string name="faq_answer_5">Oo, laging bukas sa mga boluntaryo. Bukas ang source code ng app sa GitHub, at maaari mong kontakin ang mga lumikha sa worldwidewaves@proton.me (hindi garantisado ang sagot). Ang pinakamainam na paraan para tumulong ay ang pagpapalaganap: ibahagi ang mga larawan at video mula sa mga event gamit ang mga mungkahing hashtag, kontakin ang mga lokal na influencer para palakasin ang mensahe, pag-usapan ito sa inyong komunidad, at higit sa lahat, sumali sa alon!</string>
   <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
   <string name="faq_question_6">Paano magsagawa ng simulation ng alon?</string>
-  <!-- src_hash: 27df94d0a489449a5eefab0f67b96460cca1d2d2 -->
-  <string name="faq_answer_6">Pindutin ang button sa ibaba para paganahin ang mode ng simulasyon. Sa mga screen ng event, gamitin ang button ng timer na malapit sa button na "Sumali sa alon" para simulan ang simulation gamit ang mga katangian ng event na ito (petsa, oras, lokasyon). Para ihinto ang simulation, gamitin ang parehong button. At sa huli, itigil ang mode ng simulasyon gamit ang stop icon sa nananatiling layer kapag tapos ka na.</string>
+  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
+  <string name="faq_answer_6">I-tap ang button sa ibaba para paganahin ang mode ng simulasyon. Sa mga screen ng event, gamitin ang button ng timer na malapit sa button na "Sumali sa alon" upang simulan ang simulasyon gamit ang mga detalye ng event na ito (petsa, oras, lokasyon). Upang ihinto ang simulasyon, gamitin ang parehong button. Pagkatapos, ihinto ang mode ng simulasyon gamit ang stop icon sa nananatiling layer kapag tapos ka na.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

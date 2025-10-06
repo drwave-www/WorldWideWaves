@@ -272,8 +272,8 @@
   <string name="faq_answer_5">Sí, siempre damos la bienvenida a personas voluntarias. El código de la app es de código abierto en GitHub, y puedes contactar a sus creadores en worldwidewaves@proton.me (no se garantiza respuesta). La mejor forma de ayudar es correr la voz: comparte fotos y videos de los eventos usando los hashtags sugeridos, contacta a influencers locales para amplificar el mensaje, háblalo con tu comunidad y, sobre todo, ¡únete a la ola!</string>
   <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
   <string name="faq_question_6">¿Cómo simulo una ola?</string>
-  <!-- src_hash: 27df94d0a489449a5eefab0f67b96460cca1d2d2 -->
-  <string name="faq_answer_6">Toca el botón de abajo para activar el modo de simulación. En las pantallas del evento, usa el botón del temporizador junto al botón "Únete a la ola" para iniciar la simulación usando las propiedades de este evento (fecha, hora, ubicación). Para detener la simulación, usa el mismo botón. Y, por último, desactiva el modo de simulación usando el icono de detener en la superposición persistente cuando termines.</string>
+  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
+  <string name="faq_answer_6">Toca el botón de abajo para activar el modo de simulación. En las pantallas del evento, usa el botón del temporizador junto al botón "Únete a la ola" para iniciar la simulación con las propiedades de este evento (fecha, hora, ubicación). Para detener la simulación, usa el mismo botón. Y, por último, desactiva el modo de simulación con el icono de detener en la capa persistente cuando termines.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">EE. UU.</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
