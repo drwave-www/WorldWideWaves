@@ -195,7 +195,7 @@
     <string name="faq_answer_5">Yes, volunteers are always welcome. The app’s code is open-source on GitHub, and you can reach the creators at worldwidewaves@proton.me (replies not guaranteed). The best way to help is to spread the word: share photos and videos from events using the suggested hashtags, contact local influencers to amplify the message, talk about it with your community, and most importantly, join the wave!</string>
 
     <string name="faq_question_6">How can I simulate a wave?</string>
-    <string name="faq_answer_6">Tap the button below to activate the simulation mode. On the event screens use the timer button close the the "Join the wave" button to start the simulation using this event's properties (date, time, location). To stop the simulation use the same button. And finally stop the simulation mode using the stop icon on the persisting layer when you're done.</string>
+    <string name="faq_answer_6">Tap the button below to activate the simulation mode. On the event screens use the timer button close the "Join the wave" button to start the simulation using this event's properties (date, time, location). To stop the simulation use the same button. And finally stop the simulation mode using the stop icon on the persisting layer when you're done.</string>
 
     <!-- Context: Countries where the events happen, Size: short (limited size, about 20/25 chars) -->
     <string name="country_usa">USA</string>
