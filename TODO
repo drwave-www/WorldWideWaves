@@ -11,6 +11,7 @@ TODAY :
 docs/COMPREHENSIVE_PROJECT_ANALYSIS.md
 "ok, implement this, use agents, verify regularly that everything compiles and that all tests passes, do not stop until you resolved all the todo, do it on a branch"
 
+- ISSUE: MAP LOADING TIME
 
 prios: IOS:
 - Terminer vagues / MapLibre
