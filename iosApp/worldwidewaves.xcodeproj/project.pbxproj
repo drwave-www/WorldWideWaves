@@ -132,6 +132,14 @@
 			);
 			target = C17B3C752E886C610097A3A5 /* worldwidewaves */;
 		};
+		C1A718FE2E95075A005B6CD9 /* Exceptions for "worldwidewavesUITests" folder in "worldwidewavesUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				README.md,
+			);
+			target = C1A718E82E95055E005B6CD9 /* worldwidewavesUITests */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -145,6 +153,9 @@
 		};
 		C1A718EA2E95055E005B6CD9 /* worldwidewavesUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C1A718FE2E95075A005B6CD9 /* Exceptions for "worldwidewavesUITests" folder in "worldwidewavesUITests" target */,
+			);
 			path = worldwidewavesUITests;
 			sourceTree = "<group>";
 		};
