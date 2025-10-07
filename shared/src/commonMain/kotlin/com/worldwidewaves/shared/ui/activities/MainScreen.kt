@@ -21,8 +21,11 @@ package com.worldwidewaves.shared.ui.activities
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
@@ -157,7 +160,12 @@ open class MainScreen
                     color = MaterialTheme.colorScheme.background,
                 ) {
                     // Box to stack main content and simulation-mode overlay
-                    Box(modifier = Modifier.fillMaxSize()) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .windowInsetsPadding(WindowInsets.safeDrawing),
+                    ) {
                         var showDebugScreen by remember { mutableStateOf(false) }
 
                         val ready by isSplashFinished.collectAsState()
