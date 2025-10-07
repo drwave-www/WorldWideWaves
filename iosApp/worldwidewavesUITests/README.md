@@ -149,6 +149,33 @@ XCUITest accesses these via `.otherElements["{testTag}"]`.
 3. Set `ENABLE_ON_DEMAND_RESOURCES` to `NO` for UI test target only
 4. Main app keeps ODR enabled
 
+### Issue: "Multiple commands produce Info.plist"
+**Solution**: Remove duplicate Info.plist reference in target.
+
+**Error:**
+```
+Multiple commands produce '.../worldwidewavesUITests.xctest/Info.plist'
+```
+
+**Fix Steps:**
+1. Select `worldwidewavesUITests` target
+2. Go to **Build Phases** tab
+3. Expand "Copy Bundle Resources"
+4. Find `Info.plist` in the list
+5. Click the `-` button to remove it
+6. Info.plist should NOT be in Copy Bundle Resources
+7. It should only be referenced in Build Settings → Packaging → Info.plist File
+8. Clean build folder: Shift+Cmd+K
+9. Rebuild: Cmd+B
+
+**Why this happens:**
+- Xcode automatically processes Info.plist from Build Settings
+- If Info.plist is also added to Copy Bundle Resources, it creates a duplicate
+- The file should only be in Build Settings, not in build phases
+
+**Verification:**
+After removing from Copy Bundle Resources, build should succeed without this error.
+
 ## Next Steps
 
 After setup, proceed to:
