@@ -78,11 +78,15 @@ echo "  5. Galaxy A54 5G (2340x1080, API 34) - Mid-range Samsung"
 echo ""
 
 # Run tests on Firebase Test Lab
-echo -e "${GREEN}🧪 Running tests on Firebase Test Lab...${NC}"
+echo -e "${GREEN}🧪 Running E2E test on Firebase Test Lab...${NC}"
+echo "  Test: CompleteWaveParticipationE2ETest"
+echo ""
+
 if gcloud firebase test android run \
   --type instrumentation \
   --app "${APP_APK}" \
   --test "${TEST_APK}" \
+  --test-targets "class com.worldwidewaves.e2e.CompleteWaveParticipationE2ETest" \
   --device model=akita,version=34,locale=en_US,orientation=portrait \
   --device model=bluejay,version=32,locale=en_US,orientation=portrait \
   --device model=b0q,version=33,locale=en_US,orientation=portrait \
@@ -95,10 +99,10 @@ if gcloud firebase test android run \
   --directories-to-pull /sdcard/Android/data/com.worldwidewaves/files/e2e_screenshots \
   --project="${PROJECT_ID}"; then
     echo ""
-    echo -e "${GREEN}✅ Android tests completed successfully!${NC}"
+    echo -e "${GREEN}✅ Android E2E test completed successfully!${NC}"
 else
     echo ""
-    echo -e "${RED}❌ Android tests failed${NC}"
+    echo -e "${RED}❌ Android E2E test failed${NC}"
     exit 1
 fi
 

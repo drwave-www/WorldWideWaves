@@ -9,7 +9,7 @@
 set -e
 
 # Configuration
-RESULTS_BUCKET="${FIREBASE_RESULTS_BUCKET:-worldwidewaves-test-results}"
+RESULTS_BUCKET="${FIREBASE_RESULTS_BUCKET:-world-wide-waves-results}"
 OUTPUT_DIR="test_results/firebase"
 
 # Colors for output
