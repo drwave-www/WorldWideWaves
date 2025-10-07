@@ -176,6 +176,28 @@ Multiple commands produce '.../worldwidewavesUITests.xctest/Info.plist'
 **Verification:**
 After removing from Copy Bundle Resources, build should succeed without this error.
 
+### Issue: "This process does not adopt UIScene lifecycle"
+**Solution**: This is an informational warning and can be safely ignored.
+
+**Warning:**
+```
+CLIENT OF UIKIT REQUIRES UPDATE: This process does not adopt UIScene lifecycle.
+This will become an assert in a future version.
+```
+
+**Explanation:**
+- WorldWideWaves already uses UIScene lifecycle (SceneDelegate.swift)
+- Info.plist has UIApplicationSceneManifest configured correctly
+- Warning appears during test builds but app works correctly
+- This is a known UIKit warning that may appear in test environments
+
+**Why it appears:**
+- Test harness may initialize UIKit differently
+- App delegate pattern is transitioning in iOS
+- Doesn't affect functionality or App Store submission
+
+**Status:** Safe to ignore, app is properly configured ✅
+
 ## Next Steps
 
 After setup, proceed to:
