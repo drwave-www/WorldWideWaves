@@ -11,6 +11,7 @@ TODAY :
 - CEHCK INTENTs stacks, no need to stack all screens..
 - ICONE iOS size
 - size of drawable area top/bottom
+- crashlytics on iOS
 
 prios: IOS:
 - Terminer vagues / MapLibre

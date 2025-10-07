@@ -21,7 +21,7 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 # Configuration
-PROJECT_ID="${FIREBASE_PROJECT_ID:-worldwidewaves-test}"
+PROJECT_ID="${FIREBASE_PROJECT_ID:-world-wide-waves}"
 
 # Authenticate with Firebase (if needed)
 if ! gcloud auth list --filter=status:ACTIVE --format="value(account)" &> /dev/null; then
