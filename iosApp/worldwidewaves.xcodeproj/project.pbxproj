@@ -12,6 +12,16 @@
 		C17B465B2E8999FF0097A3A5 /* Shared.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C17B46592E8999FF0097A3A5 /* Shared.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		C1A718EF2E95055E005B6CD9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C17B3C6E2E886C610097A3A5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C17B3C752E886C610097A3A5;
+			remoteInfo = worldwidewaves;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		C17B465C2E8999FF0097A3A5 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -29,6 +39,7 @@
 /* Begin PBXFileReference section */
 		C17B3C762E886C610097A3A5 /* worldwidewaves.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = worldwidewaves.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C17B46592E8999FF0097A3A5 /* Shared.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Shared.framework; path = "../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)/Shared.framework"; sourceTree = "<group>"; };
+		C1A718E92E95055E005B6CD9 /* worldwidewavesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = worldwidewavesUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -132,6 +143,11 @@
 			path = worldwidewaves;
 			sourceTree = "<group>";
 		};
+		C1A718EA2E95055E005B6CD9 /* worldwidewavesUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = worldwidewavesUITests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -144,6 +160,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C1A718E62E95055E005B6CD9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -151,6 +174,7 @@
 			isa = PBXGroup;
 			children = (
 				C17B3C782E886C610097A3A5 /* worldwidewaves */,
+				C1A718EA2E95055E005B6CD9 /* worldwidewavesUITests */,
 				C17B46582E89981D0097A3A5 /* Frameworks */,
 				C17B3C772E886C610097A3A5 /* Products */,
 			);
@@ -160,6 +184,7 @@
 			isa = PBXGroup;
 			children = (
 				C17B3C762E886C610097A3A5 /* worldwidewaves.app */,
+				C1A718E92E95055E005B6CD9 /* worldwidewavesUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -199,6 +224,29 @@
 			productName = worldwidewaves;
 			productReference = C17B3C762E886C610097A3A5 /* worldwidewaves.app */;
 			productType = "com.apple.product-type.application";
+		};
+		C1A718E82E95055E005B6CD9 /* worldwidewavesUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C1A718F32E95055E005B6CD9 /* Build configuration list for PBXNativeTarget "worldwidewavesUITests" */;
+			buildPhases = (
+				C1A718E52E95055E005B6CD9 /* Sources */,
+				C1A718E62E95055E005B6CD9 /* Frameworks */,
+				C1A718E72E95055E005B6CD9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C1A718F02E95055E005B6CD9 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				C1A718EA2E95055E005B6CD9 /* worldwidewavesUITests */,
+			);
+			name = worldwidewavesUITests;
+			packageProductDependencies = (
+			);
+			productName = worldwidewavesUITests;
+			productReference = C1A718E92E95055E005B6CD9 /* worldwidewavesUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
@@ -255,6 +303,10 @@
 					C17B3C752E886C610097A3A5 = {
 						CreatedOnToolsVersion = 16.4;
 					};
+					C1A718E82E95055E005B6CD9 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = C17B3C752E886C610097A3A5;
+					};
 				};
 			};
 			buildConfigurationList = C17B3C712E886C610097A3A5 /* Build configuration list for PBXProject "worldwidewaves" */;
@@ -275,12 +327,20 @@
 			projectRoot = "";
 			targets = (
 				C17B3C752E886C610097A3A5 /* worldwidewaves */,
+				C1A718E82E95055E005B6CD9 /* worldwidewavesUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		C17B3C742E886C610097A3A5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1A718E72E95055E005B6CD9 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -318,7 +378,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C1A718E52E95055E005B6CD9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C1A718F02E95055E005B6CD9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C17B3C752E886C610097A3A5 /* worldwidewaves */;
+			targetProxy = C1A718EF2E95055E005B6CD9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		C17B3C952E886C630097A3A5 /* Debug */ = {
@@ -519,6 +594,48 @@
 			};
 			name = Release;
 		};
+		C1A718F12E95055E005B6CD9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3HUXY8PKDZ;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = worldwidewavesUITests/Info.plist;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.worldwidewavesUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = worldwidewaves;
+			};
+			name = Debug;
+		};
+		C1A718F22E95055E005B6CD9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3HUXY8PKDZ;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = worldwidewavesUITests/Info.plist;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.worldwidewavesUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = worldwidewaves;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -536,6 +653,15 @@
 			buildConfigurations = (
 				C17B3C982E886C630097A3A5 /* Debug */,
 				C17B3C992E886C630097A3A5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C1A718F32E95055E005B6CD9 /* Build configuration list for PBXNativeTarget "worldwidewavesUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C1A718F12E95055E005B6CD9 /* Debug */,
+				C1A718F22E95055E005B6CD9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

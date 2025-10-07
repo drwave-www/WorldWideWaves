@@ -133,6 +133,22 @@ XCUITest accesses these via `.otherElements["{testTag}"]`.
 ### Issue: App doesn't launch
 **Solution**: Ensure `--uitesting` and `--simulation-enabled` launch arguments are handled in app
 
+### Issue: "On-Demand Resources is not supported for ui testing bundle targets"
+**Solution**: This is a standard Xcode warning and can be safely ignored.
+
+**Explanation:**
+- WorldWideWaves uses On-Demand Resources (ODR) for map downloads
+- ODR works in the main app but is not available in UI test bundles
+- This is a known Xcode limitation, not an error
+- Tests can still run, they just can't trigger new ODR downloads
+- Workaround: Ensure test maps (paris_france) are tagged as initial install tags
+
+**To suppress warning (optional):**
+1. Select worldwidewavesUITests target
+2. Build Settings → Search "On-Demand Resources"
+3. Set `ENABLE_ON_DEMAND_RESOURCES` to `NO` for UI test target only
+4. Main app keeps ODR enabled
+
 ## Next Steps
 
 After setup, proceed to:
