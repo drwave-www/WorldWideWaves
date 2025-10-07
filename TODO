@@ -7,54 +7,24 @@ TODAY :
 
 ---------------------------------------------
 
-- ISSUE: MAP LOADING TIME
 - CEHCK INTENTs stacks, no need to stack all screens..
-- ICONE iOS size
-- size of drawable area top/bottom
+- PDFs : polices
 
 prios: IOS:
 - Terminer vagues / MapLibre
 - check translations
-- remove all remaining static texts
 - fonts
-- pousser sur Play Store
-
-
-==> prio 1: terminer vagues / MapLibre
--->
-  iOS_MAP_IMPLEMENTATION_STATUS.md (470 lines):
-  - Executive summary with completion percentages
-  - Detailed Android vs iOS feature comparison with line numbers
-  - Architecture deep dive with flow diagrams
-  - 4 critical issues with fix estimates
-  - 3-phase implementation plan (2-3 weeks total)
-  - Technical decisions, trade-offs, testing status
-
-  NEXT_SESSION_PROMPT.md (381 lines):
-  - Actionable continuation prompt for next session
-  - 3 high-priority tasks with acceptance criteria
-  - Step-by-step implementation guides
-  - File references with line counts
-  - Debug tips and common issues
-  - Critical constraint reminders (iOS deadlock rules)
---
-
-===> prio 2: implement TODO_ACCESSIBILITY.md + TODO_FIREBASE_UI.md
-
-
-
+- pousser sur App Store
 
 ANDROID:
-- Virer Splashscreen ou trouver a le faire fonctionner sur Medium (taille image ?)
-- Virer Color/Theme/Type files (?)
-
-- toujours garder la place du header mobile (determiner la hauteur et descendre l'espace dessinable)
-- modifier l'image back windmill
-- Simulation do not work anymore
+- modifier l'image back windmill + islamic ? (invert)
 - verifier les traductions
 - Add the 'message' to the app (cf PDF)
 - Add the link to events on event page
-- Check global for accessibility
+
+ALL:
+- event does not disappear from the list when favorite is unchecked
+
 
 - Full human code review
 - Packaging :

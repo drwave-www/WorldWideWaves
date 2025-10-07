@@ -6,12 +6,23 @@ The Firebase configuration is now securely managed through local.properties (dev
 
 ## Automated Configuration
 
-The project now includes a Gradle task that automatically generates `google-services.json` from secure sources:
+The project includes unified scripts for generating Firebase configuration for both platforms:
 
 ```bash
-# Generate Firebase configuration
-./gradlew generateFirebaseConfig
+# Generate configs for both Android and iOS
+./scripts/generate_firebase_config.sh all
+
+# Generate Android only
+./scripts/generate_firebase_config.sh android
+
+# Generate iOS only
+./scripts/generate_firebase_config.sh ios
+
+# Alternative: Use Gradle for Android (auto-runs during build)
+./gradlew :composeApp:generateFirebaseConfig
 ```
+
+**Note**: Android config is also automatically generated during any Gradle build.
 
 ## Setup Instructions
 

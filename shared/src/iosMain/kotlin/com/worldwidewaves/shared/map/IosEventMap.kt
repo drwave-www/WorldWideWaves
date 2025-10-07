@@ -21,25 +21,22 @@ package com.worldwidewaves.shared.map
  * limitations under the License.
  */
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -49,10 +46,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.interop.UIKitViewController
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
@@ -66,8 +61,12 @@ import com.worldwidewaves.shared.ui.components.LoadingIndicator
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 import org.koin.mp.KoinPlatform
 import platform.UIKit.UIImage
 
@@ -86,40 +85,37 @@ class IosEventMap(
     private val onMapLoaded: () -> Unit = {},
     onLocationUpdate: (Position) -> Unit = {},
     mapConfig: EventMapConfig = EventMapConfig(),
+    private val onMapClick: (() -> Unit)? = null,
 ) : AbstractEventMap<UIImage>(event, mapConfig, onLocationUpdate) {
-    // Use safe iOS dependency injection pattern
+    // Create event-specific adapter instance (not singleton) to enable per-event camera control
     override val mapLibreAdapter: MapLibreAdapter<UIImage> =
-        KoinPlatform.getKoin().get<MapLibreAdapter<UIImage>>()
+        IosMapLibreAdapter(event.id)
     override val locationProvider: LocationProvider? =
         KoinPlatform.getKoin().getOrNull<LocationProvider>()
 
     private var currentPolygons = mutableListOf<Polygon>()
-
-    private fun formatCoordinates(location: Position): String =
-        "${location.lat.toString().take(COORDINATE_DISPLAY_LAT_LENGTH)}, " +
-            location.lng.toString().take(COORDINATE_DISPLAY_LNG_LENGTH)
-
-    companion object {
-        private val LOADING_COLOR = Color(0xFFFFA500)
-        private const val COORDINATE_DISPLAY_LAT_LENGTH = 8
-        private const val COORDINATE_DISPLAY_LNG_LENGTH = 9
-    }
+    private val mapScope = CoroutineScope(SupervisorJob())
+    private var setupMapCalled = false
 
     override fun updateWavePolygons(
         wavePolygons: List<Polygon>,
         clearPolygons: Boolean,
     ) {
-        Log.d("IosEventMap", "updateWavePolygons called with ${wavePolygons.size} polygons, clearPolygons=$clearPolygons")
+        Log.i("IosEventMap", "🌊 updateWavePolygons: ${wavePolygons.size} polygons, clear=$clearPolygons")
 
         if (clearPolygons) {
             currentPolygons.clear()
         }
         currentPolygons.addAll(wavePolygons)
 
-        Log.v("IosEventMap", "iOS map now tracking ${currentPolygons.size} wave polygons")
+        Log.d("IosEventMap", "iOS map now tracking ${currentPolygons.size} wave polygons")
 
-        // Store polygon data in registry for Swift to render
+        // Store polygon data in registry AND trigger immediate render callback
         storePolygonsForRendering(wavePolygons, clearPolygons)
+
+        // Request immediate render (Swift wrapper will be notified via callback)
+        MapWrapperRegistry.requestImmediateRender(event.id)
+        Log.v("IosEventMap", "✅ Polygons stored and immediate render requested")
     }
 
     private fun storePolygonsForRendering(
@@ -150,7 +146,6 @@ class IosEventMap(
         // Get unified position from PositionManager (same as Android)
         val positionManager = KoinPlatform.getKoin().get<PositionManager>()
         val platformMapManager = KoinPlatform.getKoin().get<PlatformMapManager>()
-        val currentLocation by positionManager.position.collectAsState()
 
         // Use shared EventMapDownloadManager for download state management
         val downloadCoordinator =
@@ -162,11 +157,35 @@ class IosEventMap(
 
         var mapIsLoaded by remember { mutableStateOf(false) }
 
+        // Cleanup wrapper and all callbacks when screen is disposed
+        DisposableEffect(event.id) {
+            Log.i("IosEventMap", "Screen mounted for event: ${event.id}")
+
+            onDispose {
+                Log.i("IosEventMap", "🧹 Screen disposing, cleaning up wrapper for: ${event.id}")
+                MapWrapperRegistry.unregisterWrapper(event.id)
+                Log.i("IosEventMap", "✅ Wrapper cleanup complete for: ${event.id}")
+            }
+        }
+
         // Check map availability and trigger auto-download if needed
         LaunchedEffect(event.id, autoMapDownload) {
             Log.i("IosEventMap", "LaunchedEffect triggered: event=${event.id}, autoDownload=$autoMapDownload")
             downloadCoordinator.autoDownloadIfNeeded(event.id, autoMapDownload)
             Log.d("IosEventMap", "autoDownloadIfNeeded completed for: ${event.id}")
+        }
+
+        // Register map click callback directly with wrapper (no registry)
+        // This will be triggered after viewController is created
+        LaunchedEffect(event.id, onMapClick) {
+            if (onMapClick != null) {
+                Log.i("IosEventMap", "👆 Requesting map click callback registration for: ${event.id}")
+                // Request callback registration - wrapper will set it when ready
+                MapWrapperRegistry.requestMapClickCallbackRegistration(event.id, onMapClick)
+                Log.i("IosEventMap", "✅ Map click callback registration requested for: ${event.id}")
+            } else {
+                Log.w("IosEventMap", "⚠️ No map click callback provided for: ${event.id}")
+            }
         }
 
         // Initialize position system integration (same as AbstractEventMap)
@@ -182,6 +201,20 @@ class IosEventMap(
         }
 
         Box(modifier = modifier.fillMaxSize()) {
+            // Static map image as fallback background (matches Android implementation)
+            Image(
+                modifier = Modifier.fillMaxSize(),
+                painter = painterResource(event.getMapImage() as DrawableResource),
+                contentDescription = "defaultMap",
+                contentScale = ContentScale.Crop,
+            )
+
+            // Cache view controller at top level to prevent deallocation when download state changes
+            val viewController =
+                remember(event.id) {
+                    mutableStateOf<platform.UIKit.UIViewController?>(null)
+                }
+
             // Load style URL asynchronously - don't block UI on fresh simulator
             // Reload when download completes (downloadState.isAvailable changes)
             var styleURL by remember { mutableStateOf<String?>(null) }
@@ -190,83 +223,66 @@ class IosEventMap(
                 Log.d("IosEventMap", "Loading style URL for: ${event.id}, isAvailable=${downloadState.isAvailable}")
                 styleURL = event.map.getStyleUri()
                 Log.i("IosEventMap", "Style URL loaded: $styleURL")
-            }
 
-            // Show map or loading indicator based on style availability
-            if (styleURL != null) {
-                Log.d("IosEventMap", "Using style URL for ${event.id}: ${styleURL!!.take(100)}...")
+                // Call setupMap() to initialize camera, constraints, and bounds (like Android)
+                if (!setupMapCalled && styleURL != null && downloadState.isAvailable) {
+                    Log.i("IosEventMap", "Calling setupMap() for: ${event.id}")
+                    setupMapCalled = true
 
-                // Use key() to recreate map when styleURL changes (after download)
-                key("${event.id}-$styleURL") {
-                    @Suppress("DEPRECATION")
-                    UIKitViewController(
-                        factory = {
-                            Log.i("IosEventMap", "Creating native map view controller for: ${event.id}")
-                            createNativeMapViewController(event, styleURL!!) as platform.UIKit.UIViewController
+                    // Create a dummy UIImage for the map parameter (adapter doesn't use it)
+                    // The adapter routes all operations through MapWrapperRegistry
+                    val dummyMap = UIImage()
+
+                    setupMap(
+                        map = dummyMap,
+                        scope = mapScope,
+                        stylePath = styleURL!!,
+                        onMapLoaded = {
+                            Log.i("IosEventMap", "setupMap completed for: ${event.id}")
                         },
-                        modifier = Modifier.fillMaxSize(),
+                        onMapClick =
+                            onMapClick?.let { callback ->
+                                { _: Double, _: Double ->
+                                    Log.d("IosEventMap", "Map click from setupMap for: ${event.id}")
+                                    callback()
+                                }
+                            },
                     )
-                }
-            } else {
-                // Show loading while waiting for files to download/cache
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    LoadingIndicator("Loading map...")
+                    Log.i("IosEventMap", "setupMap() completed, constraints initialized for: ${event.id}")
                 }
             }
 
-            // Overlay with map information and controls
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                // Map status card at top
-                MapStatusCard(
-                    event = event,
-                    isLoaded = mapIsLoaded,
-                    downloadState = downloadState,
-                    polygonCount = currentPolygons.size,
-                )
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                // Location info at bottom if available
-                currentLocation?.let { location ->
-                    LocationInfoCard(location)
-                }
-
-                if (currentLocation == null) {
-                    Card(
-                        colors =
-                            CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                            ),
-                        modifier = Modifier.padding(8.dp),
-                    ) {
-                        Text(
-                            text = "Location not available",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(12.dp),
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                }
-            }
-
-            // Download overlay UI (matching Android behavior)
+            // Show map OR overlays based on state (mutually exclusive, like Android)
             // Log current download state for debugging
             Log.v(
                 "IosEventMap",
-                "Overlay decision: ${event.id} | isAvailable=${downloadState.isAvailable}, " +
-                    "isDownloading=${downloadState.isDownloading}, error=${downloadState.error}, progress=${downloadState.progress}",
+                "Map state: ${event.id} | isAvailable=${downloadState.isAvailable}, " +
+                    "isDownloading=${downloadState.isDownloading}, error=${downloadState.error}, " +
+                    "styleURL=${styleURL != null}, mapIsLoaded=$mapIsLoaded",
             )
 
+            // Create view controller once when styleURL becomes available
+            LaunchedEffect(event.id, styleURL) {
+                if (styleURL != null && viewController.value == null) {
+                    Log.i("IosEventMap", "Creating view controller for: ${event.id}")
+                    viewController.value = createNativeMapViewController(event, styleURL!!) as platform.UIKit.UIViewController
+                }
+            }
+
             when {
+                // Priority 1: Show map if available and styleURL loaded
+                styleURL != null && downloadState.isAvailable && viewController.value != null -> {
+                    Log.v("IosEventMap", "Showing map for ${event.id}")
+                    key(event.id) {
+                        @Suppress("DEPRECATION")
+                        UIKitViewController(
+                            factory = { viewController.value!! },
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
+                }
+
+                // Priority 2: Show download progress
                 downloadState.isDownloading && downloadState.error == null -> {
                     Log.d("IosEventMap", "Showing MapDownloadOverlay: ${event.id} progress=${downloadState.progress}%")
                     MapDownloadOverlay(
@@ -278,6 +294,7 @@ class IosEventMap(
                     )
                 }
 
+                // Priority 3: Show error with retry
                 downloadState.error != null -> {
                     Log.d("IosEventMap", "Showing MapErrorOverlay: ${event.id} error=${downloadState.error}")
                     MapErrorOverlay(
@@ -291,19 +308,26 @@ class IosEventMap(
                     )
                 }
 
+                // Priority 4: Show download button if not available
                 !downloadState.isAvailable && !downloadState.isDownloading -> {
                     Log.d("IosEventMap", "Showing MapDownloadButton for: ${event.id}")
                     MapDownloadButton {
                         Log.i("IosEventMap", "Download button clicked for: ${event.id}")
                         MainScope().launch {
-                            Log.i("IosEventMap", "Launching download coroutine for: ${event.id}")
                             downloadCoordinator.downloadMap(event.id)
                         }
                     }
                 }
 
+                // Priority 5: Show loading while waiting for styleURL
                 else -> {
-                    Log.v("IosEventMap", "No overlay shown: ${event.id} (map loaded or downloading)")
+                    Log.d("IosEventMap", "Showing loading indicator for: ${event.id}")
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        LoadingIndicator("Loading map...")
+                    }
                 }
             }
         }
@@ -381,109 +405,6 @@ class IosEventMap(
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 }
-            }
-        }
-    }
-
-    @Composable
-    private fun MapStatusCard(
-        event: IWWWEvent,
-        isLoaded: Boolean,
-        downloadState: EventMapDownloadManager.DownloadState,
-        polygonCount: Int,
-    ) {
-        Card(
-            colors =
-                CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
-                ),
-            modifier = Modifier.padding(8.dp),
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = stringResource(event.getLocation()),
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                    textAlign = TextAlign.Center,
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row {
-                    // Map status indicator
-                    Box(
-                        modifier =
-                            Modifier
-                                .size(12.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    when {
-                                        downloadState.error != null -> Color.Red
-                                        downloadState.isAvailable && isLoaded -> Color.Green
-                                        else -> LOADING_COLOR
-                                    },
-                                ),
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text =
-                            when {
-                                downloadState.error != null -> "Error"
-                                downloadState.isDownloading -> "Downloading: ${downloadState.progress}%"
-                                !downloadState.isAvailable -> "Map Not Available"
-                                isLoaded -> "Map Ready"
-                                else -> "Loading..."
-                            },
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-
-                if (downloadState.error != null) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Download failed: ${downloadState.error}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                }
-
-                if (polygonCount > 0) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Wave Polygons: $polygonCount",
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun LocationInfoCard(location: Position) {
-        Card(
-            colors =
-                CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.9f),
-                ),
-            modifier = Modifier.padding(8.dp),
-        ) {
-            Column(
-                modifier = Modifier.padding(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = "Your Location",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                )
-
-                Text(
-                    text = formatCoordinates(location),
-                    style = MaterialTheme.typography.bodySmall,
-                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                )
             }
         }
     }

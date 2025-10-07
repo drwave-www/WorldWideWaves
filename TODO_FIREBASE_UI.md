@@ -519,24 +519,14 @@ As a user, I want to discover events, mark favorites, download maps, join a wave
 
 ---
 
-#### Step 21: Configuration Changes (Android Only)
-**Action**:
-- Rotate device (portrait ↔ landscape)
-- Verify state preserved
+#### Step 21: Configuration Changes (Removed - Portrait Only)
+**Note**: App is locked to portrait orientation on both Android and iOS.
+Rotation testing is not applicable.
 
-**Validations**:
-- ✅ UI adapts to orientation
-- ✅ State preserved (favorites, filters, scroll position)
-- ✅ No crashes
-- ✅ Map re-renders correctly
-- ✅ Choreography continues if active
-
-**Screenshot**:
-- `21a_portrait_mode.png`
-- `21b_landscape_mode.png`
-
-**Code References**:
-- `composeApp/src/androidMain/kotlin/com/worldwidewaves/activities/MainActivity.kt` - Configuration handling
+**Configuration**:
+- Android: `android:screenOrientation="portrait"` in AndroidManifest.xml
+- iOS: `UISupportedInterfaceOrientations` limited to portrait in Info.plist
+- iPad: Portrait and portrait upside-down only
 
 ---
 

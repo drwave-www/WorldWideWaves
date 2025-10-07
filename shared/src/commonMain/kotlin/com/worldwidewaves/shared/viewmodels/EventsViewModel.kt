@@ -150,12 +150,14 @@ class EventsViewModel(
      * Uses viewModelScope for automatic lifecycle management and memory leak prevention.
      */
     private fun monitorSimulatedSpeed(event: IWWWEvent) {
-        var backupSimulationSpeed = 1
+        // Capture the current simulation speed immediately (before warming or hit)
+        var backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
 
         // Handle warming started - using viewModelScope for automatic cleanup
         scope.launch {
             event.observer.isUserWarmingInProgress.collect { isWarmingStarted ->
                 if (isWarmingStarted) {
+                    // Update backup speed when warming starts (in case it changed)
                     backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
                     platform.getSimulation()?.setSpeed(1)
                 }

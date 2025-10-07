@@ -121,6 +121,9 @@ abstract class AbstractEventMap<T>(
      * Moves the camera to view the event bounds
      */
     suspend fun moveToMapBounds(onComplete: () -> Unit = {}) {
+        // Initialize constraint manager (same as moveToWindowBounds)
+        constraintManager = MapBoundsEnforcer(event.area.bbox(), mapLibreAdapter) { suppressCorrections }
+
         val bounds = event.area.bbox()
         runCameraAnimation { cb ->
             mapLibreAdapter.animateCameraToBounds(
@@ -128,6 +131,10 @@ abstract class AbstractEventMap<T>(
                 callback =
                     object : MapCameraCallback {
                         override fun onFinish() {
+                            // Apply constraints after animation finishes
+                            constraintManager?.applyConstraints()
+                            mapLibreAdapter.setMinZoomPreference(mapLibreAdapter.currentZoom.value)
+                            mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
                             cb.onFinish()
                             onComplete()
                         }

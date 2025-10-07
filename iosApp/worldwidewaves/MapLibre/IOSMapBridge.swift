@@ -139,29 +139,24 @@ import CoreLocation
     /// - Important: Must be called on main thread
     /// - Important: Call periodically after map style loads to catch pending polygons
     /// - Note: Clears pending polygons after successful rendering (one-time consumption)
-    @objc public static func renderPendingPolygons(eventId: String) {
-        WWWLog.d("IOSMapBridge", "renderPendingPolygons called for: \(eventId)")
+    @objc public static func renderPendingPolygons(eventId: String) -> Bool {
+        WWWLog.v("IOSMapBridge", "renderPendingPolygons called for: \(eventId)")
 
         guard let wrapper = Shared.MapWrapperRegistry.shared.getWrapper(eventId: eventId) as? MapLibreViewWrapper else {
-            WWWLog.w("IOSMapBridge", "No wrapper found for event: \(eventId)")
-            return
+            return false
         }
 
-        WWWLog.d("IOSMapBridge", "Wrapper found for: \(eventId)")
-
         let hasPending = Shared.MapWrapperRegistry.shared.hasPendingPolygons(eventId: eventId)
-        WWWLog.i("IOSMapBridge", "hasPendingPolygons(\(eventId)) = \(hasPending)")
 
         guard hasPending else {
-            WWWLog.v("IOSMapBridge", "No pending polygons for event: \(eventId)")
-            return
+            return false
         }
 
         guard let polygonData = Shared.MapWrapperRegistry.shared.getPendingPolygons(eventId: eventId) else {
-            return
+            return false
         }
 
-        WWWLog.i("IOSMapBridge", "Rendering \(polygonData.coordinates.count) pending polygons for event: \(eventId)")
+        WWWLog.i("IOSMapBridge", "🌊 Rendering \(polygonData.coordinates.count) pending polygons for event: \(eventId)")
 
         // Convert coordinate pairs to CLLocationCoordinate2D arrays
         let coordinateArrays: [[CLLocationCoordinate2D]] = polygonData.coordinates.map { polygon in
@@ -176,9 +171,11 @@ import CoreLocation
         // Render on map
         wrapper.addWavePolygons(polygons: coordinateArrays, clearExisting: polygonData.clearExisting)
 
-        // Clear pending polygons after successful rendering
+        // Clear after rendering - next update will overwrite with latest state
+        // This is OK: we only need to show the LATEST wave state, intermediate updates can be skipped
         Shared.MapWrapperRegistry.shared.clearPendingPolygons(eventId: eventId)
-        WWWLog.d("IOSMapBridge", "Successfully rendered and cleared pending polygons for event: \(eventId)")
+        WWWLog.i("IOSMapBridge", "✅ Rendered \(polygonData.coordinates.count) polygons, cleared from registry")
+        return true
     }
 
     /// Clears all wave polygons from the map.
@@ -286,5 +283,119 @@ import CoreLocation
             radius: radius,
             eventName: eventName
         )
+    }
+
+    // MARK: - Camera Control
+
+    /// Checks for pending camera commands and executes them if found.
+    ///
+    /// ## Purpose
+    /// Solves the timing problem where Kotlin camera control logic may issue commands
+    /// before the Swift map view is ready. Kotlin stores camera commands in the registry,
+    /// and Swift periodically checks for and executes them.
+    ///
+    /// ## Supported Commands
+    /// - **AnimateToPosition**: Animate to specific lat/lng with optional zoom
+    /// - **AnimateToBounds**: Animate to fit bounding box with padding
+    /// - **MoveToBounds**: Move (non-animated) to bounding box
+    /// - **SetConstraintBounds**: Set camera movement constraints
+    ///
+    /// ## Threading Model
+    /// Main thread only (MapLibre/UIKit requirement)
+    ///
+    /// ## Error Handling
+    /// If no wrapper or command found:
+    /// - Returns silently
+    /// - Commands remain pending for future retry
+    ///
+    /// - Parameters:
+    ///   - eventId: Unique event identifier (registry key)
+    /// - Important: Must be called on main thread
+    /// - Important: Call periodically after map initialization (e.g., from EventMapView.updateUIView)
+    @objc public static func executePendingCameraCommand(eventId: String) {
+        // Check wrapper exists
+        guard let wrapper = Shared.MapWrapperRegistry.shared.getWrapper(eventId: eventId) as? MapLibreViewWrapper else {
+            // Silent return - wrapper not registered yet (normal during initialization)
+            return
+        }
+
+        // Check if command exists
+        guard Shared.MapWrapperRegistry.shared.hasPendingCameraCommand(eventId: eventId) else {
+            // Silent return - no command pending (normal case)
+            return
+        }
+
+        guard let command = Shared.MapWrapperRegistry.shared.getPendingCameraCommand(eventId: eventId) else {
+            WWWLog.w("IOSMapBridge", "hasPendingCameraCommand=true but getPendingCameraCommand returned nil")
+            return
+        }
+
+        WWWLog.i("IOSMapBridge", "📸 Executing camera command for event: \(eventId), type: \(type(of: command))")
+        let success = executeCommand(command, on: wrapper)
+
+        // Only clear command if execution succeeded
+        if success {
+            Shared.MapWrapperRegistry.shared.clearPendingCameraCommand(eventId: eventId)
+            WWWLog.i("IOSMapBridge", "✅ Camera command executed and cleared for event: \(eventId)")
+        } else {
+            WWWLog.w("IOSMapBridge", "⚠️ Camera command execution failed, will retry later for event: \(eventId)")
+        }
+    }
+
+    /// Executes a specific camera command on the wrapper.
+    /// - Returns: True if execution succeeded, false if it should be retried
+    private static func executeCommand(_ command: CameraCommand, on wrapper: MapLibreViewWrapper) -> Bool {
+        if let animateToPos = command as? CameraCommand.AnimateToPosition {
+            let zoom = animateToPos.zoom?.doubleValue
+            let pos = animateToPos.position
+            WWWLog.i("IOSMapBridge", "Animating to position: \(pos.lat), \(pos.lng), zoom=\(zoom ?? -1)")
+            wrapper.animateCamera(
+                latitude: animateToPos.position.lat,
+                longitude: animateToPos.position.lng,
+                zoom: zoom as NSNumber?,
+                callback: nil
+            )
+            return true  // Animation commands always succeed
+        } else if let animateBounds = command as? CameraCommand.AnimateToBounds {
+            let bbox = animateBounds.bounds
+            WWWLog.i("IOSMapBridge", "Animating to bounds with padding: \(animateBounds.padding)")
+            WWWLog.d(
+                "IOSMapBridge",
+                "Swift sees bbox: minLat=\(bbox.minLatitude), minLng=\(bbox.minLongitude), maxLat=\(bbox.maxLatitude), maxLng=\(bbox.maxLongitude)"
+            )
+            wrapper.animateCameraToBounds(
+                swLat: bbox.minLatitude,
+                swLng: bbox.minLongitude,
+                neLat: bbox.maxLatitude,
+                neLng: bbox.maxLongitude,
+                padding: Int(animateBounds.padding),
+                callback: nil
+            )
+            return true  // Animation commands always succeed
+        } else if let moveBounds = command as? CameraCommand.MoveToBounds {
+            let bbox = moveBounds.bounds
+            WWWLog.i("IOSMapBridge", "Moving to bounds")
+            let center = CLLocationCoordinate2D(
+                latitude: (bbox.minLatitude + bbox.maxLatitude) / 2,
+                longitude: (bbox.minLongitude + bbox.maxLongitude) / 2
+            )
+            wrapper.moveCamera(latitude: center.latitude, longitude: center.longitude, zoom: nil)
+            return true  // Move commands always succeed
+        } else if let constraintBounds = command as? CameraCommand.SetConstraintBounds {
+            let bbox = constraintBounds.bounds
+            WWWLog.i("IOSMapBridge", "Setting camera constraint bounds")
+            WWWLog.d(
+                "IOSMapBridge",
+                "Swift sees bbox: minLat=\(bbox.minLatitude), minLng=\(bbox.minLongitude), maxLat=\(bbox.maxLatitude), maxLng=\(bbox.maxLongitude)"
+            )
+            let success = wrapper.setBoundsForCameraTarget(
+                swLat: bbox.minLatitude,
+                swLng: bbox.minLongitude,
+                neLat: bbox.maxLatitude,
+                neLng: bbox.maxLongitude
+            )
+            return success  // Return actual success/failure from setBoundsForCameraTarget
+        }
+        return true  // Unknown command type, don't retry
     }
 }

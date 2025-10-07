@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.utils.Log
 import kotlin.math.abs
 
 /**
@@ -34,41 +35,65 @@ class BoundingBox private constructor(
     val ne: Position,
 ) {
     companion object {
-        private const val LONGITUDE_HALF_RANGE = 180.0
-
         fun fromCorners(
             sw: Position,
             ne: Position,
-        ): BoundingBox =
-            if (sw.lat <= ne.lat && sw.lng <= ne.lng) {
-                // Already in correct order, no need to create new objects
-                BoundingBox(sw, ne)
-            } else {
-                BoundingBox(
-                    sw = Position(minOf(sw.lat, ne.lat), minOf(sw.lng, ne.lng)).init(),
-                    ne = Position(maxOf(sw.lat, ne.lat), maxOf(sw.lng, ne.lng)).init(),
-                )
-            }
+        ): BoundingBox {
+            Log.d(
+                "BoundingBox",
+                "fromCorners(2pos): input SW(${sw.lat},${sw.lng}) NE(${ne.lat},${ne.lng})",
+            )
+
+            val bbox =
+                if (sw.lat <= ne.lat && sw.lng <= ne.lng) {
+                    // Already in correct order, no need to create new objects
+                    BoundingBox(sw, ne)
+                } else {
+                    BoundingBox(
+                        sw = Position(minOf(sw.lat, ne.lat), minOf(sw.lng, ne.lng)).init(),
+                        ne = Position(maxOf(sw.lat, ne.lat), maxOf(sw.lng, ne.lng)).init(),
+                    )
+                }
+
+            Log.d(
+                "BoundingBox",
+                "fromCorners(2pos): output SW(${bbox.sw.lat},${bbox.sw.lng}) NE(${bbox.ne.lat},${bbox.ne.lng})",
+            )
+
+            return bbox
+        }
 
         fun fromCorners(positions: List<Position>): BoundingBox? {
             if (positions.isEmpty()) return null
             val minLat = positions.minOf { it.lat }
             val maxLat = positions.maxOf { it.lat }
-            val lngs = positions.map { it.lng }
-            val (swLng, neLng) =
-                if (lngs.max() - lngs.min() > LONGITUDE_HALF_RANGE) {
-                    lngs.max() to lngs.min()
-                } else {
-                    lngs.min() to lngs.max()
-                }
-            return BoundingBox(minLat, swLng, maxLat, neLng)
+            val minLng = positions.minOf { it.lng }
+            val maxLng = positions.maxOf { it.lng }
+
+            // Always use min/max - we don't support International Date Line wrapping
+            // iOS MapLibre requires swLng < neLng (cannot handle antimeridian wrapping)
+            val bbox = BoundingBox(minLat, minLng, maxLat, maxLng)
+
+            // Debug logging for iOS
+            Log.d(
+                "BoundingBox",
+                "fromCorners: ${positions.size} positions → SW($minLat,$minLng) NE($maxLat,$maxLng)",
+            )
+
+            return bbox
         }
     }
 
     constructor(swLat: Double, swLng: Double, neLat: Double, neLng: Double) : this(
         sw = Position(minOf(swLat, neLat), minOf(swLng, neLng)).init(),
         ne = Position(maxOf(swLat, neLat), maxOf(swLng, neLng)).init(),
-    )
+    ) {
+        // Debug logging for iOS coordinate issues
+        Log.d(
+            "BoundingBox",
+            "constructor: input SW($swLat,$swLng) NE($neLat,$neLng) → output SW(${sw.lat},${sw.lng}) NE(${ne.lat},${ne.lng})",
+        )
+    }
 
     operator fun component1(): Position = sw
 

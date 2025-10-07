@@ -625,6 +625,56 @@ xcodebuild test \
 
 ## Common Issues and Solutions
 
+### Issue 0: Xcode GUID Conflict Error (RECURRING) ⚠️
+
+**Symptoms**:
+```
+Could not compute dependency graph: unable to load transferred PIF:
+The workspace contains multiple references with the same GUID 'PACKAGE:...'
+```
+
+**Causes**:
+- Swift Package Manager cache corruption
+- Xcode DerivedData corruption
+- Multiple concurrent Xcode operations
+- Git operations while Xcode is open
+- Xcode crashes during package resolution
+
+**Prevention** (Run regularly):
+```bash
+# Clean Xcode state (recommended before important work)
+./scripts/clean_xcode.sh
+
+# Or manual cleanup:
+rm -rf ~/Library/Developer/Xcode/DerivedData/worldwidewaves-*
+rm -rf iosApp/build
+rm -rf iosApp/.swiftpm
+rm -rf iosApp/worldwidewaves.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
+```
+
+**When to Run Cleanup**:
+- ✅ **Before opening Xcode after git pull/merge**
+- ✅ **After Xcode crashes**
+- ✅ **When seeing GUID errors**
+- ✅ **After major dependency changes**
+- ✅ **Before important builds/releases**
+- ⚠️ **After any Swift Package Manager updates**
+
+**Immediate Fix** (if error occurs):
+1. Close Xcode completely (Cmd+Q)
+2. Run `./scripts/clean_xcode.sh`
+3. Open Xcode
+4. Let it re-resolve packages (File → Packages → Resolve Package Versions)
+5. Build (Cmd+B)
+
+**Best Practices**:
+- Close Xcode before git operations (pull, merge, rebase)
+- Don't interrupt Swift Package Manager resolution
+- Run cleanup script weekly during active development
+- Don't commit xcuserdata or .swiftpm directories
+
+---
+
 ### Issue 1: App Freezes on Launch
 
 **Symptoms**: White screen, unresponsive UI, no logs

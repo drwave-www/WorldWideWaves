@@ -22,21 +22,35 @@ import Foundation
 import MapLibre
 import UIKit
 import CoreLocation
+import Shared
 
-/// Swift bridging layer for MapLibre Native iOS SDK
-/// Provides @objc methods for controlling MapLibre from Kotlin or Swift
 // swiftlint:disable type_body_length file_length
+
+/// Swift bridging layer for MapLibre Native iOS SDK.
+/// Provides @objc methods for controlling MapLibre from Kotlin or Swift.
 @objc public class MapLibreViewWrapper: NSObject {
     private static let tag = "MapLibreWrapper"
     private weak var mapView: MLNMapView?
     private var onStyleLoaded: (() -> Void)?
     private var onMapClick: ((Double, Double) -> Void)?
+    private var onMapClickNavigation: (() -> Void)?  // Navigation callback (for full-screen map)
     private var onCameraIdle: (() -> Void)?
     private var cameraAnimationCallback: MapCameraCallbackWrapper?
 
     // Track layer and source IDs for cleanup
     private var waveLayerIds: [String] = []
     private var waveSourceIds: [String] = []
+
+    // DEPRECATED: Polling timer removed - now using direct dispatch callbacks
+    // private var commandPollingTimer: Timer?
+    // private static let pollingInterval: TimeInterval = 0.1 // 100ms
+
+    // Queue for polygons that arrive before style loads
+    private var pendingPolygonQueue: [[CLLocationCoordinate2D]] = []
+    private var styleIsLoaded: Bool = false
+
+    // Queue for constraint bounds that arrive before style loads
+    private var pendingConstraintBounds: MLNCoordinateBounds?
 
     // MARK: - Accessibility State
 
@@ -52,27 +66,73 @@ import CoreLocation
         WWWLog.d(Self.tag, "Initializing MapLibreViewWrapper")
     }
 
+    deinit {
+        WWWLog.w(Self.tag, "⚠️ Deinitializing MapLibreViewWrapper for event: \(eventId ?? "unknown")")
+        WWWLog.w(Self.tag, "This will stop polygon updates! Wrapper should stay alive during wave screen.")
+        // DEPRECATED: No longer using polling timer
+        // stopContinuousPolling()
+    }
+
     // MARK: - Map Setup
 
     private var eventId: String?
 
     @objc public func setMapView(_ mapView: MLNMapView) {
-        WWWLog.d(Self.tag, "setMapView called, bounds: \(mapView.bounds)")
+        WWWLog.i(Self.tag, "setMapView called for event: \(eventId ?? "nil"), bounds: \(mapView.bounds)")
         self.mapView = mapView
         self.mapView?.delegate = self
+
+        // Ensure user interaction is enabled
+        mapView.isUserInteractionEnabled = true
+        WWWLog.d(Self.tag, "User interaction enabled: \(mapView.isUserInteractionEnabled)")
 
         // Configure accessibility for VoiceOver
         configureMapAccessibility()
 
         // Add tap gesture recognizer for map clicks
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleMapTap(_:)))
-        self.mapView?.addGestureRecognizer(tapGesture)
-        WWWLog.d(Self.tag, "Map view configured successfully")
+        tapGesture.numberOfTapsRequired = 1
+        tapGesture.numberOfTouchesRequired = 1
+        tapGesture.delegate = self  // Set delegate to handle conflicts with MapLibre gestures
+        mapView.addGestureRecognizer(tapGesture)
+
+        WWWLog.i(Self.tag, "👆 Tap gesture added to map view")
+        WWWLog.i(Self.tag, "Total gesture recognizers on map: \(mapView.gestureRecognizers?.count ?? 0)")
+
+        // Log all gesture recognizers to debug conflicts
+        mapView.gestureRecognizers?.enumerated().forEach { index, recognizer in
+            WWWLog.d(Self.tag, "Gesture \(index): \(type(of: recognizer))")
+        }
+        WWWLog.d(Self.tag, "Map view configured successfully for event: \(eventId ?? "nil")")
     }
 
     @objc public func setEventId(_ eventId: String) {
         self.eventId = eventId
         WWWLog.d(Self.tag, "Event ID set: \(eventId)")
+
+        // Register immediate render callback (eliminates polling delay for polygons)
+        Shared.MapWrapperRegistry.shared.setRenderCallback(eventId: eventId) { [weak self] in
+            guard let self = self else { return }
+            WWWLog.i(Self.tag, "🚀 Immediate render callback triggered for: \(eventId)")
+            _ = IOSMapBridge.renderPendingPolygons(eventId: eventId)
+        }
+        WWWLog.d(Self.tag, "Immediate render callback registered for: \(eventId)")
+
+        // Register immediate camera callback (eliminates polling delay for camera commands)
+        Shared.MapWrapperRegistry.shared.setCameraCallback(eventId: eventId) { [weak self] in
+            guard let self = self else { return }
+            WWWLog.i(Self.tag, "📸 Immediate camera callback triggered for: \(eventId)")
+            IOSMapBridge.executePendingCameraCommand(eventId: eventId)
+        }
+        WWWLog.d(Self.tag, "Immediate camera callback registered for: \(eventId)")
+
+        // Register map click callback handler (direct callback storage, no registry lookup)
+        Shared.MapWrapperRegistry.shared.setMapClickRegistrationCallback(eventId: eventId) { [weak self] clickCallback in
+            guard let self = self else { return }
+            WWWLog.i(Self.tag, "👆 Registering map click navigation callback directly on wrapper")
+            self.setOnMapClickNavigationListener(clickCallback)
+        }
+        WWWLog.d(Self.tag, "Map click registration callback registered for: \(eventId)")
     }
 
     @objc public func setStyle(styleURL: String, completion: @escaping () -> Void) {
@@ -180,9 +240,19 @@ import CoreLocation
         callback: MapCameraCallbackWrapper?
     ) {
         guard let mapView = mapView else {
+            WWWLog.w(Self.tag, "Cannot animate to bounds - mapView is nil")
             callback?.onCancel()
             return
         }
+
+        // Validate bounds before attempting camera calculation
+        guard neLat > swLat else {
+            WWWLog.e(Self.tag, "Invalid bounds for animation: neLat (\(neLat)) must be > swLat (\(swLat))")
+            callback?.onCancel()
+            return
+        }
+
+        WWWLog.i(Self.tag, "Animating camera to bounds: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng)) padding=\(padding)")
 
         self.cameraAnimationCallback = callback
 
@@ -197,10 +267,13 @@ import CoreLocation
             right: CGFloat(padding)
         )
 
+        // Note: cameraThatFitsCoordinateBounds can throw C++ std::domain_error, but Swift can't catch C++ exceptions
+        // We validate bounds above to prevent invalid calls
         let camera = mapView.cameraThatFitsCoordinateBounds(bounds, edgePadding: edgePadding)
         let timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
 
         mapView.setCamera(camera, withDuration: 0.5, animationTimingFunction: timingFunction) { [weak self] in
+            WWWLog.d(Self.tag, "✅ Camera animation to bounds completed")
             callback?.onFinish()
             self?.cameraAnimationCallback = nil
         }
@@ -208,14 +281,45 @@ import CoreLocation
 
     // MARK: - Camera Constraints
 
-    @objc public func setBoundsForCameraTarget(swLat: Double, swLng: Double, neLat: Double, neLng: Double) {
-        guard let mapView = mapView else { return }
+    @objc public func setBoundsForCameraTarget(swLat: Double, swLng: Double, neLat: Double, neLng: Double) -> Bool {
+        guard let mapView = mapView else {
+            WWWLog.w(Self.tag, "Cannot set bounds - mapView is nil")
+            return false
+        }
+
+        // Validate bounds before setting or queuing
+        guard neLat > swLat else {
+            WWWLog.e(Self.tag, "Invalid bounds: neLat (\(neLat)) must be > swLat (\(swLat))")
+            return false
+        }
+
+        // Validate coordinates are within valid ranges
+        guard swLat >= -90 && swLat <= 90 && neLat >= -90 && neLat <= 90 &&
+              swLng >= -180 && swLng <= 180 && neLng >= -180 && neLng <= 180 else {
+            WWWLog.e(Self.tag, "Invalid coordinate values: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng))")
+            return false
+        }
 
         let southwest = CLLocationCoordinate2D(latitude: swLat, longitude: swLng)
         let northeast = CLLocationCoordinate2D(latitude: neLat, longitude: neLng)
         let bounds = MLNCoordinateBounds(sw: southwest, ne: northeast)
 
+        // If style not loaded yet, queue bounds for later application
+        guard styleIsLoaded, mapView.style != nil else {
+            WWWLog.i(
+                Self.tag,
+                "Style not loaded - queueing constraint bounds: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng))"
+            )
+            pendingConstraintBounds = bounds
+            return true  // Return true - will be applied when style loads
+        }
+
+        // Style is loaded - apply bounds immediately
+        WWWLog.i(Self.tag, "Setting camera constraint bounds: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng))")
         mapView.setVisibleCoordinateBounds(bounds, animated: false)
+        pendingConstraintBounds = nil  // Clear pending bounds
+        WWWLog.i(Self.tag, "✅ Camera constraint bounds set successfully")
+        return true
     }
 
     @objc public func setMinZoom(_ minZoom: Double) {
@@ -230,6 +334,18 @@ import CoreLocation
         return mapView?.minimumZoomLevel ?? 0
     }
 
+    @objc public func getVisibleRegionBounds() -> [String: Double]? {
+        guard let mapView = mapView else { return nil }
+
+        let visibleBounds = mapView.visibleCoordinateBounds
+        return [
+            "minLat": visibleBounds.sw.latitude,
+            "minLng": visibleBounds.sw.longitude,
+            "maxLat": visibleBounds.ne.latitude,
+            "maxLng": visibleBounds.ne.longitude
+        ]
+    }
+
     // MARK: - Attribution
 
     @objc public func setAttributionMargins(left: Int, top: Int, right: Int, bottom: Int) {
@@ -242,17 +358,36 @@ import CoreLocation
     // MARK: - Wave Polygons
 
     @objc public func addWavePolygons(polygons: [[CLLocationCoordinate2D]], clearExisting: Bool) {
-        WWWLog.i(Self.tag, "addWavePolygons: \(polygons.count) polygons, clearExisting: \(clearExisting)")
-        guard let mapView = mapView, let style = mapView.style else {
+        WWWLog.i(
+            Self.tag,
+            """
+            addWavePolygons: \(polygons.count) polygons, \
+            clearExisting: \(clearExisting), styleLoaded: \(styleIsLoaded)
+            """
+        )
+
+        // If style not loaded yet, queue polygons for later
+        guard styleIsLoaded, let mapView = mapView, let style = mapView.style else {
             let hasMap = mapView != nil
             let hasStyle = mapView?.style != nil
-            WWWLog.e(Self.tag, "Cannot add polygons - style not loaded (mapView: \(hasMap), style: \(hasStyle))")
+            WWWLog.w(
+                Self.tag,
+                "Style not ready - queueing \(polygons.count) polygons (mapView: \(hasMap), style: \(hasStyle))"
+            )
+
+            // Queue polygons to render when style loads
+            if clearExisting {
+                pendingPolygonQueue.removeAll()
+            }
+            pendingPolygonQueue.append(contentsOf: polygons)
+            WWWLog.d(Self.tag, "Polygon queue now contains \(pendingPolygonQueue.count) polygons")
             return
         }
 
+        // Style is loaded - render immediately
         // Clear existing polygons if requested
         if clearExisting {
-            WWWLog.d(Self.tag, "Clearing existing wave polygons")
+            WWWLog.d(Self.tag, "Clearing existing wave polygons before rendering")
             clearWavePolygons()
         }
 
@@ -279,6 +414,8 @@ import CoreLocation
             waveSourceIds.append(sourceId)
             waveLayerIds.append(layerId)
         }
+
+        WWWLog.i(Self.tag, "✅ Rendered \(polygons.count) wave polygons to map, total layers: \(waveLayerIds.count)")
 
         // Update accessibility state with new polygons
         currentWavePolygons = polygons
@@ -340,15 +477,42 @@ import CoreLocation
         self.onMapClick = listener
     }
 
+    @objc public func setOnMapClickNavigationListener(_ listener: @escaping () -> Void) {
+        WWWLog.d(Self.tag, "Setting map click navigation listener")
+        self.onMapClickNavigation = listener
+    }
+
     @objc public func setOnCameraIdleListener(_ listener: @escaping () -> Void) {
         self.onCameraIdle = listener
     }
 
     @objc private func handleMapTap(_ gesture: UITapGestureRecognizer) {
-        guard let mapView = mapView else { return }
+        WWWLog.i(Self.tag, "👆 Map tap detected!")
+
+        guard let mapView = mapView else {
+            WWWLog.w(Self.tag, "Cannot handle tap - mapView is nil")
+            return
+        }
+
         let point = gesture.location(in: mapView)
         let coordinate = mapView.convert(point, toCoordinateFrom: mapView)
-        onMapClick?(coordinate.latitude, coordinate.longitude)
+        WWWLog.d(Self.tag, "Tap coordinates: \(coordinate.latitude), \(coordinate.longitude)")
+
+        // Call coordinate callback if set
+        if let onMapClick = onMapClick {
+            WWWLog.d(Self.tag, "Calling onMapClick coordinate callback")
+            onMapClick(coordinate.latitude, coordinate.longitude)
+        } else {
+            WWWLog.v(Self.tag, "No onMapClick coordinate callback set")
+        }
+
+        // Call navigation callback directly (no registry lookup)
+        if let onMapClickNavigation = onMapClickNavigation {
+            WWWLog.i(Self.tag, "✅ Calling map click navigation callback directly")
+            onMapClickNavigation()
+        } else {
+            WWWLog.v(Self.tag, "No map click navigation callback set")
+        }
     }
 
     // MARK: - Accessibility Configuration
@@ -415,7 +579,7 @@ import CoreLocation
         }
 
         if let userPos = currentUserPosition, let eventCenter = currentEventCenter {
-            let distance = calculateDistance(from: userPos, to: eventCenter)
+            let distance = calculateDistance(from: userPos, destination: eventCenter)
             let distanceMeters = Int(distance)
             summaryText += ". You are \(distanceMeters) meters from event center"
         }
@@ -514,9 +678,9 @@ import CoreLocation
     }
 
     /// Calculates distance in meters between two coordinates.
-    private func calculateDistance(from: CLLocationCoordinate2D, to: CLLocationCoordinate2D) -> Double {
+    private func calculateDistance(from: CLLocationCoordinate2D, destination: CLLocationCoordinate2D) -> Double {
         let fromLocation = CLLocation(latitude: from.latitude, longitude: from.longitude)
-        let toLocation = CLLocation(latitude: to.latitude, longitude: to.longitude)
+        let toLocation = CLLocation(latitude: destination.latitude, longitude: destination.longitude)
         return fromLocation.distance(from: toLocation)
     }
 
@@ -563,21 +727,68 @@ import CoreLocation
         updateMapAccessibility()
         WWWLog.v(Self.tag, "Event info updated for accessibility: \(eventName ?? "unknown")")
     }
+
+    // MARK: - DEPRECATED: Continuous Command Polling
+    // NOTE: Polling has been replaced with direct dispatch callbacks for better performance
+    // The immediate render and camera callbacks registered in setEventId() now handle updates
+    // This eliminates 100ms+ polling delay and reduces CPU/battery usage
+
+    /*
+    /// DEPRECATED: Replaced with direct dispatch callbacks
+    private func startContinuousPolling() {
+        // No longer needed - using MapWrapperRegistry.setRenderCallback and setCameraCallback
+    }
+
+    /// DEPRECATED: Replaced with direct dispatch callbacks
+    private func stopContinuousPolling() {
+        // No longer needed - callbacks are automatically cleaned up
+    }
+    */
 }
 
 // MARK: - MLNMapViewDelegate
 
 extension MapLibreViewWrapper: MLNMapViewDelegate {
     public func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
-        WWWLog.i(Self.tag, "Style loaded successfully")
+        WWWLog.i(Self.tag, "🎨 Style loaded successfully for event: \(eventId ?? "unknown")")
+        styleIsLoaded = true
         onStyleLoaded?()
         onStyleLoaded = nil
 
-        // Check for pending polygons to render
-        if let eventId = eventId {
-            WWWLog.d(Self.tag, "Checking for pending polygons after style load for event: \(eventId)")
-            IOSMapBridge.renderPendingPolygons(eventId: eventId)
+        guard let eventId = eventId else {
+            WWWLog.e(Self.tag, "Cannot execute commands - eventId is nil")
+            return
         }
+
+        // IMMEDIATE EXECUTION: Execute all pending commands now that map is ready
+        WWWLog.i(Self.tag, "⚡ Executing pending commands immediately after style load...")
+
+        // 1. Render queued polygons that arrived before style loaded
+        if !pendingPolygonQueue.isEmpty {
+            WWWLog.i(Self.tag, "📦 Flushing polygon queue: \(pendingPolygonQueue.count) polygons")
+            addWavePolygons(polygons: pendingPolygonQueue, clearExisting: true)
+            pendingPolygonQueue.removeAll()
+        }
+
+        // 2. Execute pending camera commands (initial positioning, constraints)
+        WWWLog.d(Self.tag, "Checking for pending camera commands...")
+        IOSMapBridge.executePendingCameraCommand(eventId: eventId)
+
+        // 3. Render pending wave polygons from registry (initial wave state)
+        WWWLog.d(Self.tag, "Checking for pending polygons in registry...")
+        _ = IOSMapBridge.renderPendingPolygons(eventId: eventId)
+
+        // 4. Apply queued constraint bounds if any
+        if let bounds = pendingConstraintBounds {
+            WWWLog.i(Self.tag, "Applying queued constraint bounds after style load")
+            mapView.setVisibleCoordinateBounds(bounds, animated: false)
+            pendingConstraintBounds = nil
+            WWWLog.i(Self.tag, "✅ Constraint bounds applied successfully")
+        }
+
+        // NOTE: Continuous polling REMOVED - now using direct dispatch callbacks
+        // Callbacks were registered in setEventId() and provide immediate updates (<16ms vs 100ms+)
+        WWWLog.i(Self.tag, "✅ Map initialization complete with direct dispatch callbacks for event: \(eventId)")
     }
 
     public func mapView(_ mapView: MLNMapView, regionDidChangeAnimated animated: Bool) {
@@ -585,12 +796,79 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         WWWLog.v(Self.tag, "Region changed, camera idle")
         onCameraIdle?()
 
+        // Invoke camera idle listener from registry (for adapter's addOnCameraIdleListener)
+        if let eventId = eventId {
+            Shared.MapWrapperRegistry.shared.invokeCameraIdleListener(eventId: eventId)
+
+            // Update visible region in registry (for getVisibleRegion calls)
+            let bounds = mapView.visibleCoordinateBounds
+            let bbox = BoundingBox(
+                minLatitude: bounds.sw.latitude,
+                minLongitude: bounds.sw.longitude,
+                maxLatitude: bounds.ne.latitude,
+                maxLongitude: bounds.ne.longitude
+            )
+            Shared.MapWrapperRegistry.shared.updateVisibleRegion(eventId: eventId, bbox: bbox)
+
+            // Update min zoom in registry
+            Shared.MapWrapperRegistry.shared.updateMinZoom(eventId: eventId, minZoom: mapView.minimumZoomLevel)
+        }
+
         // Update accessibility when map region changes
         updateMapAccessibility()
     }
 
     public func mapViewDidFailLoadingMap(_ mapView: MLNMapView, withError error: Error) {
-        WWWLog.e(Self.tag, "Failed to load map", error: error)
+        WWWLog.e(Self.tag, "❌ FAILED to load map", error: error)
+        WWWLog.e(Self.tag, "Error domain: \((error as NSError).domain), code: \((error as NSError).code)")
+        WWWLog.e(Self.tag, "Error description: \(error.localizedDescription)")
+        WWWLog.e(Self.tag, "Event: \(eventId ?? "unknown")")
+    }
+
+    @objc public func mapView(_ mapView: MLNMapView, didFailToLoadImage imageName: String) -> UIImage? {
+        WWWLog.w(Self.tag, "⚠️ Failed to load image: \(imageName)")
+        WWWLog.w(Self.tag, "Event: \(eventId ?? "unknown")")
+        return nil // Return nil to let MapLibre use default/fallback
+    }
+
+    public func mapViewWillStartLoadingMap(_ mapView: MLNMapView) {
+        WWWLog.i(Self.tag, "🔄 Map WILL START loading for event: \(eventId ?? "unknown")")
+        WWWLog.d(Self.tag, "Style URL: \(mapView.styleURL?.absoluteString ?? "nil")")
+    }
+
+    public func mapViewDidFinishLoadingMap(_ mapView: MLNMapView) {
+        WWWLog.i(Self.tag, "🗺️ Map DID FINISH loading (tiles, layers) for event: \(eventId ?? "unknown")")
+        // Note: This is different from didFinishLoading style:
+        // - didFinishLoadingMap = all tiles and resources loaded
+        // - didFinishLoading style: = style JSON parsed and layers created
+    }
+
+    public func mapViewWillStartRenderingFrame(_ mapView: MLNMapView) {
+        // Called frequently - only log once
+        if !styleIsLoaded {
+            WWWLog.d(
+                Self.tag,
+                "🎬 Map started rendering frames (first frame) for event: \(eventId ?? "unknown")"
+            )
+        }
+    }
+
+    public func mapViewDidFinishRenderingFrame(_ mapView: MLNMapView, fullyRendered: Bool) {
+        // Called frequently - only log once
+        if !styleIsLoaded {
+            WWWLog.i(
+                Self.tag,
+                "🖼️ Map finished rendering frame, fullyRendered: \(fullyRendered), event: \(eventId ?? "unknown")"
+            )
+        }
+    }
+
+    public func mapViewDidBecomeIdle(_ mapView: MLNMapView) {
+        WWWLog.d(Self.tag, "💤 Map became idle for event: \(eventId ?? "unknown")")
+    }
+
+    public func mapView(_ mapView: MLNMapView, didSelect annotation: MLNAnnotation) {
+        WWWLog.d(Self.tag, "📍 Annotation selected: \(annotation)")
     }
 }
 
@@ -612,6 +890,29 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
 
     @objc public func onCancel() {
         onCancelBlock()
+    }
+}
+
+// MARK: - UIGestureRecognizerDelegate
+
+extension MapLibreViewWrapper: UIGestureRecognizerDelegate {
+    /// Allow our tap gesture to work simultaneously with MapLibre's gestures
+    public func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
+        // Allow our tap gesture to work alongside MapLibre's gestures
+        WWWLog.v(
+            Self.tag,
+            "Gesture conflict: \(type(of: gestureRecognizer)) vs \(type(of: otherGestureRecognizer))"
+        )
+        return true
+    }
+
+    /// Ensure tap gesture receives touch events
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        WWWLog.v(Self.tag, "Gesture should receive touch: \(type(of: gestureRecognizer))")
+        return true
     }
 }
 

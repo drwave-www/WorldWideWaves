@@ -10,7 +10,19 @@
 		C125F0372E8C7A4D00AAD24C /* MapLibre in Frameworks */ = {isa = PBXBuildFile; productRef = C125F0362E8C7A4D00AAD24C /* MapLibre */; };
 		C17B465A2E8999FF0097A3A5 /* Shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C17B46592E8999FF0097A3A5 /* Shared.framework */; };
 		C17B465B2E8999FF0097A3A5 /* Shared.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C17B46592E8999FF0097A3A5 /* Shared.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C1A719F62E969281005B6CD9 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = C1A719F52E969281005B6CD9 /* FirebaseAnalytics */; };
+		C1A719F82E969281005B6CD9 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = C1A719F72E969281005B6CD9 /* FirebaseCrashlytics */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C1A718EF2E95055E005B6CD9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C17B3C6E2E886C610097A3A5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C17B3C752E886C610097A3A5;
+			remoteInfo = worldwidewaves;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		C17B465C2E8999FF0097A3A5 /* Embed Frameworks */ = {
@@ -29,6 +41,7 @@
 /* Begin PBXFileReference section */
 		C17B3C762E886C610097A3A5 /* worldwidewaves.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = worldwidewaves.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C17B46592E8999FF0097A3A5 /* Shared.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Shared.framework; path = "../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)/Shared.framework"; sourceTree = "<group>"; };
+		C1A718E92E95055E005B6CD9 /* worldwidewavesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = worldwidewavesUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -121,6 +134,14 @@
 			);
 			target = C17B3C752E886C610097A3A5 /* worldwidewaves */;
 		};
+		C1A718FE2E95075A005B6CD9 /* Exceptions for "worldwidewavesUITests" folder in "worldwidewavesUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				README.md,
+			);
+			target = C1A718E82E95055E005B6CD9 /* worldwidewavesUITests */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -132,6 +153,14 @@
 			path = worldwidewaves;
 			sourceTree = "<group>";
 		};
+		C1A718EA2E95055E005B6CD9 /* worldwidewavesUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C1A718FE2E95075A005B6CD9 /* Exceptions for "worldwidewavesUITests" folder in "worldwidewavesUITests" target */,
+			);
+			path = worldwidewavesUITests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -140,7 +169,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				C125F0372E8C7A4D00AAD24C /* MapLibre in Frameworks */,
+				C1A719F82E969281005B6CD9 /* FirebaseCrashlytics in Frameworks */,
 				C17B465A2E8999FF0097A3A5 /* Shared.framework in Frameworks */,
+				C1A719F62E969281005B6CD9 /* FirebaseAnalytics in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1A718E62E95055E005B6CD9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -151,6 +189,7 @@
 			isa = PBXGroup;
 			children = (
 				C17B3C782E886C610097A3A5 /* worldwidewaves */,
+				C1A718EA2E95055E005B6CD9 /* worldwidewavesUITests */,
 				C17B46582E89981D0097A3A5 /* Frameworks */,
 				C17B3C772E886C610097A3A5 /* Products */,
 			);
@@ -160,6 +199,7 @@
 			isa = PBXGroup;
 			children = (
 				C17B3C762E886C610097A3A5 /* worldwidewaves.app */,
+				C1A718E92E95055E005B6CD9 /* worldwidewavesUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -179,7 +219,8 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = C17B3C972E886C630097A3A5 /* Build configuration list for PBXNativeTarget "worldwidewaves" */;
 			buildPhases = (
-				C17B3CA12E886C960097A3A5 /* ShellScript */,
+				C17B3CA12E886C960097A3A5 /* KMM Framework Update */,
+				C1A719FD2E969942005B6CD9 /* Generate Firebase config */,
 				C17B3C722E886C610097A3A5 /* Sources */,
 				C17B3C732E886C610097A3A5 /* Frameworks */,
 				C17B3C742E886C610097A3A5 /* Resources */,
@@ -195,10 +236,35 @@
 			name = worldwidewaves;
 			packageProductDependencies = (
 				C125F0362E8C7A4D00AAD24C /* MapLibre */,
+				C1A719F52E969281005B6CD9 /* FirebaseAnalytics */,
+				C1A719F72E969281005B6CD9 /* FirebaseCrashlytics */,
 			);
 			productName = worldwidewaves;
 			productReference = C17B3C762E886C610097A3A5 /* worldwidewaves.app */;
 			productType = "com.apple.product-type.application";
+		};
+		C1A718E82E95055E005B6CD9 /* worldwidewavesUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C1A718F32E95055E005B6CD9 /* Build configuration list for PBXNativeTarget "worldwidewavesUITests" */;
+			buildPhases = (
+				C1A718E52E95055E005B6CD9 /* Sources */,
+				C1A718E62E95055E005B6CD9 /* Frameworks */,
+				C1A718E72E95055E005B6CD9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C1A718F02E95055E005B6CD9 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				C1A718EA2E95055E005B6CD9 /* worldwidewavesUITests */,
+			);
+			name = worldwidewavesUITests;
+			packageProductDependencies = (
+			);
+			productName = worldwidewavesUITests;
+			productReference = C1A718E92E95055E005B6CD9 /* worldwidewavesUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
@@ -255,6 +321,10 @@
 					C17B3C752E886C610097A3A5 = {
 						CreatedOnToolsVersion = 16.4;
 					};
+					C1A718E82E95055E005B6CD9 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = C17B3C752E886C610097A3A5;
+					};
 				};
 			};
 			buildConfigurationList = C17B3C712E886C610097A3A5 /* Build configuration list for PBXProject "worldwidewaves" */;
@@ -268,6 +338,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				C125F0352E8C7A4D00AAD24C /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */,
+				C1A719F42E969281005B6CD9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C17B3C772E886C610097A3A5 /* Products */;
@@ -275,6 +346,7 @@
 			projectRoot = "";
 			targets = (
 				C17B3C752E886C610097A3A5 /* worldwidewaves */,
+				C1A718E82E95055E005B6CD9 /* worldwidewavesUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -287,10 +359,17 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C1A718E72E95055E005B6CD9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		C17B3CA12E886C960097A3A5 /* ShellScript */ = {
+		C17B3CA12E886C960097A3A5 /* KMM Framework Update */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -300,6 +379,7 @@
 			);
 			inputPaths = (
 			);
+			name = "KMM Framework Update";
 			outputFileListPaths = (
 			);
 			outputPaths = (
@@ -307,6 +387,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "export PATH=\"/opt/homebrew/opt/openjdk@17/bin:/opt/homebrew/bin:$PATH\"\nexport JAVA_HOME=\"/opt/homebrew/opt/openjdk@17\"\ncd \"$SRCROOT/..\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode \\\n  -PXCODE_CONFIGURATION=${CONFIGURATION} \\\n  -PPLATFORM_NAME=${PLATFORM_NAME} \\\n  -PARCHS=\"${ARCHS}\"\n";
+		};
+		C1A719FD2E969942005B6CD9 /* Generate Firebase config */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/../local.properties",
+			);
+			name = "Generate Firebase config";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/worldwidewaves/GoogleService-Info.plist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "  set -e\n\n  SCRIPT_PATH=\"${PROJECT_DIR}/../scripts/generate_ios_firebase_config.sh\"\n\n  echo \"🔥 Auto-generating Firebase configuration...\"\n  if \"$SCRIPT_PATH\"; then\n      echo \"✅ Firebase configuration generated successfully\"\n  else\n      echo \"error: Firebase configuration generation failed\"\n      exit 1\n  fi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -318,7 +418,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C1A718E52E95055E005B6CD9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C1A718F02E95055E005B6CD9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C17B3C752E886C610097A3A5 /* worldwidewaves */;
+			targetProxy = C1A718EF2E95055E005B6CD9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		C17B3C952E886C630097A3A5 /* Debug */ = {
@@ -375,7 +490,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -432,7 +547,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -464,6 +579,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -503,6 +619,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -516,6 +633,49 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		C1A718F12E95055E005B6CD9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3HUXY8PKDZ;
+				ENABLE_ON_DEMAND_RESOURCES = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = worldwidewavesUITests/Info.plist;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.worldwidewavesUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = worldwidewaves;
+			};
+			name = Debug;
+		};
+		C1A718F22E95055E005B6CD9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3HUXY8PKDZ;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = worldwidewavesUITests/Info.plist;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.worldwidewavesUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = worldwidewaves;
 			};
 			name = Release;
 		};
@@ -540,6 +700,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		C1A718F32E95055E005B6CD9 /* Build configuration list for PBXNativeTarget "worldwidewavesUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C1A718F12E95055E005B6CD9 /* Debug */,
+				C1A718F22E95055E005B6CD9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -551,6 +720,14 @@
 				minimumVersion = 6.19.1;
 			};
 		};
+		C1A719F42E969281005B6CD9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.4.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -558,6 +735,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C125F0352E8C7A4D00AAD24C /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */;
 			productName = MapLibre;
+		};
+		C1A719F52E969281005B6CD9 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C1A719F42E969281005B6CD9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		C1A719F72E969281005B6CD9 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C1A719F42E969281005B6CD9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -50,42 +50,65 @@ struct EventMapView: UIViewRepresentable {
         mapView.setCenter(coordinate, zoomLevel: initialZoom, animated: false)
         WWWLog.d(Self.tag, "Camera position set")
 
-        // Set style URL - use fileURLWithPath for local file paths
+        // Configure style URL
+        configureStyleURL(for: mapView)
+
+        // Create and configure wrapper
+        _ = createAndConfigureWrapper(for: mapView)
+
+        return mapView
+    }
+
+    private func configureStyleURL(for mapView: MLNMapView) {
         let url: URL
         if styleURL.hasPrefix("http://") || styleURL.hasPrefix("https://") {
-            // Remote URL
             url = URL(string: styleURL)!
-            WWWLog.d(Self.tag, "Using remote style URL")
+            WWWLog.d(Self.tag, "Using remote style URL: \(url)")
         } else {
-            // Local file path - convert to file URL
             url = URL(fileURLWithPath: styleURL)
-            WWWLog.d(Self.tag, "Converted file path to URL: \(url)")
+            WWWLog.i(Self.tag, "Local file path: \(styleURL)")
+            validateStyleFile(at: styleURL)
         }
         mapView.styleURL = url
-        WWWLog.d(Self.tag, "Style URL set on map view")
+        WWWLog.i(Self.tag, "✅ Style URL set on map view: \(url.absoluteString)")
+    }
 
-        // Create wrapper and bind to the map view
+    private func validateStyleFile(at path: String) {
+        let fileManager = FileManager.default
+        if fileManager.fileExists(atPath: path) {
+            WWWLog.i(Self.tag, "✅ Style file EXISTS at path: \(path)")
+            if let attributes = try? fileManager.attributesOfItem(atPath: path),
+               let fileSize = attributes[.size] as? UInt64 {
+                WWWLog.d(Self.tag, "Style file size: \(fileSize) bytes")
+            }
+        } else {
+            WWWLog.e(Self.tag, "❌ Style file DOES NOT EXIST at path: \(path)")
+        }
+    }
+
+    private func createAndConfigureWrapper(for mapView: MLNMapView) -> MapLibreViewWrapper {
         let mapWrapper = MapLibreViewWrapper()
         mapWrapper.setEventId(eventId)
         mapWrapper.setMapView(mapView)
         WWWLog.d(Self.tag, "Wrapper bound to map view")
 
-        // Register wrapper in Kotlin registry for later access
         Shared.MapWrapperRegistry.shared.registerWrapper(eventId: eventId, wrapper: mapWrapper)
         WWWLog.d(Self.tag, "Wrapper registered in MapWrapperRegistry for event: \(eventId)")
 
-        // Update binding
         DispatchQueue.main.async {
             self.wrapper = mapWrapper
             WWWLog.d(Self.tag, "Wrapper binding updated in main thread")
         }
 
-        return mapView
+        return mapWrapper
     }
 
     func updateUIView(_ mapView: MLNMapView, context: Context) {
         // Check for pending polygons and render them
-        IOSMapBridge.renderPendingPolygons(eventId: eventId)
+        _ = IOSMapBridge.renderPendingPolygons(eventId: eventId)
+
+        // Check for pending camera commands and execute them
+        IOSMapBridge.executePendingCameraCommand(eventId: eventId)
     }
 }
 

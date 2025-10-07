@@ -19,6 +19,8 @@
  * limitations under the License.
  */
 import UIKit
+import FirebaseCore
+import FirebaseCrashlytics
 
 /// The app delegate for WorldWideWaves iOS app, handling app-wide lifecycle and legacy URL routing.
 ///
@@ -75,7 +77,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     /// - Note: Called once at app launch (cold start)
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        true
+        // Initialize Firebase
+        FirebaseApp.configure()
+
+        // Enable Crashlytics collection
+        // Crashlytics is automatically enabled when FirebaseApp.configure() is called
+        // and will automatically collect crash reports
+
+        NSLog("[AppDelegate] ✅ Firebase configured successfully")
+
+        return true
     }
 
     /// UIApplicationDelegate method called to configure a new scene session.

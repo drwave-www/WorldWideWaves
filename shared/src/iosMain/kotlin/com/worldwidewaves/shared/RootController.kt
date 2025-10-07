@@ -226,7 +226,12 @@ fun makeEventViewController(eventId: String): UIViewController =
         bindIosLifecycle(host)
 
         host.asComponent(
-            eventMapBuilder = { event -> IosEventMap(event) },
+            eventMapBuilder = { event ->
+                IosEventMap(
+                    event,
+                    onMapClick = { enabler.openFullMapActivity(event.id) },
+                )
+            },
             onFinish = finish,
         )
     }
@@ -269,7 +274,12 @@ fun makeWaveViewController(eventId: String): UIViewController =
         bindIosLifecycle(host)
 
         host.asComponent(
-            eventMapBuilder = { event -> IosEventMap(event) },
+            eventMapBuilder = { event ->
+                IosEventMap(
+                    event,
+                    onMapClick = { enabler.openFullMapActivity(event.id) },
+                )
+            },
             onFinish = finish,
         )
     }
