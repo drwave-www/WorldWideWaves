@@ -67,12 +67,14 @@ echo -e "${GREEN}✅ APKs built successfully${NC}"
 echo "  App APK: ${APP_APK}"
 echo "  Test APK: ${TEST_APK}"
 
-# Device matrix
+# Device matrix - 5 devices with different resolutions and API levels
 echo ""
-echo -e "${GREEN}📱 Device Matrix:${NC}"
-echo "  - Pixel 6 (API 33)"
-echo "  - Pixel 5 (API 31)"
-echo "  - Samsung Galaxy S22 (API 33)"
+echo -e "${GREEN}📱 Device Matrix (5 devices):${NC}"
+echo "  1. Pixel 8a (2400x1080, API 34) - Latest Pixel"
+echo "  2. Pixel 6a (2400x1080, API 32) - Mid-range Pixel"
+echo "  3. Galaxy S22 Ultra (3088x1440, API 33) - High-res flagship"
+echo "  4. Galaxy A12 (1600x720, API 31) - Low-res budget"
+echo "  5. Galaxy A54 5G (2340x1080, API 34) - Mid-range Samsung"
 echo ""
 
 # Run tests on Firebase Test Lab
@@ -81,9 +83,11 @@ if gcloud firebase test android run \
   --type instrumentation \
   --app "${APP_APK}" \
   --test "${TEST_APK}" \
-  --device model=redfin,version=33,locale=en_US,orientation=portrait \
-  --device model=redfin,version=31,locale=en_US,orientation=portrait \
+  --device model=akita,version=34,locale=en_US,orientation=portrait \
+  --device model=bluejay,version=32,locale=en_US,orientation=portrait \
   --device model=b0q,version=33,locale=en_US,orientation=portrait \
+  --device model=a12,version=31,locale=en_US,orientation=portrait \
+  --device model=a54x,version=34,locale=en_US,orientation=portrait \
   --timeout 20m \
   --results-bucket="${RESULTS_BUCKET}" \
   --results-dir="${RESULTS_DIR}" \

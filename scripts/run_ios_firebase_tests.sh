@@ -99,21 +99,25 @@ echo -e "${GREEN}✅ Test bundle created: ${ZIP_NAME}${NC}"
 # Move back to project root
 cd ../../../..
 
-# Device matrix
+# Device matrix - 5 devices with different form factors and iOS versions
 echo ""
-echo -e "${GREEN}📱 Device Matrix:${NC}"
-echo "  - iPhone 14 Pro (iOS 16.6)"
-echo "  - iPhone 13 (iOS 16.6)"
-echo "  - iPad Pro 12.9 (iOS 16.6)"
+echo -e "${GREEN}📱 Device Matrix (5 devices):${NC}"
+echo "  1. iPhone 15 Pro (iOS 18.0) - Latest flagship"
+echo "  2. iPhone 14 Pro (iOS 16.6) - Previous flagship"
+echo "  3. iPhone 13 Pro (iOS 16.6) - Older flagship"
+echo "  4. iPhone 8 (iOS 16.6) - Legacy small screen"
+echo "  5. iPad (10th gen) (iOS 16.6) - Tablet"
 echo ""
 
 # Run tests on Firebase Test Lab
 echo -e "${GREEN}🧪 Running tests on Firebase Test Lab...${NC}"
 if gcloud firebase test ios run \
   --test "iosApp/build/Build/Products/${ZIP_NAME}" \
+  --device model=iphone15pro,version=18.0,locale=en_US,orientation=portrait \
   --device model=iphone14pro,version=16.6,locale=en_US,orientation=portrait \
-  --device model=iphone13,version=16.6,locale=en_US,orientation=portrait \
-  --device model=ipadpro12inch5,version=16.6,locale=en_US,orientation=portrait \
+  --device model=iphone13pro,version=16.6,locale=en_US,orientation=portrait \
+  --device model=iphone8,version=16.6,locale=en_US,orientation=portrait \
+  --device model=ipad10,version=16.6,locale=en_US,orientation=portrait \
   --timeout 20m \
   --results-bucket="${RESULTS_BUCKET}" \
   --results-dir="${RESULTS_DIR}" \
