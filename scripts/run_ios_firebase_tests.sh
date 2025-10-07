@@ -127,13 +127,13 @@ echo "  5. iPad (10th gen) (iOS 16.6) - Tablet"
 echo ""
 
 # Run tests on Firebase Test Lab
-echo -e "${GREEN}🧪 Running E2E test on Firebase Test Lab...${NC}"
-echo "  Test: CompleteWaveParticipationUITest/testCompleteWaveParticipationJourney"
+echo -e "${GREEN}🧪 Running iOS UI tests on Firebase Test Lab...${NC}"
+echo "  Note: iOS Firebase Test Lab runs all tests in the bundle"
+echo "  Test bundle: worldwidewavesUITests"
 echo ""
 
 if gcloud firebase test ios run \
   --test "iosApp/build/Build/Products/${ZIP_NAME}" \
-  --test-targets "worldwidewavesUITests/CompleteWaveParticipationUITest/testCompleteWaveParticipationJourney" \
   --device model=iphone15pro,version=18.0,locale=en_US,orientation=portrait \
   --device model=iphone14pro,version=16.6,locale=en_US,orientation=portrait \
   --device model=iphone13pro,version=16.6,locale=en_US,orientation=portrait \
@@ -144,10 +144,10 @@ if gcloud firebase test ios run \
   --results-dir="${RESULTS_DIR}" \
   --project="${PROJECT_ID}"; then
     echo ""
-    echo -e "${GREEN}✅ iOS E2E test completed successfully!${NC}"
+    echo -e "${GREEN}✅ iOS tests completed successfully!${NC}"
 else
     echo ""
-    echo -e "${RED}❌ iOS E2E test failed${NC}"
+    echo -e "${RED}❌ iOS tests failed${NC}"
     exit 1
 fi
 
