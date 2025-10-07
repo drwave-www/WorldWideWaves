@@ -10,8 +10,8 @@
 set -e
 
 # Configuration
-PROJECT_ID="${FIREBASE_PROJECT_ID:-worldwidewaves-test}"
-RESULTS_BUCKET="${FIREBASE_RESULTS_BUCKET:-worldwidewaves-test-results}"
+PROJECT_ID="${FIREBASE_PROJECT_ID:-world-wide-waves}"
+RESULTS_BUCKET="${FIREBASE_RESULTS_BUCKET:-world-wide-waves-results}"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 RESULTS_DIR="android/${TIMESTAMP}"
 
