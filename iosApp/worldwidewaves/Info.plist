@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -16,6 +18,14 @@
 	<key>NSOnDemandResourcesInitialInstallTags</key>
 	<array>
 		<string>paris_france</string>
+	</array>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Montserrat-VF.ttf</string>
+		<string>MontserratAlternates-Regular.ttf</string>
+		<string>MontserratAlternates-Medium.ttf</string>
+		<string>MontserratAlternates-Bold.ttf</string>
+		<string>NotoSans-VF.ttf</string>
 	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>

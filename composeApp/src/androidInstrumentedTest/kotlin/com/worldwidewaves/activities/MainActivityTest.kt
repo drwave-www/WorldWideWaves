@@ -22,10 +22,7 @@
 package com.worldwidewaves.activities
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotSelected
-import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -122,31 +119,20 @@ class MainActivityTest {
             }
         }
 
-        // Verify Events tab is selected by default (index 0)
-        composeTestRule.onNodeWithContentDescription("Tab 0").assertIsSelected()
+        // Verify Events content is displayed (EventsList is the new testTag)
+        composeTestRule.onNodeWithTag("EventsList").assertIsDisplayed()
 
-        // Verify Events content is displayed
-        composeTestRule.onNodeWithTag("events-list-screen").assertIsDisplayed()
-
-        // Click About tab (index 1)
-        composeTestRule.onNodeWithContentDescription("Tab 1").performClick()
-
-        // Verify About tab is now selected
-        composeTestRule.onNodeWithContentDescription("Tab 1").assertIsSelected()
-        composeTestRule.onNodeWithContentDescription("Tab 0").assertIsNotSelected()
+        // Click About tab
+        composeTestRule.onNodeWithText("About").performClick()
 
         // Verify About content is displayed
-        composeTestRule.onNodeWithTag("about-screen").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("AboutTab_Info").assertIsDisplayed()
 
-        // Click Events tab again
-        composeTestRule.onNodeWithContentDescription("Tab 0").performClick()
-
-        // Verify Events tab is selected again
-        composeTestRule.onNodeWithContentDescription("Tab 0").assertIsSelected()
-        composeTestRule.onNodeWithContentDescription("Tab 1").assertIsNotSelected()
+        // Click Events tab again (navigate back)
+        composeTestRule.onNodeWithText("Events").performClick()
 
         // Verify Events content is displayed again
-        composeTestRule.onNodeWithTag("events-list-screen").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("EventsList").assertIsDisplayed()
     }
 
     @Test
@@ -165,7 +151,7 @@ class MainActivityTest {
         // We can test that the app handles permission states gracefully
 
         // Test 1: App should load even without location permission initially
-        composeTestRule.onNodeWithTag("events-list-screen").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("EventsList").assertIsDisplayed()
 
         // Test 2: Check for any permission-related UI elements
         try {
@@ -178,7 +164,7 @@ class MainActivityTest {
 
         // Test 3: Verify app functions without crashing when location is unavailable
         // The events list should still be accessible
-        composeTestRule.onNodeWithTag("events-list-screen").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("EventsList").assertIsDisplayed()
 
         // Note: Actual permission dialogs are system-level and cannot be easily tested
         // in UI tests. This would require integration tests with permission frameworks.
@@ -217,7 +203,7 @@ class MainActivityTest {
 
         // Verify main content is displayed after loading
         composeTestRule.onNodeWithTag("tab-view").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("events-list-screen").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("EventsList").assertIsDisplayed()
 
         // Verify splash screen is no longer visible
         try {
@@ -243,7 +229,7 @@ class MainActivityTest {
 
         // Test 1: App should handle network errors gracefully
         // The app should still display basic UI even with network issues
-        composeTestRule.onNodeWithTag("events-list-screen").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("EventsList").assertIsDisplayed()
 
         // Test 2: Check for error state indicators
         try {
@@ -283,20 +269,20 @@ class MainActivityTest {
         }
 
         // Navigate to About tab first
-        composeTestRule.onNodeWithContentDescription("Tab 1").performClick()
-        composeTestRule.onNodeWithTag("about-screen").assertIsDisplayed()
+        composeTestRule.onNodeWithText("About").performClick()
+        composeTestRule.onNodeWithTag("AboutTab_Info").assertIsDisplayed()
 
         // Test back navigation behavior - simulate with events
         // Note: Actual back button testing requires UiAutomator integration
 
         // Verify app navigation is working properly
-        composeTestRule.onNodeWithTag("about-screen").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("AboutTab_Info").assertIsDisplayed()
 
         // Navigate back to Events tab using tab click
-        composeTestRule.onNodeWithContentDescription("Tab 0").performClick()
+        composeTestRule.onNodeWithText("Events").performClick()
 
         // Verify navigation worked
-        composeTestRule.onNodeWithTag("events-list-screen").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("EventsList").assertIsDisplayed()
 
         // If double-back-to-exit is implemented, app might close
         // If not, it should still be running

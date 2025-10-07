@@ -27,9 +27,15 @@ import androidx.compose.ui.unit.sp
  */
 
 // Font families - expect/actual for platform-specific font loading
-expect val AppBodyFontFamily: FontFamily
-expect val AppDisplayFontFamily: FontFamily
-expect val AppExtraFontFamily: FontFamily
+// These are now @Composable functions to support Compose Multiplatform Font() API on iOS
+@Composable
+expect fun AppBodyFontFamily(): FontFamily
+
+@Composable
+expect fun AppDisplayFontFamily(): FontFamily
+
+@Composable
+expect fun AppExtraFontFamily(): FontFamily
 
 /**
  * Creates typography with dynamic scaling for accessibility.
@@ -41,54 +47,56 @@ expect val AppExtraFontFamily: FontFamily
 @Composable
 fun AppTypography(): Typography {
     val scale = rememberDynamicTypeScale()
+    val bodyFont = AppBodyFontFamily()
+    val displayFont = AppDisplayFontFamily()
 
     return Typography(
         // Event-specific text styles matching Android exactly
         headlineLarge =
             TextStyle(
-                fontFamily = AppDisplayFontFamily,
+                fontFamily = displayFont,
                 fontSize = (32 * scale).sp,
                 fontWeight = FontWeight.Bold,
                 lineHeight = (40 * scale).sp,
             ),
         headlineMedium =
             TextStyle(
-                fontFamily = AppDisplayFontFamily,
+                fontFamily = displayFont,
                 fontSize = (28 * scale).sp,
                 fontWeight = FontWeight.Bold,
                 lineHeight = (36 * scale).sp,
             ),
         titleLarge =
             TextStyle(
-                fontFamily = AppBodyFontFamily,
+                fontFamily = bodyFont,
                 fontSize = (26 * scale).sp, // EVENT_LOCATION_FONTSIZE = 26
                 fontWeight = FontWeight.Medium,
                 lineHeight = (32 * scale).sp,
             ),
         titleMedium =
             TextStyle(
-                fontFamily = AppBodyFontFamily,
+                fontFamily = bodyFont,
                 fontSize = (30 * scale).sp, // EVENT_DATE_FONTSIZE = 30
                 fontWeight = FontWeight.Bold,
                 lineHeight = (36 * scale).sp,
             ),
         bodyLarge =
             TextStyle(
-                fontFamily = AppBodyFontFamily,
+                fontFamily = bodyFont,
                 fontSize = (18 * scale).sp, // EVENT_COUNTRY_FONTSIZE = 18 (MEDIUM)
                 fontWeight = FontWeight.Normal,
                 lineHeight = (24 * scale).sp,
             ),
         bodyMedium =
             TextStyle(
-                fontFamily = AppBodyFontFamily,
+                fontFamily = bodyFont,
                 fontSize = (16 * scale).sp, // EVENT_COMMUNITY_FONTSIZE = 16 (DEFAULT)
                 fontWeight = FontWeight.Normal,
                 lineHeight = (20 * scale).sp,
             ),
         labelSmall =
             TextStyle(
-                fontFamily = AppBodyFontFamily,
+                fontFamily = bodyFont,
                 fontSize = (12 * scale).sp, // SOONRUNNING_FONTSIZE for badges
                 fontWeight = FontWeight.Bold,
                 lineHeight = (16 * scale).sp,

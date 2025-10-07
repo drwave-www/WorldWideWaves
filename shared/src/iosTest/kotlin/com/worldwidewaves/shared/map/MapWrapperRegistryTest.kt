@@ -10,11 +10,14 @@ package com.worldwidewaves.shared.map
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
+import com.worldwidewaves.shared.events.utils.BoundingBox
+import com.worldwidewaves.shared.events.utils.Position
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -188,5 +191,169 @@ class MapWrapperRegistryTest {
         assertTrue(MapWrapperRegistry.hasPendingPolygons("event2"))
         assertTrue(MapWrapperRegistry.hasPendingPolygons("event3"))
         assertTrue(MapWrapperRegistry.hasPendingPolygons("event4"))
+    }
+
+    // ============================================================
+    // CAMERA COMMAND TESTS (Added October 8, 2025)
+    // ============================================================
+
+    @Test
+    fun testPendingCameraCommand_AnimateToPosition() {
+        val position = Position(48.8566, 2.3522)
+        val command = CameraCommand.AnimateToPosition(position, zoom = 12.0)
+
+        MapWrapperRegistry.setPendingCameraCommand("event1", command)
+
+        assertTrue(MapWrapperRegistry.hasPendingCameraCommand("event1"))
+
+        val retrieved = MapWrapperRegistry.getPendingCameraCommand("event1")
+        assertNotNull(retrieved)
+        assertIs<CameraCommand.AnimateToPosition>(retrieved)
+        assertEquals(position.lat, retrieved.position.lat, 0.0001)
+        assertEquals(position.lng, retrieved.position.lng, 0.0001)
+        assertEquals(12.0, retrieved.zoom)
+    }
+
+    @Test
+    fun testPendingCameraCommand_AnimateToBounds() {
+        val bounds =
+            BoundingBox.fromCorners(
+                listOf(
+                    Position(48.0, 2.0),
+                    Position(49.0, 3.0),
+                ),
+            )!!
+        val command = CameraCommand.AnimateToBounds(bounds, padding = 50)
+
+        MapWrapperRegistry.setPendingCameraCommand("event1", command)
+
+        val retrieved = MapWrapperRegistry.getPendingCameraCommand("event1")
+        assertNotNull(retrieved)
+        assertIs<CameraCommand.AnimateToBounds>(retrieved)
+        assertEquals(50, retrieved.padding)
+    }
+
+    @Test
+    fun testPendingCameraCommand_MoveToBounds() {
+        val bounds =
+            BoundingBox.fromCorners(
+                listOf(
+                    Position(48.0, 2.0),
+                    Position(49.0, 3.0),
+                ),
+            )!!
+        val command = CameraCommand.MoveToBounds(bounds)
+
+        MapWrapperRegistry.setPendingCameraCommand("event1", command)
+
+        val retrieved = MapWrapperRegistry.getPendingCameraCommand("event1")
+        assertNotNull(retrieved)
+        assertIs<CameraCommand.MoveToBounds>(retrieved)
+    }
+
+    @Test
+    fun testPendingCameraCommand_SetConstraintBounds() {
+        val bounds =
+            BoundingBox.fromCorners(
+                listOf(
+                    Position(48.0, 2.0),
+                    Position(49.0, 3.0),
+                ),
+            )!!
+        val command = CameraCommand.SetConstraintBounds(bounds)
+
+        MapWrapperRegistry.setPendingCameraCommand("event1", command)
+
+        val retrieved = MapWrapperRegistry.getPendingCameraCommand("event1")
+        assertNotNull(retrieved)
+        assertIs<CameraCommand.SetConstraintBounds>(retrieved)
+    }
+
+    @Test
+    fun testClearPendingCameraCommand() {
+        val position = Position(48.8566, 2.3522)
+        val command = CameraCommand.AnimateToPosition(position, zoom = 12.0)
+
+        MapWrapperRegistry.setPendingCameraCommand("event1", command)
+        assertTrue(MapWrapperRegistry.hasPendingCameraCommand("event1"))
+
+        MapWrapperRegistry.clearPendingCameraCommand("event1")
+        assertFalse(MapWrapperRegistry.hasPendingCameraCommand("event1"))
+        assertNull(MapWrapperRegistry.getPendingCameraCommand("event1"))
+    }
+
+    @Test
+    fun testUnregisterClearsCameraCommands() {
+        val wrapper = "TestWrapper"
+        val position = Position(48.8566, 2.3522)
+        val command = CameraCommand.AnimateToPosition(position, zoom = 12.0)
+
+        MapWrapperRegistry.registerWrapper("event1", wrapper)
+        MapWrapperRegistry.setPendingCameraCommand("event1", command)
+
+        MapWrapperRegistry.unregisterWrapper("event1")
+
+        assertNull(MapWrapperRegistry.getWrapper("event1"))
+        assertFalse(MapWrapperRegistry.hasPendingCameraCommand("event1"))
+    }
+
+    @Test
+    fun testUnregisterClearsBothPolygonsAndCameraCommands() {
+        val wrapper = "TestWrapper"
+        val polygons = listOf(listOf(Pair(0.0, 0.0), Pair(1.0, 1.0)))
+        val position = Position(48.8566, 2.3522)
+        val command = CameraCommand.AnimateToPosition(position, zoom = 12.0)
+
+        MapWrapperRegistry.registerWrapper("event1", wrapper)
+        MapWrapperRegistry.setPendingPolygons("event1", polygons, clearExisting = true)
+        MapWrapperRegistry.setPendingCameraCommand("event1", command)
+
+        // Verify all data present
+        assertTrue(MapWrapperRegistry.hasPendingPolygons("event1"))
+        assertTrue(MapWrapperRegistry.hasPendingCameraCommand("event1"))
+
+        MapWrapperRegistry.unregisterWrapper("event1")
+
+        // Verify everything cleared
+        assertNull(MapWrapperRegistry.getWrapper("event1"))
+        assertFalse(MapWrapperRegistry.hasPendingPolygons("event1"))
+        assertFalse(MapWrapperRegistry.hasPendingCameraCommand("event1"))
+    }
+
+    @Test
+    fun testClearRemovesCameraCommands() {
+        val position = Position(48.8566, 2.3522)
+        val command = CameraCommand.AnimateToPosition(position, zoom = 12.0)
+
+        MapWrapperRegistry.setPendingCameraCommand("event1", command)
+        MapWrapperRegistry.setPendingCameraCommand("event2", command)
+
+        MapWrapperRegistry.clear()
+
+        assertFalse(MapWrapperRegistry.hasPendingCameraCommand("event1"))
+        assertFalse(MapWrapperRegistry.hasPendingCameraCommand("event2"))
+    }
+
+    @Test
+    fun testCameraCommandOverwrite() {
+        val position1 = Position(48.8566, 2.3522)
+        val position2 = Position(40.7128, -74.0060)
+        val command1 = CameraCommand.AnimateToPosition(position1, zoom = 12.0)
+        val command2 = CameraCommand.AnimateToPosition(position2, zoom = 15.0)
+
+        MapWrapperRegistry.setPendingCameraCommand("event1", command1)
+        MapWrapperRegistry.setPendingCameraCommand("event1", command2)
+
+        val retrieved = MapWrapperRegistry.getPendingCameraCommand("event1")
+        assertNotNull(retrieved)
+        assertIs<CameraCommand.AnimateToPosition>(retrieved)
+        assertEquals(position2.lat, retrieved.position.lat, 0.0001)
+        assertEquals(15.0, retrieved.zoom)
+    }
+
+    @Test
+    fun testNoPendingCameraCommand() {
+        assertFalse(MapWrapperRegistry.hasPendingCameraCommand("nonexistent"))
+        assertNull(MapWrapperRegistry.getPendingCameraCommand("nonexistent"))
     }
 }

@@ -62,39 +62,51 @@ val sharedExtendedLight =
 
 fun sharedDefaultTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle = TextStyle(fontSize = fontSize.sp)
 
+@Composable
 fun sharedCommonTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
-    sharedDefaultTextStyle(fontSize).copy(fontFamily = AppBodyFontFamily)
+    sharedDefaultTextStyle(fontSize).copy(fontFamily = AppBodyFontFamily())
 
+@Composable
 fun sharedCommonJustifiedTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     sharedCommonTextStyle(fontSize).copy(textAlign = TextAlign.Justify)
 
+@Composable
 fun sharedCommonBoldStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     sharedCommonTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 
+@Composable
 fun sharedPrimaryColoredTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     sharedCommonTextStyle(fontSize).copy(color = AppLightColorScheme.primary)
 
+@Composable
 fun sharedPrimaryColoredBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     sharedPrimaryColoredTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 
+@Composable
 fun sharedQuinaryColoredTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     sharedCommonTextStyle(fontSize).copy(color = sharedExtendedLight.quinary.color)
 
+@Composable
 fun sharedQuaternaryColoredTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     sharedCommonTextStyle(fontSize).copy(color = sharedExtendedLight.quaternary.color)
 
+@Composable
 fun sharedQuinaryColoredBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     sharedQuinaryColoredTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 
+@Composable
 fun sharedExtraBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     sharedExtraTextStyle(fontSize).copy(fontWeight = FontWeight.ExtraBold)
 
+@Composable
 fun sharedExtraTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
-    sharedDefaultTextStyle(fontSize).copy(fontFamily = AppExtraFontFamily)
+    sharedDefaultTextStyle(fontSize).copy(fontFamily = AppExtraFontFamily())
 
+@Composable
 fun sharedExtraLightTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     sharedExtraTextStyle(fontSize).copy(fontWeight = FontWeight.Light)
 
+@Composable
 fun sharedExtraPrimaryColoredBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     sharedPrimaryColoredBoldTextStyle(fontSize).copy(fontWeight = FontWeight.ExtraBold)
 

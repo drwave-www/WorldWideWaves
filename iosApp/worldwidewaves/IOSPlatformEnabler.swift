@@ -50,6 +50,12 @@ final class IOSPlatformEnabler: PlatformEnabler {
         routeTo(urlString: url)
     }
 
+    func openFullMapActivity(eventId: String) {
+        let url = "worldwidewaves://fullmap?id=\(eventId)"
+        NSLog("[\(tag)] 🎯 openFullMapActivity(eventId=\(eventId)) -> \(url)")
+        routeTo(urlString: url)
+    }
+
     func toast(message: String) {
         NSLog("[\(tag)] 🔔 toast: \"\(message)\"")
         guard let hostView = Self.topViewController()?.view else {

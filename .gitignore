@@ -10,12 +10,33 @@ local.properties
 captures
 .externalNativeBuild
 .cxx
+.swp
 *.xcodeproj/*
 !*.xcodeproj/project.pbxproj
 !*.xcodeproj/xcshareddata/
 !*.xcodeproj/project.xcworkspace/
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
+
+# Xcode - Prevent GUID conflicts
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+iosApp/.swiftpm/
+iosApp/build/
+.swiftpm/
+*.xcworkspace/xcuserdata/
+
+# Xcode - Derived Data and Caches
+DerivedData/
+*.hmap
+*.ipa
+
+# Swift Package Manager
+.build/
+Packages/
+Package.resolved
+.swiftpm/config/registries.json
+.swiftpm/xcode/package.xcworkspace/
 *.aab
 **/logs/
 scripts/images/generated_images/
@@ -24,7 +45,8 @@ CLAUDE.md.backup*
 
 # Firebase configuration files containing sensitive API keys
 composeApp/google-services.json
-iosApp/GoogleService-Info.plist
+iosApp/**/GoogleService-Info.plist
 
 # iOS ODR Resources (should only exist locally for testing)
 iosApp/worldwidewaves/Resources/Maps/
+test_results/

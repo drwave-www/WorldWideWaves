@@ -26,10 +26,8 @@ import com.worldwidewaves.shared.data.IosFavoriteEventsStore
 import com.worldwidewaves.shared.domain.usecases.IosMapAvailabilityChecker
 import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker
 import com.worldwidewaves.shared.map.IosLocationProvider
-import com.worldwidewaves.shared.map.IosMapLibreAdapter
 import com.worldwidewaves.shared.map.IosPlatformMapManager
 import com.worldwidewaves.shared.map.LocationProvider
-import com.worldwidewaves.shared.map.MapLibreAdapter
 import com.worldwidewaves.shared.map.MapStateHolder
 import com.worldwidewaves.shared.map.PlatformMapManager
 import com.worldwidewaves.shared.sound.IosSoundPlayer
@@ -82,7 +80,8 @@ val IosModule =
 
         // Map services
         single<PlatformMapManager> { IosPlatformMapManager() }
-        single<MapLibreAdapter<Any>> { IosMapLibreAdapter() }
+        // Note: IosMapLibreAdapter is now created per-instance in IosEventMap with eventId
+        // Removed singleton registration - each map creates its own adapter
         single { MapStateHolder(get()) }
         // Note: NativeMapViewProvider is registered by iOS app (SwiftNativeMapViewProvider)
         // If not registered, MapViewFactory will use IosNativeMapViewProvider as fallback

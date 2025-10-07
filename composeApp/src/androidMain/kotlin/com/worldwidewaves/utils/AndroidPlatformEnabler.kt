@@ -28,6 +28,7 @@ import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import com.worldwidewaves.activities.event.EventActivity
+import com.worldwidewaves.activities.event.EventFullMapActivity
 import com.worldwidewaves.activities.event.WaveActivity
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.utils.Log
@@ -49,6 +50,15 @@ class AndroidPlatformEnabler(
         val context: Context = context ?: KoinPlatform.getKoin().get()
         context.startActivity(
             Intent(context, WaveActivity::class.java).apply {
+                putExtra("eventId", eventId)
+            },
+        )
+    }
+
+    override fun openFullMapActivity(eventId: String) {
+        val context: Context = context ?: KoinPlatform.getKoin().get()
+        context.startActivity(
+            Intent(context, EventFullMapActivity::class.java).apply {
                 putExtra("eventId", eventId)
             },
         )

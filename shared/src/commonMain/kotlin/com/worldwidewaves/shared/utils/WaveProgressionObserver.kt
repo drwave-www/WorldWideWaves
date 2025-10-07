@@ -173,12 +173,15 @@ class WaveProgressionObserver(
             if (lastWavePolygons.isNotEmpty()) {
                 // Keep displaying the previous frame to avoid flicker when the
                 // shared layer temporarily returns an empty list.
+                Log.v("WaveObserver", "📊 Empty polygons, keeping last frame: ${lastWavePolygons.size} polygons")
                 eventMap?.updateWavePolygons(lastWavePolygons, false)
             }
             return
         } else {
             lastWavePolygons = polygons
+            Log.i("WaveObserver", "📊 Updating wave polygons: ${polygons.size} polygons")
             eventMap?.updateWavePolygons(polygons, true)
+            Log.v("WaveObserver", "✅ updateWavePolygons called successfully")
         }
     }
 }

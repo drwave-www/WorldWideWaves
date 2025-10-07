@@ -133,6 +133,71 @@ XCUITest accesses these via `.otherElements["{testTag}"]`.
 ### Issue: App doesn't launch
 **Solution**: Ensure `--uitesting` and `--simulation-enabled` launch arguments are handled in app
 
+### Issue: "On-Demand Resources is not supported for ui testing bundle targets"
+**Solution**: This is a standard Xcode warning and can be safely ignored.
+
+**Explanation:**
+- WorldWideWaves uses On-Demand Resources (ODR) for map downloads
+- ODR works in the main app but is not available in UI test bundles
+- This is a known Xcode limitation, not an error
+- Tests can still run, they just can't trigger new ODR downloads
+- Workaround: Ensure test maps (paris_france) are tagged as initial install tags
+
+**To suppress warning (optional):**
+1. Select worldwidewavesUITests target
+2. Build Settings → Search "On-Demand Resources"
+3. Set `ENABLE_ON_DEMAND_RESOURCES` to `NO` for UI test target only
+4. Main app keeps ODR enabled
+
+### Issue: "Multiple commands produce Info.plist"
+**Solution**: Remove duplicate Info.plist reference in target.
+
+**Error:**
+```
+Multiple commands produce '.../worldwidewavesUITests.xctest/Info.plist'
+```
+
+**Fix Steps:**
+1. Select `worldwidewavesUITests` target
+2. Go to **Build Phases** tab
+3. Expand "Copy Bundle Resources"
+4. Find `Info.plist` in the list
+5. Click the `-` button to remove it
+6. Info.plist should NOT be in Copy Bundle Resources
+7. It should only be referenced in Build Settings → Packaging → Info.plist File
+8. Clean build folder: Shift+Cmd+K
+9. Rebuild: Cmd+B
+
+**Why this happens:**
+- Xcode automatically processes Info.plist from Build Settings
+- If Info.plist is also added to Copy Bundle Resources, it creates a duplicate
+- The file should only be in Build Settings, not in build phases
+
+**Verification:**
+After removing from Copy Bundle Resources, build should succeed without this error.
+
+### Issue: "This process does not adopt UIScene lifecycle"
+**Solution**: This is an informational warning and can be safely ignored.
+
+**Warning:**
+```
+CLIENT OF UIKIT REQUIRES UPDATE: This process does not adopt UIScene lifecycle.
+This will become an assert in a future version.
+```
+
+**Explanation:**
+- WorldWideWaves already uses UIScene lifecycle (SceneDelegate.swift)
+- Info.plist has UIApplicationSceneManifest configured correctly
+- Warning appears during test builds but app works correctly
+- This is a known UIKit warning that may appear in test environments
+
+**Why it appears:**
+- Test harness may initialize UIKit differently
+- App delegate pattern is transitioning in iOS
+- Doesn't affect functionality or App Store submission
+
+**Status:** Safe to ignore, app is properly configured ✅
+
 ## Next Steps
 
 After setup, proceed to:
