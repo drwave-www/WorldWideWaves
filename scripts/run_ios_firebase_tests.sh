@@ -125,7 +125,13 @@ cp "${XCTESTRUN_PATH}" build/
 # Create zip from build directory - this preserves Build/Products structure
 cd build
 XCTESTRUN_FILENAME=$(basename "${XCTESTRUN_PATH}")
-zip -r "${ZIP_NAME}" "${XCTESTRUN_FILENAME}" Build/Products/*-iphoneos/
+
+# Use ditto (macOS native tool) which properly handles .app bundles and extended attributes
+# This creates a zip-compatible archive that preserves all iOS app bundle structure
+ditto -c -k --sequesterRsrc --keepParent "Build" "${ZIP_NAME}.tmp"
+# Add .xctestrun file to the archive
+zip -u "${ZIP_NAME}.tmp" "${XCTESTRUN_FILENAME}"
+mv "${ZIP_NAME}.tmp" "${ZIP_NAME}"
 
 echo -e "${GREEN}✅ Test bundle created: ${ZIP_NAME}${NC}"
 
