@@ -303,6 +303,18 @@ import Shared
         return mapView?.minimumZoomLevel ?? 0
     }
 
+    @objc public func getVisibleRegionBounds() -> [String: Double]? {
+        guard let mapView = mapView else { return nil }
+
+        let visibleBounds = mapView.visibleCoordinateBounds
+        return [
+            "minLat": visibleBounds.sw.latitude,
+            "minLng": visibleBounds.sw.longitude,
+            "maxLat": visibleBounds.ne.latitude,
+            "maxLng": visibleBounds.ne.longitude
+        ]
+    }
+
     // MARK: - Attribution
 
     @objc public func setAttributionMargins(left: Int, top: Int, right: Int, bottom: Int) {

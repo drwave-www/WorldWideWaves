@@ -273,6 +273,24 @@ object MapWrapperRegistry {
     }
 
     /**
+     * Get visible region from wrapper.
+     * Returns the current visible bounds of the map.
+     */
+    fun getVisibleRegion(eventId: String): BoundingBox? {
+        val wrapper = getWrapper(eventId) ?: return null
+
+        // Call Swift wrapper to get visible bounds
+        val boundsDict = wrapper.getVisibleRegionBounds() ?: return null
+
+        val minLat = boundsDict["minLat"] as? Double ?: return null
+        val minLng = boundsDict["minLng"] as? Double ?: return null
+        val maxLat = boundsDict["maxLat"] as? Double ?: return null
+        val maxLng = boundsDict["maxLng"] as? Double ?: return null
+
+        return BoundingBox(minLat, minLng, maxLat, maxLng)
+    }
+
+    /**
      * Get and invoke map click callback for an event.
      * Swift calls this when map is tapped.
      * Returns true if callback was found and invoked.

@@ -192,6 +192,12 @@ class IosEventMap(
                 contentScale = ContentScale.Crop,
             )
 
+            // Cache view controller at top level to prevent deallocation when download state changes
+            val viewController =
+                remember(event.id) {
+                    mutableStateOf<platform.UIKit.UIViewController?>(null)
+                }
+
             // Load style URL asynchronously - don't block UI on fresh simulator
             // Reload when download completes (downloadState.isAvailable changes)
             var styleURL by remember { mutableStateOf<String?>(null) }
@@ -238,29 +244,22 @@ class IosEventMap(
                     "styleURL=${styleURL != null}, mapIsLoaded=$mapIsLoaded",
             )
 
+            // Create view controller once when styleURL becomes available
+            LaunchedEffect(event.id, styleURL) {
+                if (styleURL != null && viewController.value == null) {
+                    Log.i("IosEventMap", "Creating view controller for: ${event.id}")
+                    viewController.value = createNativeMapViewController(event, styleURL!!) as platform.UIKit.UIViewController
+                }
+            }
+
             when {
                 // Priority 1: Show map if available and styleURL loaded
-                styleURL != null && downloadState.isAvailable -> {
-                    Log.d("IosEventMap", "Showing map for ${event.id}, styleURL ready")
-                    // CRITICAL FIX: Use only event.id in key(), not styleURL
-                    // styleURL in key() causes wrapper deallocation when URL changes null→loaded
-                    // This destroys the wrapper, stops the timer, and loses all state
+                styleURL != null && downloadState.isAvailable && viewController.value != null -> {
+                    Log.v("IosEventMap", "Showing map for ${event.id}")
                     key(event.id) {
-                        // Cache the view controller to prevent recreation
-                        // CRITICAL: Only use event.id in remember, NOT styleURL
-                        // Including styleURL causes recreation when it changes null→path
-                        val viewController =
-                            remember(event.id) {
-                                Log.i(
-                                    "IosEventMap",
-                                    "Creating native map view controller for: ${event.id}, styleURL=${styleURL!!.take(80)}",
-                                )
-                                createNativeMapViewController(event, styleURL!!) as platform.UIKit.UIViewController
-                            }
-
                         @Suppress("DEPRECATION")
                         UIKitViewController(
-                            factory = { viewController },
+                            factory = { viewController.value!! },
                             modifier = Modifier.fillMaxSize(),
                         )
                     }

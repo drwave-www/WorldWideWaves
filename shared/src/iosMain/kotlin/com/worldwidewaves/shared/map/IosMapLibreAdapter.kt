@@ -82,12 +82,21 @@ class IosMapLibreAdapter(
     override fun getCameraPosition(): Position? = _currentPosition.value
 
     override fun getVisibleRegion(): BoundingBox {
-        if (wrapper == null) {
+        val w = wrapper
+        if (w == null) {
+            Log.w(TAG, "getVisibleRegion: wrapper is null, returning fallback")
             return createFallbackBounds()
         }
 
-        // NOTE: Swift wrapper call will be implemented via cinterop
-        return createFallbackBounds()
+        // Get visible region from Swift wrapper
+        val visibleRegion = MapWrapperRegistry.getVisibleRegion(eventId)
+        if (visibleRegion == null) {
+            Log.w(TAG, "getVisibleRegion: no visible region available, returning fallback")
+            return createFallbackBounds()
+        }
+
+        Log.d(TAG, "getVisibleRegion: got region from Swift wrapper")
+        return visibleRegion
     }
 
     private fun createFallbackBounds(): BoundingBox =
