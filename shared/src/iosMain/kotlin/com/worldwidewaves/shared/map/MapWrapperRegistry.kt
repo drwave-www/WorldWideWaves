@@ -83,7 +83,10 @@ object MapWrapperRegistry {
     private val pendingPolygons = mutableMapOf<String, PendingPolygonData>()
 
     // Store pending camera commands that Swift will execute
-    private val pendingCameraCommands = mutableMapOf<String, CameraCommand>()
+    // Configuration commands (bounds/zoom) are stored separately and applied immediately
+    // Animation commands (AnimateToPosition, AnimateToBounds) use single slot (latest wins)
+    private val pendingAnimationCommands = mutableMapOf<String, CameraCommand>()
+    private val pendingConfigCommands = mutableMapOf<String, MutableList<CameraCommand>>()
 
     // Store map click callbacks that Swift will invoke
     private val mapClickCallbacks = mutableMapOf<String, () -> Unit>()
@@ -190,7 +193,8 @@ object MapWrapperRegistry {
 
         // Clean up all associated data and callbacks
         pendingPolygons.remove(eventId)
-        pendingCameraCommands.remove(eventId)
+        pendingConfigCommands.remove(eventId)
+        pendingAnimationCommands.remove(eventId)
         mapClickCallbacks.remove(eventId)
         mapClickRegistrationCallbacks.remove(eventId)
         renderCallbacks.remove(eventId)
@@ -209,6 +213,12 @@ object MapWrapperRegistry {
     /**
      * Store a camera command to be executed.
      * Called from Kotlin when camera needs to be controlled.
+     *
+     * Architecture:
+     * - Configuration commands (SetConstraintBounds, SetMinZoom, SetMaxZoom) are queued
+     *   and executed in order. These must all apply to configure map constraints correctly.
+     * - Animation commands (AnimateToPosition, AnimateToBounds, MoveToBounds) use single slot
+     *   where the latest command replaces any pending animation (cancel previous, animate to new target).
      */
     fun setPendingCameraCommand(
         eventId: String,
@@ -225,8 +235,27 @@ object MapWrapperRegistry {
                 is CameraCommand.SetMaxZoom -> "SetMaxZoom(${command.maxZoom})"
             }
         Log.i(TAG, "📸 Storing camera command for event: $eventId → $commandDetails")
-        pendingCameraCommands[eventId] = command
-        Log.d(TAG, "Camera command stored, hasPending=${hasPendingCameraCommand(eventId)}")
+
+        // Separate configuration commands (must all execute) from animation commands (latest wins)
+        when (command) {
+            is CameraCommand.SetConstraintBounds,
+            is CameraCommand.SetMinZoom,
+            is CameraCommand.SetMaxZoom,
+            -> {
+                // Queue configuration commands (all must execute in order)
+                val queue = pendingConfigCommands.getOrPut(eventId) { mutableListOf() }
+                queue.add(command)
+                Log.d(TAG, "Config command queued, queue size=${queue.size}")
+            }
+            is CameraCommand.AnimateToPosition,
+            is CameraCommand.AnimateToBounds,
+            is CameraCommand.MoveToBounds,
+            -> {
+                // Single slot for animations (latest wins, cancel previous)
+                pendingAnimationCommands[eventId] = command
+                Log.d(TAG, "Animation command stored (overwrites previous animation)")
+            }
+        }
 
         // Trigger immediate execution (like wave polygons)
         requestImmediateCameraExecution(eventId)
@@ -264,24 +293,59 @@ object MapWrapperRegistry {
     }
 
     /**
-     * Get pending camera command for an event.
+     * Get next pending camera command for an event.
      * Swift calls this to retrieve camera commands that need to be executed.
      * Returns null if no pending commands.
+     *
+     * Priority: Configuration commands execute first (in queue order), then animation commands.
+     * This ensures map constraints are set before animations run.
      */
-    fun getPendingCameraCommand(eventId: String): CameraCommand? = pendingCameraCommands[eventId]
+    fun getPendingCameraCommand(eventId: String): CameraCommand? {
+        // Check configuration queue first (must execute before animations)
+        val configQueue = pendingConfigCommands[eventId]
+        if (configQueue != null && configQueue.isNotEmpty()) {
+            return configQueue.first() // Return oldest config command (FIFO)
+        }
+
+        // Then check animation slot
+        return pendingAnimationCommands[eventId]
+    }
 
     /**
      * Check if there is a pending camera command for an event.
      */
-    fun hasPendingCameraCommand(eventId: String): Boolean = pendingCameraCommands.containsKey(eventId)
+    fun hasPendingCameraCommand(eventId: String): Boolean {
+        val hasConfig = pendingConfigCommands[eventId]?.isNotEmpty() == true
+        val hasAnimation = pendingAnimationCommands.containsKey(eventId)
+        return hasConfig || hasAnimation
+    }
 
     /**
      * Clear pending camera command after it's been executed.
      * Swift calls this after successfully executing the command.
+     *
+     * Removes the command that was just returned by getPendingCameraCommand().
+     * Configuration commands are removed from queue (FIFO), animation commands clear the slot.
      */
     fun clearPendingCameraCommand(eventId: String) {
         Log.v(TAG, "Clearing pending camera command for event: $eventId")
-        pendingCameraCommands.remove(eventId)
+
+        // Try to clear from config queue first (FIFO removal)
+        val configQueue = pendingConfigCommands[eventId]
+        if (configQueue != null && configQueue.isNotEmpty()) {
+            val removed = configQueue.removeAt(0)
+            Log.v(TAG, "Removed config command: ${removed::class.simpleName}, remaining=${configQueue.size}")
+            if (configQueue.isEmpty()) {
+                pendingConfigCommands.remove(eventId)
+            }
+            return
+        }
+
+        // Then try animation slot
+        if (pendingAnimationCommands.containsKey(eventId)) {
+            pendingAnimationCommands.remove(eventId)
+            Log.v(TAG, "Cleared animation command")
+        }
     }
 
     /**
@@ -675,7 +739,8 @@ object MapWrapperRegistry {
         Log.d(TAG, "Clearing all registered wrappers, pending data, and callbacks")
         wrappers.clear()
         pendingPolygons.clear()
-        pendingCameraCommands.clear()
+        pendingConfigCommands.clear()
+        pendingAnimationCommands.clear()
         mapClickCallbacks.clear()
         mapClickRegistrationCallbacks.clear()
         mapClickCoordinateListeners.clear()

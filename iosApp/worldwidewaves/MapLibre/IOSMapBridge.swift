@@ -368,11 +368,19 @@ import CoreLocation
     /// before the Swift map view is ready. Kotlin stores camera commands in the registry,
     /// and Swift periodically checks for and executes them.
     ///
+    /// ## Command Execution Strategy
+    /// - **Configuration commands** (SetConstraintBounds, SetMinZoom, SetMaxZoom): Execute ALL queued commands
+    ///   in order until queue is empty. These are fast synchronous operations that configure map constraints.
+    /// - **Animation commands** (AnimateToPosition, AnimateToBounds, MoveToBounds): Execute ONE command per call.
+    ///   Animations are asynchronous and should not be batched.
+    ///
     /// ## Supported Commands
     /// - **AnimateToPosition**: Animate to specific lat/lng with optional zoom
     /// - **AnimateToBounds**: Animate to fit bounding box with padding
     /// - **MoveToBounds**: Move (non-animated) to bounding box
     /// - **SetConstraintBounds**: Set camera movement constraints
+    /// - **SetMinZoom**: Set minimum zoom level
+    /// - **SetMaxZoom**: Set maximum zoom level
     ///
     /// ## Threading Model
     /// Main thread only (MapLibre/UIKit requirement)
@@ -393,26 +401,45 @@ import CoreLocation
             return
         }
 
-        // Check if command exists
-        guard Shared.MapWrapperRegistry.shared.hasPendingCameraCommand(eventId: eventId) else {
-            // Silent return - no command pending (normal case)
-            return
+        // Execute all pending commands until queue is empty or we hit an animation command
+        // Configuration commands are batched, animation commands are executed one at a time
+        var executedCount = 0
+        let maxBatchSize = 10 // Safety limit to prevent infinite loops
+
+        while Shared.MapWrapperRegistry.shared.hasPendingCameraCommand(eventId: eventId)
+            && executedCount < maxBatchSize {
+            guard let command = Shared.MapWrapperRegistry.shared.getPendingCameraCommand(eventId: eventId) else {
+                WWWLog.w("IOSMapBridge", "hasPendingCameraCommand=true but getPendingCameraCommand returned nil")
+                break
+            }
+
+            // Check if this is a configuration command (can batch) or animation command (execute one)
+            let isConfigCommand = command is CameraCommand.SetConstraintBounds ||
+                                 command is CameraCommand.SetMinZoom ||
+                                 command is CameraCommand.SetMaxZoom
+
+            WWWLog.i("IOSMapBridge", "📸 Executing camera command for event: \(eventId), type: \(type(of: command))")
+            let success = executeCommand(command, on: wrapper)
+
+            // Only clear command if execution succeeded
+            if success {
+                Shared.MapWrapperRegistry.shared.clearPendingCameraCommand(eventId: eventId)
+                WWWLog.i("IOSMapBridge", "✅ Camera command executed and cleared for event: \(eventId)")
+                executedCount += 1
+
+                // If this was an animation command, stop batching (animations are asynchronous)
+                if !isConfigCommand {
+                    WWWLog.d("IOSMapBridge", "Animation command executed, stopping batch execution")
+                    break
+                }
+            } else {
+                WWWLog.w("IOSMapBridge", "⚠️ Camera command execution failed, will retry later for event: \(eventId)")
+                break
+            }
         }
 
-        guard let command = Shared.MapWrapperRegistry.shared.getPendingCameraCommand(eventId: eventId) else {
-            WWWLog.w("IOSMapBridge", "hasPendingCameraCommand=true but getPendingCameraCommand returned nil")
-            return
-        }
-
-        WWWLog.i("IOSMapBridge", "📸 Executing camera command for event: \(eventId), type: \(type(of: command))")
-        let success = executeCommand(command, on: wrapper)
-
-        // Only clear command if execution succeeded
-        if success {
-            Shared.MapWrapperRegistry.shared.clearPendingCameraCommand(eventId: eventId)
-            WWWLog.i("IOSMapBridge", "✅ Camera command executed and cleared for event: \(eventId)")
-        } else {
-            WWWLog.w("IOSMapBridge", "⚠️ Camera command execution failed, will retry later for event: \(eventId)")
+        if executedCount > 0 {
+            WWWLog.d("IOSMapBridge", "Batch execution complete: \(executedCount) command(s) executed")
         }
     }
 
