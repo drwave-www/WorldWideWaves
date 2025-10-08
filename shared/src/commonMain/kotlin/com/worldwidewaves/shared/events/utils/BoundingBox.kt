@@ -57,14 +57,28 @@ class BoundingBox private constructor(
 
             // Always use min/max - we don't support International Date Line wrapping
             // iOS MapLibre requires swLng < neLng (cannot handle antimeridian wrapping)
-            return BoundingBox(minLat, minLng, maxLat, maxLng)
+            val bbox = BoundingBox(minLat, minLng, maxLat, maxLng)
+
+            // Debug logging for iOS
+            com.worldwidewaves.shared.utils.Log.d(
+                "BoundingBox",
+                "fromCorners: ${positions.size} positions → SW($minLat,$minLng) NE($maxLat,$maxLng)",
+            )
+
+            return bbox
         }
     }
 
     constructor(swLat: Double, swLng: Double, neLat: Double, neLng: Double) : this(
         sw = Position(minOf(swLat, neLat), minOf(swLng, neLng)).init(),
         ne = Position(maxOf(swLat, neLat), maxOf(swLng, neLng)).init(),
-    )
+    ) {
+        // Debug logging for iOS coordinate issues
+        com.worldwidewaves.shared.utils.Log.d(
+            "BoundingBox",
+            "constructor: input SW($swLat,$swLng) NE($neLat,$neLng) → output SW(${sw.lat},${sw.lng}) NE(${ne.lat},${ne.lng})",
+        )
+    }
 
     operator fun component1(): Position = sw
 
