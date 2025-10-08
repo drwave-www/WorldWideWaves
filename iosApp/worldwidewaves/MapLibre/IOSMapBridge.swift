@@ -257,6 +257,38 @@ import CoreLocation
         wrapper.setAttributionMargins(left: left, top: top, right: right, bottom: bottom)
     }
 
+    // MARK: - Camera Constraints
+
+    /// Gets the actual minimum zoom level from the map view.
+    ///
+    /// ## Purpose
+    /// Provides real-time minimum zoom level directly from mapView.minimumZoomLevel.
+    /// This bypasses the registry cache to prevent race conditions where the cached
+    /// value returns 0.0 while the map view has the correct constraint-based min zoom.
+    ///
+    /// ## Threading Model
+    /// Main thread only (UIKit requirement)
+    ///
+    /// ## Use Cases
+    /// - Called from IosMapLibreAdapter.getMinZoomLevel() before constraint enforcement
+    /// - Prevents infinite unzoom when constraints are applied before registry updates
+    ///
+    /// - Parameters:
+    ///   - eventId: Unique event identifier (registry key)
+    /// - Returns: Actual minimum zoom level from map view, or 0.0 if wrapper not found
+    /// - Important: Must be called on main thread
+    /// - Note: Called from Kotlin via @objc bridge
+    @objc public static func getActualMinZoomLevel(eventId: String) -> Double {
+        guard let wrapper = Shared.MapWrapperRegistry.shared.getWrapper(eventId: eventId) as? MapLibreViewWrapper else {
+            WWWLog.w("IOSMapBridge", "No wrapper found for event: \(eventId), returning 0.0")
+            return 0.0
+        }
+
+        let actualMinZoom = wrapper.getMinZoom()
+        WWWLog.v("IOSMapBridge", "getActualMinZoomLevel for \(eventId): \(actualMinZoom)")
+        return actualMinZoom
+    }
+
     // MARK: - Accessibility Support
 
     /// Updates user position for VoiceOver accessibility.

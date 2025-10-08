@@ -149,6 +149,15 @@ import Shared
             }
         }
         WWWLog.d(Self.tag, "Map click registration callback registered for: \(eventId)")
+
+        // Register getActualMinZoom callback (provides real-time min zoom to Kotlin)
+        Shared.MapWrapperRegistry.shared.setGetActualMinZoomCallback(eventId: eventId) { [weak self] in
+            guard let self = self, let mapView = self.mapView else { return }
+            let actualMinZoom = mapView.minimumZoomLevel
+            WWWLog.v(Self.tag, "getActualMinZoom callback: \(eventId) -> \(actualMinZoom)")
+            Shared.MapWrapperRegistry.shared.updateActualMinZoom(eventId: eventId, actualMinZoom: actualMinZoom)
+        }
+        WWWLog.d(Self.tag, "getActualMinZoom callback registered for: \(eventId)")
     }
 
     @objc public func setStyle(styleURL: String, completion: @escaping () -> Void) {

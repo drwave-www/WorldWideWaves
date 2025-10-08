@@ -100,9 +100,10 @@ import Shared
     @objc public static func createMapViewController(
         for event: IWWWEvent,
         styleURL: String,
+        enableGestures: Bool,
         wrapperRef: UnsafeMutablePointer<MapLibreViewWrapper?>?
     ) -> UIViewController {
-        WWWLog.i("MapViewBridge", "Creating map view controller for event: \(event.id)")
+        WWWLog.i("MapViewBridge", "Creating map view controller for event: \(event.id), enableGestures: \(enableGestures)")
 
         // Create the SwiftUI map view
         // NOTE: Using default Paris coordinates as initial position
@@ -113,6 +114,7 @@ import Shared
             initialLatitude: 48.8566,
             initialLongitude: 2.3522,
             initialZoom: 12.0,
+            enableGestures: enableGestures,
             wrapper: .constant(nil) // Will be bound via EventMapView's own State
         )
 

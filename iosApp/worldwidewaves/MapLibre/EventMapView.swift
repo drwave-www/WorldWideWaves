@@ -32,6 +32,7 @@ struct EventMapView: UIViewRepresentable {
     let initialLatitude: Double
     let initialLongitude: Double
     let initialZoom: Double
+    let enableGestures: Bool  // Whether to enable zoom/scroll gestures (matches Android activateMapGestures)
 
     @Binding var wrapper: MapLibreViewWrapper?
 
@@ -45,6 +46,9 @@ struct EventMapView: UIViewRepresentable {
 
         WWWLog.d(Self.tag, "Map view created, frame: \(mapView.frame)")
 
+        // Configure gestures (matches Android behavior)
+        configureGestures(for: mapView)
+
         // Set initial camera position
         let coordinate = CLLocationCoordinate2D(latitude: initialLatitude, longitude: initialLongitude)
         mapView.setCenter(coordinate, zoomLevel: initialZoom, animated: false)
@@ -57,6 +61,39 @@ struct EventMapView: UIViewRepresentable {
         _ = createAndConfigureWrapper(for: mapView)
 
         return mapView
+    }
+
+    private func configureGestures(for mapView: MLNMapView) {
+        WWWLog.i(Self.tag, "Configuring gestures, enableGestures: \(enableGestures)")
+
+        // Conditional gesture activation (matches Android)
+        // Gestures are only enabled when mapConfig.initialCameraPosition == MapCameraPosition.WINDOW
+        mapView.isZoomEnabled = enableGestures
+        mapView.isScrollEnabled = enableGestures
+
+        // Always disable rotation and tilt (matches Android)
+        mapView.allowsRotating = false
+        mapView.allowsTilting = false
+
+        // Remove rotation gesture recognizers if they exist
+        if let gestureRecognizers = mapView.gestureRecognizers {
+            for recognizer in gestureRecognizers {
+                if recognizer is UIRotationGestureRecognizer || recognizer is UIPinchGestureRecognizer {
+                    if recognizer is UIRotationGestureRecognizer {
+                        mapView.removeGestureRecognizer(recognizer)
+                        WWWLog.d(Self.tag, "Removed UIRotationGestureRecognizer")
+                    }
+                }
+            }
+        }
+
+        WWWLog.i(
+            Self.tag,
+            "Gestures configured: zoom=\(mapView.isZoomEnabled), " +
+            "scroll=\(mapView.isScrollEnabled), " +
+            "rotate=\(mapView.allowsRotating), " +
+            "tilt=\(mapView.allowsTilting)"
+        )
     }
 
     private func configureStyleURL(for mapView: MLNMapView) {
@@ -123,6 +160,7 @@ struct EventMapView_Previews: PreviewProvider {
             initialLatitude: 48.8566,
             initialLongitude: 2.3522,
             initialZoom: 12.0,
+            enableGestures: true,
             wrapper: $wrapper
         )
     }

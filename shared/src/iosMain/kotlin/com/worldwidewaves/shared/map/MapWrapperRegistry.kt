@@ -450,9 +450,79 @@ object MapWrapperRegistry {
     }
 
     /**
-     * Get min zoom level for event.
+     * Get min zoom level for event (cached from Swift).
      */
     fun getMinZoom(eventId: String): Double = minZoomLevels[eventId] ?: 0.0
+
+    /**
+     * Get actual min zoom from map view (bypasses cache to prevent race condition).
+     * This directly queries the Swift wrapper's map view for the current minimum zoom level.
+     * Called from IosMapLibreAdapter.getMinZoomLevel() to get real-time value.
+     *
+     * NOTE: This method should be called from Swift via IOSMapBridge to populate
+     * the actualMinZoomLevels map with real-time values before querying.
+     */
+    private val actualMinZoomLevels = mutableMapOf<String, Double>()
+
+    fun getActualMinZoom(eventId: String): Double {
+        val wrapper =
+            getWrapper(eventId) ?: run {
+                Log.w(TAG, "getActualMinZoom: wrapper is null for event: $eventId")
+                return 0.0
+            }
+
+        // Call wrapper's getMinZoom() which queries mapView.minimumZoomLevel directly
+        return actualMinZoomLevels[eventId] ?: run {
+            Log.v(TAG, "getActualMinZoom: no cached value for $eventId, requesting from Swift")
+            // Will be populated by Swift calling updateActualMinZoom()
+            0.0
+        }
+    }
+
+    /**
+     * Update actual min zoom from Swift (called synchronously before getActualMinZoom).
+     */
+    fun updateActualMinZoom(
+        eventId: String,
+        actualMinZoom: Double,
+    ) {
+        actualMinZoomLevels[eventId] = actualMinZoom
+        Log.v(TAG, "updateActualMinZoom: $eventId -> $actualMinZoom")
+    }
+
+    /**
+     * Synchronously fetch actualMinZoom from wrapper and update cache.
+     * This is called before getActualMinZoom() to ensure fresh value.
+     *
+     * NOTE: This triggers the registered callback which will call updateActualMinZoom().
+     */
+    fun syncActualMinZoomFromWrapper(eventId: String) {
+        val wrapper = getWrapper(eventId)
+        if (wrapper != null) {
+            // Trigger getActualMinZoom callback (registered by Swift wrapper)
+            val callback = getActualMinZoomCallbacks[eventId]
+            if (callback != null) {
+                callback.invoke()
+                Log.v(TAG, "syncActualMinZoomFromWrapper: triggered callback for $eventId")
+            } else {
+                Log.w(TAG, "syncActualMinZoomFromWrapper: no callback registered for $eventId")
+            }
+        }
+    }
+
+    private val getActualMinZoomCallbacks = mutableMapOf<String, () -> Unit>()
+
+    /**
+     * Register callback for getActualMinZoom requests.
+     * Swift wrapper registers this to provide real-time min zoom values.
+     */
+    fun setGetActualMinZoomCallback(
+        eventId: String,
+        callback: () -> Unit,
+    ) {
+        getActualMinZoomCallbacks[eventId] = callback
+        Log.d(TAG, "Registered getActualMinZoom callback for event: $eventId")
+    }
 
     /**
      * Set min zoom command (Swift will execute).

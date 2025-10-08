@@ -240,8 +240,14 @@ class IosMapLibreAdapter(
             return 0.0
         }
 
-        // Request min zoom via registry (Swift will provide)
-        return MapWrapperRegistry.getMinZoom(eventId)
+        // Synchronously update actualMinZoom from Swift before querying
+        // This prevents race condition where cached registry value returns 0.0
+        // while map view has the correct constraint-based min zoom
+        MapWrapperRegistry.syncActualMinZoomFromWrapper(eventId)
+
+        val actualMinZoom = MapWrapperRegistry.getActualMinZoom(eventId)
+        Log.d(TAG, "getMinZoomLevel: returning actual map value: $actualMinZoom for event: $eventId")
+        return actualMinZoom
     }
 
     override fun setMinZoomPreference(minZoom: Double) {

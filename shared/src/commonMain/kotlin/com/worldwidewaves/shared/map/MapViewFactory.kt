@@ -16,4 +16,5 @@ import com.worldwidewaves.shared.events.IWWWEvent
 expect fun createNativeMapViewController(
     event: IWWWEvent,
     styleURL: String,
+    enableGestures: Boolean = true,
 ): Any // Returns UIViewController on iOS, View on Android

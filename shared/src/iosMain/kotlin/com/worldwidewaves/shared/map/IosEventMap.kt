@@ -265,7 +265,11 @@ class IosEventMap(
             LaunchedEffect(event.id, styleURL) {
                 if (styleURL != null && viewController.value == null) {
                     Log.i("IosEventMap", "Creating view controller for: ${event.id}")
-                    viewController.value = createNativeMapViewController(event, styleURL!!) as platform.UIKit.UIViewController
+                    // Enable gestures only when mapConfig.initialCameraPosition == MapCameraPosition.WINDOW (matches Android)
+                    val enableGestures = mapConfig.initialCameraPosition == MapCameraPosition.WINDOW
+                    Log.d("IosEventMap", "Gesture activation: $enableGestures (initialCameraPosition=${mapConfig.initialCameraPosition})")
+                    viewController.value =
+                        createNativeMapViewController(event, styleURL!!, enableGestures) as platform.UIKit.UIViewController
                 }
             }
 
