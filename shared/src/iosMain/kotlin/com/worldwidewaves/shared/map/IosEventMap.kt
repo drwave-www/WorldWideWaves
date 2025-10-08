@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.map
  * limitations under the License.
  */
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.interop.UIKitViewController
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -68,6 +70,8 @@ import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 import org.koin.mp.KoinPlatform
 import platform.UIKit.UIImage
 
@@ -182,6 +186,14 @@ class IosEventMap(
         }
 
         Box(modifier = modifier.fillMaxSize()) {
+            // Static map image as fallback background (matches Android implementation)
+            Image(
+                modifier = Modifier.fillMaxSize(),
+                painter = painterResource(event.getMapImage() as DrawableResource),
+                contentDescription = "defaultMap",
+                contentScale = ContentScale.Crop,
+            )
+
             // Load style URL asynchronously - don't block UI on fresh simulator
             // Reload when download completes (downloadState.isAvailable changes)
             var styleURL by remember { mutableStateOf<String?>(null) }
