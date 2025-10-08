@@ -86,9 +86,16 @@ import Shared
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleMapTap(_:)))
         tapGesture.numberOfTapsRequired = 1
         tapGesture.numberOfTouchesRequired = 1
+        tapGesture.delegate = self  // Set delegate to handle conflicts with MapLibre gestures
         mapView.addGestureRecognizer(tapGesture)
 
-        WWWLog.i(Self.tag, "👆 Tap gesture added to map view, gestureRecognizers: \(mapView.gestureRecognizers?.count ?? 0)")
+        WWWLog.i(Self.tag, "👆 Tap gesture added to map view")
+        WWWLog.i(Self.tag, "Total gesture recognizers on map: \(mapView.gestureRecognizers?.count ?? 0)")
+
+        // Log all gesture recognizers to debug conflicts
+        mapView.gestureRecognizers?.enumerated().forEach { index, recognizer in
+            WWWLog.d(Self.tag, "Gesture \(index): \(type(of: recognizer))")
+        }
         WWWLog.d(Self.tag, "Map view configured successfully for event: \(eventId ?? "nil")")
     }
 
@@ -684,14 +691,25 @@ import Shared
 
         WWWLog.i(Self.tag, "Starting continuous command polling for event: \(eventId)")
 
+        var pollCount = 0
         commandPollingTimer = Timer.scheduledTimer(withTimeInterval: Self.pollingInterval, repeats: true) { [weak self] _ in
             guard let self = self, let eventId = self.eventId else { return }
+
+            pollCount += 1
+
+            // Log every 50 polls (~5 seconds) to track polling is active
+            if pollCount % 50 == 0 {
+                WWWLog.d(Self.tag, "🔄 Polling active: \(pollCount) polls completed for event: \(eventId)")
+            }
 
             // Execute pending camera commands (constraints, auto-following)
             IOSMapBridge.executePendingCameraCommand(eventId: eventId)
 
             // Render pending wave polygons (real-time progression)
-            IOSMapBridge.renderPendingPolygons(eventId: eventId)
+            let hadPolygons = IOSMapBridge.renderPendingPolygons(eventId: eventId)
+            if hadPolygons {
+                WWWLog.i(Self.tag, "🌊 Wave polygons rendered during poll #\(pollCount)")
+            }
         }
 
         WWWLog.d(Self.tag, "Polling timer started (interval: \(Self.pollingInterval * 1000)ms)")
@@ -821,6 +839,26 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
 
     @objc public func onCancel() {
         onCancelBlock()
+    }
+}
+
+// MARK: - UIGestureRecognizerDelegate
+
+extension MapLibreViewWrapper: UIGestureRecognizerDelegate {
+    /// Allow our tap gesture to work simultaneously with MapLibre's gestures
+    public func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
+        // Allow our tap gesture to work alongside MapLibre's gestures
+        WWWLog.v(Self.tag, "Gesture conflict check: \(type(of: gestureRecognizer)) vs \(type(of: otherGestureRecognizer))")
+        return true
+    }
+
+    /// Ensure tap gesture receives touch events
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        WWWLog.v(Self.tag, "Gesture should receive touch: \(type(of: gestureRecognizer))")
+        return true
     }
 }
 

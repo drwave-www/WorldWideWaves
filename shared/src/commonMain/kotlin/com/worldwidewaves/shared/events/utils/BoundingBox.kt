@@ -34,8 +34,6 @@ class BoundingBox private constructor(
     val ne: Position,
 ) {
     companion object {
-        private const val LONGITUDE_HALF_RANGE = 180.0
-
         fun fromCorners(
             sw: Position,
             ne: Position,
@@ -54,14 +52,12 @@ class BoundingBox private constructor(
             if (positions.isEmpty()) return null
             val minLat = positions.minOf { it.lat }
             val maxLat = positions.maxOf { it.lat }
-            val lngs = positions.map { it.lng }
-            val (swLng, neLng) =
-                if (lngs.max() - lngs.min() > LONGITUDE_HALF_RANGE) {
-                    lngs.max() to lngs.min()
-                } else {
-                    lngs.min() to lngs.max()
-                }
-            return BoundingBox(minLat, swLng, maxLat, neLng)
+            val minLng = positions.minOf { it.lng }
+            val maxLng = positions.maxOf { it.lng }
+
+            // Always use min/max - we don't support International Date Line wrapping
+            // iOS MapLibre requires swLng < neLng (cannot handle antimeridian wrapping)
+            return BoundingBox(minLat, minLng, maxLat, maxLng)
         }
     }
 

@@ -139,29 +139,24 @@ import CoreLocation
     /// - Important: Must be called on main thread
     /// - Important: Call periodically after map style loads to catch pending polygons
     /// - Note: Clears pending polygons after successful rendering (one-time consumption)
-    @objc public static func renderPendingPolygons(eventId: String) {
-        WWWLog.d("IOSMapBridge", "renderPendingPolygons called for: \(eventId)")
+    @objc public static func renderPendingPolygons(eventId: String) -> Bool {
+        WWWLog.v("IOSMapBridge", "renderPendingPolygons called for: \(eventId)")
 
         guard let wrapper = Shared.MapWrapperRegistry.shared.getWrapper(eventId: eventId) as? MapLibreViewWrapper else {
-            WWWLog.w("IOSMapBridge", "No wrapper found for event: \(eventId)")
-            return
+            return false
         }
 
-        WWWLog.d("IOSMapBridge", "Wrapper found for: \(eventId)")
-
         let hasPending = Shared.MapWrapperRegistry.shared.hasPendingPolygons(eventId: eventId)
-        WWWLog.i("IOSMapBridge", "hasPendingPolygons(\(eventId)) = \(hasPending)")
 
         guard hasPending else {
-            WWWLog.v("IOSMapBridge", "No pending polygons for event: \(eventId)")
-            return
+            return false
         }
 
         guard let polygonData = Shared.MapWrapperRegistry.shared.getPendingPolygons(eventId: eventId) else {
-            return
+            return false
         }
 
-        WWWLog.i("IOSMapBridge", "Rendering \(polygonData.coordinates.count) pending polygons for event: \(eventId)")
+        WWWLog.i("IOSMapBridge", "🌊 Rendering \(polygonData.coordinates.count) pending polygons for event: \(eventId)")
 
         // Convert coordinate pairs to CLLocationCoordinate2D arrays
         let coordinateArrays: [[CLLocationCoordinate2D]] = polygonData.coordinates.map { polygon in
@@ -178,7 +173,8 @@ import CoreLocation
 
         // Clear pending polygons after successful rendering
         Shared.MapWrapperRegistry.shared.clearPendingPolygons(eventId: eventId)
-        WWWLog.d("IOSMapBridge", "Successfully rendered and cleared pending polygons for event: \(eventId)")
+        WWWLog.i("IOSMapBridge", "✅ Successfully rendered and cleared \(polygonData.coordinates.count) polygons")
+        return true
     }
 
     /// Clears all wave polygons from the map.
