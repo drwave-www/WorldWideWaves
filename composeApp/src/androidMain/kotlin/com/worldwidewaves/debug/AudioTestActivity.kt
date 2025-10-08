@@ -51,6 +51,8 @@ import com.worldwidewaves.shared.sound.MidiTrack
 import com.worldwidewaves.shared.sound.SoundPlayer
 import com.worldwidewaves.shared.sound.WaveformGenerator
 import com.worldwidewaves.shared.utils.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration
@@ -390,50 +392,53 @@ class AudioTestActivity : ComponentActivity() {
             Log.d(TAG, "🌊 Slot $currentSlotIndex: Wave hits $peoplePerSlot people at ${elapsedTime.inWholeSeconds}s")
 
             // Simulate people getting hit by the wave at this time
-            repeat(peoplePerSlot) { personIndex ->
-                // Each person has random micro-timing within the 100ms slot
-                val randomOffsetMs = kotlin.random.Random.nextInt(0, waveSlotDurationMs.toInt())
+            // Use coroutineScope for structured concurrency - all child coroutines are tracked and cancelled together
+            coroutineScope {
+                repeat(peoplePerSlot) { personIndex ->
+                    // Each person has random micro-timing within the 100ms slot
+                    val randomOffsetMs = kotlin.random.Random.nextInt(0, waveSlotDurationMs.toInt())
 
-                kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-                    delay(randomOffsetMs.milliseconds)
+                    launch(Dispatchers.IO) {
+                        delay(randomOffsetMs.milliseconds)
 
-                    // Calculate what this person should play (like SoundChoreographyManager.playCurrentSoundTone)
-                    val personHitTime = currentTime.plus(randomOffsetMs.milliseconds)
-                    val elapsedSinceWaveStart = personHitTime - waveStartTime
+                        // Calculate what this person should play (like SoundChoreographyManager.playCurrentSoundTone)
+                        val personHitTime = currentTime.plus(randomOffsetMs.milliseconds)
+                        val elapsedSinceWaveStart = personHitTime - waveStartTime
 
-                    // Calculate position in track with looping
-                    val trackPosition =
-                        if (track.totalDuration > Duration.ZERO) {
-                            (elapsedSinceWaveStart.inWholeNanoseconds % track.totalDuration.inWholeNanoseconds).milliseconds
-                        } else {
-                            elapsedSinceWaveStart
+                        // Calculate position in track with looping
+                        val trackPosition =
+                            if (track.totalDuration > Duration.ZERO) {
+                                (elapsedSinceWaveStart.inWholeNanoseconds % track.totalDuration.inWholeNanoseconds).milliseconds
+                            } else {
+                                elapsedSinceWaveStart
+                            }
+
+                        // Find active notes at this position (like real SoundChoreographyManager)
+                        val activeNotes = track.notes.filter { it.isActiveAt(trackPosition) }
+
+                        if (activeNotes.isNotEmpty()) {
+                            // Pick a random note from active ones (like real implementation)
+                            val note = activeNotes[kotlin.random.Random.nextInt(activeNotes.size)]
+                            val frequency = WaveformGenerator.midiPitchToFrequency(note.pitch)
+                            val amplitude = WaveformGenerator.midiVelocityToAmplitude(note.velocity) * 0.15
+
+                            // All people use SQUARE waveform (like real SoundChoreographyManager)
+                            // SQUARE waveform has richer harmonics for better perceived loudness
+                            val waveform = SoundPlayer.Waveform.SQUARE
+
+                            Log.v(
+                                TAG,
+                                "   Person ${personIndex + 1} (+${randomOffsetMs}ms): " +
+                                    "MIDI ${note.pitch} at ${trackPosition.inWholeMilliseconds}ms",
+                            )
+
+                            soundPlayer.playTone(
+                                frequency = frequency,
+                                amplitude = amplitude,
+                                duration = (waveSlotDurationMs * 0.8).milliseconds,
+                                waveform = waveform,
+                            )
                         }
-
-                    // Find active notes at this position (like real SoundChoreographyManager)
-                    val activeNotes = track.notes.filter { it.isActiveAt(trackPosition) }
-
-                    if (activeNotes.isNotEmpty()) {
-                        // Pick a random note from active ones (like real implementation)
-                        val note = activeNotes[kotlin.random.Random.nextInt(activeNotes.size)]
-                        val frequency = WaveformGenerator.midiPitchToFrequency(note.pitch)
-                        val amplitude = WaveformGenerator.midiVelocityToAmplitude(note.velocity) * 0.15
-
-                        // All people use SQUARE waveform (like real SoundChoreographyManager)
-                        // SQUARE waveform has richer harmonics for better perceived loudness
-                        val waveform = SoundPlayer.Waveform.SQUARE
-
-                        Log.v(
-                            TAG,
-                            "   Person ${personIndex + 1} (+${randomOffsetMs}ms): " +
-                                "MIDI ${note.pitch} at ${trackPosition.inWholeMilliseconds}ms",
-                        )
-
-                        soundPlayer.playTone(
-                            frequency = frequency,
-                            amplitude = amplitude,
-                            duration = (waveSlotDurationMs * 0.8).milliseconds,
-                            waveform = waveform,
-                        )
                     }
                 }
             }
