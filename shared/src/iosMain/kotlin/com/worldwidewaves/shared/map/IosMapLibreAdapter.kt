@@ -139,7 +139,10 @@ class IosMapLibreAdapter(
     /**
      * Poll registry for camera updates and update StateFlows.
      * Called periodically or on demand to sync registry → StateFlow.
+     * Currently unused - camera updates happen via MapWrapperRegistry.updateCameraPosition/Zoom
+     * Kept for potential future use with polling fallback.
      */
+    @Suppress("UnusedPrivateMember")
     private fun syncCameraStateFromRegistry() {
         val position = MapWrapperRegistry.getCameraPosition(eventId)
         if (position != null) {
