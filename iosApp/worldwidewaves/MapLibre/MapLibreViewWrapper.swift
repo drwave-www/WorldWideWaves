@@ -756,7 +756,7 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
 
         // 3. Render pending wave polygons from registry (initial wave state)
         WWWLog.d(Self.tag, "Checking for pending polygons in registry...")
-        IOSMapBridge.renderPendingPolygons(eventId: eventId)
+        _ = IOSMapBridge.renderPendingPolygons(eventId: eventId)
 
         // START CONTINUOUS POLLING: For dynamic updates (auto-following, wave progression)
         WWWLog.i(Self.tag, "🔄 Starting continuous polling for dynamic updates...")
@@ -781,8 +781,8 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         WWWLog.e(Self.tag, "Event: \(eventId ?? "unknown")")
     }
 
-    @objc public func mapView(_ mapView: MLNMapView, didFailToLoadImage url: URL) -> UIImage? {
-        WWWLog.w(Self.tag, "⚠️ Failed to load image from URL: \(url)")
+    @objc public func mapView(_ mapView: MLNMapView, didFailToLoadImage imageName: String) -> UIImage? {
+        WWWLog.w(Self.tag, "⚠️ Failed to load image: \(imageName)")
         WWWLog.w(Self.tag, "Event: \(eventId ?? "unknown")")
         return nil // Return nil to let MapLibre use default/fallback
     }

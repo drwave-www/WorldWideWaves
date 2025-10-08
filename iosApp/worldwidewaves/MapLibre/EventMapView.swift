@@ -117,7 +117,7 @@ struct EventMapView: UIViewRepresentable {
 
     func updateUIView(_ mapView: MLNMapView, context: Context) {
         // Check for pending polygons and render them
-        IOSMapBridge.renderPendingPolygons(eventId: eventId)
+        _ = IOSMapBridge.renderPendingPolygons(eventId: eventId)
 
         // Check for pending camera commands and execute them
         IOSMapBridge.executePendingCameraCommand(eventId: eventId)
