@@ -22,6 +22,7 @@ import Foundation
 import MapLibre
 import UIKit
 import CoreLocation
+import Shared
 
 /// Swift bridging layer for MapLibre Native iOS SDK
 /// Provides @objc methods for controlling MapLibre from Kotlin or Swift
