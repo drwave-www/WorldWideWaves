@@ -359,6 +359,10 @@ import CoreLocation
         } else if let animateBounds = command as? CameraCommand.AnimateToBounds {
             let bbox = animateBounds.bounds
             WWWLog.i("IOSMapBridge", "Animating to bounds with padding: \(animateBounds.padding)")
+            WWWLog.d(
+                "IOSMapBridge",
+                "Swift sees bbox: minLat=\(bbox.minLatitude), minLng=\(bbox.minLongitude), maxLat=\(bbox.maxLatitude), maxLng=\(bbox.maxLongitude)"
+            )
             wrapper.animateCameraToBounds(
                 swLat: bbox.minLatitude,
                 swLng: bbox.minLongitude,
@@ -380,6 +384,10 @@ import CoreLocation
         } else if let constraintBounds = command as? CameraCommand.SetConstraintBounds {
             let bbox = constraintBounds.bounds
             WWWLog.i("IOSMapBridge", "Setting camera constraint bounds")
+            WWWLog.d(
+                "IOSMapBridge",
+                "Swift sees bbox: minLat=\(bbox.minLatitude), minLng=\(bbox.minLongitude), maxLat=\(bbox.maxLatitude), maxLng=\(bbox.maxLongitude)"
+            )
             let success = wrapper.setBoundsForCameraTarget(
                 swLat: bbox.minLatitude,
                 swLng: bbox.minLongitude,

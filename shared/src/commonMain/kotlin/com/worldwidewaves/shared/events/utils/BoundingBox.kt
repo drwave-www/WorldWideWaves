@@ -41,22 +41,23 @@ class BoundingBox private constructor(
         ): BoundingBox {
             Log.d(
                 "BoundingBox",
-                "fromCorners(2pos): input SW(${sw.lat},${sw.lng}) NE(${ne.lat},${ne.lng})"
+                "fromCorners(2pos): input SW(${sw.lat},${sw.lng}) NE(${ne.lat},${ne.lng})",
             )
 
-            val bbox = if (sw.lat <= ne.lat && sw.lng <= ne.lng) {
-                // Already in correct order, no need to create new objects
-                BoundingBox(sw, ne)
-            } else {
-                BoundingBox(
-                    sw = Position(minOf(sw.lat, ne.lat), minOf(sw.lng, ne.lng)).init(),
-                    ne = Position(maxOf(sw.lat, ne.lat), maxOf(sw.lng, ne.lng)).init(),
-                )
-            }
+            val bbox =
+                if (sw.lat <= ne.lat && sw.lng <= ne.lng) {
+                    // Already in correct order, no need to create new objects
+                    BoundingBox(sw, ne)
+                } else {
+                    BoundingBox(
+                        sw = Position(minOf(sw.lat, ne.lat), minOf(sw.lng, ne.lng)).init(),
+                        ne = Position(maxOf(sw.lat, ne.lat), maxOf(sw.lng, ne.lng)).init(),
+                    )
+                }
 
             Log.d(
                 "BoundingBox",
-                "fromCorners(2pos): output SW(${bbox.sw.lat},${bbox.sw.lng}) NE(${bbox.ne.lat},${bbox.ne.lng})"
+                "fromCorners(2pos): output SW(${bbox.sw.lat},${bbox.sw.lng}) NE(${bbox.ne.lat},${bbox.ne.lng})",
             )
 
             return bbox
