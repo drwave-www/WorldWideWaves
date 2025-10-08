@@ -55,14 +55,46 @@ struct EventMapView: UIViewRepresentable {
         if styleURL.hasPrefix("http://") || styleURL.hasPrefix("https://") {
             // Remote URL
             url = URL(string: styleURL)!
-            WWWLog.d(Self.tag, "Using remote style URL")
+            WWWLog.d(Self.tag, "Using remote style URL: \(url)")
         } else {
             // Local file path - convert to file URL
             url = URL(fileURLWithPath: styleURL)
-            WWWLog.d(Self.tag, "Converted file path to URL: \(url)")
+            WWWLog.i(Self.tag, "Local file path: \(styleURL)")
+            WWWLog.d(Self.tag, "Converted to file URL: \(url)")
+
+            // CRITICAL: Check if style file actually exists
+            let fileManager = FileManager.default
+            if fileManager.fileExists(atPath: styleURL) {
+                WWWLog.i(Self.tag, "✅ Style file EXISTS at path: \(styleURL)")
+
+                // Check file size
+                do {
+                    let attributes = try fileManager.attributesOfItem(atPath: styleURL)
+                    let fileSize = attributes[.size] as? UInt64 ?? 0
+                    WWWLog.d(Self.tag, "Style file size: \(fileSize) bytes")
+                } catch {
+                    WWWLog.w(Self.tag, "Could not get file attributes: \(error)")
+                }
+            } else {
+                WWWLog.e(Self.tag, "❌ Style file DOES NOT EXIST at path: \(styleURL)")
+                WWWLog.e(Self.tag, "This will cause MapLibre to fail loading!")
+
+                // Try to list parent directory
+                let parentDir = (styleURL as NSString).deletingLastPathComponent
+                if fileManager.fileExists(atPath: parentDir) {
+                    do {
+                        let contents = try fileManager.contentsOfDirectory(atPath: parentDir)
+                        WWWLog.e(Self.tag, "Parent directory contents: \(contents)")
+                    } catch {
+                        WWWLog.e(Self.tag, "Could not list parent directory: \(error)")
+                    }
+                } else {
+                    WWWLog.e(Self.tag, "Parent directory also doesn't exist: \(parentDir)")
+                }
+            }
         }
         mapView.styleURL = url
-        WWWLog.d(Self.tag, "Style URL set on map view")
+        WWWLog.i(Self.tag, "✅ Style URL set on map view: \(url.absoluteString)")
 
         // Create wrapper and bind to the map view
         let mapWrapper = MapLibreViewWrapper()

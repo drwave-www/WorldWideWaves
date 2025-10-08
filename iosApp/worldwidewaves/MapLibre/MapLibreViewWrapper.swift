@@ -758,7 +758,50 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
     }
 
     public func mapViewDidFailLoadingMap(_ mapView: MLNMapView, withError error: Error) {
-        WWWLog.e(Self.tag, "Failed to load map", error: error)
+        WWWLog.e(Self.tag, "❌ FAILED to load map", error: error)
+        WWWLog.e(Self.tag, "Error domain: \((error as NSError).domain), code: \((error as NSError).code)")
+        WWWLog.e(Self.tag, "Error description: \(error.localizedDescription)")
+        WWWLog.e(Self.tag, "Event: \(eventId ?? "unknown")")
+    }
+
+    public func mapView(_ mapView: MLNMapView, didFailToLoadImage url: URL) -> UIImage? {
+        WWWLog.w(Self.tag, "⚠️ Failed to load image from URL: \(url)")
+        WWWLog.w(Self.tag, "Event: \(eventId ?? "unknown")")
+        return nil // Return nil to let MapLibre use default/fallback
+    }
+
+    public func mapViewWillStartLoadingMap(_ mapView: MLNMapView) {
+        WWWLog.i(Self.tag, "🔄 Map WILL START loading for event: \(eventId ?? "unknown")")
+        WWWLog.d(Self.tag, "Style URL: \(mapView.styleURL?.absoluteString ?? "nil")")
+    }
+
+    public func mapViewDidFinishLoadingMap(_ mapView: MLNMapView) {
+        WWWLog.i(Self.tag, "🗺️ Map DID FINISH loading (tiles, layers) for event: \(eventId ?? "unknown")")
+        // Note: This is different from didFinishLoading style:
+        // - didFinishLoadingMap = all tiles and resources loaded
+        // - didFinishLoading style: = style JSON parsed and layers created
+    }
+
+    public func mapViewWillStartRenderingFrame(_ mapView: MLNMapView) {
+        // Called frequently - only log once
+        if !styleIsLoaded {
+            WWWLog.d(Self.tag, "🎬 Map started rendering frames (first frame) for event: \(eventId ?? "unknown")")
+        }
+    }
+
+    public func mapViewDidFinishRenderingFrame(_ mapView: MLNMapView, fullyRendered: Bool) {
+        // Called frequently - only log once
+        if !styleIsLoaded {
+            WWWLog.i(Self.tag, "🖼️ Map finished rendering frame, fullyRendered: \(fullyRendered), event: \(eventId ?? "unknown")")
+        }
+    }
+
+    public func mapViewDidBecomeIdle(_ mapView: MLNMapView) {
+        WWWLog.d(Self.tag, "💤 Map became idle for event: \(eventId ?? "unknown")")
+    }
+
+    public func mapView(_ mapView: MLNMapView, didSelect annotation: MLNAnnotation) {
+        WWWLog.d(Self.tag, "📍 Annotation selected: \(annotation)")
     }
 }
 
