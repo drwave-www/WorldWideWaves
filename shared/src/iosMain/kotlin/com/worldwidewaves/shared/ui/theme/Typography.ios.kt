@@ -26,16 +26,16 @@ import platform.posix.ftell
 import platform.posix.rewind
 
 /**
- * iOS font families using Google Fonts (bundled as TTF files in iOS app bundle).
+ * iOS font families using Google Fonts (bundled as variable TTF files in iOS app bundle).
  * These fonts match exactly with Android implementation for consistent branding.
  *
  * Fonts are bundled at app root and registered via UIAppFonts in Info.plist.
- * Fonts are loaded directly from the bundle using NSData.
+ * Variable fonts contain all weights (100-900) in a single file for better efficiency.
  *
  * **Font Files** (bundled in app root, source: iosApp/worldwidewaves/Fonts/):
- * - Montserrat-Regular.ttf, Montserrat-Medium.ttf, Montserrat-Bold.ttf
- * - MontserratAlternates-Regular.ttf, MontserratAlternates-Medium.ttf, MontserratAlternates-Bold.ttf
- * - NotoSans-Regular.ttf, NotoSans-Medium.ttf, NotoSans-Bold.ttf
+ * - Montserrat-VF.ttf (variable font, all weights)
+ * - MontserratAlternates-*.ttf (static fonts: Regular, Medium, Bold)
+ * - NotoSans-VF.ttf (variable font, all weights)
  */
 
 @OptIn(ExperimentalForeignApi::class)
@@ -70,34 +70,34 @@ private fun loadFontData(fileName: String): ByteArray {
 @Composable
 actual fun AppBodyFontFamily(): FontFamily =
     FontFamily(
-        Font("Montserrat-Regular", loadFontData("Montserrat-Regular.ttf"), FontWeight.Normal),
-        Font("Montserrat-Medium", loadFontData("Montserrat-Medium.ttf"), FontWeight.Medium),
-        Font("Montserrat-Bold", loadFontData("Montserrat-Bold.ttf"), FontWeight.Bold),
+        Font("Montserrat", loadFontData("Montserrat-VF.ttf"), FontWeight.Normal),
+        Font("Montserrat", loadFontData("Montserrat-VF.ttf"), FontWeight.Medium),
+        Font("Montserrat", loadFontData("Montserrat-VF.ttf"), FontWeight.Bold),
     )
 
 @Composable
 actual fun AppDisplayFontFamily(): FontFamily =
     FontFamily(
-        Font("Montserrat-Regular", loadFontData("Montserrat-Regular.ttf"), FontWeight.Normal),
-        Font("Montserrat-Medium", loadFontData("Montserrat-Medium.ttf"), FontWeight.Medium),
-        Font("Montserrat-Bold", loadFontData("Montserrat-Bold.ttf"), FontWeight.Bold),
+        Font("Montserrat", loadFontData("Montserrat-VF.ttf"), FontWeight.Normal),
+        Font("Montserrat", loadFontData("Montserrat-VF.ttf"), FontWeight.Medium),
+        Font("Montserrat", loadFontData("Montserrat-VF.ttf"), FontWeight.Bold),
     )
 
 @Composable
 actual fun AppExtraFontFamily(): FontFamily =
     FontFamily(
         Font(
-            "MontserratAlternates-Regular",
+            "MontserratAlternates",
             loadFontData("MontserratAlternates-Regular.ttf"),
             FontWeight.Normal,
         ),
         Font(
-            "MontserratAlternates-Medium",
+            "MontserratAlternates",
             loadFontData("MontserratAlternates-Medium.ttf"),
             FontWeight.Medium,
         ),
         Font(
-            "MontserratAlternates-Bold",
+            "MontserratAlternates",
             loadFontData("MontserratAlternates-Bold.ttf"),
             FontWeight.Bold,
         ),

@@ -21,15 +21,11 @@
 	</array>
 	<key>UIAppFonts</key>
 	<array>
-		<string>Montserrat-Regular.ttf</string>
-		<string>Montserrat-Medium.ttf</string>
-		<string>Montserrat-Bold.ttf</string>
+		<string>Montserrat-VF.ttf</string>
 		<string>MontserratAlternates-Regular.ttf</string>
 		<string>MontserratAlternates-Medium.ttf</string>
 		<string>MontserratAlternates-Bold.ttf</string>
-		<string>NotoSans-Regular.ttf</string>
-		<string>NotoSans-Medium.ttf</string>
-		<string>NotoSans-Bold.ttf</string>
+		<string>NotoSans-VF.ttf</string>
 	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
