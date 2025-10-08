@@ -23,7 +23,6 @@ package com.worldwidewaves.shared.map
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -156,6 +155,14 @@ class IosEventMap(
             Log.d("IosEventMap", "autoDownloadIfNeeded completed for: ${event.id}")
         }
 
+        // Register map click callback if provided
+        LaunchedEffect(event.id, onMapClick) {
+            if (onMapClick != null) {
+                Log.d("IosEventMap", "Registering map click callback for: ${event.id}")
+                MapWrapperRegistry.setMapClickCallback(event.id, onMapClick)
+            }
+        }
+
         // Initialize position system integration (same as AbstractEventMap)
         LaunchedEffect(Unit) {
             // Start location updates and integrate with PositionManager
@@ -187,46 +194,32 @@ class IosEventMap(
                 Log.i("IosEventMap", "Style URL loaded: $styleURL")
             }
 
-            // Show map or loading indicator based on style availability
-            if (styleURL != null) {
-                Log.d("IosEventMap", "Using style URL for ${event.id}: ${styleURL!!.take(100)}...")
-
-                // Use key() to recreate map when styleURL changes (after download)
-                key("${event.id}-$styleURL") {
-                    @Suppress("DEPRECATION")
-                    UIKitViewController(
-                        factory = {
-                            Log.i("IosEventMap", "Creating native map view controller for: ${event.id}")
-                            createNativeMapViewController(event, styleURL!!) as platform.UIKit.UIViewController
-                        },
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .clickable(enabled = onMapClick != null) {
-                                    Log.d("IosEventMap", "Map clicked for event: ${event.id}")
-                                    onMapClick?.invoke()
-                                },
-                    )
-                }
-            } else {
-                // Show loading while waiting for files to download/cache
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    LoadingIndicator("Loading map...")
-                }
-            }
-
-            // Download overlay UI (matching Android behavior)
+            // Show map OR overlays based on state (mutually exclusive, like Android)
             // Log current download state for debugging
             Log.v(
                 "IosEventMap",
-                "Overlay decision: ${event.id} | isAvailable=${downloadState.isAvailable}, " +
-                    "isDownloading=${downloadState.isDownloading}, error=${downloadState.error}, progress=${downloadState.progress}",
+                "Map state: ${event.id} | isAvailable=${downloadState.isAvailable}, " +
+                    "isDownloading=${downloadState.isDownloading}, error=${downloadState.error}, " +
+                    "styleURL=${styleURL != null}, mapIsLoaded=$mapIsLoaded",
             )
 
             when {
+                // Priority 1: Show map if available and styleURL loaded
+                styleURL != null && downloadState.isAvailable -> {
+                    Log.d("IosEventMap", "Showing map for ${event.id}")
+                    key("${event.id}-$styleURL") {
+                        @Suppress("DEPRECATION")
+                        UIKitViewController(
+                            factory = {
+                                Log.i("IosEventMap", "Creating native map view controller for: ${event.id}")
+                                createNativeMapViewController(event, styleURL!!) as platform.UIKit.UIViewController
+                            },
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
+                }
+
+                // Priority 2: Show download progress
                 downloadState.isDownloading && downloadState.error == null -> {
                     Log.d("IosEventMap", "Showing MapDownloadOverlay: ${event.id} progress=${downloadState.progress}%")
                     MapDownloadOverlay(
@@ -238,6 +231,7 @@ class IosEventMap(
                     )
                 }
 
+                // Priority 3: Show error with retry
                 downloadState.error != null -> {
                     Log.d("IosEventMap", "Showing MapErrorOverlay: ${event.id} error=${downloadState.error}")
                     MapErrorOverlay(
@@ -251,19 +245,26 @@ class IosEventMap(
                     )
                 }
 
+                // Priority 4: Show download button if not available
                 !downloadState.isAvailable && !downloadState.isDownloading -> {
                     Log.d("IosEventMap", "Showing MapDownloadButton for: ${event.id}")
                     MapDownloadButton {
                         Log.i("IosEventMap", "Download button clicked for: ${event.id}")
                         MainScope().launch {
-                            Log.i("IosEventMap", "Launching download coroutine for: ${event.id}")
                             downloadCoordinator.downloadMap(event.id)
                         }
                     }
                 }
 
+                // Priority 5: Show loading while waiting for styleURL
                 else -> {
-                    Log.v("IosEventMap", "No overlay shown: ${event.id} (map loaded or downloading)")
+                    Log.d("IosEventMap", "Showing loading indicator for: ${event.id}")
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        LoadingIndicator("Loading map...")
+                    }
                 }
             }
         }

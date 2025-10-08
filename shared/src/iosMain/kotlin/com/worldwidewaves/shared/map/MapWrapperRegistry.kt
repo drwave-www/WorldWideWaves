@@ -83,6 +83,9 @@ object MapWrapperRegistry {
     // Store pending camera commands that Swift will execute
     private val pendingCameraCommands = mutableMapOf<String, CameraCommand>()
 
+    // Store map click callbacks that Swift will invoke
+    private val mapClickCallbacks = mutableMapOf<String, () -> Unit>()
+
     /**
      * Evict the least recently used entry if cache is full.
      */
@@ -189,13 +192,14 @@ object MapWrapperRegistry {
 
     /**
      * Unregister a wrapper when the map is destroyed.
-     * Clears wrapper, pending polygons, and pending camera commands.
+     * Clears wrapper, pending polygons, pending camera commands, and callbacks.
      */
     fun unregisterWrapper(eventId: String) {
         Log.d(TAG, "Unregistering wrapper for event: $eventId")
         wrappers.remove(eventId)
         pendingPolygons.remove(eventId)
         pendingCameraCommands.remove(eventId)
+        mapClickCallbacks.remove(eventId)
     }
 
     /**
@@ -244,13 +248,50 @@ object MapWrapperRegistry {
     }
 
     /**
+     * Set map click callback for an event.
+     * Swift will invoke this when the map is tapped.
+     */
+    fun setMapClickCallback(
+        eventId: String,
+        callback: () -> Unit,
+    ) {
+        Log.d(TAG, "Registering map click callback for event: $eventId")
+        mapClickCallbacks[eventId] = callback
+    }
+
+    /**
+     * Get and invoke map click callback for an event.
+     * Swift calls this when map is tapped.
+     * Returns true if callback was found and invoked.
+     */
+    fun invokeMapClickCallback(eventId: String): Boolean {
+        val callback = mapClickCallbacks[eventId]
+        if (callback != null) {
+            Log.d(TAG, "Invoking map click callback for event: $eventId")
+            callback.invoke()
+            return true
+        }
+        Log.v(TAG, "No map click callback for event: $eventId")
+        return false
+    }
+
+    /**
+     * Clear map click callback for an event.
+     */
+    fun clearMapClickCallback(eventId: String) {
+        Log.v(TAG, "Clearing map click callback for event: $eventId")
+        mapClickCallbacks.remove(eventId)
+    }
+
+    /**
      * Clear all registered wrappers and pending data.
      * Useful for cleanup during app termination or testing.
      */
     fun clear() {
-        Log.d(TAG, "Clearing all registered wrappers, pending polygons, and camera commands")
+        Log.d(TAG, "Clearing all registered wrappers, pending data, and callbacks")
         wrappers.clear()
         pendingPolygons.clear()
         pendingCameraCommands.clear()
+        mapClickCallbacks.clear()
     }
 }

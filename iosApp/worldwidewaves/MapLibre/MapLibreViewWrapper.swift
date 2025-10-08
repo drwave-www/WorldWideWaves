@@ -348,7 +348,17 @@ import CoreLocation
         guard let mapView = mapView else { return }
         let point = gesture.location(in: mapView)
         let coordinate = mapView.convert(point, toCoordinateFrom: mapView)
+
+        // Call coordinate callback if set
         onMapClick?(coordinate.latitude, coordinate.longitude)
+
+        // Invoke map click callback from registry (for navigation)
+        if let eventId = eventId {
+            let invoked = Shared.MapWrapperRegistry.shared.invokeMapClickCallback(eventId: eventId)
+            if invoked {
+                WWWLog.d(Self.tag, "Map click callback invoked for event: \(eventId)")
+            }
+        }
     }
 
     // MARK: - Accessibility Configuration
