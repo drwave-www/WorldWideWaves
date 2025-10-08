@@ -20,29 +20,31 @@ iOS Map Feature Parity: 65% → 95% (October 8, 2025)
 - ✅ All 902 unit tests passing
 - ✅ Production ready for iOS release
 
-Recent commits (Oct 8):
-- 589652f2: fix(coroutines): AudioTestActivity structured concurrency
-- cabe38e3: feat(ios): Static map image fallback
-- d47c2bcf: feat(ios): Camera controls via MapWrapperRegistry
-- 5c403e32: feat(ios): Full-screen map navigation
-- cb5e7f68: docs(ios): Final update - 95% feature parity achieved
+Recent documentation cleanup (Oct 14):
+- Archived 18 historical iOS map refactor documents
+- Archived 5 testing reports and setup guides
+- Created comprehensive archive structure with README
+- Updated references to current documentation
 
-Current priorities (from TODO file):
-1. ✅ iOS wave/MapLibre finalization - COMPLETE!
-2. TODO_ACCESSIBILITY.md - WCAG 2.1 Level AA compliance (partially done)
-3. TODO_FIREBASE_UI.md - Firebase UI implementation
-4. Translations and localization verification
-5. Play Store deployment preparation
+Current priorities:
+1. ✅ iOS wave/MapLibre finalization - COMPLETE! (Oct 8, 2025)
+2. ✅ Documentation cleanup - COMPLETE! (Oct 14, 2025)
+3. TODO_ACCESSIBILITY.md - WCAG 2.1 Level AA compliance (in progress)
+4. TODO_FIREBASE_UI.md - Firebase UI implementation
+5. Translations and localization verification
+6. Play Store deployment preparation
 
 Next recommended actions:
-- Review TODO_ACCESSIBILITY.md for remaining accessibility work
-- Review TODO_FIREBASE_UI.md for Firebase integration tasks
-- Verify translations are working correctly
+- Continue accessibility implementation (see TODO_ACCESSIBILITY.md)
+- Begin Firebase UI integration (see TODO_FIREBASE_UI.md)
+- Verify all translations are working correctly
 - Prepare for Play Store deployment
 - Consider adding Crashlytics for iOS
 
-See iOS_MAP_IMPLEMENTATION_STATUS.md for complete iOS map status.
-See archived optimization reports in docs/archive/ for complete history.
+Current documentation:
+- iOS_MAP_IMPLEMENTATION_STATUS.md - iOS map status (95% feature parity)
+- CLAUDE_iOS.md - Complete iOS development guide
+- docs/archive/ - Historical documentation (18 iOS docs, 5 reports archived)
 ```
 
 ---

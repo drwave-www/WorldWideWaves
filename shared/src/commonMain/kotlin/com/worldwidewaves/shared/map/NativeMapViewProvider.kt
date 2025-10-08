@@ -19,11 +19,15 @@ interface NativeMapViewProvider {
      *
      * @param event The event to display
      * @param styleURL The map style URL (mbtiles:// or https://)
+     * @param enableGestures Whether to enable zoom/scroll gestures (matches Android activateMapGestures)
+     * @param registryKey Optional unique registry key (iOS only, prevents wrapper conflicts between screens)
      * @return Platform-specific view (UIViewController on iOS, View on Android)
      */
     fun createMapView(
         event: IWWWEvent,
         styleURL: String,
+        enableGestures: Boolean = true,
+        registryKey: String? = null,
     ): Any
 
     /**

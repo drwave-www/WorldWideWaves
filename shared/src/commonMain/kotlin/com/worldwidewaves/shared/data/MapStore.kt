@@ -172,4 +172,4 @@ suspend fun getMapFileAbsolutePath(
 expect fun cacheStringToFile(
     fileName: String,
     content: String,
-): String
+): String?

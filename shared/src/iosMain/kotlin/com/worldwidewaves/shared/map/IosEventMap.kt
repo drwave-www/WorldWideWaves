@@ -55,7 +55,6 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.EventMapDownloadManager
-import com.worldwidewaves.shared.position.PositionManager
 import com.worldwidewaves.shared.ui.components.DownloadProgressIndicator
 import com.worldwidewaves.shared.ui.components.LoadingIndicator
 import com.worldwidewaves.shared.utils.Log
@@ -64,6 +63,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -86,10 +86,15 @@ class IosEventMap(
     onLocationUpdate: (Position) -> Unit = {},
     mapConfig: EventMapConfig = EventMapConfig(),
     private val onMapClick: (() -> Unit)? = null,
+    private val registryKey: String? = null, // Optional unique key for wrapper registry (prevents conflicts)
 ) : AbstractEventMap<UIImage>(event, mapConfig, onLocationUpdate) {
+    // Use unique registry key if provided (e.g., "paris_france-fullmap" vs "paris_france-event")
+    // This prevents wrapper conflicts when multiple screens show the same event
+    private val mapRegistryKey = registryKey ?: event.id
+
     // Create event-specific adapter instance (not singleton) to enable per-event camera control
     override val mapLibreAdapter: MapLibreAdapter<UIImage> =
-        IosMapLibreAdapter(event.id)
+        IosMapLibreAdapter(mapRegistryKey)
     override val locationProvider: LocationProvider? =
         KoinPlatform.getKoin().getOrNull<LocationProvider>()
 
@@ -97,6 +102,7 @@ class IosEventMap(
     private val mapScope = CoroutineScope(SupervisorJob())
     private var setupMapCalled = false
 
+    @OptIn(ExperimentalForeignApi::class)
     override fun updateWavePolygons(
         wavePolygons: List<Polygon>,
         clearPolygons: Boolean,
@@ -110,12 +116,28 @@ class IosEventMap(
 
         Log.d("IosEventMap", "iOS map now tracking ${currentPolygons.size} wave polygons")
 
-        // Store polygon data in registry AND trigger immediate render callback
-        storePolygonsForRendering(wavePolygons, clearPolygons)
+        // Try to render immediately to prevent flickering (like Android's runOnUiThread)
+        val wrapper = MapWrapperRegistry.getWrapper(mapRegistryKey)
+        if (wrapper != null && MapWrapperRegistry.isStyleLoaded(mapRegistryKey)) {
+            // Wrapper is ready - render immediately on current thread (already on main thread in Compose)
+            Log.d("IosEventMap", "Rendering polygons immediately for key: $mapRegistryKey")
+            storePolygonsForRendering(wavePolygons, clearPolygons)
 
-        // Request immediate render (Swift wrapper will be notified via callback)
-        MapWrapperRegistry.requestImmediateRender(event.id)
-        Log.v("IosEventMap", "✅ Polygons stored and immediate render requested")
+            // Trigger render callback immediately (already on main thread from Compose)
+            val renderCallback = MapWrapperRegistry.getRenderCallback(mapRegistryKey)
+            if (renderCallback != null) {
+                renderCallback.invoke()
+                Log.v("IosEventMap", "Immediate render callback executed")
+            } else {
+                Log.w("IosEventMap", "No render callback registered, polygons queued for async render")
+            }
+        } else {
+            // Wrapper not ready - fall back to async rendering (initial load case)
+            Log.d("IosEventMap", "Wrapper not ready, using async rendering (initial load)")
+            storePolygonsForRendering(wavePolygons, clearPolygons)
+            MapWrapperRegistry.requestImmediateRender(mapRegistryKey)
+        }
+        Log.v("IosEventMap", "✅ Polygon update completed")
     }
 
     private fun storePolygonsForRendering(
@@ -131,20 +153,20 @@ class IosEventMap(
             }
 
         // Store in registry - Swift will poll and render these
-        MapWrapperRegistry.setPendingPolygons(event.id, coordinates, clearExisting)
-        Log.i("IosEventMap", "Stored ${polygons.size} polygons in registry for Swift to render")
+        MapWrapperRegistry.setPendingPolygons(mapRegistryKey, coordinates, clearExisting)
+        Log.i("IosEventMap", "Stored ${polygons.size} polygons in registry (key: $mapRegistryKey) for Swift to render")
     }
 
     @OptIn(ExperimentalForeignApi::class)
     @Composable
+    @Suppress("LongMethod", "CyclomaticComplexMethod") // UI composition function with download state handling
     override fun Draw(
         autoMapDownload: Boolean,
         modifier: Modifier,
     ) {
         Log.i("IosEventMap", "Draw() called for event: ${event.id}, autoMapDownload=$autoMapDownload")
 
-        // Get unified position from PositionManager (same as Android)
-        val positionManager = KoinPlatform.getKoin().get<PositionManager>()
+        // Get platform map manager for download coordination
         val platformMapManager = KoinPlatform.getKoin().get<PlatformMapManager>()
 
         // Use shared EventMapDownloadManager for download state management
@@ -158,13 +180,13 @@ class IosEventMap(
         var mapIsLoaded by remember { mutableStateOf(false) }
 
         // Cleanup wrapper and all callbacks when screen is disposed
-        DisposableEffect(event.id) {
-            Log.i("IosEventMap", "Screen mounted for event: ${event.id}")
+        DisposableEffect(mapRegistryKey) {
+            Log.i("IosEventMap", "Screen mounted for event: ${event.id}, registryKey: $mapRegistryKey")
 
             onDispose {
-                Log.i("IosEventMap", "🧹 Screen disposing, cleaning up wrapper for: ${event.id}")
-                MapWrapperRegistry.unregisterWrapper(event.id)
-                Log.i("IosEventMap", "✅ Wrapper cleanup complete for: ${event.id}")
+                Log.i("IosEventMap", "🧹 Screen disposing, cleaning up wrapper for registryKey: $mapRegistryKey")
+                MapWrapperRegistry.unregisterWrapper(mapRegistryKey)
+                Log.i("IosEventMap", "✅ Wrapper cleanup complete for registryKey: $mapRegistryKey")
             }
         }
 
@@ -177,28 +199,20 @@ class IosEventMap(
 
         // Register map click callback directly with wrapper (no registry)
         // This will be triggered after viewController is created
-        LaunchedEffect(event.id, onMapClick) {
+        LaunchedEffect(mapRegistryKey, onMapClick) {
             if (onMapClick != null) {
-                Log.i("IosEventMap", "👆 Requesting map click callback registration for: ${event.id}")
+                Log.i("IosEventMap", "👆 Requesting map click callback registration for: $mapRegistryKey")
                 // Request callback registration - wrapper will set it when ready
-                MapWrapperRegistry.requestMapClickCallbackRegistration(event.id, onMapClick)
-                Log.i("IosEventMap", "✅ Map click callback registration requested for: ${event.id}")
+                MapWrapperRegistry.requestMapClickCallbackRegistration(mapRegistryKey, onMapClick)
+                Log.i("IosEventMap", "✅ Map click callback registration requested for: $mapRegistryKey")
             } else {
-                Log.w("IosEventMap", "⚠️ No map click callback provided for: ${event.id}")
+                Log.w("IosEventMap", "⚠️ No map click callback provided for: $mapRegistryKey")
             }
         }
 
-        // Initialize position system integration (same as AbstractEventMap)
-        LaunchedEffect(Unit) {
-            // Start location updates and integrate with PositionManager
-            locationProvider?.startLocationUpdates { rawPosition ->
-                // Update PositionManager with GPS position
-                positionManager.updatePosition(PositionManager.PositionSource.GPS, rawPosition)
-            }
-
-            mapIsLoaded = true
-            onMapLoaded()
-        }
+        // NOTE: Position system integration is handled by AbstractEventMap.setupMap()
+        // which starts locationProvider updates and subscribes to PositionManager.position flow
+        // Do NOT duplicate that logic here - it would bypass the mapLibreAdapter.setUserPosition() call
 
         Box(modifier = modifier.fillMaxSize()) {
             // Static map image as fallback background (matches Android implementation)
@@ -222,33 +236,53 @@ class IosEventMap(
             LaunchedEffect(event.id, downloadState.isAvailable) {
                 Log.d("IosEventMap", "Loading style URL for: ${event.id}, isAvailable=${downloadState.isAvailable}")
                 styleURL = event.map.getStyleUri()
-                Log.i("IosEventMap", "Style URL loaded: $styleURL")
 
-                // Call setupMap() to initialize camera, constraints, and bounds (like Android)
+                // Retry once if null or file doesn't exist (matches Android pattern)
+                if (styleURL == null) {
+                    Log.w("IosEventMap", "Style URL is null, retrying after 100ms...")
+                    delay(100)
+                    styleURL = event.map.getStyleUri()
+                    if (styleURL == null) {
+                        Log.e("IosEventMap", "Style URL is still null after retry for: ${event.id}")
+                    } else {
+                        Log.i("IosEventMap", "Style URL loaded on retry: $styleURL")
+                    }
+                } else {
+                    Log.i("IosEventMap", "Style URL loaded: $styleURL")
+                }
+
+                // Register setupMap() to be called AFTER style loads (matches Android timing)
+                // Android calls setupMap inside style load callback (AndroidEventMap.kt:646)
                 if (!setupMapCalled && styleURL != null && downloadState.isAvailable) {
-                    Log.i("IosEventMap", "Calling setupMap() for: ${event.id}")
+                    Log.i("IosEventMap", "Registering setupMap() callback for: ${event.id}")
                     setupMapCalled = true
 
-                    // Create a dummy UIImage for the map parameter (adapter doesn't use it)
-                    // The adapter routes all operations through MapWrapperRegistry
-                    val dummyMap = UIImage()
+                    // Register callback to run setupMap AFTER style loads
+                    MapWrapperRegistry.addOnMapReadyCallback(mapRegistryKey) {
+                        Log.i("IosEventMap", "Style loaded, now calling setupMap for: ${event.id}")
 
-                    setupMap(
-                        map = dummyMap,
-                        scope = mapScope,
-                        stylePath = styleURL!!,
-                        onMapLoaded = {
-                            Log.i("IosEventMap", "setupMap completed for: ${event.id}")
-                        },
-                        onMapClick =
-                            onMapClick?.let { callback ->
-                                { _: Double, _: Double ->
-                                    Log.d("IosEventMap", "Map click from setupMap for: ${event.id}")
-                                    callback()
-                                }
+                        // Create a dummy UIImage for the map parameter (adapter doesn't use it)
+                        // The adapter routes all operations through MapWrapperRegistry
+                        val dummyMap = UIImage()
+
+                        setupMap(
+                            map = dummyMap,
+                            scope = mapScope,
+                            stylePath = styleURL!!,
+                            onMapLoaded = {
+                                Log.i("IosEventMap", "setupMap completed for: ${event.id}")
+                                onMapLoaded()
                             },
-                    )
-                    Log.i("IosEventMap", "setupMap() completed, constraints initialized for: ${event.id}")
+                            onMapClick =
+                                onMapClick?.let { callback ->
+                                    { _: Double, _: Double ->
+                                        Log.d("IosEventMap", "Map click from setupMap for: ${event.id}")
+                                        callback()
+                                    }
+                                },
+                        )
+                        Log.i("IosEventMap", "setupMap() completed, constraints initialized for: ${event.id}")
+                    }
                 }
             }
 
@@ -264,8 +298,19 @@ class IosEventMap(
             // Create view controller once when styleURL becomes available
             LaunchedEffect(event.id, styleURL) {
                 if (styleURL != null && viewController.value == null) {
-                    Log.i("IosEventMap", "Creating view controller for: ${event.id}")
-                    viewController.value = createNativeMapViewController(event, styleURL!!) as platform.UIKit.UIViewController
+                    Log.i("IosEventMap", "Creating view controller for: ${event.id}, registryKey: $mapRegistryKey")
+                    // Enable gestures only for full map screen (WINDOW + autoTarget)
+                    // Event screen uses WINDOW but keeps gestures DISABLED (matches Android behavior)
+                    val enableGestures =
+                        mapConfig.initialCameraPosition == MapCameraPosition.WINDOW &&
+                            mapConfig.autoTargetUserOnFirstLocation
+                    Log.d(
+                        "IosEventMap",
+                        "Gesture activation: $enableGestures (WINDOW=${mapConfig.initialCameraPosition == MapCameraPosition.WINDOW}, " +
+                            "autoTarget=${mapConfig.autoTargetUserOnFirstLocation})",
+                    )
+                    viewController.value =
+                        createNativeMapViewController(event, styleURL!!, enableGestures, mapRegistryKey) as platform.UIKit.UIViewController
                 }
             }
 

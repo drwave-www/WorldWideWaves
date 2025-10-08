@@ -174,6 +174,7 @@ abstract class WWWEventWave :
         }
     }
 
+    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     suspend fun timeBeforeUserHit(): Duration? {
         val hasBeenHit = hasUserBeenHitInCurrentPosition()
         if (hasBeenHit) {

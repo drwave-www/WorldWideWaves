@@ -30,18 +30,22 @@ import com.worldwidewaves.shared.map.AbstractEventMap
 
 /**
  * Shared map zoom and location update component.
- * Automatically targets the user and wave when the user is in the event area.
+ * Automatically targets the user and wave when the user enters the event area.
  * Works with any AbstractEventMap implementation (Android, iOS).
+ *
+ * NOTE: Only triggers on isInArea change (not progression) to prevent animation loops.
+ * Rapid progression updates (60 FPS) would restart animations constantly, causing UI freeze.
  */
 @Composable
 fun MapZoomAndLocationUpdate(
     event: IWWWEvent,
     eventMap: AbstractEventMap<*>?,
 ) {
-    val progression by event.observer.progression.collectAsState()
     val isInArea by event.observer.userIsInArea.collectAsState()
 
-    LaunchedEffect(progression, isInArea) {
+    // Only react to isInArea changes (entering/exiting event area)
+    // DO NOT include progression - it updates 60 times/second and causes animation restart loops
+    LaunchedEffect(isInArea) {
         if (isInArea) {
             eventMap?.targetUserAndWave()
         }

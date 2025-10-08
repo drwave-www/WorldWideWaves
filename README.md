@@ -238,8 +238,10 @@ See [docs/contributing.md](docs/contributing.md) for complete guidelines.
 
 ### Specialized Topics
 
-- [Firebase Setup](FIREBASE_SETUP.md) - Firebase project configuration and security
-- [Map Architecture](MAP_ARCHITECTURE_ANALYSIS.md) - Shared vs platform-specific map system design
+- [Firebase Setup](docs/setup/FIREBASE_SETUP.md) - Firebase project configuration and security
+- [Map Architecture](docs/architecture/MAP_ARCHITECTURE_ANALYSIS.md) - Shared vs platform-specific map system design
+- [iOS Development](CLAUDE_iOS.md) - Complete iOS development guide
+- [iOS Map Status](iOS_MAP_IMPLEMENTATION_STATUS.md) - iOS map feature parity (95%)
 
 See [docs/README.md](docs/README.md) for complete documentation map.
 
@@ -282,7 +284,7 @@ See [docs/README.md](docs/README.md) for complete documentation map.
 - ✅ Geometric accuracy proven (Haversine, point-in-polygon)
 - ✅ Battery optimization validated (adaptive intervals)
 
-See [docs/FINAL_TEST_IMPLEMENTATION_REPORT.md](docs/FINAL_TEST_IMPLEMENTATION_REPORT.md) for complete test coverage analysis.
+See [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) and [docs/TEST_COVERAGE_FINAL_REPORT.md](docs/TEST_COVERAGE_FINAL_REPORT.md) for complete test coverage analysis.
 
 ### Running Tests
 

@@ -87,7 +87,9 @@ class DefaultPositionObserver(
             val isInArea =
                 if (position != null && polygonsLoaded) {
                     try {
-                        waveProgressionTracker.isUserInWaveArea(position, event.area)
+                        // Fetch polygons once per flow emission, then pass to tracker (performance optimization)
+                        val polygons = event.area.getPolygons()
+                        waveProgressionTracker.isUserInWaveArea(position, event.area, polygons)
                     } catch (e: Exception) {
                         Log.e("DefaultPositionObserver", "Error checking if user in area: $e")
                         false
@@ -123,6 +125,7 @@ class DefaultPositionObserver(
             position.lat.isFinite() &&
             position.lng.isFinite()
 
+    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     override fun calculateDistance(
         from: Position,
         to: Position,

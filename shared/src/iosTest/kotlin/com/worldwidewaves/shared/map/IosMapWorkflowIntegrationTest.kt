@@ -274,10 +274,11 @@ class IosMapWorkflowIntegrationTest {
         assertTrue(MapWrapperRegistry.hasPendingCameraCommand(testEventId))
         assertTrue(MapWrapperRegistry.hasPendingPolygons(testEventId))
 
-        // 6. Simulate Swift execution
+        // 6. Simulate Swift execution (via callbacks in real app)
         MapWrapperRegistry.getPendingCameraCommand(testEventId)
         MapWrapperRegistry.clearPendingCameraCommand(testEventId)
-        MapWrapperRegistry.renderPendingPolygons(testEventId)
+        // Note: renderPendingPolygons() is in IOSMapBridge (Swift), not MapWrapperRegistry
+        // In real app, Swift callbacks handle rendering automatically
         MapWrapperRegistry.clearPendingPolygons(testEventId)
 
         // 7. Simulate map click

@@ -130,6 +130,7 @@ object PolygonTransformations {
      * @see splitByLongitude(Polygon, ComposedLongitude) for composed longitude variant
      * @see clipToHalfPlane for the underlying clipping algorithm
      */
+    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     fun splitByLongitude(
         polygon: Polygon,
         lngToCut: Double,
@@ -195,6 +196,7 @@ object PolygonTransformations {
      * @see completeLongitudePoints for topology correction algorithm
      * @see ComposedLongitude.intersectWithSegment for intersection calculation
      */
+    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     fun splitByLongitude(
         polygon: Polygon,
         lngToCut: ComposedLongitude,
@@ -362,6 +364,7 @@ object PolygonTransformations {
         return determinePolygonSideWithBbox(workingPolygon, polyBbox, lngBbox)
     }
 
+    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     private fun determinePolygonSideWithCutLng(
         workingPolygon: Polygon,
         polyBbox: BoundingBox,
@@ -388,6 +391,7 @@ object PolygonTransformations {
         }
     }
 
+    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     private fun determinePolygonSideWithBbox(
         workingPolygon: Polygon,
         polyBbox: BoundingBox,
@@ -683,6 +687,7 @@ object PolygonTransformations {
         return polygon
     }
 
+    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     private fun processAnchorPair(
         anchor1: Position,
         anchor2: Position,
