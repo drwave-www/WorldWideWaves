@@ -58,13 +58,13 @@ cd iosApp
 # Clean previous builds
 rm -rf ./build
 
-# Build for testing
+# Build for testing (use default DerivedData for SPM packages)
 if ! xcodebuild build-for-testing \
   -project worldwidewaves.xcodeproj \
   -scheme worldwidewaves \
   -sdk iphoneos \
-  -derivedDataPath ./build \
-  -destination generic/platform=iOS; then
+  -destination generic/platform=iOS \
+  -configuration Debug; then
     echo -e "${RED}❌ Error: iOS build failed${NC}"
     cd ..
     exit 1
@@ -76,10 +76,11 @@ echo -e "${GREEN}✅ iOS build successful${NC}"
 echo ""
 echo -e "${GREEN}📦 Creating test bundle...${NC}"
 
-# Find build artifacts
-XCTESTRUN_PATH=$(find build/Build/Products -name "*.xctestrun" -type f | head -1)
-APP_DIR=$(find build/Build/Products -name "worldwidewaves.app" -type d | head -1)
-TEST_RUNNER_DIR=$(find build/Build/Products -name "worldwidewavesUITests-Runner.app" -type d | head -1)
+# Find build artifacts in Xcode's default DerivedData location
+DERIVED_DATA="${HOME}/Library/Developer/Xcode/DerivedData"
+XCTESTRUN_PATH=$(find "${DERIVED_DATA}" -name "*worldwidewaves*.xctestrun" -type f -mmin -10 | head -1)
+APP_DIR=$(find "${DERIVED_DATA}" -path "*/Build/Products/Debug-iphoneos/worldwidewaves.app" -type d -mmin -10 | head -1)
+TEST_RUNNER_DIR=$(find "${DERIVED_DATA}" -path "*/Build/Products/Debug-iphoneos/worldwidewavesUITests-Runner.app" -type d -mmin -10 | head -1)
 
 if [[ -z "$APP_DIR" ]]; then
     echo -e "${RED}❌ Error: Could not find worldwidewaves.app${NC}"
@@ -120,28 +121,26 @@ echo "  XCTestRun: ${XCTESTRUN_PATH}"
 ZIP_NAME="worldwidewaves_tests_${TIMESTAMP}.zip"
 
 # Create temporary directory for proper zip structure
-TEMP_DIR="build/firebase_test_bundle"
-rm -rf "${TEMP_DIR}"
-mkdir -p "${TEMP_DIR}"
+TEMP_DIR="build"
+mkdir -p "${TEMP_DIR}/firebase_test_bundle"
 
 # Copy .xctestrun to temp root (Firebase expects it at zip root)
-cp "${XCTESTRUN_PATH}" "${TEMP_DIR}/"
+cp "${XCTESTRUN_PATH}" "${TEMP_DIR}/firebase_test_bundle/"
 
-# Copy Build directory to temp (preserves full structure)
-cp -R "build/Build" "${TEMP_DIR}/"
+# Create Build/Products structure and copy app bundles
+mkdir -p "${TEMP_DIR}/firebase_test_bundle/Build/Products/Debug-iphoneos"
+cp -R "${APP_DIR}" "${TEMP_DIR}/firebase_test_bundle/Build/Products/Debug-iphoneos/"
+cp -R "${TEST_RUNNER_DIR}" "${TEMP_DIR}/firebase_test_bundle/Build/Products/Debug-iphoneos/"
 
 # Create zip from temp directory using ditto (preserves extended attributes)
-cd build/firebase_test_bundle
+cd "${TEMP_DIR}/firebase_test_bundle"
 ditto -c -k --sequesterRsrc "." "../${ZIP_NAME}"
-cd ..
+cd ../..
 
 # Cleanup temp directory
-rm -rf firebase_test_bundle
+rm -rf "${TEMP_DIR}/firebase_test_bundle"
 
 echo -e "${GREEN}✅ Test bundle created: ${ZIP_NAME}${NC}"
-
-# Go back to iosApp directory
-cd ..
 
 # Device matrix - 5 devices with different form factors and iOS versions
 echo ""
@@ -158,9 +157,6 @@ echo -e "${GREEN}🧪 Running iOS UI tests on Firebase Test Lab...${NC}"
 echo "  Note: iOS Firebase Test Lab runs all tests in the bundle"
 echo "  Test bundle: worldwidewavesUITests"
 echo ""
-
-# Move to project root for gcloud command
-cd ..
 
 if gcloud firebase test ios run \
   --test "iosApp/build/${ZIP_NAME}" \
