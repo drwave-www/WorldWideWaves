@@ -189,11 +189,13 @@ object MapWrapperRegistry {
 
     /**
      * Unregister a wrapper when the map is destroyed.
+     * Clears wrapper, pending polygons, and pending camera commands.
      */
     fun unregisterWrapper(eventId: String) {
         Log.d(TAG, "Unregistering wrapper for event: $eventId")
         wrappers.remove(eventId)
         pendingPolygons.remove(eventId)
+        pendingCameraCommands.remove(eventId)
     }
 
     /**
