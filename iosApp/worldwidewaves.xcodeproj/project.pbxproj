@@ -315,14 +315,14 @@
 					toronto_canada,
 					vancouver_canada,
 				);
-				LastSwiftUpdateCheck = 1640;
-				LastUpgradeCheck = 1640;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					C17B3C752E886C610097A3A5 = {
-						CreatedOnToolsVersion = 16.4;
+						CreatedOnToolsVersion = 16.0;
 					};
 					C1A718E82E95055E005B6CD9 = {
-						CreatedOnToolsVersion = 16.4;
+						CreatedOnToolsVersion = 16.0;
 						TestTargetID = C17B3C752E886C610097A3A5;
 					};
 				};

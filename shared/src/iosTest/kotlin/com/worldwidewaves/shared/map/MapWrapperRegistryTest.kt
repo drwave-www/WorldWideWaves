@@ -52,37 +52,51 @@ class MapWrapperRegistryTest {
     }
 
     @Test
-    fun testLRUEviction() {
-        // Register 4 wrappers (exceeds MAX_CACHED_WRAPPERS = 3)
-        MapWrapperRegistry.registerWrapper("event1", "Wrapper1")
-        MapWrapperRegistry.registerWrapper("event2", "Wrapper2")
-        MapWrapperRegistry.registerWrapper("event3", "Wrapper3")
-        MapWrapperRegistry.registerWrapper("event4", "Wrapper4")
+    fun testNoEvictionWithStrongReferences() {
+        // Register 10 wrappers (no limit with strong references)
+        repeat(10) { i ->
+            MapWrapperRegistry.registerWrapper("event-$i", "Wrapper$i")
+        }
 
-        // event1 should have been evicted (oldest)
-        assertNull(MapWrapperRegistry.getWrapper("event1"))
-        assertNotNull(MapWrapperRegistry.getWrapper("event2"))
-        assertNotNull(MapWrapperRegistry.getWrapper("event3"))
-        assertNotNull(MapWrapperRegistry.getWrapper("event4"))
+        // All wrappers should exist (no automatic eviction)
+        repeat(10) { i ->
+            assertNotNull(
+                MapWrapperRegistry.getWrapper("event-$i"),
+                "Wrapper $i should exist (no LRU eviction)",
+            )
+        }
+
+        // Cleanup all
+        repeat(10) { i ->
+            MapWrapperRegistry.unregisterWrapper("event-$i")
+        }
     }
 
     @Test
-    fun testLRUAccessOrder() {
-        // Register 3 wrappers
+    fun testExplicitLifecycleManagement() {
+        // With strong references, lifecycle is explicit
         MapWrapperRegistry.registerWrapper("event1", "Wrapper1")
         MapWrapperRegistry.registerWrapper("event2", "Wrapper2")
         MapWrapperRegistry.registerWrapper("event3", "Wrapper3")
 
-        // Access event1 (moves it to most recently used)
-        MapWrapperRegistry.getWrapper("event1")
-
-        // Register event4 (should evict event2, the least recently used)
-        MapWrapperRegistry.registerWrapper("event4", "Wrapper4")
-
+        // All remain accessible (no automatic eviction)
         assertNotNull(MapWrapperRegistry.getWrapper("event1"))
-        assertNull(MapWrapperRegistry.getWrapper("event2"))
+        assertNotNull(MapWrapperRegistry.getWrapper("event2"))
         assertNotNull(MapWrapperRegistry.getWrapper("event3"))
-        assertNotNull(MapWrapperRegistry.getWrapper("event4"))
+
+        // Access order doesn't matter
+        MapWrapperRegistry.getWrapper("event1")
+        MapWrapperRegistry.getWrapper("event3")
+
+        // All still exist
+        assertNotNull(MapWrapperRegistry.getWrapper("event1"))
+        assertNotNull(MapWrapperRegistry.getWrapper("event2"))
+        assertNotNull(MapWrapperRegistry.getWrapper("event3"))
+
+        // Explicit cleanup required
+        MapWrapperRegistry.unregisterWrapper("event1")
+        MapWrapperRegistry.unregisterWrapper("event2")
+        MapWrapperRegistry.unregisterWrapper("event3")
     }
 
     @Test
@@ -98,31 +112,30 @@ class MapWrapperRegistryTest {
         // Verify it's registered
         assertNotNull(MapWrapperRegistry.getWrapper("event1"))
 
-        // Remove strong reference
-        wrapper = null
+        // With strong references, wrapper persists until explicit unregister
+        // This test now verifies strong reference behavior (not weak refs)
 
-        // Note: System.gc() is not available in Kotlin/Native
-        // GC timing is non-deterministic anyway, so we test the mechanism not the timing
-        // kotlin.native.internal.GC.collect() exists but is internal API
-
-        // Prune stale references
-        MapWrapperRegistry.pruneStaleReferences()
-
-        // The wrapper should be gone or null (depends on GC timing)
-        // This test verifies the mechanism exists, actual GC timing is non-deterministic
+        // Wrapper should still exist (strong reference prevents GC)
         val retrieved = MapWrapperRegistry.getWrapper("event1")
-        // We can't guarantee GC ran, but we can verify the mechanism works
-        assertTrue(retrieved == null || retrieved is HeavyWrapper)
+        assertNotNull(retrieved, "Strong reference should keep wrapper alive")
+
+        // Explicit cleanup required
+        MapWrapperRegistry.unregisterWrapper("event1")
+        assertNull(MapWrapperRegistry.getWrapper("event1"), "Wrapper should be removed after unregister")
     }
 
     @Test
-    fun testPruneStaleReferences() {
-        // Register a wrapper
+    fun testStrongReferencePersistence() {
+        // Register a wrapper with strong reference
         MapWrapperRegistry.registerWrapper("event1", "Wrapper1")
 
-        // Manually prune (should not remove strong reference)
-        MapWrapperRegistry.pruneStaleReferences()
-        assertNotNull(MapWrapperRegistry.getWrapper("event1"))
+        // Wrapper should persist across multiple accesses
+        repeat(100) {
+            assertNotNull(MapWrapperRegistry.getWrapper("event1"), "Strong ref should persist")
+        }
+
+        // Cleanup
+        MapWrapperRegistry.unregisterWrapper("event1")
     }
 
     @Test
@@ -173,24 +186,31 @@ class MapWrapperRegistryTest {
     }
 
     @Test
-    fun testPendingPolygonsNotAffectedByLRU() {
-        // Register pending polygons for events
+    fun testPendingPolygonsIndependentOfWrappers() {
+        // Pending polygons can exist without wrappers
         MapWrapperRegistry.setPendingPolygons("event1", listOf(listOf(Pair(0.0, 0.0))), false)
         MapWrapperRegistry.setPendingPolygons("event2", listOf(listOf(Pair(1.0, 1.0))), false)
         MapWrapperRegistry.setPendingPolygons("event3", listOf(listOf(Pair(2.0, 2.0))), false)
         MapWrapperRegistry.setPendingPolygons("event4", listOf(listOf(Pair(3.0, 3.0))), false)
 
-        // Register wrappers (triggers LRU eviction)
+        // Register wrappers later
         MapWrapperRegistry.registerWrapper("event1", "Wrapper1")
         MapWrapperRegistry.registerWrapper("event2", "Wrapper2")
         MapWrapperRegistry.registerWrapper("event3", "Wrapper3")
         MapWrapperRegistry.registerWrapper("event4", "Wrapper4")
 
-        // Even though event1 wrapper was evicted, its pending polygons remain
+        // All polygons and wrappers should exist (no eviction)
         assertTrue(MapWrapperRegistry.hasPendingPolygons("event1"))
         assertTrue(MapWrapperRegistry.hasPendingPolygons("event2"))
         assertTrue(MapWrapperRegistry.hasPendingPolygons("event3"))
         assertTrue(MapWrapperRegistry.hasPendingPolygons("event4"))
+        assertNotNull(MapWrapperRegistry.getWrapper("event1"))
+        assertNotNull(MapWrapperRegistry.getWrapper("event2"))
+        assertNotNull(MapWrapperRegistry.getWrapper("event3"))
+        assertNotNull(MapWrapperRegistry.getWrapper("event4"))
+
+        // Cleanup
+        repeat(4) { i -> MapWrapperRegistry.unregisterWrapper("event${i + 1}") }
     }
 
     // ============================================================

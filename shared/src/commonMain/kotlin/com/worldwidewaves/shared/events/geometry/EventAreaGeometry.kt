@@ -53,6 +53,7 @@ object EventAreaGeometry {
      * 3. Extent computed from GeoJSON coordinates
      * 4. Bbox calculated from loaded polygons
      */
+    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     suspend fun computeBoundingBox(
         event: IWWWEvent,
         bboxOverride: String?,
@@ -258,6 +259,7 @@ object EventAreaGeometry {
             }
         }
 
+        @Suppress("ReturnCount") // Early returns for guard clauses improve readability
         private fun isValidCoordinatePair(element: JsonElement): Boolean {
             if (element !is kotlinx.serialization.json.JsonArray) {
                 return false

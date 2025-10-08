@@ -267,6 +267,7 @@ object PolygonOperations {
      * **Based on**: https://github.com/KohlsAdrian/google_maps_utils/blob/master/lib/poly_utils.dart
      * Enhanced with improved numerical stability and edge case handling.
      */
+    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     fun Polygon.containsPosition(tap: Position): Boolean {
         require(isNotEmpty()) { return false }
 

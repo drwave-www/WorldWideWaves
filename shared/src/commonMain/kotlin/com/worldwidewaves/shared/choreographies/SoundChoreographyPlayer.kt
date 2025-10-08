@@ -129,6 +129,7 @@ class SoundChoreographyPlayer : KoinComponent {
      * Play a random tone from the notes that would be active at the current position
      * in the MIDI track based on elapsed time since the given start time.
      */
+    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     suspend fun playCurrentSoundTone(waveStartTime: Instant): Int? {
         val track = currentTrack
         if (track == null) {

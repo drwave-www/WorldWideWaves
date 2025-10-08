@@ -22,11 +22,13 @@ sealed class CameraCommand {
     data class AnimateToPosition(
         val position: Position,
         val zoom: Double?,
+        val callbackId: String? = null,
     ) : CameraCommand()
 
     data class AnimateToBounds(
         val bounds: BoundingBox,
         val padding: Int = 0,
+        val callbackId: String? = null,
     ) : CameraCommand()
 
     data class MoveToBounds(
@@ -35,6 +37,21 @@ sealed class CameraCommand {
 
     data class SetConstraintBounds(
         val bounds: BoundingBox,
+    ) : CameraCommand()
+
+    data class SetMinZoom(
+        val minZoom: Double,
+    ) : CameraCommand()
+
+    data class SetMaxZoom(
+        val maxZoom: Double,
+    ) : CameraCommand()
+
+    data class SetAttributionMargins(
+        val left: Int,
+        val top: Int,
+        val right: Int,
+        val bottom: Int,
     ) : CameraCommand()
 }
 
@@ -73,7 +90,10 @@ object MapWrapperRegistry {
     private val pendingPolygons = mutableMapOf<String, PendingPolygonData>()
 
     // Store pending camera commands that Swift will execute
-    private val pendingCameraCommands = mutableMapOf<String, CameraCommand>()
+    // Configuration commands (bounds/zoom) are stored separately and applied immediately
+    // Animation commands (AnimateToPosition, AnimateToBounds) use single slot (latest wins)
+    private val pendingAnimationCommands = mutableMapOf<String, CameraCommand>()
+    private val pendingConfigCommands = mutableMapOf<String, MutableList<CameraCommand>>()
 
     // Store map click callbacks that Swift will invoke
     private val mapClickCallbacks = mutableMapOf<String, () -> Unit>()
@@ -180,14 +200,23 @@ object MapWrapperRegistry {
 
         // Clean up all associated data and callbacks
         pendingPolygons.remove(eventId)
-        pendingCameraCommands.remove(eventId)
+        pendingConfigCommands.remove(eventId)
+        pendingAnimationCommands.remove(eventId)
         mapClickCallbacks.remove(eventId)
         mapClickRegistrationCallbacks.remove(eventId)
         renderCallbacks.remove(eventId)
         cameraCallbacks.remove(eventId)
         visibleRegions.remove(eventId)
         minZoomLevels.remove(eventId)
+        mapWidths.remove(eventId)
+        mapHeights.remove(eventId)
         cameraIdleListeners.remove(eventId)
+        onMapReadyCallbacks.remove(eventId)
+        styleLoadedStates.remove(eventId)
+        locationComponentCallbacks.remove(eventId)
+        setUserPositionCallbacks.remove(eventId)
+        pendingLocationComponentStates.remove(eventId)
+        pendingUserPositions.remove(eventId)
 
         Log.i(TAG, "✅ Wrapper unregistered and cleanup complete for: $eventId")
     }
@@ -197,6 +226,12 @@ object MapWrapperRegistry {
     /**
      * Store a camera command to be executed.
      * Called from Kotlin when camera needs to be controlled.
+     *
+     * Architecture:
+     * - Configuration commands (SetConstraintBounds, SetMinZoom, SetMaxZoom) are queued
+     *   and executed in order. These must all apply to configure map constraints correctly.
+     * - Animation commands (AnimateToPosition, AnimateToBounds, MoveToBounds) use single slot
+     *   where the latest command replaces any pending animation (cancel previous, animate to new target).
      */
     fun setPendingCameraCommand(
         eventId: String,
@@ -204,14 +239,39 @@ object MapWrapperRegistry {
     ) {
         val commandDetails =
             when (command) {
-                is CameraCommand.AnimateToPosition -> "AnimateToPosition(${command.position.lat},${command.position.lng},zoom=${command.zoom})"
+                is CameraCommand.AnimateToPosition ->
+                    "AnimateToPosition(${command.position.lat},${command.position.lng},zoom=${command.zoom})"
                 is CameraCommand.AnimateToBounds -> "AnimateToBounds(padding=${command.padding})"
                 is CameraCommand.MoveToBounds -> "MoveToBounds"
                 is CameraCommand.SetConstraintBounds -> "SetConstraintBounds"
+                is CameraCommand.SetMinZoom -> "SetMinZoom(${command.minZoom})"
+                is CameraCommand.SetMaxZoom -> "SetMaxZoom(${command.maxZoom})"
+                is CameraCommand.SetAttributionMargins ->
+                    "SetAttributionMargins(${command.left},${command.top},${command.right},${command.bottom})"
             }
         Log.i(TAG, "📸 Storing camera command for event: $eventId → $commandDetails")
-        pendingCameraCommands[eventId] = command
-        Log.d(TAG, "Camera command stored, hasPending=${hasPendingCameraCommand(eventId)}")
+
+        // Separate configuration commands (must all execute) from animation commands (latest wins)
+        when (command) {
+            is CameraCommand.SetConstraintBounds,
+            is CameraCommand.SetMinZoom,
+            is CameraCommand.SetMaxZoom,
+            is CameraCommand.SetAttributionMargins,
+            -> {
+                // Queue configuration commands (all must execute in order)
+                val queue = pendingConfigCommands.getOrPut(eventId) { mutableListOf() }
+                queue.add(command)
+                Log.d(TAG, "Config command queued, queue size=${queue.size}")
+            }
+            is CameraCommand.AnimateToPosition,
+            is CameraCommand.AnimateToBounds,
+            is CameraCommand.MoveToBounds,
+            -> {
+                // Single slot for animations (latest wins, cancel previous)
+                pendingAnimationCommands[eventId] = command
+                Log.d(TAG, "Animation command stored (overwrites previous animation)")
+            }
+        }
 
         // Trigger immediate execution (like wave polygons)
         requestImmediateCameraExecution(eventId)
@@ -249,24 +309,59 @@ object MapWrapperRegistry {
     }
 
     /**
-     * Get pending camera command for an event.
+     * Get next pending camera command for an event.
      * Swift calls this to retrieve camera commands that need to be executed.
      * Returns null if no pending commands.
+     *
+     * Priority: Configuration commands execute first (in queue order), then animation commands.
+     * This ensures map constraints are set before animations run.
      */
-    fun getPendingCameraCommand(eventId: String): CameraCommand? = pendingCameraCommands[eventId]
+    fun getPendingCameraCommand(eventId: String): CameraCommand? {
+        // Check configuration queue first (must execute before animations)
+        val configQueue = pendingConfigCommands[eventId]
+        if (configQueue != null && configQueue.isNotEmpty()) {
+            return configQueue.first() // Return oldest config command (FIFO)
+        }
+
+        // Then check animation slot
+        return pendingAnimationCommands[eventId]
+    }
 
     /**
      * Check if there is a pending camera command for an event.
      */
-    fun hasPendingCameraCommand(eventId: String): Boolean = pendingCameraCommands.containsKey(eventId)
+    fun hasPendingCameraCommand(eventId: String): Boolean {
+        val hasConfig = pendingConfigCommands[eventId]?.isNotEmpty() == true
+        val hasAnimation = pendingAnimationCommands.containsKey(eventId)
+        return hasConfig || hasAnimation
+    }
 
     /**
      * Clear pending camera command after it's been executed.
      * Swift calls this after successfully executing the command.
+     *
+     * Removes the command that was just returned by getPendingCameraCommand().
+     * Configuration commands are removed from queue (FIFO), animation commands clear the slot.
      */
     fun clearPendingCameraCommand(eventId: String) {
         Log.v(TAG, "Clearing pending camera command for event: $eventId")
-        pendingCameraCommands.remove(eventId)
+
+        // Try to clear from config queue first (FIFO removal)
+        val configQueue = pendingConfigCommands[eventId]
+        if (configQueue != null && configQueue.isNotEmpty()) {
+            val removed = configQueue.removeAt(0)
+            Log.v(TAG, "Removed config command: ${removed::class.simpleName}, remaining=${configQueue.size}")
+            if (configQueue.isEmpty()) {
+                pendingConfigCommands.remove(eventId)
+            }
+            return
+        }
+
+        // Then try animation slot
+        if (pendingAnimationCommands.containsKey(eventId)) {
+            pendingAnimationCommands.remove(eventId)
+            Log.v(TAG, "Cleared animation command")
+        }
     }
 
     /**
@@ -324,8 +419,28 @@ object MapWrapperRegistry {
     // Store zoom levels that Swift can update
     private val minZoomLevels = mutableMapOf<String, Double>()
 
-    // Store camera idle listeners
-    private val cameraIdleListeners = mutableMapOf<String, () -> Unit>()
+    // Store map dimensions that Swift can update
+    private val mapWidths = mutableMapOf<String, Double>()
+    private val mapHeights = mutableMapOf<String, Double>()
+
+    // Store camera idle listeners (support multiple listeners per event like Android)
+    private val cameraIdleListeners = mutableMapOf<String, MutableList<() -> Unit>>()
+
+    // Store camera positions and zoom for StateFlow updates
+    private val cameraPositions = mutableMapOf<String, Pair<Double, Double>>()
+    private val cameraZooms = mutableMapOf<String, Double>()
+
+    // Store camera animation callbacks (for async completion signaling)
+    private val cameraAnimationCallbacks = mutableMapOf<String, MapCameraCallback>()
+
+    // Store map click coordinate listeners (for tap with coordinates)
+    private val mapClickCoordinateListeners = mutableMapOf<String, (Double, Double) -> Unit>()
+
+    // Store map ready callbacks (invoked after style loads)
+    private val onMapReadyCallbacks = mutableMapOf<String, MutableList<() -> Unit>>()
+
+    // Track style loaded state
+    private val styleLoadedStates = mutableMapOf<String, Boolean>()
 
     /**
      * Update visible region from Swift.
@@ -355,9 +470,115 @@ object MapWrapperRegistry {
     }
 
     /**
-     * Get min zoom level for event.
+     * Get min zoom level for event (cached from Swift).
      */
     fun getMinZoom(eventId: String): Double = minZoomLevels[eventId] ?: 0.0
+
+    /**
+     * Update map width from Swift.
+     * Called by Swift when map view bounds change.
+     */
+    fun updateMapWidth(
+        eventId: String,
+        width: Double,
+    ) {
+        mapWidths[eventId] = width
+        Log.v(TAG, "Map width updated: $width for event: $eventId")
+    }
+
+    /**
+     * Update map height from Swift.
+     * Called by Swift when map view bounds change.
+     */
+    fun updateMapHeight(
+        eventId: String,
+        height: Double,
+    ) {
+        mapHeights[eventId] = height
+        Log.v(TAG, "Map height updated: $height for event: $eventId")
+    }
+
+    /**
+     * Get map width for event.
+     * Returns actual map view width from Swift wrapper.
+     */
+    fun getMapWidth(eventId: String): Double = mapWidths[eventId] ?: 0.0
+
+    /**
+     * Get map height for event.
+     * Returns actual map view height from Swift wrapper.
+     */
+    fun getMapHeight(eventId: String): Double = mapHeights[eventId] ?: 0.0
+
+    /**
+     * Get actual min zoom from map view (bypasses cache to prevent race condition).
+     * This directly queries the Swift wrapper's map view for the current minimum zoom level.
+     * Called from IosMapLibreAdapter.getMinZoomLevel() to get real-time value.
+     *
+     * NOTE: This method should be called from Swift via IOSMapBridge to populate
+     * the actualMinZoomLevels map with real-time values before querying.
+     */
+    private val actualMinZoomLevels = mutableMapOf<String, Double>()
+
+    fun getActualMinZoom(eventId: String): Double {
+        val wrapper =
+            getWrapper(eventId) ?: run {
+                Log.w(TAG, "getActualMinZoom: wrapper is null for event: $eventId")
+                return 0.0
+            }
+
+        // Call wrapper's getMinZoom() which queries mapView.minimumZoomLevel directly
+        return actualMinZoomLevels[eventId] ?: run {
+            Log.v(TAG, "getActualMinZoom: no cached value for $eventId, requesting from Swift")
+            // Will be populated by Swift calling updateActualMinZoom()
+            0.0
+        }
+    }
+
+    /**
+     * Update actual min zoom from Swift (called synchronously before getActualMinZoom).
+     */
+    fun updateActualMinZoom(
+        eventId: String,
+        actualMinZoom: Double,
+    ) {
+        actualMinZoomLevels[eventId] = actualMinZoom
+        Log.v(TAG, "updateActualMinZoom: $eventId -> $actualMinZoom")
+    }
+
+    /**
+     * Synchronously fetch actualMinZoom from wrapper and update cache.
+     * This is called before getActualMinZoom() to ensure fresh value.
+     *
+     * NOTE: This triggers the registered callback which will call updateActualMinZoom().
+     */
+    fun syncActualMinZoomFromWrapper(eventId: String) {
+        val wrapper = getWrapper(eventId)
+        if (wrapper != null) {
+            // Trigger getActualMinZoom callback (registered by Swift wrapper)
+            val callback = getActualMinZoomCallbacks[eventId]
+            if (callback != null) {
+                callback.invoke()
+                Log.v(TAG, "syncActualMinZoomFromWrapper: triggered callback for $eventId")
+            } else {
+                Log.w(TAG, "syncActualMinZoomFromWrapper: no callback registered for $eventId")
+            }
+        }
+    }
+
+    private val getActualMinZoomCallbacks = mutableMapOf<String, () -> Unit>()
+
+    /**
+     * Register callback for getActualMinZoom requests.
+     * Swift wrapper registers this to provide real-time min zoom values.
+     */
+    fun setGetActualMinZoomCallback(
+        eventId: String,
+        callback: () -> Unit,
+    ) {
+        getActualMinZoomCallbacks[eventId] = callback
+        Log.d(TAG, "Registered getActualMinZoom callback for event: $eventId")
+    }
 
     /**
      * Set min zoom command (Swift will execute).
@@ -367,16 +588,7 @@ object MapWrapperRegistry {
         minZoom: Double,
     ) {
         Log.d(TAG, "Setting min zoom command: $minZoom for event: $eventId")
-        // Trigger immediate execution via camera callback
-        requestImmediateCameraExecution(eventId)
-        // Store as a special camera command or handle directly
-        val wrapper = getWrapper(eventId)
-        if (wrapper != null) {
-            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
-                // Swift wrapper will handle this - just notify via existing callback
-                Log.i(TAG, "Min zoom will be set via wrapper method")
-            }
-        }
+        setPendingCameraCommand(eventId, CameraCommand.SetMinZoom(minZoom))
     }
 
     /**
@@ -387,31 +599,170 @@ object MapWrapperRegistry {
         maxZoom: Double,
     ) {
         Log.d(TAG, "Setting max zoom command: $maxZoom for event: $eventId")
-        // Similar to setMinZoomCommand
-        platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
-            Log.i(TAG, "Max zoom will be set via wrapper method")
-        }
+        setPendingCameraCommand(eventId, CameraCommand.SetMaxZoom(maxZoom))
+    }
+
+    /**
+     * Set attribution margins command (Swift will execute).
+     */
+    fun setAttributionMarginsCommand(
+        eventId: String,
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int,
+    ) {
+        Log.d(TAG, "Setting attribution margins command: ($left,$top,$right,$bottom) for event: $eventId")
+        setPendingCameraCommand(eventId, CameraCommand.SetAttributionMargins(left, top, right, bottom))
     }
 
     /**
      * Set camera idle listener for event.
+     * Supports multiple listeners like Android MapLibre API.
      */
     fun setCameraIdleListener(
         eventId: String,
         callback: () -> Unit,
     ) {
-        Log.d(TAG, "Setting camera idle listener for event: $eventId")
-        cameraIdleListeners[eventId] = callback
+        Log.d(TAG, "Adding camera idle listener for event: $eventId")
+        val listeners = cameraIdleListeners.getOrPut(eventId) { mutableListOf() }
+        listeners.add(callback)
+        Log.d(TAG, "Camera idle listeners for $eventId: ${listeners.size}")
     }
 
     /**
-     * Invoke camera idle listener (called from Swift).
+     * Invoke all camera idle listeners (called from Swift).
+     * Executes all registered callbacks in order.
      */
     fun invokeCameraIdleListener(eventId: String) {
-        val callback = cameraIdleListeners[eventId]
+        val listeners = cameraIdleListeners[eventId]
+        if (listeners == null || listeners.isEmpty()) {
+            return
+        }
+
+        Log.v(TAG, "Invoking ${listeners.size} camera idle callback(s) for event: $eventId")
+        listeners.forEach { callback ->
+            try {
+                callback.invoke()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error invoking camera idle callback for event: $eventId", throwable = e)
+            }
+        }
+    }
+
+    /**
+     * Set map click coordinate listener (invoked with tap coordinates).
+     */
+    fun setMapClickCoordinateListener(
+        eventId: String,
+        listener: (Double, Double) -> Unit,
+    ) {
+        Log.d(TAG, "Setting map click coordinate listener for event: $eventId")
+        mapClickCoordinateListeners[eventId] = listener
+    }
+
+    /**
+     * Clear map click coordinate listener.
+     */
+    fun clearMapClickCoordinateListener(eventId: String) {
+        mapClickCoordinateListeners.remove(eventId)
+    }
+
+    /**
+     * Invoke map click coordinate listener (called from Swift with tap coordinates).
+     */
+    fun invokeMapClickCoordinateListener(
+        eventId: String,
+        latitude: Double,
+        longitude: Double,
+    ) {
+        val listener = mapClickCoordinateListeners[eventId]
+        if (listener != null) {
+            Log.d(TAG, "Invoking map click coordinate listener: ($latitude, $longitude)")
+            listener.invoke(latitude, longitude)
+        }
+    }
+
+    /**
+     * Draw debug bounding box overlay (for testing constraint bounds).
+     */
+    @Suppress("UnusedParameter")
+    fun drawDebugBbox(
+        eventId: String,
+        bbox: BoundingBox,
+    ) {
+        Log.d(TAG, "Drawing debug bbox for event: $eventId")
+        val wrapper = getWrapper(eventId)
+        if (wrapper != null) {
+            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+                // Swift wrapper will handle drawing via IOSMapBridge or direct call
+                Log.i(TAG, "Debug bbox draw dispatched for: $eventId")
+                // Note: Swift wrapper already has drawOverrideBbox() method at line 438
+                // bbox parameter available for future use in direct Swift call
+            }
+        }
+    }
+
+    /**
+     * Update camera position from Swift (for StateFlow reactive updates).
+     * Called when map camera moves.
+     */
+    fun updateCameraPosition(
+        eventId: String,
+        latitude: Double,
+        longitude: Double,
+    ) {
+        cameraPositions[eventId] = Pair(latitude, longitude)
+        Log.v(TAG, "Camera position updated: ($latitude, $longitude)")
+    }
+
+    /**
+     * Update camera zoom from Swift (for StateFlow reactive updates).
+     * Called when map zoom changes.
+     */
+    fun updateCameraZoom(
+        eventId: String,
+        zoom: Double,
+    ) {
+        cameraZooms[eventId] = zoom
+        Log.v(TAG, "Camera zoom updated: $zoom")
+    }
+
+    /**
+     * Get camera position for event.
+     */
+    fun getCameraPosition(eventId: String): Pair<Double, Double>? = cameraPositions[eventId]
+
+    /**
+     * Get camera zoom for event.
+     */
+    fun getCameraZoom(eventId: String): Double? = cameraZooms[eventId]
+
+    /**
+     * Store camera animation callback for async completion.
+     */
+    fun setCameraAnimationCallback(
+        callbackId: String,
+        callback: MapCameraCallback,
+    ) {
+        cameraAnimationCallbacks[callbackId] = callback
+    }
+
+    /**
+     * Invoke camera animation callback (called from Swift when animation completes).
+     */
+    fun invokeCameraAnimationCallback(
+        callbackId: String,
+        success: Boolean,
+    ) {
+        val callback = cameraAnimationCallbacks[callbackId]
         if (callback != null) {
-            Log.v(TAG, "Invoking camera idle callback for event: $eventId")
-            callback.invoke()
+            if (success) {
+                callback.onFinish()
+            } else {
+                callback.onCancel()
+            }
+            cameraAnimationCallbacks.remove(callbackId)
         }
     }
 
@@ -420,6 +771,7 @@ object MapWrapperRegistry {
      * Swift calls this when map is tapped.
      * Returns true if callback was found and invoked.
      */
+    @Suppress("ReturnCount") // Early returns for error handling - clearer than nested conditionals
     fun invokeMapClickCallback(eventId: String): Boolean {
         Log.i(TAG, "👆 invokeMapClickCallback called for event: $eventId")
         val callback = mapClickCallbacks[eventId]
@@ -459,6 +811,119 @@ object MapWrapperRegistry {
     }
 
     /**
+     * Get the registered render callback for an event.
+     * Used for synchronous polygon rendering.
+     */
+    fun getRenderCallback(eventId: String): (() -> Unit)? = renderCallbacks[eventId]
+
+    // Store callbacks for location component control
+    private val locationComponentCallbacks = mutableMapOf<String, (Boolean) -> Unit>()
+    private val setUserPositionCallbacks = mutableMapOf<String, (Double, Double) -> Unit>()
+
+    // Store pending user position (for race condition handling)
+    private val pendingUserPositions = mutableMapOf<String, Pair<Double, Double>>()
+
+    /**
+     * Register callback for enabling/disabling location component.
+     * Swift wrapper registers this to receive location component enable/disable commands.
+     */
+    fun setLocationComponentCallback(
+        eventId: String,
+        callback: (Boolean) -> Unit,
+    ) {
+        locationComponentCallbacks[eventId] = callback
+        Log.d(TAG, "Location component callback registered for event: $eventId")
+
+        // Apply pending location component state if it was set before callback registered
+        val pendingState = pendingLocationComponentStates[eventId]
+        if (pendingState != null) {
+            Log.i(TAG, "✅ Applying pending location component state: $pendingState for event: $eventId")
+            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+                callback.invoke(pendingState)
+            }
+            pendingLocationComponentStates.remove(eventId)
+        }
+    }
+
+    /**
+     * Register callback for setting user position.
+     * Swift wrapper registers this to receive user position updates.
+     */
+    fun setUserPositionCallback(
+        eventId: String,
+        callback: (Double, Double) -> Unit,
+    ) {
+        setUserPositionCallbacks[eventId] = callback
+        Log.d(TAG, "User position callback registered for event: $eventId")
+
+        // Apply pending user position if it was set before callback registered
+        val pendingPosition = pendingUserPositions[eventId]
+        if (pendingPosition != null) {
+            Log.i(TAG, "✅ Applying pending user position: (${pendingPosition.first}, ${pendingPosition.second}) for event: $eventId")
+            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+                callback.invoke(pendingPosition.first, pendingPosition.second)
+            }
+            pendingUserPositions.remove(eventId)
+        }
+    }
+
+    /**
+     * Check if user position callback is registered for an event.
+     */
+    fun hasUserPositionCallback(eventId: String): Boolean = setUserPositionCallbacks.containsKey(eventId)
+
+    // Store pending location component state (for race condition handling)
+    private val pendingLocationComponentStates = mutableMapOf<String, Boolean>()
+
+    /**
+     * Enable or disable location component on the map wrapper.
+     */
+    fun enableLocationComponentOnWrapper(
+        eventId: String,
+        enabled: Boolean,
+    ) {
+        val callback = locationComponentCallbacks[eventId]
+        if (callback != null) {
+            Log.d(TAG, "Invoking location component callback: $enabled for event: $eventId")
+            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+                callback.invoke(enabled)
+            }
+            // Clear pending state after successful invocation
+            pendingLocationComponentStates.remove(eventId)
+        } else {
+            Log.w(TAG, "No location component callback registered for event: $eventId - storing pending state")
+            // Store pending state to apply when callback is registered
+            pendingLocationComponentStates[eventId] = enabled
+        }
+    }
+
+    /**
+     * Update user position on the map wrapper.
+     */
+    fun setUserPositionOnWrapper(
+        eventId: String,
+        latitude: Double,
+        longitude: Double,
+    ) {
+        Log.i(TAG, "📍 setUserPositionOnWrapper called: ($latitude, $longitude) for event: $eventId")
+
+        val callback = setUserPositionCallbacks[eventId]
+        if (callback != null) {
+            Log.d(TAG, "Dispatching position update to Swift via callback")
+            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+                callback.invoke(latitude, longitude)
+                Log.v(TAG, "✅ Position callback invoked on main queue")
+            }
+            // Clear pending position after successful dispatch
+            pendingUserPositions.remove(eventId)
+        } else {
+            Log.w(TAG, "⚠️ No user position callback registered for event: $eventId - storing latest position")
+            // Store only the latest position (overwrites previous)
+            pendingUserPositions[eventId] = Pair(latitude, longitude)
+        }
+    }
+
+    /**
      * Request immediate render of pending polygons.
      * Invokes the registered render callback if available.
      * Called from Kotlin when polygons are updated.
@@ -477,6 +942,61 @@ object MapWrapperRegistry {
     }
 
     /**
+     * Add a callback to be invoked when map style is loaded and ready.
+     * If style is already loaded, callback is invoked immediately.
+     */
+    fun addOnMapReadyCallback(
+        eventId: String,
+        callback: () -> Unit,
+    ) {
+        Log.d(TAG, "Adding map ready callback for event: $eventId")
+        val callbacks = onMapReadyCallbacks.getOrPut(eventId) { mutableListOf() }
+        callbacks.add(callback)
+    }
+
+    /**
+     * Mark style as loaded for an event.
+     * Called from Swift after didFinishLoading style.
+     */
+    fun setStyleLoaded(
+        eventId: String,
+        loaded: Boolean,
+    ) {
+        Log.i(TAG, "Style loaded state updated: $loaded for event: $eventId")
+        styleLoadedStates[eventId] = loaded
+    }
+
+    /**
+     * Check if style is loaded for an event.
+     */
+    fun isStyleLoaded(eventId: String): Boolean = styleLoadedStates[eventId] ?: false
+
+    /**
+     * Invoke all registered map ready callbacks for an event.
+     * Called from Swift after style loads.
+     */
+    fun invokeMapReadyCallbacks(eventId: String) {
+        val callbacks = onMapReadyCallbacks[eventId]
+        if (callbacks == null || callbacks.isEmpty()) {
+            Log.v(TAG, "No map ready callbacks registered for event: $eventId")
+            return
+        }
+
+        Log.i(TAG, "Invoking ${callbacks.size} map ready callback(s) for event: $eventId")
+        callbacks.forEach { callback ->
+            try {
+                callback.invoke()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error invoking map ready callback for event: $eventId", throwable = e)
+            }
+        }
+
+        // Clear callbacks after invoking (one-time use)
+        onMapReadyCallbacks.remove(eventId)
+        Log.d(TAG, "Map ready callbacks cleared for event: $eventId")
+    }
+
+    /**
      * Clear all registered wrappers and pending data.
      * Useful for cleanup during app termination or testing.
      */
@@ -484,13 +1004,26 @@ object MapWrapperRegistry {
         Log.d(TAG, "Clearing all registered wrappers, pending data, and callbacks")
         wrappers.clear()
         pendingPolygons.clear()
-        pendingCameraCommands.clear()
+        pendingConfigCommands.clear()
+        pendingAnimationCommands.clear()
         mapClickCallbacks.clear()
         mapClickRegistrationCallbacks.clear()
+        mapClickCoordinateListeners.clear()
         renderCallbacks.clear()
         cameraCallbacks.clear()
         visibleRegions.clear()
         minZoomLevels.clear()
+        mapWidths.clear()
+        mapHeights.clear()
         cameraIdleListeners.clear()
+        cameraPositions.clear()
+        cameraZooms.clear()
+        cameraAnimationCallbacks.clear()
+        onMapReadyCallbacks.clear()
+        styleLoadedStates.clear()
+        locationComponentCallbacks.clear()
+        setUserPositionCallbacks.clear()
+        pendingLocationComponentStates.clear()
+        pendingUserPositions.clear()
     }
 }
