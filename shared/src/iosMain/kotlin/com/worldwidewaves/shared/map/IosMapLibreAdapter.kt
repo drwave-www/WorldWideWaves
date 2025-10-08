@@ -158,6 +158,15 @@ class IosMapLibreAdapter(
 
     override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
         Log.d(TAG, "Setting camera constraint bounds for event: $eventId")
+        Log.d(
+            TAG,
+            "BBox details: minLat=${constraintBounds.minLatitude}, maxLat=${constraintBounds.maxLatitude}, " +
+                "minLng=${constraintBounds.minLongitude}, maxLng=${constraintBounds.maxLongitude}",
+        )
+        Log.d(
+            TAG,
+            "SW/NE: SW(${constraintBounds.sw.lat},${constraintBounds.sw.lng}) NE(${constraintBounds.ne.lat},${constraintBounds.ne.lng})",
+        )
         MapWrapperRegistry.setPendingCameraCommand(
             eventId,
             CameraCommand.SetConstraintBounds(constraintBounds),
