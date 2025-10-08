@@ -15,6 +15,4 @@ import com.worldwidewaves.shared.events.IWWWEvent
 actual fun createNativeMapViewController(
     event: IWWWEvent,
     styleURL: String,
-    enableGestures: Boolean,
-    registryKey: String?,
 ): Any = throw UnsupportedOperationException("Android uses AndroidEventMap with MapView directly")

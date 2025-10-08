@@ -18,22 +18,17 @@ import org.koin.mp.KoinPlatform
 actual fun createNativeMapViewController(
     event: IWWWEvent,
     styleURL: String,
-    enableGestures: Boolean,
-    registryKey: String?,
 ): Any {
-    Log.i(
-        "MapViewFactory",
-        "Creating map view for: ${event.id} via Koin provider, enableGestures=$enableGestures, registryKey=$registryKey",
-    )
+    Log.i("MapViewFactory", "Creating map view for: ${event.id} via Koin provider")
 
     val provider = KoinPlatform.getKoin().getOrNull<NativeMapViewProvider>()
 
     return if (provider != null) {
         Log.d("MapViewFactory", "Using NativeMapViewProvider from Koin")
-        provider.createMapView(event, styleURL, enableGestures, registryKey)
+        provider.createMapView(event, styleURL)
     } else {
         Log.w("MapViewFactory", "NativeMapViewProvider not registered in Koin - using default implementation")
         // Fallback: Use default iOS implementation
-        IosNativeMapViewProvider().createMapView(event, styleURL, enableGestures, registryKey)
+        IosNativeMapViewProvider().createMapView(event, styleURL)
     }
 }

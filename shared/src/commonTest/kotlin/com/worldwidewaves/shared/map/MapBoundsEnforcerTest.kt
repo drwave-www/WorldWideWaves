@@ -201,14 +201,6 @@ class MapBoundsEnforcerTest {
             callback(this)
         }
 
-        override fun enableLocationComponent(enabled: Boolean) {
-            // Test stub - no-op
-        }
-
-        override fun setUserPosition(position: Position) {
-            // Test stub - no-op
-        }
-
         fun triggerCameraIdle() {
             cameraIdleListeners.forEach { it() }
         }

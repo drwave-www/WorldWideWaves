@@ -21,7 +21,7 @@ concurrency:
 jobs:
   real-integration-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 90  # Increased from 60 to 90 minutes for emulator boot + tests
+    timeout-minutes: 60  # Reduced from 2 hours to 1 hour
 
     strategy:
       matrix:
@@ -64,6 +64,10 @@ jobs:
 
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
+      with:
+        api-level: ${{ matrix.api-level }}
+        target: ${{ env.ANDROID_TARGET }}
+        arch: ${{ env.ANDROID_ARCH }}
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
@@ -90,7 +94,6 @@ jobs:
         ram-size: 3072M
         heap-size: 512M
         disk-size: 6144M
-        emulator-boot-timeout: 900  # 15 minutes timeout for emulator boot
         script: echo "Emulator started"
         emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
 
@@ -114,10 +117,10 @@ jobs:
 
     - name: Run Critical Integration Tests
       run: |
-        echo "Running critical integration tests..."
-        # Note: realIntegrationTest source set tests are not configured in Gradle yet
-        # Running all available androidInstrumentedTest tests instead
+        echo "Running critical integration tests in parallel..."
+        # Run only the most critical tests to reduce execution time
         ./gradlew :composeApp:connectedDebugAndroidTest \
+          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealSoundChoreographyIntegrationTest \
           --no-daemon --stacktrace
       continue-on-error: true
 

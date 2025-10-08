@@ -104,7 +104,6 @@ open class ComposedLongitude(
 
     // ------------------------------------------------------------------------
 
-    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     fun isPointOnLine(point: Position): Side {
         if (positions.isEmpty()) return Side.EAST // Arbitrary choice when empty
 
@@ -157,7 +156,6 @@ open class ComposedLongitude(
             else -> Side.WEST
         }
 
-    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     fun intersectWithSegment(
         cutId: Int,
         segment: Segment,
@@ -183,7 +181,6 @@ open class ComposedLongitude(
      * Returns the plain intersection [Position] of this composed-longitude and the provided
      * [segment] or `null` when they do not intersect.
      */
-    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     fun intersectWithSegment(segment: Segment): Position? {
         if (positions.isEmpty()) return null
 
@@ -206,7 +203,6 @@ open class ComposedLongitude(
      * the single longitude is returned.  If the latitude does not intersect the composed
      * longitude, `null` is returned.
      */
-    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     fun lngAt(lat: Double): Double? {
         if (positions.isEmpty()) return null
 

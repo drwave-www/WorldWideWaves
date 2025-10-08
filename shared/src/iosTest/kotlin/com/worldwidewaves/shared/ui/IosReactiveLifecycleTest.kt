@@ -105,11 +105,7 @@ class IosReactiveLifecycleTest {
             val subscription2 = observable.observe { }
             val subscription3 = observable.observe { }
 
-            delay(50) // Allow subscriptions to initialize
-
             observable.cleanup()
-
-            delay(50) // Allow cleanup to propagate
 
             assertFalse(subscription1.isActive, "Subscription 1 should be disposed after cleanup")
             assertFalse(subscription2.isActive, "Subscription 2 should be disposed after cleanup")
@@ -124,10 +120,7 @@ class IosReactiveLifecycleTest {
 
             val subscription = observable.observe { }
 
-            delay(50) // Allow subscription to initialize
-
             observable.cleanup()
-            delay(50) // Allow first cleanup to propagate
             observable.cleanup() // Should not throw
             observable.cleanup() // Should not throw
 
@@ -153,46 +146,23 @@ class IosReactiveLifecycleTest {
             )
         }
 
-    // SKIPPED: This test is disabled because iOS Native test environment doesn't properly handle
-    // Dispatchers.Default/Main in the same way as runtime. The observe() callback pattern works
-    // correctly in production but cannot be reliably tested in iOS Native test environment due to
-    // threading limitations. All other lifecycle tests (subscription management, cleanup, etc.) pass
-    // and validate the critical functionality. The observe() method is not used in production code.
-    //
-    // @Test
-    // fun `IosStateFlowObservable callback receives updates after subscription`() =
-    //     runTest {
-    //         val stateFlow = MutableStateFlow("initial")
-    //         val observable = stateFlow.toIosObservable()
-    //         val receivedValues = mutableListOf<String>()
-    //
-    //         observable.observe { value -> receivedValues.add(value) }
-    //
-    //         // iOS requires polling to wait for async callback processing on Dispatchers.Default
-    //         // The observable uses Dispatchers.Default which runs asynchronously from the test dispatcher
-    //         var attempts = 0
-    //         val maxAttempts = 50 // 50 attempts * 100ms = 5 seconds max
-    //         while (receivedValues.isEmpty() && attempts < maxAttempts) {
-    //             delay(100) // Real delay to allow Dispatchers.Default to process
-    //             attempts++
-    //         }
-    //
-    //         stateFlow.value = "updated1"
-    //         delay(100) // Allow update to propagate
-    //         stateFlow.value = "updated2"
-    //         delay(100) // Allow update to propagate
-    //
-    //         // StateFlow emits initial value immediately, so we check for all expected values
-    //         // iOS async processing may result in any combination of values
-    //         assertTrue(
-    //             receivedValues.isNotEmpty(),
-    //             "Should receive at least one value after ${attempts * 100}ms (got: ${receivedValues.joinToString()})",
-    //         )
-    //         assertTrue(
-    //             receivedValues.contains("initial") || receivedValues.contains("updated1") || receivedValues.contains("updated2"),
-    //             "Should receive at least one of the expected values (got: ${receivedValues.joinToString()})",
-    //         )
-    //     }
+    @Test
+    fun `IosStateFlowObservable callback receives updates after subscription`() =
+        runTest {
+            val stateFlow = MutableStateFlow("initial")
+            val observable = stateFlow.toIosObservable()
+            val receivedValues = mutableListOf<String>()
+
+            observable.observe { value -> receivedValues.add(value) }
+
+            stateFlow.value = "updated1"
+            stateFlow.value = "updated2"
+
+            delay(100) // Allow coroutines to process
+
+            assertTrue(receivedValues.contains("updated1"), "Should receive updated1")
+            assertTrue(receivedValues.contains("updated2"), "Should receive updated2")
+        }
 
     @Test
     fun `IosStateFlowObservable callback does not receive updates after dispose`() =
@@ -259,11 +229,7 @@ class IosReactiveLifecycleTest {
             val subscription1 = observable.observe { }
             val subscription2 = observable.observe { }
 
-            delay(50) // Allow subscriptions to initialize
-
             observable.cleanup()
-
-            delay(50) // Allow cleanup to propagate
 
             assertFalse(subscription1.isActive, "Subscription 1 should be disposed after cleanup")
             assertFalse(subscription2.isActive, "Subscription 2 should be disposed after cleanup")

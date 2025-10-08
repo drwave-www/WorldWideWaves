@@ -17,7 +17,6 @@ import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import platform.UIKit.UIImage
-import kotlin.random.Random
 
 private const val TAG = "IosMapLibreAdapter"
 
@@ -76,45 +75,9 @@ class IosMapLibreAdapter(
         callback.invoke()
     }
 
-    @Suppress("ReturnCount") // Multiple returns for guard clauses (null wrapper, zero dimension, valid dimension)
-    override fun getWidth(): Double {
-        // Get actual map view dimensions from Swift wrapper (not hardcoded defaults)
-        val wrapper = MapWrapperRegistry.getWrapper(eventId)
-        if (wrapper == null) {
-            Log.w(TAG, "getWidth: wrapper is null, returning default: $DEFAULT_WIDTH")
-            return DEFAULT_WIDTH
-        }
+    override fun getWidth(): Double = DEFAULT_WIDTH
 
-        // Synchronously get width from Swift wrapper
-        val actualWidth = MapWrapperRegistry.getMapWidth(eventId)
-        if (actualWidth > 0) {
-            Log.v(TAG, "getWidth: returning actual map width: $actualWidth")
-            return actualWidth
-        }
-
-        Log.w(TAG, "getWidth: actual width is 0, returning default: $DEFAULT_WIDTH")
-        return DEFAULT_WIDTH
-    }
-
-    @Suppress("ReturnCount") // Multiple returns for guard clauses (null wrapper, zero dimension, valid dimension)
-    override fun getHeight(): Double {
-        // Get actual map view dimensions from Swift wrapper (not hardcoded defaults)
-        val wrapper = MapWrapperRegistry.getWrapper(eventId)
-        if (wrapper == null) {
-            Log.w(TAG, "getHeight: wrapper is null, returning default: $DEFAULT_HEIGHT")
-            return DEFAULT_HEIGHT
-        }
-
-        // Synchronously get height from Swift wrapper
-        val actualHeight = MapWrapperRegistry.getMapHeight(eventId)
-        if (actualHeight > 0) {
-            Log.v(TAG, "getHeight: returning actual map height: $actualHeight")
-            return actualHeight
-        }
-
-        Log.w(TAG, "getHeight: actual height is 0, returning default: $DEFAULT_HEIGHT")
-        return DEFAULT_HEIGHT
-    }
+    override fun getHeight(): Double = DEFAULT_HEIGHT
 
     override fun getCameraPosition(): Position? {
         // Try to get from registry first (updated by Swift)
@@ -125,7 +88,6 @@ class IosMapLibreAdapter(
         return _currentPosition.value
     }
 
-    @Suppress("ReturnCount") // Early returns for guard clauses - improves readability
     override fun getVisibleRegion(): BoundingBox {
         val w = wrapper
         if (w == null) {
@@ -176,10 +138,7 @@ class IosMapLibreAdapter(
     /**
      * Poll registry for camera updates and update StateFlows.
      * Called periodically or on demand to sync registry → StateFlow.
-     * Currently unused - camera updates happen via MapWrapperRegistry.updateCameraPosition/Zoom
-     * Kept for potential future use with polling fallback.
      */
-    @Suppress("UnusedPrivateMember")
     private fun syncCameraStateFromRegistry() {
         val position = MapWrapperRegistry.getCameraPosition(eventId)
         if (position != null) {
@@ -206,24 +165,14 @@ class IosMapLibreAdapter(
         callback: MapCameraCallback?,
     ) {
         Log.d(TAG, "Animating camera to position: ${position.lat}, ${position.lng}, zoom=$zoom for event: $eventId")
-
-        // Generate unique callback ID for this animation
-        val callbackId =
-            if (callback != null) {
-                "$eventId-animate-${Random.nextLong()}"
-            } else {
-                null
-            }
-
-        // Store callback for async completion
-        if (callback != null && callbackId != null) {
-            MapWrapperRegistry.setCameraAnimationCallback(callbackId, callback)
-        }
-
         MapWrapperRegistry.setPendingCameraCommand(
             eventId,
-            CameraCommand.AnimateToPosition(position, zoom, callbackId),
+            CameraCommand.AnimateToPosition(position, zoom),
         )
+        // Note: Callback is invoked immediately. For proper callback timing,
+        // Swift would need to signal back through registry when animation completes.
+        // For now, immediate callback prevents blocking.
+        callback?.onFinish()
     }
 
     override fun animateCameraToBounds(
@@ -232,24 +181,13 @@ class IosMapLibreAdapter(
         callback: MapCameraCallback?,
     ) {
         Log.d(TAG, "Animating camera to bounds with padding: $padding for event: $eventId")
-
-        // Generate unique callback ID for this animation
-        val callbackId =
-            if (callback != null) {
-                "$eventId-bounds-${Random.nextLong()}"
-            } else {
-                null
-            }
-
-        // Store callback for async completion
-        if (callback != null && callbackId != null) {
-            MapWrapperRegistry.setCameraAnimationCallback(callbackId, callback)
-        }
-
         MapWrapperRegistry.setPendingCameraCommand(
             eventId,
-            CameraCommand.AnimateToBounds(bounds, padding, callbackId),
+            CameraCommand.AnimateToBounds(bounds, padding),
         )
+        // Note: Callback is invoked immediately. For proper callback timing,
+        // Swift would need to signal back through registry when animation completes.
+        callback?.onFinish()
     }
 
     override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
@@ -276,14 +214,8 @@ class IosMapLibreAdapter(
             return 0.0
         }
 
-        // Synchronously update actualMinZoom from Swift before querying
-        // This prevents race condition where cached registry value returns 0.0
-        // while map view has the correct constraint-based min zoom
-        MapWrapperRegistry.syncActualMinZoomFromWrapper(eventId)
-
-        val actualMinZoom = MapWrapperRegistry.getActualMinZoom(eventId)
-        Log.d(TAG, "getMinZoomLevel: returning actual map value: $actualMinZoom for event: $eventId")
-        return actualMinZoom
+        // Request min zoom via registry (Swift will provide)
+        return MapWrapperRegistry.getMinZoom(eventId)
     }
 
     override fun setMinZoomPreference(minZoom: Double) {
@@ -302,8 +234,10 @@ class IosMapLibreAdapter(
         right: Int,
         bottom: Int,
     ) {
-        Log.d(TAG, "Setting attribution margins: left=$left, top=$top, right=$right, bottom=$bottom for event: $eventId")
-        MapWrapperRegistry.setAttributionMarginsCommand(eventId, left, top, right, bottom)
+        Log.d("IosMapLibreAdapter", "Setting attribution margins: $left, $top, $right, $bottom")
+
+        // NOTE: Implement iOS MapLibre attribution positioning
+        // Set attribution view margins
     }
 
     override fun addWavePolygons(
@@ -340,37 +274,8 @@ class IosMapLibreAdapter(
     }
 
     override fun onMapSet(callback: (MapLibreAdapter<*>) -> Unit) {
-        Log.d(TAG, "Registering onMapSet callback for event: $eventId")
-
-        // Store callback in registry (will be invoked after style loads)
-        MapWrapperRegistry.addOnMapReadyCallback(eventId) {
-            Log.d(TAG, "Map ready callback invoked for event: $eventId")
-            callback(this)
-        }
-
-        // Check if style is already loaded (edge case: callback registered late)
-        val isStyleLoaded = MapWrapperRegistry.isStyleLoaded(eventId)
-        if (isStyleLoaded) {
-            Log.i(TAG, "Style already loaded, invoking callback immediately for event: $eventId")
-            MapWrapperRegistry.invokeMapReadyCallbacks(eventId)
-        }
-    }
-
-    override fun enableLocationComponent(enabled: Boolean) {
-        Log.i(TAG, "enableLocationComponent: $enabled for event: $eventId")
-        // Call Swift wrapper via registry callback
-        MapWrapperRegistry.enableLocationComponentOnWrapper(eventId, enabled)
-    }
-
-    override fun setUserPosition(position: Position) {
-        Log.i(TAG, "📍 setUserPosition: (${position.lat}, ${position.lng}) for event: $eventId")
-
-        // Verify callback is registered
-        val hasCallback = MapWrapperRegistry.hasUserPositionCallback(eventId)
-        Log.d(TAG, "User position callback registered: $hasCallback")
-
-        // Call Swift wrapper via registry callback
-        MapWrapperRegistry.setUserPositionOnWrapper(eventId, position.lat, position.lng)
-        Log.v(TAG, "✅ setUserPositionOnWrapper called for event: $eventId")
+        Log.d("IosMapLibreAdapter", "Map set callback")
+        // NOTE: Implement map ready callback for iOS
+        callback(this)
     }
 }

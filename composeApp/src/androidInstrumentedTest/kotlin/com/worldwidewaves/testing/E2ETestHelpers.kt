@@ -28,8 +28,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeUp
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 
 /**
  * Helper functions for E2E Firebase Test Lab UI tests.
@@ -190,7 +188,7 @@ object E2ETestHelpers {
                 composeTestRule.onNodeWithTag(tag).assertIsDisplayed()
                 return true
             } catch (e: AssertionError) {
-                runBlocking { delay(100) }
+                Thread.sleep(100)
             }
         }
         return false
@@ -215,7 +213,7 @@ object E2ETestHelpers {
                 composeTestRule.onNodeWithText(text).assertIsDisplayed()
                 return true
             } catch (e: AssertionError) {
-                runBlocking { delay(100) }
+                Thread.sleep(100)
             }
         }
         return false

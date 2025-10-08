@@ -103,7 +103,6 @@ class IosExceptionHandlingTest {
         // Test 1: DataStoreException propagates correctly
         val dataStoreException = DataStoreException("Test data store error", null)
         assertEquals("Test data store error", dataStoreException.message)
-        @Suppress("USELESS_IS_CHECK") // Intentional runtime type verification for iOS exception propagation test
         assertTrue(dataStoreException is Exception)
 
         // Test 2: IllegalArgumentException propagates correctly
@@ -328,7 +327,6 @@ class IosExceptionHandlingTest {
             assertEquals("Coroutine exception test", exception.message)
 
             // Verify exception type is preserved
-            @Suppress("USELESS_IS_CHECK") // Intentional runtime type verification for iOS exception propagation test
             assertTrue(exception is RuntimeException)
 
             // Stack trace verification is limited on iOS

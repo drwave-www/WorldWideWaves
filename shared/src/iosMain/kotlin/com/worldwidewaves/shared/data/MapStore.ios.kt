@@ -175,7 +175,6 @@ private fun appSupportMapsDir(): String {
     return mapsUrl.path ?: (NSTemporaryDirectory() + "/Maps")
 }
 
-@Suppress("ReturnCount") // Early returns for guard clauses improve readability
 actual suspend fun platformTryCopyInitialTagToCache(
     eventId: String,
     extension: String,
@@ -279,7 +278,6 @@ actual suspend fun platformFetchToFile(
     }
 }
 
-@Suppress("ReturnCount") // Early returns for guard clauses improve readability
 private suspend fun mountAndCopyResource(
     request: platform.Foundation.NSBundleResourceRequest,
     eventId: String,
@@ -354,7 +352,7 @@ private fun copyResourceToDestination(
 actual fun cacheStringToFile(
     fileName: String,
     content: String,
-): String? {
+): String {
     val root = platformCacheRoot()
     val path = "$root/$fileName"
     Log.d("MapStore.ios", "cacheStringToFile: root=$root, fileName=$fileName")
@@ -372,13 +370,13 @@ actual fun cacheStringToFile(
     val nsContent = NSString.create(string = content)
     val success = nsContent.writeToFile(path, atomically = true, encoding = NSUTF8StringEncoding, error = null)
 
-    return if (success) {
+    if (success) {
         Log.i("MapStore.ios", "cacheStringToFile: SUCCESS - File written to $path")
         val exists = fm.fileExistsAtPath(path)
         Log.d("MapStore.ios", "cacheStringToFile: File exists check=$exists")
-        path
     } else {
         Log.e("MapStore.ios", "cacheStringToFile: FAILED to write file to $path")
-        null
     }
+
+    return path
 }

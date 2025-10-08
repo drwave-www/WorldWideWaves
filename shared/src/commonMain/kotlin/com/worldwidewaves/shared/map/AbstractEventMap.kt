@@ -274,8 +274,7 @@ abstract class AbstractEventMap<T>(
     }
 
     /**
-     * Moves the camera to show both the user and wave positions with good padding.
-     * Respects constraint bounds to prevent fighting with MapBoundsEnforcer.
+     * Moves the camera to show both the user and wave positions with good padding
      */
     suspend fun targetUserAndWave() {
         val userPosition = locationProvider?.currentLocation?.value
@@ -293,16 +292,15 @@ abstract class AbstractEventMap<T>(
             return
         }
 
-        // Get the area's bounding box (or constraint bounds if more restrictive)
+        // Get the area's bounding box
         val areaBbox = event.area.bbox()
-        val constraintBbox = constraintManager?.calculateConstraintBounds() ?: areaBbox
 
         // Calculate padding as percentages of the area's dimensions
         val horizontalPadding = (areaBbox.ne.lng - areaBbox.sw.lng) * 0.2
         val verticalPadding = (areaBbox.ne.lat - areaBbox.sw.lat) * 0.1
 
         // Create new bounds with padding, constrained by the area's bounding box
-        val paddedBounds =
+        val newBounds =
             BoundingBox.fromCorners(
                 Position(
                     maxOf(bounds.southLatitude - minOf(verticalPadding, bounds.southLatitude - areaBbox.sw.lat), areaBbox.sw.lat),
@@ -314,22 +312,8 @@ abstract class AbstractEventMap<T>(
                 ),
             )
 
-        // Clip to constraint bounds to prevent loop where animation extends outside
-        // constraints, then constraint enforcer pulls back, triggering new animation
-        val finalBounds =
-            BoundingBox.fromCorners(
-                Position(
-                    maxOf(paddedBounds!!.sw.lat, constraintBbox.sw.lat),
-                    maxOf(paddedBounds.sw.lng, constraintBbox.sw.lng),
-                ),
-                Position(
-                    minOf(paddedBounds.ne.lat, constraintBbox.ne.lat),
-                    minOf(paddedBounds.ne.lng, constraintBbox.ne.lng),
-                ),
-            )
-
         runCameraAnimation { _ ->
-            mapLibreAdapter.animateCameraToBounds(finalBounds)
+            mapLibreAdapter.animateCameraToBounds(newBounds)
         }
     }
 
@@ -355,9 +339,6 @@ abstract class AbstractEventMap<T>(
         mapLibreAdapter.setStyle(stylePath) {
             // Set Attribution margins to 0
             mapLibreAdapter.setAttributionMargins(0, 0, 0, 0)
-
-            // Enable location component to show user position marker
-            mapLibreAdapter.enableLocationComponent(true)
 
             // Add an explicit zone if area bbox has been overridden regarding the GEOJson standard area
             if (event.area.bboxIsOverride) {
@@ -429,9 +410,6 @@ abstract class AbstractEventMap<T>(
 
         if (lastKnownPosition == null || lastKnownPosition != position) {
             // Position is now managed by PositionManager through unified system
-
-            // Update visual location marker on map (important for iOS simulation)
-            mapLibreAdapter.setUserPosition(position)
 
             // Notify caller
             onLocationUpdate(position)

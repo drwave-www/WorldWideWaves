@@ -286,11 +286,10 @@ class MapStoreTest {
         val content = """{"test": "data", "emoji": "🌊"}"""
 
         // When: Cache string to file
-        val resultPath = cacheStringToFile(fileName, content)
+        val resultFileName = cacheStringToFile(fileName, content)
 
-        // Then: Should return absolute path and file should exist with correct content
-        val expectedPath = File(testCacheDir, fileName).toURI().path
-        assertEquals(expectedPath, resultPath)
+        // Then: File should exist with correct content
+        assertEquals(fileName, resultFileName)
         val cachedFile = File(testCacheDir, fileName)
         assertTrue(cachedFile.exists())
         assertEquals(content, cachedFile.readText())

@@ -26,6 +26,8 @@ import com.worldwidewaves.shared.map.PlatformMapManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -40,6 +42,7 @@ import kotlin.test.assertTrue
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class IosMapViewModelTest {
+    private val testScheduler = TestCoroutineScheduler()
     private lateinit var mockPlatformMapManager: TestPlatformMapManager
     private lateinit var viewModel: IosMapViewModel
 
@@ -51,10 +54,7 @@ class IosMapViewModelTest {
 
     @AfterTest
     fun tearDown() {
-        // Allow any pending coroutines to complete
-        kotlinx.coroutines.runBlocking {
-            kotlinx.coroutines.delay(200)
-        }
+        // Cleanup test resources
     }
 
     // ------------------------------------------------------------------------
@@ -63,7 +63,7 @@ class IosMapViewModelTest {
 
     @Test
     fun `initial featureState is NotChecked`() =
-        runTest {
+        runTest(testScheduler) {
             val initialState = viewModel.featureState.first()
             assertEquals(MapFeatureState.NotChecked, initialState)
         }
@@ -74,129 +74,84 @@ class IosMapViewModelTest {
 
     @Test
     fun `checkIfMapIsAvailable delegates to MapDownloadCoordinator correctly`() =
-        runTest {
+        runTest(testScheduler) {
             mockPlatformMapManager.setMapAvailable("test_map", true)
 
             viewModel.checkIfMapIsAvailable("test_map", autoDownload = false)
+            advanceUntilIdle()
 
-            // Wait for state to change with polling using real delay
-            var finalState: MapFeatureState = MapFeatureState.NotChecked
-            repeat(20) {
-                // 20 * 150ms = 3000ms timeout
-                kotlinx.coroutines.delay(150)
-                val state = viewModel.featureState.first()
-                finalState = state
-                if (state == MapFeatureState.Available) return@repeat
-            }
-
-            assertEquals(MapFeatureState.Available, finalState, "Expected Available but got $finalState")
+            val state = viewModel.featureState.first()
+            assertEquals(MapFeatureState.Available, state)
             assertTrue(mockPlatformMapManager.isMapAvailableCalled)
         }
 
     @Test
     fun `checkIfMapIsAvailable with autoDownload triggers download`() =
-        runTest {
+        runTest(testScheduler) {
             mockPlatformMapManager.setMapAvailable("test_map", false)
 
             viewModel.checkIfMapIsAvailable("test_map", autoDownload = true)
+            advanceUntilIdle()
 
-            // Wait for state to change with polling using real delay
-            var finalState: MapFeatureState = MapFeatureState.NotChecked
-            repeat(20) {
-                // 20 * 150ms = 3000ms timeout
-                kotlinx.coroutines.delay(150)
-                val state = viewModel.featureState.first()
-                finalState = state
-                if (state == MapFeatureState.Pending) return@repeat
-            }
-
-            assertEquals(MapFeatureState.Pending, finalState, "Expected Pending but got $finalState")
+            val state = viewModel.featureState.first()
+            assertEquals(MapFeatureState.Pending, state)
             assertTrue(mockPlatformMapManager.downloadMapCalled)
         }
 
     @Test
     fun `downloadMap triggers platform download with correct callbacks`() =
-        runTest {
+        runTest(testScheduler) {
             var downloadCompleted = false
             mockPlatformMapManager.simulateSuccessfulDownload = true
 
             viewModel.downloadMap("test_map") { downloadCompleted = true }
-
-            // Wait for download completion with polling using real delay
-            repeat(30) {
-                // 30 * 150ms = 4500ms timeout
-                if (downloadCompleted) return@repeat
-                kotlinx.coroutines.delay(150)
-            }
+            advanceUntilIdle()
 
             assertTrue(mockPlatformMapManager.downloadMapCalled)
             assertEquals("test_map", mockPlatformMapManager.downloadedMapId)
-            assertTrue(downloadCompleted, "Download should complete")
+            assertTrue(downloadCompleted)
         }
 
     @Test
     fun `downloadMap handles progress updates correctly`() =
-        runTest {
+        runTest(testScheduler) {
             mockPlatformMapManager.simulateProgressUpdates = true
             mockPlatformMapManager.progressValues = listOf(25, 50, 75, 100)
 
             viewModel.downloadMap("test_map")
-
-            // Wait for state to reach Installed with polling using real delay
-            var finalState: MapFeatureState = MapFeatureState.NotChecked
-            repeat(30) {
-                // 30 * 150ms = 4500ms timeout
-                kotlinx.coroutines.delay(150)
-                val state = viewModel.featureState.first()
-                finalState = state
-                if (state is MapFeatureState.Installed) return@repeat
-            }
+            advanceUntilIdle()
 
             // Should eventually reach success state
-            assertTrue(finalState is MapFeatureState.Installed, "Final state should be Installed (got: $finalState)")
+            val finalState = viewModel.featureState.first()
+            assertTrue(finalState is MapFeatureState.Installed)
         }
 
     @Test
     fun `downloadMap handles ODR failures correctly`() =
-        runTest {
+        runTest(testScheduler) {
             mockPlatformMapManager.simulateSuccessfulDownload = false
             mockPlatformMapManager.errorCode = -1
             mockPlatformMapManager.errorMessage = "ODR resource not found"
 
             viewModel.downloadMap("test_map")
+            advanceUntilIdle()
 
-            // Wait for state to reach Failed with polling using real delay
-            var finalState: MapFeatureState = MapFeatureState.NotChecked
-            repeat(30) {
-                // 30 * 150ms = 4500ms timeout
-                kotlinx.coroutines.delay(150)
-                val state = viewModel.featureState.first()
-                finalState = state
-                if (state is MapFeatureState.Failed) return@repeat
-            }
-
-            assertTrue(finalState is MapFeatureState.Failed, "State should be Failed (got: $finalState)")
-            assertEquals(-1, (finalState as MapFeatureState.Failed).errorCode)
+            val state = viewModel.featureState.first()
+            assertTrue(state is MapFeatureState.Failed)
+            assertEquals(-1, (state as MapFeatureState.Failed).errorCode)
         }
 
     @Test
     fun `cancelDownload calls platform manager and updates state`() =
-        runTest {
+        runTest(testScheduler) {
             // Start a download first
             viewModel.downloadMap("test_map")
-            kotlinx.coroutines.delay(300) // Allow download to start - iOS needs more time
+            advanceUntilIdle()
 
             viewModel.cancelDownload()
-            kotlinx.coroutines.delay(300) // Allow cancellation to process - iOS needs more time
+            advanceUntilIdle()
 
-            // Wait for cancellation to complete with polling using real delay
-            repeat(20) {
-                // 20 * 150ms = 3000ms timeout
-                if (mockPlatformMapManager.cancelDownloadCalled) return@repeat
-                kotlinx.coroutines.delay(150)
-            }
-
-            assertTrue(mockPlatformMapManager.cancelDownloadCalled, "Cancel should be called")
+            assertTrue(mockPlatformMapManager.cancelDownloadCalled)
             assertEquals("test_map", mockPlatformMapManager.cancelledMapId)
         }
 
@@ -206,38 +161,22 @@ class IosMapViewModelTest {
 
     @Test
     fun `platform adapter correctly checks map installation`() =
-        runTest {
+        runTest(testScheduler) {
             mockPlatformMapManager.setMapAvailable("installed_map", true)
             mockPlatformMapManager.setMapAvailable("missing_map", false)
 
             viewModel.checkIfMapIsAvailable("installed_map")
-            // Wait for state to change with polling using real delay
-            var state1: MapFeatureState = MapFeatureState.NotChecked
-            repeat(20) {
-                // 20 * 150ms = 3000ms timeout
-                kotlinx.coroutines.delay(150)
-                val state = viewModel.featureState.first()
-                state1 = state
-                if (state == MapFeatureState.Available) return@repeat
-            }
-            assertEquals(MapFeatureState.Available, state1, "Expected Available for installed_map (got: $state1)")
+            advanceUntilIdle()
+            assertEquals(MapFeatureState.Available, viewModel.featureState.first())
 
             viewModel.checkIfMapIsAvailable("missing_map")
-            // Wait for state to change with polling using real delay
-            var state2: MapFeatureState = MapFeatureState.NotChecked
-            repeat(20) {
-                // 20 * 150ms = 3000ms timeout
-                kotlinx.coroutines.delay(150)
-                val state = viewModel.featureState.first()
-                state2 = state
-                if (state == MapFeatureState.NotAvailable) return@repeat
-            }
-            assertEquals(MapFeatureState.NotAvailable, state2, "Expected NotAvailable for missing_map (got: $state2)")
+            advanceUntilIdle()
+            assertEquals(MapFeatureState.NotAvailable, viewModel.featureState.first())
         }
 
     @Test
     fun `platform adapter handles ODR download lifecycle`() =
-        runTest {
+        runTest(testScheduler) {
             var progressCallCount = 0
             val progressValues = mutableListOf<Int>()
 
@@ -248,25 +187,16 @@ class IosMapViewModelTest {
             mockPlatformMapManager.simulateRealisticDownload = true
 
             viewModel.downloadMap("test_map")
+            advanceUntilIdle()
 
-            // Wait for download to complete with polling using real delay
-            var finalState: MapFeatureState = MapFeatureState.NotChecked
-            repeat(30) {
-                // 30 * 150ms = 4500ms timeout
-                kotlinx.coroutines.delay(150)
-                val state = viewModel.featureState.first()
-                finalState = state
-                if (state is MapFeatureState.Installed) return@repeat
-            }
-
-            assertTrue(progressCallCount > 0, "Should have progress callbacks (got: $progressCallCount)")
-            assertTrue(progressValues.isNotEmpty(), "Should have progress values (got: ${progressValues.size})")
-            assertEquals(MapFeatureState.Installed, finalState, "Expected Installed (got: $finalState)")
+            assertTrue(progressCallCount > 0)
+            assertTrue(progressValues.isNotEmpty())
+            assertEquals(MapFeatureState.Installed, viewModel.featureState.first())
         }
 
     @Test
     fun `error message localization works correctly`() =
-        runTest {
+        runTest(testScheduler) {
             val errorCodes =
                 mapOf(
                     -1 to "ODR resource download failed",
@@ -280,18 +210,10 @@ class IosMapViewModelTest {
                 mockPlatformMapManager.simulateSuccessfulDownload = false
 
                 viewModel.downloadMap("test_map")
+                advanceUntilIdle()
 
-                // Wait for state to reach Failed with polling using real delay
-                var finalState: MapFeatureState = MapFeatureState.NotChecked
-                repeat(30) {
-                    // 30 * 150ms = 4500ms timeout
-                    kotlinx.coroutines.delay(150)
-                    val state = viewModel.featureState.first()
-                    finalState = state
-                    if (state is MapFeatureState.Failed) return@repeat
-                }
-
-                assertTrue(finalState is MapFeatureState.Failed, "State should be Failed for error code $code (got: $finalState)")
+                val state = viewModel.featureState.first()
+                assertTrue(state is MapFeatureState.Failed)
                 // Error message is set by the platform adapter logic
             }
         }
@@ -302,11 +224,11 @@ class IosMapViewModelTest {
 
     @Test
     fun `viewModel inherits BaseViewModel correctly`() =
-        runTest {
+        runTest(testScheduler) {
             // Test that BaseViewModel functionality works through public interface
             // Test coroutine scope works
             viewModel.checkIfMapIsAvailable("test")
-            delay(100) // Allow async processing
+            advanceUntilIdle()
 
             // Should not crash and should have valid state
             assertNotNull(viewModel.featureState.first())
@@ -314,7 +236,7 @@ class IosMapViewModelTest {
 
     @Test
     fun `concurrent operations are handled safely`() =
-        runTest {
+        runTest(testScheduler) {
             mockPlatformMapManager.simulateSlowDownload = true
 
             // Start multiple operations
@@ -322,7 +244,7 @@ class IosMapViewModelTest {
             viewModel.downloadMap("map2")
             viewModel.cancelDownload()
 
-            delay(200) // Allow operations to start
+            advanceUntilIdle()
 
             // Should handle all operations without crashing
             assertNotNull(viewModel.featureState.first())
@@ -376,24 +298,21 @@ class IosMapViewModelTest {
                 return // Don't complete
             }
 
-            // iOS needs more realistic delays for async processing
-            delay(50) // Initial delay before processing starts
-
             if (simulateProgressUpdates || simulateRealisticDownload) {
                 val values = if (progressValues.isNotEmpty()) progressValues else listOf(25, 50, 75, 100)
                 values.forEach { progress ->
                     onProgress(progress)
                     onProgressCallback?.invoke(progress)
-                    delay(20) // Realistic delay between progress updates
+                    delay(1) // Small delay for test scheduler
                 }
             }
 
             if (simulateSuccessfulDownload) {
                 onProgress(100)
-                delay(50) // Delay before completion
+                delay(1) // Small delay before completion
                 onSuccess()
             } else {
-                delay(50) // Delay before error
+                delay(1) // Small delay before error
                 onError(errorCode, errorMessage)
             }
         }

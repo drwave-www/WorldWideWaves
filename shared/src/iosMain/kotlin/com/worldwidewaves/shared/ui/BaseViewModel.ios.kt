@@ -1,5 +1,3 @@
-@file:Suppress("MatchingDeclarationName") // Platform-specific actual file naming (.ios.kt)
-
 package com.worldwidewaves.shared.ui
 
 /*

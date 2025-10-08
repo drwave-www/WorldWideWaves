@@ -91,13 +91,9 @@ class IosPlatformMapManagerTest {
             advanceTimeBy(35_000)
             advanceUntilIdle()
 
-            assertTrue(errorReceived, "Error callback should have been triggered")
-            assertNotNull(errorMessage, "Error message should not be null")
-            // Error message should indicate failure (exact text may vary)
-            assertTrue(
-                errorMessage!!.isNotEmpty(),
-                "Error message should not be empty",
-            )
+            assertTrue(errorReceived)
+            assertNotNull(errorMessage)
+            assertTrue(errorMessage!!.contains("ODR") || errorMessage!!.contains("bundle", ignoreCase = true))
         }
 
     @Test

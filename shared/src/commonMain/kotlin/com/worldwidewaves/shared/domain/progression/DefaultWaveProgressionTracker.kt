@@ -73,24 +73,22 @@ class DefaultWaveProgressionTracker(
     override suspend fun isUserInWaveArea(
         userPosition: Position,
         waveArea: WWWEventArea,
-        polygons: com.worldwidewaves.shared.events.utils.Area?,
     ): Boolean {
         return try {
-            // Use pre-fetched polygons if provided (performance optimization),
-            // otherwise fetch them (backward compatibility)
-            val actualPolygons = polygons ?: waveArea.getPolygons()
+            // Check if polygon data is available first
+            val polygons = waveArea.getPolygons()
             Log.d(
                 "WaveProgressionTracker",
-                "isUserInWaveArea: checking (${userPosition.lat}, ${userPosition.lng}) against ${actualPolygons.size} polygons",
+                "isUserInWaveArea: checking (${userPosition.lat}, ${userPosition.lng}) against ${polygons.size} polygons",
             )
 
-            if (actualPolygons.isEmpty()) {
+            if (polygons.isEmpty()) {
                 Log.d("WaveProgressionTracker", "isUserInWaveArea: no polygons, returning false")
                 return false
             }
 
-            // Use the area's optimized position checking with pre-fetched polygons
-            val result = waveArea.isPositionWithin(userPosition, actualPolygons)
+            // Use the area's optimized position checking
+            val result = waveArea.isPositionWithin(userPosition)
             Log.i("WaveProgressionTracker", "isUserInWaveArea: isPositionWithin returned $result")
             result
         } catch (e: Exception) {
@@ -110,12 +108,9 @@ class DefaultWaveProgressionTracker(
     ) {
         try {
             val progression = calculateProgression(event)
-
-            // Fetch polygons once and pass to tracker (performance optimization)
-            val polygons = event.area.getPolygons()
             val isInArea =
                 userPosition?.let {
-                    isUserInWaveArea(it, event.area, polygons)
+                    isUserInWaveArea(it, event.area)
                 } ?: false
 
             val snapshot =

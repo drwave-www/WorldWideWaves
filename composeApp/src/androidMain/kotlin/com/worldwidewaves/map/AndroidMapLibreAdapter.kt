@@ -51,7 +51,6 @@ import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.Point
 import org.maplibre.geojson.Polygon
-import java.util.UUID
 
 /**
  * Android-specific implementation of the shared [MapLibreAdapter].
@@ -70,10 +69,6 @@ class AndroidMapLibreAdapter(
 ) : MapLibreAdapter<MapLibreMap> {
     companion object {
         private const val TAG = "AndroidMapLibreAdapter"
-        private const val MIN_LATITUDE = -90.0
-        private const val MAX_LATITUDE = 90.0
-        private const val MIN_LONGITUDE = -180.0
-        private const val MAX_LONGITUDE = 180.0
     }
 
     // -- Public/Override properties
@@ -83,11 +78,6 @@ class AndroidMapLibreAdapter(
 
     private val _currentZoom = MutableStateFlow(0.0)
     override val currentZoom: StateFlow<Double> = _currentZoom
-
-    // Queue for polygons that arrive before style loads
-    // Only stores the most recent set since wave progression contains all previous circles
-    private var pendingPolygons: List<Polygon>? = null
-    private var styleLoaded = false
 
     override fun getWidth(): Double {
         require(mapLibreMap != null)
@@ -150,16 +140,6 @@ class AndroidMapLibreAdapter(
         mapLibreMap!!.setStyle(Style.Builder().fromUri(stylePath)) { _ ->
             // Log successful style load – confirms MapLibre has parsed the style
             Log.i(TAG, "Style loaded successfully")
-            styleLoaded = true
-
-            // Render pending polygons that arrived before style loaded
-            // Only the most recent set matters (wave progression contains all previous circles)
-            pendingPolygons?.let { polygons ->
-                Log.i(TAG, "Rendering pending polygons: ${polygons.size} polygons")
-                addWavePolygons(polygons, clearExisting = true)
-                pendingPolygons = null
-            }
-
             callback()
         }
     }
@@ -353,17 +333,6 @@ class AndroidMapLibreAdapter(
     override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
         require(mapLibreMap != null)
 
-        // Validate bounds before setting (matches iOS pattern)
-        require(constraintBounds.ne.lat > constraintBounds.sw.lat) {
-            "Invalid bounds: ne.lat (${constraintBounds.ne.lat}) must be > sw.lat (${constraintBounds.sw.lat})"
-        }
-        require(constraintBounds.sw.lat >= MIN_LATITUDE && constraintBounds.ne.lat <= MAX_LATITUDE) {
-            "Latitude out of range: must be between $MIN_LATITUDE and $MAX_LATITUDE"
-        }
-        require(constraintBounds.sw.lng >= MIN_LONGITUDE && constraintBounds.ne.lng <= MAX_LONGITUDE) {
-            "Longitude out of range: must be between $MIN_LONGITUDE and $MAX_LONGITUDE"
-        }
-
         Log.v(
             "Camera",
             "Setting camera target bounds constraint: SW=${constraintBounds.southwest.latitude}," +
@@ -376,7 +345,6 @@ class AndroidMapLibreAdapter(
 
     // -- Add the Wave polygons to the map
 
-    @Suppress("ReturnCount") // Multiple returns OK for guard clauses (null check, empty check, style not loaded)
     override fun addWavePolygons(
         polygons: List<Any>,
         clearExisting: Boolean,
@@ -388,15 +356,6 @@ class AndroidMapLibreAdapter(
             return
         }
 
-        // If style not loaded yet, store most recent polygons for later
-        // Only the most recent set matters (wave progression contains all previous circles)
-        if (!styleLoaded) {
-            Log.w(TAG, "Style not ready - storing ${wavePolygons.size} polygons (most recent)")
-            pendingPolygons = wavePolygons
-            return
-        }
-
-        // Style is loaded - render immediately
         map.getStyle { style ->
             try {
                 // -- Clear existing dynamic layers/sources when requested ----
@@ -409,10 +368,12 @@ class AndroidMapLibreAdapter(
 
                 // -- Add each polygon on its own layer -----------------------
                 wavePolygons.forEachIndexed { index, polygon ->
-                    // Add UUID to prevent ID conflicts during rapid updates (matches iOS pattern)
-                    val uuid = UUID.randomUUID().toString()
-                    val sourceId = "wave-polygons-source-$index-$uuid"
-                    val layerId = "wave-polygons-layer-$index-$uuid"
+                    val sourceId = "wave-polygons-source-$index"
+                    val layerId = "wave-polygons-layer-$index"
+
+                    // Defensive cleanup in case ids are reused
+                    style.removeLayer(layerId)
+                    style.removeSource(sourceId)
 
                     // GeoJSON source with a single polygon
                     val src =
@@ -480,19 +441,5 @@ class AndroidMapLibreAdapter(
                 },
             )
         }
-    }
-
-    override fun enableLocationComponent(enabled: Boolean) {
-        // On Android, location component is managed by AndroidEventMap
-        // This is a no-op since the location component is activated through
-        // setupMapLocationComponent() in AndroidEventMap.kt
-        Log.d(TAG, "enableLocationComponent: $enabled (no-op on Android, managed by AndroidEventMap)")
-    }
-
-    override fun setUserPosition(position: Position) {
-        // On Android, user position is managed automatically by LocationEngineProxy
-        // which feeds positions from LocationProvider to MapLibre's location component
-        // This is a no-op since the position updates happen through the LocationEngine
-        Log.v(TAG, "setUserPosition: (${position.lat}, ${position.lng}) (no-op on Android, managed by LocationEngineProxy)")
     }
 }

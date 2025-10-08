@@ -100,21 +100,19 @@ import Shared
     @objc public static func createMapViewController(
         for event: IWWWEvent,
         styleURL: String,
-        enableGestures: Bool,
         wrapperRef: UnsafeMutablePointer<MapLibreViewWrapper?>?
     ) -> UIViewController {
-        WWWLog.i(
-            "MapViewBridge",
-            "Creating map view controller for event: \(event.id), enableGestures: \(enableGestures)"
-        )
+        WWWLog.i("MapViewBridge", "Creating map view controller for event: \(event.id)")
 
         // Create the SwiftUI map view
-        // NOTE: Initial camera position NOT set here - AbstractEventMap.setupMap() handles it
-        // This ensures iOS matches Android behavior (event-specific positioning based on mapConfig)
+        // NOTE: Using default Paris coordinates as initial position
+        // The map will be re-centered based on event data after style loads
         let mapView = EventMapView(
             eventId: event.id,
             styleURL: styleURL,
-            enableGestures: enableGestures,
+            initialLatitude: 48.8566,
+            initialLongitude: 2.3522,
+            initialZoom: 12.0,
             wrapper: .constant(nil) // Will be bound via EventMapView's own State
         )
 
@@ -167,21 +165,19 @@ import Shared
     /// - Note: Clear background to let parent view control background
     public static func createMapViewControllerWithWrapper(
         for event: IWWWEvent,
-        styleURL: String,
-        enableGestures: Bool = true,
-        registryKey: String
+        styleURL: String
     ) -> UIViewController {
-        let message = "Creating map view with wrapper for: \(event.id), " +
-            "enableGestures: \(enableGestures), registryKey: \(registryKey)"
-        WWWLog.i("MapViewBridge", message)
+        WWWLog.i("MapViewBridge", "Creating map view with wrapper for: \(event.id)")
 
         var wrapperInstance: MapLibreViewWrapper?
 
-        // NOTE: Initial camera position NOT set - AbstractEventMap.setupMap() handles it
+        // NOTE: Using default Paris coordinates as initial position
         let mapView = EventMapView(
-            eventId: registryKey,  // Use registryKey instead of event.id
+            eventId: event.id,
             styleURL: styleURL,
-            enableGestures: enableGestures,
+            initialLatitude: 48.8566,
+            initialLongitude: 2.3522,
+            initialZoom: 12.0,
             wrapper: Binding(
                 get: { wrapperInstance },
                 set: { wrapperInstance = $0 }
@@ -191,7 +187,7 @@ import Shared
         let controller = UIHostingController(rootView: mapView)
         controller.view.backgroundColor = UIColor.clear
 
-        WWWLog.d("MapViewBridge", "Map view controller created with registryKey: \(registryKey)")
+        WWWLog.d("MapViewBridge", "Map view controller created")
         return controller
     }
 }

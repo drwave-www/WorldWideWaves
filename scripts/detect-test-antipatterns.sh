@@ -77,8 +77,7 @@ FILES=$(grep -r "Thread\.sleep" shared/src/commonTest/kotlin/ composeApp/src/and
 report_violation "Thread\.sleep" "Using Thread.sleep creates flaky tests" "$FILES"
 
 # 2. Detect System.currentTimeMillis usage (non-deterministic time)
-# NOTE: Exclude androidInstrumentedTest - legitimate usage for real device timeouts
-FILES=$(grep -r "System\.currentTimeMillis" shared/src/commonTest/kotlin/ 2>/dev/null || true)
+FILES=$(grep -r "System\.currentTimeMillis" shared/src/commonTest/kotlin/ composeApp/src/androidInstrumentedTest/kotlin/ 2>/dev/null || true)
 report_violation "System\.currentTimeMillis" "Using System.currentTimeMillis makes tests non-deterministic" "$FILES"
 
 # 3. Detect Random() without seed (non-reproducible randomness)

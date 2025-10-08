@@ -52,7 +52,6 @@ class MapBoundsEnforcer(
     private var visibleRegionPadding = VisibleRegionPadding()
     private var constraintBounds: BoundingBox? = null
     private var constraintsApplied = false
-    private var lastAppliedBounds: BoundingBox? = null // Track last applied bounds to prevent redundant updates
 
     fun setVisibleRegionPadding(padding: VisibleRegionPadding) {
         visibleRegionPadding = padding
@@ -73,12 +72,6 @@ class MapBoundsEnforcer(
         // Register the camera-idle listener only once
         if (!constraintsApplied) {
             mapLibreAdapter.addOnCameraIdleListener {
-                // Prevent recalculation if animation/user interaction is in progress
-                if (isSuppressed()) {
-                    Log.v("MapBoundsEnforcer", "Camera idle callback suppressed (animation in progress)")
-                    return@addOnCameraIdleListener
-                }
-
                 val newPadding = calculateVisibleRegionPadding()
 
                 if (
@@ -86,13 +79,10 @@ class MapBoundsEnforcer(
                         VisibleRegionPadding(newPadding.latPadding, newPadding.lngPadding),
                     )
                 ) {
-                    Log.d("MapBoundsEnforcer", "Significant padding change detected, updating constraints")
                     setVisibleRegionPadding(
                         VisibleRegionPadding(newPadding.latPadding, newPadding.lngPadding),
                     )
                     applyConstraintsWithPadding()
-                } else {
-                    Log.v("MapBoundsEnforcer", "Padding change insignificant, skipping constraint update")
                 }
             }
             constraintsApplied = true
@@ -108,48 +98,13 @@ class MapBoundsEnforcer(
             val paddedBounds = calculateConstraintBounds()
             constraintBounds = paddedBounds
 
-            // Prevent infinite loop: skip if bounds haven't changed significantly (iOS triggers camera idle on every setBounds)
-            if (lastAppliedBounds != null && boundsAreSimilar(lastAppliedBounds!!, paddedBounds)) {
-                Log.v("MapBoundsEnforcer", "Bounds unchanged, skipping redundant constraint update")
-                return
-            }
-
             // Apply bounds & min-zoom to the map – no immediate camera move
             mapLibreAdapter.setBoundsForCameraTarget(paddedBounds)
             val minZoom = mapLibreAdapter.getMinZoomLevel()
             mapLibreAdapter.setMinZoomPreference(minZoom)
-
-            // Track the bounds we just applied
-            lastAppliedBounds = paddedBounds
         } catch (e: Exception) {
             Napier.e("Error applying constraints: ${e.message}")
         }
-    }
-
-    /**
-     * Check if two bounding boxes are similar enough to be considered the same (within 0.1% tolerance).
-     * This prevents infinite loops caused by floating-point precision issues and iOS camera idle callbacks.
-     */
-    private fun boundsAreSimilar(
-        bounds1: BoundingBox,
-        bounds2: BoundingBox,
-    ): Boolean {
-        val tolerance = 0.001 // 0.1% tolerance for coordinate comparison
-
-        val latDiff =
-            abs(bounds1.southwest.latitude - bounds2.southwest.latitude) +
-                abs(bounds1.northeast.latitude - bounds2.northeast.latitude)
-        val lngDiff =
-            abs(bounds1.southwest.longitude - bounds2.southwest.longitude) +
-                abs(bounds1.northeast.longitude - bounds2.northeast.longitude)
-
-        val isSimilar = latDiff < tolerance && lngDiff < tolerance
-
-        if (!isSimilar) {
-            Log.d("MapBoundsEnforcer", "Bounds changed significantly: latDiff=$latDiff, lngDiff=$lngDiff")
-        }
-
-        return isSimilar
     }
 
     /**

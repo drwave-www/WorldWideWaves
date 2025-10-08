@@ -28,8 +28,6 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.testing.BaseE2ETest
 import com.worldwidewaves.testing.E2ETestHelpers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -59,7 +57,7 @@ class CompleteWaveParticipationE2ETest : BaseE2ETest() {
     @Test
     fun testCompleteWaveParticipationJourney() {
         // Wait for app to fully load (splash screen can take time)
-        runBlocking { delay(5000) }
+        Thread.sleep(5000)
 
         // ============================================================
         // STEP 1: APP LAUNCH IN DEBUG MODE
@@ -225,7 +223,7 @@ class CompleteWaveParticipationE2ETest : BaseE2ETest() {
     private fun verifyEventsListLoaded() {
         E2ETestHelpers.assertEventListDisplayed(composeTestRule)
         // Verify at least one event is visible
-        runBlocking { delay(1000) } // Allow events to load
+        Thread.sleep(1000) // Allow events to load
     }
 
     private fun verifyEmptyFavorites() {
@@ -237,7 +235,7 @@ class CompleteWaveParticipationE2ETest : BaseE2ETest() {
         // This assumes the second event in the test data
         // In a real implementation, we'd query the events dynamically
         // For now, we'll use a generic approach
-        runBlocking { delay(500) } // Ensure UI is stable
+        Thread.sleep(500) // Ensure UI is stable
     }
 
     private fun verifyFavoriteIconFilled() {
@@ -260,7 +258,7 @@ class CompleteWaveParticipationE2ETest : BaseE2ETest() {
 
     private fun clickOnParisEvent() {
         // Click on Paris event - implementation depends on event ID
-        runBlocking { delay(500) }
+        Thread.sleep(500)
         composeTestRule.onNodeWithText("Paris").performClick()
         waitForIdle()
     }
@@ -275,12 +273,12 @@ class CompleteWaveParticipationE2ETest : BaseE2ETest() {
 
     private fun verifyWaveProgression() {
         // Verify wave progression UI is visible
-        runBlocking { delay(500) }
+        Thread.sleep(500)
     }
 
     private fun verifyMapLoaded() {
         // Map verification - requires specific map testTag or content
-        runBlocking { delay(1000) }
+        Thread.sleep(1000)
     }
 
     private fun verifyUserMarker() {
@@ -293,7 +291,7 @@ class CompleteWaveParticipationE2ETest : BaseE2ETest() {
 
     private fun panMap() {
         // Pan map interaction
-        runBlocking { delay(500) }
+        Thread.sleep(500)
     }
 
     private fun verifyWaveScreen() {
@@ -302,12 +300,12 @@ class CompleteWaveParticipationE2ETest : BaseE2ETest() {
 
     private fun verifyWaveComponentsVisible() {
         // Verify wave UI components
-        runBlocking { delay(500) }
+        Thread.sleep(500)
     }
 
     private fun waitForChoreography() {
         // Wait for choreography to trigger
-        runBlocking { delay(2000) }
+        Thread.sleep(2000)
     }
 
     private fun navigateToAboutTab() {
@@ -323,7 +321,7 @@ class CompleteWaveParticipationE2ETest : BaseE2ETest() {
 
     private fun scrollAboutInfo() {
         // Scroll About info content
-        runBlocking { delay(500) }
+        Thread.sleep(500)
     }
 
     private fun verifyFaqList() {
@@ -336,7 +334,7 @@ class CompleteWaveParticipationE2ETest : BaseE2ETest() {
 
     private fun verifyFaqExpanded() {
         // Verify FAQ item is expanded
-        runBlocking { delay(500) }
+        Thread.sleep(500)
     }
 
     private fun verifySimulationIndicator() {
@@ -347,7 +345,7 @@ class CompleteWaveParticipationE2ETest : BaseE2ETest() {
     private fun pressBack() {
         // Navigate back using UI element (more reliable for Firebase Test Lab)
         // In a real implementation, use a back button testTag or navigation action
-        runBlocking { delay(500) }
+        Thread.sleep(500)
     }
 
     private fun verifyOnEventsTab() {

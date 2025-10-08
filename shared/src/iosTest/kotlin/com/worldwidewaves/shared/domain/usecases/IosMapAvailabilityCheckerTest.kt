@@ -81,10 +81,9 @@ class IosMapAvailabilityCheckerTest {
             checker.trackMaps(mapIds)
             advanceUntilIdle()
 
-            // Maps are tracked but may not be "downloaded" without actual ODR resources
-            val mapStates = checker.mapStates.first()
-            assertEquals(3, mapStates.size, "Should track 3 maps")
-            assertTrue(mapStates.keys.containsAll(mapIds), "Should contain all map IDs")
+            val trackedMaps = checker.getDownloadedMaps()
+            assertEquals(3, trackedMaps.size)
+            assertTrue(trackedMaps.containsAll(mapIds))
         }
 
     @Test
@@ -114,11 +113,11 @@ class IosMapAvailabilityCheckerTest {
             checker.trackMaps(listOf("paris_france", "tokyo_japan"))
             advanceUntilIdle()
 
-            val mapStates = checker.mapStates.first()
-            assertEquals(3, mapStates.size, "Should track 3 unique maps")
-            assertTrue(mapStates.keys.contains("paris_france"))
-            assertTrue(mapStates.keys.contains("london_uk"))
-            assertTrue(mapStates.keys.contains("tokyo_japan"))
+            val trackedMaps = checker.getDownloadedMaps()
+            assertEquals(3, trackedMaps.size)
+            assertTrue(trackedMaps.contains("paris_france"))
+            assertTrue(trackedMaps.contains("london_uk"))
+            assertTrue(trackedMaps.contains("tokyo_japan"))
         }
 
     @Test
@@ -145,17 +144,17 @@ class IosMapAvailabilityCheckerTest {
             checker.trackMaps(mapIds)
             advanceUntilIdle()
 
-            // Check initial state
+            // Clear the state to test refresh
             val initialState = checker.mapStates.first()
             assertEquals(2, initialState.size)
 
             checker.refreshAvailability()
 
-            // Should still have tracked maps (availability depends on ODR/cache)
+            // Should still show tracked maps as available
             val refreshedState = checker.mapStates.first()
             assertEquals(2, refreshedState.size)
-            assertTrue(refreshedState.containsKey("paris_france"))
-            assertTrue(refreshedState.containsKey("london_uk"))
+            assertTrue(refreshedState["paris_france"] == true)
+            assertTrue(refreshedState["london_uk"] == true)
         }
 
     @Test
@@ -172,12 +171,14 @@ class IosMapAvailabilityCheckerTest {
             checker.trackMaps(listOf("sydney_australia"))
             advanceUntilIdle()
 
+            val trackedMaps = checker.getDownloadedMaps()
+            assertEquals(4, trackedMaps.size)
+
             val mapStates = checker.mapStates.first()
-            assertEquals(4, mapStates.size, "Should accumulate all tracked maps")
-            assertTrue(mapStates.containsKey("paris_france"))
-            assertTrue(mapStates.containsKey("london_uk"))
-            assertTrue(mapStates.containsKey("tokyo_japan"))
-            assertTrue(mapStates.containsKey("sydney_australia"))
+            assertEquals(4, mapStates.size)
+            mapStates.values.forEach { isAvailable ->
+                assertTrue(isAvailable) // All should be true on iOS
+            }
         }
 
     @Test
@@ -188,9 +189,13 @@ class IosMapAvailabilityCheckerTest {
             checker.trackMaps(listOf("single_map"))
             advanceUntilIdle()
 
+            val trackedMaps = checker.getDownloadedMaps()
+            assertEquals(1, trackedMaps.size)
+            assertEquals("single_map", trackedMaps.first())
+
             val mapStates = checker.mapStates.first()
-            assertEquals(1, mapStates.size, "Should track single map")
-            assertTrue(mapStates.containsKey("single_map"))
+            assertEquals(1, mapStates.size)
+            assertTrue(mapStates["single_map"] == true)
         }
 
     @Test
@@ -208,10 +213,12 @@ class IosMapAvailabilityCheckerTest {
             checker.trackMaps(specialMapIds)
             advanceUntilIdle()
 
-            val mapStates = checker.mapStates.first()
-            assertEquals(4, mapStates.size, "Should track all special character maps")
+            val trackedMaps = checker.getDownloadedMaps()
+            assertEquals(4, trackedMaps.size)
+            assertTrue(trackedMaps.containsAll(specialMapIds))
+
             specialMapIds.forEach { mapId ->
-                assertTrue(mapStates.containsKey(mapId), "Should track $mapId")
+                assertTrue(checker.isMapDownloaded(mapId))
             }
         }
 
@@ -228,12 +235,15 @@ class IosMapAvailabilityCheckerTest {
             }
             advanceUntilIdle()
 
-            val mapStates = checker.mapStates.first()
-            assertEquals(mapCount, mapStates.size, "Should track all 100 maps")
+            val trackedMaps = checker.getDownloadedMaps()
+            assertEquals(mapCount, trackedMaps.size)
 
-            // Verify all map IDs are present
-            mapIds.forEach { mapId ->
-                assertTrue(mapStates.containsKey(mapId), "Should contain $mapId")
+            val mapStates = checker.mapStates.first()
+            assertEquals(mapCount, mapStates.size)
+
+            // Verify all maps are marked as available
+            mapStates.values.forEach { isAvailable ->
+                assertTrue(isAvailable)
             }
         }
 
@@ -241,19 +251,23 @@ class IosMapAvailabilityCheckerTest {
     fun `StateFlow mapStates emits updates correctly`() =
         runTest(testScheduler) {
             val checker = IosMapAvailabilityChecker()
+            val emittedStates = mutableListOf<Map<String, Boolean>>()
 
-            // Initial state should be empty
+            // Collect states (this would typically be done in a coroutine)
             val initialState = checker.mapStates.first()
-            assertTrue(initialState.isEmpty(), "Initial state should be empty")
+            emittedStates.add(initialState)
 
             checker.trackMaps(listOf("test_map_1"))
             advanceUntilIdle()
 
             val updatedState = checker.mapStates.first()
 
+            // Initial state should be empty
+            assertTrue(emittedStates[0].isEmpty())
+
             // Updated state should contain the tracked map
-            assertEquals(1, updatedState.size, "Should have 1 tracked map")
-            assertTrue(updatedState.containsKey("test_map_1"))
+            assertEquals(1, updatedState.size)
+            assertTrue(updatedState["test_map_1"] == true)
         }
 
     @Test
@@ -279,26 +293,24 @@ class IosMapAvailabilityCheckerTest {
         }
 
     @Test
-    fun `releaseDownloadedMap clears individual maps`() =
+    fun `cleanup clears all tracked maps and states`() =
         runTest(testScheduler) {
             val checker = IosMapAvailabilityChecker()
 
-            // Track and request download for some maps
+            // Track some maps
             checker.trackMaps(listOf("paris_france", "london_uk"))
             advanceUntilIdle()
 
-            // Maps are tracked
-            val initialState = checker.mapStates.first()
-            assertEquals(2, initialState.size)
+            checker.getDownloadedMaps()
+            // Should have some tracked maps
 
-            // Release one map (cleanup is done via releaseDownloadedMap, not a cleanup() method)
-            checker.releaseDownloadedMap("paris_france")
             advanceUntilIdle()
 
-            // The map should still be tracked but ODR request released
-            // (tracking != ODR download state)
-            val afterRelease = checker.mapStates.first()
-            assertEquals(2, afterRelease.size, "Maps remain tracked after release")
+            val finalTrackedMaps = checker.getDownloadedMaps()
+            assertTrue(finalTrackedMaps.isEmpty())
+
+            val finalState = checker.mapStates.first()
+            assertTrue(finalState.isEmpty())
         }
 
     @Test
