@@ -555,6 +555,7 @@ object MapWrapperRegistry {
      * Swift calls this when map is tapped.
      * Returns true if callback was found and invoked.
      */
+    @Suppress("ReturnCount") // Early returns for error handling - clearer than nested conditionals
     fun invokeMapClickCallback(eventId: String): Boolean {
         Log.i(TAG, "👆 invokeMapClickCallback called for event: $eventId")
         val callback = mapClickCallbacks[eventId]

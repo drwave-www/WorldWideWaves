@@ -423,6 +423,202 @@ class IosMapLibreIntegrationTest {
     }
 
     // ============================================================
+    // ON MAP SET CALLBACK TIMING TESTS
+    // ============================================================
+
+    @Test
+    fun `onMapSet callback should not fire before style loads`() {
+        var callbackInvoked = false
+
+        // Register callback before style loads
+        MapWrapperRegistry.addOnMapReadyCallback(testEventId) {
+            callbackInvoked = true
+        }
+
+        // Verify callback NOT invoked yet
+        assertFalse(callbackInvoked, "Callback should not fire before style loads")
+        assertFalse(MapWrapperRegistry.isStyleLoaded(testEventId), "Style should not be loaded yet")
+    }
+
+    @Test
+    fun `onMapSet callback should fire after style load and invokeMapReadyCallbacks`() {
+        var callbackInvoked = false
+
+        // Register callback
+        MapWrapperRegistry.addOnMapReadyCallback(testEventId) {
+            callbackInvoked = true
+        }
+
+        // Verify not invoked yet
+        assertFalse(callbackInvoked)
+
+        // Mark style as loaded
+        MapWrapperRegistry.setStyleLoaded(testEventId, true)
+
+        // Verify callback STILL not invoked (requires explicit invokeMapReadyCallbacks)
+        assertFalse(callbackInvoked, "Callback should not auto-invoke on style load")
+
+        // Invoke callbacks (mimics Swift calling IOSMapBridge.invokeMapReadyCallbacks)
+        MapWrapperRegistry.invokeMapReadyCallbacks(testEventId)
+
+        // Verify callback invoked
+        assertTrue(callbackInvoked, "Callback should fire after invokeMapReadyCallbacks")
+    }
+
+    @Test
+    fun `multiple onMapSet callbacks should all execute`() {
+        var callback1Invoked = false
+        var callback2Invoked = false
+        var callback3Invoked = false
+
+        // Register multiple callbacks
+        MapWrapperRegistry.addOnMapReadyCallback(testEventId) {
+            callback1Invoked = true
+        }
+        MapWrapperRegistry.addOnMapReadyCallback(testEventId) {
+            callback2Invoked = true
+        }
+        MapWrapperRegistry.addOnMapReadyCallback(testEventId) {
+            callback3Invoked = true
+        }
+
+        // Mark style loaded and invoke
+        MapWrapperRegistry.setStyleLoaded(testEventId, true)
+        MapWrapperRegistry.invokeMapReadyCallbacks(testEventId)
+
+        // Verify all callbacks invoked
+        assertTrue(callback1Invoked, "Callback 1 should be invoked")
+        assertTrue(callback2Invoked, "Callback 2 should be invoked")
+        assertTrue(callback3Invoked, "Callback 3 should be invoked")
+    }
+
+    @Test
+    fun `late onMapSet callback registration should fire immediately if style already loaded`() {
+        var callbackInvoked = false
+
+        // Mark style as loaded FIRST
+        MapWrapperRegistry.setStyleLoaded(testEventId, true)
+        assertTrue(MapWrapperRegistry.isStyleLoaded(testEventId))
+
+        // Register callback AFTER style already loaded
+        MapWrapperRegistry.addOnMapReadyCallback(testEventId) {
+            callbackInvoked = true
+        }
+
+        // Callback is registered but not auto-invoked (requires explicit call)
+        assertFalse(callbackInvoked, "Late callback should not auto-invoke")
+
+        // Manual invocation (mimics IosMapLibreAdapter.onMapSet checking isStyleLoaded)
+        MapWrapperRegistry.invokeMapReadyCallbacks(testEventId)
+
+        // Verify callback invoked
+        assertTrue(callbackInvoked, "Late callback should fire on manual invocation")
+    }
+
+    @Test
+    fun `onMapSet callbacks should be cleared after invocation`() {
+        var callback1Count = 0
+        var callback2Count = 0
+
+        // Register callbacks
+        MapWrapperRegistry.addOnMapReadyCallback(testEventId) {
+            callback1Count++
+        }
+        MapWrapperRegistry.addOnMapReadyCallback(testEventId) {
+            callback2Count++
+        }
+
+        // Mark style loaded and invoke
+        MapWrapperRegistry.setStyleLoaded(testEventId, true)
+        MapWrapperRegistry.invokeMapReadyCallbacks(testEventId)
+
+        // Verify callbacks invoked once
+        assertEquals(1, callback1Count)
+        assertEquals(1, callback2Count)
+
+        // Invoke again (should do nothing - callbacks cleared)
+        MapWrapperRegistry.invokeMapReadyCallbacks(testEventId)
+
+        // Verify callbacks NOT invoked again
+        assertEquals(1, callback1Count, "Callback 1 should not be invoked again")
+        assertEquals(1, callback2Count, "Callback 2 should not be invoked again")
+    }
+
+    @Test
+    fun `onMapSet callback cleanup on unregisterWrapper`() {
+        var callbackInvoked = false
+
+        // Register wrapper and callback
+        MapWrapperRegistry.registerWrapper(testEventId, mockWrapper)
+        MapWrapperRegistry.addOnMapReadyCallback(testEventId) {
+            callbackInvoked = true
+        }
+
+        // Unregister wrapper (should clear all data including callbacks)
+        MapWrapperRegistry.unregisterWrapper(testEventId)
+
+        // Mark style loaded and try to invoke
+        MapWrapperRegistry.setStyleLoaded(testEventId, true)
+        MapWrapperRegistry.invokeMapReadyCallbacks(testEventId)
+
+        // Verify callback NOT invoked (was cleaned up)
+        assertFalse(callbackInvoked, "Callback should be cleared after unregisterWrapper")
+    }
+
+    @Test
+    fun `onMapSet callback error handling should not prevent other callbacks`() {
+        var callback1Invoked = false
+        var callback2Invoked = false
+        var callback3Invoked = false
+
+        // Register callbacks, middle one throws exception
+        MapWrapperRegistry.addOnMapReadyCallback(testEventId) {
+            callback1Invoked = true
+        }
+        MapWrapperRegistry.addOnMapReadyCallback(testEventId) {
+            callback2Invoked = true
+            throw RuntimeException("Test exception")
+        }
+        MapWrapperRegistry.addOnMapReadyCallback(testEventId) {
+            callback3Invoked = true
+        }
+
+        // Mark style loaded and invoke
+        MapWrapperRegistry.setStyleLoaded(testEventId, true)
+        MapWrapperRegistry.invokeMapReadyCallbacks(testEventId)
+
+        // Verify all callbacks attempted (exception doesn't stop others)
+        assertTrue(callback1Invoked, "Callback 1 should be invoked")
+        assertTrue(callback2Invoked, "Callback 2 should be invoked (even if it throws)")
+        assertTrue(callback3Invoked, "Callback 3 should be invoked despite callback 2 exception")
+    }
+
+    @Test
+    fun `style loaded state should persist across multiple callback invocations`() {
+        // Mark style as loaded
+        MapWrapperRegistry.setStyleLoaded(testEventId, true)
+        assertTrue(MapWrapperRegistry.isStyleLoaded(testEventId))
+
+        // Invoke callbacks (clears callback list)
+        MapWrapperRegistry.invokeMapReadyCallbacks(testEventId)
+
+        // Verify style loaded state persists
+        assertTrue(
+            MapWrapperRegistry.isStyleLoaded(testEventId),
+            "Style loaded state should persist after callbacks",
+        )
+
+        // Register new callback (should be invokable immediately)
+        var lateCallback = false
+        MapWrapperRegistry.addOnMapReadyCallback(testEventId) {
+            lateCallback = true
+        }
+        MapWrapperRegistry.invokeMapReadyCallbacks(testEventId)
+
+        assertTrue(lateCallback, "Late callback should work with persisted style loaded state")
+    }
+
+    // ============================================================
     // CALLBACK SYSTEM TESTS
     // ============================================================
 

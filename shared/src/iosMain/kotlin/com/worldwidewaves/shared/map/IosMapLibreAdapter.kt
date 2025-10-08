@@ -89,6 +89,7 @@ class IosMapLibreAdapter(
         return _currentPosition.value
     }
 
+    @Suppress("ReturnCount") // Early returns for guard clauses - improves readability
     override fun getVisibleRegion(): BoundingBox {
         val w = wrapper
         if (w == null) {

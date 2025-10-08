@@ -416,111 +416,146 @@ import CoreLocation
         }
     }
 
+    /// Creates a callback wrapper for camera animations that invokes registry callbacks.
+    /// - Returns: Optional wrapper, nil if callbackId is nil
+    private static func createCameraCallbackWrapper(callbackId: String?) -> MapCameraCallbackWrapper? {
+        guard let id = callbackId else { return nil }
+
+        return MapCameraCallbackWrapper(
+            onFinish: {
+                Shared.MapWrapperRegistry.shared.invokeCameraAnimationCallback(
+                    callbackId: id,
+                    success: true
+                )
+            },
+            onCancel: {
+                Shared.MapWrapperRegistry.shared.invokeCameraAnimationCallback(
+                    callbackId: id,
+                    success: false
+                )
+            }
+        )
+    }
+
     /// Executes a specific camera command on the wrapper.
     /// - Returns: True if execution succeeded, false if it should be retried
-    // swiftlint:disable:next function_body_length
     private static func executeCommand(_ command: CameraCommand, on wrapper: MapLibreViewWrapper) -> Bool {
-        if let animateToPos = command as? CameraCommand.AnimateToPosition {
-            let zoom = animateToPos.zoom?.doubleValue
-            let pos = animateToPos.position
-            let callbackId = animateToPos.callbackId
-            WWWLog.i("IOSMapBridge", "Animating to position: \(pos.lat), \(pos.lng), zoom=\(zoom ?? -1)")
-
-            // Create callback wrapper if callbackId provided
-            let callbackWrapper: MapCameraCallbackWrapper? = callbackId != nil ?
-                MapCameraCallbackWrapper(
-                    onFinish: {
-                        if let id = callbackId {
-                            Shared.MapWrapperRegistry.shared.invokeCameraAnimationCallback(callbackId: id, success: true)
-                        }
-                    },
-                    onCancel: {
-                        if let id = callbackId {
-                            Shared.MapWrapperRegistry.shared.invokeCameraAnimationCallback(callbackId: id, success: false)
-                        }
-                    }
-                ) : nil
-
-            wrapper.animateCamera(
-                latitude: animateToPos.position.lat,
-                longitude: animateToPos.position.lng,
-                zoom: zoom as NSNumber?,
-                callback: callbackWrapper
-            )
-            return true
-        } else if let animateBounds = command as? CameraCommand.AnimateToBounds {
-            let bbox = animateBounds.bounds
-            let callbackId = animateBounds.callbackId
-            WWWLog.i("IOSMapBridge", "Animating to bounds with padding: \(animateBounds.padding)")
-            WWWLog.d(
-                "IOSMapBridge",
-                """
-                Swift sees bbox: minLat=\(bbox.minLatitude), \
-                minLng=\(bbox.minLongitude), maxLat=\(bbox.maxLatitude), \
-                maxLng=\(bbox.maxLongitude)
-                """
-            )
-
-            // Create callback wrapper if callbackId provided
-            let callbackWrapper: MapCameraCallbackWrapper? = callbackId != nil ?
-                MapCameraCallbackWrapper(
-                    onFinish: {
-                        if let id = callbackId {
-                            Shared.MapWrapperRegistry.shared.invokeCameraAnimationCallback(callbackId: id, success: true)
-                        }
-                    },
-                    onCancel: {
-                        if let id = callbackId {
-                            Shared.MapWrapperRegistry.shared.invokeCameraAnimationCallback(callbackId: id, success: false)
-                        }
-                    }
-                ) : nil
-
-            wrapper.animateCameraToBounds(
-                swLat: bbox.minLatitude,
-                swLng: bbox.minLongitude,
-                neLat: bbox.maxLatitude,
-                neLng: bbox.maxLongitude,
-                padding: Int(animateBounds.padding),
-                callback: callbackWrapper
-            )
-            return true
-        } else if let moveBounds = command as? CameraCommand.MoveToBounds {
-            let bbox = moveBounds.bounds
-            WWWLog.i("IOSMapBridge", "Moving to bounds")
-            let center = CLLocationCoordinate2D(
-                latitude: (bbox.minLatitude + bbox.maxLatitude) / 2,
-                longitude: (bbox.minLongitude + bbox.maxLongitude) / 2
-            )
-            wrapper.moveCamera(latitude: center.latitude, longitude: center.longitude, zoom: nil)
-            return true  // Move commands always succeed
-        } else if let constraintBounds = command as? CameraCommand.SetConstraintBounds {
-            let bbox = constraintBounds.bounds
-            WWWLog.i("IOSMapBridge", "Setting camera constraint bounds")
-            WWWLog.d(
-                "IOSMapBridge",
-                """
-                Swift sees bbox: minLat=\(bbox.minLatitude), \
-                minLng=\(bbox.minLongitude), maxLat=\(bbox.maxLatitude), \
-                maxLng=\(bbox.maxLongitude)
-                """
-            )
-            let success = wrapper.setBoundsForCameraTarget(
-                swLat: bbox.minLatitude,
-                swLng: bbox.minLongitude,
-                neLat: bbox.maxLatitude,
-                neLng: bbox.maxLongitude
-            )
-            return success  // Return actual success/failure from setBoundsForCameraTarget
-        } else if let setMinZoom = command as? CameraCommand.SetMinZoom {
-            WWWLog.i("IOSMapBridge", "Setting min zoom: \(setMinZoom.minZoom)")
-            wrapper.setMinZoom(setMinZoom.minZoom)
-            return true
-        } else if let setMaxZoom = command as? CameraCommand.SetMaxZoom {
-            WWWLog.i("IOSMapBridge", "Setting max zoom: \(setMaxZoom.maxZoom)")
-            wrapper.setMaxZoom(setMaxZoom.maxZoom)
-            return true
+        switch command {
+        case let animateToPos as CameraCommand.AnimateToPosition:
+            return executeAnimateToPosition(animateToPos, on: wrapper)
+        case let animateBounds as CameraCommand.AnimateToBounds:
+            return executeAnimateToBounds(animateBounds, on: wrapper)
+        case let moveBounds as CameraCommand.MoveToBounds:
+            return executeMoveToBounds(moveBounds, on: wrapper)
+        case let constraintBounds as CameraCommand.SetConstraintBounds:
+            return executeSetConstraintBounds(constraintBounds, on: wrapper)
+        case let setMinZoom as CameraCommand.SetMinZoom:
+            return executeSetMinZoom(setMinZoom, on: wrapper)
+        case let setMaxZoom as CameraCommand.SetMaxZoom:
+            return executeSetMaxZoom(setMaxZoom, on: wrapper)
+        default:
+            return true  // Unknown command type, don't retry
         }
-        return true  // Unknown command type, don't retry
+    }
+
+    private static func executeAnimateToPosition(
+        _ command: CameraCommand.AnimateToPosition,
+        on wrapper: MapLibreViewWrapper
+    ) -> Bool {
+        let zoom = command.zoom?.doubleValue
+        let pos = command.position
+        WWWLog.i("IOSMapBridge", "Animating to position: \(pos.lat), \(pos.lng), zoom=\(zoom ?? -1)")
+
+        let callbackWrapper = createCameraCallbackWrapper(callbackId: command.callbackId)
+
+        wrapper.animateCamera(
+            latitude: command.position.lat,
+            longitude: command.position.lng,
+            zoom: zoom as NSNumber?,
+            callback: callbackWrapper
+        )
+        return true
+    }
+
+    private static func executeAnimateToBounds(
+        _ command: CameraCommand.AnimateToBounds,
+        on wrapper: MapLibreViewWrapper
+    ) -> Bool {
+        let bbox = command.bounds
+        WWWLog.i("IOSMapBridge", "Animating to bounds with padding: \(command.padding)")
+        WWWLog.d(
+            "IOSMapBridge",
+            """
+            Swift sees bbox: minLat=\(bbox.minLatitude), \
+            minLng=\(bbox.minLongitude), maxLat=\(bbox.maxLatitude), \
+            maxLng=\(bbox.maxLongitude)
+            """
+        )
+
+        let callbackWrapper = createCameraCallbackWrapper(callbackId: command.callbackId)
+
+        wrapper.animateCameraToBounds(
+            swLat: bbox.minLatitude,
+            swLng: bbox.minLongitude,
+            neLat: bbox.maxLatitude,
+            neLng: bbox.maxLongitude,
+            padding: Int(command.padding),
+            callback: callbackWrapper
+        )
+        return true
+    }
+
+    private static func executeMoveToBounds(
+        _ command: CameraCommand.MoveToBounds,
+        on wrapper: MapLibreViewWrapper
+    ) -> Bool {
+        let bbox = command.bounds
+        WWWLog.i("IOSMapBridge", "Moving to bounds")
+        let center = CLLocationCoordinate2D(
+            latitude: (bbox.minLatitude + bbox.maxLatitude) / 2,
+            longitude: (bbox.minLongitude + bbox.maxLongitude) / 2
+        )
+        wrapper.moveCamera(latitude: center.latitude, longitude: center.longitude, zoom: nil)
+        return true
+    }
+
+    private static func executeSetConstraintBounds(
+        _ command: CameraCommand.SetConstraintBounds,
+        on wrapper: MapLibreViewWrapper
+    ) -> Bool {
+        let bbox = command.bounds
+        WWWLog.i("IOSMapBridge", "Setting camera constraint bounds")
+        WWWLog.d(
+            "IOSMapBridge",
+            """
+            Swift sees bbox: minLat=\(bbox.minLatitude), \
+            minLng=\(bbox.minLongitude), maxLat=\(bbox.maxLatitude), \
+            maxLng=\(bbox.maxLongitude)
+            """
+        )
+        return wrapper.setBoundsForCameraTarget(
+            swLat: bbox.minLatitude,
+            swLng: bbox.minLongitude,
+            neLat: bbox.maxLatitude,
+            neLng: bbox.maxLongitude
+        )
+    }
+
+    private static func executeSetMinZoom(
+        _ command: CameraCommand.SetMinZoom,
+        on wrapper: MapLibreViewWrapper
+    ) -> Bool {
+        WWWLog.i("IOSMapBridge", "Setting min zoom: \(command.minZoom)")
+        wrapper.setMinZoom(command.minZoom)
+        return true
+    }
+
+    private static func executeSetMaxZoom(
+        _ command: CameraCommand.SetMaxZoom,
+        on wrapper: MapLibreViewWrapper
+    ) -> Bool {
+        WWWLog.i("IOSMapBridge", "Setting max zoom: \(command.maxZoom)")
+        wrapper.setMaxZoom(command.maxZoom)
+        return true
     }
 }
