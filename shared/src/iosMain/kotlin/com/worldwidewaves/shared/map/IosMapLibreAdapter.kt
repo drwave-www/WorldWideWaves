@@ -17,6 +17,7 @@ import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import platform.UIKit.UIImage
+import kotlin.random.Random
 
 private const val TAG = "IosMapLibreAdapter"
 
@@ -165,14 +166,24 @@ class IosMapLibreAdapter(
         callback: MapCameraCallback?,
     ) {
         Log.d(TAG, "Animating camera to position: ${position.lat}, ${position.lng}, zoom=$zoom for event: $eventId")
+
+        // Generate unique callback ID for this animation
+        val callbackId =
+            if (callback != null) {
+                "$eventId-animate-${Random.nextLong()}"
+            } else {
+                null
+            }
+
+        // Store callback for async completion
+        if (callback != null && callbackId != null) {
+            MapWrapperRegistry.setCameraAnimationCallback(callbackId, callback)
+        }
+
         MapWrapperRegistry.setPendingCameraCommand(
             eventId,
-            CameraCommand.AnimateToPosition(position, zoom),
+            CameraCommand.AnimateToPosition(position, zoom, callbackId),
         )
-        // Note: Callback is invoked immediately. For proper callback timing,
-        // Swift would need to signal back through registry when animation completes.
-        // For now, immediate callback prevents blocking.
-        callback?.onFinish()
     }
 
     override fun animateCameraToBounds(
@@ -181,13 +192,24 @@ class IosMapLibreAdapter(
         callback: MapCameraCallback?,
     ) {
         Log.d(TAG, "Animating camera to bounds with padding: $padding for event: $eventId")
+
+        // Generate unique callback ID for this animation
+        val callbackId =
+            if (callback != null) {
+                "$eventId-bounds-${Random.nextLong()}"
+            } else {
+                null
+            }
+
+        // Store callback for async completion
+        if (callback != null && callbackId != null) {
+            MapWrapperRegistry.setCameraAnimationCallback(callbackId, callback)
+        }
+
         MapWrapperRegistry.setPendingCameraCommand(
             eventId,
-            CameraCommand.AnimateToBounds(bounds, padding),
+            CameraCommand.AnimateToBounds(bounds, padding, callbackId),
         )
-        // Note: Callback is invoked immediately. For proper callback timing,
-        // Swift would need to signal back through registry when animation completes.
-        callback?.onFinish()
     }
 
     override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
