@@ -403,8 +403,8 @@ object MapWrapperRegistry {
     // Store zoom levels that Swift can update
     private val minZoomLevels = mutableMapOf<String, Double>()
 
-    // Store camera idle listeners
-    private val cameraIdleListeners = mutableMapOf<String, () -> Unit>()
+    // Store camera idle listeners (support multiple listeners per event like Android)
+    private val cameraIdleListeners = mutableMapOf<String, MutableList<() -> Unit>>()
 
     // Store camera positions and zoom for StateFlow updates
     private val cameraPositions = mutableMapOf<String, Pair<Double, Double>>()
@@ -548,23 +548,35 @@ object MapWrapperRegistry {
 
     /**
      * Set camera idle listener for event.
+     * Supports multiple listeners like Android MapLibre API.
      */
     fun setCameraIdleListener(
         eventId: String,
         callback: () -> Unit,
     ) {
-        Log.d(TAG, "Setting camera idle listener for event: $eventId")
-        cameraIdleListeners[eventId] = callback
+        Log.d(TAG, "Adding camera idle listener for event: $eventId")
+        val listeners = cameraIdleListeners.getOrPut(eventId) { mutableListOf() }
+        listeners.add(callback)
+        Log.d(TAG, "Camera idle listeners for $eventId: ${listeners.size}")
     }
 
     /**
-     * Invoke camera idle listener (called from Swift).
+     * Invoke all camera idle listeners (called from Swift).
+     * Executes all registered callbacks in order.
      */
     fun invokeCameraIdleListener(eventId: String) {
-        val callback = cameraIdleListeners[eventId]
-        if (callback != null) {
-            Log.v(TAG, "Invoking camera idle callback for event: $eventId")
-            callback.invoke()
+        val listeners = cameraIdleListeners[eventId]
+        if (listeners == null || listeners.isEmpty()) {
+            return
+        }
+
+        Log.v(TAG, "Invoking ${listeners.size} camera idle callback(s) for event: $eventId")
+        listeners.forEach { callback ->
+            try {
+                callback.invoke()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error invoking camera idle callback for event: $eventId", throwable = e)
+            }
         }
     }
 

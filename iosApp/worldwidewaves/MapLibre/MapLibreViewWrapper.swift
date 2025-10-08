@@ -123,7 +123,7 @@ import Shared
 
         // Register immediate render callback (eliminates polling delay for polygons)
         Shared.MapWrapperRegistry.shared.setRenderCallback(eventId: eventId) { [weak self] in
-            guard let self = self else { return }
+            guard self != nil else { return }
             WWWLog.i(Self.tag, "🚀 Immediate render callback triggered for: \(eventId)")
             _ = IOSMapBridge.renderPendingPolygons(eventId: eventId)
         }
@@ -131,7 +131,7 @@ import Shared
 
         // Register immediate camera callback (eliminates polling delay for camera commands)
         Shared.MapWrapperRegistry.shared.setCameraCallback(eventId: eventId) { [weak self] in
-            guard let self = self else { return }
+            guard self != nil else { return }
             WWWLog.i(Self.tag, "📸 Immediate camera callback triggered for: \(eventId)")
             IOSMapBridge.executePendingCameraCommand(eventId: eventId)
         }
@@ -145,7 +145,7 @@ import Shared
             WWWLog.i(Self.tag, "👆 Registering map click navigation callback directly on wrapper")
             // Wrap Kotlin Unit-returning function to Swift Void
             self.setOnMapClickNavigationListener {
-                clickCallback()
+                _ = clickCallback()
             }
         }
         WWWLog.d(Self.tag, "Map click registration callback registered for: \(eventId)")

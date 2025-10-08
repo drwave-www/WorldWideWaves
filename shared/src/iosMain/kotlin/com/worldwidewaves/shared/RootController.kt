@@ -230,11 +230,8 @@ fun makeEventViewController(eventId: String): UIViewController =
                 IosEventMap(
                     event,
                     onMapClick = { enabler.openFullMapActivity(event.id) },
-                    mapConfig =
-                        EventMapConfig(
-                            initialCameraPosition = MapCameraPosition.WINDOW,
-                            autoTargetUserOnFirstLocation = false,
-                        ),
+                    // Default config (EVENT camera position) - gestures disabled, map shows event bounds
+                    // This matches Android's EventDetailActivity which uses default config
                 )
             },
             onFinish = finish,
