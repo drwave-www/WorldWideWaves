@@ -115,6 +115,8 @@ interface PlatformEnabler {
 
     fun openWaveActivity(eventId: String)
 
+    fun openFullMapActivity(eventId: String)
+
     fun toast(message: String)
 
     @Composable fun OpenUrl(url: String)

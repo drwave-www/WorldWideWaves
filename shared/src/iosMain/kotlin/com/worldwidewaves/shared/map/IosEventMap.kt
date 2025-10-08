@@ -23,6 +23,7 @@ package com.worldwidewaves.shared.map
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -90,6 +91,7 @@ class IosEventMap(
     private val onMapLoaded: () -> Unit = {},
     onLocationUpdate: (Position) -> Unit = {},
     mapConfig: EventMapConfig = EventMapConfig(),
+    private val onMapClick: (() -> Unit)? = null,
 ) : AbstractEventMap<UIImage>(event, mapConfig, onLocationUpdate) {
     // Create event-specific adapter instance (not singleton) to enable per-event camera control
     override val mapLibreAdapter: MapLibreAdapter<UIImage> =
@@ -216,7 +218,13 @@ class IosEventMap(
                             Log.i("IosEventMap", "Creating native map view controller for: ${event.id}")
                             createNativeMapViewController(event, styleURL!!) as platform.UIKit.UIViewController
                         },
-                        modifier = Modifier.fillMaxSize(),
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .clickable(enabled = onMapClick != null) {
+                                    Log.d("IosEventMap", "Map clicked for event: ${event.id}")
+                                    onMapClick?.invoke()
+                                },
                     )
                 }
             } else {
