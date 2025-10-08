@@ -19,114 +19,101 @@
 
 #!/usr/bin/env python3
 """
-Enhance iOS app icon with lighting effects.
-Adds subtle shine and depth while keeping full square format.
-iOS applies rounded corners automatically.
+Enhance iOS app icon with rounded corners and lighting effects.
+Creates iOS squircle shape with the design filling to the edges.
 """
 
 from PIL import Image, ImageDraw, ImageFilter, ImageEnhance
 import math
 
+def create_ios_squircle_mask(size):
+    """
+    Create iOS-style squircle (superellipse) mask.
+    Uses the actual iOS corner radius formula.
+    """
+    mask = Image.new('L', (size, size), 0)
+    draw = ImageDraw.Draw(mask)
+
+    # iOS uses approximately 22.5% corner radius
+    corner_radius = int(size * 0.225)
+
+    # Draw the rounded rectangle
+    draw.rounded_rectangle(
+        [0, 0, size, size],
+        radius=corner_radius,
+        fill=255
+    )
+
+    # Apply slight blur for anti-aliasing
+    mask = mask.filter(ImageFilter.GaussianBlur(1))
+
+    return mask
+
 def add_lighting_effects(img):
     """
-    Add subtle iOS-style lighting effects:
-    - Top shine/highlight
-    - Subtle radial glow from center
-    - Enhanced contrast and vibrancy
+    Add subtle lighting effects: top shine, center glow, enhanced colors.
     """
     size = img.size[0]
 
-    # Ensure RGBA mode
     if img.mode != 'RGBA':
         img = img.convert('RGBA')
 
-    # Create top shine gradient (subtle white from top)
+    # Top shine gradient
     shine = Image.new('RGBA', (size, size), (255, 255, 255, 0))
     draw = ImageDraw.Draw(shine)
 
-    # Gentle top-to-middle gradient
     for y in range(size // 2):
-        # Softer quadratic falloff
-        alpha = int(35 * (1 - y / (size // 2)) ** 1.5)
+        alpha = int(40 * (1 - y / (size // 2)) ** 1.8)
         draw.rectangle([0, y, size, y + 1], fill=(255, 255, 255, alpha))
 
     img = Image.alpha_composite(img, shine)
 
-    # Add subtle radial highlight from center
+    # Center radial glow
     radial = Image.new('RGBA', (size, size), (255, 255, 255, 0))
     center = size // 2
-    max_distance = math.sqrt(2) * center
 
-    for x in range(0, size, 2):  # Step by 2 for performance
+    for x in range(0, size, 2):
         for y in range(0, size, 2):
             distance = math.sqrt((x - center) ** 2 + (y - center) ** 2)
-            # Subtle glow in center area
-            if distance < center * 0.6:
-                alpha = int(15 * (1 - distance / (center * 0.6)) ** 2)
-                radial.putpixel((x, y), (255, 255, 255, alpha))
-                if x + 1 < size:
-                    radial.putpixel((x + 1, y), (255, 255, 255, alpha))
-                if y + 1 < size:
-                    radial.putpixel((x, y + 1), (255, 255, 255, alpha))
-                if x + 1 < size and y + 1 < size:
-                    radial.putpixel((x + 1, y + 1), (255, 255, 255, alpha))
+            if distance < center * 0.5:
+                alpha = int(18 * (1 - distance / (center * 0.5)) ** 2)
+                for dx in range(2):
+                    for dy in range(2):
+                        if x + dx < size and y + dy < size:
+                            radial.putpixel((x + dx, y + dy), (255, 255, 255, alpha))
 
-    radial = radial.filter(ImageFilter.GaussianBlur(30))
+    radial = radial.filter(ImageFilter.GaussianBlur(35))
     img = Image.alpha_composite(img, radial)
 
-    # Very subtle edge darkening for depth
-    vignette = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(vignette)
-
-    # Only darken the very edges
-    edge_size = size // 20
-    for i in range(edge_size):
-        alpha = int(8 * (edge_size - i) / edge_size)
-        # Top/bottom edges
-        draw.rectangle([0, i, size, i + 1], fill=(0, 0, 0, alpha))
-        draw.rectangle([0, size - i - 1, size, size - i], fill=(0, 0, 0, alpha))
-        # Left/right edges
-        draw.rectangle([i, 0, i + 1, size], fill=(0, 0, 0, alpha))
-        draw.rectangle([size - i - 1, 0, size - i, size], fill=(0, 0, 0, alpha))
-
-    vignette = vignette.filter(ImageFilter.GaussianBlur(15))
-    img = Image.alpha_composite(img, vignette)
-
-    # Enhance contrast moderately
-    enhancer = ImageEnhance.Contrast(img)
-    img = enhancer.enhance(1.15)
-
-    # Enhance color saturation
-    enhancer = ImageEnhance.Color(img)
-    img = enhancer.enhance(1.1)
-
-    # Slight brightness boost
-    enhancer = ImageEnhance.Brightness(img)
-    img = enhancer.enhance(1.05)
+    # Enhance visual quality
+    img = ImageEnhance.Contrast(img).enhance(1.18)
+    img = ImageEnhance.Color(img).enhance(1.12)
+    img = ImageEnhance.Brightness(img).enhance(1.05)
 
     return img
 
 def enhance_icon(input_path, output_path):
     """
-    Main function to enhance the icon with iOS styling.
-    Keeps full square format - iOS applies rounded corners.
+    Enhance icon with iOS squircle shape and lighting.
     """
     print(f"📱 Loading icon from {input_path}")
 
-    # Load the original image
     img = Image.open(input_path)
-
-    # Ensure square
     size = min(img.size)
-    img = img.crop((0, 0, size, size))
-    img = img.convert('RGBA')
+    img = img.crop((0, 0, size, size)).convert('RGBA')
 
     print(f"✨ Applying lighting effects...")
     img = add_lighting_effects(img)
 
-    print(f"💾 Saving enhanced icon to {output_path}")
+    print(f"🎨 Creating iOS squircle shape...")
+    mask = create_ios_squircle_mask(size)
+
+    # Apply mask for rounded corners
+    img.putalpha(mask)
+
+    print(f"💾 Saving to {output_path}")
     img.save(output_path, 'PNG')
-    print(f"✅ Icon enhanced successfully!")
+    print(f"✅ Done!")
 
     return img
 
@@ -142,4 +129,4 @@ if __name__ == '__main__':
         output_path = sys.argv[2]
 
     enhance_icon(input_path, output_path)
-    print(f"\n🎉 Enhanced icon ready at: {output_path}")
+    print(f"\n🎉 Enhanced icon ready: {output_path}")
