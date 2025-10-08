@@ -6,7 +6,7 @@
  */
 
 // Note: File exceeds limits due to comprehensive camera command handling
-// swiftlint:disable file_length
+// swiftlint:disable file_length type_body_length
 
 import Foundation
 import Shared
@@ -618,3 +618,5 @@ import CoreLocation
         return true
     }
 }
+
+// swiftlint:enable file_length type_body_length
