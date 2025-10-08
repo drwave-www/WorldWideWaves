@@ -352,29 +352,29 @@ import CoreLocation
             let bbox = animateBounds.bounds
             WWWLog.i("IOSMapBridge", "Animating to bounds with padding: \(animateBounds.padding)")
             wrapper.animateCameraToBounds(
-                swLat: bbox.minLat,
-                swLng: bbox.minLng,
-                neLat: bbox.maxLat,
-                neLng: bbox.maxLng,
-                padding: Int32(animateBounds.padding),
+                swLat: bbox.minLatitude,
+                swLng: bbox.minLongitude,
+                neLat: bbox.maxLatitude,
+                neLng: bbox.maxLongitude,
+                padding: Int(animateBounds.padding),
                 callback: nil
             )
         } else if let moveBounds = command as? CameraCommand.MoveToBounds {
             let bbox = moveBounds.bounds
             WWWLog.i("IOSMapBridge", "Moving to bounds")
             let center = CLLocationCoordinate2D(
-                latitude: (bbox.minLat + bbox.maxLat) / 2,
-                longitude: (bbox.minLng + bbox.maxLng) / 2
+                latitude: (bbox.minLatitude + bbox.maxLatitude) / 2,
+                longitude: (bbox.minLongitude + bbox.maxLongitude) / 2
             )
             wrapper.moveCamera(latitude: center.latitude, longitude: center.longitude, zoom: nil)
         } else if let constraintBounds = command as? CameraCommand.SetConstraintBounds {
             let bbox = constraintBounds.bounds
             WWWLog.i("IOSMapBridge", "Setting camera constraint bounds")
             wrapper.setBoundsForCameraTarget(
-                swLat: bbox.minLat,
-                swLng: bbox.minLng,
-                neLat: bbox.maxLat,
-                neLng: bbox.maxLng
+                swLat: bbox.minLatitude,
+                swLng: bbox.minLongitude,
+                neLat: bbox.maxLatitude,
+                neLng: bbox.maxLongitude
             )
         }
     }
