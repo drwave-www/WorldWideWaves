@@ -97,6 +97,7 @@ class IosEventMap(
     private val mapScope = CoroutineScope(SupervisorJob())
     private var setupMapCalled = false
 
+    @OptIn(ExperimentalForeignApi::class)
     override fun updateWavePolygons(
         wavePolygons: List<Polygon>,
         clearPolygons: Boolean,
@@ -110,12 +111,30 @@ class IosEventMap(
 
         Log.d("IosEventMap", "iOS map now tracking ${currentPolygons.size} wave polygons")
 
-        // Store polygon data in registry AND trigger immediate render callback
-        storePolygonsForRendering(wavePolygons, clearPolygons)
-
-        // Request immediate render (Swift wrapper will be notified via callback)
-        MapWrapperRegistry.requestImmediateRender(event.id)
-        Log.v("IosEventMap", "✅ Polygons stored and immediate render requested")
+        // Try to render synchronously to prevent flickering (like Android's runOnUiThread)
+        val wrapper = MapWrapperRegistry.getWrapper(event.id)
+        if (wrapper != null && MapWrapperRegistry.isStyleLoaded(event.id)) {
+            // Wrapper is ready - render synchronously on main thread (prevents flicker)
+            Log.d("IosEventMap", "Rendering polygons synchronously on main thread")
+            platform.darwin.dispatch_sync(platform.darwin.dispatch_get_main_queue()) {
+                // Convert and render directly (no async callback delay)
+                storePolygonsForRendering(wavePolygons, clearPolygons)
+                // Trigger render callback synchronously to execute in this frame
+                val renderCallback = MapWrapperRegistry.getRenderCallback(event.id)
+                if (renderCallback != null) {
+                    renderCallback.invoke()
+                    Log.v("IosEventMap", "Synchronous render callback executed")
+                } else {
+                    Log.w("IosEventMap", "No render callback registered, polygons queued for async render")
+                }
+            }
+        } else {
+            // Wrapper not ready - fall back to async rendering (initial load case)
+            Log.d("IosEventMap", "Wrapper not ready, using async rendering (initial load)")
+            storePolygonsForRendering(wavePolygons, clearPolygons)
+            MapWrapperRegistry.requestImmediateRender(event.id)
+        }
+        Log.v("IosEventMap", "✅ Polygon update completed")
     }
 
     private fun storePolygonsForRendering(

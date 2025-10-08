@@ -356,6 +356,9 @@ abstract class AbstractEventMap<T>(
             // Set Attribution margins to 0
             mapLibreAdapter.setAttributionMargins(0, 0, 0, 0)
 
+            // Enable location component to show user position marker
+            mapLibreAdapter.enableLocationComponent(true)
+
             // Add an explicit zone if area bbox has been overridden regarding the GEOJson standard area
             if (event.area.bboxIsOverride) {
                 scope.launch {
@@ -426,6 +429,9 @@ abstract class AbstractEventMap<T>(
 
         if (lastKnownPosition == null || lastKnownPosition != position) {
             // Position is now managed by PositionManager through unified system
+
+            // Update visual location marker on map (important for iOS simulation)
+            mapLibreAdapter.setUserPosition(position)
 
             // Notify caller
             onLocationUpdate(position)

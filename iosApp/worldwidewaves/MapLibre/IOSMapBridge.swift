@@ -320,6 +320,27 @@ import CoreLocation
         wrapper.setUserPosition(latitude: latitude, longitude: longitude)
     }
 
+    /// Enable or disable the user location component.
+    ///
+    /// ## Purpose
+    /// Controls the visibility of the user position marker on the map.
+    /// When enabled, displays the native MapLibre location marker.
+    ///
+    /// - Parameters:
+    ///   - eventId: Event identifier to locate the wrapper
+    ///   - enabled: Whether to enable the location component
+    /// - Important: Must be called on main thread
+    /// - Note: Called from Kotlin via @objc bridge
+    @objc public static func enableLocationComponent(eventId: String, enabled: Bool) {
+        guard let wrapper = Shared.MapWrapperRegistry.shared.getWrapper(eventId: eventId) as? MapLibreViewWrapper else {
+            WWWLog.w("IOSMapBridge", "No wrapper found for event: \(eventId)")
+            return
+        }
+
+        WWWLog.i("IOSMapBridge", "enableLocationComponent: \(enabled) for event: \(eventId)")
+        wrapper.enableLocationComponent(enabled)
+    }
+
     /// Updates event metadata for VoiceOver accessibility.
     ///
     /// ## Purpose

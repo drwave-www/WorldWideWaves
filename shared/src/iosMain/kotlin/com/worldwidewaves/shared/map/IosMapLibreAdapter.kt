@@ -328,4 +328,16 @@ class IosMapLibreAdapter(
             MapWrapperRegistry.invokeMapReadyCallbacks(eventId)
         }
     }
+
+    override fun enableLocationComponent(enabled: Boolean) {
+        Log.i(TAG, "enableLocationComponent: $enabled for event: $eventId")
+        // Call Swift wrapper via registry callback
+        MapWrapperRegistry.enableLocationComponentOnWrapper(eventId, enabled)
+    }
+
+    override fun setUserPosition(position: Position) {
+        Log.v(TAG, "setUserPosition: (${position.lat}, ${position.lng}) for event: $eventId")
+        // Call Swift wrapper via registry callback
+        MapWrapperRegistry.setUserPositionOnWrapper(eventId, position.lat, position.lng)
+    }
 }

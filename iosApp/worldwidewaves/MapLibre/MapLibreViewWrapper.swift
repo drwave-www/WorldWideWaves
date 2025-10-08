@@ -158,6 +158,21 @@ import Shared
             Shared.MapWrapperRegistry.shared.updateActualMinZoom(eventId: eventId, actualMinZoom: actualMinZoom)
         }
         WWWLog.d(Self.tag, "getActualMinZoom callback registered for: \(eventId)")
+
+        // Register location component callback (enables user position marker control)
+        Shared.MapWrapperRegistry.shared.setLocationComponentCallback(eventId: eventId) { [weak self] enabled in
+            guard let self = self else { return }
+            WWWLog.i(Self.tag, "Location component callback: \(enabled) for: \(eventId)")
+            self.enableLocationComponent(enabled)
+        }
+        WWWLog.d(Self.tag, "Location component callback registered for: \(eventId)")
+
+        // Register setUserPosition callback (receives position updates from PositionManager)
+        Shared.MapWrapperRegistry.shared.setUserPositionCallback(eventId: eventId) { [weak self] latitude, longitude in
+            guard let self = self else { return }
+            self.setUserPosition(latitude: latitude, longitude: longitude)
+        }
+        WWWLog.d(Self.tag, "User position callback registered for: \(eventId)")
     }
 
     @objc public func setStyle(styleURL: String, completion: @escaping () -> Void) {

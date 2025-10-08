@@ -204,6 +204,8 @@ object MapWrapperRegistry {
         cameraIdleListeners.remove(eventId)
         onMapReadyCallbacks.remove(eventId)
         styleLoadedStates.remove(eventId)
+        locationComponentCallbacks.remove(eventId)
+        setUserPositionCallbacks.remove(eventId)
 
         Log.i(TAG, "✅ Wrapper unregistered and cleanup complete for: $eventId")
     }
@@ -741,6 +743,71 @@ object MapWrapperRegistry {
     }
 
     /**
+     * Get the registered render callback for an event.
+     * Used for synchronous polygon rendering.
+     */
+    fun getRenderCallback(eventId: String): (() -> Unit)? = renderCallbacks[eventId]
+
+    // Store callbacks for location component control
+    private val locationComponentCallbacks = mutableMapOf<String, (Boolean) -> Unit>()
+    private val setUserPositionCallbacks = mutableMapOf<String, (Double, Double) -> Unit>()
+
+    /**
+     * Register callback for enabling/disabling location component.
+     * Swift wrapper registers this to receive location component enable/disable commands.
+     */
+    fun setLocationComponentCallback(
+        eventId: String,
+        callback: (Boolean) -> Unit,
+    ) {
+        locationComponentCallbacks[eventId] = callback
+    }
+
+    /**
+     * Register callback for setting user position.
+     * Swift wrapper registers this to receive user position updates.
+     */
+    fun setUserPositionCallback(
+        eventId: String,
+        callback: (Double, Double) -> Unit,
+    ) {
+        setUserPositionCallbacks[eventId] = callback
+    }
+
+    /**
+     * Enable or disable location component on the map wrapper.
+     */
+    fun enableLocationComponentOnWrapper(
+        eventId: String,
+        enabled: Boolean,
+    ) {
+        val callback = locationComponentCallbacks[eventId]
+        if (callback != null) {
+            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+                callback.invoke(enabled)
+            }
+        } else {
+            Log.w(TAG, "No location component callback registered for event: $eventId")
+        }
+    }
+
+    /**
+     * Update user position on the map wrapper.
+     */
+    fun setUserPositionOnWrapper(
+        eventId: String,
+        latitude: Double,
+        longitude: Double,
+    ) {
+        val callback = setUserPositionCallbacks[eventId]
+        if (callback != null) {
+            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+                callback.invoke(latitude, longitude)
+            }
+        }
+    }
+
+    /**
      * Request immediate render of pending polygons.
      * Invokes the registered render callback if available.
      * Called from Kotlin when polygons are updated.
@@ -836,5 +903,7 @@ object MapWrapperRegistry {
         cameraAnimationCallbacks.clear()
         onMapReadyCallbacks.clear()
         styleLoadedStates.clear()
+        locationComponentCallbacks.clear()
+        setUserPositionCallbacks.clear()
     }
 }

@@ -127,6 +127,8 @@ class AbstractEventMapTest : KoinTest {
             thirdArg<MapCameraCallback?>()?.onFinish()
         }
         coEvery { mockMapLibreAdapter.drawOverridenBbox(any()) } just Runs
+        every { mockMapLibreAdapter.enableLocationComponent(any()) } just Runs
+        every { mockMapLibreAdapter.setUserPosition(any()) } just Runs
 
         // Setup mock LocationProvider
         mockLocationProvider = mockk()
