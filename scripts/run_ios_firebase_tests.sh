@@ -119,19 +119,24 @@ echo "  XCTestRun: ${XCTESTRUN_PATH}"
 # Firebase Test Lab expects: .xctestrun in root + Build/Products directory structure
 ZIP_NAME="worldwidewaves_tests_${TIMESTAMP}.zip"
 
-# Copy .xctestrun to Build directory root so it's at the right level
-cp "${XCTESTRUN_PATH}" build/
+# Create temporary directory for proper zip structure
+TEMP_DIR="build/firebase_test_bundle"
+rm -rf "${TEMP_DIR}"
+mkdir -p "${TEMP_DIR}"
 
-# Create zip from build directory - this preserves Build/Products structure
-cd build
-XCTESTRUN_FILENAME=$(basename "${XCTESTRUN_PATH}")
+# Copy .xctestrun to temp root (Firebase expects it at zip root)
+cp "${XCTESTRUN_PATH}" "${TEMP_DIR}/"
 
-# Use ditto (macOS native tool) which properly handles .app bundles and extended attributes
-# This creates a zip-compatible archive that preserves all iOS app bundle structure
-ditto -c -k --sequesterRsrc --keepParent "Build" "${ZIP_NAME}.tmp"
-# Add .xctestrun file to the archive
-zip -u "${ZIP_NAME}.tmp" "${XCTESTRUN_FILENAME}"
-mv "${ZIP_NAME}.tmp" "${ZIP_NAME}"
+# Copy Build directory to temp (preserves full structure)
+cp -R "build/Build" "${TEMP_DIR}/"
+
+# Create zip from temp directory using ditto (preserves extended attributes)
+cd build/firebase_test_bundle
+ditto -c -k --sequesterRsrc --keepParent "." "../${ZIP_NAME}"
+cd ../..
+
+# Cleanup temp directory
+rm -rf "${TEMP_DIR}"
 
 echo -e "${GREEN}✅ Test bundle created: ${ZIP_NAME}${NC}"
 
