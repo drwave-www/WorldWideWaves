@@ -143,7 +143,10 @@ import Shared
         ) { [weak self] clickCallback in
             guard let self = self else { return }
             WWWLog.i(Self.tag, "👆 Registering map click navigation callback directly on wrapper")
-            self.setOnMapClickNavigationListener(clickCallback)
+            // Wrap Kotlin Unit-returning function to Swift Void
+            self.setOnMapClickNavigationListener {
+                clickCallback()
+            }
         }
         WWWLog.d(Self.tag, "Map click registration callback registered for: \(eventId)")
     }
@@ -872,10 +875,10 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
             // Update visible region in registry (for getVisibleRegion calls)
             let bounds = mapView.visibleCoordinateBounds
             let bbox = BoundingBox(
-                minLatitude: bounds.sw.latitude,
-                minLongitude: bounds.sw.longitude,
-                maxLatitude: bounds.ne.latitude,
-                maxLongitude: bounds.ne.longitude
+                swLat: bounds.sw.latitude,
+                swLng: bounds.sw.longitude,
+                neLat: bounds.ne.latitude,
+                neLng: bounds.ne.longitude
             )
             Shared.MapWrapperRegistry.shared.updateVisibleRegion(eventId: eventId, bbox: bbox)
 

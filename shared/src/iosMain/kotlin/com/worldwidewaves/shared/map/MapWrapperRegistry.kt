@@ -214,7 +214,8 @@ object MapWrapperRegistry {
     ) {
         val commandDetails =
             when (command) {
-                is CameraCommand.AnimateToPosition -> "AnimateToPosition(${command.position.lat},${command.position.lng},zoom=${command.zoom})"
+                is CameraCommand.AnimateToPosition ->
+                    "AnimateToPosition(${command.position.lat},${command.position.lng},zoom=${command.zoom})"
                 is CameraCommand.AnimateToBounds -> "AnimateToBounds(padding=${command.padding})"
                 is CameraCommand.MoveToBounds -> "MoveToBounds"
                 is CameraCommand.SetConstraintBounds -> "SetConstraintBounds"
@@ -461,6 +462,7 @@ object MapWrapperRegistry {
     /**
      * Draw debug bounding box overlay (for testing constraint bounds).
      */
+    @Suppress("UnusedParameter")
     fun drawDebugBbox(
         eventId: String,
         bbox: BoundingBox,
@@ -472,6 +474,7 @@ object MapWrapperRegistry {
                 // Swift wrapper will handle drawing via IOSMapBridge or direct call
                 Log.i(TAG, "Debug bbox draw dispatched for: $eventId")
                 // Note: Swift wrapper already has drawOverrideBbox() method at line 438
+                // bbox parameter available for future use in direct Swift call
             }
         }
     }
