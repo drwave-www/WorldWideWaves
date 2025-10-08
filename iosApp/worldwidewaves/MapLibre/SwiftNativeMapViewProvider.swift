@@ -97,12 +97,11 @@ public class SwiftNativeMapViewProvider: NativeMapViewProvider {
         WWWLog.i("SwiftNativeMapViewProvider", "Creating MapLibre map view for: \(event.id), registryKey: \(key)")
         WWWLog.d("SwiftNativeMapViewProvider", "Style URL: \(styleURL), enableGestures: \(enableGestures)")
 
-        // Use Swift MapViewBridge instead of ObjC WWWMapViewBridge
-        let viewController = MapViewBridge.createMapViewController(
+        // Use Swift MapViewBridge.createMapViewControllerWithWrapper (not the @objc version)
+        let viewController = MapViewBridge.createMapViewControllerWithWrapper(
             for: event,
             styleURL: styleURL,
             enableGestures: enableGestures,
-            wrapperRef: nil,
             registryKey: key
         )
 

@@ -162,15 +162,18 @@ import Shared
         // Register location component callback (enables user position marker control)
         Shared.MapWrapperRegistry.shared.setLocationComponentCallback(eventId: eventId) { [weak self] enabled in
             guard let self = self else { return }
-            WWWLog.i(Self.tag, "Location component callback: \(enabled) for: \(eventId)")
-            self.enableLocationComponent(enabled)
+            let swiftEnabled = enabled.boolValue  // Convert KotlinBoolean to Bool
+            WWWLog.i(Self.tag, "Location component callback: \(swiftEnabled) for: \(eventId)")
+            self.enableLocationComponent(swiftEnabled)
         }
         WWWLog.d(Self.tag, "Location component callback registered for: \(eventId)")
 
         // Register setUserPosition callback (receives position updates from PositionManager)
         Shared.MapWrapperRegistry.shared.setUserPositionCallback(eventId: eventId) { [weak self] latitude, longitude in
             guard let self = self else { return }
-            self.setUserPosition(latitude: latitude, longitude: longitude)
+            let swiftLat = latitude.doubleValue  // Convert KotlinDouble to Double
+            let swiftLng = longitude.doubleValue
+            self.setUserPosition(latitude: swiftLat, longitude: swiftLng)
         }
         WWWLog.d(Self.tag, "User position callback registered for: \(eventId)")
     }
