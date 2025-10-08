@@ -91,9 +91,9 @@ class IosEventMap(
     onLocationUpdate: (Position) -> Unit = {},
     mapConfig: EventMapConfig = EventMapConfig(),
 ) : AbstractEventMap<UIImage>(event, mapConfig, onLocationUpdate) {
-    // Use safe iOS dependency injection pattern
+    // Create event-specific adapter instance (not singleton) to enable per-event camera control
     override val mapLibreAdapter: MapLibreAdapter<UIImage> =
-        KoinPlatform.getKoin().get<MapLibreAdapter<UIImage>>()
+        IosMapLibreAdapter(event.id)
     override val locationProvider: LocationProvider? =
         KoinPlatform.getKoin().getOrNull<LocationProvider>()
 

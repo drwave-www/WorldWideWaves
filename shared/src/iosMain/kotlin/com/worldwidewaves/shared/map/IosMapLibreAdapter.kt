@@ -26,17 +26,21 @@ private const val DEFAULT_HEIGHT = 812.0
 /**
  * iOS implementation of MapLibreAdapter using iOS MapLibre SDK via Swift wrapper.
  *
- * This adapter bridges Kotlin shared logic to Swift MapLibreViewWrapper.
- * The Swift wrapper (MapLibreViewWrapper from iosApp) is passed via setMap()
- * as an NSObject and methods are called via Kotlin/Native ObjC interop.
+ * This adapter bridges Kotlin shared logic to Swift MapLibreViewWrapper via MapWrapperRegistry.
+ * Camera commands are stored in the registry and polled/executed by Swift.
  *
  * Architecture:
- * - Kotlin (this class) ← ObjC interop → Swift (@objc MapLibreViewWrapper) ← → MapLibre SDK
+ * - Kotlin (this class) → MapWrapperRegistry (camera commands) → Swift MapLibreViewWrapper → MapLibre SDK
  *
- * The wrapper must be an @objc Swift class with @objc methods to be callable from Kotlin.
+ * Similar to polygon rendering, camera commands use the registry pattern for Kotlin-Swift coordination.
+ *
+ * Note: Each IosEventMap creates its own adapter instance with event-specific ID for
+ * proper camera command routing through the registry.
  */
-class IosMapLibreAdapter : MapLibreAdapter<Any> {
-    // Wrapper instance (currently not used - map rendering happens via SwiftUI in IosEventMap)
+class IosMapLibreAdapter(
+    private val eventId: String,
+) : MapLibreAdapter<Any> {
+    // Wrapper instance (not directly used - commands go through MapWrapperRegistry)
     private var wrapper: Any? = null
 
     private val _currentPosition = MutableStateFlow<Position?>(null)
@@ -46,12 +50,12 @@ class IosMapLibreAdapter : MapLibreAdapter<Any> {
     override val currentZoom: StateFlow<Double> = _currentZoom
 
     /**
-     * Sets the map wrapper (not used in current hybrid architecture).
+     * Sets the map wrapper.
      * Map rendering happens via SwiftUI EventMapView embedded in Compose.
      */
     override fun setMap(map: Any) {
         this.wrapper = map
-        Log.d(TAG, "Map wrapper set (not used - rendering via SwiftUI)")
+        Log.d(TAG, "Map wrapper set for eventId: $eventId")
     }
 
     override fun setStyle(
@@ -113,12 +117,11 @@ class IosMapLibreAdapter : MapLibreAdapter<Any> {
     }
 
     override fun moveCamera(bounds: BoundingBox) {
-        if (wrapper != null) {
-            Log.d("IosMapLibreAdapter", "Moving camera to bounds")
-
-            // NOTE: Implement iOS MapLibre camera movement
-            // Will be implemented via cinterop bindings
-        }
+        Log.d(TAG, "Moving camera to bounds for event: $eventId")
+        MapWrapperRegistry.setPendingCameraCommand(
+            eventId,
+            CameraCommand.MoveToBounds(bounds),
+        )
     }
 
     override fun animateCamera(
@@ -126,14 +129,15 @@ class IosMapLibreAdapter : MapLibreAdapter<Any> {
         zoom: Double?,
         callback: MapCameraCallback?,
     ) {
-        if (wrapper != null) {
-            Log.d("IosMapLibreAdapter", "Animating camera to position: ${position.lat}, ${position.lng}")
-
-            // NOTE: Implement iOS MapLibre camera animation
-            // Will be implemented via cinterop bindings
-
-            callback?.onFinish()
-        }
+        Log.d(TAG, "Animating camera to position: ${position.lat}, ${position.lng}, zoom=$zoom for event: $eventId")
+        MapWrapperRegistry.setPendingCameraCommand(
+            eventId,
+            CameraCommand.AnimateToPosition(position, zoom),
+        )
+        // Note: Callback is invoked immediately. For proper callback timing,
+        // Swift would need to signal back through registry when animation completes.
+        // For now, immediate callback prevents blocking.
+        callback?.onFinish()
     }
 
     override fun animateCameraToBounds(
@@ -141,21 +145,22 @@ class IosMapLibreAdapter : MapLibreAdapter<Any> {
         padding: Int,
         callback: MapCameraCallback?,
     ) {
-        if (wrapper != null) {
-            Log.d("IosMapLibreAdapter", "Animating camera to bounds with padding: $padding")
-
-            // NOTE: Implement iOS MapLibre bounds animation
-            // Will be implemented via cinterop bindings
-
-            callback?.onFinish()
-        }
+        Log.d(TAG, "Animating camera to bounds with padding: $padding for event: $eventId")
+        MapWrapperRegistry.setPendingCameraCommand(
+            eventId,
+            CameraCommand.AnimateToBounds(bounds, padding),
+        )
+        // Note: Callback is invoked immediately. For proper callback timing,
+        // Swift would need to signal back through registry when animation completes.
+        callback?.onFinish()
     }
 
     override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
-        Log.d("IosMapLibreAdapter", "Setting camera constraint bounds")
-
-        // NOTE: Implement iOS MapLibre camera constraints
-        // Set bounds within which the camera can move
+        Log.d(TAG, "Setting camera constraint bounds for event: $eventId")
+        MapWrapperRegistry.setPendingCameraCommand(
+            eventId,
+            CameraCommand.SetConstraintBounds(constraintBounds),
+        )
     }
 
     override fun getMinZoomLevel(): Double {
@@ -195,14 +200,10 @@ class IosMapLibreAdapter : MapLibreAdapter<Any> {
         polygons: List<Any>,
         clearExisting: Boolean,
     ) {
-        if (wrapper != null) {
-            Log.d("IosMapLibreAdapter", "Adding ${polygons.size} wave polygons, clearExisting: $clearExisting")
-
-            // NOTE: Implement iOS MapLibre polygon rendering
-            // Will be implemented via cinterop bindings
-            // Convert polygons to iOS MapLibre format and add to map
-            // Handle clearExisting flag to remove previous polygons
-        }
+        Log.d(TAG, "addWavePolygons called - delegated to IosEventMap.updateWavePolygons()")
+        // Note: Polygon rendering is handled by IosEventMap.updateWavePolygons()
+        // which stores polygons in MapWrapperRegistry for Swift to render.
+        // This method is not called in the current iOS architecture.
     }
 
     override fun setOnMapClickListener(listener: ((Double, Double) -> Unit)?) {

@@ -287,4 +287,95 @@ import CoreLocation
             eventName: eventName
         )
     }
+
+    // MARK: - Camera Control
+
+    /// Checks for pending camera commands and executes them if found.
+    ///
+    /// ## Purpose
+    /// Solves the timing problem where Kotlin camera control logic may issue commands
+    /// before the Swift map view is ready. Kotlin stores camera commands in the registry,
+    /// and Swift periodically checks for and executes them.
+    ///
+    /// ## Supported Commands
+    /// - **AnimateToPosition**: Animate to specific lat/lng with optional zoom
+    /// - **AnimateToBounds**: Animate to fit bounding box with padding
+    /// - **MoveToBounds**: Move (non-animated) to bounding box
+    /// - **SetConstraintBounds**: Set camera movement constraints
+    ///
+    /// ## Threading Model
+    /// Main thread only (MapLibre/UIKit requirement)
+    ///
+    /// ## Error Handling
+    /// If no wrapper or command found:
+    /// - Returns silently
+    /// - Commands remain pending for future retry
+    ///
+    /// - Parameters:
+    ///   - eventId: Unique event identifier (registry key)
+    /// - Important: Must be called on main thread
+    /// - Important: Call periodically after map initialization (e.g., from EventMapView.updateUIView)
+    @objc public static func executePendingCameraCommand(eventId: String) {
+        guard let wrapper = Shared.MapWrapperRegistry.shared.getWrapper(eventId: eventId) as? MapLibreViewWrapper else {
+            return
+        }
+
+        guard Shared.MapWrapperRegistry.shared.hasPendingCameraCommand(eventId: eventId) else {
+            return
+        }
+
+        guard let command = Shared.MapWrapperRegistry.shared.getPendingCameraCommand(eventId: eventId) else {
+            return
+        }
+
+        WWWLog.d("IOSMapBridge", "Executing camera command for event: \(eventId)")
+        executeCommand(command, on: wrapper)
+
+        // Clear command after execution
+        Shared.MapWrapperRegistry.shared.clearPendingCameraCommand(eventId: eventId)
+        WWWLog.d("IOSMapBridge", "Camera command executed and cleared for event: \(eventId)")
+    }
+
+    /// Executes a specific camera command on the wrapper.
+    private static func executeCommand(_ command: CameraCommand, on wrapper: MapLibreViewWrapper) {
+        if let animateToPos = command as? CameraCommand.AnimateToPosition {
+            let zoom = animateToPos.zoom?.doubleValue
+            let pos = animateToPos.position
+            WWWLog.i("IOSMapBridge", "Animating to position: \(pos.lat), \(pos.lng), zoom=\(zoom ?? -1)")
+            wrapper.animateCamera(
+                latitude: animateToPos.position.lat,
+                longitude: animateToPos.position.lng,
+                zoom: zoom as NSNumber?,
+                callback: nil
+            )
+        } else if let animateBounds = command as? CameraCommand.AnimateToBounds {
+            let bbox = animateBounds.bounds
+            WWWLog.i("IOSMapBridge", "Animating to bounds with padding: \(animateBounds.padding)")
+            wrapper.animateCameraToBounds(
+                swLat: bbox.minLat,
+                swLng: bbox.minLng,
+                neLat: bbox.maxLat,
+                neLng: bbox.maxLng,
+                padding: Int32(animateBounds.padding),
+                callback: nil
+            )
+        } else if let moveBounds = command as? CameraCommand.MoveToBounds {
+            let bbox = moveBounds.bounds
+            WWWLog.i("IOSMapBridge", "Moving to bounds")
+            let center = CLLocationCoordinate2D(
+                latitude: (bbox.minLat + bbox.maxLat) / 2,
+                longitude: (bbox.minLng + bbox.maxLng) / 2
+            )
+            wrapper.moveCamera(latitude: center.latitude, longitude: center.longitude, zoom: nil)
+        } else if let constraintBounds = command as? CameraCommand.SetConstraintBounds {
+            let bbox = constraintBounds.bounds
+            WWWLog.i("IOSMapBridge", "Setting camera constraint bounds")
+            wrapper.setBoundsForCameraTarget(
+                swLat: bbox.minLat,
+                swLng: bbox.minLng,
+                neLat: bbox.maxLat,
+                neLng: bbox.maxLng
+            )
+        }
+    }
 }

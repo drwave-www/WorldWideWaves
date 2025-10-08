@@ -10,6 +10,8 @@ package com.worldwidewaves.shared.map
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
+import com.worldwidewaves.shared.events.utils.BoundingBox
+import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.utils.Log
 import platform.Foundation.NSDate
 import platform.Foundation.timeIntervalSince1970
@@ -17,7 +19,30 @@ import kotlin.experimental.ExperimentalNativeApi
 import kotlin.native.ref.WeakReference
 
 /**
- * Registry to store MapLibreViewWrapper instances and polygon data.
+ * Camera command types for iOS map control.
+ */
+sealed class CameraCommand {
+    data class AnimateToPosition(
+        val position: Position,
+        val zoom: Double?,
+    ) : CameraCommand()
+
+    data class AnimateToBounds(
+        val bounds: BoundingBox,
+        val padding: Int = 0,
+    ) : CameraCommand()
+
+    data class MoveToBounds(
+        val bounds: BoundingBox,
+    ) : CameraCommand()
+
+    data class SetConstraintBounds(
+        val bounds: BoundingBox,
+    ) : CameraCommand()
+}
+
+/**
+ * Registry to store MapLibreViewWrapper instances, polygon data, and camera commands.
  * This allows coordination between Kotlin (IosEventMap) and Swift (MapLibreViewWrapper).
  *
  * Architecture:
@@ -54,6 +79,9 @@ object MapWrapperRegistry {
 
     // Store pending polygon data that Swift will render
     private val pendingPolygons = mutableMapOf<String, PendingPolygonData>()
+
+    // Store pending camera commands that Swift will execute
+    private val pendingCameraCommands = mutableMapOf<String, CameraCommand>()
 
     /**
      * Evict the least recently used entry if cache is full.
@@ -181,12 +209,46 @@ object MapWrapperRegistry {
     }
 
     /**
+     * Store a camera command to be executed.
+     * Called from Kotlin when camera needs to be controlled.
+     */
+    fun setPendingCameraCommand(
+        eventId: String,
+        command: CameraCommand,
+    ) {
+        Log.i(TAG, "Storing camera command for event: $eventId, command=${command::class.simpleName}")
+        pendingCameraCommands[eventId] = command
+    }
+
+    /**
+     * Get pending camera command for an event.
+     * Swift calls this to retrieve camera commands that need to be executed.
+     * Returns null if no pending commands.
+     */
+    fun getPendingCameraCommand(eventId: String): CameraCommand? = pendingCameraCommands[eventId]
+
+    /**
+     * Check if there is a pending camera command for an event.
+     */
+    fun hasPendingCameraCommand(eventId: String): Boolean = pendingCameraCommands.containsKey(eventId)
+
+    /**
+     * Clear pending camera command after it's been executed.
+     * Swift calls this after successfully executing the command.
+     */
+    fun clearPendingCameraCommand(eventId: String) {
+        Log.v(TAG, "Clearing pending camera command for event: $eventId")
+        pendingCameraCommands.remove(eventId)
+    }
+
+    /**
      * Clear all registered wrappers and pending data.
      * Useful for cleanup during app termination or testing.
      */
     fun clear() {
-        Log.d(TAG, "Clearing all registered wrappers and pending polygons")
+        Log.d(TAG, "Clearing all registered wrappers, pending polygons, and camera commands")
         wrappers.clear()
         pendingPolygons.clear()
+        pendingCameraCommands.clear()
     }
 }

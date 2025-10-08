@@ -10,6 +10,8 @@
 		C125F0372E8C7A4D00AAD24C /* MapLibre in Frameworks */ = {isa = PBXBuildFile; productRef = C125F0362E8C7A4D00AAD24C /* MapLibre */; };
 		C17B465A2E8999FF0097A3A5 /* Shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C17B46592E8999FF0097A3A5 /* Shared.framework */; };
 		C17B465B2E8999FF0097A3A5 /* Shared.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C17B46592E8999FF0097A3A5 /* Shared.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C1A719F62E969281005B6CD9 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = C1A719F52E969281005B6CD9 /* FirebaseAnalytics */; };
+		C1A719F82E969281005B6CD9 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = C1A719F72E969281005B6CD9 /* FirebaseCrashlytics */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -167,7 +169,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				C125F0372E8C7A4D00AAD24C /* MapLibre in Frameworks */,
+				C1A719F82E969281005B6CD9 /* FirebaseCrashlytics in Frameworks */,
 				C17B465A2E8999FF0097A3A5 /* Shared.framework in Frameworks */,
+				C1A719F62E969281005B6CD9 /* FirebaseAnalytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -231,6 +235,8 @@
 			name = worldwidewaves;
 			packageProductDependencies = (
 				C125F0362E8C7A4D00AAD24C /* MapLibre */,
+				C1A719F52E969281005B6CD9 /* FirebaseAnalytics */,
+				C1A719F72E969281005B6CD9 /* FirebaseCrashlytics */,
 			);
 			productName = worldwidewaves;
 			productReference = C17B3C762E886C610097A3A5 /* worldwidewaves.app */;
@@ -331,6 +337,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				C125F0352E8C7A4D00AAD24C /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */,
+				C1A719F42E969281005B6CD9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C17B3C772E886C610097A3A5 /* Products */;
@@ -550,6 +557,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -589,6 +597,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -689,6 +698,14 @@
 				minimumVersion = 6.19.1;
 			};
 		};
+		C1A719F42E969281005B6CD9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.4.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -696,6 +713,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C125F0352E8C7A4D00AAD24C /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */;
 			productName = MapLibre;
+		};
+		C1A719F52E969281005B6CD9 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C1A719F42E969281005B6CD9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		C1A719F72E969281005B6CD9 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C1A719F42E969281005B6CD9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
