@@ -69,8 +69,6 @@ class AndroidMapViewModel(
     private val splitInstallManager: SplitInstallManager = SplitInstallManagerFactory.create(application)
     private var currentSessionId = 0
     private var installStateListener: SplitInstallStateUpdatedListener? = null
-    private var retryRunnable: Runnable? = null
-    private val retryHandler = Handler(Looper.getMainLooper())
 
     // Platform adapter for business logic
     private val platformAdapter =
@@ -97,14 +95,6 @@ class AndroidMapViewModel(
             }
 
             override suspend fun cancelPlatformDownload() {
-                // Cancel any pending retry
-                retryRunnable?.let { runnable ->
-                    retryHandler.removeCallbacks(runnable)
-                    retryRunnable = null
-                    Log.i(TAG, "Cancelled pending retry")
-                }
-
-                // Cancel active Play Store download
                 if (currentSessionId > 0) {
                     splitInstallManager.cancelInstall(currentSessionId)
                 }
@@ -154,16 +144,11 @@ class AndroidMapViewModel(
                     val retryCount = downloadManager.retryManager.incrementRetryCount()
                     downloadManager.setStateRetrying(retryCount, MapDownloadUtils.RetryManager.MAX_RETRIES)
 
-                    // Store the runnable so we can cancel it later if needed
-                    retryRunnable =
-                        Runnable {
-                            viewModelScope.launch {
-                                downloadManager.downloadMap(mapId, onMapDownloaded)
-                            }
-                            retryRunnable = null // Clear after execution
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        viewModelScope.launch {
+                            downloadManager.downloadMap(mapId, onMapDownloaded)
                         }
-
-                    retryHandler.postDelayed(retryRunnable!!, delay)
+                    }, delay)
                 } else {
                     downloadManager.handleDownloadFailure(0, shouldRetry = false)
                 }
@@ -289,12 +274,8 @@ class AndroidMapViewModel(
         }
 
     override fun onCleared() {
-        // Clean up listeners and handlers
         installStateListener?.let {
             splitInstallManager.unregisterListener(it)
-        }
-        retryRunnable?.let { runnable ->
-            retryHandler.removeCallbacks(runnable)
         }
         super.onCleared()
     }

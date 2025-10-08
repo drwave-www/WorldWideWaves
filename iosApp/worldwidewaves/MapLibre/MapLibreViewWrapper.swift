@@ -22,7 +22,6 @@ import Foundation
 import MapLibre
 import UIKit
 import CoreLocation
-import MapKit
 import Shared
 
 // Note: File exceeds 1000 lines due to comprehensive MapLibre feature set
@@ -49,15 +48,11 @@ import Shared
     // private static let pollingInterval: TimeInterval = 0.1 // 100ms
 
     // Queue for polygons that arrive before style loads
-    // Only stores the most recent set since wave progression contains all previous circles
-    private var pendingPolygons: [[CLLocationCoordinate2D]]?
+    private var pendingPolygonQueue: [[CLLocationCoordinate2D]] = []
     private var styleIsLoaded: Bool = false
 
     // Queue for constraint bounds that arrive before style loads
     private var pendingConstraintBounds: MLNCoordinateBounds?
-
-    // Current constraint bounds for gesture clamping (matches Android behavior)
-    private var currentConstraintBounds: MLNCoordinateBounds?
 
     // MARK: - Accessibility State
 
@@ -70,11 +65,9 @@ import Shared
 
     // MARK: - Location Component
 
-    /// User location annotation (matches Android styling)
+    /// User location annotation (blue dot)
     private var userLocationAnnotation: MLNPointAnnotation?
     private var isLocationComponentEnabled: Bool = false
-    private var userLocationAnnotationView: MKAnnotationView?
-    private var pulseLayer: CAShapeLayer?
 
     @objc public override init() {
         super.init()
@@ -127,7 +120,7 @@ import Shared
 
         // Register immediate render callback (eliminates polling delay for polygons)
         Shared.MapWrapperRegistry.shared.setRenderCallback(eventId: eventId) { [weak self] in
-            guard self != nil else { return }
+            guard let self = self else { return }
             WWWLog.i(Self.tag, "🚀 Immediate render callback triggered for: \(eventId)")
             _ = IOSMapBridge.renderPendingPolygons(eventId: eventId)
         }
@@ -135,7 +128,7 @@ import Shared
 
         // Register immediate camera callback (eliminates polling delay for camera commands)
         Shared.MapWrapperRegistry.shared.setCameraCallback(eventId: eventId) { [weak self] in
-            guard self != nil else { return }
+            guard let self = self else { return }
             WWWLog.i(Self.tag, "📸 Immediate camera callback triggered for: \(eventId)")
             IOSMapBridge.executePendingCameraCommand(eventId: eventId)
         }
@@ -147,39 +140,9 @@ import Shared
         ) { [weak self] clickCallback in
             guard let self = self else { return }
             WWWLog.i(Self.tag, "👆 Registering map click navigation callback directly on wrapper")
-            // Wrap Kotlin Unit-returning function to Swift Void
-            self.setOnMapClickNavigationListener {
-                _ = clickCallback()
-            }
+            self.setOnMapClickNavigationListener(clickCallback)
         }
         WWWLog.d(Self.tag, "Map click registration callback registered for: \(eventId)")
-
-        // Register getActualMinZoom callback (provides real-time min zoom to Kotlin)
-        Shared.MapWrapperRegistry.shared.setGetActualMinZoomCallback(eventId: eventId) { [weak self] in
-            guard let self = self, let mapView = self.mapView else { return }
-            let actualMinZoom = mapView.minimumZoomLevel
-            WWWLog.v(Self.tag, "getActualMinZoom callback: \(eventId) -> \(actualMinZoom)")
-            Shared.MapWrapperRegistry.shared.updateActualMinZoom(eventId: eventId, actualMinZoom: actualMinZoom)
-        }
-        WWWLog.d(Self.tag, "getActualMinZoom callback registered for: \(eventId)")
-
-        // Register location component callback (enables user position marker control)
-        Shared.MapWrapperRegistry.shared.setLocationComponentCallback(eventId: eventId) { [weak self] enabled in
-            guard let self = self else { return }
-            let swiftEnabled = enabled.boolValue  // Convert KotlinBoolean to Bool
-            WWWLog.i(Self.tag, "Location component callback: \(swiftEnabled) for: \(eventId)")
-            self.enableLocationComponent(swiftEnabled)
-        }
-        WWWLog.d(Self.tag, "Location component callback registered for: \(eventId)")
-
-        // Register setUserPosition callback (receives position updates from PositionManager)
-        Shared.MapWrapperRegistry.shared.setUserPositionCallback(eventId: eventId) { [weak self] latitude, longitude in
-            guard let self = self else { return }
-            let swiftLat = latitude.doubleValue  // Convert KotlinDouble to Double
-            let swiftLng = longitude.doubleValue
-            self.setUserPosition(latitude: swiftLat, longitude: swiftLng)
-        }
-        WWWLog.d(Self.tag, "User position callback registered for: \(eventId)")
     }
 
     @objc public func setStyle(styleURL: String, completion: @escaping () -> Void) {
@@ -363,38 +326,9 @@ import Shared
 
         // Style is loaded - apply bounds immediately
         WWWLog.i(Self.tag, "Setting camera constraint bounds: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng))")
-
-        // Use MapLibre's native camera calculation to get accurate zoom level (matches Android behavior)
-        // This prevents the infinite loop while maintaining accurate zoom calculations
-        let camera = mapView.cameraThatFitsCoordinateBounds(bounds, edgePadding: .zero)
-
-        // Convert camera altitude to zoom level using MapLibre's formula
-        // altitude = 40075016.686 * cos(latitude) / (2^(zoom + 1))
-        // zoom = log2(40075016.686 * cos(latitude) / altitude) - 1
-        let earthCircumference = 40_075_016.686  // Earth's equatorial circumference in meters
-        let centerLat = (bounds.sw.latitude + bounds.ne.latitude) / 2.0
-        let latRadians = centerLat * .pi / 180.0
-        let calculatedMinZoom = log2(earthCircumference * cos(latRadians) / camera.altitude) - 1.0
-
-        WWWLog.d(
-            Self.tag,
-            "Calculated min zoom using MapLibre's cameraThatFitsCoordinateBounds: \(calculatedMinZoom)"
-        )
-
-        // Set minimum zoom to prevent zooming out beyond bounds
-        mapView.minimumZoomLevel = max(0, calculatedMinZoom)
-        WWWLog.i(Self.tag, "Set minimum zoom to \(calculatedMinZoom) (from MapLibre camera)")
-
-        // Store constraint bounds for gesture clamping (matches Android setLatLngBoundsForCameraTarget behavior)
-        // NOTE: We don't call setVisibleCoordinateBounds here because it triggers regionDidChangeAnimated
-        // which creates an infinite loop. Instead, we rely on:
-        // 1. minimumZoomLevel to prevent zoom out beyond bounds
-        // 2. shouldChangeFrom delegate to prevent pan/zoom outside bounds
-        currentConstraintBounds = bounds
-        WWWLog.i(Self.tag, "Constraint bounds stored for gesture clamping (minZoom + shouldChangeFrom delegate)")
-
+        mapView.setVisibleCoordinateBounds(bounds, animated: false)
         pendingConstraintBounds = nil  // Clear pending bounds
-        WWWLog.i(Self.tag, "✅ Camera constraint bounds set successfully with min zoom constraint")
+        WWWLog.i(Self.tag, "✅ Camera constraint bounds set successfully")
         return true
     }
 
@@ -425,57 +359,10 @@ import Shared
     // MARK: - Attribution
 
     @objc public func setAttributionMargins(left: Int, top: Int, right: Int, bottom: Int) {
-        guard let mapView = mapView else {
-            WWWLog.w(Self.tag, "Cannot set attribution margins - mapView is nil")
-            return
-        }
-
-        WWWLog.d(Self.tag, "Setting attribution margins: left=\(left), top=\(top), right=\(right), bottom=\(bottom)")
-
-        // Ensure logo and attribution are visible
-        mapView.logoView.isHidden = false
-        mapView.attributionButton.isHidden = false
-
-        // Enable Auto Layout for logo and attribution
-        mapView.logoView.translatesAutoresizingMaskIntoConstraints = false
-        mapView.attributionButton.translatesAutoresizingMaskIntoConstraints = false
-
-        // Remove existing attribution constraints
-        let logoConstraints = mapView.constraints.filter { constraint in
-            constraint.firstItem as? UIView == mapView.logoView ||
-            constraint.secondItem as? UIView == mapView.logoView
-        }
-        let attrConstraints = mapView.constraints.filter { constraint in
-            constraint.firstItem as? UIView == mapView.attributionButton ||
-            constraint.secondItem as? UIView == mapView.attributionButton
-        }
-        NSLayoutConstraint.deactivate(logoConstraints + attrConstraints)
-
-        // Apply new constraints for logo (bottom-left position with margins)
-        NSLayoutConstraint.activate([
-            mapView.logoView.leadingAnchor.constraint(
-                equalTo: mapView.leadingAnchor,
-                constant: CGFloat(left)
-            ),
-            mapView.logoView.bottomAnchor.constraint(
-                equalTo: mapView.bottomAnchor,
-                constant: -CGFloat(bottom)
-            )
-        ])
-
-        // Apply new constraints for attribution button (bottom-right position with margins)
-        NSLayoutConstraint.activate([
-            mapView.attributionButton.trailingAnchor.constraint(
-                equalTo: mapView.trailingAnchor,
-                constant: -CGFloat(right)
-            ),
-            mapView.attributionButton.bottomAnchor.constraint(
-                equalTo: mapView.bottomAnchor,
-                constant: -CGFloat(bottom)
-            )
-        ])
-
-        WWWLog.i(Self.tag, "✅ Attribution margins applied successfully")
+        // iOS MapLibre attribution positioning
+        // Note: Attribution button position can be adjusted via logoView and attributionButton properties
+        mapView?.logoView.isHidden = false
+        mapView?.attributionButton.isHidden = false
     }
 
     // MARK: - Wave Polygons
@@ -489,15 +376,21 @@ import Shared
             """
         )
 
-        // If style not loaded yet, store most recent polygons for later
-        // Only the most recent set matters (wave progression contains all previous circles)
+        // If style not loaded yet, queue polygons for later
         guard styleIsLoaded, let mapView = mapView, let style = mapView.style else {
             let hasMap = mapView != nil
             let hasStyle = mapView?.style != nil
-            let message = "Style not ready - storing \(polygons.count) polygons " +
-                "(most recent, mapView: \(hasMap), style: \(hasStyle))"
-            WWWLog.w(Self.tag, message)
-            pendingPolygons = polygons
+            WWWLog.w(
+                Self.tag,
+                "Style not ready - queueing \(polygons.count) polygons (mapView: \(hasMap), style: \(hasStyle))"
+            )
+
+            // Queue polygons to render when style loads
+            if clearExisting {
+                pendingPolygonQueue.removeAll()
+            }
+            pendingPolygonQueue.append(contentsOf: polygons)
+            WWWLog.d(Self.tag, "Polygon queue now contains \(pendingPolygonQueue.count) polygons")
             return
         }
 
@@ -834,98 +727,62 @@ import Shared
     /// Updates user position for accessibility.
     /// Call this when user location changes.
     @objc public func setUserPosition(latitude: Double, longitude: Double) {
-        WWWLog.i(
-            Self.tag,
-            "📍 setUserPosition called: (\(latitude), \(longitude)), locationEnabled=\(isLocationComponentEnabled)"
-        )
-
         currentUserPosition = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
         updateMapAccessibility()
+        WWWLog.v(Self.tag, "User position updated for accessibility: \(latitude), \(longitude)")
 
         // Update location marker if enabled
         if isLocationComponentEnabled {
-            WWWLog.d(Self.tag, "Updating location marker for: \(eventId ?? "unknown")")
             updateUserLocationMarker(coordinate: currentUserPosition!)
-        } else {
-            WWWLog.w(Self.tag, "⚠️ Location component NOT enabled, marker not updated")
         }
     }
 
     // MARK: - Location Component
 
-    /// Enable/disable user location marker with custom annotation.
-    /// Uses custom annotation because we're using PositionManager (not native CLLocationManager).
+    /// Enable/disable user location marker (blue dot).
     @objc public func enableLocationComponent(_ enabled: Bool) {
         guard let mapView = mapView else { return }
 
         isLocationComponentEnabled = enabled
 
         if enabled {
-            WWWLog.i(Self.tag, "Enabling location component with custom annotation")
-
-            // Create user location annotation if it doesn't exist
+            WWWLog.i(Self.tag, "Enabling location component")
+            // Create user location annotation if needed
             if userLocationAnnotation == nil {
-                let annotation = MLNPointAnnotation()
-                annotation.title = "Your Location"
-                userLocationAnnotation = annotation
-
-                // Add annotation to map if we have a current position
-                if let currentPos = currentUserPosition {
-                    annotation.coordinate = currentPos
-                    mapView.addAnnotation(annotation)
-                    WWWLog.i(
-                        Self.tag,
-                        "Added user location annotation at: \(currentPos.latitude), \(currentPos.longitude)"
-                    )
-                } else {
-                    WWWLog.w(Self.tag, "No current position available for annotation")
-                }
+                userLocationAnnotation = MLNPointAnnotation()
+                userLocationAnnotation?.title = "Your Location"
             }
 
-            WWWLog.i(Self.tag, "✅ Location component enabled (custom annotation)")
+            // Add to map if we have a position
+            if let position = currentUserPosition, userLocationAnnotation != nil {
+                userLocationAnnotation?.coordinate = position
+                if let annotation = userLocationAnnotation {
+                    mapView.addAnnotation(annotation)
+                }
+                WWWLog.i(Self.tag, "✅ Location component enabled with user position")
+            }
         } else {
             WWWLog.i(Self.tag, "Disabling location component")
-
-            // Remove annotation from map
+            // Remove annotation
             if let annotation = userLocationAnnotation {
                 mapView.removeAnnotation(annotation)
-                userLocationAnnotation = nil
             }
         }
     }
 
     /// Update user location marker position.
-    /// Manually updates the custom annotation position when using PositionManager.
     private func updateUserLocationMarker(coordinate: CLLocationCoordinate2D) {
-        guard let mapView = mapView else {
-            WWWLog.w(Self.tag, "Cannot update user location - mapView is nil")
-            return
-        }
+        guard let mapView = mapView, let annotation = userLocationAnnotation else { return }
 
-        // Update the annotation coordinate
-        if let annotation = userLocationAnnotation {
-            // Remove old annotation
-            mapView.removeAnnotation(annotation)
+        // Update annotation coordinate
+        annotation.coordinate = coordinate
 
-            // Update coordinate
-            annotation.coordinate = coordinate
-
-            // Add back to map
+        // If not already on map, add it
+        if !mapView.annotations.contains(where: { ($0 as? MLNPointAnnotation) === annotation }) {
             mapView.addAnnotation(annotation)
-
-            WWWLog.v(Self.tag, "User location marker updated: \(coordinate.latitude), \(coordinate.longitude)")
+            WWWLog.d(Self.tag, "Added user location marker to map")
         } else {
-            WWWLog.w(Self.tag, "User location annotation not created yet, creating now")
-            // Create annotation if it doesn't exist (shouldn't happen if enableLocationComponent called first)
-            let annotation = MLNPointAnnotation()
-            annotation.title = "Your Location"
-            annotation.coordinate = coordinate
-            userLocationAnnotation = annotation
-            mapView.addAnnotation(annotation)
-            WWWLog.i(
-                Self.tag,
-                "Created and added user location annotation at: \(coordinate.latitude), \(coordinate.longitude)"
-            )
+            WWWLog.v(Self.tag, "Updated user location marker position: \(coordinate.latitude), \(coordinate.longitude)")
         }
     }
 
@@ -976,128 +833,35 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
             return
         }
 
-        // Mark style as loaded in registry (enables immediate callback invocation)
-        Shared.MapWrapperRegistry.shared.setStyleLoaded(eventId: eventId, loaded: true)
-
-        // Update map dimensions in registry for padding/bounds calculations
-        Shared.MapWrapperRegistry.shared.updateMapWidth(
-            eventId: eventId,
-            width: Double(mapView.bounds.size.width)
-        )
-        Shared.MapWrapperRegistry.shared.updateMapHeight(
-            eventId: eventId,
-            height: Double(mapView.bounds.size.height)
-        )
-        WWWLog.d(Self.tag, "Map dimensions updated: \(mapView.bounds.size.width) x \(mapView.bounds.size.height)")
-
         // IMMEDIATE EXECUTION: Execute all pending commands now that map is ready
-        // ORDER MATTERS: Constraints BEFORE camera positioning (matches Android)
         WWWLog.i(Self.tag, "⚡ Executing pending commands immediately after style load...")
 
-        // 1. Apply queued constraint bounds FIRST (before any camera movements)
-        if let bounds = pendingConstraintBounds {
-            WWWLog.i(Self.tag, "📐 Applying constraint bounds BEFORE camera commands (matches Android)")
-
-            // Use MapLibre's native camera calculation to get accurate zoom level
-            let camera = mapView.cameraThatFitsCoordinateBounds(bounds, edgePadding: .zero)
-
-            // Convert camera altitude to zoom level using MapLibre's formula
-            let earthCircumference = 40_075_016.686
-            let centerLat = (bounds.sw.latitude + bounds.ne.latitude) / 2.0
-            let latRadians = centerLat * .pi / 180.0
-            let calculatedMinZoom = log2(earthCircumference * cos(latRadians) / camera.altitude) - 1.0
-
-            mapView.minimumZoomLevel = max(0, calculatedMinZoom)
-            WWWLog.i(Self.tag, "Set min zoom: \(calculatedMinZoom) (prevents over-zoom out)")
-
-            // Store constraint bounds for gesture enforcement via shouldChangeFrom delegate
-            currentConstraintBounds = bounds
-            pendingConstraintBounds = nil
-            WWWLog.i(Self.tag, "✅ Constraint bounds applied (minZoom + shouldChangeFrom delegate)")
+        // 1. Render queued polygons that arrived before style loaded
+        if !pendingPolygonQueue.isEmpty {
+            WWWLog.i(Self.tag, "📦 Flushing polygon queue: \(pendingPolygonQueue.count) polygons")
+            addWavePolygons(polygons: pendingPolygonQueue, clearExisting: true)
+            pendingPolygonQueue.removeAll()
         }
 
-        // 2. Render pending polygons that arrived before style loaded
-        if let polygons = pendingPolygons {
-            WWWLog.i(Self.tag, "📦 Rendering pending polygons: \(polygons.count) polygons")
-            addWavePolygons(polygons: polygons, clearExisting: true)
-            pendingPolygons = nil
-        }
-
-        // 3. Execute pending camera commands (NOW within constraints - matches Android)
-        WWWLog.d(Self.tag, "📸 Executing camera commands (now within constraints)...")
+        // 2. Execute pending camera commands (initial positioning, constraints)
+        WWWLog.d(Self.tag, "Checking for pending camera commands...")
         IOSMapBridge.executePendingCameraCommand(eventId: eventId)
 
-        // 4. Render pending wave polygons from registry
+        // 3. Render pending wave polygons from registry (initial wave state)
         WWWLog.d(Self.tag, "Checking for pending polygons in registry...")
         _ = IOSMapBridge.renderPendingPolygons(eventId: eventId)
 
-        // 5. Invoke map ready callbacks (enables setupMap and other operations)
-        WWWLog.i(Self.tag, "Invoking map ready callbacks...")
-        IOSMapBridge.invokeMapReadyCallbacks(eventId: eventId)
+        // 4. Apply queued constraint bounds if any
+        if let bounds = pendingConstraintBounds {
+            WWWLog.i(Self.tag, "Applying queued constraint bounds after style load")
+            mapView.setVisibleCoordinateBounds(bounds, animated: false)
+            pendingConstraintBounds = nil
+            WWWLog.i(Self.tag, "✅ Constraint bounds applied successfully")
+        }
 
         // NOTE: Continuous polling REMOVED - now using direct dispatch callbacks
         // Callbacks were registered in setEventId() and provide immediate updates (<16ms vs 100ms+)
         WWWLog.i(Self.tag, "✅ Map initialization complete with direct dispatch callbacks for event: \(eventId)")
-    }
-
-    public func mapView(
-        _ mapView: MLNMapView,
-        shouldChangeFrom oldCamera: MLNMapCamera,
-        to newCamera: MLNMapCamera,
-        reason: MLNCameraChangeReason
-    ) -> Bool {
-        // Enforce constraint bounds if set (matches Android setLatLngBoundsForCameraTarget behavior)
-        guard let bounds = currentConstraintBounds else {
-            return true  // No constraints, allow all movements
-        }
-
-        // Get viewport bounds from the new camera using MapLibre's native calculation
-        // This matches Android's exact behavior and prevents math approximation errors
-        let viewportBounds = getViewportBoundsForCamera(newCamera, in: mapView)
-
-        // Check if all viewport corners are within constraint bounds (matches Android)
-        let swInBounds = viewportBounds.sw.latitude >= bounds.sw.latitude &&
-                         viewportBounds.sw.longitude >= bounds.sw.longitude
-        let neInBounds = viewportBounds.ne.latitude <= bounds.ne.latitude &&
-                         viewportBounds.ne.longitude <= bounds.ne.longitude
-
-        if swInBounds && neInBounds {
-            return true  // All viewport corners within bounds, allow movement
-        }
-
-        // Viewport would extend outside bounds - prevent movement
-        return false  // Prevent movement (matches Android setLatLngBoundsForCameraTarget behavior)
-    }
-
-    /// Get viewport bounds for a camera using MapLibre's accurate calculation
-    /// This matches Android's exact behavior by using the same Mercator projection math as MapLibre
-    /// Avoids expensive camera set/restore which triggers delegate callbacks
-    private func getViewportBoundsForCamera(_ camera: MLNMapCamera, in mapView: MLNMapView) -> MLNCoordinateBounds {
-        // Use MapLibre's internal math to calculate bounds from camera altitude
-        // This matches the exact calculation used by visibleCoordinateBounds
-        let metersPerPoint = camera.altitude / Double(mapView.bounds.height)
-
-        // Calculate latitude delta (linear in Mercator projection)
-        let halfHeight = Double(mapView.bounds.height) / 2.0
-        let latDelta = (halfHeight * metersPerPoint) / 111_320.0  // meters per degree latitude
-
-        // Calculate longitude delta (varies by latitude in Mercator projection)
-        let halfWidth = Double(mapView.bounds.width) / 2.0
-        let centerLat = camera.centerCoordinate.latitude
-        let latRadians = centerLat * .pi / 180.0
-        let metersPerDegreeLng = 111_320.0 * cos(latRadians)
-        let lngDelta = (halfWidth * metersPerPoint) / metersPerDegreeLng
-
-        let southwest = CLLocationCoordinate2D(
-            latitude: centerLat - latDelta,
-            longitude: camera.centerCoordinate.longitude - lngDelta
-        )
-        let northeast = CLLocationCoordinate2D(
-            latitude: centerLat + latDelta,
-            longitude: camera.centerCoordinate.longitude + lngDelta
-        )
-
-        return MLNCoordinateBounds(sw: southwest, ne: northeast)
     }
 
     public func mapView(_ mapView: MLNMapView, regionDidChangeAnimated animated: Bool) {
@@ -1123,25 +887,15 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
             // Update visible region in registry (for getVisibleRegion calls)
             let bounds = mapView.visibleCoordinateBounds
             let bbox = BoundingBox(
-                swLat: bounds.sw.latitude,
-                swLng: bounds.sw.longitude,
-                neLat: bounds.ne.latitude,
-                neLng: bounds.ne.longitude
+                minLatitude: bounds.sw.latitude,
+                minLongitude: bounds.sw.longitude,
+                maxLatitude: bounds.ne.latitude,
+                maxLongitude: bounds.ne.longitude
             )
             Shared.MapWrapperRegistry.shared.updateVisibleRegion(eventId: eventId, bbox: bbox)
 
             // Update min zoom in registry
             Shared.MapWrapperRegistry.shared.updateMinZoom(eventId: eventId, minZoom: mapView.minimumZoomLevel)
-
-            // Update map dimensions in registry (for padding/bounds calculations)
-            Shared.MapWrapperRegistry.shared.updateMapWidth(
-                eventId: eventId,
-                width: Double(mapView.bounds.size.width)
-            )
-            Shared.MapWrapperRegistry.shared.updateMapHeight(
-                eventId: eventId,
-                height: Double(mapView.bounds.size.height)
-            )
         }
 
         // Update accessibility when map region changes
@@ -1199,61 +953,6 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
 
     public func mapView(_ mapView: MLNMapView, didSelect annotation: MLNAnnotation) {
         WWWLog.d(Self.tag, "📍 Annotation selected: \(annotation)")
-    }
-
-    /// Add pulse animation to match Android's pulsing location marker.
-    /// Creates a repeating scale animation on the pulse circle.
-    private func addPulseAnimation(to view: UIView) {
-        let pulseAnimation = CABasicAnimation(keyPath: "transform.scale")
-        pulseAnimation.duration = 1.5
-        pulseAnimation.fromValue = 1.0
-        pulseAnimation.toValue = 1.3
-        pulseAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-        pulseAnimation.autoreverses = true
-        pulseAnimation.repeatCount = .infinity
-        view.layer.add(pulseAnimation, forKey: "pulse")
-    }
-
-    public func mapView(_ mapView: MLNMapView, viewFor annotation: MLNAnnotation) -> MLNAnnotationView? {
-        // Customize user location annotation to match Android style
-        if let userAnnotation = userLocationAnnotation, annotation === userAnnotation {
-            let reuseIdentifier = "userLocation"
-
-            // Try to reuse existing annotation view
-            var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseIdentifier)
-
-            if annotationView == nil {
-                // Create new annotation view - matches Android style
-                annotationView = MLNAnnotationView(reuseIdentifier: reuseIdentifier)
-                annotationView?.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
-
-                // Red pulse circle (matches Android pulseColor with full opacity)
-                let pulseView = UIView(frame: CGRect(x: 0, y: 0, width: 40, height: 40))
-                pulseView.backgroundColor = UIColor(red: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)
-                pulseView.layer.cornerRadius = 20
-                pulseView.tag = 100 // Tag for animation
-
-                // Black center dot (matches Android foregroundTintColor)
-                let dotView = UIView(frame: CGRect(x: 15, y: 15, width: 10, height: 10))
-                dotView.backgroundColor = UIColor.black
-                dotView.layer.cornerRadius = 5
-                dotView.layer.borderWidth = 2
-                dotView.layer.borderColor = UIColor.white.cgColor
-
-                pulseView.addSubview(dotView)
-                annotationView?.addSubview(pulseView)
-
-                // Center the annotation on the coordinate
-                annotationView?.centerOffset = CGVector(dx: 0, dy: 0)
-
-                // Add pulse animation (matches Android pulse effect)
-                addPulseAnimation(to: pulseView)
-            }
-
-            return annotationView
-        }
-
-        return nil
     }
 }
 
@@ -1318,5 +1017,3 @@ extension UIColor {
         self.init(red: red, green: green, blue: blue, alpha: 1.0)
     }
 }
-
-// swiftlint:enable file_length type_body_length

@@ -63,7 +63,6 @@ data class WWWEventWaveLinear(
 
     // ---------------------------
 
-    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     override suspend fun getWavePolygons(): WavePolygons? {
         val isRunning = event.isRunning()
         if (!isRunning) {
@@ -161,7 +160,6 @@ data class WWWEventWaveLinear(
         return hitTime <= clock.now()
     }
 
-    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     override suspend fun userHitDateTime(): Instant? {
         val userPosition = getUserPosition()
         if (userPosition == null) {
@@ -230,7 +228,6 @@ data class WWWEventWaveLinear(
         }
     }
 
-    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     override suspend fun userPositionToWaveRatio(): Double? {
         val userPosition = getUserPosition()
         if (userPosition == null) {

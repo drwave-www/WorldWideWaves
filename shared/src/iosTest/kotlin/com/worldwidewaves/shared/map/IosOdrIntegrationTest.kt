@@ -65,7 +65,6 @@ class IosOdrIntegrationTest {
         runTest {
             val manager = IosPlatformMapManager()
             var downloadCompleted = false
-            var errorOccurred = false
             var progressUpdates = mutableListOf<Int>()
 
             // WHEN: Download map with both file types
@@ -73,27 +72,16 @@ class IosOdrIntegrationTest {
                 mapId = "paris_france",
                 onProgress = { progress -> progressUpdates.add(progress) },
                 onSuccess = { downloadCompleted = true },
-                onError = { _, _ -> errorOccurred = true },
+                onError = { _, _ -> /* Should not happen in test */ },
             )
 
-            // Wait for simulated download (ODR is async on iOS)
-            // Use polling instead of advanceTimeBy for iOS compatibility
-            repeat(40) {
-                // 40 * 1000ms = 40s timeout
-                if (downloadCompleted || errorOccurred) return@repeat
-                kotlinx.coroutines.delay(1000)
-            }
+            // Wait for simulated download
+            advanceTimeBy(35000) // More than MAX_DOWNLOAD_DURATION_MS
+            advanceUntilIdle()
 
-            // THEN: Download should complete with either success or error (depending on ODR availability in test)
-            // In test environment, ODR resources may not be available, so either outcome is acceptable
-            assertTrue(
-                downloadCompleted || errorOccurred,
-                "Download should complete or error (got: completed=$downloadCompleted, error=$errorOccurred, progress=${progressUpdates.size})",
-            )
-            assertTrue(
-                progressUpdates.isNotEmpty() || errorOccurred,
-                "Progress updates should be provided unless error occurred immediately (got: progress=${progressUpdates.size}, error=$errorOccurred)",
-            )
+            // THEN: Download should complete (either success or error, depending on bundle availability)
+            assertTrue(progressUpdates.isNotEmpty(), "Progress updates should be provided")
+            assertTrue(progressUpdates.contains(0), "Should start with 0% progress")
         }
 
     @Test
@@ -117,7 +105,7 @@ class IosOdrIntegrationTest {
     fun `concurrent ODR downloads are limited correctly`() =
         runTest {
             val manager = IosPlatformMapManager()
-            val processedDownloads = mutableSetOf<String>()
+            val startedDownloads = mutableSetOf<String>()
 
             // Start multiple downloads concurrently
             val maps = listOf("paris_france", "new_york_usa", "london_england", "berlin_germany", "tokyo_japan")
@@ -126,21 +114,19 @@ class IosOdrIntegrationTest {
                 manager.downloadMap(
                     mapId = mapId,
                     onProgress = { /* Track progress */ },
-                    onSuccess = { processedDownloads.add(mapId) },
+                    onSuccess = { startedDownloads.add(mapId) },
                     onError = { _, _ ->
-                        processedDownloads.add(mapId) // Handle errors - still counts as processed
+                        startedDownloads.add(mapId) // Handle errors - still counts as processed
                     },
                 )
             }
 
-            // Wait for downloads to process (ODR is async, may not complete all in test environment)
+            // Wait for downloads to process
             advanceTimeBy(35000)
             advanceUntilIdle()
 
-            // THEN: Downloads should be started (processed count may be 0 in test environment without ODR bundles)
-            // The test verifies that the manager handles concurrent requests without crashing
-            assertTrue(processedDownloads.size >= 0, "Manager should handle concurrent downloads without crashing")
-            println("Processed ${processedDownloads.size}/${maps.size} downloads in test environment")
+            // THEN: All downloads should eventually complete or error
+            assertTrue(startedDownloads.isNotEmpty(), "At least some downloads should be processed")
         }
 
     @Test
@@ -154,13 +140,9 @@ class IosOdrIntegrationTest {
 
             advanceUntilIdle()
 
-            // Release maps (iOS uses releaseDownloadedMap, not a generic cleanup())
-            testMaps.forEach { checker.releaseDownloadedMap(it) }
-            advanceUntilIdle()
-
-            // Maps are still tracked (release != untrack), but ODR requests are released
+            // THEN: Map states should be cleared
             val states = checker.mapStates.first()
-            assertEquals(3, states.size, "Maps remain tracked after ODR release")
+            assertTrue(states.isEmpty(), "Maps should be cleared after cleanup")
         }
 
     @Test
@@ -168,35 +150,25 @@ class IosOdrIntegrationTest {
         runTest {
             val manager = IosPlatformMapManager()
             var errorReceived = false
-            var successReceived = false
             var errorCode = 0
 
-            // WHEN: Download non-existent map (should fail in test environment)
+            // WHEN: Download non-existent map (should fail)
             manager.downloadMap(
                 mapId = "non_existent_map",
                 onProgress = { /* No progress expected */ },
-                onSuccess = { successReceived = true },
+                onSuccess = { /* Should not succeed */ },
                 onError = { code, _ ->
                     errorReceived = true
                     errorCode = code
                 },
             )
 
-            // Wait for callback using polling for iOS compatibility
-            repeat(40) {
-                // 40 * 1000ms = 40s timeout
-                if (errorReceived || successReceived) return@repeat
-                kotlinx.coroutines.delay(1000)
-            }
+            advanceTimeBy(35000)
+            advanceUntilIdle()
 
-            // THEN: Should receive either error or success callback (ODR behavior varies in test environment)
-            assertTrue(
-                errorReceived || successReceived,
-                "Should receive callback (error or success) - got: error=$errorReceived, success=$successReceived",
-            )
-            if (errorReceived) {
-                assertTrue(errorCode != 0, "Error code should indicate failure (got: $errorCode)")
-            }
+            // THEN: Error should be properly handled
+            assertTrue(errorReceived, "Error callback should be triggered")
+            assertTrue(errorCode != 0, "Error code should indicate failure")
         }
 
     @Test

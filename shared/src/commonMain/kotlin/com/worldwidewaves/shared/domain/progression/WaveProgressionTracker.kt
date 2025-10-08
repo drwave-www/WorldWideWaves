@@ -62,18 +62,13 @@ interface WaveProgressionTracker {
     /**
      * Determines if the user's current position is within the wave area.
      *
-     * Performance optimization: Pass pre-fetched polygons to avoid redundant getPolygons() calls.
-     * If polygons is null, they will be fetched from waveArea.
-     *
      * @param userPosition The user's current position
      * @param waveArea The wave area to check against
-     * @param polygons Optional pre-fetched polygons to avoid redundant getPolygons() calls
      * @return true if user is within the wave area, false otherwise
      */
     suspend fun isUserInWaveArea(
         userPosition: Position,
         waveArea: WWWEventArea,
-        polygons: com.worldwidewaves.shared.events.utils.Area? = null,
     ): Boolean
 
     /**

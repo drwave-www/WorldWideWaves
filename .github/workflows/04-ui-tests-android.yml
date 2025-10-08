@@ -78,7 +78,6 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -skin 1080x1920
           disable-animations: true
           force-avd-creation: false
-          emulator-boot-timeout: 900  # Increased from default 600s to 900s (15 minutes)
           script: echo "Generated AVD snapshot for caching."
 
       - name: Assemble Debug APK
@@ -100,7 +99,6 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -skin 1080x1920
           disable-animations: true
           force-avd-creation: false
-          emulator-boot-timeout: 900  # Increased from default 600s to 900s (15 minutes)
           script: |
             # Wait for emulator to fully boot
             adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\''\r'\'') ]]; do sleep 1; done; input keyevent 82'

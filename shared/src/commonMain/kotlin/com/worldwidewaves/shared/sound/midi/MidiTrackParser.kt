@@ -1,5 +1,3 @@
-@file:Suppress("TooGenericExceptionCaught") // IndexOutOfBoundsException is specific to malformed track data
-
 package com.worldwidewaves.shared.sound.midi
 
 /*
@@ -152,8 +150,9 @@ internal object MidiTrackParser {
             Log.e(TAG, "Invalid track $trackIndex format: ${e.message}", throwable = e)
             throw IllegalArgumentException("Invalid track $trackIndex format: ${e.message}", e)
         } catch (e: IndexOutOfBoundsException) {
-            // IndexOutOfBoundsException is caught specifically for malformed track data (array access violations)
+            @Suppress("TooGenericExceptionCaught") // IndexOutOfBoundsException is the most specific exception for malformed track data
             Log.e(TAG, "Malformed track $trackIndex data: ${e.message}", throwable = e)
+            @Suppress("TooGenericExceptionCaught")
             throw IllegalArgumentException("Malformed track $trackIndex data: ${e.message}", e)
         } catch (e: NumberFormatException) {
             Log.e(TAG, "Invalid number format in track $trackIndex: ${e.message}", throwable = e)
@@ -162,8 +161,9 @@ internal object MidiTrackParser {
             Log.e(TAG, "Arithmetic error in track $trackIndex: ${e.message}", throwable = e)
             throw IllegalArgumentException("Arithmetic error in track $trackIndex: ${e.message}", e)
         } catch (e: Exception) {
-            // Catch-all for any unexpected track parsing errors
+            @Suppress("TooGenericExceptionCaught") // Catch-all for any unexpected track parsing errors
             Log.e(TAG, "Unexpected error in track $trackIndex: ${e.message}", throwable = e)
+            @Suppress("TooGenericExceptionCaught")
             throw IllegalArgumentException("Unexpected error in track $trackIndex: ${e.message}", e)
         }
     }

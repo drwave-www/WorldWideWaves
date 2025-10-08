@@ -52,7 +52,6 @@ object EventAreaPositionTesting {
      * If it is within the bounding box, it then checks if the position is within
      * the polygons using the ray-casting algorithm.
      */
-    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     suspend fun isPositionWithin(
         position: Position,
         bbox: BoundingBox,

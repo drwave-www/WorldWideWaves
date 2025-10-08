@@ -35,7 +35,6 @@ data class Segment(
      * Calculates the intersection of the segment with a given longitude
      * and returns a CutPosition if the segment intersects the longitude.
      */
-    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     fun intersectWithLng(
         cutId: Int,
         cutLng: Double,
@@ -69,7 +68,6 @@ data class Segment(
      * Calculates the intersection of the segment with a given other segment
      * and returns a CutPosition if the segments intersects.
      */
-    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     fun intersectWithSegment(
         cutId: Int,
         other: Segment,
@@ -119,7 +117,6 @@ data class Segment(
      * and returns the intersection point as a [Position] or `null` when no
      * intersection occurs (parallel or out of segment bounds).
      */
-    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     fun intersectWithLng(cutLng: Double): Position? {
         val latDiff = end.lat - start.lat
         val lngDiff = end.lng - start.lng
@@ -138,7 +135,6 @@ data class Segment(
      * Calculates the intersection point of this segment with [other] and returns it
      * as a plain [Position], or `null` when the segments do not intersect.
      */
-    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     fun intersectWithSegment(other: Segment): Position? {
         val (x1, y1) = start.lng to start.lat
         val (x2, y2) = end.lng to end.lat

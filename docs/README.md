@@ -155,27 +155,16 @@ Found an issue or have a suggestion?
 - Submit a PR with documentation improvements
 - Discussion: [WorldWideWaves Discussions](https://github.com/mglcel/WorldWideWaves/discussions)
 
-## Historical Documentation
-
-Historical documentation (iOS map refactoring, test reports, setup guides) has been archived:
-
-**[Archive Directory](archive/README.md)**
-- iOS map refactor analysis (10 documents)
-- Testing reports (5 documents)
-- Setup guides (3 documents)
-- Complete archive index and retrieval instructions
-
 ## Version History
 
 | Date | Version | Changes |
 |------|---------|---------|
-| 2025-10-14 | 2.1 | Documentation cleanup - 18 historical docs archived |
 | 2025-10-01 | 2.0 | Complete documentation rewrite with production-grade structure |
 | 2025-09-23 | 1.5 | Post Position System Refactor updates |
 | 2025-01-15 | 1.0 | Initial documentation |
 
 ---
 
-**Last Updated:** October 14, 2025
+**Last Updated:** October 1, 2025
 **Maintainer:** WorldWideWaves Development Team
-**Status:** Active Development (Android Production-Ready, iOS 95% Feature Parity)
+**Status:** Active Development (Android Production-Ready, iOS In Progress)

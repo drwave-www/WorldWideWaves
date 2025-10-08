@@ -1,5 +1,3 @@
-@file:Suppress("MatchingDeclarationName") // Platform-specific actual file naming (.android.kt)
-
 package com.worldwidewaves.shared.format
 
 /* * Copyright 2025 DrWave

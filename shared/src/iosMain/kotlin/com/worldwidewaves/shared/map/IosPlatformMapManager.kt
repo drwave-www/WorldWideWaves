@@ -56,7 +56,6 @@ class IosPlatformMapManager(
      * This matches how MapStore.readGeoJson() actually accesses the files.
      */
     @OptIn(ExperimentalForeignApi::class)
-    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     override fun isMapAvailable(mapId: String): Boolean {
         Log.d(TAG, "Checking map availability for: $mapId")
 
@@ -86,7 +85,6 @@ class IosPlatformMapManager(
      * Try standard subdirectory paths (same logic as MapStore.resolveFromStandardPaths)
      */
     @OptIn(ExperimentalForeignApi::class)
-    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     private fun resolveFromStandardPaths(
         bundle: NSBundle,
         eventId: String,

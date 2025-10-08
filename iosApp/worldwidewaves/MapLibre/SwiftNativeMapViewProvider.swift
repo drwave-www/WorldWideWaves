@@ -92,20 +92,18 @@ public class SwiftNativeMapViewProvider: NativeMapViewProvider {
     ///   - styleURL: MapLibre style JSON URL (defines map appearance)
     /// - Returns: UIViewController containing MapLibre map (type-erased to `Any` for Kotlin)
     /// - Note: Called from Kotlin Compose IOSEventMap composable
-    public func createMapView(event: IWWWEvent, styleURL: String, enableGestures: Bool, registryKey: String?) -> Any {
-        let key = registryKey ?? event.id
-        WWWLog.i("SwiftNativeMapViewProvider", "Creating MapLibre map view for: \(event.id), registryKey: \(key)")
-        WWWLog.d("SwiftNativeMapViewProvider", "Style URL: \(styleURL), enableGestures: \(enableGestures)")
+    public func createMapView(event: IWWWEvent, styleURL: String) -> Any {
+        WWWLog.i("SwiftNativeMapViewProvider", "Creating MapLibre map view for: \(event.id)")
+        WWWLog.d("SwiftNativeMapViewProvider", "Style URL: \(styleURL)")
 
-        // Use Swift MapViewBridge.createMapViewControllerWithWrapper (not the @objc version)
-        let viewController = MapViewBridge.createMapViewControllerWithWrapper(
+        // Use Swift MapViewBridge instead of ObjC WWWMapViewBridge
+        let viewController = MapViewBridge.createMapViewController(
             for: event,
             styleURL: styleURL,
-            enableGestures: enableGestures,
-            registryKey: key
+            wrapperRef: nil
         )
 
-        WWWLog.i("SwiftNativeMapViewProvider", "MapLibre view controller created successfully with registryKey: \(key)")
+        WWWLog.i("SwiftNativeMapViewProvider", "MapLibre view controller created successfully")
         return viewController
     }
 

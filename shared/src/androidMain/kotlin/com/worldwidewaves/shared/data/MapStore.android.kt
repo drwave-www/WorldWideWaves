@@ -316,18 +316,11 @@ private fun attemptSingleFetch(
 actual fun cacheStringToFile(
     fileName: String,
     content: String,
-): String? {
+): String {
     val root = platformCacheRoot()
     val f = File(root, fileName)
     f.parentFile?.mkdirs()
     Log.v("cacheStringToFile", "Caching data to $fileName")
-    return try {
-        f.writeText(content)
-        val absolutePath = f.toURI().path
-        Log.d("cacheStringToFile", "Successfully cached to: $absolutePath")
-        absolutePath
-    } catch (e: Exception) {
-        Log.e("cacheStringToFile", "Failed to cache $fileName: ${e.message}", e)
-        null
-    }
+    f.writeText(content)
+    return fileName
 }
