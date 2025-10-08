@@ -12,34 +12,93 @@ package com.worldwidewaves.shared.ui.theme
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.platform.Font
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.usePinned
+import platform.Foundation.NSBundle
+import platform.posix.fclose
+import platform.posix.fopen
+import platform.posix.fread
+import platform.posix.fseek
+import platform.posix.ftell
+import platform.posix.rewind
 
 /**
  * iOS font families using Google Fonts (bundled as TTF files in iOS app bundle).
  * These fonts match exactly with Android implementation for consistent branding.
  *
- * **MANUAL SETUP REQUIRED**: See iOS_FONT_SETUP_INSTRUCTIONS.md
+ * Fonts are bundled at app root and registered via UIAppFonts in Info.plist.
+ * Fonts are loaded directly from the bundle using NSData.
  *
- * Fonts must be added to Xcode project with target membership for proper bundling.
- * Once added, UIAppFonts in Info.plist will register them with the system, making
- * them available as system fonts by their PostScript names.
- *
- * **Font Files** (in iosApp/worldwidewaves/Fonts/):
+ * **Font Files** (bundled in app root, source: iosApp/worldwidewaves/Fonts/):
  * - Montserrat-Regular.ttf, Montserrat-Medium.ttf, Montserrat-Bold.ttf
  * - MontserratAlternates-Regular.ttf, MontserratAlternates-Medium.ttf, MontserratAlternates-Bold.ttf
  * - NotoSans-Regular.ttf, NotoSans-Medium.ttf, NotoSans-Bold.ttf
- *
- * **Current Status**: Using system font (FontFamily.Default) as fallback.
- * After Xcode setup, fonts will be registered via UIAppFonts and can be referenced by PostScript name.
  */
 
-// NOTE: Requires Xcode setup - fonts must be added to Xcode project with target membership.
-// After manual setup, implement font loading using platform.UIKit.UIFont APIs.
-// See iOS_FONT_SETUP_INSTRUCTIONS.md for complete setup steps.
-@Composable
-actual fun AppBodyFontFamily(): FontFamily = FontFamily.Default
+@OptIn(ExperimentalForeignApi::class)
+@Suppress("TooGenericExceptionCaught", "ReturnCount")
+private fun loadFontData(fileName: String): ByteArray {
+    val bundle = NSBundle.mainBundle
+    val path =
+        bundle.pathForResource(fileName.substringBeforeLast("."), "ttf")
+            ?: error("Font file not found in bundle: $fileName")
+
+    return try {
+        val file = fopen(path, "rb") ?: error("Cannot open font file: $fileName")
+
+        try {
+            fseek(file, 0, platform.posix.SEEK_END)
+            val size = ftell(file).toInt()
+            rewind(file)
+
+            val buffer = ByteArray(size)
+            buffer.usePinned { pinned ->
+                fread(pinned.addressOf(0), 1u, size.toULong(), file)
+            }
+            buffer
+        } finally {
+            fclose(file)
+        }
+    } catch (e: Exception) {
+        error("Failed to load font $fileName: ${e.message}")
+    }
+}
 
 @Composable
-actual fun AppDisplayFontFamily(): FontFamily = FontFamily.Default
+actual fun AppBodyFontFamily(): FontFamily =
+    FontFamily(
+        Font("Montserrat-Regular", loadFontData("Montserrat-Regular.ttf"), FontWeight.Normal),
+        Font("Montserrat-Medium", loadFontData("Montserrat-Medium.ttf"), FontWeight.Medium),
+        Font("Montserrat-Bold", loadFontData("Montserrat-Bold.ttf"), FontWeight.Bold),
+    )
 
 @Composable
-actual fun AppExtraFontFamily(): FontFamily = FontFamily.Default
+actual fun AppDisplayFontFamily(): FontFamily =
+    FontFamily(
+        Font("Montserrat-Regular", loadFontData("Montserrat-Regular.ttf"), FontWeight.Normal),
+        Font("Montserrat-Medium", loadFontData("Montserrat-Medium.ttf"), FontWeight.Medium),
+        Font("Montserrat-Bold", loadFontData("Montserrat-Bold.ttf"), FontWeight.Bold),
+    )
+
+@Composable
+actual fun AppExtraFontFamily(): FontFamily =
+    FontFamily(
+        Font(
+            "MontserratAlternates-Regular",
+            loadFontData("MontserratAlternates-Regular.ttf"),
+            FontWeight.Normal,
+        ),
+        Font(
+            "MontserratAlternates-Medium",
+            loadFontData("MontserratAlternates-Medium.ttf"),
+            FontWeight.Medium,
+        ),
+        Font(
+            "MontserratAlternates-Bold",
+            loadFontData("MontserratAlternates-Bold.ttf"),
+            FontWeight.Bold,
+        ),
+    )
