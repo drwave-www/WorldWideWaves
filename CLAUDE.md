@@ -690,6 +690,15 @@ data class Result(val value: String)
 
 ### Code Quality Best Practices
 
+**🚨 CRITICAL: Zero-Warnings Policy (MANDATORY)**:
+- **BEFORE EVERY COMMIT**: ALL build and lint warnings MUST be fixed
+- **NO EXCEPTIONS**: There are ZERO acceptable warnings - fix them all
+- **Pre-commit check**: Run linters and verify 0 warnings in modified files
+- **SwiftLint**: Fix ALL warnings (line length, function length, file length, etc.)
+- **Detekt**: Fix ALL warnings or add justified `@Suppress` with explanation
+- **Compilation**: Fix ALL compiler warnings
+- This requirement is NON-NEGOTIABLE and applies to ALL commits
+
 **Detekt Warnings**:
 - Fix all unused properties and variables (remove dead code)
 - Use specific exception types (avoid `catch (e: Exception)` when possible)
@@ -698,6 +707,7 @@ data class Result(val value: String)
 - Create data classes for functions with >6 parameters
 - Break long lines (keep under max line length)
 - Extract magic numbers to named constants
+- Extract long functions into smaller helpers to meet length limits
 
 **Acceptable Detekt Suppressions** (when justified):
 - `@Suppress("ReturnCount")` - Multiple returns OK for guard clauses and early exits
