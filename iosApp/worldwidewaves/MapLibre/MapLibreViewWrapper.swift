@@ -365,10 +365,57 @@ import Shared
     // MARK: - Attribution
 
     @objc public func setAttributionMargins(left: Int, top: Int, right: Int, bottom: Int) {
-        // iOS MapLibre attribution positioning
-        // Note: Attribution button position can be adjusted via logoView and attributionButton properties
-        mapView?.logoView.isHidden = false
-        mapView?.attributionButton.isHidden = false
+        guard let mapView = mapView else {
+            WWWLog.w(Self.tag, "Cannot set attribution margins - mapView is nil")
+            return
+        }
+
+        WWWLog.d(Self.tag, "Setting attribution margins: left=\(left), top=\(top), right=\(right), bottom=\(bottom)")
+
+        // Ensure logo and attribution are visible
+        mapView.logoView.isHidden = false
+        mapView.attributionButton.isHidden = false
+
+        // Enable Auto Layout for logo and attribution
+        mapView.logoView.translatesAutoresizingMaskIntoConstraints = false
+        mapView.attributionButton.translatesAutoresizingMaskIntoConstraints = false
+
+        // Remove existing attribution constraints
+        let logoConstraints = mapView.constraints.filter { constraint in
+            constraint.firstItem as? UIView == mapView.logoView ||
+            constraint.secondItem as? UIView == mapView.logoView
+        }
+        let attrConstraints = mapView.constraints.filter { constraint in
+            constraint.firstItem as? UIView == mapView.attributionButton ||
+            constraint.secondItem as? UIView == mapView.attributionButton
+        }
+        NSLayoutConstraint.deactivate(logoConstraints + attrConstraints)
+
+        // Apply new constraints for logo (bottom-left position with margins)
+        NSLayoutConstraint.activate([
+            mapView.logoView.leadingAnchor.constraint(
+                equalTo: mapView.leadingAnchor,
+                constant: CGFloat(left)
+            ),
+            mapView.logoView.bottomAnchor.constraint(
+                equalTo: mapView.bottomAnchor,
+                constant: -CGFloat(bottom)
+            )
+        ])
+
+        // Apply new constraints for attribution button (bottom-right position with margins)
+        NSLayoutConstraint.activate([
+            mapView.attributionButton.trailingAnchor.constraint(
+                equalTo: mapView.trailingAnchor,
+                constant: -CGFloat(right)
+            ),
+            mapView.attributionButton.bottomAnchor.constraint(
+                equalTo: mapView.bottomAnchor,
+                constant: -CGFloat(bottom)
+            )
+        ])
+
+        WWWLog.i(Self.tag, "✅ Attribution margins applied successfully")
     }
 
     // MARK: - Wave Polygons
@@ -821,6 +868,9 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
             return
         }
 
+        // Mark style as loaded in registry (enables immediate callback invocation)
+        Shared.MapWrapperRegistry.shared.setStyleLoaded(eventId: eventId, loaded: true)
+
         // IMMEDIATE EXECUTION: Execute all pending commands now that map is ready
         WWWLog.i(Self.tag, "⚡ Executing pending commands immediately after style load...")
 
@@ -846,6 +896,10 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
             pendingConstraintBounds = nil
             WWWLog.i(Self.tag, "✅ Constraint bounds applied successfully")
         }
+
+        // 5. Invoke map ready callbacks (enables wave polygon rendering and other operations)
+        WWWLog.i(Self.tag, "Invoking map ready callbacks...")
+        IOSMapBridge.invokeMapReadyCallbacks(eventId: eventId)
 
         // NOTE: Continuous polling REMOVED - now using direct dispatch callbacks
         // Callbacks were registered in setEventId() and provide immediate updates (<16ms vs 100ms+)

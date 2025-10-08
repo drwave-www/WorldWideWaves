@@ -198,6 +198,8 @@ object MapWrapperRegistry {
         visibleRegions.remove(eventId)
         minZoomLevels.remove(eventId)
         cameraIdleListeners.remove(eventId)
+        onMapReadyCallbacks.remove(eventId)
+        styleLoadedStates.remove(eventId)
 
         Log.i(TAG, "✅ Wrapper unregistered and cleanup complete for: $eventId")
     }
@@ -349,6 +351,12 @@ object MapWrapperRegistry {
 
     // Store map click coordinate listeners (for tap with coordinates)
     private val mapClickCoordinateListeners = mutableMapOf<String, (Double, Double) -> Unit>()
+
+    // Store map ready callbacks (invoked after style loads)
+    private val onMapReadyCallbacks = mutableMapOf<String, MutableList<() -> Unit>>()
+
+    // Track style loaded state
+    private val styleLoadedStates = mutableMapOf<String, Boolean>()
 
     /**
      * Update visible region from Swift.
@@ -604,6 +612,61 @@ object MapWrapperRegistry {
     }
 
     /**
+     * Add a callback to be invoked when map style is loaded and ready.
+     * If style is already loaded, callback is invoked immediately.
+     */
+    fun addOnMapReadyCallback(
+        eventId: String,
+        callback: () -> Unit,
+    ) {
+        Log.d(TAG, "Adding map ready callback for event: $eventId")
+        val callbacks = onMapReadyCallbacks.getOrPut(eventId) { mutableListOf() }
+        callbacks.add(callback)
+    }
+
+    /**
+     * Mark style as loaded for an event.
+     * Called from Swift after didFinishLoading style.
+     */
+    fun setStyleLoaded(
+        eventId: String,
+        loaded: Boolean,
+    ) {
+        Log.i(TAG, "Style loaded state updated: $loaded for event: $eventId")
+        styleLoadedStates[eventId] = loaded
+    }
+
+    /**
+     * Check if style is loaded for an event.
+     */
+    fun isStyleLoaded(eventId: String): Boolean = styleLoadedStates[eventId] ?: false
+
+    /**
+     * Invoke all registered map ready callbacks for an event.
+     * Called from Swift after style loads.
+     */
+    fun invokeMapReadyCallbacks(eventId: String) {
+        val callbacks = onMapReadyCallbacks[eventId]
+        if (callbacks == null || callbacks.isEmpty()) {
+            Log.v(TAG, "No map ready callbacks registered for event: $eventId")
+            return
+        }
+
+        Log.i(TAG, "Invoking ${callbacks.size} map ready callback(s) for event: $eventId")
+        callbacks.forEach { callback ->
+            try {
+                callback.invoke()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error invoking map ready callback for event: $eventId", throwable = e)
+            }
+        }
+
+        // Clear callbacks after invoking (one-time use)
+        onMapReadyCallbacks.remove(eventId)
+        Log.d(TAG, "Map ready callbacks cleared for event: $eventId")
+    }
+
+    /**
      * Clear all registered wrappers and pending data.
      * Useful for cleanup during app termination or testing.
      */
@@ -623,5 +686,7 @@ object MapWrapperRegistry {
         cameraPositions.clear()
         cameraZooms.clear()
         cameraAnimationCallbacks.clear()
+        onMapReadyCallbacks.clear()
+        styleLoadedStates.clear()
     }
 }

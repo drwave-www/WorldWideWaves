@@ -216,6 +216,47 @@ import CoreLocation
         wrapper.clearWavePolygons()
     }
 
+    // MARK: - Attribution
+
+    /// Sets attribution and logo margins.
+    ///
+    /// ## Purpose
+    /// Adjusts the position of MapLibre attribution button and logo view
+    /// to avoid overlap with other UI elements (e.g., bottom navigation).
+    ///
+    /// ## Threading Model
+    /// Main thread only (UIKit requirement)
+    ///
+    /// ## Coordinate System
+    /// - left: Distance from left edge of map view
+    /// - top: Distance from top edge of map view (currently unused for bottom-aligned elements)
+    /// - right: Distance from right edge of map view
+    /// - bottom: Distance from bottom edge of map view
+    ///
+    /// - Parameters:
+    ///   - eventId: Unique event identifier (registry key)
+    ///   - left: Left margin in points
+    ///   - top: Top margin in points
+    ///   - right: Right margin in points
+    ///   - bottom: Bottom margin in points
+    /// - Important: Must be called on main thread
+    /// - Note: Called from Kotlin via @objc bridge
+    @objc public static func setAttributionMargins(
+        eventId: String,
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int
+    ) {
+        guard let wrapper = Shared.MapWrapperRegistry.shared.getWrapper(eventId: eventId) as? MapLibreViewWrapper else {
+            WWWLog.w("IOSMapBridge", "No wrapper found for event: \(eventId)")
+            return
+        }
+
+        WWWLog.d("IOSMapBridge", "Setting attribution margins for event: \(eventId)")
+        wrapper.setAttributionMargins(left: left, top: top, right: right, bottom: bottom)
+    }
+
     // MARK: - Accessibility Support
 
     /// Updates user position for VoiceOver accessibility.
@@ -286,6 +327,36 @@ import CoreLocation
             radius: radius,
             eventName: eventName
         )
+    }
+
+    // MARK: - Map Ready Callbacks
+
+    /// Invokes map ready callbacks after style loads.
+    ///
+    /// ## Purpose
+    /// Solves the timing problem where Kotlin may register onMapSet callbacks before the map is ready.
+    /// Kotlin stores callbacks in the registry, and Swift invokes them after style loads.
+    ///
+    /// ## Use Cases
+    /// - Wave polygon rendering that requires style to be loaded
+    /// - Camera positioning that depends on map being initialized
+    /// - Any operation that needs the map to be fully ready
+    ///
+    /// ## Threading Model
+    /// Main thread only (MapLibre/UIKit requirement)
+    ///
+    /// ## Error Handling
+    /// - No callbacks registered: Logs verbose, returns (normal case)
+    /// - Callback throws exception: Logged but doesn't prevent other callbacks from executing
+    ///
+    /// - Parameters:
+    ///   - eventId: Unique event identifier (registry key)
+    /// - Important: Must be called on main thread
+    /// - Important: Call after didFinishLoading style: to ensure map is ready
+    /// - Note: Called from MapLibreViewWrapper after style loads
+    @objc public static func invokeMapReadyCallbacks(eventId: String) {
+        WWWLog.i("IOSMapBridge", "Invoking map ready callbacks for event: \(eventId)")
+        Shared.MapWrapperRegistry.shared.invokeMapReadyCallbacks(eventId: eventId)
     }
 
     // MARK: - Camera Control

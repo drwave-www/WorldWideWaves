@@ -259,10 +259,17 @@ class IosMapLibreAdapter(
         right: Int,
         bottom: Int,
     ) {
-        Log.d("IosMapLibreAdapter", "Setting attribution margins: $left, $top, $right, $bottom")
+        Log.d(TAG, "Setting attribution margins: left=$left, top=$top, right=$right, bottom=$bottom for event: $eventId")
 
-        // NOTE: Implement iOS MapLibre attribution positioning
-        // Set attribution view margins
+        // Attribution margins can be set via MapLibreViewWrapper.setAttributionMargins()
+        // This method is implemented in MapLibreViewWrapper.swift (lines 367-419)
+        // and can be called from Swift via IOSMapBridge.setAttributionMargins()
+        //
+        // Currently this method is never called from the shared Kotlin code.
+        // If needed in the future, implement via MapWrapperRegistry command pattern
+        // similar to camera commands, or call directly via Swift bridge in iosApp target.
+        //
+        // Implementation is complete on the Swift side and ready to use.
     }
 
     override fun addWavePolygons(
@@ -299,8 +306,19 @@ class IosMapLibreAdapter(
     }
 
     override fun onMapSet(callback: (MapLibreAdapter<*>) -> Unit) {
-        Log.d("IosMapLibreAdapter", "Map set callback")
-        // NOTE: Implement map ready callback for iOS
-        callback(this)
+        Log.d(TAG, "Registering onMapSet callback for event: $eventId")
+
+        // Store callback in registry (will be invoked after style loads)
+        MapWrapperRegistry.addOnMapReadyCallback(eventId) {
+            Log.d(TAG, "Map ready callback invoked for event: $eventId")
+            callback(this)
+        }
+
+        // Check if style is already loaded (edge case: callback registered late)
+        val isStyleLoaded = MapWrapperRegistry.isStyleLoaded(eventId)
+        if (isStyleLoaded) {
+            Log.i(TAG, "Style already loaded, invoking callback immediately for event: $eventId")
+            MapWrapperRegistry.invokeMapReadyCallbacks(eventId)
+        }
     }
 }
