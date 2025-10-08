@@ -16,6 +16,7 @@ import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import platform.UIKit.UIImage
 
 private const val TAG = "IosMapLibreAdapter"
 
@@ -39,9 +40,9 @@ private const val DEFAULT_HEIGHT = 812.0
  */
 class IosMapLibreAdapter(
     private val eventId: String,
-) : MapLibreAdapter<Any> {
+) : MapLibreAdapter<UIImage> {
     // Wrapper instance (not directly used - commands go through MapWrapperRegistry)
-    private var wrapper: Any? = null
+    private var wrapper: UIImage? = null
 
     private val _currentPosition = MutableStateFlow<Position?>(null)
     private val _currentZoom = MutableStateFlow(10.0)
@@ -53,7 +54,7 @@ class IosMapLibreAdapter(
      * Sets the map wrapper.
      * Map rendering happens via SwiftUI EventMapView embedded in Compose.
      */
-    override fun setMap(map: Any) {
+    override fun setMap(map: UIImage) {
         this.wrapper = map
         Log.d(TAG, "Map wrapper set for eventId: $eventId")
     }
