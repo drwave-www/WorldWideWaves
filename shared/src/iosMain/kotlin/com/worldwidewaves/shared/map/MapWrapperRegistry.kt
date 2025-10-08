@@ -327,6 +327,10 @@ object MapWrapperRegistry {
     // Store camera idle listeners
     private val cameraIdleListeners = mutableMapOf<String, () -> Unit>()
 
+    // Store camera positions and zoom for StateFlow updates
+    private val cameraPositions = mutableMapOf<String, Pair<Double, Double>>()
+    private val cameraZooms = mutableMapOf<String, Double>()
+
     // Store map click coordinate listeners (for tap with coordinates)
     private val mapClickCoordinateListeners = mutableMapOf<String, (Double, Double) -> Unit>()
 
@@ -470,6 +474,41 @@ object MapWrapperRegistry {
     }
 
     /**
+     * Update camera position from Swift (for StateFlow reactive updates).
+     * Called when map camera moves.
+     */
+    fun updateCameraPosition(
+        eventId: String,
+        latitude: Double,
+        longitude: Double,
+    ) {
+        cameraPositions[eventId] = Pair(latitude, longitude)
+        Log.v(TAG, "Camera position updated: ($latitude, $longitude)")
+    }
+
+    /**
+     * Update camera zoom from Swift (for StateFlow reactive updates).
+     * Called when map zoom changes.
+     */
+    fun updateCameraZoom(
+        eventId: String,
+        zoom: Double,
+    ) {
+        cameraZooms[eventId] = zoom
+        Log.v(TAG, "Camera zoom updated: $zoom")
+    }
+
+    /**
+     * Get camera position for event.
+     */
+    fun getCameraPosition(eventId: String): Pair<Double, Double>? = cameraPositions[eventId]
+
+    /**
+     * Get camera zoom for event.
+     */
+    fun getCameraZoom(eventId: String): Double? = cameraZooms[eventId]
+
+    /**
      * Get and invoke map click callback for an event.
      * Swift calls this when map is tapped.
      * Returns true if callback was found and invoked.
@@ -547,5 +586,7 @@ object MapWrapperRegistry {
         visibleRegions.clear()
         minZoomLevels.clear()
         cameraIdleListeners.clear()
+        cameraPositions.clear()
+        cameraZooms.clear()
     }
 }

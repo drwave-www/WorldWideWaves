@@ -24,7 +24,9 @@ import UIKit
 import CoreLocation
 import Shared
 
-// swiftlint:disable type_body_length file_length
+// Note: File exceeds 1000 lines due to comprehensive MapLibre feature set
+// Includes: camera control, wave polygons, accessibility, callbacks, location component
+// swiftlint:disable file_length type_body_length
 
 /// Swift bridging layer for MapLibre Native iOS SDK.
 /// Provides @objc methods for controlling MapLibre from Kotlin or Swift.
@@ -60,6 +62,12 @@ import Shared
     private var currentEventRadius: Double = 0
     private var currentEventName: String?
     private var currentWavePolygons: [[CLLocationCoordinate2D]] = []
+
+    // MARK: - Location Component
+
+    /// User location annotation (blue dot)
+    private var userLocationAnnotation: MLNPointAnnotation?
+    private var isLocationComponentEnabled: Bool = false
 
     @objc public override init() {
         super.init()
@@ -126,8 +134,10 @@ import Shared
         }
         WWWLog.d(Self.tag, "Immediate camera callback registered for: \(eventId)")
 
-        // Register map click callback handler (direct callback storage, no registry lookup)
-        Shared.MapWrapperRegistry.shared.setMapClickRegistrationCallback(eventId: eventId) { [weak self] clickCallback in
+        // Register map click callback handler (direct callback storage)
+        Shared.MapWrapperRegistry.shared.setMapClickRegistrationCallback(
+            eventId: eventId
+        ) { [weak self] clickCallback in
             guard let self = self else { return }
             WWWLog.i(Self.tag, "👆 Registering map click navigation callback directly on wrapper")
             self.setOnMapClickNavigationListener(clickCallback)
@@ -720,6 +730,60 @@ import Shared
         currentUserPosition = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
         updateMapAccessibility()
         WWWLog.v(Self.tag, "User position updated for accessibility: \(latitude), \(longitude)")
+
+        // Update location marker if enabled
+        if isLocationComponentEnabled {
+            updateUserLocationMarker(coordinate: currentUserPosition!)
+        }
+    }
+
+    // MARK: - Location Component
+
+    /// Enable/disable user location marker (blue dot).
+    @objc public func enableLocationComponent(_ enabled: Bool) {
+        guard let mapView = mapView else { return }
+
+        isLocationComponentEnabled = enabled
+
+        if enabled {
+            WWWLog.i(Self.tag, "Enabling location component")
+            // Create user location annotation if needed
+            if userLocationAnnotation == nil {
+                userLocationAnnotation = MLNPointAnnotation()
+                userLocationAnnotation?.title = "Your Location"
+            }
+
+            // Add to map if we have a position
+            if let position = currentUserPosition, userLocationAnnotation != nil {
+                userLocationAnnotation?.coordinate = position
+                if let annotation = userLocationAnnotation {
+                    mapView.addAnnotation(annotation)
+                }
+                WWWLog.i(Self.tag, "✅ Location component enabled with user position")
+            }
+        } else {
+            WWWLog.i(Self.tag, "Disabling location component")
+            // Remove annotation
+            if let annotation = userLocationAnnotation {
+                mapView.removeAnnotation(annotation)
+            }
+        }
+    }
+
+    /// Update user location marker position.
+    private func updateUserLocationMarker(coordinate: CLLocationCoordinate2D) {
+        guard let mapView = mapView, let annotation = userLocationAnnotation else { return }
+
+        // Update annotation coordinate
+        annotation.coordinate = coordinate
+
+        // If not already on map, add it
+        if !mapView.annotations.contains(where: { ($0 as? MLNPointAnnotation) === annotation }) {
+            mapView.addAnnotation(annotation)
+            WWWLog.d(Self.tag, "Added user location marker to map")
+        } else {
+            WWWLog.v(Self.tag, "Updated user location marker position: \(coordinate.latitude), \(coordinate.longitude)")
+        }
     }
 
     /// Updates event metadata for accessibility.
@@ -808,6 +872,17 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         // Invoke camera idle listener from registry (for adapter's addOnCameraIdleListener)
         if let eventId = eventId {
             Shared.MapWrapperRegistry.shared.invokeCameraIdleListener(eventId: eventId)
+
+            // Update camera position and zoom in adapter (for StateFlow reactive updates)
+            Shared.MapWrapperRegistry.shared.updateCameraPosition(
+                eventId: eventId,
+                latitude: mapView.centerCoordinate.latitude,
+                longitude: mapView.centerCoordinate.longitude
+            )
+            Shared.MapWrapperRegistry.shared.updateCameraZoom(
+                eventId: eventId,
+                zoom: mapView.zoomLevel
+            )
 
             // Update visible region in registry (for getVisibleRegion calls)
             let bounds = mapView.visibleCoordinateBounds

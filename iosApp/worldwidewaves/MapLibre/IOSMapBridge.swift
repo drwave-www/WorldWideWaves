@@ -5,6 +5,9 @@
  * https://www.apache.org/licenses/LICENSE-2.0
  */
 
+// Note: File exceeds limits due to comprehensive camera command handling
+// swiftlint:disable file_length
+
 import Foundation
 import Shared
 import CoreLocation
@@ -344,6 +347,7 @@ import CoreLocation
 
     /// Executes a specific camera command on the wrapper.
     /// - Returns: True if execution succeeded, false if it should be retried
+    // swiftlint:disable:next function_body_length
     private static func executeCommand(_ command: CameraCommand, on wrapper: MapLibreViewWrapper) -> Bool {
         if let animateToPos = command as? CameraCommand.AnimateToPosition {
             let zoom = animateToPos.zoom?.doubleValue
@@ -361,7 +365,11 @@ import CoreLocation
             WWWLog.i("IOSMapBridge", "Animating to bounds with padding: \(animateBounds.padding)")
             WWWLog.d(
                 "IOSMapBridge",
-                "Swift sees bbox: minLat=\(bbox.minLatitude), minLng=\(bbox.minLongitude), maxLat=\(bbox.maxLatitude), maxLng=\(bbox.maxLongitude)"
+                """
+                Swift sees bbox: minLat=\(bbox.minLatitude), \
+                minLng=\(bbox.minLongitude), maxLat=\(bbox.maxLatitude), \
+                maxLng=\(bbox.maxLongitude)
+                """
             )
             wrapper.animateCameraToBounds(
                 swLat: bbox.minLatitude,
@@ -386,7 +394,11 @@ import CoreLocation
             WWWLog.i("IOSMapBridge", "Setting camera constraint bounds")
             WWWLog.d(
                 "IOSMapBridge",
-                "Swift sees bbox: minLat=\(bbox.minLatitude), minLng=\(bbox.minLongitude), maxLat=\(bbox.maxLatitude), maxLng=\(bbox.maxLongitude)"
+                """
+                Swift sees bbox: minLat=\(bbox.minLatitude), \
+                minLng=\(bbox.minLongitude), maxLat=\(bbox.maxLatitude), \
+                maxLng=\(bbox.maxLongitude)
+                """
             )
             let success = wrapper.setBoundsForCameraTarget(
                 swLat: bbox.minLatitude,

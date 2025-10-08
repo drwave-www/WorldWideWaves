@@ -79,7 +79,14 @@ class IosMapLibreAdapter(
 
     override fun getHeight(): Double = DEFAULT_HEIGHT
 
-    override fun getCameraPosition(): Position? = _currentPosition.value
+    override fun getCameraPosition(): Position? {
+        // Try to get from registry first (updated by Swift)
+        val registryPosition = MapWrapperRegistry.getCameraPosition(eventId)
+        if (registryPosition != null) {
+            return Position(registryPosition.first, registryPosition.second)
+        }
+        return _currentPosition.value
+    }
 
     override fun getVisibleRegion(): BoundingBox {
         val w = wrapper
@@ -110,6 +117,7 @@ class IosMapLibreAdapter(
     /**
      * Update camera position from Swift delegate callback.
      * Called by Swift code when map camera changes.
+     * Now bridges from MapWrapperRegistry to StateFlow.
      */
     fun updateCameraPosition(
         latitude: Double,
@@ -121,9 +129,26 @@ class IosMapLibreAdapter(
     /**
      * Update zoom level from Swift delegate callback.
      * Called by Swift code when map zoom changes.
+     * Now bridges from MapWrapperRegistry to StateFlow.
      */
     fun updateZoom(zoom: Double) {
         _currentZoom.value = zoom
+    }
+
+    /**
+     * Poll registry for camera updates and update StateFlows.
+     * Called periodically or on demand to sync registry → StateFlow.
+     */
+    private fun syncCameraStateFromRegistry() {
+        val position = MapWrapperRegistry.getCameraPosition(eventId)
+        if (position != null) {
+            _currentPosition.value = Position(position.first, position.second)
+        }
+
+        val zoom = MapWrapperRegistry.getCameraZoom(eventId)
+        if (zoom != null) {
+            _currentZoom.value = zoom
+        }
     }
 
     override fun moveCamera(bounds: BoundingBox) {
