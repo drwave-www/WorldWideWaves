@@ -21,7 +21,8 @@
 import UIKit
 import Shared
 
-/// The primary scene coordinator for WorldWideWaves iOS app, responsible for managing the app's window lifecycle and routing.
+/// The primary scene coordinator for WorldWideWaves iOS app, responsible for managing
+/// the app's window lifecycle and routing.
 ///
 /// ## Purpose
 /// SceneDelegate is the central coordinator that:
@@ -106,49 +107,60 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         switch host {
         case "event":
-            guard let id = id else {
-                NSLog("[\(tag)] ❌ event route missing id")
-                return nil
-            }
-            do {
-                let viewController = try RootControllerKt.makeEventViewController(eventId: id)
-                NSLog("[\(tag)] ✅ routed -> EventViewController(id=\(id))")
-                return viewController
-            } catch {
-                NSLog("[\(tag)] ❌ Error creating EventViewController: \(error)")
-                return nil
-            }
-
+            return makeEventViewController(id: id)
         case "wave":
-            guard let id = id else {
-                NSLog("[\(tag)] ❌ wave route missing id")
-                return nil
-            }
-            do {
-                let viewController = try RootControllerKt.makeWaveViewController(eventId: id)
-                NSLog("[\(tag)] ✅ routed -> WaveViewController(id=\(id))")
-                return viewController
-            } catch {
-                NSLog("[\(tag)] ❌ Error creating WaveViewController: \(error)")
-                return nil
-            }
-
+            return makeWaveViewController(id: id)
         case "fullmap":
-            guard let id = id else {
-                NSLog("[\(tag)] ❌ full map route missing id")
-                return nil
-            }
-            do {
-                let viewController = try RootControllerKt.makeFullMapViewController(eventId: id)
-                NSLog("[\(tag)] ✅ routed -> FullMapViewController(id=\(id))")
-                return viewController
-            } catch {
-                NSLog("[\(tag)] ❌ Error creating FullMapViewController: \(error)")
-                return nil
-            }
-
+            return makeFullMapViewController(id: id)
         default:
             NSLog("[\(tag)] ❓ unknown host: \(host ?? "nil")")
+            return nil
+        }
+    }
+
+    // MARK: - Private Route Helpers
+
+    private func makeEventViewController(id: String?) -> UIViewController? {
+        guard let id = id else {
+            NSLog("[\(tag)] ❌ event route missing id")
+            return nil
+        }
+        do {
+            let viewController = try RootControllerKt.makeEventViewController(eventId: id)
+            NSLog("[\(tag)] ✅ routed -> EventViewController(id=\(id))")
+            return viewController
+        } catch {
+            NSLog("[\(tag)] ❌ Error creating EventViewController: \(error)")
+            return nil
+        }
+    }
+
+    private func makeWaveViewController(id: String?) -> UIViewController? {
+        guard let id = id else {
+            NSLog("[\(tag)] ❌ wave route missing id")
+            return nil
+        }
+        do {
+            let viewController = try RootControllerKt.makeWaveViewController(eventId: id)
+            NSLog("[\(tag)] ✅ routed -> WaveViewController(id=\(id))")
+            return viewController
+        } catch {
+            NSLog("[\(tag)] ❌ Error creating WaveViewController: \(error)")
+            return nil
+        }
+    }
+
+    private func makeFullMapViewController(id: String?) -> UIViewController? {
+        guard let id = id else {
+            NSLog("[\(tag)] ❌ full map route missing id")
+            return nil
+        }
+        do {
+            let viewController = try RootControllerKt.makeFullMapViewController(eventId: id)
+            NSLog("[\(tag)] ✅ routed -> FullMapViewController(id=\(id))")
+            return viewController
+        } catch {
+            NSLog("[\(tag)] ❌ Error creating FullMapViewController: \(error)")
             return nil
         }
     }
@@ -207,7 +219,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             try IosPlatformEnablerKt.registerPlatformEnabler(enabler: IOSPlatformEnabler())
             NSLog("[\(tag)] ✅ PlatformEnabler (Swift) registered into Koin")
 
-            try NativeMapViewProviderRegistrationKt.registerNativeMapViewProvider(provider: SwiftNativeMapViewProvider())
+            try NativeMapViewProviderRegistrationKt.registerNativeMapViewProvider(
+                provider: SwiftNativeMapViewProvider()
+            )
             NSLog("[\(tag)] ✅ NativeMapViewProvider (Swift) registered into Koin")
         } catch {
             NSLog("[\(tag)] ❌ Error during registration: \(error)")
