@@ -690,13 +690,20 @@ data class Result(val value: String)
 
 ### Code Quality Best Practices
 
-**🚨 CRITICAL: Zero-Warnings Policy (MANDATORY)**:
-- **BEFORE EVERY COMMIT**: ALL build and lint warnings MUST be fixed
-- **NO EXCEPTIONS**: There are ZERO acceptable warnings - fix them all
-- **Pre-commit check**: Run linters and verify 0 warnings in modified files
+**🚨 CRITICAL: Zero-Warnings & Full Compilation Policy (MANDATORY)**:
+- **BEFORE EVERY COMMIT**: ALL platforms MUST compile successfully with ZERO warnings
+- **NO EXCEPTIONS**: There are ZERO acceptable warnings or compilation errors
+- **Pre-commit verification checklist**:
+  1. ✅ Run `./gradlew :shared:compileKotlinIosSimulatorArm64` (iOS Kotlin)
+  2. ✅ Run `./gradlew :shared:compileDebugKotlinAndroid` (Android Kotlin)
+  3. ✅ Run `./gradlew :shared:testDebugUnitTest` (All unit tests)
+  4. ✅ Run `cd iosApp && xcodebuild -project worldwidewaves.xcodeproj -scheme worldwidewaves build` (iOS Swift)
+  5. ✅ Run `swiftlint lint --quiet` and verify 0 warnings in modified files
+  6. ✅ Verify detekt reports 0 warnings in modified files
 - **SwiftLint**: Fix ALL warnings (line length, function length, file length, etc.)
 - **Detekt**: Fix ALL warnings or add justified `@Suppress` with explanation
-- **Compilation**: Fix ALL compiler warnings
+- **Compilation**: Fix ALL compiler errors on BOTH platforms (Kotlin + Swift)
+- **Why**: Prevents breaking iOS when modifying Kotlin expect/actual declarations
 - This requirement is NON-NEGOTIABLE and applies to ALL commits
 
 **Detekt Warnings**:
