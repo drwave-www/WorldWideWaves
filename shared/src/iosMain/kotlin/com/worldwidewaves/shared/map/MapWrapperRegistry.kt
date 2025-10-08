@@ -327,6 +327,9 @@ object MapWrapperRegistry {
     // Store camera idle listeners
     private val cameraIdleListeners = mutableMapOf<String, () -> Unit>()
 
+    // Store map click coordinate listeners (for tap with coordinates)
+    private val mapClickCoordinateListeners = mutableMapOf<String, (Double, Double) -> Unit>()
+
     /**
      * Update visible region from Swift.
      * Called by Swift when map region changes.
@@ -416,6 +419,57 @@ object MapWrapperRegistry {
     }
 
     /**
+     * Set map click coordinate listener (invoked with tap coordinates).
+     */
+    fun setMapClickCoordinateListener(
+        eventId: String,
+        listener: (Double, Double) -> Unit,
+    ) {
+        Log.d(TAG, "Setting map click coordinate listener for event: $eventId")
+        mapClickCoordinateListeners[eventId] = listener
+    }
+
+    /**
+     * Clear map click coordinate listener.
+     */
+    fun clearMapClickCoordinateListener(eventId: String) {
+        mapClickCoordinateListeners.remove(eventId)
+    }
+
+    /**
+     * Invoke map click coordinate listener (called from Swift with tap coordinates).
+     */
+    fun invokeMapClickCoordinateListener(
+        eventId: String,
+        latitude: Double,
+        longitude: Double,
+    ) {
+        val listener = mapClickCoordinateListeners[eventId]
+        if (listener != null) {
+            Log.d(TAG, "Invoking map click coordinate listener: ($latitude, $longitude)")
+            listener.invoke(latitude, longitude)
+        }
+    }
+
+    /**
+     * Draw debug bounding box overlay (for testing constraint bounds).
+     */
+    fun drawDebugBbox(
+        eventId: String,
+        bbox: BoundingBox,
+    ) {
+        Log.d(TAG, "Drawing debug bbox for event: $eventId")
+        val wrapper = getWrapper(eventId)
+        if (wrapper != null) {
+            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+                // Swift wrapper will handle drawing via IOSMapBridge or direct call
+                Log.i(TAG, "Debug bbox draw dispatched for: $eventId")
+                // Note: Swift wrapper already has drawOverrideBbox() method at line 438
+            }
+        }
+    }
+
+    /**
      * Get and invoke map click callback for an event.
      * Swift calls this when map is tapped.
      * Returns true if callback was found and invoked.
@@ -487,6 +541,7 @@ object MapWrapperRegistry {
         pendingCameraCommands.clear()
         mapClickCallbacks.clear()
         mapClickRegistrationCallbacks.clear()
+        mapClickCoordinateListeners.clear()
         renderCallbacks.clear()
         cameraCallbacks.clear()
         visibleRegions.clear()

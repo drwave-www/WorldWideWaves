@@ -498,12 +498,21 @@ import Shared
         let coordinate = mapView.convert(point, toCoordinateFrom: mapView)
         WWWLog.d(Self.tag, "Tap coordinates: \(coordinate.latitude), \(coordinate.longitude)")
 
-        // Call coordinate callback if set
+        // Call coordinate callback if set (local)
         if let onMapClick = onMapClick {
             WWWLog.d(Self.tag, "Calling onMapClick coordinate callback")
             onMapClick(coordinate.latitude, coordinate.longitude)
         } else {
             WWWLog.v(Self.tag, "No onMapClick coordinate callback set")
+        }
+
+        // Call coordinate listener from registry (for setOnMapClickListener)
+        if let eventId = eventId {
+            Shared.MapWrapperRegistry.shared.invokeMapClickCoordinateListener(
+                eventId: eventId,
+                latitude: coordinate.latitude,
+                longitude: coordinate.longitude
+            )
         }
 
         // Call navigation callback directly (no registry lookup)

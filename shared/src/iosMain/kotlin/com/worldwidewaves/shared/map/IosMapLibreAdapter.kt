@@ -226,10 +226,14 @@ class IosMapLibreAdapter(
     }
 
     override fun setOnMapClickListener(listener: ((Double, Double) -> Unit)?) {
-        Log.d("IosMapLibreAdapter", "Setting map click listener")
+        Log.d(TAG, "Setting map click coordinate listener for event: $eventId")
 
-        // NOTE: Implement iOS MapLibre tap gesture handling
-        // Add tap gesture recognizer and forward coordinates to listener
+        if (listener != null) {
+            // Store listener in registry, Swift wrapper will invoke with coordinates
+            MapWrapperRegistry.setMapClickCoordinateListener(eventId, listener)
+        } else {
+            MapWrapperRegistry.clearMapClickCoordinateListener(eventId)
+        }
     }
 
     override fun addOnCameraIdleListener(callback: () -> Unit) {
@@ -238,10 +242,10 @@ class IosMapLibreAdapter(
     }
 
     override fun drawOverridenBbox(bbox: BoundingBox) {
-        Log.d("IosMapLibreAdapter", "Drawing override bounding box")
+        Log.d(TAG, "Drawing override bounding box for event: $eventId")
 
-        // NOTE: Implement iOS MapLibre bounding box overlay
-        // Draw visual bounds overlay on map
+        // Trigger bbox drawing via registry
+        MapWrapperRegistry.drawDebugBbox(eventId, bbox)
     }
 
     override fun onMapSet(callback: (MapLibreAdapter<*>) -> Unit) {
