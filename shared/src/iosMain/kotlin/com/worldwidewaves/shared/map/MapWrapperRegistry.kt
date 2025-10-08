@@ -13,10 +13,7 @@ package com.worldwidewaves.shared.map
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.utils.Log
-import platform.Foundation.NSDate
-import platform.Foundation.timeIntervalSince1970
 import kotlin.experimental.ExperimentalNativeApi
-import kotlin.native.ref.WeakReference
 
 /**
  * Camera command types for iOS map control.
@@ -48,34 +45,29 @@ sealed class CameraCommand {
  * Architecture:
  * 1. Swift creates MapLibreViewWrapper in EventMapView
  * 2. Swift registers it here via registerWrapper(eventId, wrapper)
- * 3. Kotlin stores polygon data via setPendingPolygons(eventId, polygons)
- * 4. Swift retrieves and renders polygons via renderPendingPolygons(eventId)
+ * 3. Kotlin triggers immediate updates via callback system (direct dispatch)
+ * 4. Swift receives callbacks and executes immediately on main thread
  *
- * Memory Management:
- * - Uses LRU cache with max 3 entries to prevent unbounded growth
- * - WeakReference allows garbage collection of unused wrappers
- * - Automatically evicts oldest unused wrappers when limit is exceeded
+ * Memory Management (STRONG REFERENCES):
+ * - Uses STRONG references (not WeakReference) to prevent premature GC
+ * - Wrappers survive entire screen session for dynamic updates
+ * - CRITICAL: Must call unregisterWrapper() on screen exit to prevent leaks
+ * - DisposableEffect in IosEventMap handles cleanup automatically
+ * - No LRU eviction - explicit lifecycle management only
  */
 @OptIn(ExperimentalNativeApi::class)
 object MapWrapperRegistry {
     private const val TAG = "MapWrapperRegistry"
-    private const val MAX_CACHED_WRAPPERS = 3
-    private const val MILLISECONDS_PER_SECOND = 1000
 
     /**
-     * Entry in the LRU cache with timestamp for tracking access order.
+     * Strong references to wrappers.
+     * Wrappers are kept alive for entire screen session.
+     * Explicit cleanup via unregisterWrapper() is required on screen exit.
+     *
+     * Changed from WeakReference to strong references to prevent premature GC.
+     * The wrapper MUST survive the entire screen session to handle dynamic updates.
      */
-    private data class CacheEntry(
-        val weakRef: WeakReference<Any>,
-        var lastAccessed: Long,
-    )
-
-    /**
-     * LRU cache implementation using mutableMap with manual eviction.
-     * Uses WeakReference to allow garbage collection.
-     * Access order is tracked via timestamps.
-     */
-    private val wrappers = mutableMapOf<String, CacheEntry>()
+    private val wrappers = mutableMapOf<String, Any>()
 
     // Store pending polygon data that Swift will render
     private val pendingPolygons = mutableMapOf<String, PendingPolygonData>()
@@ -89,18 +81,8 @@ object MapWrapperRegistry {
     // Store render callbacks that Swift wrappers can register for immediate notifications
     private val renderCallbacks = mutableMapOf<String, () -> Unit>()
 
-    /**
-     * Evict the least recently used entry if cache is full.
-     */
-    private fun evictLRUIfNeeded() {
-        if (wrappers.size >= MAX_CACHED_WRAPPERS) {
-            val lruEntry = wrappers.entries.minByOrNull { it.value.lastAccessed }
-            if (lruEntry != null) {
-                Log.d(TAG, "LRU evicting wrapper for event: ${lruEntry.key} (cache size: ${wrappers.size})")
-                wrappers.remove(lruEntry.key)
-            }
-        }
-    }
+    // REMOVED: LRU eviction - no longer needed with explicit cleanup
+    // Wrappers are now managed explicitly via registerWrapper/unregisterWrapper
 
     data class PendingPolygonData(
         val coordinates: List<List<Pair<Double, Double>>>, // List of polygons, each containing lat/lng pairs
@@ -110,22 +92,19 @@ object MapWrapperRegistry {
     /**
      * Register a MapLibreViewWrapper for an event.
      * Called from Swift after wrapper creation.
-     * Uses WeakReference to allow garbage collection.
+     * Uses STRONG reference - wrapper survives entire screen session.
+     * MUST call unregisterWrapper() on screen exit to prevent memory leaks.
      */
     fun registerWrapper(
         eventId: String,
         wrapper: Any,
     ) {
-        Log.d(TAG, "Registering wrapper for event: $eventId (cache size: ${wrappers.size})")
+        Log.d(TAG, "Registering wrapper for event: $eventId (total wrappers: ${wrappers.size})")
 
-        // Evict LRU entry if cache is full
-        evictLRUIfNeeded()
+        // Store strong reference
+        wrappers[eventId] = wrapper
 
-        wrappers[eventId] =
-            CacheEntry(
-                weakRef = WeakReference(wrapper),
-                lastAccessed = (NSDate().timeIntervalSince1970 * 1000).toLong(),
-            )
+        Log.i(TAG, "✅ Wrapper registered with STRONG reference for: $eventId")
 
         // If there are pending polygons, notify that they should be rendered
         if (pendingPolygons.containsKey(eventId)) {
@@ -135,26 +114,17 @@ object MapWrapperRegistry {
 
     /**
      * Get the registered wrapper for an event.
-     * Returns null if not yet registered or if garbage collected.
-     * Accessing an entry marks it as recently used (LRU).
+     * Returns null if not yet registered.
+     * With strong references, wrapper is guaranteed to exist until unregisterWrapper() is called.
      */
     fun getWrapper(eventId: String): Any? {
-        val entry = wrappers[eventId]
-        if (entry == null) {
+        val wrapper = wrappers[eventId]
+        if (wrapper == null) {
             Log.w(TAG, "No wrapper registered for event: $eventId")
             return null
         }
 
-        // Update last accessed time for LRU
-        entry.lastAccessed = (NSDate().timeIntervalSince1970 * MILLISECONDS_PER_SECOND).toLong()
-
-        val wrapper = entry.weakRef.get()
-        if (wrapper == null) {
-            Log.w(TAG, "Wrapper for event $eventId was garbage collected")
-            wrappers.remove(eventId)
-        } else {
-            Log.v(TAG, "Retrieved wrapper for event: $eventId")
-        }
+        Log.v(TAG, "Retrieved wrapper for event: $eventId")
         return wrapper
     }
 
@@ -198,28 +168,31 @@ object MapWrapperRegistry {
     }
 
     /**
-     * Unregister a wrapper when the map is destroyed.
-     * Clears wrapper, pending polygons, pending camera commands, and callbacks.
+     * Unregister a wrapper when the map screen is exited.
+     * CRITICAL: Must be called to release strong reference and prevent memory leaks.
+     * Clears wrapper, pending data, and all callbacks for the event.
      */
     fun unregisterWrapper(eventId: String) {
-        Log.d(TAG, "Unregistering wrapper for event: $eventId")
+        Log.i(TAG, "🧹 Unregistering wrapper and cleaning up for event: $eventId")
+
+        // Remove wrapper (releases strong reference)
         wrappers.remove(eventId)
+
+        // Clean up all associated data and callbacks
         pendingPolygons.remove(eventId)
         pendingCameraCommands.remove(eventId)
         mapClickCallbacks.remove(eventId)
+        mapClickRegistrationCallbacks.remove(eventId)
+        renderCallbacks.remove(eventId)
+        cameraCallbacks.remove(eventId)
+        visibleRegions.remove(eventId)
+        minZoomLevels.remove(eventId)
+        cameraIdleListeners.remove(eventId)
+
+        Log.i(TAG, "✅ Wrapper unregistered and cleanup complete for: $eventId")
     }
 
-    /**
-     * Remove all stale WeakReference entries (where the referent has been garbage collected).
-     * This is automatically done in getWrapper, but can be called manually for cleanup.
-     */
-    fun pruneStaleReferences() {
-        val staleKeys = wrappers.entries.filter { it.value.weakRef.get() == null }.map { it.key }
-        if (staleKeys.isNotEmpty()) {
-            Log.d(TAG, "Pruning ${staleKeys.size} stale wrapper references")
-            staleKeys.forEach { wrappers.remove(it) }
-        }
-    }
+    // REMOVED: pruneStaleReferences() - no longer needed with strong references
 
     /**
      * Store a camera command to be executed.

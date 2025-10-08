@@ -36,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -155,6 +156,17 @@ class IosEventMap(
         val downloadState by downloadCoordinator.getDownloadState(event.id).collectAsState()
 
         var mapIsLoaded by remember { mutableStateOf(false) }
+
+        // Cleanup wrapper and all callbacks when screen is disposed
+        DisposableEffect(event.id) {
+            Log.i("IosEventMap", "Screen mounted for event: ${event.id}")
+
+            onDispose {
+                Log.i("IosEventMap", "🧹 Screen disposing, cleaning up wrapper for: ${event.id}")
+                MapWrapperRegistry.unregisterWrapper(event.id)
+                Log.i("IosEventMap", "✅ Wrapper cleanup complete for: ${event.id}")
+            }
+        }
 
         // Check map availability and trigger auto-download if needed
         LaunchedEffect(event.id, autoMapDownload) {
