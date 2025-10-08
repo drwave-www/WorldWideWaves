@@ -170,9 +170,10 @@ import Shared
     /// - Note: Clear background to let parent view control background
     public static func createMapViewControllerWithWrapper(
         for event: IWWWEvent,
-        styleURL: String
+        styleURL: String,
+        enableGestures: Bool = true
     ) -> UIViewController {
-        WWWLog.i("MapViewBridge", "Creating map view with wrapper for: \(event.id)")
+        WWWLog.i("MapViewBridge", "Creating map view with wrapper for: \(event.id), enableGestures: \(enableGestures)")
 
         var wrapperInstance: MapLibreViewWrapper?
 
@@ -183,6 +184,7 @@ import Shared
             initialLatitude: 48.8566,
             initialLongitude: 2.3522,
             initialZoom: 12.0,
+            enableGestures: enableGestures,
             wrapper: Binding(
                 get: { wrapperInstance },
                 set: { wrapperInstance = $0 }
