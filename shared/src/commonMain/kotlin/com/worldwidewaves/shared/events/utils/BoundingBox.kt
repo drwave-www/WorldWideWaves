@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.utils.Log
 import kotlin.math.abs
 
 /**
@@ -37,8 +38,13 @@ class BoundingBox private constructor(
         fun fromCorners(
             sw: Position,
             ne: Position,
-        ): BoundingBox =
-            if (sw.lat <= ne.lat && sw.lng <= ne.lng) {
+        ): BoundingBox {
+            Log.d(
+                "BoundingBox",
+                "fromCorners(2pos): input SW(${sw.lat},${sw.lng}) NE(${ne.lat},${ne.lng})"
+            )
+
+            val bbox = if (sw.lat <= ne.lat && sw.lng <= ne.lng) {
                 // Already in correct order, no need to create new objects
                 BoundingBox(sw, ne)
             } else {
@@ -47,6 +53,14 @@ class BoundingBox private constructor(
                     ne = Position(maxOf(sw.lat, ne.lat), maxOf(sw.lng, ne.lng)).init(),
                 )
             }
+
+            Log.d(
+                "BoundingBox",
+                "fromCorners(2pos): output SW(${bbox.sw.lat},${bbox.sw.lng}) NE(${bbox.ne.lat},${bbox.ne.lng})"
+            )
+
+            return bbox
+        }
 
         fun fromCorners(positions: List<Position>): BoundingBox? {
             if (positions.isEmpty()) return null
@@ -60,7 +74,7 @@ class BoundingBox private constructor(
             val bbox = BoundingBox(minLat, minLng, maxLat, maxLng)
 
             // Debug logging for iOS
-            com.worldwidewaves.shared.utils.Log.d(
+            Log.d(
                 "BoundingBox",
                 "fromCorners: ${positions.size} positions → SW($minLat,$minLng) NE($maxLat,$maxLng)",
             )
@@ -74,7 +88,7 @@ class BoundingBox private constructor(
         ne = Position(maxOf(swLat, neLat), maxOf(swLng, neLng)).init(),
     ) {
         // Debug logging for iOS coordinate issues
-        com.worldwidewaves.shared.utils.Log.d(
+        Log.d(
             "BoundingBox",
             "constructor: input SW($swLat,$swLng) NE($neLat,$neLng) → output SW(${sw.lat},${sw.lng}) NE(${ne.lat},${ne.lng})",
         )

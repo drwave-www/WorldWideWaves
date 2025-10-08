@@ -24,6 +24,7 @@ package com.worldwidewaves.shared.map
 import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.utils.Log
 import io.github.aakira.napier.Napier
 import kotlin.math.abs
 import kotlin.math.max
@@ -165,8 +166,11 @@ class MapBoundsEnforcer(
         return VisibleRegionPadding(latPadding, lngPadding)
     }
 
-    private fun calculatePaddedBounds(padding: VisibleRegionPadding): BoundingBox =
-        BoundingBox.fromCorners(
+    private fun calculatePaddedBounds(padding: VisibleRegionPadding): BoundingBox {
+        Log.d("MapBoundsEnforcer", "mapBounds: SW(${mapBounds.sw.lat},${mapBounds.sw.lng}) NE(${mapBounds.ne.lat},${mapBounds.ne.lng})")
+        Log.d("MapBoundsEnforcer", "padding: lat=${padding.latPadding}, lng=${padding.lngPadding}")
+
+        return BoundingBox.fromCorners(
             Position(
                 mapBounds.southwest.latitude + padding.latPadding,
                 mapBounds.southwest.longitude + padding.lngPadding,
@@ -176,6 +180,7 @@ class MapBoundsEnforcer(
                 mapBounds.northeast.longitude - padding.lngPadding,
             ),
         )
+    }
 
     fun isValidBounds(
         bounds: BoundingBox,
