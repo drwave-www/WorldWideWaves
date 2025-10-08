@@ -248,30 +248,30 @@ import Shared
 
     // MARK: - Camera Constraints
 
-    @objc public func setBoundsForCameraTarget(swLat: Double, swLng: Double, neLat: Double, neLng: Double) {
+    @objc public func setBoundsForCameraTarget(swLat: Double, swLng: Double, neLat: Double, neLng: Double) -> Bool {
         guard let mapView = mapView else {
             WWWLog.w(Self.tag, "Cannot set bounds - mapView is nil")
-            return
+            return false
         }
 
         // CRITICAL: Don't set constraint bounds if style not loaded
         // setVisibleCoordinateBounds throws std::domain_error if called before style loads
         guard styleIsLoaded, mapView.style != nil else {
-            WWWLog.w(Self.tag, "Cannot set constraint bounds - style not loaded yet (will be set after style loads)")
-            return
+            WWWLog.w(Self.tag, "Cannot set constraint bounds - style not loaded yet (will retry after style loads)")
+            return false  // Return false to indicate failure, allowing retry
         }
 
         // Validate bounds before setting
         guard neLat > swLat else {
             WWWLog.e(Self.tag, "Invalid bounds: neLat (\(neLat)) must be > swLat (\(swLat))")
-            return
+            return false
         }
 
         // Validate coordinates are within valid ranges
         guard swLat >= -90 && swLat <= 90 && neLat >= -90 && neLat <= 90 &&
               swLng >= -180 && swLng <= 180 && neLng >= -180 && neLng <= 180 else {
             WWWLog.e(Self.tag, "Invalid coordinate values: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng))")
-            return
+            return false
         }
 
         WWWLog.i(Self.tag, "Setting camera constraint bounds: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng))")
@@ -284,6 +284,7 @@ import Shared
         // Swift can't catch C++ exceptions, so we prevent invalid calls instead
         mapView.setVisibleCoordinateBounds(bounds, animated: false)
         WWWLog.i(Self.tag, "✅ Camera constraint bounds set successfully")
+        return true
     }
 
     @objc public func setMinZoom(_ minZoom: Double) {
@@ -357,6 +358,8 @@ import Shared
             waveSourceIds.append(sourceId)
             waveLayerIds.append(layerId)
         }
+
+        WWWLog.i(Self.tag, "✅ Rendered \(polygons.count) wave polygons to map, total layers: \(waveLayerIds.count)")
 
         // Update accessibility state with new polygons
         currentWavePolygons = polygons

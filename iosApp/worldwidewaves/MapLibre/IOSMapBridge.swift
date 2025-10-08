@@ -334,15 +334,20 @@ import CoreLocation
         }
 
         WWWLog.i("IOSMapBridge", "📸 Executing camera command for event: \(eventId), type: \(type(of: command))")
-        executeCommand(command, on: wrapper)
+        let success = executeCommand(command, on: wrapper)
 
-        // Clear command after execution
-        Shared.MapWrapperRegistry.shared.clearPendingCameraCommand(eventId: eventId)
-        WWWLog.i("IOSMapBridge", "✅ Camera command executed and cleared for event: \(eventId)")
+        // Only clear command if execution succeeded
+        if success {
+            Shared.MapWrapperRegistry.shared.clearPendingCameraCommand(eventId: eventId)
+            WWWLog.i("IOSMapBridge", "✅ Camera command executed and cleared for event: \(eventId)")
+        } else {
+            WWWLog.w("IOSMapBridge", "⚠️ Camera command execution failed, will retry later for event: \(eventId)")
+        }
     }
 
     /// Executes a specific camera command on the wrapper.
-    private static func executeCommand(_ command: CameraCommand, on wrapper: MapLibreViewWrapper) {
+    /// - Returns: True if execution succeeded, false if it should be retried
+    private static func executeCommand(_ command: CameraCommand, on wrapper: MapLibreViewWrapper) -> Bool {
         if let animateToPos = command as? CameraCommand.AnimateToPosition {
             let zoom = animateToPos.zoom?.doubleValue
             let pos = animateToPos.position
@@ -353,6 +358,7 @@ import CoreLocation
                 zoom: zoom as NSNumber?,
                 callback: nil
             )
+            return true  // Animation commands always succeed
         } else if let animateBounds = command as? CameraCommand.AnimateToBounds {
             let bbox = animateBounds.bounds
             WWWLog.i("IOSMapBridge", "Animating to bounds with padding: \(animateBounds.padding)")
@@ -364,6 +370,7 @@ import CoreLocation
                 padding: Int(animateBounds.padding),
                 callback: nil
             )
+            return true  // Animation commands always succeed
         } else if let moveBounds = command as? CameraCommand.MoveToBounds {
             let bbox = moveBounds.bounds
             WWWLog.i("IOSMapBridge", "Moving to bounds")
@@ -372,15 +379,18 @@ import CoreLocation
                 longitude: (bbox.minLongitude + bbox.maxLongitude) / 2
             )
             wrapper.moveCamera(latitude: center.latitude, longitude: center.longitude, zoom: nil)
+            return true  // Move commands always succeed
         } else if let constraintBounds = command as? CameraCommand.SetConstraintBounds {
             let bbox = constraintBounds.bounds
             WWWLog.i("IOSMapBridge", "Setting camera constraint bounds")
-            wrapper.setBoundsForCameraTarget(
+            let success = wrapper.setBoundsForCameraTarget(
                 swLat: bbox.minLatitude,
                 swLng: bbox.minLongitude,
                 neLat: bbox.maxLatitude,
                 neLng: bbox.maxLongitude
             )
+            return success  // Return actual success/failure from setBoundsForCameraTarget
         }
+        return true  // Unknown command type, don't retry
     }
 }

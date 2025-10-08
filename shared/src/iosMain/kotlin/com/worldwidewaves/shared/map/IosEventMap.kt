@@ -100,17 +100,19 @@ class IosEventMap(
         wavePolygons: List<Polygon>,
         clearPolygons: Boolean,
     ) {
-        Log.d("IosEventMap", "updateWavePolygons called with ${wavePolygons.size} polygons, clearPolygons=$clearPolygons")
+        val timestamp = System.currentTimeMillis()
+        Log.i("IosEventMap", "🌊 [$timestamp] updateWavePolygons: ${wavePolygons.size} polygons, clear=$clearPolygons")
 
         if (clearPolygons) {
             currentPolygons.clear()
         }
         currentPolygons.addAll(wavePolygons)
 
-        Log.v("IosEventMap", "iOS map now tracking ${currentPolygons.size} wave polygons")
+        Log.d("IosEventMap", "iOS map now tracking ${currentPolygons.size} wave polygons")
 
         // Store polygon data in registry for Swift to render
         storePolygonsForRendering(wavePolygons, clearPolygons)
+        Log.v("IosEventMap", "✅ [$timestamp] Polygons stored in registry")
     }
 
     private fun storePolygonsForRendering(
