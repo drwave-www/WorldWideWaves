@@ -240,12 +240,18 @@ class IosEventMap(
             when {
                 // Priority 1: Show map if available and styleURL loaded
                 styleURL != null && downloadState.isAvailable -> {
-                    Log.d("IosEventMap", "Showing map for ${event.id}")
-                    key("${event.id}-$styleURL") {
+                    Log.d("IosEventMap", "Showing map for ${event.id}, styleURL ready")
+                    // CRITICAL FIX: Use only event.id in key(), not styleURL
+                    // styleURL in key() causes wrapper deallocation when URL changes null→loaded
+                    // This destroys the wrapper, stops the timer, and loses all state
+                    key(event.id) {
                         @Suppress("DEPRECATION")
                         UIKitViewController(
                             factory = {
-                                Log.i("IosEventMap", "Creating native map view controller for: ${event.id}")
+                                Log.i(
+                                    "IosEventMap",
+                                    "Creating native map view controller for: ${event.id}, styleURL=${styleURL!!.take(80)}",
+                                )
                                 createNativeMapViewController(event, styleURL!!) as platform.UIKit.UIViewController
                             },
                             modifier = Modifier.fillMaxSize(),

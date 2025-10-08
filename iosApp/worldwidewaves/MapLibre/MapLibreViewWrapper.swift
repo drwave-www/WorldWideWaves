@@ -43,6 +43,10 @@ import Shared
     private var commandPollingTimer: Timer?
     private static let pollingInterval: TimeInterval = 0.1 // 100ms
 
+    // Queue for polygons that arrive before style loads
+    private var pendingPolygonQueue: [[CLLocationCoordinate2D]] = []
+    private var styleIsLoaded: Bool = false
+
     // MARK: - Accessibility State
 
     /// Accessibility state tracking for VoiceOver
@@ -67,17 +71,25 @@ import Shared
     private var eventId: String?
 
     @objc public func setMapView(_ mapView: MLNMapView) {
-        WWWLog.d(Self.tag, "setMapView called, bounds: \(mapView.bounds)")
+        WWWLog.i(Self.tag, "setMapView called for event: \(eventId ?? "nil"), bounds: \(mapView.bounds)")
         self.mapView = mapView
         self.mapView?.delegate = self
+
+        // Ensure user interaction is enabled
+        mapView.isUserInteractionEnabled = true
+        WWWLog.d(Self.tag, "User interaction enabled: \(mapView.isUserInteractionEnabled)")
 
         // Configure accessibility for VoiceOver
         configureMapAccessibility()
 
         // Add tap gesture recognizer for map clicks
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleMapTap(_:)))
-        self.mapView?.addGestureRecognizer(tapGesture)
-        WWWLog.d(Self.tag, "Map view configured successfully")
+        tapGesture.numberOfTapsRequired = 1
+        tapGesture.numberOfTouchesRequired = 1
+        mapView.addGestureRecognizer(tapGesture)
+
+        WWWLog.i(Self.tag, "👆 Tap gesture added to map view, gestureRecognizers: \(mapView.gestureRecognizers?.count ?? 0)")
+        WWWLog.d(Self.tag, "Map view configured successfully for event: \(eventId ?? "nil")")
     }
 
     @objc public func setEventId(_ eventId: String) {
@@ -252,17 +264,27 @@ import Shared
     // MARK: - Wave Polygons
 
     @objc public func addWavePolygons(polygons: [[CLLocationCoordinate2D]], clearExisting: Bool) {
-        WWWLog.i(Self.tag, "addWavePolygons: \(polygons.count) polygons, clearExisting: \(clearExisting)")
-        guard let mapView = mapView, let style = mapView.style else {
+        WWWLog.i(Self.tag, "addWavePolygons: \(polygons.count) polygons, clearExisting: \(clearExisting), styleLoaded: \(styleIsLoaded)")
+
+        // If style not loaded yet, queue polygons for later
+        guard styleIsLoaded, let mapView = mapView, let style = mapView.style else {
             let hasMap = mapView != nil
             let hasStyle = mapView?.style != nil
-            WWWLog.e(Self.tag, "Cannot add polygons - style not loaded (mapView: \(hasMap), style: \(hasStyle))")
+            WWWLog.w(Self.tag, "Style not ready - queueing \(polygons.count) polygons (mapView: \(hasMap), style: \(hasStyle))")
+
+            // Queue polygons to render when style loads
+            if clearExisting {
+                pendingPolygonQueue.removeAll()
+            }
+            pendingPolygonQueue.append(contentsOf: polygons)
+            WWWLog.d(Self.tag, "Polygon queue now contains \(pendingPolygonQueue.count) polygons")
             return
         }
 
+        // Style is loaded - render immediately
         // Clear existing polygons if requested
         if clearExisting {
-            WWWLog.d(Self.tag, "Clearing existing wave polygons")
+            WWWLog.d(Self.tag, "Clearing existing wave polygons before rendering")
             clearWavePolygons()
         }
 
@@ -646,6 +668,7 @@ import Shared
 extension MapLibreViewWrapper: MLNMapViewDelegate {
     public func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
         WWWLog.i(Self.tag, "🎨 Style loaded successfully for event: \(eventId ?? "unknown")")
+        styleIsLoaded = true
         onStyleLoaded?()
         onStyleLoaded = nil
 
@@ -657,12 +680,19 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         // IMMEDIATE EXECUTION: Execute all pending commands now that map is ready
         WWWLog.i(Self.tag, "⚡ Executing pending commands immediately after style load...")
 
-        // 1. Execute pending camera commands (initial positioning, constraints)
+        // 1. Render queued polygons that arrived before style loaded
+        if !pendingPolygonQueue.isEmpty {
+            WWWLog.i(Self.tag, "📦 Flushing polygon queue: \(pendingPolygonQueue.count) polygons")
+            addWavePolygons(polygons: pendingPolygonQueue, clearExisting: true)
+            pendingPolygonQueue.removeAll()
+        }
+
+        // 2. Execute pending camera commands (initial positioning, constraints)
         WWWLog.d(Self.tag, "Checking for pending camera commands...")
         IOSMapBridge.executePendingCameraCommand(eventId: eventId)
 
-        // 2. Render pending wave polygons (initial wave state)
-        WWWLog.d(Self.tag, "Checking for pending polygons...")
+        // 3. Render pending wave polygons from registry (initial wave state)
+        WWWLog.d(Self.tag, "Checking for pending polygons in registry...")
         IOSMapBridge.renderPendingPolygons(eventId: eventId)
 
         // START CONTINUOUS POLLING: For dynamic updates (auto-following, wave progression)

@@ -314,6 +314,51 @@ class IosMapWorkflowIntegrationTest {
         assertFalse(invoked)
     }
 
+    @Test
+    fun testPolygonQueueingBeforeStyleLoads() {
+        // Simulate polygons arriving before Swift style loads
+        val polygon1 = listOf(Pair(48.85, 2.30), Pair(48.86, 2.30), Pair(48.86, 2.31))
+        val polygon2 = listOf(Pair(48.87, 2.30), Pair(48.88, 2.30), Pair(48.88, 2.31))
+
+        // 1. Store multiple polygon updates
+        MapWrapperRegistry.setPendingPolygons(testEventId, listOf(polygon1), clearExisting = true)
+        MapWrapperRegistry.setPendingPolygons(testEventId, listOf(polygon2), clearExisting = false)
+
+        // 2. Both should be stored (last one wins in registry)
+        assertTrue(MapWrapperRegistry.hasPendingPolygons(testEventId))
+
+        // 3. Swift renders when style loads
+        val data = MapWrapperRegistry.getPendingPolygons(testEventId)
+        assertNotNull(data)
+        MapWrapperRegistry.clearPendingPolygons(testEventId)
+
+        // 4. Verify cleared
+        assertFalse(MapWrapperRegistry.hasPendingPolygons(testEventId))
+    }
+
+    @Test
+    fun testKeyStabilityDoesNotAffectRegistry() {
+        // Verify that Compose key() changes don't affect MapWrapperRegistry data
+        val wrapper1 = "Wrapper1"
+        val polygons = listOf(listOf(Pair(48.85, 2.30)))
+        val command = CameraCommand.AnimateToPosition(Position(48.85, 2.3), 12.0)
+
+        // 1. Initial registration
+        MapWrapperRegistry.registerWrapper(testEventId, wrapper1)
+        MapWrapperRegistry.setPendingPolygons(testEventId, polygons, false)
+        MapWrapperRegistry.setPendingCameraCommand(testEventId, command)
+
+        // 2. Simulate key() change causing re-registration (wrapper changes but eventId same)
+        val wrapper2 = "Wrapper2"
+        MapWrapperRegistry.registerWrapper(testEventId, wrapper2)
+
+        // 3. Verify data persists across wrapper changes (same eventId)
+        assertTrue(MapWrapperRegistry.hasPendingPolygons(testEventId))
+        assertTrue(MapWrapperRegistry.hasPendingCameraCommand(testEventId))
+        assertNotNull(MapWrapperRegistry.getWrapper(testEventId))
+        assertEquals(wrapper2, MapWrapperRegistry.getWrapper(testEventId))
+    }
+
     // Helper function to simulate Swift calling renderPendingPolygons
     private fun renderPendingPolygons(eventId: String) {
         if (MapWrapperRegistry.hasPendingPolygons(eventId)) {
