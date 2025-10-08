@@ -396,11 +396,13 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
+				"$(SRCROOT)/../local.properties",
 			);
 			name = "Generate Firebase config";
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"$(SRCROOT)/worldwidewaves/GoogleService-Info.plist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
