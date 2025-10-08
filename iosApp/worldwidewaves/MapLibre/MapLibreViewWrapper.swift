@@ -24,9 +24,10 @@ import UIKit
 import CoreLocation
 import Shared
 
-/// Swift bridging layer for MapLibre Native iOS SDK
-/// Provides @objc methods for controlling MapLibre from Kotlin or Swift
 // swiftlint:disable type_body_length file_length
+
+/// Swift bridging layer for MapLibre Native iOS SDK.
+/// Provides @objc methods for controlling MapLibre from Kotlin or Swift.
 @objc public class MapLibreViewWrapper: NSObject {
     private static let tag = "MapLibreWrapper"
     private weak var mapView: MLNMapView?
@@ -314,13 +315,19 @@ import Shared
     // MARK: - Wave Polygons
 
     @objc public func addWavePolygons(polygons: [[CLLocationCoordinate2D]], clearExisting: Bool) {
-        WWWLog.i(Self.tag, "addWavePolygons: \(polygons.count) polygons, clearExisting: \(clearExisting), styleLoaded: \(styleIsLoaded)")
+        WWWLog.i(
+            Self.tag,
+            "addWavePolygons: \(polygons.count) polygons, clearExisting: \(clearExisting), styleLoaded: \(styleIsLoaded)"
+        )
 
         // If style not loaded yet, queue polygons for later
         guard styleIsLoaded, let mapView = mapView, let style = mapView.style else {
             let hasMap = mapView != nil
             let hasStyle = mapView?.style != nil
-            WWWLog.w(Self.tag, "Style not ready - queueing \(polygons.count) polygons (mapView: \(hasMap), style: \(hasStyle))")
+            WWWLog.w(
+                Self.tag,
+                "Style not ready - queueing \(polygons.count) polygons (mapView: \(hasMap), style: \(hasStyle))"
+            )
 
             // Queue polygons to render when style loads
             if clearExisting {
@@ -526,7 +533,7 @@ import Shared
         }
 
         if let userPos = currentUserPosition, let eventCenter = currentEventCenter {
-            let distance = calculateDistance(from: userPos, to: eventCenter)
+            let distance = calculateDistance(from: userPos, destination: eventCenter)
             let distanceMeters = Int(distance)
             summaryText += ". You are \(distanceMeters) meters from event center"
         }
@@ -625,9 +632,9 @@ import Shared
     }
 
     /// Calculates distance in meters between two coordinates.
-    private func calculateDistance(from: CLLocationCoordinate2D, to: CLLocationCoordinate2D) -> Double {
+    private func calculateDistance(from: CLLocationCoordinate2D, destination: CLLocationCoordinate2D) -> Double {
         let fromLocation = CLLocation(latitude: from.latitude, longitude: from.longitude)
-        let toLocation = CLLocation(latitude: to.latitude, longitude: to.longitude)
+        let toLocation = CLLocation(latitude: destination.latitude, longitude: destination.longitude)
         return fromLocation.distance(from: toLocation)
     }
 
@@ -693,7 +700,10 @@ import Shared
         WWWLog.i(Self.tag, "Starting continuous command polling for event: \(eventId)")
 
         var pollCount = 0
-        commandPollingTimer = Timer.scheduledTimer(withTimeInterval: Self.pollingInterval, repeats: true) { [weak self] _ in
+        commandPollingTimer = Timer.scheduledTimer(
+            withTimeInterval: Self.pollingInterval,
+            repeats: true
+        ) { [weak self] _ in
             guard let self = self, let eventId = self.eventId else { return }
 
             pollCount += 1
@@ -802,7 +812,10 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
     public func mapViewWillStartRenderingFrame(_ mapView: MLNMapView) {
         // Called frequently - only log once
         if !styleIsLoaded {
-            WWWLog.d(Self.tag, "🎬 Map started rendering frames (first frame) for event: \(eventId ?? "unknown")")
+            WWWLog.d(
+                Self.tag,
+                "🎬 Map started rendering frames (first frame) for event: \(eventId ?? "unknown")"
+            )
         }
     }
 
@@ -852,7 +865,10 @@ extension MapLibreViewWrapper: UIGestureRecognizerDelegate {
         shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
     ) -> Bool {
         // Allow our tap gesture to work alongside MapLibre's gestures
-        WWWLog.v(Self.tag, "Gesture conflict check: \(type(of: gestureRecognizer)) vs \(type(of: otherGestureRecognizer))")
+        WWWLog.v(
+            Self.tag,
+            "Gesture conflict: \(type(of: gestureRecognizer)) vs \(type(of: otherGestureRecognizer))"
+        )
         return true
     }
 
