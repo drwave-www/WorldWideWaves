@@ -316,24 +316,29 @@ import CoreLocation
     /// - Important: Must be called on main thread
     /// - Important: Call periodically after map initialization (e.g., from EventMapView.updateUIView)
     @objc public static func executePendingCameraCommand(eventId: String) {
+        // Check wrapper exists
         guard let wrapper = Shared.MapWrapperRegistry.shared.getWrapper(eventId: eventId) as? MapLibreViewWrapper else {
+            // Silent return - wrapper not registered yet (normal during initialization)
             return
         }
 
+        // Check if command exists
         guard Shared.MapWrapperRegistry.shared.hasPendingCameraCommand(eventId: eventId) else {
+            // Silent return - no command pending (normal case)
             return
         }
 
         guard let command = Shared.MapWrapperRegistry.shared.getPendingCameraCommand(eventId: eventId) else {
+            WWWLog.w("IOSMapBridge", "hasPendingCameraCommand=true but getPendingCameraCommand returned nil")
             return
         }
 
-        WWWLog.d("IOSMapBridge", "Executing camera command for event: \(eventId)")
+        WWWLog.i("IOSMapBridge", "📸 Executing camera command for event: \(eventId), type: \(type(of: command))")
         executeCommand(command, on: wrapper)
 
         // Clear command after execution
         Shared.MapWrapperRegistry.shared.clearPendingCameraCommand(eventId: eventId)
-        WWWLog.d("IOSMapBridge", "Camera command executed and cleared for event: \(eventId)")
+        WWWLog.i("IOSMapBridge", "✅ Camera command executed and cleared for event: \(eventId)")
     }
 
     /// Executes a specific camera command on the wrapper.

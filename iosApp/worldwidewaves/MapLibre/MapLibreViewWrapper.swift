@@ -39,6 +39,10 @@ import Shared
     private var waveLayerIds: [String] = []
     private var waveSourceIds: [String] = []
 
+    // Timer for continuous polling of camera commands and polygons
+    private var commandPollingTimer: Timer?
+    private static let pollingInterval: TimeInterval = 0.1 // 100ms
+
     // MARK: - Accessibility State
 
     /// Accessibility state tracking for VoiceOver
@@ -51,6 +55,11 @@ import Shared
     @objc public override init() {
         super.init()
         WWWLog.d(Self.tag, "Initializing MapLibreViewWrapper")
+    }
+
+    deinit {
+        WWWLog.d(Self.tag, "Deinitializing MapLibreViewWrapper for event: \(eventId ?? "unknown")")
+        stopContinuousPolling()
     }
 
     // MARK: - Map Setup
@@ -346,19 +355,36 @@ import Shared
     }
 
     @objc private func handleMapTap(_ gesture: UITapGestureRecognizer) {
-        guard let mapView = mapView else { return }
+        WWWLog.i(Self.tag, "👆 Map tap detected!")
+
+        guard let mapView = mapView else {
+            WWWLog.w(Self.tag, "Cannot handle tap - mapView is nil")
+            return
+        }
+
         let point = gesture.location(in: mapView)
         let coordinate = mapView.convert(point, toCoordinateFrom: mapView)
+        WWWLog.d(Self.tag, "Tap coordinates: \(coordinate.latitude), \(coordinate.longitude)")
 
         // Call coordinate callback if set
-        onMapClick?(coordinate.latitude, coordinate.longitude)
+        if let onMapClick = onMapClick {
+            WWWLog.d(Self.tag, "Calling onMapClick coordinate callback")
+            onMapClick(coordinate.latitude, coordinate.longitude)
+        } else {
+            WWWLog.v(Self.tag, "No onMapClick coordinate callback set")
+        }
 
         // Invoke map click callback from registry (for navigation)
         if let eventId = eventId {
+            WWWLog.i(Self.tag, "Attempting to invoke map click callback for event: \(eventId)")
             let invoked = Shared.MapWrapperRegistry.shared.invokeMapClickCallback(eventId: eventId)
             if invoked {
-                WWWLog.d(Self.tag, "Map click callback invoked for event: \(eventId)")
+                WWWLog.i(Self.tag, "✅ Map click callback invoked successfully for event: \(eventId)")
+            } else {
+                WWWLog.w(Self.tag, "⚠️ Map click callback NOT invoked for event: \(eventId)")
             }
+        } else {
+            WWWLog.w(Self.tag, "Cannot invoke click callback - eventId is nil")
         }
     }
 
@@ -574,21 +600,76 @@ import Shared
         updateMapAccessibility()
         WWWLog.v(Self.tag, "Event info updated for accessibility: \(eventName ?? "unknown")")
     }
+
+    // MARK: - Continuous Command Polling
+
+    /// Starts continuous polling for camera commands and wave polygons.
+    /// Required because Kotlin code executes asynchronously and SwiftUI updateUIView()
+    /// is not called frequently enough for immediate command execution.
+    ///
+    /// Polls every 100ms to:
+    /// 1. Execute pending camera commands (auto-following, constraints)
+    /// 2. Render pending wave polygons (real-time wave progression)
+    private func startContinuousPolling() {
+        guard let eventId = eventId else {
+            WWWLog.w(Self.tag, "Cannot start polling - eventId is nil")
+            return
+        }
+
+        WWWLog.i(Self.tag, "Starting continuous command polling for event: \(eventId)")
+
+        commandPollingTimer = Timer.scheduledTimer(withTimeInterval: Self.pollingInterval, repeats: true) { [weak self] _ in
+            guard let self = self, let eventId = self.eventId else { return }
+
+            // Execute pending camera commands (constraints, auto-following)
+            IOSMapBridge.executePendingCameraCommand(eventId: eventId)
+
+            // Render pending wave polygons (real-time progression)
+            IOSMapBridge.renderPendingPolygons(eventId: eventId)
+        }
+
+        WWWLog.d(Self.tag, "Polling timer started (interval: \(Self.pollingInterval * 1000)ms)")
+    }
+
+    /// Stops continuous polling and invalidates the timer.
+    private func stopContinuousPolling() {
+        if let timer = commandPollingTimer {
+            timer.invalidate()
+            commandPollingTimer = nil
+            WWWLog.d(Self.tag, "Polling timer stopped for event: \(eventId ?? "unknown")")
+        }
+    }
 }
 
 // MARK: - MLNMapViewDelegate
 
 extension MapLibreViewWrapper: MLNMapViewDelegate {
     public func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
-        WWWLog.i(Self.tag, "Style loaded successfully")
+        WWWLog.i(Self.tag, "🎨 Style loaded successfully for event: \(eventId ?? "unknown")")
         onStyleLoaded?()
         onStyleLoaded = nil
 
-        // Check for pending polygons to render
-        if let eventId = eventId {
-            WWWLog.d(Self.tag, "Checking for pending polygons after style load for event: \(eventId)")
-            IOSMapBridge.renderPendingPolygons(eventId: eventId)
+        guard let eventId = eventId else {
+            WWWLog.e(Self.tag, "Cannot execute commands - eventId is nil")
+            return
         }
+
+        // IMMEDIATE EXECUTION: Execute all pending commands now that map is ready
+        WWWLog.i(Self.tag, "⚡ Executing pending commands immediately after style load...")
+
+        // 1. Execute pending camera commands (initial positioning, constraints)
+        WWWLog.d(Self.tag, "Checking for pending camera commands...")
+        IOSMapBridge.executePendingCameraCommand(eventId: eventId)
+
+        // 2. Render pending wave polygons (initial wave state)
+        WWWLog.d(Self.tag, "Checking for pending polygons...")
+        IOSMapBridge.renderPendingPolygons(eventId: eventId)
+
+        // START CONTINUOUS POLLING: For dynamic updates (auto-following, wave progression)
+        WWWLog.i(Self.tag, "🔄 Starting continuous polling for dynamic updates...")
+        startContinuousPolling()
+
+        WWWLog.i(Self.tag, "✅ Map initialization complete for event: \(eventId)")
     }
 
     public func mapView(_ mapView: MLNMapView, regionDidChangeAnimated animated: Bool) {

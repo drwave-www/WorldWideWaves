@@ -162,8 +162,11 @@ class IosEventMap(
         // Register map click callback if provided
         LaunchedEffect(event.id, onMapClick) {
             if (onMapClick != null) {
-                Log.d("IosEventMap", "Registering map click callback for: ${event.id}")
+                Log.i("IosEventMap", "👆 Registering map click callback for: ${event.id}")
                 MapWrapperRegistry.setMapClickCallback(event.id, onMapClick)
+                Log.i("IosEventMap", "✅ Map click callback registered for: ${event.id}")
+            } else {
+                Log.w("IosEventMap", "⚠️ No map click callback provided for: ${event.id}")
             }
         }
 

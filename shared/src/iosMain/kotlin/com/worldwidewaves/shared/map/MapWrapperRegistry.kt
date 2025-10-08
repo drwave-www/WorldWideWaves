@@ -164,9 +164,13 @@ object MapWrapperRegistry {
         coordinates: List<List<Pair<Double, Double>>>,
         clearExisting: Boolean,
     ) {
-        Log.i(TAG, "Storing ${coordinates.size} pending polygons for event: $eventId")
+        val totalPoints = coordinates.sumOf { it.size }
+        Log.i(
+            TAG,
+            "🌊 Storing ${coordinates.size} pending polygons for event: $eventId ($totalPoints total points, clearExisting=$clearExisting)",
+        )
         pendingPolygons[eventId] = PendingPolygonData(coordinates, clearExisting)
-        Log.i(TAG, "After storing: hasPendingPolygons($eventId) = ${hasPendingPolygons(eventId)}, size=${pendingPolygons.size}")
+        Log.d(TAG, "Polygons stored, hasPending=${hasPendingPolygons(eventId)}, registrySize=${pendingPolygons.size}")
     }
 
     /**
@@ -222,8 +226,16 @@ object MapWrapperRegistry {
         eventId: String,
         command: CameraCommand,
     ) {
-        Log.i(TAG, "Storing camera command for event: $eventId, command=${command::class.simpleName}")
+        val commandDetails =
+            when (command) {
+                is CameraCommand.AnimateToPosition -> "AnimateToPosition(${command.position.lat},${command.position.lng},zoom=${command.zoom})"
+                is CameraCommand.AnimateToBounds -> "AnimateToBounds(padding=${command.padding})"
+                is CameraCommand.MoveToBounds -> "MoveToBounds"
+                is CameraCommand.SetConstraintBounds -> "SetConstraintBounds"
+            }
+        Log.i(TAG, "📸 Storing camera command for event: $eventId → $commandDetails")
         pendingCameraCommands[eventId] = command
+        Log.d(TAG, "Camera command stored, hasPending=${hasPendingCameraCommand(eventId)}")
     }
 
     /**
@@ -255,8 +267,9 @@ object MapWrapperRegistry {
         eventId: String,
         callback: () -> Unit,
     ) {
-        Log.d(TAG, "Registering map click callback for event: $eventId")
+        Log.i(TAG, "👆 Registering map click callback for event: $eventId")
         mapClickCallbacks[eventId] = callback
+        Log.d(TAG, "Map click callback registered, totalCallbacks=${mapClickCallbacks.size}")
     }
 
     /**
@@ -265,13 +278,20 @@ object MapWrapperRegistry {
      * Returns true if callback was found and invoked.
      */
     fun invokeMapClickCallback(eventId: String): Boolean {
+        Log.i(TAG, "👆 invokeMapClickCallback called for event: $eventId")
         val callback = mapClickCallbacks[eventId]
         if (callback != null) {
-            Log.d(TAG, "Invoking map click callback for event: $eventId")
-            callback.invoke()
-            return true
+            Log.i(TAG, "✅ Map click callback found, invoking for event: $eventId")
+            try {
+                callback.invoke()
+                Log.i(TAG, "✅ Map click callback invoked successfully for event: $eventId")
+                return true
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error invoking map click callback for event: $eventId", throwable = e)
+                return false
+            }
         }
-        Log.v(TAG, "No map click callback for event: $eventId")
+        Log.w(TAG, "❌ No map click callback registered for event: $eventId (available: ${mapClickCallbacks.keys})")
         return false
     }
 
