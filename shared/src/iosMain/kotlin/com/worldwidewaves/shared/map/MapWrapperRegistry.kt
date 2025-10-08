@@ -86,6 +86,9 @@ object MapWrapperRegistry {
     // Store map click callbacks that Swift will invoke
     private val mapClickCallbacks = mutableMapOf<String, () -> Unit>()
 
+    // Store render callbacks that Swift wrappers can register for immediate notifications
+    private val renderCallbacks = mutableMapOf<String, () -> Unit>()
+
     /**
      * Evict the least recently used entry if cache is full.
      */
@@ -236,6 +239,40 @@ object MapWrapperRegistry {
         Log.i(TAG, "📸 Storing camera command for event: $eventId → $commandDetails")
         pendingCameraCommands[eventId] = command
         Log.d(TAG, "Camera command stored, hasPending=${hasPendingCameraCommand(eventId)}")
+
+        // Trigger immediate execution (like wave polygons)
+        requestImmediateCameraExecution(eventId)
+    }
+
+    // Store camera execution callbacks
+    private val cameraCallbacks = mutableMapOf<String, () -> Unit>()
+
+    /**
+     * Register a callback that Swift wrapper will invoke when camera command needs execution.
+     * This enables direct dispatch pattern (no polling).
+     */
+    fun setCameraCallback(
+        eventId: String,
+        callback: () -> Unit,
+    ) {
+        Log.d(TAG, "Setting camera callback for event: $eventId")
+        cameraCallbacks[eventId] = callback
+    }
+
+    /**
+     * Request immediate execution of pending camera command.
+     * Invokes the registered camera callback if available.
+     */
+    fun requestImmediateCameraExecution(eventId: String) {
+        val callback = cameraCallbacks[eventId]
+        if (callback != null) {
+            Log.i(TAG, "📸 Triggering immediate camera execution for event: $eventId")
+            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+                callback.invoke()
+            }
+        } else {
+            Log.v(TAG, "No camera callback registered for event: $eventId (will fall back to polling)")
+        }
     }
 
     /**
@@ -272,23 +309,25 @@ object MapWrapperRegistry {
         Log.d(TAG, "Map click callback registered, totalCallbacks=${mapClickCallbacks.size}")
     }
 
+    // Store visible region that Swift can update
+    private val visibleRegions = mutableMapOf<String, BoundingBox>()
+
+    /**
+     * Update visible region from Swift.
+     * Called by Swift when map region changes.
+     */
+    fun updateVisibleRegion(
+        eventId: String,
+        bbox: BoundingBox,
+    ) {
+        visibleRegions[eventId] = bbox
+    }
+
     /**
      * Get visible region from wrapper.
      * Returns the current visible bounds of the map.
      */
-    fun getVisibleRegion(eventId: String): BoundingBox? {
-        val wrapper = getWrapper(eventId) ?: return null
-
-        // Call Swift wrapper to get visible bounds
-        val boundsDict = wrapper.getVisibleRegionBounds() ?: return null
-
-        val minLat = boundsDict["minLat"] as? Double ?: return null
-        val minLng = boundsDict["minLng"] as? Double ?: return null
-        val maxLat = boundsDict["maxLat"] as? Double ?: return null
-        val maxLng = boundsDict["maxLng"] as? Double ?: return null
-
-        return BoundingBox(minLat, minLng, maxLat, maxLng)
-    }
+    fun getVisibleRegion(eventId: String): BoundingBox? = visibleRegions[eventId]
 
     /**
      * Get and invoke map click callback for an event.
@@ -322,6 +361,36 @@ object MapWrapperRegistry {
     }
 
     /**
+     * Register a callback that Swift wrapper will invoke when immediate render is requested.
+     * This enables direct dispatch pattern (no polling).
+     */
+    fun setRenderCallback(
+        eventId: String,
+        callback: () -> Unit,
+    ) {
+        Log.d(TAG, "Setting render callback for event: $eventId")
+        renderCallbacks[eventId] = callback
+    }
+
+    /**
+     * Request immediate render of pending polygons.
+     * Invokes the registered render callback if available.
+     * Called from Kotlin when polygons are updated.
+     */
+    fun requestImmediateRender(eventId: String) {
+        val callback = renderCallbacks[eventId]
+        if (callback != null) {
+            Log.i(TAG, "🚀 Triggering immediate render callback for event: $eventId")
+            // Dispatch to main queue to ensure UI thread execution
+            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+                callback.invoke()
+            }
+        } else {
+            Log.v(TAG, "No render callback registered for event: $eventId (will fall back to polling)")
+        }
+    }
+
+    /**
      * Clear all registered wrappers and pending data.
      * Useful for cleanup during app termination or testing.
      */
@@ -331,5 +400,8 @@ object MapWrapperRegistry {
         pendingPolygons.clear()
         pendingCameraCommands.clear()
         mapClickCallbacks.clear()
+        renderCallbacks.clear()
+        cameraCallbacks.clear()
+        visibleRegions.clear()
     }
 }

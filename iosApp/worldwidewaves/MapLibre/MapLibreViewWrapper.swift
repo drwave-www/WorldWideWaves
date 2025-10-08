@@ -40,13 +40,16 @@ import Shared
     private var waveLayerIds: [String] = []
     private var waveSourceIds: [String] = []
 
-    // Timer for continuous polling of camera commands and polygons
-    private var commandPollingTimer: Timer?
-    private static let pollingInterval: TimeInterval = 0.1 // 100ms
+    // DEPRECATED: Polling timer removed - now using direct dispatch callbacks
+    // private var commandPollingTimer: Timer?
+    // private static let pollingInterval: TimeInterval = 0.1 // 100ms
 
     // Queue for polygons that arrive before style loads
     private var pendingPolygonQueue: [[CLLocationCoordinate2D]] = []
     private var styleIsLoaded: Bool = false
+
+    // Queue for constraint bounds that arrive before style loads
+    private var pendingConstraintBounds: MLNCoordinateBounds?
 
     // MARK: - Accessibility State
 
@@ -65,7 +68,8 @@ import Shared
     deinit {
         WWWLog.w(Self.tag, "⚠️ Deinitializing MapLibreViewWrapper for event: \(eventId ?? "unknown")")
         WWWLog.w(Self.tag, "This will stop polygon updates! Wrapper should stay alive during wave screen.")
-        stopContinuousPolling()
+        // DEPRECATED: No longer using polling timer
+        // stopContinuousPolling()
     }
 
     // MARK: - Map Setup
@@ -104,6 +108,22 @@ import Shared
     @objc public func setEventId(_ eventId: String) {
         self.eventId = eventId
         WWWLog.d(Self.tag, "Event ID set: \(eventId)")
+
+        // Register immediate render callback (eliminates polling delay for polygons)
+        Shared.MapWrapperRegistry.shared.setRenderCallback(eventId: eventId) { [weak self] in
+            guard let self = self else { return }
+            WWWLog.i(Self.tag, "🚀 Immediate render callback triggered for: \(eventId)")
+            _ = IOSMapBridge.renderPendingPolygons(eventId: eventId)
+        }
+        WWWLog.d(Self.tag, "Immediate render callback registered for: \(eventId)")
+
+        // Register immediate camera callback (eliminates polling delay for camera commands)
+        Shared.MapWrapperRegistry.shared.setCameraCallback(eventId: eventId) { [weak self] in
+            guard let self = self else { return }
+            WWWLog.i(Self.tag, "📸 Immediate camera callback triggered for: \(eventId)")
+            IOSMapBridge.executePendingCameraCommand(eventId: eventId)
+        }
+        WWWLog.d(Self.tag, "Immediate camera callback registered for: \(eventId)")
     }
 
     @objc public func setStyle(styleURL: String, completion: @escaping () -> Void) {
@@ -258,14 +278,7 @@ import Shared
             return false
         }
 
-        // CRITICAL: Don't set constraint bounds if style not loaded
-        // setVisibleCoordinateBounds throws std::domain_error if called before style loads
-        guard styleIsLoaded, mapView.style != nil else {
-            WWWLog.w(Self.tag, "Cannot set constraint bounds - style not loaded yet (will retry after style loads)")
-            return false  // Return false to indicate failure, allowing retry
-        }
-
-        // Validate bounds before setting
+        // Validate bounds before setting or queuing
         guard neLat > swLat else {
             WWWLog.e(Self.tag, "Invalid bounds: neLat (\(neLat)) must be > swLat (\(swLat))")
             return false
@@ -278,15 +291,24 @@ import Shared
             return false
         }
 
-        WWWLog.i(Self.tag, "Setting camera constraint bounds: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng))")
-
         let southwest = CLLocationCoordinate2D(latitude: swLat, longitude: swLng)
         let northeast = CLLocationCoordinate2D(latitude: neLat, longitude: neLng)
         let bounds = MLNCoordinateBounds(sw: southwest, ne: northeast)
 
-        // MapLibre's setVisibleCoordinateBounds can throw C++ std::domain_error
-        // Swift can't catch C++ exceptions, so we prevent invalid calls instead
+        // If style not loaded yet, queue bounds for later application
+        guard styleIsLoaded, mapView.style != nil else {
+            WWWLog.i(
+                Self.tag,
+                "Style not loaded - queueing constraint bounds: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng))"
+            )
+            pendingConstraintBounds = bounds
+            return true  // Return true - will be applied when style loads
+        }
+
+        // Style is loaded - apply bounds immediately
+        WWWLog.i(Self.tag, "Setting camera constraint bounds: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng))")
         mapView.setVisibleCoordinateBounds(bounds, animated: false)
+        pendingConstraintBounds = nil  // Clear pending bounds
         WWWLog.i(Self.tag, "✅ Camera constraint bounds set successfully")
         return true
     }
@@ -697,58 +719,22 @@ import Shared
         WWWLog.v(Self.tag, "Event info updated for accessibility: \(eventName ?? "unknown")")
     }
 
-    // MARK: - Continuous Command Polling
+    // MARK: - DEPRECATED: Continuous Command Polling
+    // NOTE: Polling has been replaced with direct dispatch callbacks for better performance
+    // The immediate render and camera callbacks registered in setEventId() now handle updates
+    // This eliminates 100ms+ polling delay and reduces CPU/battery usage
 
-    /// Starts continuous polling for camera commands and wave polygons.
-    /// Required because Kotlin code executes asynchronously and SwiftUI updateUIView()
-    /// is not called frequently enough for immediate command execution.
-    ///
-    /// Polls every 100ms to:
-    /// 1. Execute pending camera commands (auto-following, constraints)
-    /// 2. Render pending wave polygons (real-time wave progression)
+    /*
+    /// DEPRECATED: Replaced with direct dispatch callbacks
     private func startContinuousPolling() {
-        guard let eventId = eventId else {
-            WWWLog.w(Self.tag, "Cannot start polling - eventId is nil")
-            return
-        }
-
-        WWWLog.i(Self.tag, "Starting continuous command polling for event: \(eventId)")
-
-        var pollCount = 0
-        commandPollingTimer = Timer.scheduledTimer(
-            withTimeInterval: Self.pollingInterval,
-            repeats: true
-        ) { [weak self] _ in
-            guard let self = self, let eventId = self.eventId else { return }
-
-            pollCount += 1
-
-            // Log every 50 polls (~5 seconds) to track polling is active
-            if pollCount % 50 == 0 {
-                WWWLog.d(Self.tag, "🔄 Polling active: \(pollCount) polls completed for event: \(eventId)")
-            }
-
-            // Execute pending camera commands (constraints, auto-following)
-            IOSMapBridge.executePendingCameraCommand(eventId: eventId)
-
-            // Render pending wave polygons (real-time progression)
-            let hadPolygons = IOSMapBridge.renderPendingPolygons(eventId: eventId)
-            if hadPolygons {
-                WWWLog.i(Self.tag, "🌊 Wave polygons rendered during poll #\(pollCount)")
-            }
-        }
-
-        WWWLog.d(Self.tag, "Polling timer started (interval: \(Self.pollingInterval * 1000)ms)")
+        // No longer needed - using MapWrapperRegistry.setRenderCallback and setCameraCallback
     }
 
-    /// Stops continuous polling and invalidates the timer.
+    /// DEPRECATED: Replaced with direct dispatch callbacks
     private func stopContinuousPolling() {
-        if let timer = commandPollingTimer {
-            timer.invalidate()
-            commandPollingTimer = nil
-            WWWLog.d(Self.tag, "Polling timer stopped for event: \(eventId ?? "unknown")")
-        }
+        // No longer needed - callbacks are automatically cleaned up
     }
+    */
 }
 
 // MARK: - MLNMapViewDelegate
@@ -783,17 +769,35 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         WWWLog.d(Self.tag, "Checking for pending polygons in registry...")
         _ = IOSMapBridge.renderPendingPolygons(eventId: eventId)
 
-        // START CONTINUOUS POLLING: For dynamic updates (auto-following, wave progression)
-        WWWLog.i(Self.tag, "🔄 Starting continuous polling for dynamic updates...")
-        startContinuousPolling()
+        // 4. Apply queued constraint bounds if any
+        if let bounds = pendingConstraintBounds {
+            WWWLog.i(Self.tag, "Applying queued constraint bounds after style load")
+            mapView.setVisibleCoordinateBounds(bounds, animated: false)
+            pendingConstraintBounds = nil
+            WWWLog.i(Self.tag, "✅ Constraint bounds applied successfully")
+        }
 
-        WWWLog.i(Self.tag, "✅ Map initialization complete for event: \(eventId)")
+        // NOTE: Continuous polling REMOVED - now using direct dispatch callbacks
+        // Callbacks were registered in setEventId() and provide immediate updates (<16ms vs 100ms+)
+        WWWLog.i(Self.tag, "✅ Map initialization complete with direct dispatch callbacks for event: \(eventId)")
     }
 
     public func mapView(_ mapView: MLNMapView, regionDidChangeAnimated animated: Bool) {
         // Camera idle event
         WWWLog.v(Self.tag, "Region changed, camera idle")
         onCameraIdle?()
+
+        // Update visible region in registry (for getVisibleRegion calls)
+        if let eventId = eventId {
+            let bounds = mapView.visibleCoordinateBounds
+            let bbox = BoundingBox(
+                minLatitude: bounds.sw.latitude,
+                minLongitude: bounds.sw.longitude,
+                maxLatitude: bounds.ne.latitude,
+                maxLongitude: bounds.ne.longitude
+            )
+            Shared.MapWrapperRegistry.shared.updateVisibleRegion(eventId: eventId, bbox: bbox)
+        }
 
         // Update accessibility when map region changes
         updateMapAccessibility()

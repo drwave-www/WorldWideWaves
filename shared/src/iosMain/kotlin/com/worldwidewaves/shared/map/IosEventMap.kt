@@ -109,9 +109,12 @@ class IosEventMap(
 
         Log.d("IosEventMap", "iOS map now tracking ${currentPolygons.size} wave polygons")
 
-        // Store polygon data in registry for Swift to render
+        // Store polygon data in registry AND trigger immediate render callback
         storePolygonsForRendering(wavePolygons, clearPolygons)
-        Log.v("IosEventMap", "✅ Polygons stored in registry")
+
+        // Request immediate render (Swift wrapper will be notified via callback)
+        MapWrapperRegistry.requestImmediateRender(event.id)
+        Log.v("IosEventMap", "✅ Polygons stored and immediate render requested")
     }
 
     private fun storePolygonsForRendering(
