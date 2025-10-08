@@ -15,12 +15,20 @@ Firebase Crashlytics provides real-time crash reporting for iOS, helping track a
 
 ## Step 1: Generate GoogleService-Info.plist
 
-The project includes a script to automatically generate `GoogleService-Info.plist` from secure sources:
+The project includes unified scripts for Firebase configuration generation:
 
 ```bash
-# Generate Firebase configuration for iOS
+# Recommended: Generate configs for both platforms
+./scripts/generate_firebase_config.sh all
+
+# iOS only
+./scripts/generate_firebase_config.sh ios
+
+# Alternative: iOS-specific script
 ./scripts/generate_ios_firebase_config.sh
 ```
+
+All methods use the same configuration sources and produce identical results.
 
 ### Configuration Sources
 

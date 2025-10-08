@@ -121,4 +121,3 @@ EOF
 
 echo "✅ Generated GoogleService-Info.plist successfully"
 echo "📁 Location: $OUTPUT_FILE"
-EOF
