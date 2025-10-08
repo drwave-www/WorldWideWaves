@@ -202,9 +202,19 @@ import Shared
         callback: MapCameraCallbackWrapper?
     ) {
         guard let mapView = mapView else {
+            WWWLog.w(Self.tag, "Cannot animate to bounds - mapView is nil")
             callback?.onCancel()
             return
         }
+
+        // Validate bounds before attempting camera calculation
+        guard neLat > swLat else {
+            WWWLog.e(Self.tag, "Invalid bounds for animation: neLat (\(neLat)) must be > swLat (\(swLat))")
+            callback?.onCancel()
+            return
+        }
+
+        WWWLog.i(Self.tag, "Animating camera to bounds: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng)) padding=\(padding)")
 
         self.cameraAnimationCallback = callback
 
@@ -219,25 +229,61 @@ import Shared
             right: CGFloat(padding)
         )
 
-        let camera = mapView.cameraThatFitsCoordinateBounds(bounds, edgePadding: edgePadding)
-        let timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        do {
+            // cameraThatFitsCoordinateBounds can throw std::domain_error if bounds invalid
+            let camera = mapView.cameraThatFitsCoordinateBounds(bounds, edgePadding: edgePadding)
+            let timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
 
-        mapView.setCamera(camera, withDuration: 0.5, animationTimingFunction: timingFunction) { [weak self] in
-            callback?.onFinish()
-            self?.cameraAnimationCallback = nil
+            mapView.setCamera(camera, withDuration: 0.5, animationTimingFunction: timingFunction) { [weak self] in
+                WWWLog.d(Self.tag, "✅ Camera animation to bounds completed")
+                callback?.onFinish()
+                self?.cameraAnimationCallback = nil
+            }
+        } catch let error as NSError {
+            WWWLog.e(Self.tag, "❌ Error calculating camera for bounds: \(error.localizedDescription)")
+            callback?.onCancel()
+            self.cameraAnimationCallback = nil
         }
     }
 
     // MARK: - Camera Constraints
 
     @objc public func setBoundsForCameraTarget(swLat: Double, swLng: Double, neLat: Double, neLng: Double) {
-        guard let mapView = mapView else { return }
+        guard let mapView = mapView else {
+            WWWLog.w(Self.tag, "Cannot set bounds - mapView is nil")
+            return
+        }
+
+        // CRITICAL: Don't set constraint bounds if style not loaded
+        // setVisibleCoordinateBounds throws std::domain_error if called before style loads
+        guard styleIsLoaded, mapView.style != nil else {
+            WWWLog.w(Self.tag, "Cannot set constraint bounds - style not loaded yet (will be set after style loads)")
+            return
+        }
+
+        // Validate bounds before setting
+        guard neLat > swLat else {
+            WWWLog.e(Self.tag, "Invalid bounds: neLat (\(neLat)) must be > swLat (\(swLat))")
+            return
+        }
+
+        // Validate coordinates are within valid ranges
+        guard swLat >= -90 && swLat <= 90 && neLat >= -90 && neLat <= 90 &&
+              swLng >= -180 && swLng <= 180 && neLng >= -180 && neLng <= 180 else {
+            WWWLog.e(Self.tag, "Invalid coordinate values: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng))")
+            return
+        }
+
+        WWWLog.i(Self.tag, "Setting camera constraint bounds: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng))")
 
         let southwest = CLLocationCoordinate2D(latitude: swLat, longitude: swLng)
         let northeast = CLLocationCoordinate2D(latitude: neLat, longitude: neLng)
         let bounds = MLNCoordinateBounds(sw: southwest, ne: northeast)
 
+        // MapLibre's setVisibleCoordinateBounds can throw C++ std::domain_error
+        // Swift can't catch C++ exceptions, so we prevent invalid calls instead
         mapView.setVisibleCoordinateBounds(bounds, animated: false)
+        WWWLog.i(Self.tag, "✅ Camera constraint bounds set successfully")
     }
 
     @objc public func setMinZoom(_ minZoom: Double) {
