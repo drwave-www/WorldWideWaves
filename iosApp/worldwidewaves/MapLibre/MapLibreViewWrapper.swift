@@ -229,20 +229,15 @@ import Shared
             right: CGFloat(padding)
         )
 
-        do {
-            // cameraThatFitsCoordinateBounds can throw std::domain_error if bounds invalid
-            let camera = mapView.cameraThatFitsCoordinateBounds(bounds, edgePadding: edgePadding)
-            let timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        // Note: cameraThatFitsCoordinateBounds can throw C++ std::domain_error, but Swift can't catch C++ exceptions
+        // We validate bounds above to prevent invalid calls
+        let camera = mapView.cameraThatFitsCoordinateBounds(bounds, edgePadding: edgePadding)
+        let timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
 
-            mapView.setCamera(camera, withDuration: 0.5, animationTimingFunction: timingFunction) { [weak self] in
-                WWWLog.d(Self.tag, "✅ Camera animation to bounds completed")
-                callback?.onFinish()
-                self?.cameraAnimationCallback = nil
-            }
-        } catch let error as NSError {
-            WWWLog.e(Self.tag, "❌ Error calculating camera for bounds: \(error.localizedDescription)")
-            callback?.onCancel()
-            self.cameraAnimationCallback = nil
+        mapView.setCamera(camera, withDuration: 0.5, animationTimingFunction: timingFunction) { [weak self] in
+            WWWLog.d(Self.tag, "✅ Camera animation to bounds completed")
+            callback?.onFinish()
+            self?.cameraAnimationCallback = nil
         }
     }
 
@@ -767,7 +762,7 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         WWWLog.e(Self.tag, "Event: \(eventId ?? "unknown")")
     }
 
-    public func mapView(_ mapView: MLNMapView, didFailToLoadImage url: URL) -> UIImage? {
+    @objc public func mapView(_ mapView: MLNMapView, didFailToLoadImage url: URL) -> UIImage? {
         WWWLog.w(Self.tag, "⚠️ Failed to load image from URL: \(url)")
         WWWLog.w(Self.tag, "Event: \(eventId ?? "unknown")")
         return nil // Return nil to let MapLibre use default/fallback
