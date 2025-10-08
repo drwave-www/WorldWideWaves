@@ -116,22 +116,20 @@ class IosEventMap(
 
         Log.d("IosEventMap", "iOS map now tracking ${currentPolygons.size} wave polygons")
 
-        // Try to render synchronously to prevent flickering (like Android's runOnUiThread)
+        // Try to render immediately to prevent flickering (like Android's runOnUiThread)
         val wrapper = MapWrapperRegistry.getWrapper(mapRegistryKey)
         if (wrapper != null && MapWrapperRegistry.isStyleLoaded(mapRegistryKey)) {
-            // Wrapper is ready - render synchronously on main thread (prevents flicker)
-            Log.d("IosEventMap", "Rendering polygons synchronously on main thread for key: $mapRegistryKey")
-            platform.darwin.dispatch_sync(platform.darwin.dispatch_get_main_queue()) {
-                // Convert and render directly (no async callback delay)
-                storePolygonsForRendering(wavePolygons, clearPolygons)
-                // Trigger render callback synchronously to execute in this frame
-                val renderCallback = MapWrapperRegistry.getRenderCallback(mapRegistryKey)
-                if (renderCallback != null) {
-                    renderCallback.invoke()
-                    Log.v("IosEventMap", "Synchronous render callback executed")
-                } else {
-                    Log.w("IosEventMap", "No render callback registered, polygons queued for async render")
-                }
+            // Wrapper is ready - render immediately on current thread (already on main thread in Compose)
+            Log.d("IosEventMap", "Rendering polygons immediately for key: $mapRegistryKey")
+            storePolygonsForRendering(wavePolygons, clearPolygons)
+
+            // Trigger render callback immediately (already on main thread from Compose)
+            val renderCallback = MapWrapperRegistry.getRenderCallback(mapRegistryKey)
+            if (renderCallback != null) {
+                renderCallback.invoke()
+                Log.v("IosEventMap", "Immediate render callback executed")
+            } else {
+                Log.w("IosEventMap", "No render callback registered, polygons queued for async render")
             }
         } else {
             // Wrapper not ready - fall back to async rendering (initial load case)
