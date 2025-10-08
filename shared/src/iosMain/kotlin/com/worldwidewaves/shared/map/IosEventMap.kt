@@ -27,17 +27,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -51,11 +46,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.interop.UIKitViewController
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
@@ -100,16 +92,6 @@ class IosEventMap(
         KoinPlatform.getKoin().getOrNull<LocationProvider>()
 
     private var currentPolygons = mutableListOf<Polygon>()
-
-    private fun formatCoordinates(location: Position): String =
-        "${location.lat.toString().take(COORDINATE_DISPLAY_LAT_LENGTH)}, " +
-            location.lng.toString().take(COORDINATE_DISPLAY_LNG_LENGTH)
-
-    companion object {
-        private val LOADING_COLOR = Color(0xFFFFA500)
-        private const val COORDINATE_DISPLAY_LAT_LENGTH = 8
-        private const val COORDINATE_DISPLAY_LNG_LENGTH = 9
-    }
 
     override fun updateWavePolygons(
         wavePolygons: List<Polygon>,
@@ -237,47 +219,6 @@ class IosEventMap(
                 }
             }
 
-            // Overlay with map information and controls
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                // Map status card at top
-                MapStatusCard(
-                    event = event,
-                    isLoaded = mapIsLoaded,
-                    downloadState = downloadState,
-                    polygonCount = currentPolygons.size,
-                )
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                // Location info at bottom if available
-                currentLocation?.let { location ->
-                    LocationInfoCard(location)
-                }
-
-                if (currentLocation == null) {
-                    Card(
-                        colors =
-                            CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                            ),
-                        modifier = Modifier.padding(8.dp),
-                    ) {
-                        Text(
-                            text = "Location not available",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(12.dp),
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                }
-            }
-
             // Download overlay UI (matching Android behavior)
             // Log current download state for debugging
             Log.v(
@@ -401,109 +342,6 @@ class IosEventMap(
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 }
-            }
-        }
-    }
-
-    @Composable
-    private fun MapStatusCard(
-        event: IWWWEvent,
-        isLoaded: Boolean,
-        downloadState: EventMapDownloadManager.DownloadState,
-        polygonCount: Int,
-    ) {
-        Card(
-            colors =
-                CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
-                ),
-            modifier = Modifier.padding(8.dp),
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = stringResource(event.getLocation()),
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                    textAlign = TextAlign.Center,
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row {
-                    // Map status indicator
-                    Box(
-                        modifier =
-                            Modifier
-                                .size(12.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    when {
-                                        downloadState.error != null -> Color.Red
-                                        downloadState.isAvailable && isLoaded -> Color.Green
-                                        else -> LOADING_COLOR
-                                    },
-                                ),
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text =
-                            when {
-                                downloadState.error != null -> "Error"
-                                downloadState.isDownloading -> "Downloading: ${downloadState.progress}%"
-                                !downloadState.isAvailable -> "Map Not Available"
-                                isLoaded -> "Map Ready"
-                                else -> "Loading..."
-                            },
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-
-                if (downloadState.error != null) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Download failed: ${downloadState.error}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                }
-
-                if (polygonCount > 0) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Wave Polygons: $polygonCount",
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun LocationInfoCard(location: Position) {
-        Card(
-            colors =
-                CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.9f),
-                ),
-            modifier = Modifier.padding(8.dp),
-        ) {
-            Column(
-                modifier = Modifier.padding(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = "Your Location",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                )
-
-                Text(
-                    text = formatCoordinates(location),
-                    style = MaterialTheme.typography.bodySmall,
-                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                )
             }
         }
     }
