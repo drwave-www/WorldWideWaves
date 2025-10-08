@@ -219,7 +219,8 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = C17B3C972E886C630097A3A5 /* Build configuration list for PBXNativeTarget "worldwidewaves" */;
 			buildPhases = (
-				C17B3CA12E886C960097A3A5 /* ShellScript */,
+				C17B3CA12E886C960097A3A5 /* KMM Framework Update */,
+				C1A719FD2E969942005B6CD9 /* Generate Firebase config */,
 				C17B3C722E886C610097A3A5 /* Sources */,
 				C17B3C732E886C610097A3A5 /* Frameworks */,
 				C17B3C742E886C610097A3A5 /* Resources */,
@@ -368,7 +369,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		C17B3CA12E886C960097A3A5 /* ShellScript */ = {
+		C17B3CA12E886C960097A3A5 /* KMM Framework Update */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -378,6 +379,7 @@
 			);
 			inputPaths = (
 			);
+			name = "KMM Framework Update";
 			outputFileListPaths = (
 			);
 			outputPaths = (
@@ -385,6 +387,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "export PATH=\"/opt/homebrew/opt/openjdk@17/bin:/opt/homebrew/bin:$PATH\"\nexport JAVA_HOME=\"/opt/homebrew/opt/openjdk@17\"\ncd \"$SRCROOT/..\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode \\\n  -PXCODE_CONFIGURATION=${CONFIGURATION} \\\n  -PPLATFORM_NAME=${PLATFORM_NAME} \\\n  -PARCHS=\"${ARCHS}\"\n";
+		};
+		C1A719FD2E969942005B6CD9 /* Generate Firebase config */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Generate Firebase config";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "  set -e\n\n  SCRIPT_PATH=\"${PROJECT_DIR}/../scripts/generate_ios_firebase_config.sh\"\n\n  echo \"🔥 Auto-generating Firebase configuration...\"\n  if \"$SCRIPT_PATH\"; then\n      echo \"✅ Firebase configuration generated successfully\"\n  else\n      echo \"error: Firebase configuration generation failed\"\n      exit 1\n  fi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
