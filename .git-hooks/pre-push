@@ -139,22 +139,32 @@ fi
 
 echo "📱 Android emulator is available. Running critical integration tests..."
 
-# Run basic compilation and lightweight tests to verify emulator connectivity
-echo "🧪 Running basic connectivity test..."
-if ! timeout 120 ./gradlew :composeApp:assembleDebugAndroidTest --no-daemon --quiet; then
-    echo "❌ Failed to compile instrumented tests"
+# Select first available device/emulator
+device_serial=$($adb_cmd devices | grep -E "device$|emulator" | head -n 1 | awk '{print $1}')
+if [ -z "$device_serial" ]; then
+    echo "❌ No device/emulator found"
     test_failed=true
 else
-    echo "✅ Instrumented tests compile successfully"
+    echo "📱 Using device: $device_serial"
+    export ANDROID_SERIAL="$device_serial"
 
-    # Run a simple connectivity check instead of full integration tests
-    echo "🔍 Verifying emulator connectivity..."
-    if $adb_cmd shell getprop sys.boot_completed | grep -q "1"; then
-        echo "✅ Emulator is fully booted and responsive"
-        test_failed=false
-    else
-        echo "⚠️  Emulator connectivity issues detected"
+    # Run basic compilation and lightweight tests to verify emulator connectivity
+    echo "🧪 Running basic connectivity test..."
+    if ! timeout 120 ./gradlew :composeApp:assembleDebugAndroidTest --no-daemon --quiet; then
+        echo "❌ Failed to compile instrumented tests"
         test_failed=true
+    else
+        echo "✅ Instrumented tests compile successfully"
+
+        # Run a simple connectivity check instead of full integration tests
+        echo "🔍 Verifying emulator connectivity..."
+        if $adb_cmd -s "$device_serial" shell getprop sys.boot_completed | grep -q "1"; then
+            echo "✅ Emulator is fully booted and responsive"
+            test_failed=false
+        else
+            echo "⚠️  Emulator connectivity issues detected"
+            test_failed=true
+        fi
     fi
 fi
 

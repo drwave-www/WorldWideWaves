@@ -68,7 +68,7 @@ After adding fonts, the app should:
 UIAppFonts key properly configured with all 9 fonts
 
 ### ✅ `shared/src/iosMain/kotlin/.../Typography.ios.kt`
-Font loading code ready to load from bundle
+Font loading code ready (currently using FontFamily.Default until fonts are bundled)
 
 ## Troubleshooting
 
