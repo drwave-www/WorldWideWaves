@@ -17,4 +17,5 @@ expect fun createNativeMapViewController(
     event: IWWWEvent,
     styleURL: String,
     enableGestures: Boolean = true,
+    registryKey: String? = null,
 ): Any // Returns UIViewController on iOS, View on Android

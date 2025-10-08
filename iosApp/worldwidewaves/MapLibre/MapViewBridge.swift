@@ -171,15 +171,16 @@ import Shared
     public static func createMapViewControllerWithWrapper(
         for event: IWWWEvent,
         styleURL: String,
-        enableGestures: Bool = true
+        enableGestures: Bool = true,
+        registryKey: String
     ) -> UIViewController {
-        WWWLog.i("MapViewBridge", "Creating map view with wrapper for: \(event.id), enableGestures: \(enableGestures)")
+        WWWLog.i("MapViewBridge", "Creating map view with wrapper for: \(event.id), enableGestures: \(enableGestures), registryKey: \(registryKey)")
 
         var wrapperInstance: MapLibreViewWrapper?
 
         // NOTE: Using default Paris coordinates as initial position
         let mapView = EventMapView(
-            eventId: event.id,
+            eventId: registryKey,  // Use registryKey instead of event.id
             styleURL: styleURL,
             initialLatitude: 48.8566,
             initialLongitude: 2.3522,
@@ -194,7 +195,7 @@ import Shared
         let controller = UIHostingController(rootView: mapView)
         controller.view.backgroundColor = UIColor.clear
 
-        WWWLog.d("MapViewBridge", "Map view controller created")
+        WWWLog.d("MapViewBridge", "Map view controller created with registryKey: \(registryKey)")
         return controller
     }
 }

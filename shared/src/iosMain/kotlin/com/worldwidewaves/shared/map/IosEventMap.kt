@@ -86,10 +86,15 @@ class IosEventMap(
     onLocationUpdate: (Position) -> Unit = {},
     mapConfig: EventMapConfig = EventMapConfig(),
     private val onMapClick: (() -> Unit)? = null,
+    private val registryKey: String? = null, // Optional unique key for wrapper registry (prevents conflicts)
 ) : AbstractEventMap<UIImage>(event, mapConfig, onLocationUpdate) {
+    // Use unique registry key if provided (e.g., "paris_france-fullmap" vs "paris_france-event")
+    // This prevents wrapper conflicts when multiple screens show the same event
+    private val mapRegistryKey = registryKey ?: event.id
+
     // Create event-specific adapter instance (not singleton) to enable per-event camera control
     override val mapLibreAdapter: MapLibreAdapter<UIImage> =
-        IosMapLibreAdapter(event.id)
+        IosMapLibreAdapter(mapRegistryKey)
     override val locationProvider: LocationProvider? =
         KoinPlatform.getKoin().getOrNull<LocationProvider>()
 
@@ -112,15 +117,15 @@ class IosEventMap(
         Log.d("IosEventMap", "iOS map now tracking ${currentPolygons.size} wave polygons")
 
         // Try to render synchronously to prevent flickering (like Android's runOnUiThread)
-        val wrapper = MapWrapperRegistry.getWrapper(event.id)
-        if (wrapper != null && MapWrapperRegistry.isStyleLoaded(event.id)) {
+        val wrapper = MapWrapperRegistry.getWrapper(mapRegistryKey)
+        if (wrapper != null && MapWrapperRegistry.isStyleLoaded(mapRegistryKey)) {
             // Wrapper is ready - render synchronously on main thread (prevents flicker)
-            Log.d("IosEventMap", "Rendering polygons synchronously on main thread")
+            Log.d("IosEventMap", "Rendering polygons synchronously on main thread for key: $mapRegistryKey")
             platform.darwin.dispatch_sync(platform.darwin.dispatch_get_main_queue()) {
                 // Convert and render directly (no async callback delay)
                 storePolygonsForRendering(wavePolygons, clearPolygons)
                 // Trigger render callback synchronously to execute in this frame
-                val renderCallback = MapWrapperRegistry.getRenderCallback(event.id)
+                val renderCallback = MapWrapperRegistry.getRenderCallback(mapRegistryKey)
                 if (renderCallback != null) {
                     renderCallback.invoke()
                     Log.v("IosEventMap", "Synchronous render callback executed")
@@ -132,7 +137,7 @@ class IosEventMap(
             // Wrapper not ready - fall back to async rendering (initial load case)
             Log.d("IosEventMap", "Wrapper not ready, using async rendering (initial load)")
             storePolygonsForRendering(wavePolygons, clearPolygons)
-            MapWrapperRegistry.requestImmediateRender(event.id)
+            MapWrapperRegistry.requestImmediateRender(mapRegistryKey)
         }
         Log.v("IosEventMap", "✅ Polygon update completed")
     }
@@ -150,8 +155,8 @@ class IosEventMap(
             }
 
         // Store in registry - Swift will poll and render these
-        MapWrapperRegistry.setPendingPolygons(event.id, coordinates, clearExisting)
-        Log.i("IosEventMap", "Stored ${polygons.size} polygons in registry for Swift to render")
+        MapWrapperRegistry.setPendingPolygons(mapRegistryKey, coordinates, clearExisting)
+        Log.i("IosEventMap", "Stored ${polygons.size} polygons in registry (key: $mapRegistryKey) for Swift to render")
     }
 
     @OptIn(ExperimentalForeignApi::class)
@@ -177,13 +182,13 @@ class IosEventMap(
         var mapIsLoaded by remember { mutableStateOf(false) }
 
         // Cleanup wrapper and all callbacks when screen is disposed
-        DisposableEffect(event.id) {
-            Log.i("IosEventMap", "Screen mounted for event: ${event.id}")
+        DisposableEffect(mapRegistryKey) {
+            Log.i("IosEventMap", "Screen mounted for event: ${event.id}, registryKey: $mapRegistryKey")
 
             onDispose {
-                Log.i("IosEventMap", "🧹 Screen disposing, cleaning up wrapper for: ${event.id}")
-                MapWrapperRegistry.unregisterWrapper(event.id)
-                Log.i("IosEventMap", "✅ Wrapper cleanup complete for: ${event.id}")
+                Log.i("IosEventMap", "🧹 Screen disposing, cleaning up wrapper for registryKey: $mapRegistryKey")
+                MapWrapperRegistry.unregisterWrapper(mapRegistryKey)
+                Log.i("IosEventMap", "✅ Wrapper cleanup complete for registryKey: $mapRegistryKey")
             }
         }
 
@@ -196,14 +201,14 @@ class IosEventMap(
 
         // Register map click callback directly with wrapper (no registry)
         // This will be triggered after viewController is created
-        LaunchedEffect(event.id, onMapClick) {
+        LaunchedEffect(mapRegistryKey, onMapClick) {
             if (onMapClick != null) {
-                Log.i("IosEventMap", "👆 Requesting map click callback registration for: ${event.id}")
+                Log.i("IosEventMap", "👆 Requesting map click callback registration for: $mapRegistryKey")
                 // Request callback registration - wrapper will set it when ready
-                MapWrapperRegistry.requestMapClickCallbackRegistration(event.id, onMapClick)
-                Log.i("IosEventMap", "✅ Map click callback registration requested for: ${event.id}")
+                MapWrapperRegistry.requestMapClickCallbackRegistration(mapRegistryKey, onMapClick)
+                Log.i("IosEventMap", "✅ Map click callback registration requested for: $mapRegistryKey")
             } else {
-                Log.w("IosEventMap", "⚠️ No map click callback provided for: ${event.id}")
+                Log.w("IosEventMap", "⚠️ No map click callback provided for: $mapRegistryKey")
             }
         }
 
@@ -283,12 +288,12 @@ class IosEventMap(
             // Create view controller once when styleURL becomes available
             LaunchedEffect(event.id, styleURL) {
                 if (styleURL != null && viewController.value == null) {
-                    Log.i("IosEventMap", "Creating view controller for: ${event.id}")
+                    Log.i("IosEventMap", "Creating view controller for: ${event.id}, registryKey: $mapRegistryKey")
                     // Enable gestures only when mapConfig.initialCameraPosition == MapCameraPosition.WINDOW (matches Android)
                     val enableGestures = mapConfig.initialCameraPosition == MapCameraPosition.WINDOW
                     Log.d("IosEventMap", "Gesture activation: $enableGestures (initialCameraPosition=${mapConfig.initialCameraPosition})")
                     viewController.value =
-                        createNativeMapViewController(event, styleURL!!, enableGestures) as platform.UIKit.UIViewController
+                        createNativeMapViewController(event, styleURL!!, enableGestures, mapRegistryKey) as platform.UIKit.UIViewController
                 }
             }
 
