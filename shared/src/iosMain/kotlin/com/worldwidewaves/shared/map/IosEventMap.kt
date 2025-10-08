@@ -247,8 +247,10 @@ class IosEventMap(
                     // This destroys the wrapper, stops the timer, and loses all state
                     key(event.id) {
                         // Cache the view controller to prevent recreation
+                        // CRITICAL: Only use event.id in remember, NOT styleURL
+                        // Including styleURL causes recreation when it changes null→path
                         val viewController =
-                            remember(event.id, styleURL) {
+                            remember(event.id) {
                                 Log.i(
                                     "IosEventMap",
                                     "Creating native map view controller for: ${event.id}, styleURL=${styleURL!!.take(80)}",

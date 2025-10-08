@@ -317,7 +317,10 @@ import Shared
     @objc public func addWavePolygons(polygons: [[CLLocationCoordinate2D]], clearExisting: Bool) {
         WWWLog.i(
             Self.tag,
-            "addWavePolygons: \(polygons.count) polygons, clearExisting: \(clearExisting), styleLoaded: \(styleIsLoaded)"
+            """
+            addWavePolygons: \(polygons.count) polygons, \
+            clearExisting: \(clearExisting), styleLoaded: \(styleIsLoaded)
+            """
         )
 
         // If style not loaded yet, queue polygons for later
@@ -822,7 +825,10 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
     public func mapViewDidFinishRenderingFrame(_ mapView: MLNMapView, fullyRendered: Bool) {
         // Called frequently - only log once
         if !styleIsLoaded {
-            WWWLog.i(Self.tag, "🖼️ Map finished rendering frame, fullyRendered: \(fullyRendered), event: \(eventId ?? "unknown")")
+            WWWLog.i(
+                Self.tag,
+                "🖼️ Map finished rendering frame, fullyRendered: \(fullyRendered), event: \(eventId ?? "unknown")"
+            )
         }
     }
 
