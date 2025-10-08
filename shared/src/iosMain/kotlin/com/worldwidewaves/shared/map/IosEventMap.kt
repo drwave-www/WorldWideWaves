@@ -246,15 +246,19 @@ class IosEventMap(
                     // styleURL in key() causes wrapper deallocation when URL changes null→loaded
                     // This destroys the wrapper, stops the timer, and loses all state
                     key(event.id) {
-                        @Suppress("DEPRECATION")
-                        UIKitViewController(
-                            factory = {
+                        // Cache the view controller to prevent recreation
+                        val viewController =
+                            remember(event.id, styleURL) {
                                 Log.i(
                                     "IosEventMap",
                                     "Creating native map view controller for: ${event.id}, styleURL=${styleURL!!.take(80)}",
                                 )
                                 createNativeMapViewController(event, styleURL!!) as platform.UIKit.UIViewController
-                            },
+                            }
+
+                        @Suppress("DEPRECATION")
+                        UIKitViewController(
+                            factory = { viewController },
                             modifier = Modifier.fillMaxSize(),
                         )
                     }

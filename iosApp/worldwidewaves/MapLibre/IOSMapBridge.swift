@@ -171,9 +171,10 @@ import CoreLocation
         // Render on map
         wrapper.addWavePolygons(polygons: coordinateArrays, clearExisting: polygonData.clearExisting)
 
-        // Clear pending polygons after successful rendering
+        // Clear after rendering - next update will overwrite with latest state
+        // This is OK: we only need to show the LATEST wave state, intermediate updates can be skipped
         Shared.MapWrapperRegistry.shared.clearPendingPolygons(eventId: eventId)
-        WWWLog.i("IOSMapBridge", "✅ Successfully rendered and cleared \(polygonData.coordinates.count) polygons")
+        WWWLog.i("IOSMapBridge", "✅ Rendered \(polygonData.coordinates.count) polygons, cleared from registry")
         return true
     }
 

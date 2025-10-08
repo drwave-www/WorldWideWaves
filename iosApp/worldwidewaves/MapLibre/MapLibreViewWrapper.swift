@@ -62,7 +62,8 @@ import Shared
     }
 
     deinit {
-        WWWLog.d(Self.tag, "Deinitializing MapLibreViewWrapper for event: \(eventId ?? "unknown")")
+        WWWLog.w(Self.tag, "⚠️ Deinitializing MapLibreViewWrapper for event: \(eventId ?? "unknown")")
+        WWWLog.w(Self.tag, "This will stop polygon updates! Wrapper should stay alive during wave screen.")
         stopContinuousPolling()
     }
 
