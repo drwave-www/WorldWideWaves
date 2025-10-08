@@ -138,7 +138,6 @@ class IosEventMap(
         // Get unified position from PositionManager (same as Android)
         val positionManager = KoinPlatform.getKoin().get<PositionManager>()
         val platformMapManager = KoinPlatform.getKoin().get<PlatformMapManager>()
-        val currentLocation by positionManager.position.collectAsState()
 
         // Use shared EventMapDownloadManager for download state management
         val downloadCoordinator =
