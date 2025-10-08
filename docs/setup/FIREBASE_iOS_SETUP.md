@@ -36,13 +36,24 @@ The script reads Firebase configuration from:
 
 2. **local.properties** (development):
    ```properties
+   # Shared configuration (same Firebase project for both platforms)
    FIREBASE_PROJECT_ID=your-project-id
    FIREBASE_PROJECT_NUMBER=your-project-number
-   FIREBASE_IOS_APP_ID=your-ios-app-id
-   FIREBASE_API_KEY=your-api-key
+   FIREBASE_API_KEY=your-shared-api-key
+
+   # Android-specific configuration
+   FIREBASE_MOBILE_SDK_APP_ID=1:xxx:android:xxx
+
+   # iOS-specific configuration
+   FIREBASE_IOS_APP_ID=1:xxx:ios:xxx
+   # Optional: iOS-specific API key (falls back to shared key)
+   FIREBASE_IOS_API_KEY=your-ios-api-key
    ```
 
-   **Note**: For iOS, use `FIREBASE_IOS_APP_ID` (falls back to `FIREBASE_MOBILE_SDK_APP_ID` if not set)
+   **Note**:
+   - Use the same `FIREBASE_PROJECT_ID` and `FIREBASE_PROJECT_NUMBER` for both platforms
+   - Each platform has its own app ID (android vs ios)
+   - API keys may differ between platforms (iOS will use `FIREBASE_IOS_API_KEY` if set, otherwise falls back to `FIREBASE_API_KEY`)
 
 ### Security Note
 

@@ -19,20 +19,34 @@ if [ -f "$OUTPUT_FILE" ] && [ -s "$OUTPUT_FILE" ]; then
     exit 0
 fi
 
+# Function to get property from local.properties
+get_property() {
+    local key="$1"
+    local value=""
+    if [ -f "$LOCAL_PROPERTIES" ]; then
+        value=$(grep "^${key}=" "$LOCAL_PROPERTIES" | cut -d'=' -f2- | sed 's/\r$//')
+    fi
+    echo "$value"
+}
+
 # Load from local.properties if it exists
 if [ -f "$LOCAL_PROPERTIES" ]; then
     echo "📝 Loading Firebase config from local.properties..."
-    source <(grep -v '^#' "$LOCAL_PROPERTIES" | sed 's/\r$//' | grep '=' | sed 's/^/export /')
 fi
 
 # Get values from environment variables (take precedence) or local.properties
-FIREBASE_PROJECT_ID="${FIREBASE_PROJECT_ID:-}"
-FIREBASE_PROJECT_NUMBER="${FIREBASE_PROJECT_NUMBER:-}"
-FIREBASE_IOS_APP_ID="${FIREBASE_IOS_APP_ID:-${FIREBASE_MOBILE_SDK_APP_ID:-}}"
-FIREBASE_API_KEY="${FIREBASE_API_KEY:-}"
-FIREBASE_CLIENT_ID="${FIREBASE_CLIENT_ID:-}"
-FIREBASE_REVERSED_CLIENT_ID="${FIREBASE_REVERSED_CLIENT_ID:-}"
-FIREBASE_GCM_SENDER_ID="${FIREBASE_GCM_SENDER_ID:-${FIREBASE_PROJECT_NUMBER:-}}"
+FIREBASE_PROJECT_ID="${FIREBASE_PROJECT_ID:-$(get_property 'FIREBASE_PROJECT_ID')}"
+FIREBASE_PROJECT_NUMBER="${FIREBASE_PROJECT_NUMBER:-$(get_property 'FIREBASE_PROJECT_NUMBER')}"
+FIREBASE_IOS_APP_ID="${FIREBASE_IOS_APP_ID:-$(get_property 'FIREBASE_IOS_APP_ID')}"
+[ -z "$FIREBASE_IOS_APP_ID" ] && FIREBASE_IOS_APP_ID="$(get_property 'FIREBASE_MOBILE_SDK_APP_ID')"
+
+# Use iOS-specific API key if available, otherwise fall back to shared key
+FIREBASE_API_KEY="${FIREBASE_IOS_API_KEY:-$(get_property 'FIREBASE_IOS_API_KEY')}"
+[ -z "$FIREBASE_API_KEY" ] && FIREBASE_API_KEY="${FIREBASE_API_KEY:-$(get_property 'FIREBASE_API_KEY')}"
+
+FIREBASE_CLIENT_ID="${FIREBASE_CLIENT_ID:-$(get_property 'FIREBASE_CLIENT_ID')}"
+FIREBASE_REVERSED_CLIENT_ID="${FIREBASE_REVERSED_CLIENT_ID:-$(get_property 'FIREBASE_REVERSED_CLIENT_ID')}"
+FIREBASE_GCM_SENDER_ID="${FIREBASE_GCM_SENDER_ID:-${FIREBASE_PROJECT_NUMBER}}"
 
 # Validate required fields
 if [ -z "$FIREBASE_PROJECT_ID" ] || [ -z "$FIREBASE_PROJECT_NUMBER" ] || \
