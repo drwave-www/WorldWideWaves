@@ -60,7 +60,9 @@ import com.worldwidewaves.shared.ui.components.LoadingIndicator
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -91,6 +93,8 @@ class IosEventMap(
         KoinPlatform.getKoin().getOrNull<LocationProvider>()
 
     private var currentPolygons = mutableListOf<Polygon>()
+    private val mapScope = CoroutineScope(SupervisorJob())
+    private var setupMapCalled = false
 
     override fun updateWavePolygons(
         wavePolygons: List<Polygon>,
@@ -192,6 +196,33 @@ class IosEventMap(
                 Log.d("IosEventMap", "Loading style URL for: ${event.id}, isAvailable=${downloadState.isAvailable}")
                 styleURL = event.map.getStyleUri()
                 Log.i("IosEventMap", "Style URL loaded: $styleURL")
+
+                // Call setupMap() to initialize camera, constraints, and bounds (like Android)
+                if (!setupMapCalled && styleURL != null && downloadState.isAvailable) {
+                    Log.i("IosEventMap", "Calling setupMap() for: ${event.id}")
+                    setupMapCalled = true
+
+                    // Create a dummy UIImage for the map parameter (adapter doesn't use it)
+                    // The adapter routes all operations through MapWrapperRegistry
+                    val dummyMap = UIImage()
+
+                    setupMap(
+                        map = dummyMap,
+                        scope = mapScope,
+                        stylePath = styleURL!!,
+                        onMapLoaded = {
+                            Log.i("IosEventMap", "setupMap completed for: ${event.id}")
+                        },
+                        onMapClick =
+                            onMapClick?.let { callback ->
+                                { _: Double, _: Double ->
+                                    Log.d("IosEventMap", "Map click from setupMap for: ${event.id}")
+                                    callback()
+                                }
+                            },
+                    )
+                    Log.i("IosEventMap", "setupMap() completed, constraints initialized for: ${event.id}")
+                }
             }
 
             // Show map OR overlays based on state (mutually exclusive, like Android)
