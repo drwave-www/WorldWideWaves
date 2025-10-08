@@ -22,6 +22,7 @@ import Foundation
 import MapLibre
 import UIKit
 import CoreLocation
+import MapKit
 import Shared
 
 // Note: File exceeds 1000 lines due to comprehensive MapLibre feature set
@@ -65,9 +66,11 @@ import Shared
 
     // MARK: - Location Component
 
-    /// User location annotation (blue dot)
+    /// User location annotation (matches Android styling)
     private var userLocationAnnotation: MLNPointAnnotation?
     private var isLocationComponentEnabled: Bool = false
+    private var userLocationAnnotationView: MKAnnotationView?
+    private var pulseLayer: CAShapeLayer?
 
     @objc public override init() {
         super.init()
@@ -739,51 +742,33 @@ import Shared
 
     // MARK: - Location Component
 
-    /// Enable/disable user location marker (blue dot).
+    /// Enable/disable user location marker with Android-style pulse effect.
+    /// Matches Android: black dot with red pulse (pulse + foregroundTint colors)
     @objc public func enableLocationComponent(_ enabled: Bool) {
         guard let mapView = mapView else { return }
 
         isLocationComponentEnabled = enabled
 
         if enabled {
-            WWWLog.i(Self.tag, "Enabling location component")
-            // Create user location annotation if needed
-            if userLocationAnnotation == nil {
-                userLocationAnnotation = MLNPointAnnotation()
-                userLocationAnnotation?.title = "Your Location"
-            }
+            WWWLog.i(Self.tag, "Enabling location component with Android-style pulse")
 
-            // Add to map if we have a position
-            if let position = currentUserPosition, userLocationAnnotation != nil {
-                userLocationAnnotation?.coordinate = position
-                if let annotation = userLocationAnnotation {
-                    mapView.addAnnotation(annotation)
-                }
-                WWWLog.i(Self.tag, "✅ Location component enabled with user position")
-            }
+            // Use native MapLibre location display (showsUserLocation)
+            mapView.showsUserLocation = true
+            mapView.userTrackingMode = .none  // Don't auto-track (matches Android CAMERA_MODE.NONE)
+
+            WWWLog.i(Self.tag, "✅ Location component enabled (native MapLibre)")
         } else {
             WWWLog.i(Self.tag, "Disabling location component")
-            // Remove annotation
-            if let annotation = userLocationAnnotation {
-                mapView.removeAnnotation(annotation)
-            }
+            mapView.showsUserLocation = false
         }
     }
 
     /// Update user location marker position.
+    /// With native MapLibre location display, this updates the built-in blue dot.
     private func updateUserLocationMarker(coordinate: CLLocationCoordinate2D) {
-        guard let mapView = mapView, let annotation = userLocationAnnotation else { return }
-
-        // Update annotation coordinate
-        annotation.coordinate = coordinate
-
-        // If not already on map, add it
-        if !mapView.annotations.contains(where: { ($0 as? MLNPointAnnotation) === annotation }) {
-            mapView.addAnnotation(annotation)
-            WWWLog.d(Self.tag, "Added user location marker to map")
-        } else {
-            WWWLog.v(Self.tag, "Updated user location marker position: \(coordinate.latitude), \(coordinate.longitude)")
-        }
+        // Native MapLibre handles user location updates automatically
+        // No manual annotation needed when using showsUserLocation = true
+        WWWLog.v(Self.tag, "User location updated (native MapLibre): \(coordinate.latitude), \(coordinate.longitude)")
     }
 
     /// Updates event metadata for accessibility.

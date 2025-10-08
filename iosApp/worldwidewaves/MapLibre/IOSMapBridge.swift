@@ -352,16 +352,34 @@ import CoreLocation
         if let animateToPos = command as? CameraCommand.AnimateToPosition {
             let zoom = animateToPos.zoom?.doubleValue
             let pos = animateToPos.position
+            let callbackId = animateToPos.callbackId
             WWWLog.i("IOSMapBridge", "Animating to position: \(pos.lat), \(pos.lng), zoom=\(zoom ?? -1)")
+
+            // Create callback wrapper if callbackId provided
+            let callbackWrapper: MapCameraCallbackWrapper? = callbackId != nil ?
+                MapCameraCallbackWrapper(
+                    onFinish: {
+                        if let id = callbackId {
+                            Shared.MapWrapperRegistry.shared.invokeCameraAnimationCallback(callbackId: id, success: true)
+                        }
+                    },
+                    onCancel: {
+                        if let id = callbackId {
+                            Shared.MapWrapperRegistry.shared.invokeCameraAnimationCallback(callbackId: id, success: false)
+                        }
+                    }
+                ) : nil
+
             wrapper.animateCamera(
                 latitude: animateToPos.position.lat,
                 longitude: animateToPos.position.lng,
                 zoom: zoom as NSNumber?,
-                callback: nil
+                callback: callbackWrapper
             )
-            return true  // Animation commands always succeed
+            return true
         } else if let animateBounds = command as? CameraCommand.AnimateToBounds {
             let bbox = animateBounds.bounds
+            let callbackId = animateBounds.callbackId
             WWWLog.i("IOSMapBridge", "Animating to bounds with padding: \(animateBounds.padding)")
             WWWLog.d(
                 "IOSMapBridge",
@@ -371,15 +389,31 @@ import CoreLocation
                 maxLng=\(bbox.maxLongitude)
                 """
             )
+
+            // Create callback wrapper if callbackId provided
+            let callbackWrapper: MapCameraCallbackWrapper? = callbackId != nil ?
+                MapCameraCallbackWrapper(
+                    onFinish: {
+                        if let id = callbackId {
+                            Shared.MapWrapperRegistry.shared.invokeCameraAnimationCallback(callbackId: id, success: true)
+                        }
+                    },
+                    onCancel: {
+                        if let id = callbackId {
+                            Shared.MapWrapperRegistry.shared.invokeCameraAnimationCallback(callbackId: id, success: false)
+                        }
+                    }
+                ) : nil
+
             wrapper.animateCameraToBounds(
                 swLat: bbox.minLatitude,
                 swLng: bbox.minLongitude,
                 neLat: bbox.maxLatitude,
                 neLng: bbox.maxLongitude,
                 padding: Int(animateBounds.padding),
-                callback: nil
+                callback: callbackWrapper
             )
-            return true  // Animation commands always succeed
+            return true
         } else if let moveBounds = command as? CameraCommand.MoveToBounds {
             let bbox = moveBounds.bounds
             WWWLog.i("IOSMapBridge", "Moving to bounds")
@@ -407,6 +441,14 @@ import CoreLocation
                 neLng: bbox.maxLongitude
             )
             return success  // Return actual success/failure from setBoundsForCameraTarget
+        } else if let setMinZoom = command as? CameraCommand.SetMinZoom {
+            WWWLog.i("IOSMapBridge", "Setting min zoom: \(setMinZoom.minZoom)")
+            wrapper.setMinZoom(setMinZoom.minZoom)
+            return true
+        } else if let setMaxZoom = command as? CameraCommand.SetMaxZoom {
+            WWWLog.i("IOSMapBridge", "Setting max zoom: \(setMaxZoom.maxZoom)")
+            wrapper.setMaxZoom(setMaxZoom.maxZoom)
+            return true
         }
         return true  // Unknown command type, don't retry
     }

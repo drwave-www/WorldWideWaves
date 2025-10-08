@@ -22,11 +22,13 @@ sealed class CameraCommand {
     data class AnimateToPosition(
         val position: Position,
         val zoom: Double?,
+        val callbackId: String? = null,
     ) : CameraCommand()
 
     data class AnimateToBounds(
         val bounds: BoundingBox,
         val padding: Int = 0,
+        val callbackId: String? = null,
     ) : CameraCommand()
 
     data class MoveToBounds(
@@ -35,6 +37,14 @@ sealed class CameraCommand {
 
     data class SetConstraintBounds(
         val bounds: BoundingBox,
+    ) : CameraCommand()
+
+    data class SetMinZoom(
+        val minZoom: Double,
+    ) : CameraCommand()
+
+    data class SetMaxZoom(
+        val maxZoom: Double,
     ) : CameraCommand()
 }
 
@@ -208,6 +218,8 @@ object MapWrapperRegistry {
                 is CameraCommand.AnimateToBounds -> "AnimateToBounds(padding=${command.padding})"
                 is CameraCommand.MoveToBounds -> "MoveToBounds"
                 is CameraCommand.SetConstraintBounds -> "SetConstraintBounds"
+                is CameraCommand.SetMinZoom -> "SetMinZoom(${command.minZoom})"
+                is CameraCommand.SetMaxZoom -> "SetMaxZoom(${command.maxZoom})"
             }
         Log.i(TAG, "📸 Storing camera command for event: $eventId → $commandDetails")
         pendingCameraCommands[eventId] = command
@@ -331,6 +343,9 @@ object MapWrapperRegistry {
     private val cameraPositions = mutableMapOf<String, Pair<Double, Double>>()
     private val cameraZooms = mutableMapOf<String, Double>()
 
+    // Store camera animation callbacks (for async completion signaling)
+    private val cameraAnimationCallbacks = mutableMapOf<String, MapCameraCallback>()
+
     // Store map click coordinate listeners (for tap with coordinates)
     private val mapClickCoordinateListeners = mutableMapOf<String, (Double, Double) -> Unit>()
 
@@ -374,16 +389,7 @@ object MapWrapperRegistry {
         minZoom: Double,
     ) {
         Log.d(TAG, "Setting min zoom command: $minZoom for event: $eventId")
-        // Trigger immediate execution via camera callback
-        requestImmediateCameraExecution(eventId)
-        // Store as a special camera command or handle directly
-        val wrapper = getWrapper(eventId)
-        if (wrapper != null) {
-            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
-                // Swift wrapper will handle this - just notify via existing callback
-                Log.i(TAG, "Min zoom will be set via wrapper method")
-            }
-        }
+        setPendingCameraCommand(eventId, CameraCommand.SetMinZoom(minZoom))
     }
 
     /**
@@ -394,10 +400,7 @@ object MapWrapperRegistry {
         maxZoom: Double,
     ) {
         Log.d(TAG, "Setting max zoom command: $maxZoom for event: $eventId")
-        // Similar to setMinZoomCommand
-        platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
-            Log.i(TAG, "Max zoom will be set via wrapper method")
-        }
+        setPendingCameraCommand(eventId, CameraCommand.SetMaxZoom(maxZoom))
     }
 
     /**
@@ -509,6 +512,34 @@ object MapWrapperRegistry {
     fun getCameraZoom(eventId: String): Double? = cameraZooms[eventId]
 
     /**
+     * Store camera animation callback for async completion.
+     */
+    fun setCameraAnimationCallback(
+        callbackId: String,
+        callback: MapCameraCallback,
+    ) {
+        cameraAnimationCallbacks[callbackId] = callback
+    }
+
+    /**
+     * Invoke camera animation callback (called from Swift when animation completes).
+     */
+    fun invokeCameraAnimationCallback(
+        callbackId: String,
+        success: Boolean,
+    ) {
+        val callback = cameraAnimationCallbacks[callbackId]
+        if (callback != null) {
+            if (success) {
+                callback.onFinish()
+            } else {
+                callback.onCancel()
+            }
+            cameraAnimationCallbacks.remove(callbackId)
+        }
+    }
+
+    /**
      * Get and invoke map click callback for an event.
      * Swift calls this when map is tapped.
      * Returns true if callback was found and invoked.
@@ -588,5 +619,6 @@ object MapWrapperRegistry {
         cameraIdleListeners.clear()
         cameraPositions.clear()
         cameraZooms.clear()
+        cameraAnimationCallbacks.clear()
     }
 }
