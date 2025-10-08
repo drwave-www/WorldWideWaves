@@ -132,16 +132,15 @@ cp -R "build/Build" "${TEMP_DIR}/"
 
 # Create zip from temp directory using ditto (preserves extended attributes)
 cd build/firebase_test_bundle
-ditto -c -k --sequesterRsrc --keepParent "." "../${ZIP_NAME}"
-cd ../..
+ditto -c -k --sequesterRsrc "." "../${ZIP_NAME}"
+cd ..
 
 # Cleanup temp directory
-rm -rf "${TEMP_DIR}"
+rm -rf firebase_test_bundle
 
 echo -e "${GREEN}✅ Test bundle created: ${ZIP_NAME}${NC}"
 
-# Move back to iosApp directory, then project root
-cd ..
+# Go back to iosApp directory
 cd ..
 
 # Device matrix - 5 devices with different form factors and iOS versions
@@ -159,6 +158,9 @@ echo -e "${GREEN}🧪 Running iOS UI tests on Firebase Test Lab...${NC}"
 echo "  Note: iOS Firebase Test Lab runs all tests in the bundle"
 echo "  Test bundle: worldwidewavesUITests"
 echo ""
+
+# Move to project root for gcloud command
+cd ..
 
 if gcloud firebase test ios run \
   --test "iosApp/build/${ZIP_NAME}" \
