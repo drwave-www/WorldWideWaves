@@ -17,6 +17,26 @@ captures
 !*.xcodeproj/project.xcworkspace/
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
+
+# Xcode - Prevent GUID conflicts
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+iosApp/.swiftpm/
+iosApp/build/
+.swiftpm/
+*.xcworkspace/xcuserdata/
+
+# Xcode - Derived Data and Caches
+DerivedData/
+*.hmap
+*.ipa
+
+# Swift Package Manager
+.build/
+Packages/
+Package.resolved
+.swiftpm/config/registries.json
+.swiftpm/xcode/package.xcworkspace/
 *.aab
 **/logs/
 scripts/images/generated_images/
