@@ -33,6 +33,7 @@ import Shared
     private weak var mapView: MLNMapView?
     private var onStyleLoaded: (() -> Void)?
     private var onMapClick: ((Double, Double) -> Void)?
+    private var onMapClickNavigation: (() -> Void)?  // Navigation callback (for full-screen map)
     private var onCameraIdle: (() -> Void)?
     private var cameraAnimationCallback: MapCameraCallbackWrapper?
 
@@ -124,6 +125,14 @@ import Shared
             IOSMapBridge.executePendingCameraCommand(eventId: eventId)
         }
         WWWLog.d(Self.tag, "Immediate camera callback registered for: \(eventId)")
+
+        // Register map click callback handler (direct callback storage, no registry lookup)
+        Shared.MapWrapperRegistry.shared.setMapClickRegistrationCallback(eventId: eventId) { [weak self] clickCallback in
+            guard let self = self else { return }
+            WWWLog.i(Self.tag, "👆 Registering map click navigation callback directly on wrapper")
+            self.setOnMapClickNavigationListener(clickCallback)
+        }
+        WWWLog.d(Self.tag, "Map click registration callback registered for: \(eventId)")
     }
 
     @objc public func setStyle(styleURL: String, completion: @escaping () -> Void) {
@@ -468,6 +477,11 @@ import Shared
         self.onMapClick = listener
     }
 
+    @objc public func setOnMapClickNavigationListener(_ listener: @escaping () -> Void) {
+        WWWLog.d(Self.tag, "Setting map click navigation listener")
+        self.onMapClickNavigation = listener
+    }
+
     @objc public func setOnCameraIdleListener(_ listener: @escaping () -> Void) {
         self.onCameraIdle = listener
     }
@@ -492,17 +506,12 @@ import Shared
             WWWLog.v(Self.tag, "No onMapClick coordinate callback set")
         }
 
-        // Invoke map click callback from registry (for navigation)
-        if let eventId = eventId {
-            WWWLog.i(Self.tag, "Attempting to invoke map click callback for event: \(eventId)")
-            let invoked = Shared.MapWrapperRegistry.shared.invokeMapClickCallback(eventId: eventId)
-            if invoked {
-                WWWLog.i(Self.tag, "✅ Map click callback invoked successfully for event: \(eventId)")
-            } else {
-                WWWLog.w(Self.tag, "⚠️ Map click callback NOT invoked for event: \(eventId)")
-            }
+        // Call navigation callback directly (no registry lookup)
+        if let onMapClickNavigation = onMapClickNavigation {
+            WWWLog.i(Self.tag, "✅ Calling map click navigation callback directly")
+            onMapClickNavigation()
         } else {
-            WWWLog.w(Self.tag, "Cannot invoke click callback - eventId is nil")
+            WWWLog.v(Self.tag, "No map click navigation callback set")
         }
     }
 
@@ -787,8 +796,11 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         WWWLog.v(Self.tag, "Region changed, camera idle")
         onCameraIdle?()
 
-        // Update visible region in registry (for getVisibleRegion calls)
+        // Invoke camera idle listener from registry (for adapter's addOnCameraIdleListener)
         if let eventId = eventId {
+            Shared.MapWrapperRegistry.shared.invokeCameraIdleListener(eventId: eventId)
+
+            // Update visible region in registry (for getVisibleRegion calls)
             let bounds = mapView.visibleCoordinateBounds
             let bbox = BoundingBox(
                 minLatitude: bounds.sw.latitude,
@@ -797,6 +809,9 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
                 maxLongitude: bounds.ne.longitude
             )
             Shared.MapWrapperRegistry.shared.updateVisibleRegion(eventId: eventId, bbox: bbox)
+
+            // Update min zoom in registry
+            Shared.MapWrapperRegistry.shared.updateMinZoom(eventId: eventId, minZoom: mapView.minimumZoomLevel)
         }
 
         // Update accessibility when map region changes

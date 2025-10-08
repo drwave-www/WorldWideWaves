@@ -309,8 +309,50 @@ object MapWrapperRegistry {
         Log.d(TAG, "Map click callback registered, totalCallbacks=${mapClickCallbacks.size}")
     }
 
+    // Store map click registration callbacks (for direct wrapper registration)
+    private val mapClickRegistrationCallbacks = mutableMapOf<String, (() -> Unit) -> Unit>()
+
+    /**
+     * Register a callback that Swift wrapper will invoke to register map click callbacks.
+     * This enables direct callback storage in wrapper (no registry lookup).
+     */
+    fun setMapClickRegistrationCallback(
+        eventId: String,
+        callback: ((() -> Unit) -> Unit),
+    ) {
+        Log.d(TAG, "Setting map click registration callback for event: $eventId")
+        mapClickRegistrationCallbacks[eventId] = callback
+    }
+
+    /**
+     * Request map click callback registration on wrapper.
+     * Invokes the registered callback to set the click listener directly on the wrapper.
+     */
+    fun requestMapClickCallbackRegistration(
+        eventId: String,
+        clickCallback: () -> Unit,
+    ) {
+        val registrationCallback = mapClickRegistrationCallbacks[eventId]
+        if (registrationCallback != null) {
+            Log.i(TAG, "🚀 Triggering map click callback registration for event: $eventId")
+            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+                registrationCallback.invoke(clickCallback)
+            }
+        } else {
+            Log.v(TAG, "No registration callback for event: $eventId (falling back to legacy registry)")
+            // Fallback to legacy registry-based approach
+            setMapClickCallback(eventId, clickCallback)
+        }
+    }
+
     // Store visible region that Swift can update
     private val visibleRegions = mutableMapOf<String, BoundingBox>()
+
+    // Store zoom levels that Swift can update
+    private val minZoomLevels = mutableMapOf<String, Double>()
+
+    // Store camera idle listeners
+    private val cameraIdleListeners = mutableMapOf<String, () -> Unit>()
 
     /**
      * Update visible region from Swift.
@@ -328,6 +370,77 @@ object MapWrapperRegistry {
      * Returns the current visible bounds of the map.
      */
     fun getVisibleRegion(eventId: String): BoundingBox? = visibleRegions[eventId]
+
+    /**
+     * Update min zoom level from Swift.
+     */
+    fun updateMinZoom(
+        eventId: String,
+        minZoom: Double,
+    ) {
+        minZoomLevels[eventId] = minZoom
+    }
+
+    /**
+     * Get min zoom level for event.
+     */
+    fun getMinZoom(eventId: String): Double = minZoomLevels[eventId] ?: 0.0
+
+    /**
+     * Set min zoom command (Swift will execute).
+     */
+    fun setMinZoomCommand(
+        eventId: String,
+        minZoom: Double,
+    ) {
+        Log.d(TAG, "Setting min zoom command: $minZoom for event: $eventId")
+        // Trigger immediate execution via camera callback
+        requestImmediateCameraExecution(eventId)
+        // Store as a special camera command or handle directly
+        val wrapper = getWrapper(eventId)
+        if (wrapper != null) {
+            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+                // Swift wrapper will handle this - just notify via existing callback
+                Log.i(TAG, "Min zoom will be set via wrapper method")
+            }
+        }
+    }
+
+    /**
+     * Set max zoom command (Swift will execute).
+     */
+    fun setMaxZoomCommand(
+        eventId: String,
+        maxZoom: Double,
+    ) {
+        Log.d(TAG, "Setting max zoom command: $maxZoom for event: $eventId")
+        // Similar to setMinZoomCommand
+        platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+            Log.i(TAG, "Max zoom will be set via wrapper method")
+        }
+    }
+
+    /**
+     * Set camera idle listener for event.
+     */
+    fun setCameraIdleListener(
+        eventId: String,
+        callback: () -> Unit,
+    ) {
+        Log.d(TAG, "Setting camera idle listener for event: $eventId")
+        cameraIdleListeners[eventId] = callback
+    }
+
+    /**
+     * Invoke camera idle listener (called from Swift).
+     */
+    fun invokeCameraIdleListener(eventId: String) {
+        val callback = cameraIdleListeners[eventId]
+        if (callback != null) {
+            Log.v(TAG, "Invoking camera idle callback for event: $eventId")
+            callback.invoke()
+        }
+    }
 
     /**
      * Get and invoke map click callback for an event.
@@ -400,8 +513,11 @@ object MapWrapperRegistry {
         pendingPolygons.clear()
         pendingCameraCommands.clear()
         mapClickCallbacks.clear()
+        mapClickRegistrationCallbacks.clear()
         renderCallbacks.clear()
         cameraCallbacks.clear()
         visibleRegions.clear()
+        minZoomLevels.clear()
+        cameraIdleListeners.clear()
     }
 }

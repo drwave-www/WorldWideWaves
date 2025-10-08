@@ -163,12 +163,14 @@ class IosEventMap(
             Log.d("IosEventMap", "autoDownloadIfNeeded completed for: ${event.id}")
         }
 
-        // Register map click callback if provided
+        // Register map click callback directly with wrapper (no registry)
+        // This will be triggered after viewController is created
         LaunchedEffect(event.id, onMapClick) {
             if (onMapClick != null) {
-                Log.i("IosEventMap", "👆 Registering map click callback for: ${event.id}")
-                MapWrapperRegistry.setMapClickCallback(event.id, onMapClick)
-                Log.i("IosEventMap", "✅ Map click callback registered for: ${event.id}")
+                Log.i("IosEventMap", "👆 Requesting map click callback registration for: ${event.id}")
+                // Request callback registration - wrapper will set it when ready
+                MapWrapperRegistry.requestMapClickCallbackRegistration(event.id, onMapClick)
+                Log.i("IosEventMap", "✅ Map click callback registration requested for: ${event.id}")
             } else {
                 Log.w("IosEventMap", "⚠️ No map click callback provided for: ${event.id}")
             }

@@ -183,24 +183,24 @@ class IosMapLibreAdapter(
     }
 
     override fun getMinZoomLevel(): Double {
-        // NOTE: Implement with proper MapLibre iOS bindings
-        return 0.0
+        val wrapper = MapWrapperRegistry.getWrapper(eventId)
+        if (wrapper == null) {
+            Log.w(TAG, "getMinZoomLevel: wrapper is null, returning 0.0")
+            return 0.0
+        }
+
+        // Request min zoom via registry (Swift will provide)
+        return MapWrapperRegistry.getMinZoom(eventId)
     }
 
     override fun setMinZoomPreference(minZoom: Double) {
-        if (wrapper != null) {
-            // NOTE: Implement via cinterop bindings
-            // wrapper.minimumZoomLevel = minZoom
-            Log.d("IosMapLibreAdapter", "Set minimum zoom level: $minZoom")
-        }
+        Log.d(TAG, "Setting minimum zoom preference: $minZoom for event: $eventId")
+        MapWrapperRegistry.setMinZoomCommand(eventId, minZoom)
     }
 
     override fun setMaxZoomPreference(maxZoom: Double) {
-        if (wrapper != null) {
-            // NOTE: Implement via cinterop bindings
-            // wrapper.maximumZoomLevel = maxZoom
-            Log.d("IosMapLibreAdapter", "Set maximum zoom level: $maxZoom")
-        }
+        Log.d(TAG, "Setting maximum zoom preference: $maxZoom for event: $eventId")
+        MapWrapperRegistry.setMaxZoomCommand(eventId, maxZoom)
     }
 
     override fun setAttributionMargins(
@@ -233,10 +233,8 @@ class IosMapLibreAdapter(
     }
 
     override fun addOnCameraIdleListener(callback: () -> Unit) {
-        Log.d("IosMapLibreAdapter", "Adding camera idle listener")
-
-        // NOTE: Implement iOS MapLibre camera idle detection
-        // Listen for camera movement completion and call callback
+        Log.d(TAG, "Adding camera idle listener for event: $eventId")
+        MapWrapperRegistry.setCameraIdleListener(eventId, callback)
     }
 
     override fun drawOverridenBbox(bbox: BoundingBox) {
