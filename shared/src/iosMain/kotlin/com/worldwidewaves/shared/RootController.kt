@@ -230,6 +230,11 @@ fun makeEventViewController(eventId: String): UIViewController =
                 IosEventMap(
                     event,
                     onMapClick = { enabler.openFullMapActivity(event.id) },
+                    mapConfig =
+                        EventMapConfig(
+                            initialCameraPosition = MapCameraPosition.WINDOW,
+                            autoTargetUserOnFirstLocation = false,
+                        ),
                 )
             },
             onFinish = finish,
