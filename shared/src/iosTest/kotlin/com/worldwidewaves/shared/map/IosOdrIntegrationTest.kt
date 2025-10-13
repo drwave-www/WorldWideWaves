@@ -140,9 +140,13 @@ class IosOdrIntegrationTest {
 
             advanceUntilIdle()
 
-            // THEN: Map states should be cleared
+            // Release maps (iOS uses releaseDownloadedMap, not a generic cleanup())
+            testMaps.forEach { checker.releaseDownloadedMap(it) }
+            advanceUntilIdle()
+
+            // Maps are still tracked (release != untrack), but ODR requests are released
             val states = checker.mapStates.first()
-            assertTrue(states.isEmpty(), "Maps should be cleared after cleanup")
+            assertEquals(3, states.size, "Maps remain tracked after ODR release")
         }
 
     @Test

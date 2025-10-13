@@ -39,7 +39,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withTimeout
 import kotlinx.datetime.TimeZone
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
@@ -422,33 +421,41 @@ class EventsViewModelTest : KoinTest {
 
     /**
      * Wait for the ViewModel's events StateFlow to reach the expected size.
-     * This is necessary because the ViewModel uses viewModelScope which runs on a different
-     * dispatcher than the test scope, so advanceUntilIdle() doesn't wait for it.
+     * iOS-compatible: Uses delay + advanceUntilIdle instead of withTimeout
      */
     private suspend fun waitForEvents(
         viewModel: EventsViewModel,
         expectedSize: Int,
         timeoutMs: Long = 2000,
     ) {
-        withTimeout(timeoutMs) {
-            while (viewModel.events.value.size != expectedSize) {
-                delay(10)
-            }
+        val iterations = (timeoutMs / 10).toInt()
+        repeat(iterations) {
+            if (viewModel.events.value.size == expectedSize) return
+            delay(10)
+        }
+        // Final check
+        if (viewModel.events.value.size != expectedSize) {
+            error("Timeout waiting for events: expected $expectedSize, got ${viewModel.events.value.size}")
         }
     }
 
     /**
      * Wait for a boolean StateFlow to reach the expected value.
+     * iOS-compatible: Uses delay + advanceUntilIdle instead of withTimeout
      */
     private suspend fun waitForState(
         stateFlow: StateFlow<Boolean>,
         expectedValue: Boolean,
         timeoutMs: Long = 2000,
     ) {
-        withTimeout(timeoutMs) {
-            while (stateFlow.value != expectedValue) {
-                delay(10)
-            }
+        val iterations = (timeoutMs / 10).toInt()
+        repeat(iterations) {
+            if (stateFlow.value == expectedValue) return
+            delay(10)
+        }
+        // Final check
+        if (stateFlow.value != expectedValue) {
+            error("Timeout waiting for state: expected $expectedValue, got ${stateFlow.value}")
         }
     }
 
