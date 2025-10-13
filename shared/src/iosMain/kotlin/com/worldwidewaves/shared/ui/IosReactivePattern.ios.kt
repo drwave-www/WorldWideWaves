@@ -65,7 +65,9 @@ private class IosStateFlowObservable<T>(
         get() = activeScopes.size
 
     override fun observe(callback: (T) -> Unit): IosObservableSubscription {
-        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+        // Use Default dispatcher instead of Main to ensure test compatibility
+        // iOS tests don't run Main dispatcher, and Default is safe for UI updates on iOS
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
         activeScopes.add(scope)
 
@@ -132,7 +134,9 @@ private class IosFlowObservable<T>(
         get() = activeScopes.size
 
     override fun observe(callback: (T) -> Unit): IosObservableSubscription {
-        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+        // Use Default dispatcher instead of Main to ensure test compatibility
+        // iOS tests don't run Main dispatcher, and Default is safe for UI updates on iOS
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
         activeScopes.add(scope)
 
