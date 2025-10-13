@@ -77,15 +77,22 @@ class IosOdrIntegrationTest {
             )
 
             // Wait for simulated download (ODR is async on iOS)
-            advanceTimeBy(35000) // More than MAX_DOWNLOAD_DURATION_MS
-            advanceUntilIdle()
+            // Use polling instead of advanceTimeBy for iOS compatibility
+            repeat(40) {
+                // 40 * 1000ms = 40s timeout
+                if (downloadCompleted || errorOccurred) return@repeat
+                kotlinx.coroutines.delay(1000)
+            }
 
             // THEN: Download should complete with either success or error (depending on ODR availability in test)
             // In test environment, ODR resources may not be available, so either outcome is acceptable
-            assertTrue(downloadCompleted || errorOccurred, "Download should complete or error")
+            assertTrue(
+                downloadCompleted || errorOccurred,
+                "Download should complete or error (got: completed=$downloadCompleted, error=$errorOccurred, progress=${progressUpdates.size})",
+            )
             assertTrue(
                 progressUpdates.isNotEmpty() || errorOccurred,
-                "Progress updates should be provided unless error occurred immediately",
+                "Progress updates should be provided unless error occurred immediately (got: progress=${progressUpdates.size}, error=$errorOccurred)",
             )
         }
 
@@ -175,13 +182,20 @@ class IosOdrIntegrationTest {
                 },
             )
 
-            advanceTimeBy(35000)
-            advanceUntilIdle()
+            // Wait for callback using polling for iOS compatibility
+            repeat(40) {
+                // 40 * 1000ms = 40s timeout
+                if (errorReceived || successReceived) return@repeat
+                kotlinx.coroutines.delay(1000)
+            }
 
             // THEN: Should receive either error or success callback (ODR behavior varies in test environment)
-            assertTrue(errorReceived || successReceived, "Should receive callback (error or success)")
+            assertTrue(
+                errorReceived || successReceived,
+                "Should receive callback (error or success) - got: error=$errorReceived, success=$successReceived",
+            )
             if (errorReceived) {
-                assertTrue(errorCode != 0, "Error code should indicate failure")
+                assertTrue(errorCode != 0, "Error code should indicate failure (got: $errorCode)")
             }
         }
 

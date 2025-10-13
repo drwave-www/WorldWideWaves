@@ -308,7 +308,7 @@ class IosDeadlockPreventionTest : KoinTest {
 
                 // Start observation - this should NOT deadlock
                 observer.startObservation()
-                delay(200) // Give time for observation to start
+                delay(500) // Give time for observation to start - increased for iOS async
 
                 // Verify state flows are accessible
                 assertNotNull(observer.eventStatus, "eventStatus flow should be accessible")
@@ -316,7 +316,7 @@ class IosDeadlockPreventionTest : KoinTest {
 
                 // Clean up
                 observer.stopObservation()
-                delay(100) // Allow cleanup to complete
+                delay(300) // Allow cleanup to complete - increased for iOS async
 
                 val duration =
                     kotlin.time.Clock.System
@@ -579,9 +579,9 @@ class IosDeadlockPreventionTest : KoinTest {
                 repeat(10) { iteration ->
                     val observer = WWWEventObserver(event)
                     observer.startObservation()
-                    delay(100) // Simulate brief active period - increased for iOS async
+                    delay(200) // Simulate brief active period - increased for iOS async
                     observer.stopObservation()
-                    delay(100) // Simulate brief inactive period - allow proper cleanup
+                    delay(200) // Simulate brief inactive period - allow proper cleanup
 
                     // Verify observer is still functional
                     assertNotNull(observer.eventStatus, "Iteration $iteration: observer should be functional")
