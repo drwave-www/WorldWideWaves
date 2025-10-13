@@ -428,9 +428,15 @@ class EventsViewModelTest : KoinTest {
         expectedSize: Int,
         timeoutMs: Long = 10000, // Increased from 2000ms to 10000ms for iOS K/N
     ) {
-        val startTime = kotlin.time.Clock.System.now()
+        val startTime =
+            kotlin.time.Clock.System
+                .now()
         while (viewModel.events.value.size != expectedSize) {
-            val elapsed = (kotlin.time.Clock.System.now() - startTime).inWholeMilliseconds
+            val elapsed =
+                (
+                    kotlin.time.Clock.System
+                        .now() - startTime
+                ).inWholeMilliseconds
             if (elapsed >= timeoutMs) {
                 error("Timeout waiting for events after ${elapsed}ms: expected $expectedSize, got ${viewModel.events.value.size}")
             }
@@ -447,9 +453,15 @@ class EventsViewModelTest : KoinTest {
         expectedValue: Boolean,
         timeoutMs: Long = 10000, // Increased from 2000ms to 10000ms for iOS K/N
     ) {
-        val startTime = kotlin.time.Clock.System.now()
+        val startTime =
+            kotlin.time.Clock.System
+                .now()
         while (stateFlow.value != expectedValue) {
-            val elapsed = (kotlin.time.Clock.System.now() - startTime).inWholeMilliseconds
+            val elapsed =
+                (
+                    kotlin.time.Clock.System
+                        .now() - startTime
+                ).inWholeMilliseconds
             if (elapsed >= timeoutMs) {
                 error("Timeout waiting for state after ${elapsed}ms: expected $expectedValue, got ${stateFlow.value}")
             }
