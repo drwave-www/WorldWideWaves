@@ -22,8 +22,10 @@ class IosNativeMapViewProvider : NativeMapViewProvider {
     override fun createMapView(
         event: IWWWEvent,
         styleURL: String,
+        enableGestures: Boolean,
+        registryKey: String?,
     ): Any {
-        Log.i("IosNativeMapViewProvider", "Creating placeholder map view for: ${event.id}")
+        Log.i("IosNativeMapViewProvider", "Creating placeholder map view for: ${event.id}, registryKey: $registryKey")
         Log.d("IosNativeMapViewProvider", "Style URL: $styleURL")
         Log.w(
             "IosNativeMapViewProvider",

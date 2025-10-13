@@ -89,6 +89,7 @@ class IosMapLibreAdapter(
         return _currentPosition.value
     }
 
+    @Suppress("ReturnCount") // Early returns for guard clauses - improves readability
     override fun getVisibleRegion(): BoundingBox {
         val w = wrapper
         if (w == null) {
@@ -239,8 +240,14 @@ class IosMapLibreAdapter(
             return 0.0
         }
 
-        // Request min zoom via registry (Swift will provide)
-        return MapWrapperRegistry.getMinZoom(eventId)
+        // Synchronously update actualMinZoom from Swift before querying
+        // This prevents race condition where cached registry value returns 0.0
+        // while map view has the correct constraint-based min zoom
+        MapWrapperRegistry.syncActualMinZoomFromWrapper(eventId)
+
+        val actualMinZoom = MapWrapperRegistry.getActualMinZoom(eventId)
+        Log.d(TAG, "getMinZoomLevel: returning actual map value: $actualMinZoom for event: $eventId")
+        return actualMinZoom
     }
 
     override fun setMinZoomPreference(minZoom: Double) {
@@ -259,10 +266,17 @@ class IosMapLibreAdapter(
         right: Int,
         bottom: Int,
     ) {
-        Log.d("IosMapLibreAdapter", "Setting attribution margins: $left, $top, $right, $bottom")
+        Log.d(TAG, "Setting attribution margins: left=$left, top=$top, right=$right, bottom=$bottom for event: $eventId")
 
-        // NOTE: Implement iOS MapLibre attribution positioning
-        // Set attribution view margins
+        // Attribution margins can be set via MapLibreViewWrapper.setAttributionMargins()
+        // This method is implemented in MapLibreViewWrapper.swift (lines 367-419)
+        // and can be called from Swift via IOSMapBridge.setAttributionMargins()
+        //
+        // Currently this method is never called from the shared Kotlin code.
+        // If needed in the future, implement via MapWrapperRegistry command pattern
+        // similar to camera commands, or call directly via Swift bridge in iosApp target.
+        //
+        // Implementation is complete on the Swift side and ready to use.
     }
 
     override fun addWavePolygons(
@@ -299,8 +313,31 @@ class IosMapLibreAdapter(
     }
 
     override fun onMapSet(callback: (MapLibreAdapter<*>) -> Unit) {
-        Log.d("IosMapLibreAdapter", "Map set callback")
-        // NOTE: Implement map ready callback for iOS
-        callback(this)
+        Log.d(TAG, "Registering onMapSet callback for event: $eventId")
+
+        // Store callback in registry (will be invoked after style loads)
+        MapWrapperRegistry.addOnMapReadyCallback(eventId) {
+            Log.d(TAG, "Map ready callback invoked for event: $eventId")
+            callback(this)
+        }
+
+        // Check if style is already loaded (edge case: callback registered late)
+        val isStyleLoaded = MapWrapperRegistry.isStyleLoaded(eventId)
+        if (isStyleLoaded) {
+            Log.i(TAG, "Style already loaded, invoking callback immediately for event: $eventId")
+            MapWrapperRegistry.invokeMapReadyCallbacks(eventId)
+        }
+    }
+
+    override fun enableLocationComponent(enabled: Boolean) {
+        Log.i(TAG, "enableLocationComponent: $enabled for event: $eventId")
+        // Call Swift wrapper via registry callback
+        MapWrapperRegistry.enableLocationComponentOnWrapper(eventId, enabled)
+    }
+
+    override fun setUserPosition(position: Position) {
+        Log.v(TAG, "setUserPosition: (${position.lat}, ${position.lng}) for event: $eventId")
+        // Call Swift wrapper via registry callback
+        MapWrapperRegistry.setUserPositionOnWrapper(eventId, position.lat, position.lng)
     }
 }

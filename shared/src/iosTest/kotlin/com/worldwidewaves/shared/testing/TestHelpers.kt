@@ -16,11 +16,11 @@ import com.worldwidewaves.shared.events.WWWEventWave
 import com.worldwidewaves.shared.events.WWWEventWaveLinear
 import com.worldwidewaves.shared.events.WWWEventWaveWarming
 import dev.icerock.moko.resources.StringResource
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * Simple test implementation of IWWWEvent for iOS tests.

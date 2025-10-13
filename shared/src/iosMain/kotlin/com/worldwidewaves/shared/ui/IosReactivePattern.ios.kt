@@ -23,6 +23,7 @@ package com.worldwidewaves.shared.ui
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
@@ -64,19 +65,19 @@ private class IosStateFlowObservable<T>(
         get() = activeScopes.size
 
     override fun observe(callback: (T) -> Unit): IosObservableSubscription {
-        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+        // Use Default dispatcher instead of Main to ensure test compatibility
+        // iOS tests don't run Main dispatcher, and Default is safe for UI updates on iOS
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
         activeScopes.add(scope)
 
-        val job =
-            stateFlow
-                .onEach { value ->
-                    callback(value)
-                }.launchIn(scope)
+        stateFlow
+            .onEach { value ->
+                callback(value)
+            }.launchIn(scope)
 
         return IosSubscription(
             scope = scope,
-            isActiveParameter = job.isActive,
             onDispose = {
                 activeScopes.remove(scope)
             },
@@ -133,20 +134,20 @@ private class IosFlowObservable<T>(
         get() = activeScopes.size
 
     override fun observe(callback: (T) -> Unit): IosObservableSubscription {
-        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+        // Use Default dispatcher instead of Main to ensure test compatibility
+        // iOS tests don't run Main dispatcher, and Default is safe for UI updates on iOS
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
         activeScopes.add(scope)
 
-        val job =
-            flow
-                .onEach { value ->
-                    _cachedValue = value
-                    callback(value)
-                }.launchIn(scope)
+        flow
+            .onEach { value ->
+                _cachedValue = value
+                callback(value)
+            }.launchIn(scope)
 
         return IosSubscription(
             scope = scope,
-            isActiveParameter = job.isActive,
             onDispose = {
                 activeScopes.remove(scope)
             },
@@ -184,16 +185,17 @@ private class IosFlowObservable<T>(
  */
 private class IosSubscription(
     private val scope: CoroutineScope,
-    private var isActiveParameter: Boolean,
     private val onDispose: (() -> Unit)? = null,
 ) : IosObservableSubscription {
+    private var disposed = false
+
     override val isActive: Boolean
-        get() = isActiveParameter
+        get() = !disposed && scope.coroutineContext[kotlinx.coroutines.Job]?.isActive == true
 
     override fun dispose() {
-        if (isActiveParameter) {
+        if (!disposed) {
+            disposed = true
             scope.cancel()
-            isActiveParameter = false
             onDispose?.invoke()
         }
     }

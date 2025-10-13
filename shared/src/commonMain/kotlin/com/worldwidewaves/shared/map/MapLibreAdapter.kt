@@ -88,4 +88,19 @@ interface MapLibreAdapter<T> {
     fun drawOverridenBbox(bbox: BoundingBox)
 
     fun onMapSet(callback: (MapLibreAdapter<*>) -> Unit)
+
+    /**
+     * Enable or disable the user location marker on the map.
+     * On Android, this activates the location component.
+     * On iOS, this enables showsUserLocation on the map view.
+     */
+    fun enableLocationComponent(enabled: Boolean)
+
+    /**
+     * Update the user position marker on the map.
+     * Used during simulation to show simulated position (not device GPS).
+     * On Android, this is handled automatically by LocationEngineProxy.
+     * On iOS, this manually updates the location marker.
+     */
+    fun setUserPosition(position: Position)
 }
