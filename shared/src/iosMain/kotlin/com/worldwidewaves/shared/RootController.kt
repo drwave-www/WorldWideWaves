@@ -230,6 +230,9 @@ fun makeEventViewController(eventId: String): UIViewController =
                 IosEventMap(
                     event,
                     onMapClick = { enabler.openFullMapActivity(event.id) },
+                    // Default config (EVENT camera position) - gestures disabled, map shows event bounds
+                    // This matches Android's EventDetailActivity which uses default config
+                    registryKey = "${event.id}-event", // Unique key to prevent conflicts with full map
                 )
             },
             onFinish = finish,
@@ -278,6 +281,7 @@ fun makeWaveViewController(eventId: String): UIViewController =
                 IosEventMap(
                     event,
                     onMapClick = { enabler.openFullMapActivity(event.id) },
+                    registryKey = "${event.id}-wave", // Unique key to prevent conflicts
                 )
             },
             onFinish = finish,
@@ -333,6 +337,7 @@ fun makeFullMapViewController(eventId: String): UIViewController =
                             initialCameraPosition = MapCameraPosition.WINDOW,
                             autoTargetUserOnFirstLocation = true,
                         ),
+                    registryKey = "${event.id}-fullmap", // Unique key to prevent conflicts
                 )
             },
             onFinish = finish,

@@ -442,4 +442,18 @@ class AndroidMapLibreAdapter(
             )
         }
     }
+
+    override fun enableLocationComponent(enabled: Boolean) {
+        // On Android, location component is managed by AndroidEventMap
+        // This is a no-op since the location component is activated through
+        // setupMapLocationComponent() in AndroidEventMap.kt
+        Log.d(TAG, "enableLocationComponent: $enabled (no-op on Android, managed by AndroidEventMap)")
+    }
+
+    override fun setUserPosition(position: Position) {
+        // On Android, user position is managed automatically by LocationEngineProxy
+        // which feeds positions from LocationProvider to MapLibre's location component
+        // This is a no-op since the position updates happen through the LocationEngine
+        Log.v(TAG, "setUserPosition: (${position.lat}, ${position.lng}) (no-op on Android, managed by LocationEngineProxy)")
+    }
 }

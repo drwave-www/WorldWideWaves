@@ -690,6 +690,22 @@ data class Result(val value: String)
 
 ### Code Quality Best Practices
 
+**🚨 CRITICAL: Zero-Warnings & Full Compilation Policy (MANDATORY)**:
+- **BEFORE EVERY COMMIT**: ALL platforms MUST compile successfully with ZERO warnings
+- **NO EXCEPTIONS**: There are ZERO acceptable warnings or compilation errors
+- **Pre-commit verification checklist**:
+  1. ✅ Run `./gradlew :shared:compileKotlinIosSimulatorArm64` (iOS Kotlin)
+  2. ✅ Run `./gradlew :shared:compileDebugKotlinAndroid` (Android Kotlin)
+  3. ✅ Run `./gradlew :shared:testDebugUnitTest` (All unit tests)
+  4. ✅ Run `cd iosApp && xcodebuild -project worldwidewaves.xcodeproj -scheme worldwidewaves build` (iOS Swift)
+  5. ✅ Run `swiftlint lint --quiet` and verify 0 warnings in modified files
+  6. ✅ Verify detekt reports 0 warnings in modified files
+- **SwiftLint**: Fix ALL warnings (line length, function length, file length, etc.)
+- **Detekt**: Fix ALL warnings or add justified `@Suppress` with explanation
+- **Compilation**: Fix ALL compiler errors on BOTH platforms (Kotlin + Swift)
+- **Why**: Prevents breaking iOS when modifying Kotlin expect/actual declarations
+- This requirement is NON-NEGOTIABLE and applies to ALL commits
+
 **Detekt Warnings**:
 - Fix all unused properties and variables (remove dead code)
 - Use specific exception types (avoid `catch (e: Exception)` when possible)
@@ -698,6 +714,7 @@ data class Result(val value: String)
 - Create data classes for functions with >6 parameters
 - Break long lines (keep under max line length)
 - Extract magic numbers to named constants
+- Extract long functions into smaller helpers to meet length limits
 
 **Acceptable Detekt Suppressions** (when justified):
 - `@Suppress("ReturnCount")` - Multiple returns OK for guard clauses and early exits

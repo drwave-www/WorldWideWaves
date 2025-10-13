@@ -92,13 +92,17 @@ class NativeMapViewProviderTest {
     private class TestNativeMapViewProvider : NativeMapViewProvider {
         var createMapViewCalled = false
         var lastEventId: String? = null
+        var lastRegistryKey: String? = null
 
         override fun createMapView(
             event: IWWWEvent,
             styleURL: String,
+            enableGestures: Boolean,
+            registryKey: String?,
         ): Any {
             createMapViewCalled = true
             lastEventId = event.id
+            lastRegistryKey = registryKey
             return UIViewController()
         }
     }

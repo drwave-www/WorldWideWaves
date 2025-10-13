@@ -114,7 +114,14 @@ class WWWEventMap(
         Log.i("WWWEventMap", "getStyleUri: MBTiles path = $mbtilesFilePath")
 
         val styleFilename = "style-${event.id}.json"
-        val isCacheValid = cachedFileExists(styleFilename) && !isCachedFileStale(styleFilename)
+
+        // Check cache validity: file must exist AND not be stale
+        val fileExists = cachedFileExists(styleFilename)
+        val isStale = if (fileExists) isCachedFileStale(styleFilename) else true
+        val isCacheValid = fileExists && !isStale
+
+        Log.d("WWWEventMap", "getStyleUri: Cache check - exists=$fileExists, stale=$isStale, valid=$isCacheValid")
+
         if (isCacheValid) {
             val cachedPath = cachedFilePath(styleFilename)
             Log.i("WWWEventMap", "getStyleUri: Using cached style file: $cachedPath")
@@ -158,10 +165,15 @@ class WWWEventMap(
         Log.v("WWWEventMap", "  __SPRITE_URI__ -> $spriteUri")
 
         val cachedPath = cacheStringToFile(styleFilename, newFileStr)
-        updateCacheMetadata(styleFilename)
-        Log.d("WWWEventMap", "getStyleUri: Style file cached at: $cachedPath")
-        Log.i("WWWEventMap", "getStyleUri: Returning style path: $cachedPath")
-        return cachedPath
+        if (cachedPath != null) {
+            updateCacheMetadata(styleFilename)
+            Log.d("WWWEventMap", "getStyleUri: Style file cached at: $cachedPath")
+            Log.i("WWWEventMap", "getStyleUri: Returning style path: $cachedPath")
+            return cachedPath
+        } else {
+            Log.e("WWWEventMap", "getStyleUri: Failed to cache style file")
+            return null
+        }
     }
 
     // ---------------------------

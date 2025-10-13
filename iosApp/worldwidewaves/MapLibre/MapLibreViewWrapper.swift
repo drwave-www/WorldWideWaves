@@ -123,7 +123,7 @@ import Shared
 
         // Register immediate render callback (eliminates polling delay for polygons)
         Shared.MapWrapperRegistry.shared.setRenderCallback(eventId: eventId) { [weak self] in
-            guard let self = self else { return }
+            guard self != nil else { return }
             WWWLog.i(Self.tag, "🚀 Immediate render callback triggered for: \(eventId)")
             _ = IOSMapBridge.renderPendingPolygons(eventId: eventId)
         }
@@ -131,7 +131,7 @@ import Shared
 
         // Register immediate camera callback (eliminates polling delay for camera commands)
         Shared.MapWrapperRegistry.shared.setCameraCallback(eventId: eventId) { [weak self] in
-            guard let self = self else { return }
+            guard self != nil else { return }
             WWWLog.i(Self.tag, "📸 Immediate camera callback triggered for: \(eventId)")
             IOSMapBridge.executePendingCameraCommand(eventId: eventId)
         }
@@ -145,10 +145,37 @@ import Shared
             WWWLog.i(Self.tag, "👆 Registering map click navigation callback directly on wrapper")
             // Wrap Kotlin Unit-returning function to Swift Void
             self.setOnMapClickNavigationListener {
-                clickCallback()
+                _ = clickCallback()
             }
         }
         WWWLog.d(Self.tag, "Map click registration callback registered for: \(eventId)")
+
+        // Register getActualMinZoom callback (provides real-time min zoom to Kotlin)
+        Shared.MapWrapperRegistry.shared.setGetActualMinZoomCallback(eventId: eventId) { [weak self] in
+            guard let self = self, let mapView = self.mapView else { return }
+            let actualMinZoom = mapView.minimumZoomLevel
+            WWWLog.v(Self.tag, "getActualMinZoom callback: \(eventId) -> \(actualMinZoom)")
+            Shared.MapWrapperRegistry.shared.updateActualMinZoom(eventId: eventId, actualMinZoom: actualMinZoom)
+        }
+        WWWLog.d(Self.tag, "getActualMinZoom callback registered for: \(eventId)")
+
+        // Register location component callback (enables user position marker control)
+        Shared.MapWrapperRegistry.shared.setLocationComponentCallback(eventId: eventId) { [weak self] enabled in
+            guard let self = self else { return }
+            let swiftEnabled = enabled.boolValue  // Convert KotlinBoolean to Bool
+            WWWLog.i(Self.tag, "Location component callback: \(swiftEnabled) for: \(eventId)")
+            self.enableLocationComponent(swiftEnabled)
+        }
+        WWWLog.d(Self.tag, "Location component callback registered for: \(eventId)")
+
+        // Register setUserPosition callback (receives position updates from PositionManager)
+        Shared.MapWrapperRegistry.shared.setUserPositionCallback(eventId: eventId) { [weak self] latitude, longitude in
+            guard let self = self else { return }
+            let swiftLat = latitude.doubleValue  // Convert KotlinDouble to Double
+            let swiftLng = longitude.doubleValue
+            self.setUserPosition(latitude: swiftLat, longitude: swiftLng)
+        }
+        WWWLog.d(Self.tag, "User position callback registered for: \(eventId)")
     }
 
     @objc public func setStyle(styleURL: String, completion: @escaping () -> Void) {
@@ -365,10 +392,57 @@ import Shared
     // MARK: - Attribution
 
     @objc public func setAttributionMargins(left: Int, top: Int, right: Int, bottom: Int) {
-        // iOS MapLibre attribution positioning
-        // Note: Attribution button position can be adjusted via logoView and attributionButton properties
-        mapView?.logoView.isHidden = false
-        mapView?.attributionButton.isHidden = false
+        guard let mapView = mapView else {
+            WWWLog.w(Self.tag, "Cannot set attribution margins - mapView is nil")
+            return
+        }
+
+        WWWLog.d(Self.tag, "Setting attribution margins: left=\(left), top=\(top), right=\(right), bottom=\(bottom)")
+
+        // Ensure logo and attribution are visible
+        mapView.logoView.isHidden = false
+        mapView.attributionButton.isHidden = false
+
+        // Enable Auto Layout for logo and attribution
+        mapView.logoView.translatesAutoresizingMaskIntoConstraints = false
+        mapView.attributionButton.translatesAutoresizingMaskIntoConstraints = false
+
+        // Remove existing attribution constraints
+        let logoConstraints = mapView.constraints.filter { constraint in
+            constraint.firstItem as? UIView == mapView.logoView ||
+            constraint.secondItem as? UIView == mapView.logoView
+        }
+        let attrConstraints = mapView.constraints.filter { constraint in
+            constraint.firstItem as? UIView == mapView.attributionButton ||
+            constraint.secondItem as? UIView == mapView.attributionButton
+        }
+        NSLayoutConstraint.deactivate(logoConstraints + attrConstraints)
+
+        // Apply new constraints for logo (bottom-left position with margins)
+        NSLayoutConstraint.activate([
+            mapView.logoView.leadingAnchor.constraint(
+                equalTo: mapView.leadingAnchor,
+                constant: CGFloat(left)
+            ),
+            mapView.logoView.bottomAnchor.constraint(
+                equalTo: mapView.bottomAnchor,
+                constant: -CGFloat(bottom)
+            )
+        ])
+
+        // Apply new constraints for attribution button (bottom-right position with margins)
+        NSLayoutConstraint.activate([
+            mapView.attributionButton.trailingAnchor.constraint(
+                equalTo: mapView.trailingAnchor,
+                constant: -CGFloat(right)
+            ),
+            mapView.attributionButton.bottomAnchor.constraint(
+                equalTo: mapView.bottomAnchor,
+                constant: -CGFloat(bottom)
+            )
+        ])
+
+        WWWLog.i(Self.tag, "✅ Attribution margins applied successfully")
     }
 
     // MARK: - Wave Polygons
@@ -821,6 +895,9 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
             return
         }
 
+        // Mark style as loaded in registry (enables immediate callback invocation)
+        Shared.MapWrapperRegistry.shared.setStyleLoaded(eventId: eventId, loaded: true)
+
         // IMMEDIATE EXECUTION: Execute all pending commands now that map is ready
         WWWLog.i(Self.tag, "⚡ Executing pending commands immediately after style load...")
 
@@ -846,6 +923,10 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
             pendingConstraintBounds = nil
             WWWLog.i(Self.tag, "✅ Constraint bounds applied successfully")
         }
+
+        // 5. Invoke map ready callbacks (enables wave polygon rendering and other operations)
+        WWWLog.i(Self.tag, "Invoking map ready callbacks...")
+        IOSMapBridge.invokeMapReadyCallbacks(eventId: eventId)
 
         // NOTE: Continuous polling REMOVED - now using direct dispatch callbacks
         // Callbacks were registered in setEventId() and provide immediate updates (<16ms vs 100ms+)
@@ -1005,3 +1086,5 @@ extension UIColor {
         self.init(red: red, green: green, blue: blue, alpha: 1.0)
     }
 }
+
+// swiftlint:enable file_length type_body_length

@@ -135,8 +135,9 @@ class MapStoreErrorTest {
             val result2 = cacheStringToFile(fileName, content2)
 
             // Then: Both operations should complete (last write wins)
-            assertEquals(fileName, result1)
-            assertEquals(fileName, result2)
+            val expectedPath = File(testCacheDir, fileName).toURI().path
+            assertEquals(expectedPath, result1)
+            assertEquals(expectedPath, result2)
 
             // Verify final content is from last write
             val cachedFile = File(testCacheDir, fileName)
@@ -217,7 +218,8 @@ class MapStoreErrorTest {
             val result = cacheStringToFile(fileName, validGeoJson)
 
             // Then: Should succeed and file should contain valid data
-            assertEquals(fileName, result)
+            val expectedPath = File(testCacheDir, fileName).toURI().path
+            assertEquals(expectedPath, result)
             val cachedFile = File(testCacheDir, fileName)
             assertTrue(cachedFile.exists())
             assertEquals(validGeoJson, cachedFile.readText())
@@ -234,7 +236,8 @@ class MapStoreErrorTest {
             val result = cacheStringToFile(fileName, emptyContent)
 
             // Then: Should create file with empty content
-            assertEquals(fileName, result)
+            val expectedPath = File(testCacheDir, fileName).toURI().path
+            assertEquals(expectedPath, result)
             val cachedFile = File(testCacheDir, fileName)
             assertTrue(cachedFile.exists())
             assertEquals("", cachedFile.readText())
@@ -251,7 +254,8 @@ class MapStoreErrorTest {
             val result = cacheStringToFile(fileName, largeContent)
 
             // Then: Should succeed
-            assertEquals(fileName, result)
+            val expectedPath = File(testCacheDir, fileName).toURI().path
+            assertEquals(expectedPath, result)
             val cachedFile = File(testCacheDir, fileName)
             assertTrue(cachedFile.exists())
             assertEquals(largeContent.length, cachedFile.readText().length)
