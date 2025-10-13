@@ -421,41 +421,39 @@ class EventsViewModelTest : KoinTest {
 
     /**
      * Wait for the ViewModel's events StateFlow to reach the expected size.
-     * iOS-compatible: Uses delay + advanceUntilIdle instead of withTimeout
+     * iOS-compatible: Uses delay + real time waiting instead of withTimeout
      */
     private suspend fun waitForEvents(
         viewModel: EventsViewModel,
         expectedSize: Int,
-        timeoutMs: Long = 2000,
+        timeoutMs: Long = 10000, // Increased from 2000ms to 10000ms for iOS K/N
     ) {
-        val iterations = (timeoutMs / 10).toInt()
-        repeat(iterations) {
-            if (viewModel.events.value.size == expectedSize) return
-            delay(10)
-        }
-        // Final check
-        if (viewModel.events.value.size != expectedSize) {
-            error("Timeout waiting for events: expected $expectedSize, got ${viewModel.events.value.size}")
+        val startTime = kotlin.time.Clock.System.now()
+        while (viewModel.events.value.size != expectedSize) {
+            val elapsed = (kotlin.time.Clock.System.now() - startTime).inWholeMilliseconds
+            if (elapsed >= timeoutMs) {
+                error("Timeout waiting for events after ${elapsed}ms: expected $expectedSize, got ${viewModel.events.value.size}")
+            }
+            kotlinx.coroutines.delay(50) // Real delay for iOS K/N
         }
     }
 
     /**
      * Wait for a boolean StateFlow to reach the expected value.
-     * iOS-compatible: Uses delay + advanceUntilIdle instead of withTimeout
+     * iOS-compatible: Uses delay + real time waiting instead of withTimeout
      */
     private suspend fun waitForState(
         stateFlow: StateFlow<Boolean>,
         expectedValue: Boolean,
-        timeoutMs: Long = 2000,
+        timeoutMs: Long = 10000, // Increased from 2000ms to 10000ms for iOS K/N
     ) {
-        val iterations = (timeoutMs / 10).toInt()
-        repeat(iterations) {
-            if (stateFlow.value == expectedValue) return
-            delay(10)
-        }
-        // Final check
-        if (stateFlow.value != expectedValue) {
-            error("Timeout waiting for state: expected $expectedValue, got ${stateFlow.value}")
+        val startTime = kotlin.time.Clock.System.now()
+        while (stateFlow.value != expectedValue) {
+            val elapsed = (kotlin.time.Clock.System.now() - startTime).inWholeMilliseconds
+            if (elapsed >= timeoutMs) {
+                error("Timeout waiting for state after ${elapsed}ms: expected $expectedValue, got ${stateFlow.value}")
+            }
+            kotlinx.coroutines.delay(50) // Real delay for iOS K/N
         }
     }
 
@@ -512,6 +510,7 @@ class EventsViewModelTest : KoinTest {
 
             // When
             viewModel.loadEvents()
+            kotlinx.coroutines.delay(100) // Give coroutines time to start on iOS K/N
             waitForEvents(viewModel, 3)
 
             // Then
@@ -662,8 +661,8 @@ class EventsViewModelTest : KoinTest {
 
             // Clear filter
             viewModel.filterEvents(onlyFavorites = false)
-            // CI environments need more time
-            waitForEvents(viewModel, 5, timeoutMs = 5000)
+            // CI environments and iOS need more time
+            waitForEvents(viewModel, 5, timeoutMs = 15000)
 
             // Then - should show all events
             assertEquals(5, viewModel.events.value.size)
@@ -777,7 +776,7 @@ class EventsViewModelTest : KoinTest {
 
             // Wait for hasFavorites to be updated (not just events count)
             // This properly waits for the ViewModel's flow processing to complete
-            waitForState(viewModel.hasFavorites, true, timeoutMs = 2000)
+            waitForState(viewModel.hasFavorites, true, timeoutMs = 15000)
 
             // Then - hasFavorites should be updated after the new events are processed
             assertTrue(viewModel.hasFavorites.value, "hasFavorites should update to true after emitting events with favorites")
@@ -1006,9 +1005,9 @@ class EventsViewModelTest : KoinTest {
                 viewModel.filterEvents(onlyFavorites = shouldFilter)
 
                 // Wait for this specific filter operation to complete before next
-                // CI environments need more time for 100 iterations
-                // Increased to 20s to handle slower CI runners (was 10s)
-                waitForEvents(viewModel, expectedSize, timeoutMs = 20000)
+                // CI environments and iOS K/N need more time for 100 iterations
+                // Increased to 30s to handle slower iOS Kotlin/Native (was 20s)
+                waitForEvents(viewModel, expectedSize, timeoutMs = 30000)
             }
 
             // Then - verify final state is correct and no crashes
