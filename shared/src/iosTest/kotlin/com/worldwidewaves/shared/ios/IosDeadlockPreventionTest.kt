@@ -302,33 +302,21 @@ class IosDeadlockPreventionTest : KoinTest {
                 // Create a test event using shared helper
                 val event = testEvent("ios-deadlock-test")
 
-                // Create observer - this should NOT deadlock (5 second timeout via iterations)
-                var observer: WWWEventObserver? = null
-                val iterations = 500 // 5 seconds (10ms per iteration)
-                repeat(iterations) {
-                    if (observer == null) {
-                        try {
-                            observer = WWWEventObserver(event)
-                        } catch (e: Exception) {
-                            // Ignore and retry
-                        }
-                    }
-                    if (observer != null) return@repeat
-                    kotlinx.coroutines.runBlocking { delay(10) }
-                }
-
+                // Create observer - this should NOT deadlock
+                val observer = WWWEventObserver(event)
                 assertNotNull(observer, "WWWEventObserver should initialize")
 
                 // Start observation - this should NOT deadlock
-                observer?.startObservation()
-                delay(100) // Give time for observation to start
+                observer.startObservation()
+                delay(200) // Give time for observation to start
 
                 // Verify state flows are accessible
-                assertNotNull(observer?.eventStatus, "eventStatus flow should be accessible")
-                assertNotNull(observer?.progression, "progression flow should be accessible")
+                assertNotNull(observer.eventStatus, "eventStatus flow should be accessible")
+                assertNotNull(observer.progression, "progression flow should be accessible")
 
                 // Clean up
-                observer?.stopObservation()
+                observer.stopObservation()
+                delay(100) // Allow cleanup to complete
 
                 val duration =
                     kotlin.time.Clock.System
@@ -587,13 +575,13 @@ class IosDeadlockPreventionTest : KoinTest {
             try {
                 val event = testEvent("ios-lifecycle-test")
 
-                // Simulate rapid lifecycle changes (common on iOS) - iOS-compatible without withTimeout
+                // Simulate rapid lifecycle changes (common on iOS)
                 repeat(10) { iteration ->
                     val observer = WWWEventObserver(event)
                     observer.startObservation()
-                    delay(50) // Simulate brief active period
+                    delay(100) // Simulate brief active period - increased for iOS async
                     observer.stopObservation()
-                    delay(50) // Simulate brief inactive period
+                    delay(100) // Simulate brief inactive period - allow proper cleanup
 
                     // Verify observer is still functional
                     assertNotNull(observer.eventStatus, "Iteration $iteration: observer should be functional")
