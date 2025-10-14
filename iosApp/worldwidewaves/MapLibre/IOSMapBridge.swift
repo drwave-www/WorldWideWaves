@@ -422,8 +422,9 @@ import CoreLocation
     /// and Swift periodically checks for and executes them.
     ///
     /// ## Command Execution Strategy
-    /// - **Configuration commands** (SetConstraintBounds, SetMinZoom, SetMaxZoom, SetAttributionMargins): Execute ALL queued commands
-    ///   in order until queue is empty. These are fast synchronous operations that configure map constraints.
+    /// - **Configuration commands** (SetConstraintBounds, SetMinZoom, SetMaxZoom, SetAttributionMargins):
+    ///   Execute ALL queued commands in order until queue is empty.
+    ///   These are fast synchronous operations that configure map constraints.
     /// - **Animation commands** (AnimateToPosition, AnimateToBounds, MoveToBounds): Execute ONE command per call.
     ///   Animations are asynchronous and should not be batched.
     ///
