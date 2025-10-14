@@ -55,7 +55,6 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.EventMapDownloadManager
-import com.worldwidewaves.shared.position.PositionManager
 import com.worldwidewaves.shared.ui.components.DownloadProgressIndicator
 import com.worldwidewaves.shared.ui.components.LoadingIndicator
 import com.worldwidewaves.shared.utils.Log
@@ -165,8 +164,7 @@ class IosEventMap(
     ) {
         Log.i("IosEventMap", "Draw() called for event: ${event.id}, autoMapDownload=$autoMapDownload")
 
-        // Get unified position from PositionManager (same as Android)
-        val positionManager = KoinPlatform.getKoin().get<PositionManager>()
+        // Get platform map manager for download coordination
         val platformMapManager = KoinPlatform.getKoin().get<PlatformMapManager>()
 
         // Use shared EventMapDownloadManager for download state management
@@ -210,17 +208,9 @@ class IosEventMap(
             }
         }
 
-        // Initialize position system integration (same as AbstractEventMap)
-        LaunchedEffect(Unit) {
-            // Start location updates and integrate with PositionManager
-            locationProvider?.startLocationUpdates { rawPosition ->
-                // Update PositionManager with GPS position
-                positionManager.updatePosition(PositionManager.PositionSource.GPS, rawPosition)
-            }
-
-            mapIsLoaded = true
-            onMapLoaded()
-        }
+        // NOTE: Position system integration is handled by AbstractEventMap.setupMap()
+        // which starts locationProvider updates and subscribes to PositionManager.position flow
+        // Do NOT duplicate that logic here - it would bypass the mapLibreAdapter.setUserPosition() call
 
         Box(modifier = modifier.fillMaxSize()) {
             // Static map image as fallback background (matches Android implementation)

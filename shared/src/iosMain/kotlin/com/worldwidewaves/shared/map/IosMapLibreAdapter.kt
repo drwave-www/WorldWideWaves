@@ -336,8 +336,14 @@ class IosMapLibreAdapter(
     }
 
     override fun setUserPosition(position: Position) {
-        Log.v(TAG, "setUserPosition: (${position.lat}, ${position.lng}) for event: $eventId")
+        Log.i(TAG, "📍 setUserPosition: (${position.lat}, ${position.lng}) for event: $eventId")
+
+        // Verify callback is registered
+        val hasCallback = MapWrapperRegistry.hasUserPositionCallback(eventId)
+        Log.d(TAG, "User position callback registered: $hasCallback")
+
         // Call Swift wrapper via registry callback
         MapWrapperRegistry.setUserPositionOnWrapper(eventId, position.lat, position.lng)
+        Log.v(TAG, "✅ setUserPositionOnWrapper called for event: $eventId")
     }
 }

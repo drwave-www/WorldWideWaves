@@ -772,7 +772,13 @@ object MapWrapperRegistry {
         callback: (Double, Double) -> Unit,
     ) {
         setUserPositionCallbacks[eventId] = callback
+        Log.d(TAG, "User position callback registered for event: $eventId")
     }
+
+    /**
+     * Check if user position callback is registered for an event.
+     */
+    fun hasUserPositionCallback(eventId: String): Boolean = setUserPositionCallbacks.containsKey(eventId)
 
     /**
      * Enable or disable location component on the map wrapper.
@@ -799,11 +805,18 @@ object MapWrapperRegistry {
         latitude: Double,
         longitude: Double,
     ) {
+        Log.i(TAG, "📍 setUserPositionOnWrapper called: ($latitude, $longitude) for event: $eventId")
+
         val callback = setUserPositionCallbacks[eventId]
         if (callback != null) {
+            Log.d(TAG, "Dispatching position update to Swift via callback")
             platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
                 callback.invoke(latitude, longitude)
+                Log.v(TAG, "✅ Position callback invoked on main queue")
             }
+        } else {
+            Log.w(TAG, "⚠️ No user position callback registered for event: $eventId")
+            Log.w(TAG, "Available callbacks: ${setUserPositionCallbacks.keys}")
         }
     }
 

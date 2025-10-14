@@ -807,13 +807,20 @@ import Shared
     /// Updates user position for accessibility.
     /// Call this when user location changes.
     @objc public func setUserPosition(latitude: Double, longitude: Double) {
+        WWWLog.i(
+            Self.tag,
+            "📍 setUserPosition called: (\(latitude), \(longitude)), locationEnabled=\(isLocationComponentEnabled)"
+        )
+
         currentUserPosition = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
         updateMapAccessibility()
-        WWWLog.v(Self.tag, "User position updated for accessibility: \(latitude), \(longitude)")
 
         // Update location marker if enabled
         if isLocationComponentEnabled {
+            WWWLog.d(Self.tag, "Updating location marker for: \(eventId ?? "unknown")")
             updateUserLocationMarker(coordinate: currentUserPosition!)
+        } else {
+            WWWLog.w(Self.tag, "⚠️ Location component NOT enabled, marker not updated")
         }
     }
 
