@@ -363,6 +363,23 @@ import Shared
 
         // Style is loaded - apply bounds immediately
         WWWLog.i(Self.tag, "Setting camera constraint bounds: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng))")
+
+        // Calculate minimum zoom that fits entire bounds in viewport (matches Android behavior)
+        // This prevents zooming out so far that corners appear in middle of screen
+        let camera = mapView.cameraThatFitsCoordinateBounds(bounds, edgePadding: .zero)
+        // Convert camera altitude to zoom level
+        // Note: We need to temporarily set the camera to calculate the zoom, then get the resulting zoom level
+        let currentZoom = mapView.zoomLevel
+        mapView.setCamera(camera, animated: false)
+        let calculatedMinZoom = mapView.zoomLevel
+        // Restore original zoom if it was higher
+        if currentZoom > calculatedMinZoom {
+            mapView.zoomLevel = currentZoom
+        }
+        mapView.minimumZoomLevel = calculatedMinZoom
+        WWWLog.i(Self.tag, "Set minimum zoom to \(calculatedMinZoom) (prevents excessive zoom out)")
+
+        // Set visible bounds (moves camera to show bounds)
         mapView.setVisibleCoordinateBounds(bounds, animated: false)
 
         // Store constraint bounds for gesture clamping (matches Android setLatLngBoundsForCameraTarget behavior)
@@ -370,7 +387,7 @@ import Shared
         WWWLog.i(Self.tag, "Constraint bounds stored for gesture clamping")
 
         pendingConstraintBounds = nil  // Clear pending bounds
-        WWWLog.i(Self.tag, "✅ Camera constraint bounds set successfully")
+        WWWLog.i(Self.tag, "✅ Camera constraint bounds set successfully with min zoom constraint")
         return true
     }
 
@@ -988,10 +1005,22 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         // 4. Apply queued constraint bounds if any
         if let bounds = pendingConstraintBounds {
             WWWLog.i(Self.tag, "Applying queued constraint bounds after style load")
+
+            // Calculate and set minimum zoom (matches Android behavior)
+            let camera = mapView.cameraThatFitsCoordinateBounds(bounds, edgePadding: .zero)
+            let currentZoom = mapView.zoomLevel
+            mapView.setCamera(camera, animated: false)
+            let calculatedMinZoom = mapView.zoomLevel
+            if currentZoom > calculatedMinZoom {
+                mapView.zoomLevel = currentZoom
+            }
+            mapView.minimumZoomLevel = calculatedMinZoom
+            WWWLog.i(Self.tag, "Set minimum zoom to \(calculatedMinZoom)")
+
             mapView.setVisibleCoordinateBounds(bounds, animated: false)
             currentConstraintBounds = bounds  // Store for gesture clamping
             pendingConstraintBounds = nil
-            WWWLog.i(Self.tag, "✅ Constraint bounds applied successfully with gesture clamping")
+            WWWLog.i(Self.tag, "✅ Constraint bounds applied with min zoom and gesture clamping")
         }
 
         // 5. Invoke map ready callbacks (enables wave polygon rendering and other operations)

@@ -90,8 +90,8 @@ class EventPositionTracker(
             )
 
             if (polygons.isNotEmpty()) {
-                // Now call the actual area detection
-                val isInArea = waveProgressionTracker.isUserInWaveArea(userPosition, event.area)
+                // Now call the actual area detection with pre-fetched polygons (performance optimization)
+                val isInArea = waveProgressionTracker.isUserInWaveArea(userPosition, event.area, polygons)
                 Log.i("EventPositionTracker", "isUserInArea: ${event.id} isInArea=$isInArea")
                 isInArea
             } else {
