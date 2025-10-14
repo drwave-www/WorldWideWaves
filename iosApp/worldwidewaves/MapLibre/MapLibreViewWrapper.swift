@@ -1078,6 +1078,19 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         WWWLog.d(Self.tag, "📍 Annotation selected: \(annotation)")
     }
 
+    /// Add pulse animation to match Android's pulsing location marker.
+    /// Creates a repeating scale animation on the pulse circle.
+    private func addPulseAnimation(to view: UIView) {
+        let pulseAnimation = CABasicAnimation(keyPath: "transform.scale")
+        pulseAnimation.duration = 1.5
+        pulseAnimation.fromValue = 1.0
+        pulseAnimation.toValue = 1.3
+        pulseAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        pulseAnimation.autoreverses = true
+        pulseAnimation.repeatCount = .infinity
+        view.layer.add(pulseAnimation, forKey: "pulse")
+    }
+
     public func mapView(_ mapView: MLNMapView, viewFor annotation: MLNAnnotation) -> MLNAnnotationView? {
         // Customize user location annotation to match Android style
         if let userAnnotation = userLocationAnnotation, annotation === userAnnotation {
@@ -1087,27 +1100,31 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
             var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseIdentifier)
 
             if annotationView == nil {
-                // Create new annotation view
+                // Create new annotation view - matches Android style
                 annotationView = MLNAnnotationView(reuseIdentifier: reuseIdentifier)
-                annotationView?.frame = CGRect(x: 0, y: 0, width: 20, height: 20)
+                annotationView?.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
 
-                // Create a blue circle to match iOS native location marker
-                let circleView = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
-                circleView.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.3)
-                circleView.layer.cornerRadius = 10
-                circleView.layer.borderWidth = 2
-                circleView.layer.borderColor = UIColor.white.cgColor
+                // Red pulse circle (matches Android pulseColor)
+                let pulseView = UIView(frame: CGRect(x: 0, y: 0, width: 40, height: 40))
+                pulseView.backgroundColor = UIColor.systemRed.withAlphaComponent(0.3)
+                pulseView.layer.cornerRadius = 20
+                pulseView.tag = 100 // Tag for animation
 
-                // Add inner dot
-                let dotView = UIView(frame: CGRect(x: 7, y: 7, width: 6, height: 6))
-                dotView.backgroundColor = UIColor.systemBlue
-                dotView.layer.cornerRadius = 3
-                circleView.addSubview(dotView)
+                // Black center dot (matches Android foregroundTintColor)
+                let dotView = UIView(frame: CGRect(x: 15, y: 15, width: 10, height: 10))
+                dotView.backgroundColor = UIColor.black
+                dotView.layer.cornerRadius = 5
+                dotView.layer.borderWidth = 2
+                dotView.layer.borderColor = UIColor.white.cgColor
 
-                annotationView?.addSubview(circleView)
+                pulseView.addSubview(dotView)
+                annotationView?.addSubview(pulseView)
 
                 // Center the annotation on the coordinate
                 annotationView?.centerOffset = CGVector(dx: 0, dy: 0)
+
+                // Add pulse animation (matches Android pulse effect)
+                addPulseAnimation(to: pulseView)
             }
 
             return annotationView
