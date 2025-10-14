@@ -75,13 +75,17 @@ jobs:
           # List available simulators for debugging
           xcrun simctl list devices available | grep -i iphone || true
 
-          # Build for specific iPhone simulator (generic destination not supported)
+          # Find first available iPhone simulator
+          SIMULATOR_ID=$(xcrun simctl list devices available | grep "iPhone" | head -1 | sed -E 's/.*\(([A-Z0-9-]+)\).*/\1/')
+          echo "Using simulator: $SIMULATOR_ID"
+
+          # Build for simulator using ID (most reliable method)
           xcodebuild \
             -project iosApp/worldwidewaves.xcodeproj \
             -scheme worldwidewaves \
             -configuration Debug \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -destination "id=$SIMULATOR_ID" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             build
