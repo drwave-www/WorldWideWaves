@@ -1043,45 +1043,36 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
             return true  // No constraints, allow all movements
         }
 
-        // Get the center coordinate of the new camera
-        let newCenter = newCamera.centerCoordinate
-
-        // Check if new center is within constraint bounds
-        let withinLatBounds = newCenter.latitude >= bounds.sw.latitude && newCenter.latitude <= bounds.ne.latitude
-        let withinLngBounds = newCenter.longitude >= bounds.sw.longitude && newCenter.longitude <= bounds.ne.longitude
-
-        if withinLatBounds && withinLngBounds {
-            return true  // Movement is within bounds, allow it
-        }
-
-        // Camera would move outside bounds - clamp to bounds
-        var clampedLat = newCenter.latitude
-        var clampedLng = newCenter.longitude
-
-        // Clamp latitude
-        if newCenter.latitude < bounds.sw.latitude {
-            clampedLat = bounds.sw.latitude
-        } else if newCenter.latitude > bounds.ne.latitude {
-            clampedLat = bounds.ne.latitude
-        }
-
-        // Clamp longitude
-        if newCenter.longitude < bounds.sw.longitude {
-            clampedLng = bounds.sw.longitude
-        } else if newCenter.longitude > bounds.ne.longitude {
-            clampedLng = bounds.ne.longitude
-        }
-
-        // Apply clamped position
-        let clampedCenter = CLLocationCoordinate2D(latitude: clampedLat, longitude: clampedLng)
-        mapView.setCenter(clampedCenter, animated: false)
-
-        WWWLog.v(
-            Self.tag,
-            "Clamped camera from (\(newCenter.latitude),\(newCenter.longitude)) to (\(clampedLat),\(clampedLng))"
+        // Calculate viewport bounds for the new camera position
+        // This matches Android behavior which prevents viewport corners from going outside bounds
+        let tempCamera = MLNMapCamera(
+            lookingAtCenter: newCamera.centerCoordinate,
+            altitude: newCamera.altitude,
+            pitch: newCamera.pitch,
+            heading: newCamera.heading
         )
+        mapView.setCamera(tempCamera, animated: false)
+        let viewportBounds = mapView.visibleCoordinateBounds
 
-        return false  // Prevent the original movement, use clamped position instead
+        // Check if all viewport corners are within constraint bounds (matches Android)
+        let swInBounds = viewportBounds.sw.latitude >= bounds.sw.latitude &&
+                         viewportBounds.sw.longitude >= bounds.sw.longitude
+        let neInBounds = viewportBounds.ne.latitude <= bounds.ne.latitude &&
+                         viewportBounds.ne.longitude <= bounds.ne.longitude
+
+        // Restore old camera if check is happening
+        mapView.setCamera(oldCamera, animated: false)
+
+        if swInBounds && neInBounds {
+            return true  // All viewport corners within bounds, allow movement
+        }
+
+        // Viewport would extend outside bounds - prevent movement
+        let message = "Prevented camera change: viewport would extend outside bounds " +
+            "(sw: \(viewportBounds.sw), ne: \(viewportBounds.ne))"
+        WWWLog.v(Self.tag, message)
+
+        return false  // Prevent movement (matches Android setLatLngBoundsForCameraTarget behavior)
     }
 
     public func mapView(_ mapView: MLNMapView, regionDidChangeAnimated animated: Bool) {
