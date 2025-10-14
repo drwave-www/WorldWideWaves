@@ -159,6 +159,7 @@ class IosEventMap(
 
     @OptIn(ExperimentalForeignApi::class)
     @Composable
+    @Suppress("LongMethod", "CyclomaticComplexMethod") // UI composition function with download state handling
     override fun Draw(
         autoMapDownload: Boolean,
         modifier: Modifier,
