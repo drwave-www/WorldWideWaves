@@ -206,6 +206,7 @@ object MapWrapperRegistry {
         styleLoadedStates.remove(eventId)
         locationComponentCallbacks.remove(eventId)
         setUserPositionCallbacks.remove(eventId)
+        pendingLocationComponentStates.remove(eventId)
 
         Log.i(TAG, "✅ Wrapper unregistered and cleanup complete for: $eventId")
     }
@@ -761,6 +762,17 @@ object MapWrapperRegistry {
         callback: (Boolean) -> Unit,
     ) {
         locationComponentCallbacks[eventId] = callback
+        Log.d(TAG, "Location component callback registered for event: $eventId")
+
+        // Apply pending location component state if it was set before callback registered
+        val pendingState = pendingLocationComponentStates[eventId]
+        if (pendingState != null) {
+            Log.i(TAG, "✅ Applying pending location component state: $pendingState for event: $eventId")
+            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+                callback.invoke(pendingState)
+            }
+            pendingLocationComponentStates.remove(eventId)
+        }
     }
 
     /**
@@ -780,6 +792,9 @@ object MapWrapperRegistry {
      */
     fun hasUserPositionCallback(eventId: String): Boolean = setUserPositionCallbacks.containsKey(eventId)
 
+    // Store pending location component state (for race condition handling)
+    private val pendingLocationComponentStates = mutableMapOf<String, Boolean>()
+
     /**
      * Enable or disable location component on the map wrapper.
      */
@@ -789,11 +804,16 @@ object MapWrapperRegistry {
     ) {
         val callback = locationComponentCallbacks[eventId]
         if (callback != null) {
+            Log.d(TAG, "Invoking location component callback: $enabled for event: $eventId")
             platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
                 callback.invoke(enabled)
             }
+            // Clear pending state after successful invocation
+            pendingLocationComponentStates.remove(eventId)
         } else {
-            Log.w(TAG, "No location component callback registered for event: $eventId")
+            Log.w(TAG, "No location component callback registered for event: $eventId - storing pending state")
+            // Store pending state to apply when callback is registered
+            pendingLocationComponentStates[eventId] = enabled
         }
     }
 
@@ -918,5 +938,6 @@ object MapWrapperRegistry {
         styleLoadedStates.clear()
         locationComponentCallbacks.clear()
         setUserPositionCallbacks.clear()
+        pendingLocationComponentStates.clear()
     }
 }
