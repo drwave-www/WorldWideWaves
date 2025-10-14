@@ -75,13 +75,13 @@ jobs:
           # List available simulators for debugging
           xcrun simctl list devices available | grep -i iphone || true
 
-          # Build for generic iOS Simulator (more reliable across Xcode versions)
+          # Build for specific iPhone simulator (generic destination not supported)
           xcodebuild \
             -project iosApp/worldwidewaves.xcodeproj \
             -scheme worldwidewaves \
             -configuration Debug \
             -sdk iphonesimulator \
-            -destination 'generic/platform=iOS Simulator' \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             build
