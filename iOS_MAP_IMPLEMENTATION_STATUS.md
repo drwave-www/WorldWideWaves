@@ -1,7 +1,29 @@
 # iOS Map Implementation - Complete Configuration Analysis & TODO
 
+> **STANDALONE PROMPT**: This document is a complete, self-contained guide for implementing iOS map feature parity with Android. Use this as your primary reference for the next work session.
+
 **Last Updated**: 2025-10-14
+**Analysis Date**: 2025-10-14
 **Status**: 🔴 **CRITICAL GAPS IDENTIFIED** - Systematic 97-point comparison completed
+**Test Status**: ✅ All unit tests passing (902/902), iOS Kotlin compiles, iOS Swift compiles
+
+---
+
+## 📖 HOW TO USE THIS DOCUMENT
+
+### For Next Session (Standalone Prompt):
+1. Read this entire document first
+2. Start with P0 issues (Critical section below)
+3. After each fix, run ALL tests: `./gradlew clean :shared:testDebugUnitTest && ./gradlew :shared:compileKotlinIosSimulatorArm64 && xcodebuild -project iosApp/worldwidewaves.xcodeproj -scheme worldwidewaves build`
+4. Commit after each logical fix
+5. Update this document with progress
+
+### Document Sections:
+- **Executive Summary**: High-level findings and statistics
+- **Complete Comparison Matrix**: 97 properties compared across 16 categories
+- **Prioritized Action Plan**: P0 (critical), P1 (high), P2 (medium) with code snippets
+- **Testing Plan**: Unit tests, integration tests, manual testing
+- **Files Reference**: Complete list of files to modify
 
 ---
 
@@ -713,6 +735,97 @@ mapView.localIdeographFontFamily = "Droid Sans"  // If API exists
 
 ---
 
+## ✅ TESTING REQUIREMENTS (MANDATORY AFTER EACH CHANGE)
+
+### Run After EVERY Modification:
+
+```bash
+# 1. Clean and run ALL unit tests (902 tests)
+./gradlew clean :shared:testDebugUnitTest
+
+# 2. Compile iOS Kotlin code
+./gradlew :shared:compileKotlinIosSimulatorArm64
+
+# 3. Compile iOS Swift code
+xcodebuild -project iosApp/worldwidewaves.xcodeproj \
+  -scheme worldwidewaves \
+  -destination 'platform=iOS Simulator,name=iPhone 16' \
+  build
+
+# 4. Run SwiftLint on modified files
+swiftlint lint --quiet
+
+# All must pass before committing!
+```
+
+### Success Criteria:
+- ✅ All 902 unit tests pass
+- ✅ iOS Kotlin compiles without errors
+- ✅ iOS Swift builds successfully
+- ✅ 0 SwiftLint warnings on modified files
+- ✅ 0 detekt warnings on modified files
+
+---
+
+## 📝 PROGRESS TRACKING (UPDATE AFTER EACH FIX)
+
+### Completed (2025-10-14):
+- [x] P0.1: Remove hard-coded Paris camera position (`MapViewBridge.swift`, `EventMapView.swift`)
+- [x] Position marker architecture (race conditions fixed, pending states implemented)
+- [x] Position marker appearance (red pulse + black dot matching Android)
+- [x] Comprehensive 97-point analysis completed
+- [x] iOS_MAP_IMPLEMENTATION_STATUS.md created as standalone prompt
+
+### In Progress:
+- [ ] P0.2: Fix camera bounds enforcement on iOS
+- [ ] P0.3: Document location marker architecture in CLAUDE_iOS.md
+- [ ] Investigate observeWave mechanism not working
+
+### Remaining P0:
+- [ ] P0.2: Camera bounds enforcement (research iOS API or implement gesture clamping)
+- [ ] P0.3: Documentation in CLAUDE_iOS.md
+
+### Remaining P1:
+- [ ] P1.1: Call iOS attribution margins implementation
+- [ ] P1.2: Add polygon queueing to Android
+- [ ] P1.3: Add bounds validation to Android
+- [ ] P1.4: Add UUID to Android layer/source IDs
+- [ ] P1.5: Add double-tap gesture to iOS
+
+### Remaining P2:
+- [ ] P2.1: Add compass fading to iOS
+- [ ] P2.2: Add style retry logic to iOS
+- [ ] P2.3: Fix iOS pulse color opacity
+- [ ] P2.4: Add local ideograph font to iOS
+
+---
+
+## 🔗 CONTEXT & BACKGROUND
+
+### Why This Analysis Was Needed:
+User reported multiple issues with iOS maps:
+1. Position marker not visible
+2. ObserveWave mechanism not working
+3. Map not well zoomed in event screen
+4. Map constraints not enforced on full screen
+
+Initial investigation revealed iOS implementation had diverged from Android, bypassing shared code and missing key configurations.
+
+### Analysis Methodology:
+- **3 specialized agents** analyzed Android, iOS, and compared systematically
+- **97 configuration points** examined across 16 categories
+- **Line-by-line comparison** of all visual and behavioral properties
+- **File:line references** for every finding
+
+### Key Architectural Differences Discovered:
+1. **iOS uses custom MLNPointAnnotation** while Android uses native LocationComponent
+2. **iOS has comprehensive race condition handling** (pending states) while Android relies on initialization order
+3. **iOS has complete accessibility** (VoiceOver) while Android has none
+4. **iOS hard-coded Paris coordinates** instead of using event data
+
+---
+
 **Status**: 🔴 **CRITICAL WORK REQUIRED**
-**Next Action**: Fix P0 issues (hard-coded position, bounds enforcement, documentation)
+**Next Action**: Fix remaining P0 issues (bounds enforcement, documentation), then P1 issues
 **Test Coverage Goal**: 100% of Kotlin-Swift bridge layer
+**Testing Requirement**: Run ALL tests after EVERY change (no exceptions)
