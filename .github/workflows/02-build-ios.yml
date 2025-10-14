@@ -73,17 +73,16 @@ jobs:
       - name: Build iOS App (Simulator)
         run: |
           # Build iOS app for simulator
-          # Use -allowProvisioningUpdates and -allowProvisioningDeviceRegistration for CI
-          xcodebuild clean build \
+          # Project now downgraded to Xcode 16.0 to match GitHub Actions iOS 17.5 SDK
+          xcodebuild \
             -project iosApp/worldwidewaves.xcodeproj \
             -scheme worldwidewaves \
             -configuration Debug \
             -sdk iphonesimulator \
-            -arch arm64 \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
+            -destination 'platform=iOS Simulator,name=iPhone SE (3rd generation)' \
             CODE_SIGNING_ALLOWED=NO \
-            -allowProvisioningUpdates
+            CODE_SIGNING_REQUIRED=NO \
+            build
         env:
           NSUnbufferedIO: YES
 
