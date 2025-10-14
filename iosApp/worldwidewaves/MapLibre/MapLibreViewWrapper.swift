@@ -59,6 +59,9 @@ import Shared
     // Current constraint bounds for gesture clamping (matches Android behavior)
     private var currentConstraintBounds: MLNCoordinateBounds?
 
+    // Flag to prevent infinite loop when checking viewport bounds
+    private var isCheckingViewportBounds = false
+
     // MARK: - Accessibility State
 
     /// Accessibility state tracking for VoiceOver
@@ -1038,10 +1041,19 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         to newCamera: MLNMapCamera,
         reason: MLNCameraChangeReason
     ) -> Bool {
+        // Prevent infinite loop from our viewport checking
+        guard !isCheckingViewportBounds else {
+            return true
+        }
+
         // Enforce constraint bounds if set (matches Android setLatLngBoundsForCameraTarget behavior)
         guard let bounds = currentConstraintBounds else {
             return true  // No constraints, allow all movements
         }
+
+        // Set flag to prevent recursive calls
+        isCheckingViewportBounds = true
+        defer { isCheckingViewportBounds = false }
 
         // Calculate viewport bounds for the new camera position
         // This matches Android behavior which prevents viewport corners from going outside bounds
@@ -1060,7 +1072,7 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         let neInBounds = viewportBounds.ne.latitude <= bounds.ne.latitude &&
                          viewportBounds.ne.longitude <= bounds.ne.longitude
 
-        // Restore old camera if check is happening
+        // Restore old camera
         mapView.setCamera(oldCamera, animated: false)
 
         if swInBounds && neInBounds {
