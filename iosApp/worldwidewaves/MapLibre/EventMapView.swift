@@ -72,6 +72,9 @@ struct EventMapView: UIViewRepresentable {
         mapView.allowsRotating = false
         mapView.allowsTilting = false
 
+        // Note: MLNMapView doesn't have allowsZoomingWithDoubleTap property
+        // Double-tap to zoom is automatically enabled/disabled with isZoomEnabled
+
         // Remove rotation gesture recognizers if they exist
         if let gestureRecognizers = mapView.gestureRecognizers {
             for recognizer in gestureRecognizers {
@@ -84,13 +87,11 @@ struct EventMapView: UIViewRepresentable {
             }
         }
 
-        WWWLog.i(
-            Self.tag,
-            "Gestures configured: zoom=\(mapView.isZoomEnabled), " +
+        let gestureStatus = "Gestures configured: zoom=\(mapView.isZoomEnabled), " +
             "scroll=\(mapView.isScrollEnabled), " +
             "rotate=\(mapView.allowsRotating), " +
             "tilt=\(mapView.allowsTilting)"
-        )
+        WWWLog.i(Self.tag, gestureStatus)
     }
 
     private func configureStyleURL(for mapView: MLNMapView) {

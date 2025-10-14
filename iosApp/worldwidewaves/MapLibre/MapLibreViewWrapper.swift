@@ -55,6 +55,9 @@ import Shared
     // Queue for constraint bounds that arrive before style loads
     private var pendingConstraintBounds: MLNCoordinateBounds?
 
+    // Current constraint bounds for gesture clamping (matches Android behavior)
+    private var currentConstraintBounds: MLNCoordinateBounds?
+
     // MARK: - Accessibility State
 
     /// Accessibility state tracking for VoiceOver
@@ -360,6 +363,11 @@ import Shared
         // Style is loaded - apply bounds immediately
         WWWLog.i(Self.tag, "Setting camera constraint bounds: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng))")
         mapView.setVisibleCoordinateBounds(bounds, animated: false)
+
+        // Store constraint bounds for gesture clamping (matches Android setLatLngBoundsForCameraTarget behavior)
+        currentConstraintBounds = bounds
+        WWWLog.i(Self.tag, "Constraint bounds stored for gesture clamping")
+
         pendingConstraintBounds = nil  // Clear pending bounds
         WWWLog.i(Self.tag, "✅ Camera constraint bounds set successfully")
         return true
@@ -974,8 +982,9 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         if let bounds = pendingConstraintBounds {
             WWWLog.i(Self.tag, "Applying queued constraint bounds after style load")
             mapView.setVisibleCoordinateBounds(bounds, animated: false)
+            currentConstraintBounds = bounds  // Store for gesture clamping
             pendingConstraintBounds = nil
-            WWWLog.i(Self.tag, "✅ Constraint bounds applied successfully")
+            WWWLog.i(Self.tag, "✅ Constraint bounds applied successfully with gesture clamping")
         }
 
         // 5. Invoke map ready callbacks (enables wave polygon rendering and other operations)
@@ -985,6 +994,58 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         // NOTE: Continuous polling REMOVED - now using direct dispatch callbacks
         // Callbacks were registered in setEventId() and provide immediate updates (<16ms vs 100ms+)
         WWWLog.i(Self.tag, "✅ Map initialization complete with direct dispatch callbacks for event: \(eventId)")
+    }
+
+    public func mapView(
+        _ mapView: MLNMapView,
+        shouldChangeFrom oldCamera: MLNMapCamera,
+        to newCamera: MLNMapCamera,
+        reason: MLNCameraChangeReason
+    ) -> Bool {
+        // Enforce constraint bounds if set (matches Android setLatLngBoundsForCameraTarget behavior)
+        guard let bounds = currentConstraintBounds else {
+            return true  // No constraints, allow all movements
+        }
+
+        // Get the center coordinate of the new camera
+        let newCenter = newCamera.centerCoordinate
+
+        // Check if new center is within constraint bounds
+        let withinLatBounds = newCenter.latitude >= bounds.sw.latitude && newCenter.latitude <= bounds.ne.latitude
+        let withinLngBounds = newCenter.longitude >= bounds.sw.longitude && newCenter.longitude <= bounds.ne.longitude
+
+        if withinLatBounds && withinLngBounds {
+            return true  // Movement is within bounds, allow it
+        }
+
+        // Camera would move outside bounds - clamp to bounds
+        var clampedLat = newCenter.latitude
+        var clampedLng = newCenter.longitude
+
+        // Clamp latitude
+        if newCenter.latitude < bounds.sw.latitude {
+            clampedLat = bounds.sw.latitude
+        } else if newCenter.latitude > bounds.ne.latitude {
+            clampedLat = bounds.ne.latitude
+        }
+
+        // Clamp longitude
+        if newCenter.longitude < bounds.sw.longitude {
+            clampedLng = bounds.sw.longitude
+        } else if newCenter.longitude > bounds.ne.longitude {
+            clampedLng = bounds.ne.longitude
+        }
+
+        // Apply clamped position
+        let clampedCenter = CLLocationCoordinate2D(latitude: clampedLat, longitude: clampedLng)
+        mapView.setCenter(clampedCenter, animated: false)
+
+        WWWLog.v(
+            Self.tag,
+            "Clamped camera from (\(newCenter.latitude),\(newCenter.longitude)) to (\(clampedLat),\(clampedLng))"
+        )
+
+        return false  // Prevent the original movement, use clamped position instead
     }
 
     public func mapView(_ mapView: MLNMapView, regionDidChangeAnimated animated: Bool) {

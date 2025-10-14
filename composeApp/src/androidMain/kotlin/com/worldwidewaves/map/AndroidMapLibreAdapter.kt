@@ -51,6 +51,7 @@ import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.Point
 import org.maplibre.geojson.Polygon
+import java.util.UUID
 
 /**
  * Android-specific implementation of the shared [MapLibreAdapter].
@@ -78,6 +79,10 @@ class AndroidMapLibreAdapter(
 
     private val _currentZoom = MutableStateFlow(0.0)
     override val currentZoom: StateFlow<Double> = _currentZoom
+
+    // Queue for polygons that arrive before style loads (matches iOS pattern)
+    private val pendingPolygonQueue = mutableListOf<List<Polygon>>()
+    private var styleLoaded = false
 
     override fun getWidth(): Double {
         require(mapLibreMap != null)
@@ -140,6 +145,16 @@ class AndroidMapLibreAdapter(
         mapLibreMap!!.setStyle(Style.Builder().fromUri(stylePath)) { _ ->
             // Log successful style load – confirms MapLibre has parsed the style
             Log.i(TAG, "Style loaded successfully")
+            styleLoaded = true
+
+            // Flush pending polygons that arrived before style loaded (matches iOS pattern)
+            if (pendingPolygonQueue.isNotEmpty()) {
+                Log.i(TAG, "Flushing polygon queue: ${pendingPolygonQueue.size} polygon sets")
+                val allPolygons = pendingPolygonQueue.flatten()
+                addWavePolygons(allPolygons, clearExisting = true)
+                pendingPolygonQueue.clear()
+            }
+
             callback()
         }
     }
@@ -333,6 +348,17 @@ class AndroidMapLibreAdapter(
     override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
         require(mapLibreMap != null)
 
+        // Validate bounds before setting (matches iOS pattern)
+        require(constraintBounds.ne.lat > constraintBounds.sw.lat) {
+            "Invalid bounds: ne.lat (${constraintBounds.ne.lat}) must be > sw.lat (${constraintBounds.sw.lat})"
+        }
+        require(constraintBounds.sw.lat >= -90 && constraintBounds.ne.lat <= 90) {
+            "Latitude out of range: must be between -90 and 90"
+        }
+        require(constraintBounds.sw.lng >= -180 && constraintBounds.ne.lng <= 180) {
+            "Longitude out of range: must be between -180 and 180"
+        }
+
         Log.v(
             "Camera",
             "Setting camera target bounds constraint: SW=${constraintBounds.southwest.latitude}," +
@@ -356,6 +382,21 @@ class AndroidMapLibreAdapter(
             return
         }
 
+        // If style not loaded yet, queue polygons for later (matches iOS pattern)
+        if (!styleLoaded) {
+            Log.w(
+                TAG,
+                "Style not ready - queueing ${wavePolygons.size} polygons",
+            )
+            if (clearExisting) {
+                pendingPolygonQueue.clear()
+            }
+            pendingPolygonQueue.add(wavePolygons)
+            Log.d(TAG, "Polygon queue now contains ${pendingPolygonQueue.size} polygon sets")
+            return
+        }
+
+        // Style is loaded - render immediately
         map.getStyle { style ->
             try {
                 // -- Clear existing dynamic layers/sources when requested ----
@@ -368,12 +409,10 @@ class AndroidMapLibreAdapter(
 
                 // -- Add each polygon on its own layer -----------------------
                 wavePolygons.forEachIndexed { index, polygon ->
-                    val sourceId = "wave-polygons-source-$index"
-                    val layerId = "wave-polygons-layer-$index"
-
-                    // Defensive cleanup in case ids are reused
-                    style.removeLayer(layerId)
-                    style.removeSource(sourceId)
+                    // Add UUID to prevent ID conflicts during rapid updates (matches iOS pattern)
+                    val uuid = UUID.randomUUID().toString()
+                    val sourceId = "wave-polygons-source-$index-$uuid"
+                    val layerId = "wave-polygons-layer-$index-$uuid"
 
                     // GeoJSON source with a single polygon
                     val src =
