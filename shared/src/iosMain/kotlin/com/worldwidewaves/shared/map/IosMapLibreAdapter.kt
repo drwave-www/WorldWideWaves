@@ -76,9 +76,43 @@ class IosMapLibreAdapter(
         callback.invoke()
     }
 
-    override fun getWidth(): Double = DEFAULT_WIDTH
+    override fun getWidth(): Double {
+        // Get actual map view dimensions from Swift wrapper (not hardcoded defaults)
+        val wrapper = MapWrapperRegistry.getWrapper(eventId)
+        if (wrapper == null) {
+            Log.w(TAG, "getWidth: wrapper is null, returning default: $DEFAULT_WIDTH")
+            return DEFAULT_WIDTH
+        }
 
-    override fun getHeight(): Double = DEFAULT_HEIGHT
+        // Synchronously get width from Swift wrapper
+        val actualWidth = MapWrapperRegistry.getMapWidth(eventId)
+        if (actualWidth > 0) {
+            Log.v(TAG, "getWidth: returning actual map width: $actualWidth")
+            return actualWidth
+        }
+
+        Log.w(TAG, "getWidth: actual width is 0, returning default: $DEFAULT_WIDTH")
+        return DEFAULT_WIDTH
+    }
+
+    override fun getHeight(): Double {
+        // Get actual map view dimensions from Swift wrapper (not hardcoded defaults)
+        val wrapper = MapWrapperRegistry.getWrapper(eventId)
+        if (wrapper == null) {
+            Log.w(TAG, "getHeight: wrapper is null, returning default: $DEFAULT_HEIGHT")
+            return DEFAULT_HEIGHT
+        }
+
+        // Synchronously get height from Swift wrapper
+        val actualHeight = MapWrapperRegistry.getMapHeight(eventId)
+        if (actualHeight > 0) {
+            Log.v(TAG, "getHeight: returning actual map height: $actualHeight")
+            return actualHeight
+        }
+
+        Log.w(TAG, "getHeight: actual height is 0, returning default: $DEFAULT_HEIGHT")
+        return DEFAULT_HEIGHT
+    }
 
     override fun getCameraPosition(): Position? {
         // Try to get from registry first (updated by Swift)

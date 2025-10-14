@@ -208,6 +208,8 @@ object MapWrapperRegistry {
         cameraCallbacks.remove(eventId)
         visibleRegions.remove(eventId)
         minZoomLevels.remove(eventId)
+        mapWidths.remove(eventId)
+        mapHeights.remove(eventId)
         cameraIdleListeners.remove(eventId)
         onMapReadyCallbacks.remove(eventId)
         styleLoadedStates.remove(eventId)
@@ -417,6 +419,10 @@ object MapWrapperRegistry {
     // Store zoom levels that Swift can update
     private val minZoomLevels = mutableMapOf<String, Double>()
 
+    // Store map dimensions that Swift can update
+    private val mapWidths = mutableMapOf<String, Double>()
+    private val mapHeights = mutableMapOf<String, Double>()
+
     // Store camera idle listeners (support multiple listeners per event like Android)
     private val cameraIdleListeners = mutableMapOf<String, MutableList<() -> Unit>>()
 
@@ -467,6 +473,42 @@ object MapWrapperRegistry {
      * Get min zoom level for event (cached from Swift).
      */
     fun getMinZoom(eventId: String): Double = minZoomLevels[eventId] ?: 0.0
+
+    /**
+     * Update map width from Swift.
+     * Called by Swift when map view bounds change.
+     */
+    fun updateMapWidth(
+        eventId: String,
+        width: Double,
+    ) {
+        mapWidths[eventId] = width
+        Log.v(TAG, "Map width updated: $width for event: $eventId")
+    }
+
+    /**
+     * Update map height from Swift.
+     * Called by Swift when map view bounds change.
+     */
+    fun updateMapHeight(
+        eventId: String,
+        height: Double,
+    ) {
+        mapHeights[eventId] = height
+        Log.v(TAG, "Map height updated: $height for event: $eventId")
+    }
+
+    /**
+     * Get map width for event.
+     * Returns actual map view width from Swift wrapper.
+     */
+    fun getMapWidth(eventId: String): Double = mapWidths[eventId] ?: 0.0
+
+    /**
+     * Get map height for event.
+     * Returns actual map view height from Swift wrapper.
+     */
+    fun getMapHeight(eventId: String): Double = mapHeights[eventId] ?: 0.0
 
     /**
      * Get actual min zoom from map view (bypasses cache to prevent race condition).
@@ -971,6 +1013,8 @@ object MapWrapperRegistry {
         cameraCallbacks.clear()
         visibleRegions.clear()
         minZoomLevels.clear()
+        mapWidths.clear()
+        mapHeights.clear()
         cameraIdleListeners.clear()
         cameraPositions.clear()
         cameraZooms.clear()

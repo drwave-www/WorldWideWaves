@@ -955,6 +955,17 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         // Mark style as loaded in registry (enables immediate callback invocation)
         Shared.MapWrapperRegistry.shared.setStyleLoaded(eventId: eventId, loaded: true)
 
+        // Update map dimensions in registry for padding/bounds calculations
+        Shared.MapWrapperRegistry.shared.updateMapWidth(
+            eventId: eventId,
+            width: Double(mapView.bounds.size.width)
+        )
+        Shared.MapWrapperRegistry.shared.updateMapHeight(
+            eventId: eventId,
+            height: Double(mapView.bounds.size.height)
+        )
+        WWWLog.d(Self.tag, "Map dimensions updated: \(mapView.bounds.size.width) x \(mapView.bounds.size.height)")
+
         // IMMEDIATE EXECUTION: Execute all pending commands now that map is ready
         WWWLog.i(Self.tag, "⚡ Executing pending commands immediately after style load...")
 
@@ -1076,6 +1087,16 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
 
             // Update min zoom in registry
             Shared.MapWrapperRegistry.shared.updateMinZoom(eventId: eventId, minZoom: mapView.minimumZoomLevel)
+
+            // Update map dimensions in registry (for padding/bounds calculations)
+            Shared.MapWrapperRegistry.shared.updateMapWidth(
+                eventId: eventId,
+                width: Double(mapView.bounds.size.width)
+            )
+            Shared.MapWrapperRegistry.shared.updateMapHeight(
+                eventId: eventId,
+                height: Double(mapView.bounds.size.height)
+            )
         }
 
         // Update accessibility when map region changes
