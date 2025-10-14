@@ -504,6 +504,50 @@ class MyComponent {
 - **No Map Click Positioning**: User position comes from GPS only, not map interactions
 - **Reactive Updates**: Use unified position streams rather than direct position setting
 
+### iOS/Android Map Parity Guidelines
+
+**Critical Lessons from Map Parity Implementation (October 2025)**:
+
+1. **Platform API Limitations Are Real**
+   - Not all Android MapLibre features have iOS equivalents (e.g., `setLatLngBoundsForCameraTarget`)
+   - Solution: Implement equivalent behavior using available APIs (gesture clamping via delegate)
+   - Document why platforms differ when APIs aren't equivalent
+
+2. **Polygon Queue Optimization**
+   - Wave progression is cumulative - each set contains all previous circles
+   - Only store most recent polygon set, not entire history
+   - Reduces memory usage and simplifies logic
+
+3. **Race Condition Patterns**
+   - iOS requires comprehensive pending state queues (polygons, bounds, positions)
+   - Android can rely on initialization order but benefits from same pattern
+   - Always queue operations that depend on async style loading
+
+4. **Validation Everywhere**
+   - iOS validates bounds (ne > sw, lat/lng ranges) - prevents crashes
+   - Android lacked validation - add it proactively
+   - Validation prevents obscure C++ exceptions from native MapLibre code
+
+5. **UUID for Dynamic Layers**
+   - Simple index-based IDs can conflict during rapid updates
+   - Use UUID suffix: `"wave-polygons-source-{index}-{uuid}"`
+   - Prevents layer/source conflicts in both platforms
+
+6. **Command Pattern for iOS**
+   - MapWrapperRegistry uses command pattern for Kotlin→Swift coordination
+   - Configuration commands queue (all execute), animation commands use single slot (latest wins)
+   - Attribution margins, camera constraints, zoom all use this pattern
+
+7. **Platform-Specific Architectures Are OK**
+   - iOS: Custom MLNPointAnnotation (manual updates via PositionManager)
+   - Android: Native LocationComponent (automatic via LocationEngineProxy)
+   - Document differences, don't force artificial parity
+
+8. **Comprehensive Documentation Prevents Repetition**
+   - 97-point systematic comparison revealed all gaps
+   - Standalone prompt document enables efficient future sessions
+   - Architecture diagrams show flow differences clearly
+
 ---
 
 ## Performance Considerations for KMM
