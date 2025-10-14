@@ -21,6 +21,9 @@
 import UIKit
 import Shared
 
+// swiftlint:disable file_length
+// File length justified: Comprehensive documentation for critical platform initialization
+
 /// The primary scene coordinator for WorldWideWaves iOS app, responsible for managing
 /// the app's window lifecycle and routing.
 ///

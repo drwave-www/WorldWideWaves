@@ -171,7 +171,9 @@ import Shared
         enableGestures: Bool = true,
         registryKey: String
     ) -> UIViewController {
-        WWWLog.i("MapViewBridge", "Creating map view with wrapper for: \(event.id), enableGestures: \(enableGestures), registryKey: \(registryKey)")
+        let message = "Creating map view with wrapper for: \(event.id), " +
+            "enableGestures: \(enableGestures), registryKey: \(registryKey)"
+        WWWLog.i("MapViewBridge", message)
 
         var wrapperInstance: MapLibreViewWrapper?
 
