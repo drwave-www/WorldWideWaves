@@ -72,18 +72,18 @@ jobs:
 
       - name: Build iOS App (Simulator)
         run: |
-          # Build for simulator only (no specific device)
-          # This bypasses the iOS 18.0 requirement in the scheme
+          # Build for iOS simulator
+          # Skip destination requirement by building for generic simulator
+          # Override SDKROOT to use whatever SDK is available
           xcodebuild \
             -project iosApp/worldwidewaves.xcodeproj \
             -scheme worldwidewaves \
             -configuration Debug \
             -sdk iphonesimulator \
-            -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             ONLY_ACTIVE_ARCH=NO \
-            build
+            build-for-testing
         env:
           NSUnbufferedIO: YES
 
