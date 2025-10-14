@@ -819,33 +819,80 @@ import Shared
 
     // MARK: - Location Component
 
-    /// Enable/disable user location marker with Android-style pulse effect.
-    /// Matches Android: black dot with red pulse (pulse + foregroundTint colors)
+    /// Enable/disable user location marker with custom annotation.
+    /// Uses custom annotation because we're using PositionManager (not native CLLocationManager).
     @objc public func enableLocationComponent(_ enabled: Bool) {
         guard let mapView = mapView else { return }
 
         isLocationComponentEnabled = enabled
 
         if enabled {
-            WWWLog.i(Self.tag, "Enabling location component with Android-style pulse")
+            WWWLog.i(Self.tag, "Enabling location component with custom annotation")
 
-            // Use native MapLibre location display (showsUserLocation)
-            mapView.showsUserLocation = true
-            mapView.userTrackingMode = .none  // Don't auto-track (matches Android CAMERA_MODE.NONE)
+            // Create user location annotation if it doesn't exist
+            if userLocationAnnotation == nil {
+                let annotation = MLNPointAnnotation()
+                annotation.title = "Your Location"
+                userLocationAnnotation = annotation
 
-            WWWLog.i(Self.tag, "✅ Location component enabled (native MapLibre)")
+                // Add annotation to map if we have a current position
+                if let currentPos = currentUserPosition {
+                    annotation.coordinate = currentPos
+                    mapView.addAnnotation(annotation)
+                    WWWLog.i(
+                        Self.tag,
+                        "Added user location annotation at: \(currentPos.latitude), \(currentPos.longitude)"
+                    )
+                } else {
+                    WWWLog.w(Self.tag, "No current position available for annotation")
+                }
+            }
+
+            WWWLog.i(Self.tag, "✅ Location component enabled (custom annotation)")
         } else {
             WWWLog.i(Self.tag, "Disabling location component")
-            mapView.showsUserLocation = false
+
+            // Remove annotation from map
+            if let annotation = userLocationAnnotation {
+                mapView.removeAnnotation(annotation)
+                userLocationAnnotation = nil
+            }
         }
     }
 
     /// Update user location marker position.
-    /// With native MapLibre location display, this updates the built-in blue dot.
+    /// Manually updates the custom annotation position when using PositionManager.
     private func updateUserLocationMarker(coordinate: CLLocationCoordinate2D) {
-        // Native MapLibre handles user location updates automatically
-        // No manual annotation needed when using showsUserLocation = true
-        WWWLog.v(Self.tag, "User location updated (native MapLibre): \(coordinate.latitude), \(coordinate.longitude)")
+        guard let mapView = mapView else {
+            WWWLog.w(Self.tag, "Cannot update user location - mapView is nil")
+            return
+        }
+
+        // Update the annotation coordinate
+        if let annotation = userLocationAnnotation {
+            // Remove old annotation
+            mapView.removeAnnotation(annotation)
+
+            // Update coordinate
+            annotation.coordinate = coordinate
+
+            // Add back to map
+            mapView.addAnnotation(annotation)
+
+            WWWLog.v(Self.tag, "User location marker updated: \(coordinate.latitude), \(coordinate.longitude)")
+        } else {
+            WWWLog.w(Self.tag, "User location annotation not created yet, creating now")
+            // Create annotation if it doesn't exist (shouldn't happen if enableLocationComponent called first)
+            let annotation = MLNPointAnnotation()
+            annotation.title = "Your Location"
+            annotation.coordinate = coordinate
+            userLocationAnnotation = annotation
+            mapView.addAnnotation(annotation)
+            WWWLog.i(
+                Self.tag,
+                "Created and added user location annotation at: \(coordinate.latitude), \(coordinate.longitude)"
+            )
+        }
     }
 
     /// Updates event metadata for accessibility.
@@ -1022,6 +1069,44 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
 
     public func mapView(_ mapView: MLNMapView, didSelect annotation: MLNAnnotation) {
         WWWLog.d(Self.tag, "📍 Annotation selected: \(annotation)")
+    }
+
+    public func mapView(_ mapView: MLNMapView, viewFor annotation: MLNAnnotation) -> MLNAnnotationView? {
+        // Customize user location annotation to match Android style
+        if let userAnnotation = userLocationAnnotation, annotation === userAnnotation {
+            let reuseIdentifier = "userLocation"
+
+            // Try to reuse existing annotation view
+            var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseIdentifier)
+
+            if annotationView == nil {
+                // Create new annotation view
+                annotationView = MLNAnnotationView(reuseIdentifier: reuseIdentifier)
+                annotationView?.frame = CGRect(x: 0, y: 0, width: 20, height: 20)
+
+                // Create a blue circle to match iOS native location marker
+                let circleView = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
+                circleView.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.3)
+                circleView.layer.cornerRadius = 10
+                circleView.layer.borderWidth = 2
+                circleView.layer.borderColor = UIColor.white.cgColor
+
+                // Add inner dot
+                let dotView = UIView(frame: CGRect(x: 7, y: 7, width: 6, height: 6))
+                dotView.backgroundColor = UIColor.systemBlue
+                dotView.layer.cornerRadius = 3
+                circleView.addSubview(dotView)
+
+                annotationView?.addSubview(circleView)
+
+                // Center the annotation on the coordinate
+                annotationView?.centerOffset = CGVector(dx: 0, dy: 0)
+            }
+
+            return annotationView
+        }
+
+        return nil
     }
 }
 
