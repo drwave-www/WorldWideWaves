@@ -1,3 +1,5 @@
+@file:Suppress("ReturnCount") // Early returns used extensively for guard clauses in parsing logic
+
 package com.worldwidewaves.shared.events.io
 
 /*

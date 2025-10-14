@@ -1,3 +1,5 @@
+@file:Suppress("TooGenericExceptionCaught") // IndexOutOfBoundsException is specific to malformed MIDI data
+
 package com.worldwidewaves.shared.sound.midi
 
 /*
@@ -68,15 +70,12 @@ internal object MidiHeaderValidator {
             Log.e(TAG, "Invalid MIDI format: ${e.message}", throwable = e)
             throw IllegalArgumentException("Invalid MIDI format: ${e.message}", e)
         } catch (e: IndexOutOfBoundsException) {
-            // IndexOutOfBoundsException is the most specific exception for malformed MIDI data
-            @Suppress("TooGenericExceptionCaught")
+            // IndexOutOfBoundsException is caught specifically for malformed MIDI data (array access violations)
             Log.e(TAG, "Malformed MIDI data: ${e.message}", throwable = e)
-            @Suppress("TooGenericExceptionCaught")
             throw IllegalArgumentException("Malformed MIDI data: ${e.message}", e)
         } catch (e: Exception) {
-            @Suppress("TooGenericExceptionCaught") // Catch-all for any unexpected parsing errors
+            // Catch-all for any unexpected parsing errors
             Log.e(TAG, "Unexpected error parsing MIDI header: ${e.message}", throwable = e)
-            @Suppress("TooGenericExceptionCaught")
             throw IllegalArgumentException("Unexpected error parsing MIDI header: ${e.message}", e)
         }
     }

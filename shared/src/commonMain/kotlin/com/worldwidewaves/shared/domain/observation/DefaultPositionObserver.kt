@@ -123,6 +123,7 @@ class DefaultPositionObserver(
             position.lat.isFinite() &&
             position.lng.isFinite()
 
+    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     override fun calculateDistance(
         from: Position,
         to: Position,

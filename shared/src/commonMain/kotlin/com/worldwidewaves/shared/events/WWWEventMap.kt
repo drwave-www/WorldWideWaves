@@ -103,6 +103,7 @@ class WWWEventMap(
      *
      * **Performance**: Result is cached on disk to avoid redundant generation.
      */
+    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     suspend fun getStyleUri(): String? {
         Log.d("WWWEventMap", "getStyleUri() called for event: ${event.id}")
 
