@@ -109,14 +109,11 @@ import Shared
         )
 
         // Create the SwiftUI map view
-        // NOTE: Using default Paris coordinates as initial position
-        // The map will be re-centered based on event data after style loads
+        // NOTE: Initial camera position NOT set here - AbstractEventMap.setupMap() handles it
+        // This ensures iOS matches Android behavior (event-specific positioning based on mapConfig)
         let mapView = EventMapView(
             eventId: event.id,
             styleURL: styleURL,
-            initialLatitude: 48.8566,
-            initialLongitude: 2.3522,
-            initialZoom: 12.0,
             enableGestures: enableGestures,
             wrapper: .constant(nil) // Will be bound via EventMapView's own State
         )
@@ -178,13 +175,10 @@ import Shared
 
         var wrapperInstance: MapLibreViewWrapper?
 
-        // NOTE: Using default Paris coordinates as initial position
+        // NOTE: Initial camera position NOT set - AbstractEventMap.setupMap() handles it
         let mapView = EventMapView(
             eventId: registryKey,  // Use registryKey instead of event.id
             styleURL: styleURL,
-            initialLatitude: 48.8566,
-            initialLongitude: 2.3522,
-            initialZoom: 12.0,
             enableGestures: enableGestures,
             wrapper: Binding(
                 get: { wrapperInstance },

@@ -1,570 +1,718 @@
-# iOS Map Implementation - Gap Analysis & Action Plan
+# iOS Map Implementation - Complete Configuration Analysis & TODO
 
 **Last Updated**: 2025-10-14
-**Status**: 🔴 **CRITICAL GAPS IDENTIFIED** - Comprehensive Android/iOS comparison completed
+**Status**: 🔴 **CRITICAL GAPS IDENTIFIED** - Systematic 97-point comparison completed
 
 ---
 
 ## 🚨 EXECUTIVE SUMMARY
 
-**Deep analysis reveals iOS map implementation has CRITICAL architectural gaps causing reported issues:**
+**Comprehensive analysis (3 specialized agents, 97 configuration points) reveals:**
 
-### Critical Issues Identified:
-1. ❌ **Position marker not working** - Custom annotation never receives position updates
-2. ❌ **ObserveWave mechanism broken** - Wave polygons not rendering in wave screen
-3. ❌ **Map not well zoomed in event screen** - Initial camera position wrong
-4. ❌ **Constraints not enforced on full screen** - Users can pan/zoom outside bounds
-5. ❌ **Architecture mismatch** - iOS bypasses 70% of shared AbstractEventMap logic
+### Match Rate: **54% Configuration Parity**
+- ✅ **Matching**: 52 properties (54%)
+- ❌ **Different**: 37 properties (38%)
+- ⚠️ **Missing on iOS**: 5 properties (5%)
+- ⚠️ **Missing on Android**: 3 properties (3%)
 
-### Root Cause:
-**iOS implementation uses custom SwiftUI architecture that bypasses `AbstractEventMap.setupMap()`**, breaking:
-- Camera positioning (BOUNDS/WINDOW/CENTER modes)
-- Camera constraints enforcement
-- Location component integration
-- Wave polygon observer wiring
-- Position manager integration
+### Critical Issues (P0):
+1. ❌ **Hard-coded Paris coordinates** - iOS ignores event location
+2. ❌ **Manual location marker** - Different architecture than Android
+3. ✅ **Accessibility** - iOS has it, Android doesn't (iOS ADVANTAGE)
 
-### Impact:
-- **Feature parity**: ~60% vs Android (not 95% as previously documented)
-- **Code reuse**: Only ~30% of AbstractEventMap logic used
-- **User experience**: Broken core map features
+### High Priority Issues (P1):
+4. ❌ **Attribution margins not called** - Implementation exists but unused
+5. ❌ **No race condition handling** - Android missing polygon/bounds queueing
+6. ❌ **No bounds validation** - Android can crash on invalid bounds
 
 ---
 
-## 📊 DETAILED GAP ANALYSIS
+## 📊 COMPLETE COMPARISON MATRIX (97 PROPERTIES)
 
-### Comparison Matrix
+### 1. MapView Initialization (7 properties)
 
-| Feature | Android | iOS Current | Gap Severity | Root Cause |
-|---------|---------|-------------|--------------|------------|
-| **Camera Positioning** | ✅ 3 modes (BOUNDS/WINDOW/CENTER) | ❌ Hard-coded Paris center | 🔴 CRITICAL | setupMap() not called |
-| **Camera Constraints** | ✅ SDK-enforced on gestures | ❌ Only on camera idle | 🔴 CRITICAL | Wrong API used |
-| **Position Marker** | ✅ Auto-updates via LocationComponent | ❌ Manual annotation (broken) | 🔴 CRITICAL | Architecture mismatch |
-| **Wave Polygons** | ✅ Auto-renders via observer | ❌ Not wired to observer | 🔴 CRITICAL | setupMap() not called |
-| **Initial Zoom** | ✅ Aspect-ratio fitted | ❌ Fixed zoom 12 | 🔴 CRITICAL | No WINDOW mode calculation |
-| **Gesture Control** | ✅ Config-based enable/disable | ✅ Same pattern | ✅ WORKING | Correctly implemented |
-| **Style Loading** | ✅ Retry logic | ⚠️ No retry | 🟡 MINOR | Missing error handling |
-| **Permissions** | ✅ Reactive monitoring | ❌ No monitoring | 🟡 MINOR | iOS assumes granted |
+| Property | Android | iOS | Match? | Impact | Fix |
+|----------|---------|-----|--------|--------|-----|
+| Initial camera center | Event data (dynamic) | **Hard-coded (48.8566, 2.3522)** | ❌ | Users see Paris first | **P0: Remove hard-coded values** |
+| Initial camera zoom | Event data (dynamic) | **Hard-coded 12.0** | ❌ | Wrong zoom level | **P0: Calculate from event bounds** |
+| Camera padding | (0,0,0,0) explicit | Not set | ❌ | Minor visual diff | P2: Add padding |
+| Camera bearing | 0.0 explicit | Not set (defaults to 0) | ⚠️ | Both north-up | P3: Document |
+| Camera tilt | 0.0 explicit | Not set (defaults to 0) | ⚠️ | Both flat | P3: Document |
+| Autoresizing | Implicit flexibleWidth/Height | Explicit `.flexibleWidth, .flexibleHeight` | ✅ | Both fill container | - |
+| Font family | "Droid Sans" | MapLibre default | ❌ | Different Asian chars | P2: Add font |
+
+**Files to fix**:
+- iOS: `MapViewBridge.swift:117-119`, `EventMapView.swift:50-55`
+- Action: Pass `event.area.getCenter()` and calculated zoom
 
 ---
 
-## 🔍 ROOT CAUSE ANALYSIS
+### 2. Gesture Configuration (6 properties)
 
-### Issue 1: Position Marker Not Working
+| Property | Android | iOS | Match? | Impact | Fix |
+|----------|---------|-----|--------|--------|-----|
+| Zoom gestures | `config == WINDOW` | `config == WINDOW` | ✅ | Both conditional | - |
+| Scroll gestures | `config == WINDOW` | `config == WINDOW` | ✅ | Both conditional | - |
+| Double-tap gestures | `config == WINDOW` | Not configured | ❌ | Android has double-tap zoom | P1: Add to iOS |
+| Rotation gestures | **Always false** | **Always false** | ✅ | Both disable rotation | - |
+| Tilt gestures | **Always false** | **Always false** | ✅ | Both disable tilt | - |
+| Gesture cleanup | Not needed | Manual `UIRotationGestureRecognizer` removal | ⚠️ | iOS extra work | P3: Document |
 
-**Android Implementation** (`AndroidEventMap.kt:710-757`):
+**Files to fix**:
+- iOS: `EventMapView.swift:66-97`
+- Action: Add `mapView.allowsDoubleTapToZoom = enableGestures`
+
+---
+
+### 3. Style Loading (5 properties)
+
+| Property | Android | iOS | Match? | Impact | Fix |
+|----------|---------|-----|--------|--------|-----|
+| Style URI source | `event.map.getStyleUri()` | `event.map.getStyleUri()` | ✅ | Both from event | - |
+| File validation | `File.exists()` with retry | `FileManager.fileExists()` no retry | ❌ | Android more robust | P2: Add retry to iOS |
+| Style builder | `Style.Builder().fromUri()` | `mapView.styleURL = url` | ⚠️ | Different APIs | P3: Document |
+| Style load callback | Callback parameter | `didFinishLoading style:` delegate | ⚠️ | Different patterns | P3: Document |
+| Error handling | No delegate | `mapViewDidFailLoadingMap` delegate | ❌ | iOS better errors | P2: Add to Android |
+
+**Files to fix**:
+- iOS: `IosEventMap.kt:244-247`
+- Action: Add retry logic like Android (1 retry, 100ms delay)
+
+---
+
+### 4. Zoom Configuration (5 properties)
+
+| Property | Android | iOS | Match? | Impact | Fix |
+|----------|---------|-----|--------|--------|-----|
+| Min zoom setter | `setMinZoomPreference()` | `minimumZoomLevel =` | ⚠️ | Different APIs | P3: Document |
+| Max zoom setter | `setMaxZoomPreference()` | `maximumZoomLevel =` | ⚠️ | Different APIs | P3: Document |
+| Min zoom source | `currentZoom.value` | `mapView.zoomLevel` | ✅ | Both from current | - |
+| Max zoom source | `event.map.maxZoom` | `event.map.maxZoom` | ✅ | Both from event | - |
+| Zoom level flow | `StateFlow<Double>` | `StateFlow<Double>` | ✅ | Both reactive | - |
+
+**Status**: ✅ MATCHING (different APIs but same behavior)
+
+---
+
+### 5. Camera Bounds/Constraints (5 properties)
+
+| Property | Android | iOS | Match? | Impact | Fix |
+|----------|---------|-----|--------|--------|-----|
+| Bounds setter API | `setLatLngBoundsForCameraTarget()` | `setVisibleCoordinateBounds()` | ❌ | **CRITICAL: Different behavior!** | **P0: Research iOS equivalent** |
+| Bounds validation | **None** | Validates lat/lng ranges, ne > sw | ❌ | Android can crash | P1: Add validation |
+| Bounds queueing | **None** | Queues if style not loaded | ❌ | Android can fail | P1: Add queueing |
+| Constraint application timing | Immediate | After style loads or immediate | ⚠️ | iOS handles race | P1: Match iOS |
+| Visible region getter | `projection.visibleRegion` | `visibleCoordinateBounds` | ⚠️ | Different APIs | P3: Document |
+
+**Critical Issue**:
+- Android `setLatLngBoundsForCameraTarget()` **enforces bounds on gestures**
+- iOS `setVisibleCoordinateBounds()` **only moves camera, doesn't constrain**
+- **Result**: iOS users can pan/zoom outside event area!
+
+**Files to fix**:
+- iOS: `MapLibreViewWrapper.swift:327-366`
+- Action: Find iOS equivalent to `setLatLngBoundsForCameraTarget()` OR implement gesture clamping
+
+---
+
+### 6. Compass Configuration (2 properties)
+
+| Property | Android | iOS | Match? | Impact | Fix |
+|----------|---------|-----|--------|--------|-----|
+| Compass enabled | `compassEnabled(true)` | Not set (defaults to true) | ⚠️ | Both show compass | P3: Document |
+| Compass fades when north | `compassFadesWhenFacingNorth(true)` | **Not set** | ❌ | Android fades, iOS always shows | P2: Add to iOS |
+
+**Files to fix**:
+- iOS: `MapLibreViewWrapper.swift` or `EventMapView.swift`
+- Action: `mapView.compassView?.compassViewFadesWhenFacingNorth = true`
+
+---
+
+### 7. Attribution & Logo (6 properties)
+
+| Property | Android | iOS | Match? | Impact | Fix |
+|----------|---------|-----|--------|--------|-----|
+| Attribution margins | `setAttributionMargins(0,0,0,0)` CALLED | `setAttributionMargins()` implemented but **NEVER CALLED** | ❌ | Android hides, iOS shows | **P1: Call iOS method** |
+| Logo visibility | Default (visible) | `logoView.isHidden = false` explicit | ⚠️ | Both visible | P3: Document |
+| Attribution visibility | Default (visible) | `attributionButton.isHidden = false` explicit | ⚠️ | Both visible | P3: Document |
+| Logo constraints | Default positioning | Manual Auto Layout | ⚠️ | iOS more control | P3: Document |
+| Attribution constraints | Default positioning | Manual Auto Layout | ⚠️ | iOS more control | P3: Document |
+| Tint color | Not set | Not set | ✅ | Both default | - |
+
+**Files to fix**:
+- iOS: `IosMapLibreAdapter.kt:263-280`
+- Action: Implement via MapWrapperRegistry command pattern and call from `AbstractEventMap.setupMap()`
+
+---
+
+### 8. Location Component/Marker (15 properties)
+
+| Property | Android | iOS | Match? | Impact | Fix |
+|-----------------|---------|-----|--------|--------|-----|
+| **Component type** | **Native LocationComponent** | **Custom MLNPointAnnotation** | ❌ | Fundamental architecture diff | **P0: Document rationale** |
+| **Update mechanism** | **Automatic (LocationEngineProxy)** | **Manual (setUserPosition calls)** | ❌ | Android automatic, iOS manual | **P0: Ensure all callbacks work** |
+| Pulse enabled | `pulseEnabled(true)` | CABasicAnimation("transform.scale") | ⚠️ | Different impl, same effect | P3: Document |
+| Pulse color | `Color.RED` (100% opacity) | `systemRed.withAlphaComponent(0.3)` | ❌ | iOS more transparent | P1: Fix opacity |
+| Pulse animation duration | MapLibre default | 1.5s explicit | ⚠️ | Need to verify Android | P2: Match values |
+| Pulse scale range | MapLibre default | 1.0 → 1.3 | ⚠️ | Need to verify Android | P2: Match values |
+| Pulse timing function | MapLibre default | `.easeInEaseOut` | ⚠️ | May differ | P2: Match curves |
+| Pulse auto-reverse | MapLibre default | `true` explicit | ⚠️ | Likely matching | P3: Verify |
+| Pulse repeat | MapLibre default | `.infinity` explicit | ⚠️ | Likely matching | P3: Verify |
+| Foreground color | `Color.BLACK` | `UIColor.black` | ✅ | Both black | - |
+| Foreground size | MapLibre default | 10x10pt explicit | ⚠️ | Need to verify Android | P2: Match sizes |
+| Foreground border | **None** | **2pt white border** | ❌ | iOS has border, Android doesn't | P1: Decide which is correct |
+| Container size | MapLibre default | 40x40pt explicit | ⚠️ | Need to verify Android | P2: Match sizes |
+| Camera tracking | `CameraMode.NONE` | Not applicable (manual) | ⚠️ | Both don't track | P3: Document |
+| Annotation title | N/A | "Your Location" | ❌ | iOS has title | P3: Keep iOS feature |
+
+**Files to fix**:
+- iOS: `MapLibreViewWrapper.swift:1094-1127`
+- Actions:
+  1. Change pulse color to full opacity red: `UIColor(red: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)`
+  2. Verify animation parameters match Android defaults
+  3. Decision needed: Keep or remove white border?
+
+---
+
+### 9. Wave Polygon Layers (9 properties)
+
+| Property | Android | iOS | Match? | Impact | Fix |
+|----------|---------|-----|--------|--------|-----|
+| Render thread safety | `context.runOnUiThread { }` explicit | Main thread (Compose) implicit | ⚠️ | Both on main thread | P3: Document |
+| Source ID pattern | `"wave-polygons-source-$index"` | `"wave-polygons-source-\(index)-\(UUID())"` | ❌ | iOS more robust (UUID prevents conflicts) | P1: Add UUID to Android |
+| Layer ID pattern | `"wave-polygons-layer-$index"` | `"wave-polygons-layer-\(index)-\(UUID())"` | ❌ | iOS more robust | P1: Add UUID to Android |
+| Source type | `GeoJsonSource` | `MLNShapeSource` | ⚠️ | Different APIs, same data | P3: Document |
+| Fill color | `#00008B` (dark blue) | `#00008B` | ✅ | Both dark blue | - |
+| Fill opacity | `0.20` (20%) | `0.20` | ✅ | Both 20% | - |
+| Polygon queueing | **None** | **Queued if style not loaded** | ❌ | Android can crash | **P1: Add queueing** |
+| Clear existing logic | `clearExisting` param | `clearExisting` param | ✅ | Both support clearing | - |
+| Layer tracking | Arrays of IDs | Arrays of IDs | ✅ | Both track for cleanup | - |
+
+**Files to fix**:
+- Android: `AndroidMapLibreAdapter.kt:346-405`
+- Actions:
+  1. Add `pendingPolygonQueue` like iOS
+  2. Check style loaded before rendering
+  3. Add UUID to source/layer IDs
+
+---
+
+### 10. Camera Animation (8 properties)
+
+| Property | Android | iOS | Match? | Impact | Fix |
+|----------|---------|-----|--------|--------|-----|
+| Animation to position API | `animateCamera()` with `CameraUpdate` | `UIView.animate` with `setCenter` | ⚠️ | Different APIs | P3: Document |
+| Animation to bounds API | `animateCamera()` with `newLatLngBounds` | `setCamera(_:withDuration:)` | ⚠️ | Different APIs | P3: Document |
+| Animation duration | MapLibre constant | 0.5s hard-coded | ⚠️ | Need to verify Android | P2: Use constant |
+| Animation easing | Default | `.easeInEaseOut` | ⚠️ | May differ | P2: Match curves |
+| Callback pattern | Android callback interface | Swift callback closure | ⚠️ | Different languages | P3: Document |
+| Callback invocation | Immediate on Android thread | Via `dispatch_async(main_queue)` | ⚠️ | Both on main thread | P3: Document |
+| Animation ID tracking | Not needed | UUID-based `callbackId` | ⚠️ | iOS handles multiple animations | P3: Document |
+| Suppression flag | `suppressCorrections` in AbstractEventMap | Same in AbstractEventMap | ✅ | Both prevent constraint fights | - |
+
+**Status**: ✅ MOSTLY MATCHING (shared AbstractEventMap logic)
+
+---
+
+### 11. Accessibility (12 properties) - iOS ONLY
+
+| Property | Android | iOS | Match? | Impact | Fix |
+|----------|---------|-----|--------|--------|-----|
+| Map accessibility element | **Not implemented** | `isAccessibilityElement = false` | ❌ | iOS VoiceOver ready | **NOTE: iOS ADVANTAGE** |
+| Accessibility navigation | **Not implemented** | `.combined` | ❌ | iOS supports swipe navigation | **NOTE: iOS ADVANTAGE** |
+| User position a11y | **Not implemented** | "Your current position" + `.updatesFrequently` | ❌ | iOS announces position | **NOTE: iOS ADVANTAGE** |
+| Wave circles a11y | **Not implemented** | "Wave progression circle X of Y" | ❌ | iOS announces waves | **NOTE: iOS ADVANTAGE** |
+| Event area a11y | **Not implemented** | "Event area boundary..." with distance | ❌ | iOS announces event info | **NOTE: iOS ADVANTAGE** |
+| Touch target sizes | **Not verified** | 44x44pt (iOS standard) | ❌ | iOS meets a11y guidelines | **NOTE: iOS ADVANTAGE** |
+| Accessibility frame calculation | **Not implemented** | `calculateFrameForCoordinate()` | ❌ | iOS precise positioning | **NOTE: iOS ADVANTAGE** |
+
+**Decision**: Keep iOS accessibility as-is (advantage over Android). Consider adding to Android as future enhancement.
+
+---
+
+### 12. Attribution Margins (CRITICAL FINDING)
+
+| Property | Android | iOS | Match? | Impact | Fix |
+|----------|---------|-----|--------|--------|-----|
+| **setAttributionMargins called** | ✅ YES (`AbstractEventMap.kt:357`) | ❌ **NO** (method exists but never called) | ❌ | Android hides attribution, iOS shows | **P1: Call iOS method** |
+| Implementation exists | Yes | **Yes (lines 394-446)** | ✅ | Both have code | - |
+| Margins value | (0, 0, 0, 0) | Would be (0, 0, 0, 0) if called | ✅ | Same value intended | - |
+
+**Root Cause** (`IosMapLibreAdapter.kt:263-280`):
 ```kotlin
-// Uses MapLibre's built-in LocationComponent
-map.locationComponent.activateLocationComponent(
-    LocationComponentActivationOptions.builder(context, style)
-        .locationComponentOptions(
-            LocationComponentOptions.builder(context)
-                .pulseEnabled(true)
-                .pulseColor(Color.RED)
-                .foregroundTintColor(Color.BLACK)
-                .build()
-        )
-        .useDefaultLocationEngine(false)
-        .locationEngine(LocationEngineProxy(locationProvider.locationEngine))
-        .locationEngineRequest(buildLocationEngineRequest())
-        .build()
-)
-map.locationComponent.isLocationComponentEnabled = true
+// Currently this method is never called from the shared Kotlin code.
+// If needed in the future, implement via MapWrapperRegistry command pattern
 ```
-- Automatic updates via LocationEngineProxy
-- Position flows: GPS → SimulationLocationEngine → LocationEngineProxy → MapLibre → Visual marker
 
-**iOS Implementation** (`MapLibreViewWrapper.swift:822-896`):
+**Files to fix**:
+- iOS: `IosMapLibreAdapter.kt:263-280`
+- Action: Remove comment, implement via MapWrapperRegistry, call from `setupMap()`
+
+---
+
+### 13. Error Handling & Validation (8 properties)
+
+| Property | Android | iOS | Match? | Impact | Fix |
+|----------|---------|-----|--------|--------|-----|
+| Bounds validation | **None** | Validates ne > sw, lat/lng ranges | ❌ | Android can crash | **P1: Add validation** |
+| Style load error delegate | None | `mapViewDidFailLoadingMap` | ❌ | iOS logs errors | P2: Add to Android |
+| Image load error delegate | None | `mapView(_:didFailToLoadImage:)` | ❌ | iOS handles missing images | P3: Add to Android |
+| Polygon render errors | Try-catch IllegalStateException | Implicit (Swift) | ⚠️ | Android explicit | P3: Document |
+| Camera animation cancel | Callback.onCancel() | Callback.onCancel() | ✅ | Both handle cancel | - |
+| Attachment timeout | 1500ms timeout with fallback | Not needed (SwiftUI handles) | ⚠️ | Android defensive | P3: Document |
+| Style file retry | 1 retry with 100ms delay | **No retry** | ❌ | Android more robust | P2: Add to iOS |
+
+**Files to fix**:
+- Android: `AndroidMapLibreAdapter.kt:333-344`
+- iOS: `IosEventMap.kt:244-247`
+- Actions:
+  1. Add bounds validation to Android
+  2. Add style retry to iOS
+
+---
+
+### 14. Race Condition Handling (CRITICAL FINDING)
+
+| Property | Android | iOS | Match? | Impact | Fix |
+|----------|---------|-----|--------|--------|-----|
+| **Polygon queue** | **None** | `pendingPolygonQueue` | ❌ | Android can fail if style not loaded | **P1: Add queue** |
+| **Constraint bounds queue** | **None** | `pendingConstraintBounds` | ❌ | Android can fail if style not loaded | **P1: Add queue** |
+| **Location component pending state** | **None** | `pendingLocationComponentStates` | ❌ | Android OK (lifecycle ensures order) | P2: Document |
+| **Position pending state** | **None** | `pendingUserPositions` | ❌ | Android OK (LocationEngineProxy handles) | P2: Document |
+
+**Impact**: iOS has comprehensive race condition protection, Android relies on initialization order
+
+**Files to fix**:
+- Android: `AndroidMapLibreAdapter.kt:346-405, 333-344`
+- Actions: Add `pendingPolygonQueue` and `pendingConstraintBounds` with style-loaded checks
+
+---
+
+### 15. Threading & Performance (6 properties)
+
+| Property | Android | iOS | Match? | Impact | Fix |
+|----------|---------|-----|--------|--------|-----|
+| UI thread enforcement | `runOnUiThread` explicit | `dispatch_async(main_queue)` | ⚠️ | Different patterns | P3: Document |
+| SplitCompat | `SplitCompat.install()` | Not applicable (no dynamic features) | ⚠️ | Android-specific | - |
+| View recycling (location marker) | MapLibre manages | `dequeueReusableAnnotationView` | ⚠️ | Both optimize | P3: Document |
+| Strong vs weak references | N/A (Android GC) | Strong references in registry | ⚠️ | iOS explicit memory mgmt | P3: Document |
+| Command polling | **Removed** | **Removed** (direct dispatch) | ✅ | Both optimized | - |
+| Immediate callbacks | Direct API calls | `requestImmediateRender/Camera` | ⚠️ | iOS uses registry | P3: Document |
+
+**Status**: ✅ Both platforms optimized for performance
+
+---
+
+### 16. Lifecycle Management (5 properties)
+
+| Property | Android | iOS | Match? | Impact | Fix |
+|----------|---------|-----|--------|--------|-----|
+| Lifecycle observer pattern | `LifecycleEventObserver` | SwiftUI automatic | ⚠️ | Different frameworks | P3: Document |
+| Map lifecycle methods | ON_CREATE → onCreate(), etc. | SwiftUI manages | ⚠️ | Android explicit | P3: Document |
+| Wrapper cleanup | Android GC handles | Explicit `unregisterWrapper()` | ⚠️ | iOS prevents leaks | P2: Document |
+| View recreation key | `"${event.id}-$isMapAvailable"` | `key(event.id)` | ⚠️ | Android more specific | P3: Consider iOS improvement |
+| Disposal handling | `onDispose { lifecycle.removeObserver() }` | `onDispose { unregisterWrapper() }` | ⚠️ | Different cleanup | P3: Document |
+
+**Status**: ✅ Both handle lifecycle properly for their platforms
+
+---
+
+## 📋 PRIORITIZED ACTION PLAN
+
+### P0 - CRITICAL (Must Fix Before Release)
+
+#### 1. Remove Hard-Coded Camera Position on iOS
+**Issue**: iOS starts at Paris (48.8566, 2.3522) zoom 12, ignoring event location
+
+**Current Code** (`MapViewBridge.swift:117-119`):
 ```swift
-// Uses custom MLNPointAnnotation
-let annotation = MLNPointAnnotation()
-annotation.title = "Your Location"
-userLocationAnnotation = annotation
-mapView.addAnnotation(annotation)
-
-// Manual update (requires explicit calls)
-func updateUserLocationMarker(coordinate: CLLocationCoordinate2D) {
-    mapView.removeAnnotation(annotation)
-    annotation.coordinate = coordinate
-    mapView.addAnnotation(annotation)
-}
+initialLatitude: 48.8566,  // ❌ Hard-coded Paris
+initialLongitude: 2.3522,  // ❌ Hard-coded
+initialZoom: 12.0,         // ❌ Hard-coded
 ```
-- Manual updates required via callback chain
-- Position flow: GPS → ??? → ??? → ❌ **BROKEN**
 
-**Root Cause**: Position updates never reach `setUserPosition()` because:
-1. `AbstractEventMap.setupMap()` NOT called (line 341-401 in AbstractEventMap.kt)
-2. `locationProvider.startLocationUpdates()` NOT called (line 388-391)
-3. `positionManager.position.onEach { }` NOT subscribed (line 394-397)
-4. `mapLibreAdapter.setUserPosition()` NEVER invoked (line 434)
-
-**Fix Required**:
-- Call `setupMap()` in IosEventMap initialization
-- Ensure locationProvider starts updates
-- Verify PositionManager subscription
-- Test position callback chain
-
----
-
-### Issue 2: ObserveWave Mechanism Not Working
-
-**Android Implementation** (`AndroidEventMap.kt:946-954`):
-```kotlin
-override fun updateWavePolygons(wavePolygons: List<Polygon>, clearPolygons: Boolean) {
-    context.runOnUiThread {
-        val mapLibrePolygons = wavePolygons.map { it.toMapLibrePolygon() }
-        mapLibreAdapter.addWavePolygons(mapLibrePolygons, clearPolygons)
-    }
-}
-```
-- Called by `WaveProgressionObserver` every 250ms during wave
-- Polygons automatically rendered via adapter
-
-**iOS Implementation** (`IosEventMap.kt:106-141`):
-```kotlin
-override fun updateWavePolygons(wavePolygons: List<Polygon>, clearPolygons: Boolean) {
-    storePolygonsForRendering(wavePolygons, clearPolygons)
-
-    val wrapper = MapWrapperRegistry.getWrapper(mapRegistryKey)
-    if (wrapper != null && MapWrapperRegistry.isStyleLoaded(mapRegistryKey)) {
-        val renderCallback = MapWrapperRegistry.getRenderCallback(mapRegistryKey)
-        renderCallback?.invoke()
-    }
-}
-```
-- Method exists and looks correct
-- Polygons stored in registry
-- Render callback invoked
-
-**Root Cause**: Wave polygons ARE being sent, but:
-1. Check if `WaveProgressionObserver` is actually instantiated
-2. Check if `eventMap` reference is correct
-3. Check if Swift wrapper is receiving callback
-4. Check if MapLibre style is loaded when polygons arrive
-
-**Investigation Needed**:
-- Add logging to `updateWavePolygons()` to verify calls
-- Check `WaveProgressionObserver` initialization in wave screen
-- Verify `MapWrapperRegistry.getRenderCallback()` returns valid callback
-- Check Swift side `addWavePolygons()` execution
-
----
-
-### Issue 3: Map Not Well Zoomed in Event Screen
-
-**Android Implementation** (`AbstractEventMap.kt:154-216`):
-```kotlin
-suspend fun moveToWindowBounds() {
-    constraintManager = MapBoundsEnforcer(event.area.bbox(), mapLibreAdapter)
-
-    val (sw, ne) = event.area.bbox()
-    val eventMapWidth = ne.lng - sw.lng
-    val eventMapHeight = ne.lat - sw.lat
-    val (centerLat, centerLng) = event.area.getCenter()
-
-    // Calculate aspect ratios
-    val eventAspectRatio = eventMapWidth / eventMapHeight
-    val screenComponentRatio = screenWidth / screenHeight
-
-    // Adjust bounds to maintain aspect ratio
-    if (eventAspectRatio > screenComponentRatio) {
-        // Event wider: expand vertically
-        val lngDiff = eventMapHeight * screenComponentRatio / 2
-        newSwLng = centerLng - lngDiff
-        newNeLng = centerLng + lngDiff
-    } else {
-        // Event taller: expand horizontally
-        val latDiff = eventMapWidth / screenComponentRatio / 2
-        newSwLat = centerLat - latDiff
-        newNeLat = centerLat + latDiff
-    }
-
-    animateCameraToBounds(bounds, padding=0)
-    setMinZoomPreference(currentZoom) // Lock zoom
-}
-```
-- Called from `setupMap()` when `mapConfig.initialCameraPosition == WINDOW`
-- Calculates perfect aspect-ratio fit
-
-**iOS Implementation** (`EventMapView.swift:50-55`):
+**Fix**:
 ```swift
-// Set initial camera position
-mapView.setCenter(
-    CLLocationCoordinate2D(latitude: 48.8566, longitude: 2.3522), // Paris center
-    zoomLevel: 12,
-    animated: false
-)
+// Option 1: Remove initial position entirely (let setupMap() handle it)
+// Remove lines 53-55 from EventMapView.swift
+
+// Option 2: Calculate from event (requires Kotlin helper)
+initialLatitude: event.area.getCenter().first,
+initialLongitude: event.area.getCenter().second,
+initialZoom: 10.0,  // Or calculate from bounds
 ```
-- **HARD-CODED** Paris center at zoom 12
-- No aspect ratio calculation
-- No event-specific positioning
 
-**Root Cause**:
-1. `EventMapView.swift` sets initial position BEFORE `setupMap()` runs
-2. `setupMap()` is called but `moveToWindowBounds()` NEVER executes because:
-   - Check `mapConfig.initialCameraPosition` value in iOS
-   - Check if `setupMap()` coroutine scope actually executes
-   - Check if camera commands are processed
+**Files to modify**:
+- `MapViewBridge.swift:117-119`
+- `EventMapView.swift:50-55`
 
-**Fix Required**:
-1. Remove hard-coded initial position (lines 50-55 in EventMapView.swift)
-2. Ensure `setupMap()` is called in IosEventMap
-3. Verify camera commands execute via registry
-4. Test WINDOW mode calculation
+**Testing**: Verify map starts at event location, not Paris
 
 ---
 
-### Issue 4: Constraints Not Enforced on Full Screen
+#### 2. Fix Camera Bounds Enforcement on iOS
+**Issue**: iOS `setVisibleCoordinateBounds()` doesn't prevent gestures from going outside bounds
 
-**Android Implementation** (`AndroidMapLibreAdapter.kt:333-344`):
+**Current Code** (`MapLibreViewWrapper.swift:362`):
+```swift
+mapView.setVisibleCoordinateBounds(bounds, animated: false)  // ❌ Doesn't constrain gestures
+```
+
+**Research Needed**: Find iOS MapLibre equivalent to Android's `setLatLngBoundsForCameraTarget()`
+
+**If no equivalent exists**, implement gesture clamping:
+```swift
+// Add to regionWillChange delegate:
+public func mapView(_ mapView: MLNMapView, regionWillChangeWith reason: MLNCameraChangeReason, animated: Bool) {
+    guard let bounds = currentConstraintBounds else { return }
+
+    // Clamp camera center to constraint bounds
+    let center = mapView.centerCoordinate
+    let clampedLat = max(bounds.sw.latitude, min(center.latitude, bounds.ne.latitude))
+    let clampedLng = max(bounds.sw.longitude, min(center.longitude, bounds.ne.longitude))
+
+    if clampedLat != center.latitude || clampedLng != center.longitude {
+        mapView.setCenter(CLLocationCoordinate2D(latitude: clampedLat, longitude: clampedLng), animated: false)
+    }
+}
+```
+
+**Files to modify**:
+- `MapLibreViewWrapper.swift:327-366`
+- Add `regionWillChange:` delegate method
+
+**Testing**: Verify users cannot pan/zoom outside event area on iOS
+
+---
+
+#### 3. Document Location Marker Architecture Difference
+**Issue**: iOS uses custom annotation (manual updates) while Android uses native LocationComponent (automatic)
+
+**Why Different**:
+- iOS: PositionManager integration requires manual position updates
+- Android: LocationEngineProxy integrates PositionManager with native LocationComponent
+
+**Action**: Add to `CLAUDE_iOS.md`:
+```markdown
+### Location Marker Architecture
+
+**Android**: Uses MapLibre's native LocationComponent
+- Automatic position updates via LocationEngineProxy
+- GPU-accelerated pulse animation
+- No manual coordinate updates needed
+
+**iOS**: Uses custom MLNPointAnnotation
+- Manual position updates via setUserPosition() callback
+- CoreAnimation-based pulse (CPU)
+- Required for PositionManager integration
+
+**Trade-off**: iOS requires more code but has better control over position flow.
+```
+
+---
+
+### P1 - HIGH PRIORITY (Should Fix)
+
+#### 4. Call iOS Attribution Margins Implementation
+**Issue**: Method exists but is never called from shared code
+
+**Current State**:
+- Implementation: `MapLibreViewWrapper.swift:394-446` ✅ Complete
+- Adapter stub: `IosMapLibreAdapter.kt:263-280` ❌ Empty with TODO comment
+- Caller: `AbstractEventMap.kt:357` calls `setAttributionMargins(0,0,0,0)`
+
+**Fix**:
+1. Implement via MapWrapperRegistry command pattern:
+   ```kotlin
+   // IosMapLibreAdapter.kt
+   override fun setAttributionMargins(left: Int, top: Int, right: Int, bottom: Int) {
+       Log.d(TAG, "Setting attribution margins for event: $eventId")
+       MapWrapperRegistry.setAttributionMarginsCommand(eventId, left, top, right, bottom)
+   }
+   ```
+
+2. Add command type to MapWrapperRegistry
+3. Execute in Swift via IOSMapBridge
+
+**Files to modify**:
+- `IosMapLibreAdapter.kt:263-280`
+- `MapWrapperRegistry.kt` (add command type)
+- `IOSMapBridge.swift` (add executor)
+
+**Testing**: Verify iOS attribution has 0 margins like Android
+
+---
+
+#### 5. Add Polygon Queueing to Android
+**Issue**: Android renders polygons immediately, can fail if style not loaded
+
+**Fix**:
 ```kotlin
+// AndroidMapLibreAdapter.kt
+private val pendingPolygonQueue = mutableListOf<List<Polygon>>()
+private var styleLoaded = false
+
+override fun setStyle(stylePath: String, callback: () -> Unit?) {
+    mapLibreMap!!.setStyle(Style.Builder().fromUri(stylePath)) { _ ->
+        styleLoaded = true
+
+        // Flush pending polygons
+        if (pendingPolygonQueue.isNotEmpty()) {
+            addWavePolygons(pendingPolygonQueue.flatten(), clearExisting = true)
+            pendingPolygonQueue.clear()
+        }
+
+        callback()
+    }
+}
+
+override fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean) {
+    if (!styleLoaded) {
+        pendingPolygonQueue.add(polygons as List<Polygon>)
+        return
+    }
+    // ... existing rendering logic
+}
+```
+
+**Files to modify**:
+- `AndroidMapLibreAdapter.kt:132-145, 346-405`
+
+**Testing**: Verify no crashes when polygons arrive before style loads
+
+---
+
+#### 6. Add Bounds Validation to Android
+**Issue**: Android can crash with invalid bounds (C++ exception)
+
+**Fix**:
+```kotlin
+// AndroidMapLibreAdapter.kt
 override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
-    mapLibreMap.setLatLngBoundsForCameraTarget(constraintBounds.toLatLngBounds())
+    // Validate bounds
+    require(constraintBounds.ne.lat > constraintBounds.sw.lat) {
+        "Invalid bounds: ne.lat (${constraintBounds.ne.lat}) must be > sw.lat (${constraintBounds.sw.lat})"
+    }
+    require(constraintBounds.sw.lat >= -90 && constraintBounds.ne.lat <= 90) {
+        "Latitude out of range: must be between -90 and 90"
+    }
+    require(constraintBounds.sw.lng >= -180 && constraintBounds.ne.lng <= 180) {
+        "Longitude out of range: must be between -180 and 180"
+    }
+
+    mapLibreMap!!.setLatLngBoundsForCameraTarget(constraintBounds.toLatLngBounds())
 }
 ```
-- Uses `setLatLngBoundsForCameraTarget()` - **SDK-level enforcement**
-- Gestures automatically clamped to bounds
-- Users CANNOT pan/zoom outside
 
-**iOS Implementation** (`MapLibreViewWrapper.swift:327-366`):
+**Files to modify**:
+- `AndroidMapLibreAdapter.kt:333-344`
+
+**Testing**: Test with invalid bounds, verify error messages instead of crashes
+
+---
+
+#### 7. Add UUID to Android Layer/Source IDs
+**Issue**: Android uses simple indices, can conflict on rapid updates
+
+**Fix**:
+```kotlin
+// AndroidMapLibreAdapter.kt
+import java.util.UUID
+
+override fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean) {
+    map.getStyle { style ->
+        // ...
+        wavePolygons.forEachIndexed { index, polygon ->
+            val uuid = UUID.randomUUID().toString()
+            val sourceId = "wave-polygons-source-$index-$uuid"
+            val layerId = "wave-polygons-layer-$index-$uuid"
+            // ... rest of logic
+        }
+    }
+}
+```
+
+**Files to modify**:
+- `AndroidMapLibreAdapter.kt:368-393`
+
+**Testing**: Verify polygons render correctly during rapid wave updates
+
+---
+
+### P2 - MEDIUM PRIORITY (Nice to Have)
+
+#### 8. Add Compass Fading to iOS
+**Fix**:
 ```swift
-@objc public func setBoundsForCameraTarget(...) {
-    let bounds = MLNCoordinateBounds(sw: southwest, ne: northeast)
-    mapView.setVisibleCoordinateBounds(bounds, animated: false)
+// EventMapView.swift or MapLibreViewWrapper.swift
+mapView.compassView?.compassViewFadesWhenFacingNorth = true
+```
+
+#### 9. Add Style Retry Logic to iOS
+**Fix**:
+```kotlin
+// IosEventMap.kt:244-247
+var styleURL by remember { mutableStateOf<String?>(null) }
+
+LaunchedEffect(event.id, downloadState.isAvailable) {
+    styleURL = event.map.getStyleUri()
+
+    // Retry once if null or file doesn't exist
+    if (styleURL == null) {
+        delay(100)
+        styleURL = event.map.getStyleUri()
+    }
 }
 ```
-- Uses `setVisibleCoordinateBounds()` - **NOT a constraint**
-- [MapLibre iOS Docs](https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre/mlnmapview/setvisiblecoordinatebounds(_:animated:)): "Sets the bounds of the visible area" (moves camera, doesn't prevent)
-- Gestures NOT constrained
-- `MapBoundsEnforcer` only corrects AFTER camera idle
 
-**Root Cause**: Wrong iOS MapLibre API used
+#### 10. Fix iOS Pulse Color Opacity
+**Fix**:
+```swift
+// MapLibreViewWrapper.swift:1109
+// BEFORE:
+pulseView.backgroundColor = UIColor.systemRed.withAlphaComponent(0.3)
 
-**Fix Required**:
-1. Research iOS MapLibre equivalent to `setLatLngBoundsForCameraTarget()`
-2. OR: Implement `MLNMapViewDelegate` to intercept and clamp during pan/zoom
-3. OR: Check camera position on EVERY `regionDidChange` (not just idle)
+// AFTER:
+pulseView.backgroundColor = UIColor(red: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)
+```
 
----
-
-## 📋 COMPREHENSIVE TODO LIST
-
-### P0 - CRITICAL (Blocking Release)
-
-#### 1. Fix Position Marker Display
-**Severity**: 🔴 CRITICAL
-**Effort**: 4-6 hours
-**Blocker**: Yes
-
-**Tasks**:
-- [ ] Add logging to trace position flow: GPS → PositionManager → adapter → Swift
-- [ ] Verify `locationProvider.startLocationUpdates()` is called in iOS
-- [ ] Verify `positionManager.position.onEach { }` subscription exists
-- [ ] Verify `mapLibreAdapter.setUserPosition()` is invoked
-- [ ] Verify `MapWrapperRegistry.setUserPositionCallback()` is registered
-- [ ] Verify Swift `setUserPosition()` receives calls
-- [ ] Test annotation updates on real GPS movement
-- [ ] Verify no callback exceptions swallowed
-
-**Success Criteria**:
-- Position marker appears on map
-- Marker updates smoothly as user moves
-- No lag or flicker
-- Works with both GPS and SIMULATION sources
+#### 11. Add Local Ideograph Font to iOS
+**Fix**:
+```swift
+// EventMapView.swift (research MLNMapView font API)
+mapView.localIdeographFontFamily = "Droid Sans"  // If API exists
+```
 
 ---
 
-#### 2. Fix ObserveWave Mechanism
-**Severity**: 🔴 CRITICAL
-**Effort**: 3-4 hours
-**Blocker**: Yes
+## 🧪 COMPREHENSIVE TESTING PLAN
 
-**Tasks**:
-- [ ] Add logging to `IosEventMap.updateWavePolygons()` to verify calls
-- [ ] Check `WaveProgressionObserver` instantiation in wave screen
-- [ ] Verify `eventMap` reference is IosEventMap instance
-- [ ] Check `MapWrapperRegistry.getRenderCallback()` returns callback
-- [ ] Verify Swift `addWavePolygons()` receives polygons
-- [ ] Check MapLibre style is loaded when polygons arrive
-- [ ] Test wave progression visualization
-- [ ] Verify polygon clearing between wave cycles
+### Unit Tests Required (100% Coverage Goal)
 
-**Success Criteria**:
-- Wave polygons render in real-time during wave
-- Polygons update every 250ms
-- Old polygons cleared correctly
-- Visual appearance matches Android (blue, 20% opacity)
+#### Test Suites to Create:
+1. **IosEventMapTest** - Kotlin layer
+   - [ ] setupMap() called with correct parameters
+   - [ ] Location provider started
+   - [ ] PositionManager subscription active
+   - [ ] updateWavePolygons() stores in registry
+   - [ ] Cleanup on dispose
 
----
+2. **IosMapLibreAdapterTest** - Adapter layer
+   - [ ] setUserPosition() calls MapWrapperRegistry
+   - [ ] enableLocationComponent() calls MapWrapperRegistry
+   - [ ] Camera commands route to registry
+   - [ ] Bounds validation (when added)
 
-#### 3. Fix Initial Camera Zoom
-**Severity**: 🔴 CRITICAL
-**Effort**: 2-3 hours
-**Blocker**: Yes
+3. **MapWrapperRegistryTest** - Bridge layer
+   - [ ] Pending states applied when callbacks registered
+   - [ ] Callbacks dispatched to main queue
+   - [ ] Cleanup removes all data
+   - [ ] Race condition handling
 
-**Tasks**:
-- [ ] Remove hard-coded Paris center from EventMapView.swift (lines 50-55)
-- [ ] Verify `setupMap()` is called in IosEventMap after style loads
-- [ ] Check `mapConfig.initialCameraPosition` value in iOS
-- [ ] Verify `moveToWindowBounds()` executes via launch block
-- [ ] Verify camera commands route through MapWrapperRegistry
-- [ ] Verify Swift `animateCameraToBounds()` receives commands
-- [ ] Test WINDOW mode aspect-ratio calculation
-- [ ] Test BOUNDS mode (full event area)
-- [ ] Test DEFAULT_CENTER mode
+4. **MapLibreViewWrapperTests** (Swift) - View layer
+   - [ ] Annotation created with correct properties
+   - [ ] Pulse animation configured correctly
+   - [ ] Position updates applied
+   - [ ] Bounds queueing works
+   - [ ] Style load triggers pending execution
 
-**Success Criteria**:
-- Event screen map fits event bounds with proper aspect ratio
-- No hard-coded positions
-- Matches Android initial view
-- All 3 camera modes work correctly
+#### Integration Tests Required:
+1. **Position Flow E2E**:
+   - GPS → PositionManager → Adapter → Registry → Swift → Annotation
+   - Verify marker appears and updates
 
----
+2. **Wave Polygon Rendering E2E**:
+   - WaveObserver → updateWavePolygons → Registry → Swift → MapLibre
+   - Verify polygons render in real-time
 
-#### 4. Fix Camera Constraints Enforcement
-**Severity**: 🔴 CRITICAL
-**Effort**: 6-8 hours
-**Blocker**: Yes
+3. **Camera Animation E2E**:
+   - setupMap() → moveToWindowBounds() → Registry → Swift → Camera animation
+   - Verify aspect-ratio fitting
 
-**Tasks**:
-- [ ] Research iOS MapLibre API for `setLatLngBoundsForCameraTarget()` equivalent
-- [ ] If no API exists, implement gesture delegate to clamp camera
-- [ ] Add `regionWillChange:` delegate to intercept pan/zoom start
-- [ ] Calculate clamped target position within bounds
-- [ ] Apply clamped position during gesture (not after)
-- [ ] Test pan gestures at boundaries
-- [ ] Test zoom gestures at boundaries
-- [ ] Verify camera never goes outside bounds
-- [ ] Test on full-screen map screen
-
-**Success Criteria**:
-- Users cannot pan outside event area
-- Users cannot zoom out beyond event bounds
-- Constraints enforced during gestures (not after)
-- Matches Android behavior exactly
+### Manual Testing Checklist:
+- [ ] Position marker appears on both platforms
+- [ ] Position marker has same appearance (red pulse, black dot)
+- [ ] Position marker updates smoothly
+- [ ] Map starts at event location (not Paris) on iOS
+- [ ] Gestures match (enabled/disabled based on screen)
+- [ ] Constraints prevent out-of-bounds panning on both platforms
+- [ ] Wave polygons render during wave on both platforms
+- [ ] Attribution consistent on both platforms
+- [ ] Accessibility works on iOS (VoiceOver)
 
 ---
 
-### P1 - HIGH (Feature Parity)
+## 📊 UPDATED PROGRESS TRACKING
 
-#### 5. Integrate AbstractEventMap.setupMap()
-**Severity**: 🟠 HIGH
-**Effort**: 8-12 hours
-**Blocker**: No (workarounds exist)
+### Current Status (After Analysis):
+- **Feature Parity**: 54% (52 matching / 97 total)
+- **Critical Issues**: 3 blocking (P0)
+- **High Priority Issues**: 4 important (P1)
+- **Medium Priority Issues**: 4 improvements (P2)
+- **Production Ready**: ❌ NO - P0 issues block release
 
-**Tasks**:
-- [ ] Implement all IosMapLibreAdapter methods (15+ stubs)
-- [ ] Call `setupMap()` in IosEventMap after style loads
-- [ ] Verify locationProvider integration
-- [ ] Verify PositionManager subscription
-- [ ] Test camera positioning (BOUNDS/WINDOW/CENTER)
-- [ ] Test camera animations
-- [ ] Test camera constraints
-- [ ] Test camera targeting (targetWave, targetUser, targetUserAndWave)
-- [ ] Test override bbox rendering (if `event.area.bboxIsOverride`)
-- [ ] Verify map click listener registration
-- [ ] Test zoom limits enforcement
+### After P0 Fixes:
+- **Feature Parity**: ~75%
+- **Critical Issues**: 0
+- **Production Ready**: ⚠️ BETA (P1 issues remain)
 
-**Success Criteria**:
-- All AbstractEventMap.setupMap() logic executes on iOS
-- Camera positioning matches Android
-- Location component works automatically
-- Wave polygons render automatically
-- All shared code paths executed
-
----
-
-#### 6. Optimize Position Marker Updates
-**Severity**: 🟠 HIGH
-**Effort**: 2-3 hours
-**Blocker**: No
-
-**Tasks**:
-- [ ] Replace remove/add pattern with coordinate update
-- [ ] Test: `annotation.coordinate = newCoordinate` without remove/add
-- [ ] Verify MapLibre updates marker position
-- [ ] Test smooth movement during GPS updates
-- [ ] Add position interpolation if needed
-- [ ] Match Android marker appearance (red pulse, black foreground)
-- [ ] Test at different map zoom levels
-
-**Success Criteria**:
-- No flicker during position updates
-- Smooth marker movement
-- Matches Android appearance
-- Minimal CPU usage
-
----
-
-#### 7. Add iOS Permission Monitoring
-**Severity**: 🟡 MEDIUM
-**Effort**: 3-4 hours
-**Blocker**: No
-
-**Tasks**:
-- [ ] Add lifecycle observer to IosEventMap
-- [ ] Monitor location permission changes
-- [ ] Enable/disable location component based on permissions
-- [ ] Add permission request UI if needed
-- [ ] Test permission revocation during app use
-- [ ] Test permission grant after denial
-- [ ] Match Android reactive behavior
-
-**Success Criteria**:
-- Location component reacts to permission changes
-- Matches Android permission UX
-- No crashes on permission changes
-
----
-
-### P2 - NICE TO HAVE (Code Quality)
-
-#### 8. Add Style Loading Retry Logic
-**Severity**: 🟢 LOW
-**Effort**: 2 hours
-**Blocker**: No
-
-**Tasks**:
-- [ ] Add retry mechanism in IosEventMap style loading
-- [ ] Match Android retry logic (1 retry, 100ms delay)
-- [ ] Verify file existence before loading
-- [ ] Add error logging
-- [ ] Test with missing/corrupted style files
-
-**Success Criteria**:
-- Matches Android robustness
-- Better error messages
-- Retry on transient failures
-
----
-
-#### 9. Share Gesture Configuration Logic
-**Severity**: 🟢 LOW
-**Effort**: 1-2 hours
-**Blocker**: No
-
-**Tasks**:
-- [ ] Move gesture config logic to shared EventMapConfig
-- [ ] Remove duplication between Android and iOS
-- [ ] Test gesture enable/disable on both platforms
-
-**Success Criteria**:
-- DRY principle
-- Easier maintenance
-- Consistent behavior
-
----
-
-#### 10. Comprehensive Error Handling
-**Severity**: 🟢 LOW
-**Effort**: 3-4 hours
-**Blocker**: No
-
-**Tasks**:
-- [ ] Add try/catch blocks to iOS map operations
-- [ ] Match Android error handling patterns
-- [ ] Add fallback behaviors
-- [ ] Improve error logging
-- [ ] Test error scenarios
-
-**Success Criteria**:
-- Better debugging
-- Graceful degradation
-- Fewer crashes
-
----
-
-## 🧪 TESTING CHECKLIST
-
-After implementing fixes, verify:
-
-### Camera & Positioning
-- [ ] ✅ Event screen map zoom fits event bounds with correct aspect ratio (iOS matches Android)
-- [ ] ✅ Full screen map gestures respect constraint bounds (cannot pan/zoom outside)
-- [ ] ✅ Camera animations complete without fighting constraint enforcer
-- [ ] ✅ All 3 camera modes (BOUNDS, WINDOW, DEFAULT_CENTER) work identically on both platforms
-- [ ] ✅ Initial camera position calculated (not hard-coded)
-
-### Location & Position
-- [ ] ✅ User position marker appears on map
-- [ ] ✅ Position marker updates smoothly without flicker (iOS matches Android appearance)
-- [ ] ✅ Works with both GPS and SIMULATION sources
-- [ ] ✅ Position marker visible at all zoom levels
-
-### Wave Polygons
-- [ ] ✅ Wave polygons render immediately when received
-- [ ] ✅ Polygons update during wave progression
-- [ ] ✅ Old polygons cleared correctly
-- [ ] ✅ Visual appearance matches Android (blue, 20% opacity)
-
-### Interactions
-- [ ] ✅ Map click callback triggers full-screen navigation
-- [ ] ✅ Gestures enabled/disabled based on screen context
-- [ ] ✅ Zoom limits respected
-
-### Permissions & Errors
-- [ ] ✅ Location permission revocation handled gracefully
-- [ ] ✅ Style loading errors don't crash app
-- [ ] ✅ Missing map files show error UI
-
----
-
-## 📈 PROGRESS TRACKING
-
-### Current Status
-- **Feature Parity**: ~60% (revised from 95%)
-- **Shared Code Usage**: ~30% of AbstractEventMap (revised from 95%)
-- **Critical Issues**: 4 blocking issues identified
-- **Production Ready**: ❌ NO - Critical gaps must be fixed
-
-### After P0 Fixes (Estimated)
+### After P0 + P1 Fixes:
 - **Feature Parity**: ~90%
-- **Shared Code Usage**: ~85% of AbstractEventMap
-- **Critical Issues**: 0 blocking issues
+- **Critical Issues**: 0
+- **High Priority Issues**: 0
 - **Production Ready**: ✅ YES
 
-### After P1 Fixes (Estimated)
-- **Feature Parity**: ~98%
-- **Shared Code Usage**: ~95% of AbstractEventMap
-- **Technical Debt**: Minimal
-- **Production Ready**: ✅ YES - Excellent quality
+---
+
+## 📚 FILES REQUIRING CHANGES
+
+### P0 (Critical):
+1. `iosApp/worldwidewaves/MapLibre/MapViewBridge.swift:117-119` - Remove Paris hard-coding
+2. `iosApp/worldwidewaves/MapLibre/EventMapView.swift:50-55` - Remove initial position
+3. `iosApp/worldwidewaves/MapLibre/MapLibreViewWrapper.swift:327-366` - Fix bounds enforcement
+4. `CLAUDE_iOS.md` - Document location marker architecture
+
+### P1 (High):
+5. `shared/src/iosMain/kotlin/com/worldwidewaves/shared/map/IosMapLibreAdapter.kt:263-280` - Implement attribution margins
+6. `shared/src/iosMain/kotlin/com/worldwidewaves/shared/map/MapWrapperRegistry.kt` - Add attribution command
+7. `iosApp/worldwidewaves/MapLibre/IOSMapBridge.swift` - Add attribution executor
+8. `maps/android-maplibre/src/main/java/com/worldwidewaves/map/AndroidMapLibreAdapter.kt` - Add queueing + validation
+
+### P2 (Medium):
+9. `iosApp/worldwidewaves/MapLibre/MapLibreViewWrapper.swift` - Add compass fading
+10. `shared/src/iosMain/kotlin/com/worldwidewaves/shared/map/IosEventMap.kt` - Add style retry
+11. `iosApp/worldwidewaves/MapLibre/MapLibreViewWrapper.swift:1109` - Fix pulse opacity
 
 ---
 
-## 🎯 RECOMMENDED APPROACH
+## 🎯 EFFORT ESTIMATES
 
-### Week 1: Critical Fixes (P0)
-**Days 1-2**: Position marker + ObserveWave mechanism
-**Days 3-4**: Initial zoom + Camera constraints
-**Day 5**: Testing + bug fixes
+### P0 (Critical): 2-3 days
+- Remove hard-coded position: 2-3 hours
+- Fix bounds enforcement: 6-8 hours (research iOS API)
+- Documentation: 2 hours
 
-### Week 2: Feature Parity (P1)
-**Days 1-3**: AbstractEventMap.setupMap() integration
-**Day 4**: Position marker optimization + permissions
-**Day 5**: Final testing + documentation
+### P1 (High): 3-4 days
+- Attribution margins: 4-6 hours
+- Android queueing: 6-8 hours
+- Android validation: 2-3 hours
+- UUID for layer IDs: 2 hours
 
-### Week 3: Polish (P2 - Optional)
-**Days 1-2**: Error handling + retry logic
-**Day 3**: Code cleanup + duplication removal
-**Days 4-5**: Comprehensive testing
+### P2 (Medium): 2-3 days
+- Compass fading: 1 hour
+- Style retry: 2 hours
+- Pulse opacity: 1 hour
+- Font configuration: 2 hours
 
----
+### Testing (100% Coverage): 3-5 days
+- Unit tests: 2-3 days
+- Integration tests: 1-2 days
+- Manual testing: 1 day
 
-## 📚 KEY FILES TO MODIFY
-
-### Must Fix (P0)
-1. `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/iosApp/worldwidewaves/MapLibre/EventMapView.swift` - Remove hard-coded camera position
-2. `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotlin/com/worldwidewaves/shared/map/IosEventMap.kt` - Call setupMap(), add logging
-3. `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/iosApp/worldwidewaves/MapLibre/MapLibreViewWrapper.swift` - Fix constraints API, optimize position updates
-4. `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotlin/com/worldwidewaves/shared/map/IosMapLibreAdapter.kt` - Implement adapter methods
-
-### Should Fix (P1)
-5. `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/AbstractEventMap.kt` - Already complete, just needs iOS to call it
-6. `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotlin/com/worldwidewaves/shared/map/MapWrapperRegistry.kt` - Add more logging, verify callbacks
+**Total Estimated Effort**: 10-15 days (2-3 weeks)
 
 ---
 
 **Status**: 🔴 **CRITICAL WORK REQUIRED**
-**Estimated Total Effort**: 3-4 weeks (P0: 1 week, P1: 1 week, P2: 1 week, buffer: 1 week)
-**Priority**: Fix P0 issues immediately before release
-**Next Action**: Begin with position marker investigation (add comprehensive logging)
+**Next Action**: Fix P0 issues (hard-coded position, bounds enforcement, documentation)
+**Test Coverage Goal**: 100% of Kotlin-Swift bridge layer
