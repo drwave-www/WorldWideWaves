@@ -63,6 +63,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -234,7 +235,20 @@ class IosEventMap(
             LaunchedEffect(event.id, downloadState.isAvailable) {
                 Log.d("IosEventMap", "Loading style URL for: ${event.id}, isAvailable=${downloadState.isAvailable}")
                 styleURL = event.map.getStyleUri()
-                Log.i("IosEventMap", "Style URL loaded: $styleURL")
+
+                // Retry once if null or file doesn't exist (matches Android pattern)
+                if (styleURL == null) {
+                    Log.w("IosEventMap", "Style URL is null, retrying after 100ms...")
+                    delay(100)
+                    styleURL = event.map.getStyleUri()
+                    if (styleURL == null) {
+                        Log.e("IosEventMap", "Style URL is still null after retry for: ${event.id}")
+                    } else {
+                        Log.i("IosEventMap", "Style URL loaded on retry: $styleURL")
+                    }
+                } else {
+                    Log.i("IosEventMap", "Style URL loaded: $styleURL")
+                }
 
                 // Call setupMap() to initialize camera, constraints, and bounds (like Android)
                 if (!setupMapCalled && styleURL != null && downloadState.isAvailable) {

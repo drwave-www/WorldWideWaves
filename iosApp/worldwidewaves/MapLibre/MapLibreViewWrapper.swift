@@ -1161,9 +1161,9 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
                 annotationView = MLNAnnotationView(reuseIdentifier: reuseIdentifier)
                 annotationView?.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
 
-                // Red pulse circle (matches Android pulseColor)
+                // Red pulse circle (matches Android pulseColor with full opacity)
                 let pulseView = UIView(frame: CGRect(x: 0, y: 0, width: 40, height: 40))
-                pulseView.backgroundColor = UIColor.systemRed.withAlphaComponent(0.3)
+                pulseView.backgroundColor = UIColor(red: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)
                 pulseView.layer.cornerRadius = 20
                 pulseView.tag = 100 // Tag for animation
 
