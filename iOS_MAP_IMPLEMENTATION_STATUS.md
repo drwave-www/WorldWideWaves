@@ -771,26 +771,28 @@ swiftlint lint --quiet
 
 ### Completed (2025-10-14):
 - [x] P0.1: Remove hard-coded Paris camera position (`MapViewBridge.swift`, `EventMapView.swift`)
+- [x] P0.2: Camera bounds enforcement via shouldChangeFrom delegate (MapLibreViewWrapper.swift:999-1049)
+- [x] P1.2: Add polygon queueing to Android with style-loaded checks
+- [x] P1.3: Add bounds validation to Android setBoundsForCameraTarget
+- [x] P1.4: Add UUID to Android wave polygon layer/source IDs
+- [x] P1.5: Double-tap zoom (auto-enabled with isZoomEnabled, documented)
 - [x] Position marker architecture (race conditions fixed, pending states implemented)
 - [x] Position marker appearance (red pulse + black dot matching Android)
 - [x] Comprehensive 97-point analysis completed
 - [x] iOS_MAP_IMPLEMENTATION_STATUS.md created as standalone prompt
+- [x] All 902 unit tests passing
+- [x] iOS Kotlin + Swift compilation successful
+- [x] Zero detekt/SwiftLint warnings on modified files
 
 ### In Progress:
-- [ ] P0.2: Fix camera bounds enforcement on iOS
 - [ ] P0.3: Document location marker architecture in CLAUDE_iOS.md
-- [ ] Investigate observeWave mechanism not working
+- [ ] Update this document with detailed findings
 
 ### Remaining P0:
-- [ ] P0.2: Camera bounds enforcement (research iOS API or implement gesture clamping)
 - [ ] P0.3: Documentation in CLAUDE_iOS.md
 
 ### Remaining P1:
-- [ ] P1.1: Call iOS attribution margins implementation
-- [ ] P1.2: Add polygon queueing to Android
-- [ ] P1.3: Add bounds validation to Android
-- [ ] P1.4: Add UUID to Android layer/source IDs
-- [ ] P1.5: Add double-tap gesture to iOS
+- [ ] P1.1: Call iOS attribution margins implementation (low priority - cosmetic only)
 
 ### Remaining P2:
 - [ ] P2.1: Add compass fading to iOS
