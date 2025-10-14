@@ -76,6 +76,7 @@ class IosMapLibreAdapter(
         callback.invoke()
     }
 
+    @Suppress("ReturnCount") // Multiple returns for guard clauses (null wrapper, zero dimension, valid dimension)
     override fun getWidth(): Double {
         // Get actual map view dimensions from Swift wrapper (not hardcoded defaults)
         val wrapper = MapWrapperRegistry.getWrapper(eventId)
@@ -95,6 +96,7 @@ class IosMapLibreAdapter(
         return DEFAULT_WIDTH
     }
 
+    @Suppress("ReturnCount") // Multiple returns for guard clauses (null wrapper, zero dimension, valid dimension)
     override fun getHeight(): Double {
         // Get actual map view dimensions from Swift wrapper (not hardcoded defaults)
         val wrapper = MapWrapperRegistry.getWrapper(eventId)
