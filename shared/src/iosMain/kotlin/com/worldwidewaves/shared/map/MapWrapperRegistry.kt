@@ -207,6 +207,7 @@ object MapWrapperRegistry {
         locationComponentCallbacks.remove(eventId)
         setUserPositionCallbacks.remove(eventId)
         pendingLocationComponentStates.remove(eventId)
+        pendingUserPositions.remove(eventId)
 
         Log.i(TAG, "✅ Wrapper unregistered and cleanup complete for: $eventId")
     }
@@ -753,6 +754,9 @@ object MapWrapperRegistry {
     private val locationComponentCallbacks = mutableMapOf<String, (Boolean) -> Unit>()
     private val setUserPositionCallbacks = mutableMapOf<String, (Double, Double) -> Unit>()
 
+    // Store pending user position (for race condition handling)
+    private val pendingUserPositions = mutableMapOf<String, Pair<Double, Double>>()
+
     /**
      * Register callback for enabling/disabling location component.
      * Swift wrapper registers this to receive location component enable/disable commands.
@@ -785,6 +789,16 @@ object MapWrapperRegistry {
     ) {
         setUserPositionCallbacks[eventId] = callback
         Log.d(TAG, "User position callback registered for event: $eventId")
+
+        // Apply pending user position if it was set before callback registered
+        val pendingPosition = pendingUserPositions[eventId]
+        if (pendingPosition != null) {
+            Log.i(TAG, "✅ Applying pending user position: (${pendingPosition.first}, ${pendingPosition.second}) for event: $eventId")
+            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+                callback.invoke(pendingPosition.first, pendingPosition.second)
+            }
+            pendingUserPositions.remove(eventId)
+        }
     }
 
     /**
@@ -834,9 +848,12 @@ object MapWrapperRegistry {
                 callback.invoke(latitude, longitude)
                 Log.v(TAG, "✅ Position callback invoked on main queue")
             }
+            // Clear pending position after successful dispatch
+            pendingUserPositions.remove(eventId)
         } else {
-            Log.w(TAG, "⚠️ No user position callback registered for event: $eventId")
-            Log.w(TAG, "Available callbacks: ${setUserPositionCallbacks.keys}")
+            Log.w(TAG, "⚠️ No user position callback registered for event: $eventId - storing latest position")
+            // Store only the latest position (overwrites previous)
+            pendingUserPositions[eventId] = Pair(latitude, longitude)
         }
     }
 
@@ -939,5 +956,6 @@ object MapWrapperRegistry {
         locationComponentCallbacks.clear()
         setUserPositionCallbacks.clear()
         pendingLocationComponentStates.clear()
+        pendingUserPositions.clear()
     }
 }
