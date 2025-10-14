@@ -72,13 +72,12 @@ jobs:
 
       - name: Build iOS App (Simulator)
         run: |
-          # Build for any simulator (build-only, no destination needed for CI)
-          # Using -sdk iphonesimulator builds for simulator without requiring specific destination
+          # Build for any iOS simulator using generic placeholder destination
           xcodebuild \
             -project iosApp/worldwidewaves.xcodeproj \
             -scheme worldwidewaves \
             -configuration Debug \
-            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=Any iOS Simulator Device' \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             build
