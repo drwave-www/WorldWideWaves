@@ -72,16 +72,17 @@ jobs:
 
       - name: Build iOS App (Simulator)
         run: |
-          # Use iPhone SE 3rd gen with iOS 17.5 (available in GitHub Actions)
-          # GitHub Actions macos-15 runners have iOS 17.5 but not iOS 18.0
+          # Build for simulator only (no specific device)
+          # This bypasses the iOS 18.0 requirement in the scheme
           xcodebuild \
             -project iosApp/worldwidewaves.xcodeproj \
             -scheme worldwidewaves \
             -configuration Debug \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone SE (3rd generation),OS=17.5' \
+            -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
+            ONLY_ACTIVE_ARCH=NO \
             build
         env:
           NSUnbufferedIO: YES
