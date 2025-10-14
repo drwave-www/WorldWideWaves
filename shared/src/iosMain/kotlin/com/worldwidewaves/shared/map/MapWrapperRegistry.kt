@@ -46,6 +46,13 @@ sealed class CameraCommand {
     data class SetMaxZoom(
         val maxZoom: Double,
     ) : CameraCommand()
+
+    data class SetAttributionMargins(
+        val left: Int,
+        val top: Int,
+        val right: Int,
+        val bottom: Int,
+    ) : CameraCommand()
 }
 
 /**
@@ -237,6 +244,8 @@ object MapWrapperRegistry {
                 is CameraCommand.SetConstraintBounds -> "SetConstraintBounds"
                 is CameraCommand.SetMinZoom -> "SetMinZoom(${command.minZoom})"
                 is CameraCommand.SetMaxZoom -> "SetMaxZoom(${command.maxZoom})"
+                is CameraCommand.SetAttributionMargins ->
+                    "SetAttributionMargins(${command.left},${command.top},${command.right},${command.bottom})"
             }
         Log.i(TAG, "📸 Storing camera command for event: $eventId → $commandDetails")
 
@@ -245,6 +254,7 @@ object MapWrapperRegistry {
             is CameraCommand.SetConstraintBounds,
             is CameraCommand.SetMinZoom,
             is CameraCommand.SetMaxZoom,
+            is CameraCommand.SetAttributionMargins,
             -> {
                 // Queue configuration commands (all must execute in order)
                 val queue = pendingConfigCommands.getOrPut(eventId) { mutableListOf() }
@@ -548,6 +558,20 @@ object MapWrapperRegistry {
     ) {
         Log.d(TAG, "Setting max zoom command: $maxZoom for event: $eventId")
         setPendingCameraCommand(eventId, CameraCommand.SetMaxZoom(maxZoom))
+    }
+
+    /**
+     * Set attribution margins command (Swift will execute).
+     */
+    fun setAttributionMarginsCommand(
+        eventId: String,
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int,
+    ) {
+        Log.d(TAG, "Setting attribution margins command: ($left,$top,$right,$bottom) for event: $eventId")
+        setPendingCameraCommand(eventId, CameraCommand.SetAttributionMargins(left, top, right, bottom))
     }
 
     /**

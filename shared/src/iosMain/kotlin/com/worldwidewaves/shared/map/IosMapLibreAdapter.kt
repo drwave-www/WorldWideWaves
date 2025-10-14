@@ -267,16 +267,7 @@ class IosMapLibreAdapter(
         bottom: Int,
     ) {
         Log.d(TAG, "Setting attribution margins: left=$left, top=$top, right=$right, bottom=$bottom for event: $eventId")
-
-        // Attribution margins can be set via MapLibreViewWrapper.setAttributionMargins()
-        // This method is implemented in MapLibreViewWrapper.swift (lines 367-419)
-        // and can be called from Swift via IOSMapBridge.setAttributionMargins()
-        //
-        // Currently this method is never called from the shared Kotlin code.
-        // If needed in the future, implement via MapWrapperRegistry command pattern
-        // similar to camera commands, or call directly via Swift bridge in iosApp target.
-        //
-        // Implementation is complete on the Swift side and ready to use.
+        MapWrapperRegistry.setAttributionMarginsCommand(eventId, left, top, right, bottom)
     }
 
     override fun addWavePolygons(
