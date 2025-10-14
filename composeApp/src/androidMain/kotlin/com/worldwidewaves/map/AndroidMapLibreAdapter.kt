@@ -70,6 +70,10 @@ class AndroidMapLibreAdapter(
 ) : MapLibreAdapter<MapLibreMap> {
     companion object {
         private const val TAG = "AndroidMapLibreAdapter"
+        private const val MIN_LATITUDE = -90.0
+        private const val MAX_LATITUDE = 90.0
+        private const val MIN_LONGITUDE = -180.0
+        private const val MAX_LONGITUDE = 180.0
     }
 
     // -- Public/Override properties
@@ -352,11 +356,11 @@ class AndroidMapLibreAdapter(
         require(constraintBounds.ne.lat > constraintBounds.sw.lat) {
             "Invalid bounds: ne.lat (${constraintBounds.ne.lat}) must be > sw.lat (${constraintBounds.sw.lat})"
         }
-        require(constraintBounds.sw.lat >= -90 && constraintBounds.ne.lat <= 90) {
-            "Latitude out of range: must be between -90 and 90"
+        require(constraintBounds.sw.lat >= MIN_LATITUDE && constraintBounds.ne.lat <= MAX_LATITUDE) {
+            "Latitude out of range: must be between $MIN_LATITUDE and $MAX_LATITUDE"
         }
-        require(constraintBounds.sw.lng >= -180 && constraintBounds.ne.lng <= 180) {
-            "Longitude out of range: must be between -180 and 180"
+        require(constraintBounds.sw.lng >= MIN_LONGITUDE && constraintBounds.ne.lng <= MAX_LONGITUDE) {
+            "Longitude out of range: must be between $MIN_LONGITUDE and $MAX_LONGITUDE"
         }
 
         Log.v(
@@ -371,6 +375,7 @@ class AndroidMapLibreAdapter(
 
     // -- Add the Wave polygons to the map
 
+    @Suppress("ReturnCount") // Multiple returns OK for guard clauses (null check, empty check, style not loaded)
     override fun addWavePolygons(
         polygons: List<Any>,
         clearExisting: Boolean,
