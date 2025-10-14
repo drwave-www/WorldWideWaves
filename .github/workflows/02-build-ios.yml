@@ -72,20 +72,14 @@ jobs:
 
       - name: Build iOS App (Simulator)
         run: |
-          # List available simulators for debugging
-          echo "Available simulators:"
-          xcrun simctl list devices available | grep iPhone || true
-
-          # Try to find any available iPhone simulator
-          SIMULATOR_NAME=$(xcrun simctl list devices available | grep "iPhone" | head -n 1 | sed 's/.*(\([^)]*\)).*/\1/' || echo "iPhone 16")
-          echo "Using simulator: $SIMULATOR_NAME"
-
+          # Use iPhone SE 3rd gen with iOS 17.5 (available in GitHub Actions)
+          # GitHub Actions macos-15 runners have iOS 17.5 but not iOS 18.0
           xcodebuild \
             -project iosApp/worldwidewaves.xcodeproj \
             -scheme worldwidewaves \
             -configuration Debug \
             -sdk iphonesimulator \
-            -destination "platform=iOS Simulator,name=iPhone 16" \
+            -destination 'platform=iOS Simulator,name=iPhone SE (3rd generation),OS=17.5' \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             build
