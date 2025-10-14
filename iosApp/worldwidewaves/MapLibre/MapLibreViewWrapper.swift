@@ -470,10 +470,9 @@ import Shared
         guard styleIsLoaded, let mapView = mapView, let style = mapView.style else {
             let hasMap = mapView != nil
             let hasStyle = mapView?.style != nil
-            WWWLog.w(
-                Self.tag,
-                "Style not ready - storing \(polygons.count) polygons (most recent, mapView: \(hasMap), style: \(hasStyle))"
-            )
+            let message = "Style not ready - storing \(polygons.count) polygons " +
+                "(most recent, mapView: \(hasMap), style: \(hasStyle))"
+            WWWLog.w(Self.tag, message)
             pendingPolygons = polygons
             return
         }
