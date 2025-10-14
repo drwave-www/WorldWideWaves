@@ -84,8 +84,9 @@ class AndroidMapLibreAdapter(
     private val _currentZoom = MutableStateFlow(0.0)
     override val currentZoom: StateFlow<Double> = _currentZoom
 
-    // Queue for polygons that arrive before style loads (matches iOS pattern)
-    private val pendingPolygonQueue = mutableListOf<List<Polygon>>()
+    // Queue for polygons that arrive before style loads
+    // Only stores the most recent set since wave progression contains all previous circles
+    private var pendingPolygons: List<Polygon>? = null
     private var styleLoaded = false
 
     override fun getWidth(): Double {
@@ -151,12 +152,12 @@ class AndroidMapLibreAdapter(
             Log.i(TAG, "Style loaded successfully")
             styleLoaded = true
 
-            // Flush pending polygons that arrived before style loaded (matches iOS pattern)
-            if (pendingPolygonQueue.isNotEmpty()) {
-                Log.i(TAG, "Flushing polygon queue: ${pendingPolygonQueue.size} polygon sets")
-                val allPolygons = pendingPolygonQueue.flatten()
-                addWavePolygons(allPolygons, clearExisting = true)
-                pendingPolygonQueue.clear()
+            // Render pending polygons that arrived before style loaded
+            // Only the most recent set matters (wave progression contains all previous circles)
+            pendingPolygons?.let { polygons ->
+                Log.i(TAG, "Rendering pending polygons: ${polygons.size} polygons")
+                addWavePolygons(polygons, clearExisting = true)
+                pendingPolygons = null
             }
 
             callback()
@@ -387,17 +388,11 @@ class AndroidMapLibreAdapter(
             return
         }
 
-        // If style not loaded yet, queue polygons for later (matches iOS pattern)
+        // If style not loaded yet, store most recent polygons for later
+        // Only the most recent set matters (wave progression contains all previous circles)
         if (!styleLoaded) {
-            Log.w(
-                TAG,
-                "Style not ready - queueing ${wavePolygons.size} polygons",
-            )
-            if (clearExisting) {
-                pendingPolygonQueue.clear()
-            }
-            pendingPolygonQueue.add(wavePolygons)
-            Log.d(TAG, "Polygon queue now contains ${pendingPolygonQueue.size} polygon sets")
+            Log.w(TAG, "Style not ready - storing ${wavePolygons.size} polygons (most recent)")
+            pendingPolygons = wavePolygons
             return
         }
 

@@ -49,7 +49,8 @@ import Shared
     // private static let pollingInterval: TimeInterval = 0.1 // 100ms
 
     // Queue for polygons that arrive before style loads
-    private var pendingPolygonQueue: [[CLLocationCoordinate2D]] = []
+    // Only stores the most recent set since wave progression contains all previous circles
+    private var pendingPolygons: [[CLLocationCoordinate2D]]?
     private var styleIsLoaded: Bool = false
 
     // Queue for constraint bounds that arrive before style loads
@@ -464,21 +465,16 @@ import Shared
             """
         )
 
-        // If style not loaded yet, queue polygons for later
+        // If style not loaded yet, store most recent polygons for later
+        // Only the most recent set matters (wave progression contains all previous circles)
         guard styleIsLoaded, let mapView = mapView, let style = mapView.style else {
             let hasMap = mapView != nil
             let hasStyle = mapView?.style != nil
             WWWLog.w(
                 Self.tag,
-                "Style not ready - queueing \(polygons.count) polygons (mapView: \(hasMap), style: \(hasStyle))"
+                "Style not ready - storing \(polygons.count) polygons (most recent, mapView: \(hasMap), style: \(hasStyle))"
             )
-
-            // Queue polygons to render when style loads
-            if clearExisting {
-                pendingPolygonQueue.removeAll()
-            }
-            pendingPolygonQueue.append(contentsOf: polygons)
-            WWWLog.d(Self.tag, "Polygon queue now contains \(pendingPolygonQueue.count) polygons")
+            pendingPolygons = polygons
             return
         }
 
@@ -963,11 +959,12 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         // IMMEDIATE EXECUTION: Execute all pending commands now that map is ready
         WWWLog.i(Self.tag, "⚡ Executing pending commands immediately after style load...")
 
-        // 1. Render queued polygons that arrived before style loaded
-        if !pendingPolygonQueue.isEmpty {
-            WWWLog.i(Self.tag, "📦 Flushing polygon queue: \(pendingPolygonQueue.count) polygons")
-            addWavePolygons(polygons: pendingPolygonQueue, clearExisting: true)
-            pendingPolygonQueue.removeAll()
+        // 1. Render pending polygons that arrived before style loaded
+        // Only the most recent set matters (wave progression contains all previous circles)
+        if let polygons = pendingPolygons {
+            WWWLog.i(Self.tag, "📦 Rendering pending polygons: \(polygons.count) polygons")
+            addWavePolygons(polygons: polygons, clearExisting: true)
+            pendingPolygons = nil
         }
 
         // 2. Execute pending camera commands (initial positioning, constraints)
