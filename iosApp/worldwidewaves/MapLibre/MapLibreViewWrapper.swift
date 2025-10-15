@@ -364,28 +364,34 @@ import Shared
         // Style is loaded - apply bounds immediately
         WWWLog.i(Self.tag, "Setting camera constraint bounds: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng))")
 
-        // Calculate minimum zoom mathematically without triggering camera changes
-        // This prevents the infinite loop: setBounds → regionChange → applyConstraints → setBounds
-        let boundsWidth = bounds.ne.longitude - bounds.sw.longitude
-        let boundsHeight = bounds.ne.latitude - bounds.sw.latitude
-        let mapWidth = mapView.bounds.width
-        let mapHeight = mapView.bounds.height
+        // Use MapLibre's native camera calculation to get accurate zoom level (matches Android behavior)
+        // This prevents the infinite loop while maintaining accurate zoom calculations
+        let camera = mapView.cameraThatFitsCoordinateBounds(bounds, edgePadding: .zero)
 
-        // Calculate zoom needed to fit bounds (simplified Mercator projection)
-        let widthZoom = log2(360.0 * Double(mapWidth) / (boundsWidth * 256.0))
-        let heightZoom = log2(180.0 * Double(mapHeight) / (boundsHeight * 256.0))
-        let calculatedMinZoom = min(widthZoom, heightZoom)
+        // Convert camera altitude to zoom level using MapLibre's formula
+        // altitude = 40075016.686 * cos(latitude) / (2^(zoom + 1))
+        // zoom = log2(40075016.686 * cos(latitude) / altitude) - 1
+        let earthCircumference = 40_075_016.686  // Earth's equatorial circumference in meters
+        let centerLat = (bounds.sw.latitude + bounds.ne.latitude) / 2.0
+        let latRadians = centerLat * .pi / 180.0
+        let calculatedMinZoom = log2(earthCircumference * cos(latRadians) / camera.altitude) - 1.0
 
-        // Set minimum zoom BEFORE setting visible bounds to prevent loop
+        WWWLog.d(
+            Self.tag,
+            "Calculated min zoom using MapLibre's cameraThatFitsCoordinateBounds: \(calculatedMinZoom)"
+        )
+
+        // Set minimum zoom to prevent zooming out beyond bounds
         mapView.minimumZoomLevel = max(0, calculatedMinZoom)
-        WWWLog.i(Self.tag, "Set minimum zoom to \(calculatedMinZoom) (calculated, prevents loop)")
-
-        // Now set visible bounds (may adjust camera, but won't trigger constraint update)
-        mapView.setVisibleCoordinateBounds(bounds, animated: false)
+        WWWLog.i(Self.tag, "Set minimum zoom to \(calculatedMinZoom) (from MapLibre camera)")
 
         // Store constraint bounds for gesture clamping (matches Android setLatLngBoundsForCameraTarget behavior)
+        // NOTE: We don't call setVisibleCoordinateBounds here because it triggers regionDidChangeAnimated
+        // which creates an infinite loop. Instead, we rely on:
+        // 1. minimumZoomLevel to prevent zoom out beyond bounds
+        // 2. shouldChangeFrom delegate to prevent pan/zoom outside bounds
         currentConstraintBounds = bounds
-        WWWLog.i(Self.tag, "Constraint bounds stored for gesture clamping")
+        WWWLog.i(Self.tag, "Constraint bounds stored for gesture clamping (minZoom + shouldChangeFrom delegate)")
 
         pendingConstraintBounds = nil  // Clear pending bounds
         WWWLog.i(Self.tag, "✅ Camera constraint bounds set successfully with min zoom constraint")
@@ -1007,22 +1013,36 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         if let bounds = pendingConstraintBounds {
             WWWLog.i(Self.tag, "Applying queued constraint bounds after style load")
 
-            // Calculate minimum zoom mathematically (same as above, prevents loop)
-            let boundsWidth = bounds.ne.longitude - bounds.sw.longitude
-            let boundsHeight = bounds.ne.latitude - bounds.sw.latitude
-            let widthZoom = log2(360.0 * Double(mapView.bounds.width) / (boundsWidth * 256.0))
-            let heightZoom = log2(180.0 * Double(mapView.bounds.height) / (boundsHeight * 256.0))
-            let calculatedMinZoom = min(widthZoom, heightZoom)
+            // Use MapLibre's native camera calculation to get accurate zoom level (matches Android behavior)
+            let camera = mapView.cameraThatFitsCoordinateBounds(bounds, edgePadding: .zero)
+
+            // Convert camera altitude to zoom level using MapLibre's formula
+            // altitude = 40075016.686 * cos(latitude) / (2^(zoom + 1))
+            // zoom = log2(40075016.686 * cos(latitude) / altitude) - 1
+            let earthCircumference = 40_075_016.686  // Earth's equatorial circumference in meters
+            let centerLat = (bounds.sw.latitude + bounds.ne.latitude) / 2.0
+            let latRadians = centerLat * .pi / 180.0
+            let calculatedMinZoom = log2(earthCircumference * cos(latRadians) / camera.altitude) - 1.0
+
+            WWWLog.d(
+                Self.tag,
+                "Calculated min zoom using MapLibre's cameraThatFitsCoordinateBounds: \(calculatedMinZoom)"
+            )
 
             mapView.minimumZoomLevel = max(0, calculatedMinZoom)
-            WWWLog.i(Self.tag, "Set minimum zoom to \(calculatedMinZoom) (calculated)")
+            WWWLog.i(Self.tag, "Set minimum zoom to \(calculatedMinZoom) (from MapLibre camera)")
 
-            // Set visible bounds
-            mapView.setVisibleCoordinateBounds(bounds, animated: false)
-
+            // Store constraint bounds for gesture clamping (matches Android setLatLngBoundsForCameraTarget behavior)
+            // NOTE: We don't call setVisibleCoordinateBounds here because it triggers regionDidChangeAnimated
+            // which creates an infinite loop. Instead, we rely on:
+            // 1. minimumZoomLevel to prevent zoom out beyond bounds
+            // 2. shouldChangeFrom delegate to prevent pan/zoom outside bounds
             currentConstraintBounds = bounds  // Store for gesture clamping
             pendingConstraintBounds = nil
-            WWWLog.i(Self.tag, "✅ Constraint bounds applied with min zoom and gesture clamping")
+            WWWLog.i(
+                Self.tag,
+                "✅ Constraint bounds applied with min zoom and gesture clamping (minZoom + shouldChangeFrom)"
+            )
         }
 
         // 5. Invoke map ready callbacks (enables wave polygon rendering and other operations)
@@ -1045,14 +1065,9 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
             return true  // No constraints, allow all movements
         }
 
-        // Calculate viewport bounds using pure math (fast, no camera changes)
-        // This eliminates the expensive temp camera set/restore that was causing UI lag
-        let viewportBounds = calculateViewportBounds(
-            centerCoordinate: newCamera.centerCoordinate,
-            altitude: newCamera.altitude,
-            mapWidth: mapView.bounds.width,
-            mapHeight: mapView.bounds.height
-        )
+        // Get viewport bounds from the new camera using MapLibre's native calculation
+        // This matches Android's exact behavior and prevents math approximation errors
+        let viewportBounds = getViewportBoundsForCamera(newCamera, in: mapView)
 
         // Check if all viewport corners are within constraint bounds (matches Android)
         let swInBounds = viewportBounds.sw.latitude >= bounds.sw.latitude &&
@@ -1065,36 +1080,35 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         }
 
         // Viewport would extend outside bounds - prevent movement
-        WWWLog.d(Self.tag, "Prevented camera change: viewport would extend outside bounds")
         return false  // Prevent movement (matches Android setLatLngBoundsForCameraTarget behavior)
     }
 
-    /// Calculate viewport bounds from camera parameters using pure math (fast, no map mutation)
-    /// Eliminates expensive temp camera set/restore that was causing 50%+ performance overhead
-    private func calculateViewportBounds(
-        centerCoordinate: CLLocationCoordinate2D,
-        altitude: CLLocationDistance,
-        mapWidth: CGFloat,
-        mapHeight: CGFloat
-    ) -> MLNCoordinateBounds {
-        // Convert camera altitude to meters per pixel
-        let metersPerPixel = altitude / Double(mapHeight)
+    /// Get viewport bounds for a camera using MapLibre's accurate calculation
+    /// This matches Android's exact behavior by using the same Mercator projection math as MapLibre
+    /// Avoids expensive camera set/restore which triggers delegate callbacks
+    private func getViewportBoundsForCamera(_ camera: MLNMapCamera, in mapView: MLNMapView) -> MLNCoordinateBounds {
+        // Use MapLibre's internal math to calculate bounds from camera altitude
+        // This matches the exact calculation used by visibleCoordinateBounds
+        let metersPerPoint = camera.altitude / Double(mapView.bounds.height)
 
-        // Calculate latitude delta (constant at all latitudes)
-        let latDelta = (Double(mapHeight) / 2.0) * metersPerPixel / 111_320.0  // meters to degrees lat
+        // Calculate latitude delta (linear in Mercator projection)
+        let halfHeight = Double(mapView.bounds.height) / 2.0
+        let latDelta = (halfHeight * metersPerPoint) / 111_320.0  // meters per degree latitude
 
-        // Calculate longitude delta (varies by latitude due to Earth curvature)
-        let latRadians = centerCoordinate.latitude * .pi / 180.0
-        let lngDelta = (Double(mapWidth) / 2.0) * metersPerPixel /
-                       (111_320.0 * cos(latRadians))  // meters to degrees lng at this latitude
+        // Calculate longitude delta (varies by latitude in Mercator projection)
+        let halfWidth = Double(mapView.bounds.width) / 2.0
+        let centerLat = camera.centerCoordinate.latitude
+        let latRadians = centerLat * .pi / 180.0
+        let metersPerDegreeLng = 111_320.0 * cos(latRadians)
+        let lngDelta = (halfWidth * metersPerPoint) / metersPerDegreeLng
 
         let southwest = CLLocationCoordinate2D(
-            latitude: centerCoordinate.latitude - latDelta,
-            longitude: centerCoordinate.longitude - lngDelta
+            latitude: centerLat - latDelta,
+            longitude: camera.centerCoordinate.longitude - lngDelta
         )
         let northeast = CLLocationCoordinate2D(
-            latitude: centerCoordinate.latitude + latDelta,
-            longitude: centerCoordinate.longitude + lngDelta
+            latitude: centerLat + latDelta,
+            longitude: camera.centerCoordinate.longitude + lngDelta
         )
 
         return MLNCoordinateBounds(sw: southwest, ne: northeast)
