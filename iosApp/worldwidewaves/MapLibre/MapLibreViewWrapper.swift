@@ -991,61 +991,47 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         WWWLog.d(Self.tag, "Map dimensions updated: \(mapView.bounds.size.width) x \(mapView.bounds.size.height)")
 
         // IMMEDIATE EXECUTION: Execute all pending commands now that map is ready
+        // ORDER MATTERS: Constraints BEFORE camera positioning (matches Android)
         WWWLog.i(Self.tag, "⚡ Executing pending commands immediately after style load...")
 
-        // 1. Render pending polygons that arrived before style loaded
-        // Only the most recent set matters (wave progression contains all previous circles)
+        // 1. Apply queued constraint bounds FIRST (before any camera movements)
+        if let bounds = pendingConstraintBounds {
+            WWWLog.i(Self.tag, "📐 Applying constraint bounds BEFORE camera commands (matches Android)")
+
+            // Use MapLibre's native camera calculation to get accurate zoom level
+            let camera = mapView.cameraThatFitsCoordinateBounds(bounds, edgePadding: .zero)
+
+            // Convert camera altitude to zoom level using MapLibre's formula
+            let earthCircumference = 40_075_016.686
+            let centerLat = (bounds.sw.latitude + bounds.ne.latitude) / 2.0
+            let latRadians = centerLat * .pi / 180.0
+            let calculatedMinZoom = log2(earthCircumference * cos(latRadians) / camera.altitude) - 1.0
+
+            mapView.minimumZoomLevel = max(0, calculatedMinZoom)
+            WWWLog.i(Self.tag, "Set min zoom: \(calculatedMinZoom) (prevents over-zoom out)")
+
+            // Store constraint bounds for gesture enforcement via shouldChangeFrom delegate
+            currentConstraintBounds = bounds
+            pendingConstraintBounds = nil
+            WWWLog.i(Self.tag, "✅ Constraint bounds applied (minZoom + shouldChangeFrom delegate)")
+        }
+
+        // 2. Render pending polygons that arrived before style loaded
         if let polygons = pendingPolygons {
             WWWLog.i(Self.tag, "📦 Rendering pending polygons: \(polygons.count) polygons")
             addWavePolygons(polygons: polygons, clearExisting: true)
             pendingPolygons = nil
         }
 
-        // 2. Execute pending camera commands (initial positioning, constraints)
-        WWWLog.d(Self.tag, "Checking for pending camera commands...")
+        // 3. Execute pending camera commands (NOW within constraints - matches Android)
+        WWWLog.d(Self.tag, "📸 Executing camera commands (now within constraints)...")
         IOSMapBridge.executePendingCameraCommand(eventId: eventId)
 
-        // 3. Render pending wave polygons from registry (initial wave state)
+        // 4. Render pending wave polygons from registry
         WWWLog.d(Self.tag, "Checking for pending polygons in registry...")
         _ = IOSMapBridge.renderPendingPolygons(eventId: eventId)
 
-        // 4. Apply queued constraint bounds if any
-        if let bounds = pendingConstraintBounds {
-            WWWLog.i(Self.tag, "Applying queued constraint bounds after style load")
-
-            // Use MapLibre's native camera calculation to get accurate zoom level (matches Android behavior)
-            let camera = mapView.cameraThatFitsCoordinateBounds(bounds, edgePadding: .zero)
-
-            // Convert camera altitude to zoom level using MapLibre's formula
-            // altitude = 40075016.686 * cos(latitude) / (2^(zoom + 1))
-            // zoom = log2(40075016.686 * cos(latitude) / altitude) - 1
-            let earthCircumference = 40_075_016.686  // Earth's equatorial circumference in meters
-            let centerLat = (bounds.sw.latitude + bounds.ne.latitude) / 2.0
-            let latRadians = centerLat * .pi / 180.0
-            let calculatedMinZoom = log2(earthCircumference * cos(latRadians) / camera.altitude) - 1.0
-
-            WWWLog.d(
-                Self.tag,
-                "Calculated min zoom using MapLibre's cameraThatFitsCoordinateBounds: \(calculatedMinZoom)"
-            )
-
-            mapView.minimumZoomLevel = max(0, calculatedMinZoom)
-            WWWLog.i(Self.tag, "Set minimum zoom to \(calculatedMinZoom) (from MapLibre camera)")
-
-            // Store constraint bounds for gesture clamping (matches Android setLatLngBoundsForCameraTarget behavior)
-            // NOTE: We don't call setVisibleCoordinateBounds here because it triggers regionDidChangeAnimated
-            // which creates an infinite loop. Instead, we rely on:
-            // 1. minimumZoomLevel to prevent zoom out beyond bounds
-            // 2. shouldChangeFrom delegate to prevent pan/zoom outside bounds
-            currentConstraintBounds = bounds  // Store for gesture clamping
-            pendingConstraintBounds = nil
-            WWWLog.i(
-                Self.tag,
-                "✅ Constraint bounds applied with min zoom and gesture clamping (minZoom + shouldChangeFrom)"
-            )
-        }
-
-        // 5. Invoke map ready callbacks (enables wave polygon rendering and other operations)
+        // 5. Invoke map ready callbacks (enables setupMap and other operations)
         WWWLog.i(Self.tag, "Invoking map ready callbacks...")
         IOSMapBridge.invokeMapReadyCallbacks(eventId: eventId)
 
