@@ -364,22 +364,23 @@ import Shared
         // Style is loaded - apply bounds immediately
         WWWLog.i(Self.tag, "Setting camera constraint bounds: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng))")
 
-        // Calculate minimum zoom that fits entire bounds in viewport (matches Android behavior)
-        // This prevents zooming out so far that corners appear in middle of screen
-        let camera = mapView.cameraThatFitsCoordinateBounds(bounds, edgePadding: .zero)
-        // Convert camera altitude to zoom level
-        // Note: We need to temporarily set the camera to calculate the zoom, then get the resulting zoom level
-        let currentZoom = mapView.zoomLevel
-        mapView.setCamera(camera, animated: false)
-        let calculatedMinZoom = mapView.zoomLevel
-        // Restore original zoom if it was higher
-        if currentZoom > calculatedMinZoom {
-            mapView.zoomLevel = currentZoom
-        }
-        mapView.minimumZoomLevel = calculatedMinZoom
-        WWWLog.i(Self.tag, "Set minimum zoom to \(calculatedMinZoom) (prevents excessive zoom out)")
+        // Calculate minimum zoom mathematically without triggering camera changes
+        // This prevents the infinite loop: setBounds → regionChange → applyConstraints → setBounds
+        let boundsWidth = bounds.ne.longitude - bounds.sw.longitude
+        let boundsHeight = bounds.ne.latitude - bounds.sw.latitude
+        let mapWidth = mapView.bounds.width
+        let mapHeight = mapView.bounds.height
 
-        // Set visible bounds (moves camera to show bounds)
+        // Calculate zoom needed to fit bounds (simplified Mercator projection)
+        let widthZoom = log2(360.0 * Double(mapWidth) / (boundsWidth * 256.0))
+        let heightZoom = log2(180.0 * Double(mapHeight) / (boundsHeight * 256.0))
+        let calculatedMinZoom = min(widthZoom, heightZoom)
+
+        // Set minimum zoom BEFORE setting visible bounds to prevent loop
+        mapView.minimumZoomLevel = max(0, calculatedMinZoom)
+        WWWLog.i(Self.tag, "Set minimum zoom to \(calculatedMinZoom) (calculated, prevents loop)")
+
+        // Now set visible bounds (may adjust camera, but won't trigger constraint update)
         mapView.setVisibleCoordinateBounds(bounds, animated: false)
 
         // Store constraint bounds for gesture clamping (matches Android setLatLngBoundsForCameraTarget behavior)
@@ -1006,18 +1007,19 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         if let bounds = pendingConstraintBounds {
             WWWLog.i(Self.tag, "Applying queued constraint bounds after style load")
 
-            // Calculate and set minimum zoom (matches Android behavior)
-            let camera = mapView.cameraThatFitsCoordinateBounds(bounds, edgePadding: .zero)
-            let currentZoom = mapView.zoomLevel
-            mapView.setCamera(camera, animated: false)
-            let calculatedMinZoom = mapView.zoomLevel
-            if currentZoom > calculatedMinZoom {
-                mapView.zoomLevel = currentZoom
-            }
-            mapView.minimumZoomLevel = calculatedMinZoom
-            WWWLog.i(Self.tag, "Set minimum zoom to \(calculatedMinZoom)")
+            // Calculate minimum zoom mathematically (same as above, prevents loop)
+            let boundsWidth = bounds.ne.longitude - bounds.sw.longitude
+            let boundsHeight = bounds.ne.latitude - bounds.sw.latitude
+            let widthZoom = log2(360.0 * Double(mapView.bounds.width) / (boundsWidth * 256.0))
+            let heightZoom = log2(180.0 * Double(mapView.bounds.height) / (boundsHeight * 256.0))
+            let calculatedMinZoom = min(widthZoom, heightZoom)
 
+            mapView.minimumZoomLevel = max(0, calculatedMinZoom)
+            WWWLog.i(Self.tag, "Set minimum zoom to \(calculatedMinZoom) (calculated)")
+
+            // Set visible bounds
             mapView.setVisibleCoordinateBounds(bounds, animated: false)
+
             currentConstraintBounds = bounds  // Store for gesture clamping
             pendingConstraintBounds = nil
             WWWLog.i(Self.tag, "✅ Constraint bounds applied with min zoom and gesture clamping")

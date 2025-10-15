@@ -230,8 +230,13 @@ fun makeEventViewController(eventId: String): UIViewController =
                 IosEventMap(
                     event,
                     onMapClick = { enabler.openFullMapActivity(event.id) },
-                    // Default config (EVENT camera position) - gestures disabled, map shows event bounds
-                    // This matches Android's EventDetailActivity which uses default config
+                    mapConfig =
+                        EventMapConfig(
+                            initialCameraPosition = MapCameraPosition.WINDOW,
+                            autoTargetUserOnFirstLocation = false,
+                        ),
+                    // WINDOW mode: Fits event area to screen with aspect ratio adjustment (matches Android)
+                    // Note: Gestures remain DISABLED (only enabled when opening full map screen)
                     registryKey = "${event.id}-event", // Unique key to prevent conflicts with full map
                 )
             },
