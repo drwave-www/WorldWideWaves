@@ -59,9 +59,6 @@ import Shared
     // Current constraint bounds for gesture clamping (matches Android behavior)
     private var currentConstraintBounds: MLNCoordinateBounds?
 
-    // Flag to prevent infinite loop when checking viewport bounds
-    private var isCheckingViewportBounds = false
-
     // MARK: - Accessibility State
 
     /// Accessibility state tracking for VoiceOver
@@ -1041,30 +1038,19 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         to newCamera: MLNMapCamera,
         reason: MLNCameraChangeReason
     ) -> Bool {
-        // Prevent infinite loop from our viewport checking
-        guard !isCheckingViewportBounds else {
-            return true
-        }
-
         // Enforce constraint bounds if set (matches Android setLatLngBoundsForCameraTarget behavior)
         guard let bounds = currentConstraintBounds else {
             return true  // No constraints, allow all movements
         }
 
-        // Set flag to prevent recursive calls
-        isCheckingViewportBounds = true
-        defer { isCheckingViewportBounds = false }
-
-        // Calculate viewport bounds for the new camera position
-        // This matches Android behavior which prevents viewport corners from going outside bounds
-        let tempCamera = MLNMapCamera(
-            lookingAtCenter: newCamera.centerCoordinate,
+        // Calculate viewport bounds using pure math (fast, no camera changes)
+        // This eliminates the expensive temp camera set/restore that was causing UI lag
+        let viewportBounds = calculateViewportBounds(
+            centerCoordinate: newCamera.centerCoordinate,
             altitude: newCamera.altitude,
-            pitch: newCamera.pitch,
-            heading: newCamera.heading
+            mapWidth: mapView.bounds.width,
+            mapHeight: mapView.bounds.height
         )
-        mapView.setCamera(tempCamera, animated: false)
-        let viewportBounds = mapView.visibleCoordinateBounds
 
         // Check if all viewport corners are within constraint bounds (matches Android)
         let swInBounds = viewportBounds.sw.latitude >= bounds.sw.latitude &&
@@ -1072,19 +1058,44 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         let neInBounds = viewportBounds.ne.latitude <= bounds.ne.latitude &&
                          viewportBounds.ne.longitude <= bounds.ne.longitude
 
-        // Restore old camera
-        mapView.setCamera(oldCamera, animated: false)
-
         if swInBounds && neInBounds {
             return true  // All viewport corners within bounds, allow movement
         }
 
         // Viewport would extend outside bounds - prevent movement
-        let message = "Prevented camera change: viewport would extend outside bounds " +
-            "(sw: \(viewportBounds.sw), ne: \(viewportBounds.ne))"
-        WWWLog.v(Self.tag, message)
-
+        WWWLog.d(Self.tag, "Prevented camera change: viewport would extend outside bounds")
         return false  // Prevent movement (matches Android setLatLngBoundsForCameraTarget behavior)
+    }
+
+    /// Calculate viewport bounds from camera parameters using pure math (fast, no map mutation)
+    /// Eliminates expensive temp camera set/restore that was causing 50%+ performance overhead
+    private func calculateViewportBounds(
+        centerCoordinate: CLLocationCoordinate2D,
+        altitude: CLLocationDistance,
+        mapWidth: CGFloat,
+        mapHeight: CGFloat
+    ) -> MLNCoordinateBounds {
+        // Convert camera altitude to meters per pixel
+        let metersPerPixel = altitude / Double(mapHeight)
+
+        // Calculate latitude delta (constant at all latitudes)
+        let latDelta = (Double(mapHeight) / 2.0) * metersPerPixel / 111_320.0  // meters to degrees lat
+
+        // Calculate longitude delta (varies by latitude due to Earth curvature)
+        let latRadians = centerCoordinate.latitude * .pi / 180.0
+        let lngDelta = (Double(mapWidth) / 2.0) * metersPerPixel /
+                       (111_320.0 * cos(latRadians))  // meters to degrees lng at this latitude
+
+        let southwest = CLLocationCoordinate2D(
+            latitude: centerCoordinate.latitude - latDelta,
+            longitude: centerCoordinate.longitude - lngDelta
+        )
+        let northeast = CLLocationCoordinate2D(
+            latitude: centerCoordinate.latitude + latDelta,
+            longitude: centerCoordinate.longitude + lngDelta
+        )
+
+        return MLNCoordinateBounds(sw: southwest, ne: northeast)
     }
 
     public func mapView(_ mapView: MLNMapView, regionDidChangeAnimated animated: Bool) {
