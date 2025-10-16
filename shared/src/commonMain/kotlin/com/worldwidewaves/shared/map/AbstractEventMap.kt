@@ -261,7 +261,8 @@ abstract class AbstractEventMap<T>(
      * Moves the camera to the current wave longitude, keeping current latitude
      */
     suspend fun targetWave() {
-        val currentLocation = locationProvider?.currentLocation?.value ?: return
+        // FIXED: Use unified PositionManager (respects SIMULATION > GPS priority)
+        val currentLocation = positionManager.getCurrentPosition() ?: return
         val closestWaveLongitude = event.wave.userClosestWaveLongitude() ?: return
 
         val wavePosition = Position(currentLocation.latitude, closestWaveLongitude)
@@ -274,7 +275,8 @@ abstract class AbstractEventMap<T>(
      * Moves the camera to the current user position
      */
     suspend fun targetUser() {
-        val userPosition = locationProvider?.currentLocation?.value ?: return
+        // FIXED: Use unified PositionManager (respects SIMULATION > GPS priority)
+        val userPosition = positionManager.getCurrentPosition() ?: return
         runCameraAnimation { _ ->
             mapLibreAdapter.animateCamera(userPosition, MapDisplay.TARGET_USER_ZOOM)
         }
@@ -294,7 +296,9 @@ abstract class AbstractEventMap<T>(
      * Respects constraint bounds to prevent fighting with MapBoundsEnforcer.
      */
     suspend fun targetUserAndWave() {
-        val userPosition = locationProvider?.currentLocation?.value
+        // FIXED: Use unified PositionManager instead of locationProvider
+        // PositionManager respects SIMULATION > GPS priority
+        val userPosition = positionManager.getCurrentPosition()
         val closestWaveLongitude = event.wave.userClosestWaveLongitude()
 
         com.worldwidewaves.shared.utils.Log.i(
