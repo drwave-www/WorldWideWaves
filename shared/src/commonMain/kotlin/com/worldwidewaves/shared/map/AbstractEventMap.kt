@@ -357,21 +357,50 @@ abstract class AbstractEventMap<T>(
 
         com.worldwidewaves.shared.utils.Log.d(
             "AbstractEventMap",
-            "Padded bounds: SW(${paddedBounds!!.sw.lat}, ${paddedBounds.sw.lng}) NE(${paddedBounds.ne.lat}, ${paddedBounds.ne.lng})",
+            "Padded bounds: SW(${paddedBounds!!.sw.lat}, ${paddedBounds.sw.lng}) " +
+                "NE(${paddedBounds.ne.lat}, ${paddedBounds.ne.lng})",
         )
 
-        // FIXED: Don't clip to constraint bounds - paddedBounds are already constrained to area bbox
-        // The old clipping logic would restrict to unexpanded constraints (when padding=0),
-        // causing zero-height bounds when user is far from event area
-        // paddedBounds are already clipped to areaBbox at lines 347-352, so they're safe to use directly
+        // Limit bounds to a reasonable size to keep camera focused on user+wave
+        // Without this, bounds can become too large when user is far from event area
+        // Max size: 50% of event area in each dimension (keeps focus tight)
+        val maxLatSpan = (areaBbox.ne.lat - areaBbox.sw.lat) * 0.5
+        val maxLngSpan = (areaBbox.ne.lng - areaBbox.sw.lng) * 0.5
+
+        val currentLatSpan = paddedBounds.ne.lat - paddedBounds.sw.lat
+        val currentLngSpan = paddedBounds.ne.lng - paddedBounds.sw.lng
+
+        val finalBounds =
+            if (currentLatSpan > maxLatSpan || currentLngSpan > maxLngSpan) {
+                // Bounds too large - center on user+wave midpoint with max span
+                val midLat = (paddedBounds.sw.lat + paddedBounds.ne.lat) / 2.0
+                val midLng = (paddedBounds.sw.lng + paddedBounds.ne.lng) / 2.0
+
+                val useLat = minOf(currentLatSpan, maxLatSpan) / 2.0
+                val useLng = minOf(currentLngSpan, maxLngSpan) / 2.0
+
+                BoundingBox.fromCorners(
+                    Position(
+                        maxOf(midLat - useLat, areaBbox.sw.lat),
+                        maxOf(midLng - useLng, areaBbox.sw.lng),
+                    ),
+                    Position(
+                        minOf(midLat + useLat, areaBbox.ne.lat),
+                        minOf(midLng + useLng, areaBbox.ne.lng),
+                    ),
+                )
+            } else {
+                paddedBounds
+            }
+
         com.worldwidewaves.shared.utils.Log.i(
             "AbstractEventMap",
-            "🎬 targetUserAndWave: Animating to paddedBounds " +
-                "SW(${paddedBounds.sw.lat}, ${paddedBounds.sw.lng}) NE(${paddedBounds.ne.lat}, ${paddedBounds.ne.lng})",
+            "🎬 targetUserAndWave: Final bounds " +
+                "SW(${finalBounds.sw.lat}, ${finalBounds.sw.lng}) NE(${finalBounds.ne.lat}, ${finalBounds.ne.lng})",
         )
 
         runCameraAnimation { _ ->
-            mapLibreAdapter.animateCameraToBounds(paddedBounds)
+            mapLibreAdapter.animateCameraToBounds(finalBounds)
         }
     }
 
