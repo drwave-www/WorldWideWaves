@@ -297,7 +297,16 @@ abstract class AbstractEventMap<T>(
         val userPosition = locationProvider?.currentLocation?.value
         val closestWaveLongitude = event.wave.userClosestWaveLongitude()
 
+        com.worldwidewaves.shared.utils.Log.i(
+            "AbstractEventMap",
+            "🎯 targetUserAndWave called for event: ${event.id}, userPos=$userPosition, waveLng=$closestWaveLongitude",
+        )
+
         if (userPosition == null || closestWaveLongitude == null) {
+            com.worldwidewaves.shared.utils.Log.w(
+                "AbstractEventMap",
+                "⚠️ targetUserAndWave: missing data (userPos=$userPosition, waveLng=$closestWaveLongitude)",
+            )
             return
         }
 
@@ -306,12 +315,27 @@ abstract class AbstractEventMap<T>(
         // Create the bounds containing user and wave positions
         val bounds = BoundingBox.fromCorners(listOf(userPosition, wavePosition))
         if (bounds == null) {
+            com.worldwidewaves.shared.utils.Log
+                .e("AbstractEventMap", "Failed to create bounds from user+wave positions")
             return
         }
+
+        com.worldwidewaves.shared.utils.Log.d(
+            "AbstractEventMap",
+            "User+Wave bounds: SW(${bounds.sw.lat}, ${bounds.sw.lng}) NE(${bounds.ne.lat}, ${bounds.ne.lng})",
+        )
 
         // Get the area's bounding box (or constraint bounds if more restrictive)
         val areaBbox = event.area.bbox()
         val constraintBbox = constraintManager?.calculateConstraintBounds() ?: areaBbox
+        com.worldwidewaves.shared.utils.Log.d(
+            "AbstractEventMap",
+            "Area bbox: SW(${areaBbox.sw.lat}, ${areaBbox.sw.lng}) NE(${areaBbox.ne.lat}, ${areaBbox.ne.lng})",
+        )
+        com.worldwidewaves.shared.utils.Log.d(
+            "AbstractEventMap",
+            "Constraint bbox: SW(${constraintBbox.sw.lat}, ${constraintBbox.sw.lng}) NE(${constraintBbox.ne.lat}, ${constraintBbox.ne.lng})",
+        )
 
         // Calculate padding as percentages of the area's dimensions
         val horizontalPadding = (areaBbox.ne.lng - areaBbox.sw.lng) * 0.2
@@ -330,22 +354,22 @@ abstract class AbstractEventMap<T>(
                 ),
             )
 
-        // Clip to constraint bounds to prevent loop where animation extends outside
-        // constraints, then constraint enforcer pulls back, triggering new animation
-        val finalBounds =
-            BoundingBox.fromCorners(
-                Position(
-                    maxOf(paddedBounds!!.sw.lat, constraintBbox.sw.lat),
-                    maxOf(paddedBounds.sw.lng, constraintBbox.sw.lng),
-                ),
-                Position(
-                    minOf(paddedBounds.ne.lat, constraintBbox.ne.lat),
-                    minOf(paddedBounds.ne.lng, constraintBbox.ne.lng),
-                ),
-            )
+        com.worldwidewaves.shared.utils.Log.d(
+            "AbstractEventMap",
+            "Padded bounds: SW(${paddedBounds!!.sw.lat}, ${paddedBounds.sw.lng}) NE(${paddedBounds.ne.lat}, ${paddedBounds.ne.lng})",
+        )
+
+        // FIXED: Don't clip to constraint bounds - paddedBounds are already constrained to area bbox
+        // The old clipping logic would restrict to unexpanded constraints (when padding=0),
+        // causing zero-height bounds when user is far from event area
+        // paddedBounds are already clipped to areaBbox at lines 347-352, so they're safe to use directly
+        com.worldwidewaves.shared.utils.Log.i(
+            "AbstractEventMap",
+            "🎬 targetUserAndWave: Animating to paddedBounds SW(${paddedBounds.sw.lat}, ${paddedBounds.sw.lng}) NE(${paddedBounds.ne.lat}, ${paddedBounds.ne.lng})",
+        )
 
         runCameraAnimation { _ ->
-            mapLibreAdapter.animateCameraToBounds(finalBounds)
+            mapLibreAdapter.animateCameraToBounds(paddedBounds)
         }
     }
 
