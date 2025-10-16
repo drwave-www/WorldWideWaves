@@ -175,6 +175,7 @@ private fun appSupportMapsDir(): String {
     return mapsUrl.path ?: (NSTemporaryDirectory() + "/Maps")
 }
 
+@Suppress("ReturnCount") // Early returns for guard clauses improve readability
 actual suspend fun platformTryCopyInitialTagToCache(
     eventId: String,
     extension: String,
@@ -278,6 +279,7 @@ actual suspend fun platformFetchToFile(
     }
 }
 
+@Suppress("ReturnCount") // Early returns for guard clauses improve readability
 private suspend fun mountAndCopyResource(
     request: platform.Foundation.NSBundleResourceRequest,
     eventId: String,

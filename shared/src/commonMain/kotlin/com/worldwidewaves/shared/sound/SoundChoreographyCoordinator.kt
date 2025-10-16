@@ -59,6 +59,7 @@ class SoundChoreographyCoordinator(
     private val events: WWWEvents by inject()
     private var currentEvent: IWWWEvent? = null
     private var observationJob: Job? = null
+    private var soundPlaybackJob: Job? = null
     private var isActive = false
     private var isObservingAllEvents = false
 
@@ -181,32 +182,38 @@ class SoundChoreographyCoordinator(
      */
     private suspend fun startSoundChoreography(event: IWWWEvent) {
         Log.i(TAG, "Starting sound choreography for event: ${event.id}")
+
+        // Cancel any existing sound playback job to prevent multiple sounds
+        soundPlaybackJob?.cancel()
+        soundPlaybackJob = null
+
         isActive = true
 
         // Start observing wave hits and play sound only on transition (false -> true)
-        coroutineScopeProvider.scopeDefault().launch {
-            // Initialize previousHitState based on current state to prevent playing
-            // sound for already-hit events when entering the activity
-            var previousHitState = event.observer.userHasBeenHit.value
+        soundPlaybackJob =
+            coroutineScopeProvider.scopeDefault().launch {
+                // Initialize previousHitState based on current state to prevent playing
+                // sound for already-hit events when entering the activity
+                var previousHitState = event.observer.userHasBeenHit.value
 
-            event.observer.userHasBeenHit.collect { hasBeenHit ->
-                // Extract complex condition into named boolean variables for clarity
-                val isTransitionToHit = hasBeenHit && !previousHitState
-                val isEventActive = isActive && event.isRunning()
+                event.observer.userHasBeenHit.collect { hasBeenHit ->
+                    // Extract complex condition into named boolean variables for clarity
+                    val isTransitionToHit = hasBeenHit && !previousHitState
+                    val isEventActive = isActive && event.isRunning()
 
-                // Only play sound on transition from false to true (actual hit moment)
-                // AND only when the event is currently running (not done)
-                if (isTransitionToHit && isEventActive) {
-                    try {
-                        Log.i(TAG, "User hit detected for event ${event.id} - playing sound")
-                        event.warming.playCurrentSoundChoreographyTone()
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error playing sound choreography tone", e)
+                    // Only play sound on transition from false to true (actual hit moment)
+                    // AND only when the event is currently running (not done)
+                    if (isTransitionToHit && isEventActive) {
+                        try {
+                            Log.i(TAG, "User hit detected for event ${event.id} - playing sound")
+                            event.warming.playCurrentSoundChoreographyTone()
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error playing sound choreography tone", e)
+                        }
                     }
+                    previousHitState = hasBeenHit
                 }
-                previousHitState = hasBeenHit
             }
-        }
     }
 
     /**
@@ -215,6 +222,10 @@ class SoundChoreographyCoordinator(
     private fun stopSoundChoreography() {
         Log.i(TAG, "Stopping sound choreography")
         isActive = false
+
+        // Cancel the sound playback observation job
+        soundPlaybackJob?.cancel()
+        soundPlaybackJob = null
     }
 
     /**

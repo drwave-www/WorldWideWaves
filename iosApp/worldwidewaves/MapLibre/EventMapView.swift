@@ -29,9 +29,6 @@ struct EventMapView: UIViewRepresentable {
 
     let eventId: String
     let styleURL: String
-    let initialLatitude: Double
-    let initialLongitude: Double
-    let initialZoom: Double
     let enableGestures: Bool  // Whether to enable zoom/scroll gestures (matches Android activateMapGestures)
 
     @Binding var wrapper: MapLibreViewWrapper?
@@ -39,20 +36,24 @@ struct EventMapView: UIViewRepresentable {
     func makeUIView(context: Context) -> MLNMapView {
         WWWLog.i(Self.tag, "makeUIView - Creating map view")
         WWWLog.d(Self.tag, "Style URL: \(styleURL)")
-        WWWLog.d(Self.tag, "Initial position: lat=\(initialLatitude), lng=\(initialLongitude), zoom=\(initialZoom)")
+        WWWLog.d(Self.tag, "Initial camera position will be set by AbstractEventMap.setupMap()")
 
         let mapView = MLNMapView(frame: .zero)
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+
+        // Ensure no content insets (prevents borders/margins in map content)
+        mapView.contentInset = .zero
+        mapView.automaticallyAdjustsContentInset = false
 
         WWWLog.d(Self.tag, "Map view created, frame: \(mapView.frame)")
 
         // Configure gestures (matches Android behavior)
         configureGestures(for: mapView)
 
-        // Set initial camera position
-        let coordinate = CLLocationCoordinate2D(latitude: initialLatitude, longitude: initialLongitude)
-        mapView.setCenter(coordinate, zoomLevel: initialZoom, animated: false)
-        WWWLog.d(Self.tag, "Camera position set")
+        // NOTE: Initial camera position is NOT set here (was hard-coded to Paris)
+        // AbstractEventMap.setupMap() will handle initial positioning via moveToWindowBounds(),
+        // moveToMapBounds(), or moveToCenter() based on mapConfig.initialCameraPosition
+        // This ensures iOS matches Android behavior (event-specific positioning, not hard-coded)
 
         // Configure style URL
         configureStyleURL(for: mapView)
@@ -75,6 +76,9 @@ struct EventMapView: UIViewRepresentable {
         mapView.allowsRotating = false
         mapView.allowsTilting = false
 
+        // Note: MLNMapView doesn't have allowsZoomingWithDoubleTap property
+        // Double-tap to zoom is automatically enabled/disabled with isZoomEnabled
+
         // Remove rotation gesture recognizers if they exist
         if let gestureRecognizers = mapView.gestureRecognizers {
             for recognizer in gestureRecognizers {
@@ -87,13 +91,11 @@ struct EventMapView: UIViewRepresentable {
             }
         }
 
-        WWWLog.i(
-            Self.tag,
-            "Gestures configured: zoom=\(mapView.isZoomEnabled), " +
+        let gestureStatus = "Gestures configured: zoom=\(mapView.isZoomEnabled), " +
             "scroll=\(mapView.isScrollEnabled), " +
             "rotate=\(mapView.allowsRotating), " +
             "tilt=\(mapView.allowsTilting)"
-        )
+        WWWLog.i(Self.tag, gestureStatus)
     }
 
     private func configureStyleURL(for mapView: MLNMapView) {
@@ -157,9 +159,6 @@ struct EventMapView_Previews: PreviewProvider {
         EventMapView(
             eventId: "preview_event",
             styleURL: "https://demotiles.maplibre.org/style.json",
-            initialLatitude: 48.8566,
-            initialLongitude: 2.3522,
-            initialZoom: 12.0,
             enableGestures: true,
             wrapper: $wrapper
         )

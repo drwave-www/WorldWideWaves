@@ -197,6 +197,12 @@ fun clearEventCache(eventId: String) {
 }
 
 /**
+ * Delay in milliseconds before actually deleting renamed .mbtiles files.
+ * Allows MapLibre background threads to gracefully release file handles.
+ */
+private const val MBTILES_DELETE_DELAY_MS = 500L
+
+/**
  * Invalidates the GeoJSON cache for the specified event.
  */
 private fun invalidateGeoJsonCache(eventId: String) {
@@ -210,6 +216,9 @@ private fun invalidateGeoJsonCache(eventId: String) {
 
 /**
  * Attempts to delete a cached file from the given cache directory.
+ * For .mbtiles files, uses a safe two-step deletion to prevent MapLibre crashes:
+ * 1. Rename the file to .deleted (breaks the file path reference)
+ * 2. Schedule actual deletion after a delay (allows MapLibre to release handles)
  */
 private fun deleteCachedFile(
     cacheDir: File,
@@ -217,14 +226,68 @@ private fun deleteCachedFile(
 ) {
     try {
         val file = File(cacheDir, fileName)
-        if (file.exists()) {
-            if (file.delete()) {
-                Log.i(::clearEventCache.name, "Deleted cached file $fileName")
-            } else {
-                Log.e(::clearEventCache.name, "Failed to delete cached file $fileName")
-            }
+        if (!file.exists()) {
+            return
+        }
+
+        // CRITICAL SAFETY: .mbtiles files may have open file handles from MapLibre background threads
+        // Deleting them immediately causes: "mapbox::sqlite::Exception: unable to open database file"
+        // Solution: Rename first (breaks path reference), then delete after MapLibre releases handles
+        if (fileName.endsWith(".mbtiles")) {
+            deleteMbtilesFileSafely(file, fileName)
+        } else {
+            // Non-.mbtiles files (geojson, style.json) can be safely deleted immediately
+            deleteNonMbtilesFile(file, fileName)
         }
     } catch (e: Exception) {
         Log.e(::clearEventCache.name, "Error while deleting $fileName", e)
+    }
+}
+
+/**
+ * Safely deletes an .mbtiles file using rename-then-delete strategy.
+ * Prevents MapLibre crashes by breaking file path reference before actual deletion.
+ */
+private fun deleteMbtilesFileSafely(
+    file: File,
+    fileName: String,
+) {
+    val renamedFile = File(file.parentFile, "$fileName.deleted")
+
+    // Step 1: Rename immediately (breaks MapLibre's path reference, forces it to handle gracefully)
+    if (file.renameTo(renamedFile)) {
+        Log.i(::clearEventCache.name, "Renamed $fileName to .deleted (safe from MapLibre threads)")
+
+        // Step 2: Schedule actual deletion after MapLibre has time to release handles
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            try {
+                if (renamedFile.exists() && renamedFile.delete()) {
+                    Log.i(::clearEventCache.name, "Deleted renamed file $fileName.deleted")
+                }
+            } catch (e: Exception) {
+                Log.w(::clearEventCache.name, "Failed to delete renamed $fileName.deleted", e)
+            }
+        }, MBTILES_DELETE_DELAY_MS)
+    } else {
+        Log.w(::clearEventCache.name, "Failed to rename $fileName, falling back to direct delete")
+        // Fallback to direct delete (risky but better than leaving stale files)
+        if (file.delete()) {
+            Log.i(::clearEventCache.name, "Deleted cached file $fileName (direct)")
+        }
+    }
+}
+
+/**
+ * Deletes non-.mbtiles files (geojson, style.json) immediately.
+ * These files don't have threading concerns like .mbtiles database files.
+ */
+private fun deleteNonMbtilesFile(
+    file: File,
+    fileName: String,
+) {
+    if (file.delete()) {
+        Log.i(::clearEventCache.name, "Deleted cached file $fileName")
+    } else {
+        Log.e(::clearEventCache.name, "Failed to delete cached file $fileName")
     }
 }

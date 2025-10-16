@@ -24,6 +24,8 @@ package com.worldwidewaves.testing
 import android.os.Build
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.worldwidewaves.activities.MainActivity
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -123,7 +125,7 @@ abstract class BaseE2ETest {
             if (condition()) {
                 return true
             }
-            Thread.sleep(100)
+            runBlocking { delay(100) }
         }
         return false
     }

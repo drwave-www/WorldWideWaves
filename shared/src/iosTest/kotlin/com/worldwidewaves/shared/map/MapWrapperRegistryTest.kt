@@ -280,7 +280,7 @@ class MapWrapperRegistryTest {
                     Position(49.0, 3.0),
                 ),
             )!!
-        val command = CameraCommand.SetConstraintBounds(bounds)
+        val command = CameraCommand.SetConstraintBounds(bounds, bounds, true)
 
         MapWrapperRegistry.setPendingCameraCommand("event1", command)
 

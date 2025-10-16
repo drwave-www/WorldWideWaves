@@ -455,6 +455,7 @@ class MyComponent {
 - **Test modifications**: Changing test logic requires explanation and user approval - explain what business requirement changed
 - **Test deletion**: Absolutely forbidden without explicit user consent
 - **Always run tests before pushing**: Verify all tests pass locally before pushing to origin
+- **Self-verification requirement**: If you can test fixes yourself by running scripts, apps in simulators, or automated tests without requesting the user to do it, then you MUST do it. Only ask the user to test when it requires physical device interaction or manual user-specific actions
 
 ### Security Patterns
 - **NO credential exposure**: Never log, store, or transmit API keys, tokens, or secrets
@@ -503,6 +504,50 @@ class MyComponent {
 - **Source Priority**: SIMULATION > GPS (simulation for testing, GPS for real device location)
 - **No Map Click Positioning**: User position comes from GPS only, not map interactions
 - **Reactive Updates**: Use unified position streams rather than direct position setting
+
+### iOS/Android Map Parity Guidelines
+
+**Critical Lessons from Map Parity Implementation (October 2025)**:
+
+1. **Platform API Limitations Are Real**
+   - Not all Android MapLibre features have iOS equivalents (e.g., `setLatLngBoundsForCameraTarget`)
+   - Solution: Implement equivalent behavior using available APIs (gesture clamping via delegate)
+   - Document why platforms differ when APIs aren't equivalent
+
+2. **Polygon Queue Optimization**
+   - Wave progression is cumulative - each set contains all previous circles
+   - Only store most recent polygon set, not entire history
+   - Reduces memory usage and simplifies logic
+
+3. **Race Condition Patterns**
+   - iOS requires comprehensive pending state queues (polygons, bounds, positions)
+   - Android can rely on initialization order but benefits from same pattern
+   - Always queue operations that depend on async style loading
+
+4. **Validation Everywhere**
+   - iOS validates bounds (ne > sw, lat/lng ranges) - prevents crashes
+   - Android lacked validation - add it proactively
+   - Validation prevents obscure C++ exceptions from native MapLibre code
+
+5. **UUID for Dynamic Layers**
+   - Simple index-based IDs can conflict during rapid updates
+   - Use UUID suffix: `"wave-polygons-source-{index}-{uuid}"`
+   - Prevents layer/source conflicts in both platforms
+
+6. **Command Pattern for iOS**
+   - MapWrapperRegistry uses command pattern for Kotlin→Swift coordination
+   - Configuration commands queue (all execute), animation commands use single slot (latest wins)
+   - Attribution margins, camera constraints, zoom all use this pattern
+
+7. **Platform-Specific Architectures Are OK**
+   - iOS: Custom MLNPointAnnotation (manual updates via PositionManager)
+   - Android: Native LocationComponent (automatic via LocationEngineProxy)
+   - Document differences, don't force artificial parity
+
+8. **Comprehensive Documentation Prevents Repetition**
+   - 97-point systematic comparison revealed all gaps
+   - Standalone prompt document enables efficient future sessions
+   - Architecture diagrams show flow differences clearly
 
 ---
 
@@ -693,15 +738,20 @@ data class Result(val value: String)
 **🚨 CRITICAL: Zero-Warnings & Full Compilation Policy (MANDATORY)**:
 - **BEFORE EVERY COMMIT**: ALL platforms MUST compile successfully with ZERO warnings
 - **NO EXCEPTIONS**: There are ZERO acceptable warnings or compilation errors
+- **Fix ALL warnings in ENTIRE codebase, not just modified files**
+  - ❌ UNACCEPTABLE: "All remaining lint warnings are in files I didn't modify"
+  - ✅ REQUIRED: Fix ALL warnings even in unmodified files during your commit
+  - **Why**: Prevents warning accumulation and maintains zero-warning policy
+  - **How**: Run full lint check, fix all warnings before committing
 - **Pre-commit verification checklist**:
   1. ✅ Run `./gradlew :shared:compileKotlinIosSimulatorArm64` (iOS Kotlin)
   2. ✅ Run `./gradlew :shared:compileDebugKotlinAndroid` (Android Kotlin)
   3. ✅ Run `./gradlew :shared:testDebugUnitTest` (All unit tests)
   4. ✅ Run `cd iosApp && xcodebuild -project worldwidewaves.xcodeproj -scheme worldwidewaves build` (iOS Swift)
-  5. ✅ Run `swiftlint lint --quiet` and verify 0 warnings in modified files
-  6. ✅ Verify detekt reports 0 warnings in modified files
-- **SwiftLint**: Fix ALL warnings (line length, function length, file length, etc.)
-- **Detekt**: Fix ALL warnings or add justified `@Suppress` with explanation
+  5. ✅ Run `swiftlint lint --quiet` on ENTIRE codebase and verify 0 warnings
+  6. ✅ Run detekt on ENTIRE codebase and verify 0 warnings
+- **SwiftLint**: Fix ALL warnings (line length, function length, file length, etc.) in ALL files
+- **Detekt**: Fix ALL warnings in ALL files or add justified `@Suppress` with explanation
 - **Compilation**: Fix ALL compiler errors on BOTH platforms (Kotlin + Swift)
 - **Why**: Prevents breaking iOS when modifying Kotlin expect/actual declarations
 - This requirement is NON-NEGOTIABLE and applies to ALL commits
@@ -728,6 +778,13 @@ data class Result(val value: String)
 - Always add comment explaining WHY suppression is needed
 - Place suppression close to the violation (function/file level)
 - Document in commit message when adding suppressions
+
+**Acceptable SwiftLint Suppressions** (when justified):
+- `// swiftlint:disable file_length` - For critical platform files with comprehensive documentation
+- `// swiftlint:disable function_body_length` with `// swiftlint:enable function_body_length` - For E2E tests covering many steps
+- `// swiftlint:disable:next line_length` - For specific long lines that cannot be broken
+- Use `disable`/`enable` pairs to limit suppression scope
+- Always add justification comment above suppression
 
 **Import Management**:
 - Run `./gradlew :shared:ktlintFormat` to organize imports

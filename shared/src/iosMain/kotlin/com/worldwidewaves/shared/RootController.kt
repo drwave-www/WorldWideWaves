@@ -230,8 +230,13 @@ fun makeEventViewController(eventId: String): UIViewController =
                 IosEventMap(
                     event,
                     onMapClick = { enabler.openFullMapActivity(event.id) },
-                    // Default config (EVENT camera position) - gestures disabled, map shows event bounds
-                    // This matches Android's EventDetailActivity which uses default config
+                    mapConfig =
+                        EventMapConfig(
+                            initialCameraPosition = MapCameraPosition.BOUNDS,
+                            autoTargetUserOnFirstLocation = false,
+                        ),
+                    // BOUNDS mode: Shows entire event area (matches Android behavior)
+                    // Gestures DISABLED (user must open full map screen for interaction)
                     registryKey = "${event.id}-event", // Unique key to prevent conflicts with full map
                 )
             },
@@ -281,6 +286,13 @@ fun makeWaveViewController(eventId: String): UIViewController =
                 IosEventMap(
                     event,
                     onMapClick = { enabler.openFullMapActivity(event.id) },
+                    mapConfig =
+                        EventMapConfig(
+                            initialCameraPosition = MapCameraPosition.BOUNDS,
+                            autoTargetUserOnFirstLocation = false,
+                        ),
+                    // BOUNDS mode: Shows full event area initially (matches event detail screen)
+                    // Then targetUserAndWave() from MapZoomAndLocationUpdate takes over when user enters area
                     registryKey = "${event.id}-wave", // Unique key to prevent conflicts
                 )
             },
@@ -336,6 +348,7 @@ fun makeFullMapViewController(eventId: String): UIViewController =
                         EventMapConfig(
                             initialCameraPosition = MapCameraPosition.WINDOW,
                             autoTargetUserOnFirstLocation = true,
+                            gesturesEnabled = true, // Full map allows user interaction
                         ),
                     registryKey = "${event.id}-fullmap", // Unique key to prevent conflicts
                 )

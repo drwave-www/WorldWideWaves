@@ -7,6 +7,7 @@ package com.worldwidewaves.shared
  * https://www.apache.org/licenses/LICENSE-2.0
  */
 
+import com.worldwidewaves.shared.di.initializeSimulationMode
 import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.utils.initNapier
 import com.worldwidewaves.shared.utils.setupDebugSimulation
@@ -16,6 +17,7 @@ import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 import org.koin.core.logger.PrintLogger
+import org.koin.mp.KoinPlatform
 
 private const val TAG = "Helper"
 
@@ -40,6 +42,11 @@ fun doInitPlatform() {
             }
         if (BuildKonfig.DEBUG) {
             try {
+                // Enable simulation mode (makes the red indicator visible)
+                val platform = KoinPlatform.getKoin().get<WWWPlatform>()
+                initializeSimulationMode(platform, BuildKonfig.DEBUG)
+
+                // Set up simulation data (time, position, etc.)
                 setupDebugSimulation()
             } catch (_: Throwable) {
             }

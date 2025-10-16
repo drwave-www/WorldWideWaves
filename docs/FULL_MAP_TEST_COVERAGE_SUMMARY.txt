@@ -1,0 +1,129 @@
+FULL MAP SCREEN TEST COVERAGE ANALYSIS - EXECUTIVE SUMMARY
+===========================================================
+
+ARCHITECTURE OVERVIEW
+=====================
+
+The Full Map screen uses a 3-LEVEL PREVENTIVE CLAMPING system:
+
+1. NATIVE API: setLatLngBoundsForCameraTarget()
+   - Constrains camera center position natively in MapLibre
+   - Most efficient, handles most gestures
+
+2. MIN ZOOM ENFORCEMENT: setMinZoomPreference()
+   - Prevents viewport from growing larger than "safe size"
+   - Calculated based on event aspect ratio vs screen aspect ratio
+   - Set BEFORE animation in WINDOW mode (preventive)
+
+3. GESTURE INTERCEPTION: OnCameraMoveListener during pan/zoom
+   - Catches edge cases where viewport still exceeds bounds
+   - Clamps camera DURING movement (not after)
+   - Applies viewport-based padding calculation
+
+CRITICAL CODE LOCATIONS
+=======================
+
+1. AbstractEventMap.kt
+   - moveToMapBounds() [lines 122-173]: BOUNDS mode setup
+   - moveToWindowBounds() [lines 184-259]: WINDOW mode setup
+   - runCameraAnimation() [lines 103-117]: Animation suppression
+
+2. MapBoundsEnforcer.kt
+   - applyConstraints() [lines 72-105]: Apply all three mechanisms
+   - calculateVisibleRegionPadding() [lines 373-422]: Extract viewport
+   - calculatePaddedBounds() [lines 424-464]: Shrink bounds by padding
+   - clampCameraToKeepViewportInside() [lines 312-352]: Viewport math
+
+3. AndroidMapLibreAdapter.kt
+   - setBoundsForCameraTarget() [lines 367-514]: Calculate min zoom
+   - setupPreventiveGestureConstraints() [lines 521-591]: Gesture clamp
+   - isViewportWithinBounds() [lines 596-603]: Viewport validation
+
+CLAMPING MECHANISMS (8 TOTAL)
+==============================
+
+1. Native MapLibre Bounds: setLatLngBoundsForCameraTarget()
+2. Min Zoom Level: setMinZoomPreference()
+3. Gesture Clamping: OnCameraMoveListener during pan/zoom
+4. Viewport Edge Math: clampCameraToKeepViewportInside()
+5. Animation Suppression: suppressCorrections flag
+6. Dimension Change Detection: 10% threshold check
+7. Padding Change Threshold: 10% viewport padding change
+8. Bounds Validation: Inverted bounds, invalid coords checks
+
+MISSING TEST SCENARIOS (10 CRITICAL GAPS)
+==========================================
+
+Gap 1: Real MapLibre Visible Region
+- Missing: Tests with actual MapLibre visible region at zoom levels
+- Impact: Cannot verify constraint bounds match actual viewport
+
+Gap 2: Gesture-Driven Recalculation
+- Missing: Gesture sequences that trigger constraint recalculation
+- Impact: Cannot verify user interactions work smoothly
+
+Gap 3: Min Zoom Accuracy
+- Missing: Real MapLibre getCameraForLatLngBounds() calculation
+- Impact: Cannot verify min zoom prevents viewport overflow
+
+Gap 4: Constraint Bounds Shrinking
+- Missing: Real viewport-based padding calculation
+- Impact: Cannot verify gesture clamping uses correct bounds
+
+Gap 5: Preventive Gesture Interception
+- Missing: Real gesture sequences (down→move→move→up)
+- Impact: Cannot verify clamping happens during movement
+
+Gap 6: Edge Cases with Real Map
+- Missing: Viewport > event, poles, Mercator projection
+- Impact: Cannot verify behavior in extreme scenarios
+
+Gap 7: Animation vs Gesture
+- Missing: Real sequences of animations and gestures
+- Impact: Cannot verify suppression prevents jank
+
+Gap 8: Visible Region at Min Zoom
+- Missing: Actual getVisibleRegion() at calculated min zoom
+- Impact: Cannot verify padding calculation matches viewport
+
+Gap 9: Bounds Similarity Logic
+- Missing: Rapid constraint reapplication scenarios
+- Impact: Cannot verify iOS deadlock prevention
+
+Gap 10: WINDOW Mode Dimension Tracking
+- Missing: Device rotation and dimension change sequences
+- Impact: Cannot verify constraints recalculate correctly
+
+RECOMMENDED TEST IMPLEMENTATION
+================================
+
+PHASE 1: Real MapLibre Integration (Instrumented Tests)
+- Use real MapLibreMap instances
+- Verify visible region at various zoom levels
+- Test gesture sequences with real viewport updates
+- Validate min zoom calculation accuracy
+
+PHASE 2: Gesture Flow Tests (Instrumented Tests)
+- Simulate pan gestures with gesture listeners
+- Simulate zoom gestures with zoom level changes
+- Verify constraint clamping happens during movement
+- Test rapid multi-gesture sequences
+
+PHASE 3: Edge Case Scenarios (Unit + Instrumented)
+- Very small events
+- Very large events
+- Extreme aspect ratios
+- Pole coordinates
+- Mercator projection edge cases
+
+PHASE 4: Performance & Animation Tests
+- Animation + gesture interaction
+- Rapid constraint recalculation
+- Bounds similarity preventing loops
+- Dimension change handling
+
+TOTAL ESTIMATED EFFORT: 40-50 test cases needed
+Expected improvement: 70% → 95% coverage
+
+See FULL_MAP_CLAMPING_ANALYSIS.md for complete details
+See FULL_MAP_ARCHITECTURE_DIAGRAM.txt for visual diagrams

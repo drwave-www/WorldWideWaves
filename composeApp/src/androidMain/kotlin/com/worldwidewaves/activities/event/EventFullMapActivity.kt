@@ -46,6 +46,7 @@ class EventFullMapActivity : AbstractEventAndroidActivity<FullMapScreen>() {
                     EventMapConfig(
                         initialCameraPosition = MapCameraPosition.WINDOW,
                         autoTargetUserOnFirstLocation = true,
+                        gesturesEnabled = true, // Full map allows user interaction
                     ),
             )
         }

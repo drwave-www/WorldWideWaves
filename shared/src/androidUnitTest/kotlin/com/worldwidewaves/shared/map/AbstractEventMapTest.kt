@@ -87,6 +87,7 @@ class AbstractEventMapTest : KoinTest {
         val mockWave = mockk<WWWEventWave>()
         val mockEventMap = mockk<WWWEventMap>()
 
+        every { mockEvent.id } returns "test-event-id"
         every { mockEvent.area } returns mockArea
         every { mockEvent.wave } returns mockWave
         every { mockEvent.map } returns mockEventMap
@@ -111,6 +112,7 @@ class AbstractEventMapTest : KoinTest {
             callback()
         }
         every { mockMapLibreAdapter.setAttributionMargins(any(), any(), any(), any()) } just Runs
+        every { mockMapLibreAdapter.setGesturesEnabled(any()) } just Runs
         every { mockMapLibreAdapter.setMaxZoomPreference(any()) } just Runs
         every { mockMapLibreAdapter.setMinZoomPreference(any()) } just Runs
         every { mockMapLibreAdapter.setOnMapClickListener(any()) } just Runs
@@ -266,19 +268,24 @@ class AbstractEventMapTest : KoinTest {
             testScope.testScheduler.advanceUntilIdle()
 
             // Then
-            verify { mockMapLibreAdapter.setMinZoomPreference(12.0) }
+            // Constraints calculate and set min zoom via setBoundsForCameraTarget
+            // AbstractEventMap just sets max zoom and lets constraints handle min zoom
+            verify { mockMapLibreAdapter.getMinZoomLevel() }
             verify { mockMapLibreAdapter.setMaxZoomPreference(18.0) }
         }
 
     @Test
-    fun moveToMapBounds_temporarilyRelaxesBounds() =
+    fun moveToMapBounds_maintainsConstraintsDuringAnimation() =
         runTest {
             // When
             eventMap.moveToMapBounds()
             testScope.testScheduler.advanceUntilIdle()
 
             // Then
-            verify { mockMapLibreAdapter.setBoundsForCameraTarget(testBounds) }
+            // Constraints are applied AFTER animation, not relaxed during
+            // This restores preventive clamping behavior (no zoom out during animation)
+            // UPDATED: Now expects originalEventBounds parameter (always passed)
+            verify(atLeast = 1) { mockMapLibreAdapter.setBoundsForCameraTarget(any(), any(), any()) }
         }
 
     @Test
@@ -288,13 +295,9 @@ class AbstractEventMapTest : KoinTest {
             eventMap.moveToWindowBounds()
             testScope.testScheduler.advanceUntilIdle()
 
-            // Then
-            val slot = slot<BoundingBox>()
-            coEvery { mockMapLibreAdapter.animateCameraToBounds(capture(slot), any(), any()) }
-            testScope.testScheduler.advanceUntilIdle()
-
-            // Verify bounds were adjusted for aspect ratio
-            verify { mockMapLibreAdapter.animateCameraToBounds(any(), 0, any()) }
+            // Then - now uses animateCamera with calculated zoom (not animateCameraToBounds)
+            // Verify camera was animated to event center with intelligent zoom
+            verify(atLeast = 1) { mockMapLibreAdapter.animateCamera(any(), any(), any()) }
         }
 
     @Test
@@ -305,7 +308,9 @@ class AbstractEventMapTest : KoinTest {
             testScope.testScheduler.advanceUntilIdle()
 
             // Then
-            verify { mockMapLibreAdapter.setMinZoomPreference(12.0) }
+            // Constraints calculate and set min zoom based on expanded WINDOW bounds
+            // AbstractEventMap just sets max zoom and lets constraints handle min zoom
+            verify { mockMapLibreAdapter.getMinZoomLevel() }
             verify { mockMapLibreAdapter.setMaxZoomPreference(18.0) }
         }
 

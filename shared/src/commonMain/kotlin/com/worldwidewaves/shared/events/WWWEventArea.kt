@@ -158,6 +158,38 @@ data class WWWEventArea(
         return result
     }
 
+    /**
+     * Checks if a given position is within the event area using pre-fetched polygons.
+     *
+     * Performance optimization: Use this overload when polygons are already available
+     * to avoid redundant getPolygons() calls.
+     *
+     * @param position The position to check
+     * @param polygons Pre-fetched polygon data
+     * @return true if position is within the area, false otherwise
+     */
+    suspend fun isPositionWithin(
+        position: Position,
+        polygons: Area,
+    ): Boolean {
+        val boundingBox = bbox()
+
+        val (result, newCache) =
+            EventAreaPositionTesting.isPositionWithin(
+                position,
+                boundingBox,
+                polygons,
+                cachedPositionWithinResult,
+            )
+
+        // Update cache if changed
+        if (newCache != null) {
+            cachedPositionWithinResult = newCache
+        }
+
+        return result
+    }
+
     // ---------------------------
 
     /**
@@ -211,7 +243,7 @@ data class WWWEventArea(
         // Fast path: if cache is already populated, return immediately
         cachedAreaPolygons?.let {
             val totalPoints = it.sumOf { polygon -> polygon.size }
-            Log.v("WWWEventArea", "getPolygons: ${event.id} returning ${it.size} cached polygons with $totalPoints points")
+            // Log.v("WWWEventArea", "getPolygons: ${event.id} returning ${it.size} cached polygons with $totalPoints points")
             return it
         }
 

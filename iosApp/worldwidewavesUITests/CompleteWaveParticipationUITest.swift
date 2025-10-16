@@ -59,153 +59,112 @@ class CompleteWaveParticipationUITest: XCTestCase {
         // captureScreenshot(name: "final_state")
     }
 
+    // swiftlint:disable function_body_length
+    // Function body length justified: Comprehensive E2E test covering 20 user journey steps
     func testCompleteWaveParticipationJourney() throws {
-        // ============================================================
         // STEP 1: APP LAUNCH IN DEBUG MODE
-        // ============================================================
         XCTAssertTrue(app.wait(for: .runningForeground, timeout: 5))
         captureStepScreenshot(description: "app_launch_simulation_enabled")
         verifyMainScreenLoaded()
 
-        // ============================================================
         // STEP 2: BROWSE EVENTS LIST
-        // ============================================================
         verifyEventsListLoaded()
         scrollEventsList()
         captureStepScreenshot(description: "events_list_initial_state")
 
-        // ============================================================
         // STEP 3: FILTER FAVORITES (EMPTY STATE)
-        // ============================================================
         clickFavoritesFilter()
         verifyEmptyFavorites()
         captureStepScreenshot(description: "favorites_empty_state")
 
-        // ============================================================
         // STEP 4: RETURN TO ALL EVENTS
-        // ============================================================
         clickAllEventsFilter()
         verifyEventsListLoaded()
         captureStepScreenshot(description: "return_to_all_events")
 
-        // ============================================================
         // STEP 5: ADD EVENT TO FAVORITES
-        // ============================================================
         captureStepScreenshot(description: "before_favorite_click")
         clickFavoriteOnSecondEvent()
         verifyFavoriteIconFilled()
         captureStepScreenshot(description: "after_favorite_click")
 
-        // ============================================================
         // STEP 6: VERIFY EVENT IN FAVORITES
-        // ============================================================
         clickFavoritesFilter()
         verifyOneEventInFavorites()
         captureStepScreenshot(description: "favorites_with_one_event")
 
-        // ============================================================
         // STEP 7: CHECK DOWNLOADED MAPS TAB
-        // ============================================================
         clickDownloadedFilter()
         verifyParisEventVisible()
         verifyEventStatusRunning()
         captureStepScreenshot(description: "downloaded_maps_paris_running")
 
-        // ============================================================
         // STEP 8: OPEN EVENT DETAILS
-        // ============================================================
         clickOnParisEvent()
         verifyEventDetailScreen()
         verifyUserInArea()
         verifyWaveProgression()
         captureStepScreenshot(description: "event_detail_running_in_area")
 
-        // ============================================================
         // STEP 9: VERIFY MAP LOADED
-        // ============================================================
         verifyMapLoaded()
         verifyUserMarker()
         verifyWavePolygon()
         captureStepScreenshot(description: "event_map_loaded_paris")
 
-        // ============================================================
         // STEP 10: INTERACT WITH MAP
-        // ============================================================
         panMap()
         captureStepScreenshot(description: "map_interaction_pan")
 
-        // ============================================================
         // STEP 11: JOIN WAVE
-        // ============================================================
         clickJoinWaveButton()
         verifyWaveScreen()
         captureStepScreenshot(description: "wave_participation_screen")
 
-        // ============================================================
         // STEP 12: WAVE PARTICIPATION
-        // ============================================================
         verifyWaveComponentsVisible()
         captureStepScreenshot(description: "wave_participation_active")
 
-        // ============================================================
         // STEP 13: WAIT FOR CHOREOGRAPHY
-        // ============================================================
         waitForChoreography()
         captureStepScreenshot(description: "wave_choreography_active")
 
-        // ============================================================
         // STEP 14: NAVIGATE TO ABOUT
-        // ============================================================
         navigateToAboutTab()
         verifyAboutInfoTab()
         captureStepScreenshot(description: "about_tab_info")
 
-        // ============================================================
         // STEP 15: SCROLL ABOUT INFO
-        // ============================================================
         scrollAboutInfo()
         captureStepScreenshot(description: "about_info_scrolled")
 
-        // ============================================================
         // STEP 16: FAQ TAB
-        // ============================================================
         clickAboutFaqTab()
         verifyFaqList()
         captureStepScreenshot(description: "about_faq_collapsed")
 
-        // ============================================================
         // STEP 17: SCROLL FAQ
-        // ============================================================
         scrollFaqList()
         captureStepScreenshot(description: "faq_list_scrolled")
 
-        // ============================================================
         // STEP 18: EXPAND FAQ
-        // ============================================================
         captureStepScreenshot(description: "before_faq_expand")
         expandFirstFaq()
         verifyFaqExpanded()
         captureStepScreenshot(description: "faq_item_expanded")
 
-        // ============================================================
         // STEP 19: VERIFY SIMULATION ACTIVE
-        // ============================================================
         verifySimulationIndicator()
         captureStepScreenshot(description: "simulation_mode_active")
 
-        // ============================================================
         // STEP 20: BACK NAVIGATION
-        // ============================================================
         pressBack()
         verifyOnEventsTab()
         captureStepScreenshot(description: "back_navigation")
-
-        // Test complete!
     }
+    // swiftlint:enable function_body_length
 
-    // ============================================================
-    // SCREENSHOT HELPERS
-    // ============================================================
+    // MARK: - Screenshot Helpers
 
     func captureScreenshot(name: String) {
         ScreenshotHelper.captureScreenshot(app: app, name: name, testCase: self)
@@ -221,9 +180,7 @@ class CompleteWaveParticipationUITest: XCTestCase {
         )
     }
 
-    // ============================================================
-    // FILTER INTERACTIONS
-    // ============================================================
+    // MARK: - Filter Interactions
 
     func clickAllEventsFilter() {
         app.otherElements["FilterButton_All"].waitForExistenceAndTap()
@@ -237,9 +194,7 @@ class CompleteWaveParticipationUITest: XCTestCase {
         app.otherElements["FilterButton_Downloaded"].waitForExistenceAndTap()
     }
 
-    // ============================================================
-    // EVENT INTERACTIONS
-    // ============================================================
+    // MARK: - Event Interactions
 
     func scrollEventsList() {
         let eventsList = app.otherElements["EventsList"]
@@ -260,17 +215,13 @@ class CompleteWaveParticipationUITest: XCTestCase {
         }
     }
 
-    // ============================================================
-    // WAVE INTERACTIONS
-    // ============================================================
+    // MARK: - Wave Interactions
 
     func clickJoinWaveButton() {
         app.otherElements["JoinWaveButton"].waitForExistenceAndTap()
     }
 
-    // ============================================================
-    // ABOUT INTERACTIONS
-    // ============================================================
+    // MARK: - About Interactions
 
     func clickAboutFaqTab() {
         app.otherElements["AboutTab_FAQ"].waitForExistenceAndTap()
@@ -287,9 +238,7 @@ class CompleteWaveParticipationUITest: XCTestCase {
         app.otherElements["FaqItem_0"].waitForExistenceAndTap()
     }
 
-    // ============================================================
-    // VERIFICATION HELPERS
-    // ============================================================
+    // MARK: - Verification Helpers
 
     func verifyMainScreenLoaded() {
         verifyElementExists(app.otherElements["EventsList"], message: "Events list should be visible")

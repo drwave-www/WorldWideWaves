@@ -1,3 +1,5 @@
+@file:Suppress("MatchingDeclarationName") // Platform-specific actual file naming (.android.kt)
+
 package com.worldwidewaves.shared.ui
 
 /*

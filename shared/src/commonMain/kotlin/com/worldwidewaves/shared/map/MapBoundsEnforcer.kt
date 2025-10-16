@@ -33,10 +33,16 @@ import kotlin.math.min
 /**
  * Platform-independent map bounds enforcement that handles the logic
  * for keeping the map view within bounds.
+ *
+ * @param mapBounds The event area bounding box to constrain the map to
+ * @param mapLibreAdapter Platform-specific map adapter
+ * @param isWindowMode True for WINDOW mode (full map with gestures), false for BOUNDS mode (event detail, no gestures)
+ * @param isSuppressed Lambda that returns true when constraint enforcement should be suppressed (during animations)
  */
 class MapBoundsEnforcer(
     private val mapBounds: BoundingBox,
     private val mapLibreAdapter: MapLibreAdapter<*>,
+    private val isWindowMode: Boolean = false,
     /**
      * When this lambda returns true the enforcer will not attempt to correct /
      * move the camera.  Used while a user-initiated or automatic animation is
@@ -108,6 +114,18 @@ class MapBoundsEnforcer(
             val paddedBounds = calculateConstraintBounds()
             constraintBounds = paddedBounds
 
+            // Validate bounds are reasonable (not inverted or too small)
+            if (paddedBounds.northeast.latitude <= paddedBounds.southwest.latitude ||
+                paddedBounds.northeast.longitude <= paddedBounds.southwest.longitude
+            ) {
+                Log.w(
+                    "MapBoundsEnforcer",
+                    "Skipping constraint application - bounds are invalid/inverted " +
+                        "(map not fully initialized, will retry on next camera idle)",
+                )
+                return
+            }
+
             // Prevent infinite loop: skip if bounds haven't changed significantly (iOS triggers camera idle on every setBounds)
             if (lastAppliedBounds != null && boundsAreSimilar(lastAppliedBounds!!, paddedBounds)) {
                 Log.v("MapBoundsEnforcer", "Bounds unchanged, skipping redundant constraint update")
@@ -115,9 +133,24 @@ class MapBoundsEnforcer(
             }
 
             // Apply bounds & min-zoom to the map – no immediate camera move
-            mapLibreAdapter.setBoundsForCameraTarget(paddedBounds)
+            // NOTE: setBoundsForCameraTarget() now sets min zoom IMMEDIATELY (preventive enforcement)
+            // Pass isWindowMode to apply safety margin only for full map screen (not event details)
+            // CRITICAL: Pass ORIGINAL event bounds for min zoom calculation (not shrunk paddedBounds)
+            mapLibreAdapter.setBoundsForCameraTarget(
+                constraintBounds = paddedBounds,
+                applyZoomSafetyMargin = isWindowMode,
+                originalEventBounds = mapBounds, // CRITICAL: Original event bounds for min zoom
+            )
+
+            // Get the calculated min zoom for logging (already set by adapter)
             val minZoom = mapLibreAdapter.getMinZoomLevel()
-            mapLibreAdapter.setMinZoomPreference(minZoom)
+
+            Log.i(
+                "MapBoundsEnforcer",
+                "✅ Applied strict constraints: minZoom=$minZoom (set preventively), " +
+                    "bounds=SW(${paddedBounds.sw.lat},${paddedBounds.sw.lng}) " +
+                    "NE(${paddedBounds.ne.lat},${paddedBounds.ne.lng})",
+            )
 
             // Track the bounds we just applied
             lastAppliedBounds = paddedBounds
@@ -153,11 +186,71 @@ class MapBoundsEnforcer(
     }
 
     /**
-     * Constrain the camera to the valid bounds if needed
+     * Constrain the camera to the valid bounds if needed.
+     *
+     * DEPRECATED: This reactive approach (animating AFTER camera moves) has been replaced with
+     * preventive enforcement via MapLibre's native constraints (setLatLngBoundsForCameraTarget + minZoom).
+     *
+     * The old reactive approach caused unwanted post-gesture animations and fought with user input.
+     * The new approach prevents invalid gestures from being applied in the first place.
+     *
+     * This function is kept for compatibility but should NOT be called for Android.
+     * iOS may still use reactive corrections due to platform API limitations.
      */
+    @Suppress("ReturnCount") // Early returns are guard clauses for cleaner code
+    @Deprecated(
+        message = "Use preventive constraints (setBoundsForCameraTarget + minZoom) instead of reactive animations",
+        replaceWith = ReplaceWith("applyConstraints()"),
+    )
     fun constrainCamera() {
-        if (isSuppressed()) return
+        // ANDROID: Skip reactive animations - rely on preventive constraints
+        // MapLibre's setLatLngBoundsForCameraTarget() + setMinZoomPreference() handle this natively
+        if (!isSuppressed()) {
+            Log.v(
+                "MapBoundsEnforcer",
+                "constrainCamera() called but skipped (using preventive constraints instead)",
+            )
+        }
+
+        // NOTE: iOS may still need this for gesture clamping if MLNMapViewDelegate.shouldChangeFrom
+        // is not sufficient. Keep this code for potential iOS fallback but don't use on Android.
+        /*
         val target = mapLibreAdapter.getCameraPosition() ?: return
+
+        // Get current viewport to check if any part extends beyond event bounds
+        val viewport = mapLibreAdapter.getVisibleRegion()
+
+        // Check if viewport is completely within event bounds
+        val isViewportValid = isViewportWithinEventBounds(viewport)
+
+        if (!isViewportValid) {
+            // Viewport extends beyond event bounds - clamp camera to keep viewport inside
+            val clampedPosition = clampCameraToKeepViewportInside(target, viewport)
+
+            // Only animate if position actually changed (avoid infinite loop)
+            val positionChanged =
+                abs(clampedPosition.latitude - target.latitude) > 0.000001 ||
+                    abs(clampedPosition.longitude - target.longitude) > 0.000001
+
+            if (positionChanged) {
+                Log.d(
+                    "MapBoundsEnforcer",
+                    "${if (isWindowMode) "WINDOW" else "BOUNDS"} mode: Viewport exceeded event bounds, " +
+                        "clamping camera from (${target.latitude}, ${target.longitude}) to " +
+                        "(${clampedPosition.latitude}, ${clampedPosition.longitude})",
+                )
+
+                mapLibreAdapter.animateCamera(clampedPosition)
+            } else {
+                Log.v(
+                    "MapBoundsEnforcer",
+                    "Viewport exceeds bounds but camera already at clamped position - skipping animation",
+                )
+            }
+            return
+        }
+
+        // Additional check: Camera center within constraint bounds (legacy behavior)
         if (constraintBounds != null && !isCameraWithinConstraints(target)) {
             val mapPosition = Position(target.latitude, target.longitude)
             val constraintBoundsMapped =
@@ -170,14 +263,98 @@ class MapBoundsEnforcer(
 
             constraintBoundsMapped?.let { bounds ->
                 val nearestValid = getNearestValidPoint(mapPosition, bounds)
+                Log.v(
+                    "MapBoundsEnforcer",
+                    "${if (isWindowMode) "WINDOW" else "BOUNDS"} mode: Camera center out of constraint bounds, " +
+                        "moving to nearest valid point",
+                )
                 mapLibreAdapter.animateCamera(Position(nearestValid.latitude, nearestValid.longitude))
             }
         }
+         */
+    }
+
+    /**
+     * Checks if the entire viewport is within the event bounds.
+     * Returns true only if all four corners of the viewport are inside the event area.
+     */
+    @Suppress("UnusedPrivateMember") // Used in constrainCamera (deprecated but kept for compatibility)
+    private fun isViewportWithinEventBounds(viewport: BoundingBox): Boolean {
+        // All viewport corners must be within event bounds
+        val withinBounds =
+            viewport.southLatitude >= mapBounds.southwest.latitude &&
+                viewport.northLatitude <= mapBounds.northeast.latitude &&
+                viewport.westLongitude >= mapBounds.southwest.longitude &&
+                viewport.eastLongitude <= mapBounds.northeast.longitude
+
+        if (!withinBounds) {
+            Log.v(
+                "MapBoundsEnforcer",
+                "Viewport exceeds event bounds: " +
+                    "viewport=SW(${viewport.southLatitude},${viewport.westLongitude}) " +
+                    "NE(${viewport.northLatitude},${viewport.eastLongitude}), " +
+                    "event=SW(${mapBounds.southwest.latitude},${mapBounds.southwest.longitude}) " +
+                    "NE(${mapBounds.northeast.latitude},${mapBounds.northeast.longitude})",
+            )
+        }
+
+        return withinBounds
+    }
+
+    /**
+     * Clamps the camera position to ensure the viewport stays completely within event bounds.
+     * Calculates the nearest valid camera position that keeps all viewport edges inside the event area.
+     *
+     * Special case: If the viewport is larger than the event bounds (e.g., zoomed out too far),
+     * center the camera on the event bounds instead of trying to constrain to an invalid range.
+     */
+    @Suppress("UnusedPrivateMember") // Used in constrainCamera (deprecated but kept for compatibility)
+    private fun clampCameraToKeepViewportInside(
+        currentCamera: Position,
+        currentViewport: BoundingBox,
+    ): Position {
+        // Calculate viewport dimensions (half-width and half-height from camera center)
+        val viewportHalfHeight = (currentViewport.northLatitude - currentViewport.southLatitude) / 2.0
+        val viewportHalfWidth = (currentViewport.eastLongitude - currentViewport.westLongitude) / 2.0
+
+        // Calculate valid camera position range (camera center must stay within these bounds
+        // to keep viewport edges inside event bounds)
+        val minValidLat = mapBounds.southwest.latitude + viewportHalfHeight
+        val maxValidLat = mapBounds.northeast.latitude - viewportHalfHeight
+        val minValidLng = mapBounds.southwest.longitude + viewportHalfWidth
+        val maxValidLng = mapBounds.northeast.longitude - viewportHalfWidth
+
+        // Check if viewport is larger than bounds (invalid range where min > max)
+        // This happens when the user is zoomed out too far
+        val isViewportTooLarge = minValidLat > maxValidLat || minValidLng > maxValidLng
+
+        if (isViewportTooLarge) {
+            // Viewport is larger than event bounds - center camera on event bounds
+            val centerLat = (mapBounds.southwest.latitude + mapBounds.northeast.latitude) / 2.0
+            val centerLng = (mapBounds.southwest.longitude + mapBounds.northeast.longitude) / 2.0
+
+            Log.d(
+                "MapBoundsEnforcer",
+                "Viewport larger than bounds (viewport: ${viewportHalfHeight * 2}° x ${viewportHalfWidth * 2}°, " +
+                    "bounds: ${mapBounds.northeast.latitude - mapBounds.southwest.latitude}° x " +
+                    "${mapBounds.northeast.longitude - mapBounds.southwest.longitude}°), " +
+                    "centering camera on event bounds",
+            )
+
+            return Position(centerLat, centerLng)
+        }
+
+        // Clamp camera position to valid range (normal case)
+        val clampedLat = currentCamera.latitude.coerceIn(minValidLat, maxValidLat)
+        val clampedLng = currentCamera.longitude.coerceIn(minValidLng, maxValidLng)
+
+        return Position(clampedLat, clampedLng)
     }
 
     /**
      * Checks if camera is within the constraint bounds
      */
+    @Suppress("UnusedPrivateMember") // Used in constrainCamera (deprecated but kept for compatibility)
     private fun isCameraWithinConstraints(cameraPosition: Position): Boolean = constraintBounds?.contains(cameraPosition) ?: false
 
     // fitMapToBounds removed - was unused
@@ -192,37 +369,96 @@ class MapBoundsEnforcer(
         )
     }
 
+    @Suppress("ReturnCount") // Multiple returns for different modes
     private fun calculateVisibleRegionPadding(): VisibleRegionPadding {
-        // Get the visible region from the current map view
-        val visibleRegion = mapLibreAdapter.getVisibleRegion()
+        // CRITICAL DISTINCTION: WINDOW mode vs BOUNDS mode
+        //
+        // WINDOW mode (full map screen with gestures):
+        //   - Need viewport padding to prevent edge overflow
+        //   - setLatLngBoundsForCameraTarget() only constrains camera CENTER
+        //   - Shrink bounds by viewport half-size to keep viewport inside event area
+        //
+        // BOUNDS mode (event detail screen, no gestures):
+        //   - Want to show ENTIRE event area
+        //   - No viewport padding needed (gestures disabled, no panning to edges)
+        //   - Zero padding = constraint bounds = event bounds = entire event visible
 
-        // Calculate padding as half the visible region dimensions
-        val latPadding =
-            (
-                visibleRegion.northLatitude -
-                    visibleRegion.southLatitude
-            ) / 2.0
-        val lngPadding =
-            (
-                visibleRegion.eastLongitude -
-                    visibleRegion.westLongitude
-            ) / 2.0
+        if (!isWindowMode) {
+            // BOUNDS mode: No padding, show entire event
+            Log.d(
+                "MapBoundsEnforcer",
+                "BOUNDS mode: Using zero padding (want entire event visible, gestures disabled)",
+            )
+            return VisibleRegionPadding(0.0, 0.0)
+        }
 
-        return VisibleRegionPadding(latPadding, lngPadding)
+        // WINDOW mode: Calculate viewport padding from CURRENT viewport (zoom-dependent)
+        // Constraint bounds must adjust dynamically with zoom:
+        // - Zoom OUT: viewport larger → tighter constraints → less pan area
+        // - Zoom IN: viewport smaller → looser constraints → more pan area
+        // - At min zoom: viewport fills event → minimal pan (edges only)
+
+        val viewport = mapLibreAdapter.getVisibleRegion()
+        val viewportHalfHeight = (viewport.northLatitude - viewport.southLatitude) / 2.0
+        val viewportHalfWidth = (viewport.eastLongitude - viewport.westLongitude) / 2.0
+
+        // VALIDATION: Reject absurd viewport values (map not initialized)
+        if (viewportHalfHeight > 10.0 || viewportHalfWidth > 10.0) {
+            Log.w(
+                "MapBoundsEnforcer",
+                "WINDOW mode: Invalid viewport (halfHeight=$viewportHalfHeight, halfWidth=$viewportHalfWidth), " +
+                    "using zero padding",
+            )
+            return VisibleRegionPadding(0.0, 0.0)
+        }
+
+        Log.d(
+            "MapBoundsEnforcer",
+            "WINDOW mode: Current viewport: ${viewportHalfHeight * 2}° × ${viewportHalfWidth * 2}°, " +
+                "padding: halfHeight=$viewportHalfHeight, halfWidth=$viewportHalfWidth",
+        )
+
+        return VisibleRegionPadding(viewportHalfHeight, viewportHalfWidth)
     }
 
     private fun calculatePaddedBounds(padding: VisibleRegionPadding): BoundingBox {
         Log.d("MapBoundsEnforcer", "mapBounds: SW(${mapBounds.sw.lat},${mapBounds.sw.lng}) NE(${mapBounds.ne.lat},${mapBounds.ne.lng})")
         Log.d("MapBoundsEnforcer", "padding: lat=${padding.latPadding}, lng=${padding.lngPadding}")
 
+        // VIEWPORT EDGE CLAMPING: Shrink constraint bounds by viewport size
+        // This ensures camera center cannot move where viewport edges would exceed event bounds
+        // padding = viewportSize / 2, so we add/subtract it from event bounds to get valid camera center range
+
+        // CRITICAL iOS FIX: Prevent bounds inversion when viewport > event (e.g., zoomed out on full map)
+        // If padding >= eventSize/2, the result would have SW > NE, which iOS rejects as invalid
+        // Clamp padding to 49% of event size to guarantee valid bounds with small center region
+        val eventLatSpan = mapBounds.northeast.latitude - mapBounds.southwest.latitude
+        val eventLngSpan = mapBounds.northeast.longitude - mapBounds.southwest.longitude
+
+        // Use 49% (not 50%) to ensure a small valid region remains even when heavily zoomed out
+        val maxLatPadding = eventLatSpan * 0.49
+        val maxLngPadding = eventLngSpan * 0.49
+
+        val effectiveLatPadding = min(padding.latPadding, maxLatPadding)
+        val effectiveLngPadding = min(padding.lngPadding, maxLngPadding)
+
+        if (effectiveLatPadding < padding.latPadding || effectiveLngPadding < padding.lngPadding) {
+            Log.d(
+                "MapBoundsEnforcer",
+                "Clamping padding to prevent invalid bounds on iOS: " +
+                    "requested=(${padding.latPadding}, ${padding.lngPadding}), " +
+                    "clamped=($effectiveLatPadding, $effectiveLngPadding)",
+            )
+        }
+
         return BoundingBox.fromCorners(
             Position(
-                mapBounds.southwest.latitude + padding.latPadding,
-                mapBounds.southwest.longitude + padding.lngPadding,
+                mapBounds.southwest.latitude + effectiveLatPadding, // SW moves inward
+                mapBounds.southwest.longitude + effectiveLngPadding, // SW moves inward
             ),
             Position(
-                mapBounds.northeast.latitude - padding.latPadding,
-                mapBounds.northeast.longitude - padding.lngPadding,
+                mapBounds.northeast.latitude - effectiveLatPadding, // NE moves inward
+                mapBounds.northeast.longitude - effectiveLngPadding, // NE moves inward
             ),
         )
     }
