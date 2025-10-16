@@ -87,6 +87,7 @@ class AbstractEventMapTest : KoinTest {
         val mockWave = mockk<WWWEventWave>()
         val mockEventMap = mockk<WWWEventMap>()
 
+        every { mockEvent.id } returns "test-event-id"
         every { mockEvent.area } returns mockArea
         every { mockEvent.wave } returns mockWave
         every { mockEvent.map } returns mockEventMap

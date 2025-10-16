@@ -225,17 +225,27 @@ class MapBoundsEnforcerTest {
             val enforcer = MapBoundsEnforcer(LONDON_BOUNDS, adapter)
 
             // Set camera position outside bounds (too far west)
-            adapter.setCameraPosition(Position(51.5100, -0.3000)) // West of bounds
+            adapter.setCameraPosition(Position(51.5100, -0.3000)) // West of bounds (-0.2000 edge)
 
             enforcer.applyConstraints()
+
+            // Get the actual constraint bounds (expanded with padding)
+            val constraintBounds = enforcer.calculateConstraintBounds()
+
             enforcer.constrainCamera()
 
             // Verify camera was constrained to nearest valid point
             val animatedPosition = adapter.lastAnimatedPosition
             assertNotNull(animatedPosition, "Camera should be animated to constrained position")
+            // FIXED: Check against EXPANDED constraint bounds, not original map bounds
             assertTrue(
-                LONDON_BOUNDS.contains(animatedPosition),
-                "Constrained position should be within bounds",
+                constraintBounds.contains(animatedPosition),
+                "Constrained position should be within expanded constraint bounds",
+            )
+            // Verify position was moved closer to the valid area (westward correction)
+            assertTrue(
+                animatedPosition.longitude > -0.3000,
+                "Longitude should be corrected eastward from -0.3000",
             )
 
             println("✅ Camera constrained from (-0.3000) to (${animatedPosition.longitude})")
@@ -312,22 +322,23 @@ class MapBoundsEnforcerTest {
             // Calculate constraint bounds with padding
             val constraintBounds = enforcer.calculateConstraintBounds()
 
-            // Verify constraint bounds are within map bounds
+            // FIXED: Padding EXPANDS bounds (allows more movement), not shrinks them
+            // Verify constraint bounds EXTEND BEYOND map bounds by padding amount
             assertTrue(
-                constraintBounds.southwest.latitude >= LONDON_BOUNDS.southwest.latitude,
-                "Constraint bounds southwest latitude should be >= map bounds",
+                constraintBounds.southwest.latitude <= LONDON_BOUNDS.southwest.latitude,
+                "Constraint bounds southwest latitude should be <= map bounds (expanded outward)",
             )
             assertTrue(
-                constraintBounds.southwest.longitude >= LONDON_BOUNDS.southwest.longitude,
-                "Constraint bounds southwest longitude should be >= map bounds",
+                constraintBounds.southwest.longitude <= LONDON_BOUNDS.southwest.longitude,
+                "Constraint bounds southwest longitude should be <= map bounds (expanded outward)",
             )
             assertTrue(
-                constraintBounds.northeast.latitude <= LONDON_BOUNDS.northeast.latitude,
-                "Constraint bounds northeast latitude should be <= map bounds",
+                constraintBounds.northeast.latitude >= LONDON_BOUNDS.northeast.latitude,
+                "Constraint bounds northeast latitude should be >= map bounds (expanded outward)",
             )
             assertTrue(
-                constraintBounds.northeast.longitude <= LONDON_BOUNDS.northeast.longitude,
-                "Constraint bounds northeast longitude should be <= map bounds",
+                constraintBounds.northeast.longitude >= LONDON_BOUNDS.northeast.longitude,
+                "Constraint bounds northeast longitude should be >= map bounds (expanded outward)",
             )
 
             // Verify bounds are properly set
@@ -400,10 +411,11 @@ class MapBoundsEnforcerTest {
             val largeBounds = enforcer.calculateConstraintBounds()
             val largeSpan = largeBounds.height
 
-            // Verify larger padding produces smaller constraint bounds
+            // FIXED: Larger padding EXPANDS bounds (allows more camera movement)
+            // This gives the user more freedom to pan around the map without hitting constraints
             assertTrue(
-                largeSpan < smallSpan,
-                "Larger padding should produce smaller constraint bounds (more padding = less available space)",
+                largeSpan > smallSpan,
+                "Larger padding should produce LARGER constraint bounds (more padding = more available space for camera movement)",
             )
 
             println("✅ Safe bounds recalculated with padding: small span=$smallSpan, large span=$largeSpan")

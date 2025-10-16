@@ -215,14 +215,16 @@ class MapBoundsEnforcer(
         Log.d("MapBoundsEnforcer", "mapBounds: SW(${mapBounds.sw.lat},${mapBounds.sw.lng}) NE(${mapBounds.ne.lat},${mapBounds.ne.lng})")
         Log.d("MapBoundsEnforcer", "padding: lat=${padding.latPadding}, lng=${padding.lngPadding}")
 
+        // FIXED: Padding should EXPAND the bounds, not shrink them
+        // Subtract from SW (move outward), Add to NE (move outward)
         return BoundingBox.fromCorners(
             Position(
-                mapBounds.southwest.latitude + padding.latPadding,
-                mapBounds.southwest.longitude + padding.lngPadding,
+                mapBounds.southwest.latitude - padding.latPadding,
+                mapBounds.southwest.longitude - padding.lngPadding,
             ),
             Position(
-                mapBounds.northeast.latitude - padding.latPadding,
-                mapBounds.northeast.longitude - padding.lngPadding,
+                mapBounds.northeast.latitude + padding.latPadding,
+                mapBounds.northeast.longitude + padding.lngPadding,
             ),
         )
     }
