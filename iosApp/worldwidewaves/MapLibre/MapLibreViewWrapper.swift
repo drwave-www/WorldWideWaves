@@ -1106,27 +1106,11 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         to newCamera: MLNMapCamera,
         reason: MLNCameraChangeReason
     ) -> Bool {
-        // Enforce constraint bounds if set (matches Android setLatLngBoundsForCameraTarget behavior)
-        guard let bounds = currentConstraintBounds else {
-            return true  // No constraints, allow all movements
-        }
-
-        // Get viewport bounds from the new camera using MapLibre's native calculation
-        // This matches Android's exact behavior and prevents math approximation errors
-        let viewportBounds = getViewportBoundsForCamera(newCamera, in: mapView)
-
-        // Check if all viewport corners are within constraint bounds (matches Android)
-        let swInBounds = viewportBounds.sw.latitude >= bounds.sw.latitude &&
-                         viewportBounds.sw.longitude >= bounds.sw.longitude
-        let neInBounds = viewportBounds.ne.latitude <= bounds.ne.latitude &&
-                         viewportBounds.ne.longitude <= bounds.ne.longitude
-
-        if swInBounds && neInBounds {
-            return true  // All viewport corners within bounds, allow movement
-        }
-
-        // Viewport would extend outside bounds - prevent movement
-        return false  // Prevent movement (matches Android setLatLngBoundsForCameraTarget behavior)
+        // FIXED: Always allow gestures, rely on constrainCamera() to clamp position
+        // Android's setLatLngBoundsForCameraTarget clamps movement smoothly
+        // Blocking gestures (return false) causes jerky UX where user can't move in certain directions
+        // Instead: Allow all gestures, let constrainCamera() callback correct position smoothly
+        return true
     }
 
     /// Get viewport bounds for a camera using MapLibre's accurate calculation
