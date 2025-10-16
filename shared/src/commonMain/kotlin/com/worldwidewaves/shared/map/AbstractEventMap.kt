@@ -65,6 +65,11 @@ abstract class AbstractEventMap<T>(
     protected val mapConfig: EventMapConfig = EventMapConfig(),
     private val onLocationUpdate: (Position) -> Unit,
 ) : KoinComponent {
+    companion object {
+        // Threshold for detecting significant dimension changes (10%)
+        private const val DIMENSION_CHANGE_THRESHOLD = 0.1
+    }
+
     // Properties that must be implemented by platform-specific subclasses
     abstract val mapLibreAdapter: MapLibreAdapter<T> // MapLibre is native map library
     abstract val locationProvider: LocationProvider? // LocationProvider is native location provider
@@ -457,11 +462,11 @@ abstract class AbstractEventMap<T>(
                     val currentWidth = mapLibreAdapter.getWidth()
                     val currentHeight = mapLibreAdapter.getHeight()
 
-                    // Check if dimensions changed significantly (>10% change)
+                    // Check if dimensions changed significantly
                     val widthChange = kotlin.math.abs(currentWidth - screenWidth) / screenWidth
                     val heightChange = kotlin.math.abs(currentHeight - screenHeight) / screenHeight
 
-                    if (widthChange > 0.1 || heightChange > 0.1) {
+                    if (widthChange > DIMENSION_CHANGE_THRESHOLD || heightChange > DIMENSION_CHANGE_THRESHOLD) {
                         com.worldwidewaves.shared.utils.Log.i(
                             "AbstractEventMap",
                             "📐 Dimensions changed significantly (${screenWidth}x$screenHeight → ${currentWidth}x$currentHeight), " +
