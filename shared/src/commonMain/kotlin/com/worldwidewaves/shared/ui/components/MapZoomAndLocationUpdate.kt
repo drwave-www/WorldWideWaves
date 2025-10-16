@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.worldwidewaves.shared.events.IWWWEvent
@@ -35,7 +34,7 @@ import kotlin.math.floor
 /**
  * Shared map zoom and location update component.
  * Automatically targets the user and wave when the user enters the event area.
- * Continuously updates camera to show user+wave as wave progresses (with throttling to 1 update/second).
+ * Continuously updates camera to show user+wave as wave progresses (throttled to every 5% progression).
  * Works with any AbstractEventMap implementation (Android, iOS).
  */
 @Composable
@@ -43,31 +42,21 @@ fun MapZoomAndLocationUpdate(
     event: IWWWEvent,
     eventMap: AbstractEventMap<*>?,
 ) {
-    // Camera update throttling interval (milliseconds)
-    val cameraUpdateThrottleMs = 1000L
-
     val isInArea by event.observer.userIsInArea.collectAsState()
     val progression by event.observer.progression.collectAsState()
 
-    // Throttle progression updates to whole percentage points (avoids 60 FPS animation spam)
-    val throttledProgression = remember(progression) { floor(progression).toInt() }
+    // Throttle progression to every 5 percentage points (avoids animation spam)
+    // This gives ~20 camera updates over entire wave duration (reasonable for smooth tracking)
+    val throttledProgression = remember(progression) { (floor(progression / 5.0) * 5.0).toInt() }
 
-    // Track when camera was last updated to ensure we don't spam animations
-    var lastUpdateTime by remember { mutableStateOf(0L) }
-    val currentTime = System.currentTimeMillis()
-
-    // Trigger targetUserAndWave when entering area OR when throttled progression changes
-    // Throttling to 1-second intervals prevents animation restart loops
+    // Trigger targetUserAndWave when entering area OR every 5% progression increase
     LaunchedEffect(isInArea, throttledProgression) {
-        val timeSinceLastUpdate = currentTime - lastUpdateTime
-
-        if (isInArea && eventMap != null && timeSinceLastUpdate >= cameraUpdateThrottleMs) {
+        if (isInArea && eventMap != null) {
             com.worldwidewaves.shared.utils.Log.i(
                 "MapZoomAndLocationUpdate",
-                "Calling targetUserAndWave() for event: ${event.id} (progression=$progression)",
+                "Calling targetUserAndWave() for event: ${event.id} (progression=$progression, throttled=$throttledProgression%)",
             )
             eventMap.targetUserAndWave()
-            lastUpdateTime = currentTime
         }
     }
 }
