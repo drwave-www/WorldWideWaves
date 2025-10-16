@@ -365,7 +365,6 @@ import Shared
         WWWLog.i(Self.tag, "Setting camera constraint bounds: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng))")
 
         // Use MapLibre's native camera calculation to get accurate zoom level (matches Android behavior)
-        // This prevents the infinite loop while maintaining accurate zoom calculations
         let camera = mapView.cameraThatFitsCoordinateBounds(bounds, edgePadding: .zero)
 
         // Convert camera altitude to zoom level using MapLibre's formula
@@ -502,41 +501,102 @@ import Shared
         }
 
         // Style is loaded - render immediately
-        // Clear existing polygons if requested
-        if clearExisting {
-            WWWLog.d(Self.tag, "Clearing existing wave polygons before rendering")
-            clearWavePolygons()
-        }
-
-        // Add each polygon as a separate source and layer
-        for (index, coordinates) in polygons.enumerated() {
-            let sourceId = "wave-polygons-source-\(index)-\(UUID().uuidString)"
-            let layerId = "wave-polygons-layer-\(index)-\(UUID().uuidString)"
-
-            // Create polygon shape
-            let polygon = MLNPolygon(coordinates: coordinates, count: UInt(coordinates.count))
-
-            // Create source
-            let source = MLNShapeSource(identifier: sourceId, shape: polygon, options: nil)
-            style.addSource(source)
-
-            // Create fill layer with wave styling
-            let fillLayer = MLNFillStyleLayer(identifier: layerId, source: source)
-            fillLayer.fillColor = NSExpression(forConstantValue: UIColor(hex: "#00008B"))
-            fillLayer.fillOpacity = NSExpression(forConstantValue: 0.20)
-
-            style.addLayer(fillLayer)
-
-            // Track for cleanup
-            waveSourceIds.append(sourceId)
-            waveLayerIds.append(layerId)
-        }
+        // OPTIMIZATION: Update existing layers instead of recreating them (prevents flickering)
+        updatePolygonLayers(polygons: polygons, style: style)
 
         WWWLog.i(Self.tag, "✅ Rendered \(polygons.count) wave polygons to map, total layers: \(waveLayerIds.count)")
 
         // Update accessibility state with new polygons
         currentWavePolygons = polygons
         updateMapAccessibility()
+    }
+
+    /// Updates polygon layers efficiently by reusing existing layers instead of recreating them.
+    /// This prevents flickering during wave progression updates.
+    private func updatePolygonLayers(polygons: [[CLLocationCoordinate2D]], style: MLNStyle) {
+        // Remove excess layers if we have fewer polygons now
+        if polygons.count < waveLayerIds.count {
+            WWWLog.d(Self.tag, "Removing \(waveLayerIds.count - polygons.count) excess polygon layers")
+            for index in polygons.count..<waveLayerIds.count {
+                if let layer = style.layer(withIdentifier: waveLayerIds[index]) {
+                    style.removeLayer(layer)
+                }
+                if let source = style.source(withIdentifier: waveSourceIds[index]) {
+                    style.removeSource(source)
+                }
+            }
+            waveLayerIds.removeSubrange(polygons.count...)
+            waveSourceIds.removeSubrange(polygons.count...)
+        }
+
+        // Update or create each polygon layer
+        for (index, coordinates) in polygons.enumerated() {
+            let sourceId = index < waveSourceIds.count ? waveSourceIds[index] : "wave-polygons-source-\(index)"
+            let layerId = index < waveLayerIds.count ? waveLayerIds[index] : "wave-polygons-layer-\(index)"
+
+            // Create polygon shape
+            let polygon = MLNPolygon(coordinates: coordinates, count: UInt(coordinates.count))
+
+            if index < waveSourceIds.count {
+                // Update existing source (no flickering)
+                updateExistingPolygon(
+                    index: index,
+                    sourceId: sourceId,
+                    layerId: layerId,
+                    polygon: polygon,
+                    style: style
+                )
+            } else {
+                // Add new polygon (first time or expansion)
+                addNewPolygon(index: index, sourceId: sourceId, layerId: layerId, polygon: polygon, style: style)
+            }
+        }
+    }
+
+    /// Updates an existing polygon source to new coordinates (prevents flickering).
+    private func updateExistingPolygon(
+        index: Int,
+        sourceId: String,
+        layerId: String,
+        polygon: MLNPolygon,
+        style: MLNStyle
+    ) {
+        if let existingSource = style.source(withIdentifier: sourceId) as? MLNShapeSource {
+            existingSource.shape = polygon
+            WWWLog.v(Self.tag, "Updated existing polygon \(index)")
+        } else {
+            // Source missing - recreate it
+            WWWLog.w(Self.tag, "Source \(sourceId) missing, recreating")
+            let source = MLNShapeSource(identifier: sourceId, shape: polygon, options: nil)
+            style.addSource(source)
+
+            let fillLayer = MLNFillStyleLayer(identifier: layerId, source: source)
+            fillLayer.fillColor = NSExpression(forConstantValue: UIColor(hex: "#00008B"))
+            fillLayer.fillOpacity = NSExpression(forConstantValue: 0.20)
+            style.addLayer(fillLayer)
+        }
+    }
+
+    /// Adds a new polygon layer to the map (first time or wave expansion).
+    private func addNewPolygon(
+        index: Int,
+        sourceId: String,
+        layerId: String,
+        polygon: MLNPolygon,
+        style: MLNStyle
+    ) {
+        WWWLog.d(Self.tag, "Adding new polygon \(index)")
+        let source = MLNShapeSource(identifier: sourceId, shape: polygon, options: nil)
+        style.addSource(source)
+
+        let fillLayer = MLNFillStyleLayer(identifier: layerId, source: source)
+        fillLayer.fillColor = NSExpression(forConstantValue: UIColor(hex: "#00008B"))
+        fillLayer.fillOpacity = NSExpression(forConstantValue: 0.20)
+        style.addLayer(fillLayer)
+
+        // Track for future updates
+        waveSourceIds.append(sourceId)
+        waveLayerIds.append(layerId)
     }
 
     @objc public func clearWavePolygons() {

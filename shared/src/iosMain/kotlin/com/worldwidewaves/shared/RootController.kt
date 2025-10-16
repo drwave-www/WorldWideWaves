@@ -232,10 +232,10 @@ fun makeEventViewController(eventId: String): UIViewController =
                     onMapClick = { enabler.openFullMapActivity(event.id) },
                     mapConfig =
                         EventMapConfig(
-                            initialCameraPosition = MapCameraPosition.WINDOW,
+                            initialCameraPosition = MapCameraPosition.BOUNDS,
                             autoTargetUserOnFirstLocation = false,
                         ),
-                    // WINDOW mode: Fits event area to screen with aspect ratio adjustment (matches Android)
+                    // BOUNDS mode: Shows entire event bounds (matches Android default)
                     // Note: Gestures remain DISABLED (only enabled when opening full map screen)
                     registryKey = "${event.id}-event", // Unique key to prevent conflicts with full map
                 )
