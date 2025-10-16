@@ -43,6 +43,9 @@ fun MapZoomAndLocationUpdate(
     event: IWWWEvent,
     eventMap: AbstractEventMap<*>?,
 ) {
+    // Camera update throttling interval (milliseconds)
+    val cameraUpdateThrottleMs = 1000L
+
     val isInArea by event.observer.userIsInArea.collectAsState()
     val progression by event.observer.progression.collectAsState()
 
@@ -58,7 +61,7 @@ fun MapZoomAndLocationUpdate(
     LaunchedEffect(isInArea, throttledProgression) {
         val timeSinceLastUpdate = currentTime - lastUpdateTime
 
-        if (isInArea && eventMap != null && timeSinceLastUpdate >= 1000) {
+        if (isInArea && eventMap != null && timeSinceLastUpdate >= cameraUpdateThrottleMs) {
             com.worldwidewaves.shared.utils.Log.i(
                 "MapZoomAndLocationUpdate",
                 "Calling targetUserAndWave() for event: ${event.id} (progression=$progression)",
