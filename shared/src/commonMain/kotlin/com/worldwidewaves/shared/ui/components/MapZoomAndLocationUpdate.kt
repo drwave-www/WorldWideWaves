@@ -25,16 +25,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.map.AbstractEventMap
+import kotlinx.coroutines.delay
 
 /**
  * Shared map zoom and location update component.
  * Automatically targets the user and wave when the user enters the event area.
+ * Continuously updates camera to show user+wave as wave progresses (throttled to 1 second intervals).
  * Works with any AbstractEventMap implementation (Android, iOS).
- *
- * NOTE: Only triggers on isInArea change (not progression) to prevent animation loops.
- * Rapid progression updates (60 FPS) would restart animations constantly, causing UI freeze.
  */
 @Composable
 fun MapZoomAndLocationUpdate(
@@ -43,11 +43,46 @@ fun MapZoomAndLocationUpdate(
 ) {
     val isInArea by event.observer.userIsInArea.collectAsState()
 
-    // Only react to isInArea changes (entering/exiting event area)
-    // DO NOT include progression - it updates 60 times/second and causes animation restart loops
+    // Time-based throttling: Update camera every 1 second (real time, not simulated)
+    // Use LaunchedEffect with delay instead of progression-based throttling
     LaunchedEffect(isInArea) {
-        if (isInArea) {
-            eventMap?.targetUserAndWave()
+        if (!isInArea || eventMap == null) return@LaunchedEffect
+
+        // Initial update when entering area
+        com.worldwidewaves.shared.utils.Log.i(
+            "MapZoomAndLocationUpdate",
+            "Initial targetUserAndWave() for event: ${event.id} (entered area)",
+        )
+        eventMap.targetUserAndWave()
+
+        // Continuous updates every 1 second (real time) while in area
+        while (isInArea) {
+            delay(WWWGlobals.Timing.MAP_CAMERA_UPDATE_INTERVAL_MS.toLong())
+            com.worldwidewaves.shared.utils.Log.i(
+                "MapZoomAndLocationUpdate",
+                "Periodic targetUserAndWave() for event: ${event.id} (1s throttle)",
+            )
+            eventMap.targetUserAndWave()
         }
     }
+}
+
+/**
+ * Displays wave polygons on map WITHOUT camera movement.
+ * Used in EventDetailScreen where map shows wave progression but stays on static BOUNDS view.
+ * Similar to MapZoomAndLocationUpdate but only renders polygons (no auto-follow).
+ *
+ * Note: Parameters are unused but kept for API consistency with MapZoomAndLocationUpdate.
+ * The AbstractEventMap automatically observes event.wave.polygonSets and renders them.
+ */
+@Suppress("UnusedParameter")
+@Composable
+fun MapPolygonDisplay(
+    event: IWWWEvent,
+    eventMap: AbstractEventMap<*>?,
+) {
+    // No camera movement - just let the wave observer update polygons via eventMap
+    // The AbstractEventMap already observes event.wave.polygonSets and renders them
+    // This is a placeholder to document the intentional lack of camera tracking
+    // Camera remains on initial BOUNDS position set during map initialization
 }

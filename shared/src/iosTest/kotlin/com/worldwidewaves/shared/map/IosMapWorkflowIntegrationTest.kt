@@ -81,7 +81,7 @@ class IosMapWorkflowIntegrationTest {
             )!!
 
         // 1. Kotlin: setBoundsForCameraTarget stores SetConstraintBounds command
-        val command = CameraCommand.SetConstraintBounds(constraintBounds)
+        val command = CameraCommand.SetConstraintBounds(constraintBounds, constraintBounds, true)
         MapWrapperRegistry.setPendingCameraCommand(testEventId, command)
 
         // 2. Verify Swift can retrieve and identify constraint command
@@ -258,7 +258,7 @@ class IosMapWorkflowIntegrationTest {
         // Constraint bounds
         MapWrapperRegistry.setPendingCameraCommand(
             testEventId,
-            CameraCommand.SetConstraintBounds(initialBounds),
+            CameraCommand.SetConstraintBounds(initialBounds, initialBounds, true),
         )
 
         // 3. Map click callback registered

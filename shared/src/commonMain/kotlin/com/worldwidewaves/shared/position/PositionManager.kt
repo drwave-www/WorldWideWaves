@@ -150,6 +150,7 @@ class PositionManager(
     /**
      * Determines if a new position update should be accepted based on source priority
      */
+    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     private fun shouldAcceptUpdate(
         current: PositionState,
         new: PositionState,

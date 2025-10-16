@@ -91,6 +91,23 @@ class IosSoundPlayer :
             val outputNode = audioEngine.outputNode
             val format = outputNode.outputFormatForBus(0u)
 
+            // Validate audio format before proceeding
+            // iOS simulators may have invalid sample rates or channel counts
+            val sampleRate = format.sampleRate
+            val channelCount = format.channelCount
+
+            if (sampleRate <= 0.0 || channelCount == 0u) {
+                Log.w(
+                    TAG,
+                    "Invalid audio format: sampleRate=$sampleRate, channels=$channelCount - " +
+                        "audio not available (likely running on simulator without audio I/O)",
+                )
+                isEngineStarted = false
+                return
+            }
+
+            Log.d(TAG, "Valid audio format detected: sampleRate=$sampleRate, channels=$channelCount")
+
             // Attach nodes: playerNode -> mixerNode -> outputNode
             audioEngine.attachNode(playerNode)
             audioEngine.attachNode(mixerNode)
@@ -100,7 +117,7 @@ class IosSoundPlayer :
             audioEngine.prepare()
             audioEngine.startAndReturnError(null)
             isEngineStarted = true
-            Log.v(TAG, "Audio engine setup completed")
+            Log.v(TAG, "Audio engine setup completed successfully")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to setup audio engine (simulator or hardware issue)", e)
             isEngineStarted = false

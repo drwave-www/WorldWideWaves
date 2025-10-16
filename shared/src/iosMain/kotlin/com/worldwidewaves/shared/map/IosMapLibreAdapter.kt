@@ -76,9 +76,45 @@ class IosMapLibreAdapter(
         callback.invoke()
     }
 
-    override fun getWidth(): Double = DEFAULT_WIDTH
+    @Suppress("ReturnCount") // Multiple returns for guard clauses (null wrapper, zero dimension, valid dimension)
+    override fun getWidth(): Double {
+        // Get actual map view dimensions from Swift wrapper (not hardcoded defaults)
+        val wrapper = MapWrapperRegistry.getWrapper(eventId)
+        if (wrapper == null) {
+            Log.w(TAG, "getWidth: wrapper is null, returning default: $DEFAULT_WIDTH")
+            return DEFAULT_WIDTH
+        }
 
-    override fun getHeight(): Double = DEFAULT_HEIGHT
+        // Synchronously get width from Swift wrapper
+        val actualWidth = MapWrapperRegistry.getMapWidth(eventId)
+        if (actualWidth > 0) {
+            Log.v(TAG, "getWidth: returning actual map width: $actualWidth")
+            return actualWidth
+        }
+
+        Log.w(TAG, "getWidth: actual width is 0, returning default: $DEFAULT_WIDTH")
+        return DEFAULT_WIDTH
+    }
+
+    @Suppress("ReturnCount") // Multiple returns for guard clauses (null wrapper, zero dimension, valid dimension)
+    override fun getHeight(): Double {
+        // Get actual map view dimensions from Swift wrapper (not hardcoded defaults)
+        val wrapper = MapWrapperRegistry.getWrapper(eventId)
+        if (wrapper == null) {
+            Log.w(TAG, "getHeight: wrapper is null, returning default: $DEFAULT_HEIGHT")
+            return DEFAULT_HEIGHT
+        }
+
+        // Synchronously get height from Swift wrapper
+        val actualHeight = MapWrapperRegistry.getMapHeight(eventId)
+        if (actualHeight > 0) {
+            Log.v(TAG, "getHeight: returning actual map height: $actualHeight")
+            return actualHeight
+        }
+
+        Log.w(TAG, "getHeight: actual height is 0, returning default: $DEFAULT_HEIGHT")
+        return DEFAULT_HEIGHT
+    }
 
     override fun getCameraPosition(): Position? {
         // Try to get from registry first (updated by Swift)
@@ -216,8 +252,12 @@ class IosMapLibreAdapter(
         )
     }
 
-    override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
-        Log.d(TAG, "Setting camera constraint bounds for event: $eventId")
+    override fun setBoundsForCameraTarget(
+        constraintBounds: BoundingBox,
+        applyZoomSafetyMargin: Boolean,
+        originalEventBounds: BoundingBox?,
+    ) {
+        Log.d(TAG, "Setting camera constraint bounds for event: $eventId, applyZoomSafetyMargin=$applyZoomSafetyMargin")
         Log.d(
             TAG,
             "BBox details: minLat=${constraintBounds.minLatitude}, maxLat=${constraintBounds.maxLatitude}, " +
@@ -227,9 +267,18 @@ class IosMapLibreAdapter(
             TAG,
             "SW/NE: SW(${constraintBounds.sw.lat},${constraintBounds.sw.lng}) NE(${constraintBounds.ne.lat},${constraintBounds.ne.lng})",
         )
+        if (originalEventBounds != null) {
+            Log.d(
+                TAG,
+                "Original event bounds: SW(${originalEventBounds.sw.lat},${originalEventBounds.sw.lng}) " +
+                    "NE(${originalEventBounds.ne.lat},${originalEventBounds.ne.lng})",
+            )
+        }
+        // Pass both constraint bounds and original event bounds to iOS
+        // iOS uses constraint bounds for gesture enforcement and original bounds for min zoom calculation
         MapWrapperRegistry.setPendingCameraCommand(
             eventId,
-            CameraCommand.SetConstraintBounds(constraintBounds),
+            CameraCommand.SetConstraintBounds(constraintBounds, originalEventBounds, applyZoomSafetyMargin),
         )
     }
 
@@ -267,16 +316,7 @@ class IosMapLibreAdapter(
         bottom: Int,
     ) {
         Log.d(TAG, "Setting attribution margins: left=$left, top=$top, right=$right, bottom=$bottom for event: $eventId")
-
-        // Attribution margins can be set via MapLibreViewWrapper.setAttributionMargins()
-        // This method is implemented in MapLibreViewWrapper.swift (lines 367-419)
-        // and can be called from Swift via IOSMapBridge.setAttributionMargins()
-        //
-        // Currently this method is never called from the shared Kotlin code.
-        // If needed in the future, implement via MapWrapperRegistry command pattern
-        // similar to camera commands, or call directly via Swift bridge in iosApp target.
-        //
-        // Implementation is complete on the Swift side and ready to use.
+        MapWrapperRegistry.setAttributionMarginsCommand(eventId, left, top, right, bottom)
     }
 
     override fun addWavePolygons(
@@ -336,8 +376,20 @@ class IosMapLibreAdapter(
     }
 
     override fun setUserPosition(position: Position) {
-        Log.v(TAG, "setUserPosition: (${position.lat}, ${position.lng}) for event: $eventId")
+        Log.i(TAG, "📍 setUserPosition: (${position.lat}, ${position.lng}) for event: $eventId")
+
+        // Verify callback is registered
+        val hasCallback = MapWrapperRegistry.hasUserPositionCallback(eventId)
+        Log.d(TAG, "User position callback registered: $hasCallback")
+
         // Call Swift wrapper via registry callback
         MapWrapperRegistry.setUserPositionOnWrapper(eventId, position.lat, position.lng)
+        Log.v(TAG, "✅ setUserPositionOnWrapper called for event: $eventId")
+    }
+
+    override fun setGesturesEnabled(enabled: Boolean) {
+        Log.i(TAG, "setGesturesEnabled: $enabled for event: $eventId")
+        // Call Swift wrapper via registry callback
+        MapWrapperRegistry.setGesturesEnabledOnWrapper(eventId, enabled)
     }
 }

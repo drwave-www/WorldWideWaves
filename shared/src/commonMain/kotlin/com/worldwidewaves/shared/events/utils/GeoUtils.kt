@@ -314,6 +314,7 @@ object GeoUtils {
      * segment's endpoints.
      *
      */
+    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     fun isPointOnSegment(
         point: Position,
         segment: Segment,

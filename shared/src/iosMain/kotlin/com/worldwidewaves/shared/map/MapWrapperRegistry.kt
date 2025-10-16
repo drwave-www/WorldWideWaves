@@ -36,7 +36,9 @@ sealed class CameraCommand {
     ) : CameraCommand()
 
     data class SetConstraintBounds(
-        val bounds: BoundingBox,
+        val constraintBounds: BoundingBox,
+        val originalEventBounds: BoundingBox?,
+        val applyZoomSafetyMargin: Boolean,
     ) : CameraCommand()
 
     data class SetMinZoom(
@@ -45,6 +47,13 @@ sealed class CameraCommand {
 
     data class SetMaxZoom(
         val maxZoom: Double,
+    ) : CameraCommand()
+
+    data class SetAttributionMargins(
+        val left: Int,
+        val top: Int,
+        val right: Int,
+        val bottom: Int,
     ) : CameraCommand()
 }
 
@@ -201,11 +210,17 @@ object MapWrapperRegistry {
         cameraCallbacks.remove(eventId)
         visibleRegions.remove(eventId)
         minZoomLevels.remove(eventId)
+        mapWidths.remove(eventId)
+        mapHeights.remove(eventId)
         cameraIdleListeners.remove(eventId)
         onMapReadyCallbacks.remove(eventId)
         styleLoadedStates.remove(eventId)
         locationComponentCallbacks.remove(eventId)
         setUserPositionCallbacks.remove(eventId)
+        pendingLocationComponentStates.remove(eventId)
+        pendingUserPositions.remove(eventId)
+        setGesturesEnabledCallbacks.remove(eventId)
+        pendingGesturesStates.remove(eventId)
 
         Log.i(TAG, "✅ Wrapper unregistered and cleanup complete for: $eventId")
     }
@@ -235,6 +250,8 @@ object MapWrapperRegistry {
                 is CameraCommand.SetConstraintBounds -> "SetConstraintBounds"
                 is CameraCommand.SetMinZoom -> "SetMinZoom(${command.minZoom})"
                 is CameraCommand.SetMaxZoom -> "SetMaxZoom(${command.maxZoom})"
+                is CameraCommand.SetAttributionMargins ->
+                    "SetAttributionMargins(${command.left},${command.top},${command.right},${command.bottom})"
             }
         Log.i(TAG, "📸 Storing camera command for event: $eventId → $commandDetails")
 
@@ -243,6 +260,7 @@ object MapWrapperRegistry {
             is CameraCommand.SetConstraintBounds,
             is CameraCommand.SetMinZoom,
             is CameraCommand.SetMaxZoom,
+            is CameraCommand.SetAttributionMargins,
             -> {
                 // Queue configuration commands (all must execute in order)
                 val queue = pendingConfigCommands.getOrPut(eventId) { mutableListOf() }
@@ -405,6 +423,10 @@ object MapWrapperRegistry {
     // Store zoom levels that Swift can update
     private val minZoomLevels = mutableMapOf<String, Double>()
 
+    // Store map dimensions that Swift can update
+    private val mapWidths = mutableMapOf<String, Double>()
+    private val mapHeights = mutableMapOf<String, Double>()
+
     // Store camera idle listeners (support multiple listeners per event like Android)
     private val cameraIdleListeners = mutableMapOf<String, MutableList<() -> Unit>>()
 
@@ -455,6 +477,42 @@ object MapWrapperRegistry {
      * Get min zoom level for event (cached from Swift).
      */
     fun getMinZoom(eventId: String): Double = minZoomLevels[eventId] ?: 0.0
+
+    /**
+     * Update map width from Swift.
+     * Called by Swift when map view bounds change.
+     */
+    fun updateMapWidth(
+        eventId: String,
+        width: Double,
+    ) {
+        mapWidths[eventId] = width
+        Log.v(TAG, "Map width updated: $width for event: $eventId")
+    }
+
+    /**
+     * Update map height from Swift.
+     * Called by Swift when map view bounds change.
+     */
+    fun updateMapHeight(
+        eventId: String,
+        height: Double,
+    ) {
+        mapHeights[eventId] = height
+        Log.v(TAG, "Map height updated: $height for event: $eventId")
+    }
+
+    /**
+     * Get map width for event.
+     * Returns actual map view width from Swift wrapper.
+     */
+    fun getMapWidth(eventId: String): Double = mapWidths[eventId] ?: 0.0
+
+    /**
+     * Get map height for event.
+     * Returns actual map view height from Swift wrapper.
+     */
+    fun getMapHeight(eventId: String): Double = mapHeights[eventId] ?: 0.0
 
     /**
      * Get actual min zoom from map view (bypasses cache to prevent race condition).
@@ -546,6 +604,20 @@ object MapWrapperRegistry {
     ) {
         Log.d(TAG, "Setting max zoom command: $maxZoom for event: $eventId")
         setPendingCameraCommand(eventId, CameraCommand.SetMaxZoom(maxZoom))
+    }
+
+    /**
+     * Set attribution margins command (Swift will execute).
+     */
+    fun setAttributionMarginsCommand(
+        eventId: String,
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int,
+    ) {
+        Log.d(TAG, "Setting attribution margins command: ($left,$top,$right,$bottom) for event: $eventId")
+        setPendingCameraCommand(eventId, CameraCommand.SetAttributionMargins(left, top, right, bottom))
     }
 
     /**
@@ -752,6 +824,15 @@ object MapWrapperRegistry {
     private val locationComponentCallbacks = mutableMapOf<String, (Boolean) -> Unit>()
     private val setUserPositionCallbacks = mutableMapOf<String, (Double, Double) -> Unit>()
 
+    // Store callbacks for gesture control
+    private val setGesturesEnabledCallbacks = mutableMapOf<String, (Boolean) -> Unit>()
+
+    // Store pending user position (for race condition handling)
+    private val pendingUserPositions = mutableMapOf<String, Pair<Double, Double>>()
+
+    // Store pending gestures state (for race condition handling)
+    private val pendingGesturesStates = mutableMapOf<String, Boolean>()
+
     /**
      * Register callback for enabling/disabling location component.
      * Swift wrapper registers this to receive location component enable/disable commands.
@@ -761,6 +842,17 @@ object MapWrapperRegistry {
         callback: (Boolean) -> Unit,
     ) {
         locationComponentCallbacks[eventId] = callback
+        Log.d(TAG, "Location component callback registered for event: $eventId")
+
+        // Apply pending location component state if it was set before callback registered
+        val pendingState = pendingLocationComponentStates[eventId]
+        if (pendingState != null) {
+            Log.i(TAG, "✅ Applying pending location component state: $pendingState for event: $eventId")
+            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+                callback.invoke(pendingState)
+            }
+            pendingLocationComponentStates.remove(eventId)
+        }
     }
 
     /**
@@ -772,7 +864,26 @@ object MapWrapperRegistry {
         callback: (Double, Double) -> Unit,
     ) {
         setUserPositionCallbacks[eventId] = callback
+        Log.d(TAG, "User position callback registered for event: $eventId")
+
+        // Apply pending user position if it was set before callback registered
+        val pendingPosition = pendingUserPositions[eventId]
+        if (pendingPosition != null) {
+            Log.i(TAG, "✅ Applying pending user position: (${pendingPosition.first}, ${pendingPosition.second}) for event: $eventId")
+            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+                callback.invoke(pendingPosition.first, pendingPosition.second)
+            }
+            pendingUserPositions.remove(eventId)
+        }
     }
+
+    /**
+     * Check if user position callback is registered for an event.
+     */
+    fun hasUserPositionCallback(eventId: String): Boolean = setUserPositionCallbacks.containsKey(eventId)
+
+    // Store pending location component state (for race condition handling)
+    private val pendingLocationComponentStates = mutableMapOf<String, Boolean>()
 
     /**
      * Enable or disable location component on the map wrapper.
@@ -783,11 +894,16 @@ object MapWrapperRegistry {
     ) {
         val callback = locationComponentCallbacks[eventId]
         if (callback != null) {
+            Log.d(TAG, "Invoking location component callback: $enabled for event: $eventId")
             platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
                 callback.invoke(enabled)
             }
+            // Clear pending state after successful invocation
+            pendingLocationComponentStates.remove(eventId)
         } else {
-            Log.w(TAG, "No location component callback registered for event: $eventId")
+            Log.w(TAG, "No location component callback registered for event: $eventId - storing pending state")
+            // Store pending state to apply when callback is registered
+            pendingLocationComponentStates[eventId] = enabled
         }
     }
 
@@ -799,11 +915,65 @@ object MapWrapperRegistry {
         latitude: Double,
         longitude: Double,
     ) {
+        Log.i(TAG, "📍 setUserPositionOnWrapper called: ($latitude, $longitude) for event: $eventId")
+
         val callback = setUserPositionCallbacks[eventId]
         if (callback != null) {
+            Log.d(TAG, "Dispatching position update to Swift via callback")
             platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
                 callback.invoke(latitude, longitude)
+                Log.v(TAG, "✅ Position callback invoked on main queue")
             }
+            // Clear pending position after successful dispatch
+            pendingUserPositions.remove(eventId)
+        } else {
+            Log.w(TAG, "⚠️ No user position callback registered for event: $eventId - storing latest position")
+            // Store only the latest position (overwrites previous)
+            pendingUserPositions[eventId] = Pair(latitude, longitude)
+        }
+    }
+
+    /**
+     * Register callback for enabling/disabling gestures.
+     * Swift wrapper registers this to receive gesture enable/disable commands.
+     */
+    fun setGesturesEnabledCallback(
+        eventId: String,
+        callback: (Boolean) -> Unit,
+    ) {
+        setGesturesEnabledCallbacks[eventId] = callback
+        Log.d(TAG, "Gestures callback registered for event: $eventId")
+
+        // Apply pending gestures state if it was set before callback registered
+        val pendingState = pendingGesturesStates[eventId]
+        if (pendingState != null) {
+            Log.i(TAG, "✅ Applying pending gestures state: $pendingState for event: $eventId")
+            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+                callback.invoke(pendingState)
+            }
+            pendingGesturesStates.remove(eventId)
+        }
+    }
+
+    /**
+     * Enable or disable gestures on the map wrapper.
+     */
+    fun setGesturesEnabledOnWrapper(
+        eventId: String,
+        enabled: Boolean,
+    ) {
+        val callback = setGesturesEnabledCallbacks[eventId]
+        if (callback != null) {
+            Log.d(TAG, "Invoking gestures callback: $enabled for event: $eventId")
+            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+                callback.invoke(enabled)
+            }
+            // Clear pending state after successful invocation
+            pendingGesturesStates.remove(eventId)
+        } else {
+            Log.w(TAG, "No gestures callback registered for event: $eventId - storing pending state")
+            // Store pending state to apply when callback is registered
+            pendingGesturesStates[eventId] = enabled
         }
     }
 
@@ -897,6 +1067,8 @@ object MapWrapperRegistry {
         cameraCallbacks.clear()
         visibleRegions.clear()
         minZoomLevels.clear()
+        mapWidths.clear()
+        mapHeights.clear()
         cameraIdleListeners.clear()
         cameraPositions.clear()
         cameraZooms.clear()
@@ -905,5 +1077,9 @@ object MapWrapperRegistry {
         styleLoadedStates.clear()
         locationComponentCallbacks.clear()
         setUserPositionCallbacks.clear()
+        pendingLocationComponentStates.clear()
+        pendingUserPositions.clear()
+        setGesturesEnabledCallbacks.clear()
+        pendingGesturesStates.clear()
     }
 }

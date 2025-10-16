@@ -51,6 +51,7 @@ import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.Point
 import org.maplibre.geojson.Polygon
+import java.util.UUID
 
 /**
  * Android-specific implementation of the shared [MapLibreAdapter].
@@ -69,6 +70,13 @@ class AndroidMapLibreAdapter(
 ) : MapLibreAdapter<MapLibreMap> {
     companion object {
         private const val TAG = "AndroidMapLibreAdapter"
+        private const val MIN_LATITUDE = -90.0
+        private const val MAX_LATITUDE = 90.0
+        private const val MIN_LONGITUDE = -180.0
+        private const val MAX_LONGITUDE = 180.0
+
+        // ZOOM_SAFETY_MARGIN removed - base min zoom calculation already ensures event fits
+        // The min(zoomForWidth, zoomForHeight) ensures BOTH dimensions fit in viewport
     }
 
     // -- Public/Override properties
@@ -78,6 +86,11 @@ class AndroidMapLibreAdapter(
 
     private val _currentZoom = MutableStateFlow(0.0)
     override val currentZoom: StateFlow<Double> = _currentZoom
+
+    // Queue for polygons that arrive before style loads
+    // Only stores the most recent set since wave progression contains all previous circles
+    private var pendingPolygons: List<Polygon>? = null
+    private var styleLoaded = false
 
     override fun getWidth(): Double {
         require(mapLibreMap != null)
@@ -140,6 +153,16 @@ class AndroidMapLibreAdapter(
         mapLibreMap!!.setStyle(Style.Builder().fromUri(stylePath)) { _ ->
             // Log successful style load – confirms MapLibre has parsed the style
             Log.i(TAG, "Style loaded successfully")
+            styleLoaded = true
+
+            // Render pending polygons that arrived before style loaded
+            // Only the most recent set matters (wave progression contains all previous circles)
+            pendingPolygons?.let { polygons ->
+                Log.i(TAG, "Rendering pending polygons: ${polygons.size} polygons")
+                addWavePolygons(polygons, clearExisting = true)
+                pendingPolygons = null
+            }
+
             callback()
         }
     }
@@ -218,7 +241,9 @@ class AndroidMapLibreAdapter(
 
     override fun getMinZoomLevel(): Double {
         require(mapLibreMap != null)
-        return mapLibreMap!!.minZoomLevel
+        // Return the calculated constraint-based min zoom if available (matches iOS pattern)
+        // Otherwise fall back to MapLibre's tile-based minimum
+        return if (calculatedMinZoom > 0.0) calculatedMinZoom else mapLibreMap!!.minZoomLevel
     }
 
     override fun getCameraPosition(): Position? {
@@ -330,21 +355,288 @@ class AndroidMapLibreAdapter(
         )
     }
 
-    override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
+    // Track constraint bounds for viewport clamping (matches iOS pattern)
+    private var currentConstraintBounds: BoundingBox? = null
+    private var calculatedMinZoom: Double = 0.0
+    private var eventBounds: BoundingBox? = null // Original event bounds (not shrunk)
+    private var isGestureInProgress = false
+    private var gestureConstraintsActive = false // Track if gesture listeners are already set up
+    private var minZoomLocked = false // Track if min zoom has been set (to prevent zoom-in spiral)
+    private var lastValidCameraPosition: org.maplibre.android.geometry.LatLng? = null
+
+    override fun setBoundsForCameraTarget(
+        constraintBounds: BoundingBox,
+        applyZoomSafetyMargin: Boolean,
+        originalEventBounds: BoundingBox?,
+    ) {
         require(mapLibreMap != null)
+
+        // Validate bounds before setting (matches iOS pattern)
+        require(constraintBounds.ne.lat > constraintBounds.sw.lat) {
+            "Invalid bounds: ne.lat (${constraintBounds.ne.lat}) must be > sw.lat (${constraintBounds.sw.lat})"
+        }
+        require(constraintBounds.sw.lat >= MIN_LATITUDE && constraintBounds.ne.lat <= MAX_LATITUDE) {
+            "Latitude out of range: must be between $MIN_LATITUDE and $MAX_LATITUDE"
+        }
+        require(constraintBounds.sw.lng >= MIN_LONGITUDE && constraintBounds.ne.lng <= MAX_LONGITUDE) {
+            "Longitude out of range: must be between $MIN_LONGITUDE and $MAX_LONGITUDE"
+        }
 
         Log.v(
             "Camera",
             "Setting camera target bounds constraint: SW=${constraintBounds.southwest.latitude}," +
                 "${constraintBounds.southwest.longitude} " +
-                "NE=${constraintBounds.northeast.latitude},${constraintBounds.northeast.longitude}",
+                "NE=${constraintBounds.northeast.latitude},${constraintBounds.northeast.longitude}, " +
+                "applyZoomSafetyMargin=$applyZoomSafetyMargin",
         )
 
+        // Store constraint bounds for viewport clamping (matches iOS pattern)
+        currentConstraintBounds = constraintBounds
+
+        // CRITICAL: Only calculate min zoom if not locked OR if we're now getting originalEventBounds
+        // This ensures we calculate from ORIGINAL bounds (not shrunk), preventing infinite zoom out
+        val shouldCalculateMinZoom = !minZoomLocked || (originalEventBounds != null && !minZoomLocked)
+
+        if (shouldCalculateMinZoom && originalEventBounds != null) {
+            val boundsForMinZoom = originalEventBounds
+
+            // CRITICAL: Different calculation for WINDOW vs BOUNDS mode
+            val baseMinZoom: Double
+
+            if (applyZoomSafetyMargin) {
+                // WINDOW MODE: Fit the SMALLEST event dimension (prevents outside pixels)
+                // For wide event on tall screen: fit height (smaller)
+                // For tall event on wide screen: fit width (smaller)
+                val eventWidth = boundsForMinZoom.ne.lng - boundsForMinZoom.sw.lng
+                val eventHeight = boundsForMinZoom.ne.lat - boundsForMinZoom.sw.lat
+                val mapWidth = getWidth()
+                val mapHeight = getHeight()
+
+                // Validate dimensions before calculation (prevent division by zero)
+                if (mapWidth <= 0 || mapHeight <= 0 || eventWidth <= 0 || eventHeight <= 0) {
+                    Log.w(
+                        "Camera",
+                        "Invalid dimensions: map=${mapWidth}x$mapHeight, event=${eventWidth}x$eventHeight, " +
+                            "using fallback min zoom",
+                    )
+                    calculatedMinZoom = mapLibreMap!!.minZoomLevel
+                    mapLibreMap!!.setMinZoomPreference(calculatedMinZoom)
+                    minZoomLocked = true
+                    return
+                }
+
+                // Determine which dimension is constraining
+                val eventAspect = eventWidth / eventHeight
+                val screenAspect = mapWidth / mapHeight
+
+                // Use MapLibre to calculate zoom for the constraining dimension
+                // Wide event on tall screen: use height-constrained bounds
+                // Tall event on wide screen: use width-constrained bounds
+                val constrainingBounds =
+                    if (eventAspect > screenAspect) {
+                        // Event is wider than screen aspect → constrained by HEIGHT
+                        // Create bounds with event height but screen-proportional width
+                        val constrainedWidth = eventHeight * screenAspect
+                        val centerLng = (boundsForMinZoom.sw.lng + boundsForMinZoom.ne.lng) / 2.0
+                        BoundingBox.fromCorners(
+                            Position(boundsForMinZoom.sw.lat, centerLng - constrainedWidth / 2),
+                            Position(boundsForMinZoom.ne.lat, centerLng + constrainedWidth / 2),
+                        )
+                    } else {
+                        // Event is taller than screen aspect → constrained by WIDTH
+                        val constrainedHeight = eventWidth / screenAspect
+                        val centerLat = (boundsForMinZoom.sw.lat + boundsForMinZoom.ne.lat) / 2.0
+                        BoundingBox.fromCorners(
+                            Position(centerLat - constrainedHeight / 2, boundsForMinZoom.sw.lng),
+                            Position(centerLat + constrainedHeight / 2, boundsForMinZoom.ne.lng),
+                        )
+                    }
+
+                val latLngBounds = constrainingBounds.toLatLngBounds()
+                val cameraPosition = mapLibreMap!!.getCameraForLatLngBounds(latLngBounds, intArrayOf(0, 0, 0, 0))
+                baseMinZoom = cameraPosition?.zoom ?: mapLibreMap!!.minZoomLevel
+
+                Log.i(
+                    "Camera",
+                    "🎯 WINDOW mode: eventAspect=$eventAspect, screenAspect=$screenAspect, " +
+                        "constrainedBy=${if (eventAspect > screenAspect) "HEIGHT" else "WIDTH"}, " +
+                        "minZoom=$baseMinZoom",
+                )
+            } else {
+                // BOUNDS MODE: Use MapLibre's calculation (shows entire event)
+                val latLngBounds = boundsForMinZoom.toLatLngBounds()
+                val cameraPosition = mapLibreMap!!.getCameraForLatLngBounds(latLngBounds, intArrayOf(0, 0, 0, 0))
+                baseMinZoom = cameraPosition?.zoom ?: mapLibreMap!!.minZoomLevel
+
+                Log.i(
+                    "Camera",
+                    "🎯 BOUNDS mode min zoom: base=$baseMinZoom (entire event visible)",
+                )
+            }
+
+            // No safety margin - base min zoom already ensures event fits in viewport
+            // The max() calculation ensures BOTH dimensions fit, allowing full event visibility
+            calculatedMinZoom = baseMinZoom
+
+            Log.i(
+                "Camera",
+                "🎯 Final min zoom: $baseMinZoom (allows seeing full event, no margin)",
+            )
+
+            // Set min zoom IMMEDIATELY
+            mapLibreMap!!.setMinZoomPreference(calculatedMinZoom)
+            Log.e(
+                "Camera",
+                "🚨 SET MIN ZOOM: $calculatedMinZoom - ${if (applyZoomSafetyMargin) "NO PIXELS OUTSIDE" else "ENTIRE EVENT"} 🚨",
+            )
+
+            minZoomLocked = true
+            Log.i("Camera", "✅ Min zoom LOCKED at $calculatedMinZoom")
+        } else if (!shouldCalculateMinZoom) {
+            Log.v(
+                "Camera",
+                "Min zoom already locked at $calculatedMinZoom, skipping recalculation",
+            )
+        } else {
+            Log.w("Camera", "⚠️ Min zoom NOT calculated (originalEventBounds is null)")
+        }
+
+        // Set the underlying MapLibre bounds (constrains camera center only)
         mapLibreMap!!.setLatLngBoundsForCameraTarget(constraintBounds.toLatLngBounds())
+
+        // Setup preventive gesture constraints to enforce viewport bounds
+        // Constraint bounds are now calculated from viewport at MIN ZOOM (not current)
+        // This allows zooming to min zoom while preventing viewport overflow
+        if (applyZoomSafetyMargin && !gestureConstraintsActive) {
+            setupPreventiveGestureConstraints()
+            gestureConstraintsActive = true
+        }
+    }
+
+    /**
+     * Setup preventive gesture constraints to prevent camera from moving outside bounds.
+     * This provides iOS-like "shouldChangeFrom" behavior by intercepting gestures during movement.
+     * Called ONCE when constraints are first applied (not on every constraint update).
+     */
+    private fun setupPreventiveGestureConstraints() {
+        val map = mapLibreMap ?: return
+
+        Log.i(TAG, "Setting up preventive gesture constraints (one-time setup)")
+
+        // Track when gestures start
+        map.addOnCameraMoveStartedListener { reason ->
+            isGestureInProgress =
+                when (reason) {
+                    MapLibreMap.OnCameraMoveStartedListener.REASON_API_GESTURE,
+                    MapLibreMap.OnCameraMoveStartedListener.REASON_API_ANIMATION,
+                    MapLibreMap.OnCameraMoveStartedListener.REASON_DEVELOPER_ANIMATION,
+                    -> false // All programmatic movements (including button animations)
+                    else -> true // Only user gestures (pan, pinch, etc.)
+                }
+
+            if (!isGestureInProgress) {
+                // Save position before programmatic animation
+                lastValidCameraPosition = map.cameraPosition.target
+            }
+        }
+
+        // Intercept camera movements during gestures (PREVENTIVE)
+        map.addOnCameraMoveListener {
+            if (!isGestureInProgress) return@addOnCameraMoveListener
+
+            val currentCamera = map.cameraPosition.target ?: return@addOnCameraMoveListener
+            val viewport = getVisibleRegion()
+            val constraintBounds = currentConstraintBounds ?: return@addOnCameraMoveListener
+
+            // Check if viewport exceeds event bounds
+            if (!isViewportWithinBounds(viewport, constraintBounds)) {
+                // Viewport exceeds bounds - clamp camera position IMMEDIATELY
+                val clampedPosition =
+                    clampCameraToKeepViewportInside(
+                        Position(currentCamera.latitude, currentCamera.longitude),
+                        viewport,
+                        constraintBounds,
+                    )
+
+                // Only move if position actually changed (avoid infinite loop)
+                if (kotlin.math.abs(clampedPosition.latitude - currentCamera.latitude) > 0.000001 ||
+                    kotlin.math.abs(clampedPosition.longitude - currentCamera.longitude) > 0.000001
+                ) {
+                    Log.v(TAG, "Gesture intercepted: viewport would exceed bounds, clamping camera")
+
+                    // Move camera to clamped position WITHOUT animation (instant)
+                    map.cameraPosition =
+                        CameraPosition
+                            .Builder()
+                            .target(
+                                org.maplibre.android.geometry
+                                    .LatLng(clampedPosition.latitude, clampedPosition.longitude),
+                            ).zoom(map.cameraPosition.zoom)
+                            .build()
+                }
+            }
+        }
+
+        // Track when gesture ends
+        map.addOnCameraIdleListener {
+            if (isGestureInProgress) {
+                // Gesture ended - save this as last valid position
+                lastValidCameraPosition = map.cameraPosition.target
+                isGestureInProgress = false
+                Log.v(TAG, "Gesture ended, saved valid position")
+            }
+        }
+
+        Log.i(TAG, "✅ Preventive gesture constraints active")
+    }
+
+    /**
+     * Check if entire viewport is within event bounds.
+     */
+    private fun isViewportWithinBounds(
+        viewport: BoundingBox,
+        eventBounds: BoundingBox,
+    ): Boolean =
+        viewport.southLatitude >= eventBounds.southwest.latitude &&
+            viewport.northLatitude <= eventBounds.northeast.latitude &&
+            viewport.westLongitude >= eventBounds.southwest.longitude &&
+            viewport.eastLongitude <= eventBounds.northeast.longitude
+
+    /**
+     * Clamp camera position to ensure viewport stays within event bounds.
+     */
+    private fun clampCameraToKeepViewportInside(
+        currentCamera: Position,
+        currentViewport: BoundingBox,
+        eventBounds: BoundingBox,
+    ): Position {
+        // Calculate viewport half-dimensions
+        val viewportHalfHeight = (currentViewport.northLatitude - currentViewport.southLatitude) / 2.0
+        val viewportHalfWidth = (currentViewport.eastLongitude - currentViewport.westLongitude) / 2.0
+
+        // Calculate valid camera center range
+        val minValidLat = eventBounds.southwest.latitude + viewportHalfHeight
+        val maxValidLat = eventBounds.northeast.latitude - viewportHalfHeight
+        val minValidLng = eventBounds.southwest.longitude + viewportHalfWidth
+        val maxValidLng = eventBounds.northeast.longitude - viewportHalfWidth
+
+        // Handle case where viewport > event bounds (shouldn't happen with min zoom)
+        if (minValidLat > maxValidLat || minValidLng > maxValidLng) {
+            val centerLat = (eventBounds.southwest.latitude + eventBounds.northeast.latitude) / 2.0
+            val centerLng = (eventBounds.southwest.longitude + eventBounds.northeast.longitude) / 2.0
+            return Position(centerLat, centerLng)
+        }
+
+        // Clamp camera position to valid range
+        val clampedLat = currentCamera.latitude.coerceIn(minValidLat, maxValidLat)
+        val clampedLng = currentCamera.longitude.coerceIn(minValidLng, maxValidLng)
+
+        return Position(clampedLat, clampedLng)
     }
 
     // -- Add the Wave polygons to the map
 
+    @Suppress("ReturnCount") // Multiple returns OK for guard clauses (null check, empty check, style not loaded)
     override fun addWavePolygons(
         polygons: List<Any>,
         clearExisting: Boolean,
@@ -356,6 +648,15 @@ class AndroidMapLibreAdapter(
             return
         }
 
+        // If style not loaded yet, store most recent polygons for later
+        // Only the most recent set matters (wave progression contains all previous circles)
+        if (!styleLoaded) {
+            Log.w(TAG, "Style not ready - storing ${wavePolygons.size} polygons (most recent)")
+            pendingPolygons = wavePolygons
+            return
+        }
+
+        // Style is loaded - render immediately
         map.getStyle { style ->
             try {
                 // -- Clear existing dynamic layers/sources when requested ----
@@ -368,12 +669,10 @@ class AndroidMapLibreAdapter(
 
                 // -- Add each polygon on its own layer -----------------------
                 wavePolygons.forEachIndexed { index, polygon ->
-                    val sourceId = "wave-polygons-source-$index"
-                    val layerId = "wave-polygons-layer-$index"
-
-                    // Defensive cleanup in case ids are reused
-                    style.removeLayer(layerId)
-                    style.removeSource(sourceId)
+                    // Add UUID to prevent ID conflicts during rapid updates (matches iOS pattern)
+                    val uuid = UUID.randomUUID().toString()
+                    val sourceId = "wave-polygons-source-$index-$uuid"
+                    val layerId = "wave-polygons-layer-$index-$uuid"
 
                     // GeoJSON source with a single polygon
                     val src =
@@ -455,5 +754,21 @@ class AndroidMapLibreAdapter(
         // which feeds positions from LocationProvider to MapLibre's location component
         // This is a no-op since the position updates happen through the LocationEngine
         Log.v(TAG, "setUserPosition: (${position.lat}, ${position.lng}) (no-op on Android, managed by LocationEngineProxy)")
+    }
+
+    override fun setGesturesEnabled(enabled: Boolean) {
+        require(mapLibreMap != null)
+        Log.d(TAG, "setGesturesEnabled: $enabled")
+
+        mapLibreMap!!.uiSettings.apply {
+            // Scroll gestures (pan/drag)
+            isScrollGesturesEnabled = enabled
+            // Zoom gestures (pinch, double-tap, etc.)
+            isZoomGesturesEnabled = enabled
+            // CRITICAL: Rotation and tilt ALWAYS disabled (not controlled by enabled parameter)
+            // Map rotation breaks the constrained window concept for full map screen
+            isRotateGesturesEnabled = false // ALWAYS false
+            isTiltGesturesEnabled = false // ALWAYS false
+        }
     }
 }

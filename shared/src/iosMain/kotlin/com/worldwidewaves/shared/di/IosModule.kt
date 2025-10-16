@@ -89,3 +89,17 @@ val IosModule =
         // iOS MapViewModel
         single<MapViewModel> { IosMapViewModel(get()) }
     }
+
+/**
+ * Initialize simulation mode based on build configuration (iOS equivalent of Android's initializeSimulationMode).
+ * Call this after Koin initialization with the DEBUG flag.
+ * In debug builds, this enables the simulation mode indicator (red chip) to be visible.
+ */
+fun initializeSimulationMode(
+    platform: WWWPlatform,
+    enableSimulation: Boolean,
+) {
+    if (enableSimulation) {
+        platform.enableSimulationMode()
+    }
+}

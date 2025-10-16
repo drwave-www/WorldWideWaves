@@ -114,6 +114,11 @@ class BoundingBox private constructor(
     val westLongitude: Double get() = sw.lng
     val eastLongitude: Double get() = ne.lng
 
+    val latSouth: Double get() = sw.lat
+    val latNorth: Double get() = ne.lat
+    val longWest: Double get() = sw.lng
+    val lonEast: Double get() = ne.lng
+
     val width: Double get() =
         if (ne.lng >= sw.lng) {
             ne.lng - sw.lng

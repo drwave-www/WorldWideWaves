@@ -422,8 +422,9 @@ import CoreLocation
     /// and Swift periodically checks for and executes them.
     ///
     /// ## Command Execution Strategy
-    /// - **Configuration commands** (SetConstraintBounds, SetMinZoom, SetMaxZoom): Execute ALL queued commands
-    ///   in order until queue is empty. These are fast synchronous operations that configure map constraints.
+    /// - **Configuration commands** (SetConstraintBounds, SetMinZoom, SetMaxZoom, SetAttributionMargins):
+    ///   Execute ALL queued commands in order until queue is empty.
+    ///   These are fast synchronous operations that configure map constraints.
     /// - **Animation commands** (AnimateToPosition, AnimateToBounds, MoveToBounds): Execute ONE command per call.
     ///   Animations are asynchronous and should not be batched.
     ///
@@ -434,6 +435,7 @@ import CoreLocation
     /// - **SetConstraintBounds**: Set camera movement constraints
     /// - **SetMinZoom**: Set minimum zoom level
     /// - **SetMaxZoom**: Set maximum zoom level
+    /// - **SetAttributionMargins**: Set attribution button and logo margins
     ///
     /// ## Threading Model
     /// Main thread only (MapLibre/UIKit requirement)
@@ -469,7 +471,8 @@ import CoreLocation
             // Check if this is a configuration command (can batch) or animation command (execute one)
             let isConfigCommand = command is CameraCommand.SetConstraintBounds ||
                                  command is CameraCommand.SetMinZoom ||
-                                 command is CameraCommand.SetMaxZoom
+                                 command is CameraCommand.SetMaxZoom ||
+                                 command is CameraCommand.SetAttributionMargins
 
             WWWLog.i("IOSMapBridge", "📸 Executing camera command for event: \(eventId), type: \(type(of: command))")
             let success = executeCommand(command, on: wrapper)
@@ -533,6 +536,8 @@ import CoreLocation
             return executeSetMinZoom(setMinZoom, on: wrapper)
         case let setMaxZoom as CameraCommand.SetMaxZoom:
             return executeSetMaxZoom(setMaxZoom, on: wrapper)
+        case let setMargins as CameraCommand.SetAttributionMargins:
+            return executeSetAttributionMargins(setMargins, on: wrapper)
         default:
             return true  // Unknown command type, don't retry
         }
@@ -603,21 +608,38 @@ import CoreLocation
         _ command: CameraCommand.SetConstraintBounds,
         on wrapper: MapLibreViewWrapper
     ) -> Bool {
-        let bbox = command.bounds
-        WWWLog.i("IOSMapBridge", "Setting camera constraint bounds")
+        let constraintBbox = command.constraintBounds
+        let originalBbox = command.originalEventBounds
+        let isWindowMode = command.applyZoomSafetyMargin
+
+        WWWLog.i("IOSMapBridge", "Setting camera constraint bounds (WINDOW mode: \(isWindowMode))")
         WWWLog.d(
             "IOSMapBridge",
             """
-            Swift sees bbox: minLat=\(bbox.minLatitude), \
-            minLng=\(bbox.minLongitude), maxLat=\(bbox.maxLatitude), \
-            maxLng=\(bbox.maxLongitude)
+            Constraint bounds: SW(\(constraintBbox.minLatitude),\(constraintBbox.minLongitude)) \
+            NE(\(constraintBbox.maxLatitude),\(constraintBbox.maxLongitude))
             """
         )
+        if let origBbox = originalBbox {
+            WWWLog.d(
+                "IOSMapBridge",
+                """
+                Original event bounds: SW(\(origBbox.minLatitude),\(origBbox.minLongitude)) \
+                NE(\(origBbox.maxLatitude),\(origBbox.maxLongitude))
+                """
+            )
+        }
+
         return wrapper.setBoundsForCameraTarget(
-            swLat: bbox.minLatitude,
-            swLng: bbox.minLongitude,
-            neLat: bbox.maxLatitude,
-            neLng: bbox.maxLongitude
+            constraintSwLat: constraintBbox.minLatitude,
+            constraintSwLng: constraintBbox.minLongitude,
+            constraintNeLat: constraintBbox.maxLatitude,
+            constraintNeLng: constraintBbox.maxLongitude,
+            eventSwLat: originalBbox?.minLatitude ?? constraintBbox.minLatitude,
+            eventSwLng: originalBbox?.minLongitude ?? constraintBbox.minLongitude,
+            eventNeLat: originalBbox?.maxLatitude ?? constraintBbox.maxLatitude,
+            eventNeLng: originalBbox?.maxLongitude ?? constraintBbox.maxLongitude,
+            isWindowMode: isWindowMode
         )
     }
 
@@ -636,6 +658,21 @@ import CoreLocation
     ) -> Bool {
         WWWLog.i("IOSMapBridge", "Setting max zoom: \(command.maxZoom)")
         wrapper.setMaxZoom(command.maxZoom)
+        return true
+    }
+
+    private static func executeSetAttributionMargins(
+        _ command: CameraCommand.SetAttributionMargins,
+        on wrapper: MapLibreViewWrapper
+    ) -> Bool {
+        let margins = "(\(command.left),\(command.top),\(command.right),\(command.bottom))"
+        WWWLog.i("IOSMapBridge", "Setting attribution margins: \(margins)")
+        wrapper.setAttributionMargins(
+            left: Int(command.left),
+            top: Int(command.top),
+            right: Int(command.right),
+            bottom: Int(command.bottom)
+        )
         return true
     }
 }

@@ -40,14 +40,15 @@ import com.worldwidewaves.shared.ui.components.wave.UserWaveStatusText
 import com.worldwidewaves.shared.ui.components.wave.WaveHitCounter
 import com.worldwidewaves.shared.ui.components.wave.WaveProgressionBar
 import com.worldwidewaves.shared.ui.components.wave.choreographies.WaveChoreographies
+import com.worldwidewaves.shared.ui.formatters.calculateEventMapHeight
 import kotlin.time.ExperimentalTime
-
-// Constants
-private const val MAP_HEIGHT_DP = 300
 
 /**
  * Complete Wave Screen implementation with exact same behavior and look as the working version.
  * Restored from working commit with proper choreography display and counter positioning.
+ *
+ * Map dimensions: Uses same responsive height calculation as Event Detail screen
+ * (calculateEventMapHeight) to ensure visual consistency.
  */
 @OptIn(ExperimentalTime::class)
 @Composable
@@ -59,8 +60,8 @@ fun WaveScreen(
     // Start event/map coordination and map zoom/location updates
     MapZoomAndLocationUpdate(event, eventMap)
 
-    // Calculate height based on aspect ratio and available width (exact working implementation)
-    val calculatedHeight = MAP_HEIGHT_DP.dp
+    // Calculate height based on aspect ratio and available width (matches Event Detail screen)
+    val calculatedHeight = calculateEventMapHeight()
 
     Box(modifier = modifier.fillMaxSize()) {
         Column(

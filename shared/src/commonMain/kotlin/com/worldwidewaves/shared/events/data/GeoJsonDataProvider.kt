@@ -81,6 +81,7 @@ class DefaultGeoJsonDataProvider :
         cacheAccessOrder.add(eventId) // Add to end (most recently used)
     }
 
+    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     override suspend fun getGeoJsonData(eventId: String): JsonObject? {
         val cachedResult = getCachedResult(eventId)
         if (cachedResult != null) {
@@ -115,6 +116,7 @@ class DefaultGeoJsonDataProvider :
         }
     }
 
+    @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     private fun checkRateLimit(eventId: String): JsonObject? {
         val lastAttempt = lastAttemptTime[eventId] ?: return null
         val isOdrUnavailable = isODRUnavailable(eventId)
