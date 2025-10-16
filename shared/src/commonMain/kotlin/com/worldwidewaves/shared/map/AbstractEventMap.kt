@@ -334,7 +334,8 @@ abstract class AbstractEventMap<T>(
         )
         com.worldwidewaves.shared.utils.Log.d(
             "AbstractEventMap",
-            "Constraint bbox: SW(${constraintBbox.sw.lat}, ${constraintBbox.sw.lng}) NE(${constraintBbox.ne.lat}, ${constraintBbox.ne.lng})",
+            "Constraint bbox: SW(${constraintBbox.sw.lat}, ${constraintBbox.sw.lng}) " +
+                "NE(${constraintBbox.ne.lat}, ${constraintBbox.ne.lng})",
         )
 
         // Calculate padding as percentages of the area's dimensions
@@ -365,7 +366,8 @@ abstract class AbstractEventMap<T>(
         // paddedBounds are already clipped to areaBbox at lines 347-352, so they're safe to use directly
         com.worldwidewaves.shared.utils.Log.i(
             "AbstractEventMap",
-            "🎬 targetUserAndWave: Animating to paddedBounds SW(${paddedBounds.sw.lat}, ${paddedBounds.sw.lng}) NE(${paddedBounds.ne.lat}, ${paddedBounds.ne.lng})",
+            "🎬 targetUserAndWave: Animating to paddedBounds " +
+                "SW(${paddedBounds.sw.lat}, ${paddedBounds.sw.lng}) NE(${paddedBounds.ne.lat}, ${paddedBounds.ne.lng})",
         )
 
         runCameraAnimation { _ ->
