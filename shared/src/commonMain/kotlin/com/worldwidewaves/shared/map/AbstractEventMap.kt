@@ -79,6 +79,7 @@ abstract class AbstractEventMap<T>(
     private var userHasBeenLocated = false
     private var lastKnownPosition: Position? = null
     private var userInteracted = false
+    private var windowBoundsNeedRecalculation = false // Track if WINDOW bounds need recalc after dimension change
 
     /** When true the MapBoundsEnforcer is not allowed to move the camera. */
     private var suppressCorrections = false
@@ -448,7 +449,35 @@ abstract class AbstractEventMap<T>(
             mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
 
             // Apply bounds constraints if required
-            mapLibreAdapter.addOnCameraIdleListener { constraintManager?.constrainCamera() }
+            mapLibreAdapter.addOnCameraIdleListener {
+                constraintManager?.constrainCamera()
+
+                // WINDOW mode: Recalculate bounds when dimensions change significantly
+                if (windowBoundsNeedRecalculation && mapConfig.initialCameraPosition == MapCameraPosition.WINDOW) {
+                    val currentWidth = mapLibreAdapter.getWidth()
+                    val currentHeight = mapLibreAdapter.getHeight()
+
+                    // Check if dimensions changed significantly (>10% change)
+                    val widthChange = kotlin.math.abs(currentWidth - screenWidth) / screenWidth
+                    val heightChange = kotlin.math.abs(currentHeight - screenHeight) / screenHeight
+
+                    if (widthChange > 0.1 || heightChange > 0.1) {
+                        com.worldwidewaves.shared.utils.Log.i(
+                            "AbstractEventMap",
+                            "📐 Dimensions changed significantly (${screenWidth}x$screenHeight → ${currentWidth}x$currentHeight), " +
+                                "recalculating WINDOW bounds",
+                        )
+                        screenWidth = currentWidth
+                        screenHeight = currentHeight
+                        scope.launch {
+                            moveToWindowBounds()
+                        }
+                    } else {
+                        // Dimensions stabilized
+                        windowBoundsNeedRecalculation = false
+                    }
+                }
+            }
 
             // Configure initial camera position
             scope.launch {
@@ -470,8 +499,12 @@ abstract class AbstractEventMap<T>(
                         moveToMapBounds(onMapLoaded)
                     }
                     MapCameraPosition.WINDOW -> {
-                        com.worldwidewaves.shared.utils.Log
-                            .d("AbstractEventMap", "Calling moveToWindowBounds")
+                        com.worldwidewaves.shared.utils.Log.d(
+                            "AbstractEventMap",
+                            "Calling moveToWindowBounds (initial, dimensions may change)",
+                        )
+                        // Mark that we should watch for dimension changes and recalculate
+                        windowBoundsNeedRecalculation = true
                         moveToWindowBounds(onMapLoaded)
                     }
                 }
