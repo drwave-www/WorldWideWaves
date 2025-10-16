@@ -286,6 +286,13 @@ fun makeWaveViewController(eventId: String): UIViewController =
                 IosEventMap(
                     event,
                     onMapClick = { enabler.openFullMapActivity(event.id) },
+                    mapConfig =
+                        EventMapConfig(
+                            initialCameraPosition = MapCameraPosition.WINDOW,
+                            autoTargetUserOnFirstLocation = false,
+                        ),
+                    // WINDOW mode: Maximizes view by fitting to screen aspect ratio (width OR height)
+                    // Then targetUserAndWave() takes over for continuous user+wave tracking
                     registryKey = "${event.id}-wave", // Unique key to prevent conflicts
                 )
             },
