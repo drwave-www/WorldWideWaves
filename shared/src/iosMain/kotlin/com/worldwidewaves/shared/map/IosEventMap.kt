@@ -300,7 +300,7 @@ class IosEventMap(
                 if (styleURL != null && viewController.value == null) {
                     Log.i("IosEventMap", "Creating view controller for: ${event.id}, registryKey: $mapRegistryKey")
                     // Enable gestures only for full map screen (WINDOW + autoTarget)
-                    // Event screen uses WINDOW but keeps gestures DISABLED (matches Android behavior)
+                    // Event screen uses BOUNDS with gestures DISABLED (matches Android behavior)
                     val enableGestures =
                         mapConfig.initialCameraPosition == MapCameraPosition.WINDOW &&
                             mapConfig.autoTargetUserOnFirstLocation

@@ -121,16 +121,28 @@ abstract class AbstractEventMap<T>(
      * Moves the camera to view the event bounds
      */
     suspend fun moveToMapBounds(onComplete: () -> Unit = {}) {
+        com.worldwidewaves.shared.utils.Log.i(
+            "AbstractEventMap",
+            "📐 moveToMapBounds: Starting for event ${event.id}, bounds=${event.area.bbox()}",
+        )
         // Initialize constraint manager (same as moveToWindowBounds)
         constraintManager = MapBoundsEnforcer(event.area.bbox(), mapLibreAdapter) { suppressCorrections }
 
         val bounds = event.area.bbox()
+        com.worldwidewaves.shared.utils.Log.d(
+            "AbstractEventMap",
+            "Animating camera to bounds: SW(${bounds.sw.lat}, ${bounds.sw.lng}) NE(${bounds.ne.lat}, ${bounds.ne.lng})",
+        )
         runCameraAnimation { cb ->
             mapLibreAdapter.animateCameraToBounds(
                 bounds,
                 callback =
                     object : MapCameraCallback {
                         override fun onFinish() {
+                            com.worldwidewaves.shared.utils.Log.i(
+                                "AbstractEventMap",
+                                "✅ moveToMapBounds animation completed for event ${event.id}",
+                            )
                             // Apply constraints after animation finishes
                             constraintManager?.applyConstraints()
                             mapLibreAdapter.setMinZoomPreference(mapLibreAdapter.currentZoom.value)
@@ -140,6 +152,10 @@ abstract class AbstractEventMap<T>(
                         }
 
                         override fun onCancel() {
+                            com.worldwidewaves.shared.utils.Log.w(
+                                "AbstractEventMap",
+                                "⚠️ moveToMapBounds animation CANCELLED for event ${event.id}",
+                            )
                             cb.onCancel()
                             onComplete()
                         }
@@ -377,10 +393,28 @@ abstract class AbstractEventMap<T>(
 
             // Configure initial camera position
             scope.launch {
+                com.worldwidewaves.shared.utils.Log.i(
+                    "AbstractEventMap",
+                    "🎥 Setting initial camera position: ${mapConfig.initialCameraPosition} for event: ${event.id}",
+                )
                 when (mapConfig.initialCameraPosition) {
-                    MapCameraPosition.DEFAULT_CENTER -> moveToCenter(onMapLoaded)
-                    MapCameraPosition.BOUNDS -> moveToMapBounds(onMapLoaded)
-                    MapCameraPosition.WINDOW -> moveToWindowBounds(onMapLoaded)
+                    MapCameraPosition.DEFAULT_CENTER -> {
+                        com.worldwidewaves.shared.utils.Log
+                            .d("AbstractEventMap", "Calling moveToCenter")
+                        moveToCenter(onMapLoaded)
+                    }
+                    MapCameraPosition.BOUNDS -> {
+                        com.worldwidewaves.shared.utils.Log.d(
+                            "AbstractEventMap",
+                            "Calling moveToMapBounds for event: ${event.id}",
+                        )
+                        moveToMapBounds(onMapLoaded)
+                    }
+                    MapCameraPosition.WINDOW -> {
+                        com.worldwidewaves.shared.utils.Log
+                            .d("AbstractEventMap", "Calling moveToWindowBounds")
+                        moveToWindowBounds(onMapLoaded)
+                    }
                 }
             }
 
