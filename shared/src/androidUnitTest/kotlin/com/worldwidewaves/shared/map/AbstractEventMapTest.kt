@@ -267,8 +267,9 @@ class AbstractEventMapTest : KoinTest {
             testScope.testScheduler.advanceUntilIdle()
 
             // Then
-            // Min zoom is set to currentZoom + 0.05 to compensate for MapLibre's built-in padding
-            verify { mockMapLibreAdapter.setMinZoomPreference(12.05) }
+            // Constraints calculate and set min zoom via setBoundsForCameraTarget
+            // AbstractEventMap just sets max zoom and lets constraints handle min zoom
+            verify { mockMapLibreAdapter.getMinZoomLevel() }
             verify { mockMapLibreAdapter.setMaxZoomPreference(18.0) }
         }
 
@@ -307,9 +308,9 @@ class AbstractEventMapTest : KoinTest {
             testScope.testScheduler.advanceUntilIdle()
 
             // Then
-            // Should set minZoom based on current zoom + 0.05 offset (compensates for MapLibre padding)
-            // This prevents zooming out beyond the expanded bounds (showing padding)
-            verify { mockMapLibreAdapter.setMinZoomPreference(12.05) }
+            // Constraints calculate and set min zoom based on expanded WINDOW bounds
+            // AbstractEventMap just sets max zoom and lets constraints handle min zoom
+            verify { mockMapLibreAdapter.getMinZoomLevel() }
             verify { mockMapLibreAdapter.setMaxZoomPreference(18.0) }
         }
 

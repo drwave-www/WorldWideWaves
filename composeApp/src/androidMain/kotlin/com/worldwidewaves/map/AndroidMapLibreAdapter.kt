@@ -238,7 +238,9 @@ class AndroidMapLibreAdapter(
 
     override fun getMinZoomLevel(): Double {
         require(mapLibreMap != null)
-        return mapLibreMap!!.minZoomLevel
+        // Return the calculated constraint-based min zoom if available (matches iOS pattern)
+        // Otherwise fall back to MapLibre's tile-based minimum
+        return if (calculatedMinZoom > 0.0) calculatedMinZoom else mapLibreMap!!.minZoomLevel
     }
 
     override fun getCameraPosition(): Position? {
@@ -352,6 +354,7 @@ class AndroidMapLibreAdapter(
 
     // Track constraint bounds for viewport clamping (matches iOS pattern)
     private var currentConstraintBounds: BoundingBox? = null
+    private var calculatedMinZoom: Double = 0.0
 
     override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
         require(mapLibreMap != null)
@@ -377,8 +380,23 @@ class AndroidMapLibreAdapter(
         // Store constraint bounds for viewport clamping (matches iOS pattern)
         currentConstraintBounds = constraintBounds
 
+        // Calculate min zoom that fits bounds perfectly (matches iOS implementation)
+        // Use MapLibre's camera calculation to get accurate zoom
+        val latLngBounds = constraintBounds.toLatLngBounds()
+        val cameraUpdate = CameraUpdateFactory.newLatLngBounds(latLngBounds, 0)
+        val cameraPosition = mapLibreMap!!.getCameraForLatLngBounds(latLngBounds, intArrayOf(0, 0, 0, 0))
+        calculatedMinZoom = cameraPosition?.zoom ?: mapLibreMap!!.minZoomLevel
+
+        Log.d(
+            "Camera",
+            "Calculated min zoom from bounds: $calculatedMinZoom (prevents zoom out beyond event area)",
+        )
+
         // Set the underlying MapLibre bounds (constrains camera center only)
         mapLibreMap!!.setLatLngBoundsForCameraTarget(constraintBounds.toLatLngBounds())
+
+        // Set the calculated min zoom to prevent viewport from exceeding bounds
+        mapLibreMap!!.setMinZoomPreference(calculatedMinZoom)
     }
 
     // -- Add the Wave polygons to the map

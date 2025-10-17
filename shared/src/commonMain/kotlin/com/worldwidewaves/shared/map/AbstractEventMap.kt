@@ -150,18 +150,16 @@ abstract class AbstractEventMap<T>(
                                 "AbstractEventMap",
                                 "✅ moveToMapBounds animation completed for event ${event.id}",
                             )
-                            // Set min zoom to current zoom FIRST (prevents zooming out beyond event bounds)
-                            // Add 0.05 zoom offset to compensate for MapLibre's built-in padding in bounds calculation
-                            val currentZoom = mapLibreAdapter.currentZoom.value
-                            val minZoomWithOffset = currentZoom + 0.05 // Slight zoom in to eliminate padding
+                            // Apply constraints FIRST - this calculates and sets the correct min zoom
+                            // based on bounds that fit perfectly without padding
+                            constraintManager?.applyConstraints()
+
+                            // Get the calculated min zoom from constraints
+                            val calculatedMinZoom = mapLibreAdapter.getMinZoomLevel()
                             com.worldwidewaves.shared.utils.Log.d(
                                 "AbstractEventMap",
-                                "Setting min zoom: $minZoomWithOffset (current=$currentZoom + 0.05 offset)",
+                                "BOUNDS mode: Min zoom from constraints: $calculatedMinZoom",
                             )
-                            mapLibreAdapter.setMinZoomPreference(minZoomWithOffset)
-
-                            // THEN apply constraints (for pan/gesture clamping)
-                            constraintManager?.applyConstraints()
 
                             mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
                             cb.onFinish()
@@ -242,18 +240,16 @@ abstract class AbstractEventMap<T>(
                 padding = 0,
                 object : MapCameraCallback {
                     override fun onFinish() {
-                        // Set minZoom based on EXPANDED WINDOW bounds (not original event bounds)
-                        // This prevents zooming out beyond the expanded bounds showing padding
-                        // Add 0.05 zoom offset to compensate for MapLibre's built-in padding
-                        val currentZoom = mapLibreAdapter.currentZoom.value
-                        val minZoomWithOffset = currentZoom + 0.05
+                        // Apply constraints - this will set min zoom based on expanded WINDOW bounds
+                        constraintManager?.applyConstraints()
+
+                        // Get the calculated min zoom
+                        val calculatedMinZoom = mapLibreAdapter.getMinZoomLevel()
                         com.worldwidewaves.shared.utils.Log.d(
                             "AbstractEventMap",
-                            "WINDOW mode: Setting min zoom: $minZoomWithOffset (current=$currentZoom + 0.05)",
+                            "WINDOW mode: Min zoom from constraints: $calculatedMinZoom",
                         )
-                        mapLibreAdapter.setMinZoomPreference(minZoomWithOffset)
-                        // Apply constraints after minZoom is set
-                        constraintManager?.applyConstraints()
+
                         mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
                         cb.onFinish()
                         onComplete()
