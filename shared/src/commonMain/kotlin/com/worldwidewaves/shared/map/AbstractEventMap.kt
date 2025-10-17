@@ -174,11 +174,14 @@ abstract class AbstractEventMap<T>(
      * Adjusts the camera to fit the bounds of the event map with proper aspect ratio
      */
     suspend fun moveToWindowBounds(onComplete: () -> Unit = {}) {
+        // Capture event bbox before animation (needed for callback which is not suspend)
+        val eventBbox = event.area.bbox()
+
         // Prepare bounds enforcer – actual constraints will be applied
         // after the initial animation finishes (see onFinish below).
-        constraintManager = MapBoundsEnforcer(event.area.bbox(), mapLibreAdapter) { suppressCorrections }
+        constraintManager = MapBoundsEnforcer(eventBbox, mapLibreAdapter) { suppressCorrections }
 
-        val (sw, ne) = event.area.bbox()
+        val (sw, ne) = eventBbox
         val eventMapWidth = ne.lng - sw.lng
         val eventMapHeight = ne.lat - sw.lat
         val (centerLat, centerLng) = event.area.getCenter()
@@ -216,7 +219,7 @@ abstract class AbstractEventMap<T>(
             newNeLng = centerLng + lngDiff
         }
 
-        val bounds =
+        val expandedBounds =
             BoundingBox.fromCorners(
                 Position(newSwLat, newSwLng),
                 Position(newNeLat, newNeLng),
@@ -224,15 +227,16 @@ abstract class AbstractEventMap<T>(
 
         runCameraAnimation { cb ->
             mapLibreAdapter.animateCameraToBounds(
-                bounds,
+                expandedBounds,
                 padding = 0,
                 object : MapCameraCallback {
                     override fun onFinish() {
-                        // Now that the camera is fitted, we can apply constraints safely
-                        constraintManager?.applyConstraints()
-                        // Set minZoom to current zoom to prevent zooming out beyond WINDOW bounds
-                        // This ensures the viewport always fills with event content (no padding appears)
+                        // Set minZoom based on EXPANDED WINDOW bounds (not original event bounds)
+                        // This prevents zooming out beyond the expanded bounds showing padding
+                        // Use currentZoom which is the zoom level for the expanded bounds
                         mapLibreAdapter.setMinZoomPreference(mapLibreAdapter.currentZoom.value)
+                        // Apply constraints after minZoom is set
+                        constraintManager?.applyConstraints()
                         mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
                         cb.onFinish()
                         onComplete()

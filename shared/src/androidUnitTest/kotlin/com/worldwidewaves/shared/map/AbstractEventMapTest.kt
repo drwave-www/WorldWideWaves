@@ -306,6 +306,8 @@ class AbstractEventMapTest : KoinTest {
             testScope.testScheduler.advanceUntilIdle()
 
             // Then
+            // Should set minZoom based on current zoom (which is the zoom for expanded WINDOW bounds)
+            // This prevents zooming out beyond the expanded bounds (showing padding)
             verify { mockMapLibreAdapter.setMinZoomPreference(12.0) }
             verify { mockMapLibreAdapter.setMaxZoomPreference(18.0) }
         }

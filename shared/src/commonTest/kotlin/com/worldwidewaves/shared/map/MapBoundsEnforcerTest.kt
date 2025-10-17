@@ -322,23 +322,25 @@ class MapBoundsEnforcerTest {
             // Calculate constraint bounds with padding
             val constraintBounds = enforcer.calculateConstraintBounds()
 
-            // FIXED: Padding EXPANDS bounds (allows more movement), not shrinks them
-            // Verify constraint bounds EXTEND BEYOND map bounds by padding amount
+            // VIEWPORT EDGE CLAMPING: Padding SHRINKS constraint bounds (prevents viewport from exceeding event bounds)
+            // Constraint bounds are smaller than map bounds by half-viewport-size to ensure
+            // the camera center can't move where viewport edges would show out-of-bounds areas
+            // Verify constraint bounds are WITHIN map bounds (shrunk inward by padding)
             assertTrue(
-                constraintBounds.southwest.latitude <= LONDON_BOUNDS.southwest.latitude,
-                "Constraint bounds southwest latitude should be <= map bounds (expanded outward)",
+                constraintBounds.southwest.latitude >= LONDON_BOUNDS.southwest.latitude,
+                "Constraint bounds southwest latitude should be >= map bounds (shrunk inward)",
             )
             assertTrue(
-                constraintBounds.southwest.longitude <= LONDON_BOUNDS.southwest.longitude,
-                "Constraint bounds southwest longitude should be <= map bounds (expanded outward)",
+                constraintBounds.southwest.longitude >= LONDON_BOUNDS.southwest.longitude,
+                "Constraint bounds southwest longitude should be >= map bounds (shrunk inward)",
             )
             assertTrue(
-                constraintBounds.northeast.latitude >= LONDON_BOUNDS.northeast.latitude,
-                "Constraint bounds northeast latitude should be >= map bounds (expanded outward)",
+                constraintBounds.northeast.latitude <= LONDON_BOUNDS.northeast.latitude,
+                "Constraint bounds northeast latitude should be <= map bounds (shrunk inward)",
             )
             assertTrue(
-                constraintBounds.northeast.longitude >= LONDON_BOUNDS.northeast.longitude,
-                "Constraint bounds northeast longitude should be >= map bounds (expanded outward)",
+                constraintBounds.northeast.longitude <= LONDON_BOUNDS.northeast.longitude,
+                "Constraint bounds northeast longitude should be <= map bounds (shrunk inward)",
             )
 
             // Verify bounds are properly set
@@ -411,11 +413,12 @@ class MapBoundsEnforcerTest {
             val largeBounds = enforcer.calculateConstraintBounds()
             val largeSpan = largeBounds.height
 
-            // FIXED: Larger padding EXPANDS bounds (allows more camera movement)
-            // This gives the user more freedom to pan around the map without hitting constraints
+            // VIEWPORT EDGE CLAMPING: Larger padding SHRINKS constraint bounds (more restrictive)
+            // Larger padding means larger viewport, so camera center must stay further from edges
+            // This prevents larger viewports from showing out-of-bounds areas
             assertTrue(
-                largeSpan > smallSpan,
-                "Larger padding should produce LARGER constraint bounds (more padding = more available space for camera movement)",
+                largeSpan < smallSpan,
+                "Larger padding should produce SMALLER constraint bounds (viewport edge clamping)",
             )
 
             println("✅ Safe bounds recalculated with padding: small span=$smallSpan, large span=$largeSpan")
