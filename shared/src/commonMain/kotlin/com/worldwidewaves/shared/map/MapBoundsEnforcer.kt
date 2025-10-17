@@ -108,6 +108,18 @@ class MapBoundsEnforcer(
             val paddedBounds = calculateConstraintBounds()
             constraintBounds = paddedBounds
 
+            // Validate bounds are reasonable (not inverted or too small)
+            if (paddedBounds.northeast.latitude <= paddedBounds.southwest.latitude ||
+                paddedBounds.northeast.longitude <= paddedBounds.southwest.longitude
+            ) {
+                Log.w(
+                    "MapBoundsEnforcer",
+                    "Skipping constraint application - bounds are invalid/inverted " +
+                        "(map not fully initialized, will retry on next camera idle)",
+                )
+                return
+            }
+
             // Prevent infinite loop: skip if bounds haven't changed significantly (iOS triggers camera idle on every setBounds)
             if (lastAppliedBounds != null && boundsAreSimilar(lastAppliedBounds!!, paddedBounds)) {
                 Log.v("MapBoundsEnforcer", "Bounds unchanged, skipping redundant constraint update")
@@ -208,7 +220,25 @@ class MapBoundsEnforcer(
                     visibleRegion.westLongitude
             ) / 2.0
 
-        return VisibleRegionPadding(latPadding, lngPadding)
+        // Guard against invalid dimensions (happens when map not fully initialized)
+        // Visible region can be huge before map dimensions are known, causing out-of-range errors
+        val mapLatSpan = mapBounds.northeast.latitude - mapBounds.southwest.latitude
+        val mapLngSpan = mapBounds.northeast.longitude - mapBounds.southwest.longitude
+
+        // Clamp padding to reasonable values (max 50% of map dimensions)
+        val clampedLatPadding = latPadding.coerceIn(0.0, mapLatSpan * 0.5)
+        val clampedLngPadding = lngPadding.coerceIn(0.0, mapLngSpan * 0.5)
+
+        if (latPadding != clampedLatPadding || lngPadding != clampedLngPadding) {
+            Log.w(
+                "MapBoundsEnforcer",
+                "Clamped excessive padding: " +
+                    "lat $latPadding→$clampedLatPadding, lng $lngPadding→$clampedLngPadding " +
+                    "(map not fully initialized)",
+            )
+        }
+
+        return VisibleRegionPadding(clampedLatPadding, clampedLngPadding)
     }
 
     private fun calculatePaddedBounds(padding: VisibleRegionPadding): BoundingBox {

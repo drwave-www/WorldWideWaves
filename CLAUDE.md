@@ -455,6 +455,7 @@ class MyComponent {
 - **Test modifications**: Changing test logic requires explanation and user approval - explain what business requirement changed
 - **Test deletion**: Absolutely forbidden without explicit user consent
 - **Always run tests before pushing**: Verify all tests pass locally before pushing to origin
+- **Self-verification requirement**: If you can test fixes yourself by running scripts, apps in simulators, or automated tests without requesting the user to do it, then you MUST do it. Only ask the user to test when it requires physical device interaction or manual user-specific actions
 
 ### Security Patterns
 - **NO credential exposure**: Never log, store, or transmit API keys, tokens, or secrets
