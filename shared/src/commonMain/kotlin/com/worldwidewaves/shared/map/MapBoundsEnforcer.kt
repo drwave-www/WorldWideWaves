@@ -215,16 +215,17 @@ class MapBoundsEnforcer(
         Log.d("MapBoundsEnforcer", "mapBounds: SW(${mapBounds.sw.lat},${mapBounds.sw.lng}) NE(${mapBounds.ne.lat},${mapBounds.ne.lng})")
         Log.d("MapBoundsEnforcer", "padding: lat=${padding.latPadding}, lng=${padding.lngPadding}")
 
-        // FIXED: Padding should EXPAND the bounds, not shrink them
-        // Subtract from SW (move outward), Add to NE (move outward)
+        // VIEWPORT EDGE CLAMPING: Shrink constraint bounds by viewport size
+        // This ensures camera center cannot move where viewport edges would exceed event bounds
+        // padding = viewportSize / 2, so we add/subtract it from event bounds to get valid camera center range
         return BoundingBox.fromCorners(
             Position(
-                mapBounds.southwest.latitude - padding.latPadding,
-                mapBounds.southwest.longitude - padding.lngPadding,
+                mapBounds.southwest.latitude + padding.latPadding, // SW moves inward
+                mapBounds.southwest.longitude + padding.lngPadding, // SW moves inward
             ),
             Position(
-                mapBounds.northeast.latitude + padding.latPadding,
-                mapBounds.northeast.longitude + padding.lngPadding,
+                mapBounds.northeast.latitude - padding.latPadding, // NE moves inward
+                mapBounds.northeast.longitude - padding.lngPadding, // NE moves inward
             ),
         )
     }

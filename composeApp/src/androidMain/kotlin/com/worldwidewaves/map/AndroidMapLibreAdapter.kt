@@ -350,6 +350,9 @@ class AndroidMapLibreAdapter(
         )
     }
 
+    // Track constraint bounds for viewport clamping (matches iOS pattern)
+    private var currentConstraintBounds: BoundingBox? = null
+
     override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
         require(mapLibreMap != null)
 
@@ -371,6 +374,10 @@ class AndroidMapLibreAdapter(
                 "NE=${constraintBounds.northeast.latitude},${constraintBounds.northeast.longitude}",
         )
 
+        // Store constraint bounds for viewport clamping (matches iOS pattern)
+        currentConstraintBounds = constraintBounds
+
+        // Set the underlying MapLibre bounds (constrains camera center only)
         mapLibreMap!!.setLatLngBoundsForCameraTarget(constraintBounds.toLatLngBounds())
     }
 
