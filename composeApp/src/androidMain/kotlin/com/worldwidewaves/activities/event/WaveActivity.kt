@@ -32,4 +32,19 @@ class WaveActivity : AbstractEventAndroidActivity<WaveParticipationScreen>() {
         eventId: String,
         platformEnabler: AndroidPlatformEnabler,
     ): WaveParticipationScreen = WaveParticipationScreen(eventId, platformEnabler)
+
+    override fun createEventMapBuilder(): (com.worldwidewaves.shared.events.IWWWEvent) -> com.worldwidewaves.compose.map.AndroidEventMap =
+        { event ->
+            com.worldwidewaves.compose.map.AndroidEventMap(
+                event,
+                context = this,
+                mapConfig =
+                    com.worldwidewaves.shared.map.EventMapConfig(
+                        initialCameraPosition = com.worldwidewaves.shared.map.MapCameraPosition.WINDOW,
+                        autoTargetUserOnFirstLocation = false,
+                    ),
+            )
+            // WINDOW mode: Maximizes view by fitting to screen aspect ratio (width OR height)
+            // Then targetUserAndWave() takes over for continuous user+wave tracking
+        }
 }
