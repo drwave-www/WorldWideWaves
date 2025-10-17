@@ -62,7 +62,7 @@ fun BoxScope.SimulationModeChip(platform: WWWPlatform) {
             modifier =
                 Modifier
                     .align(Alignment.TopEnd)
-                    .padding(12.dp)
+                    .padding(top = 8.dp, end = 8.dp)
                     .clip(RoundedCornerShape(4.dp))
                     .background(Color.Red)
                     .clickable {
