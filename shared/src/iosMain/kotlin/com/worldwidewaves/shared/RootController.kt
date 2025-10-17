@@ -232,11 +232,11 @@ fun makeEventViewController(eventId: String): UIViewController =
                     onMapClick = { enabler.openFullMapActivity(event.id) },
                     mapConfig =
                         EventMapConfig(
-                            initialCameraPosition = MapCameraPosition.WINDOW,
+                            initialCameraPosition = MapCameraPosition.BOUNDS,
                             autoTargetUserOnFirstLocation = false,
                         ),
-                    // WINDOW mode: Fits to screen aspect ratio, maximizes to width OR height (no padding)
-                    // Note: Gestures remain DISABLED (only enabled when opening full map screen)
+                    // BOUNDS mode: Shows entire event area (matches Android behavior)
+                    // Gestures DISABLED (user must open full map screen for interaction)
                     registryKey = "${event.id}-event", // Unique key to prevent conflicts with full map
                 )
             },
@@ -288,11 +288,11 @@ fun makeWaveViewController(eventId: String): UIViewController =
                     onMapClick = { enabler.openFullMapActivity(event.id) },
                     mapConfig =
                         EventMapConfig(
-                            initialCameraPosition = MapCameraPosition.WINDOW,
+                            initialCameraPosition = MapCameraPosition.BOUNDS,
                             autoTargetUserOnFirstLocation = false,
                         ),
-                    // WINDOW mode: Maximizes view by fitting to screen aspect ratio (width OR height)
-                    // Then targetUserAndWave() takes over for continuous user+wave tracking
+                    // BOUNDS mode: Shows full event area initially (matches event detail screen)
+                    // Then targetUserAndWave() from MapZoomAndLocationUpdate takes over when user enters area
                     registryKey = "${event.id}-wave", // Unique key to prevent conflicts
                 )
             },

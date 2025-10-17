@@ -36,6 +36,9 @@ import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.utils.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.core.component.KoinComponent
@@ -82,6 +85,9 @@ class WWWEventMap(
 
     private val mapDataProvider: MapDataProvider by inject()
 
+    // Cache the resolved style URI to avoid repeated file I/O
+    private var _cachedStyleUri: String? = null
+
     // ---------------------------
 
     fun setRelatedEvent(event: WWWEvent) {
@@ -101,22 +107,27 @@ class WWWEventMap(
      * It retrieves MBTiles, GeoJSON, sprites, and glyphs, fills a template with the data,
      * and returns the URI of the cached style JSON.
      *
-     * **Performance**: Result is cached on disk to avoid redundant generation.
+     * **Performance**: Result is cached both in-memory and on disk to avoid redundant file I/O.
      */
     @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     suspend fun getStyleUri(): String? {
         Log.d("WWWEventMap", "getStyleUri() called for event: ${event.id}")
 
-        val mbtilesFilePath = getMbtilesFilePath()
-        if (mbtilesFilePath == null) {
-            Log.w("WWWEventMap", "getStyleUri: MBTiles file path is null for event ${event.id}")
-            return null
-        }
-        Log.i("WWWEventMap", "getStyleUri: MBTiles path = $mbtilesFilePath")
-
         val styleFilename = "style-${event.id}.json"
 
-        // Check cache validity: file must exist AND not be stale
+        // Check in-memory cache first, but validate file existence
+        _cachedStyleUri?.let { cached ->
+            // Verify cached file still exists on disk
+            if (cachedFileExists(styleFilename)) {
+                Log.d("WWWEventMap", "getStyleUri: Using validated in-memory cached style URI: $cached")
+                return cached
+            } else {
+                Log.w("WWWEventMap", "getStyleUri: In-memory cache points to non-existent file, clearing cache")
+                _cachedStyleUri = null
+            }
+        }
+
+        // Check disk cache validity: file must exist AND not be stale
         val fileExists = cachedFileExists(styleFilename)
         val isStale = if (fileExists) isCachedFileStale(styleFilename) else true
         val isCacheValid = fileExists && !isStale
@@ -126,18 +137,41 @@ class WWWEventMap(
         if (isCacheValid) {
             val cachedPath = cachedFilePath(styleFilename)
             Log.i("WWWEventMap", "getStyleUri: Using cached style file: $cachedPath")
+            // Store in memory cache for subsequent calls
+            _cachedStyleUri = cachedPath
             return cachedPath
         }
         Log.d("WWWEventMap", "getStyleUri: Cache invalid or missing, generating new style file")
 
-        val geojsonFilePath = event.area.getGeoJsonFilePath()
+        // Parallelize file path resolution and sprite/glyph caching
+        val result =
+            coroutineScope {
+                val mbtilesDeferred = async { getMbtilesFilePath() }
+                val geojsonDeferred = async { event.area.getGeoJsonFilePath() }
+                val spritesDeferred = async { cacheSpriteAndGlyphs() }
+
+                Triple(
+                    mbtilesDeferred.await(),
+                    geojsonDeferred.await(),
+                    spritesDeferred.await(),
+                )
+            }
+        val mbtilesFilePath = result.first
+        val geojsonFilePath = result.second
+        val spriteAndGlyphsPath = result.third
+
+        if (mbtilesFilePath == null) {
+            Log.w("WWWEventMap", "getStyleUri: MBTiles file path is null for event ${event.id}")
+            return null
+        }
+        Log.i("WWWEventMap", "getStyleUri: MBTiles path = $mbtilesFilePath")
+
         if (geojsonFilePath == null) {
             Log.w("WWWEventMap", "getStyleUri: GeoJSON file path is null for event ${event.id}")
             return null
         }
         Log.i("WWWEventMap", "getStyleUri: GeoJSON path = $geojsonFilePath")
 
-        val spriteAndGlyphsPath = cacheSpriteAndGlyphs()
         Log.d("WWWEventMap", "getStyleUri: Sprite and glyphs cached at: $spriteAndGlyphsPath")
 
         Log.d("WWWEventMap", "getStyleUri: Loading style template...")
@@ -170,6 +204,8 @@ class WWWEventMap(
             updateCacheMetadata(styleFilename)
             Log.d("WWWEventMap", "getStyleUri: Style file cached at: $cachedPath")
             Log.i("WWWEventMap", "getStyleUri: Returning style path: $cachedPath")
+            // Store in memory cache for subsequent calls
+            _cachedStyleUri = cachedPath
             return cachedPath
         } else {
             Log.e("WWWEventMap", "getStyleUri: Failed to cache style file")
@@ -177,24 +213,47 @@ class WWWEventMap(
         }
     }
 
+    /**
+     * Clears the in-memory style URI cache.
+     *
+     * This method should be called when the style file needs to be regenerated
+     * (e.g., when underlying map data changes or cache is invalidated).
+     */
+    fun clearStyleUriCache() {
+        Log.d("WWWEventMap", "clearStyleUriCache: Clearing in-memory style URI cache for event ${event.id}")
+        _cachedStyleUri = null
+    }
+
     // ---------------------------
 
     /**
      * Caches sprite and glyphs resources required for the map style.
      *
-     * This function reads a file listing the required resources, caches them individually,
+     * This function reads a file listing the required resources, caches them in parallel,
      * and returns the path to the cache directory.
      *
+     * **Performance**: Uses parallel processing to cache multiple files concurrently.
      */
     @OptIn(ExperimentalResourceApi::class)
     suspend fun cacheSpriteAndGlyphs(): String =
         try {
-            Res
-                .readBytes(FileSystem.STYLE_LISTING)
-                .decodeToString()
-                .lines()
-                .filter { it.isNotBlank() }
-                .forEach { cacheDeepFile("${FileSystem.STYLE_FOLDER}/$it") }
+            val files =
+                Res
+                    .readBytes(FileSystem.STYLE_LISTING)
+                    .decodeToString()
+                    .lines()
+                    .filter { it.isNotBlank() }
+
+            // Use parallel processing for file caching
+            coroutineScope {
+                files
+                    .map { file ->
+                        async(Dispatchers.Default) {
+                            cacheDeepFile("${FileSystem.STYLE_FOLDER}/$file")
+                        }
+                    }.forEach { it.await() }
+            }
+
             getCacheDir()
         } catch (e: Exception) {
             Log.e(::cacheSpriteAndGlyphs.name, "Error caching sprite and glyphs", e)

@@ -194,18 +194,26 @@ abstract class AbstractEventMap<T>(
         val newSwLng: Double
         val newNeLng: Double
 
+        // When event is WIDER than screen (eventAspectRatio > screenComponentRatio):
+        // - Keep event width (longitude span) unchanged
+        // - Expand height (latitude span) to match screen aspect ratio
+        // When event is TALLER than screen (eventAspectRatio < screenComponentRatio):
+        // - Keep event height (latitude span) unchanged
+        // - Expand width (longitude span) to match screen aspect ratio
         if (eventAspectRatio > screenComponentRatio) {
-            val lngDiff = eventMapHeight * screenComponentRatio / 2
-            newSwLat = sw.lat
-            newNeLat = ne.lat
-            newSwLng = centerLng - lngDiff
-            newNeLng = centerLng + lngDiff
-        } else {
+            // Event is wider - expand latitude to fill screen height
             val latDiff = eventMapWidth / screenComponentRatio / 2
             newSwLat = centerLat - latDiff
             newNeLat = centerLat + latDiff
             newSwLng = sw.lng
             newNeLng = ne.lng
+        } else {
+            // Event is taller - expand longitude to fill screen width
+            val lngDiff = eventMapHeight * screenComponentRatio / 2
+            newSwLat = sw.lat
+            newNeLat = ne.lat
+            newSwLng = centerLng - lngDiff
+            newNeLng = centerLng + lngDiff
         }
 
         val bounds =
@@ -222,6 +230,8 @@ abstract class AbstractEventMap<T>(
                     override fun onFinish() {
                         // Now that the camera is fitted, we can apply constraints safely
                         constraintManager?.applyConstraints()
+                        // Set minZoom to current zoom to prevent zooming out beyond WINDOW bounds
+                        // This ensures the viewport always fills with event content (no padding appears)
                         mapLibreAdapter.setMinZoomPreference(mapLibreAdapter.currentZoom.value)
                         mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
                         cb.onFinish()

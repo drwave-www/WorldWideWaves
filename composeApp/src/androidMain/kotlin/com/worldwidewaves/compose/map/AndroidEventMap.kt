@@ -31,8 +31,6 @@ import android.graphics.Color
 import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.View
 import androidx.annotation.RequiresPermission
@@ -74,7 +72,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.R
 import com.worldwidewaves.activities.event.EventFullMapActivity
 import com.worldwidewaves.map.AndroidMapLibreAdapter
@@ -99,7 +96,6 @@ import com.worldwidewaves.viewmodels.AndroidMapViewModel
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.DrawableResource
@@ -147,9 +143,6 @@ class AndroidEventMap(
     KoinComponent {
     private companion object {
         private const val TAG = "EventMap"
-
-        // Map loading constants
-        private const val MAP_ATTACH_TIMEOUT_MS = 1500L
 
         // UI Constants
         private const val DOWNLOAD_PROGRESS_MAX = 100
@@ -272,13 +265,6 @@ class AndroidEventMap(
     @Composable
     @Suppress("FunctionName")
     private fun HandleMapAvailability(mapState: MapState) {
-        // Check if map is downloaded - use event.id key to prevent redundant calls
-        LaunchedEffect(event.id) {
-            mapState.mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
-            mapState.setIsMapAvailable(mapAvailabilityChecker.isMapDownloaded(event.id))
-            Log.i(TAG, "Initial map availability check result: ${event.id} available=${mapState.isMapAvailable}")
-        }
-
         // Update download state based on MapViewModel state
         LaunchedEffect(mapState.mapFeatureState) {
             when (mapState.mapFeatureState) {
@@ -288,11 +274,8 @@ class AndroidEventMap(
                 is MapFeatureState.Pending -> mapState.setIsMapDownloading(true)
                 is MapFeatureState.Installed -> {
                     Log.i(TAG, "Map installed: ${event.id}")
-                    // Make the just-installed split immediately visible to this
-                    // running Activity – required for MapLibre to see assets.
-                    context.let {
-                        SplitCompat.installActivity(it)
-                    }
+                    // SplitCompat already installed at Activity onCreate level
+                    // (AbstractEventAndroidActivity line 81)
                     mapState.setIsMapDownloading(false)
                     mapState.setIsMapAvailable(true)
                     mapState.setMapError(false)
@@ -366,8 +349,16 @@ class AndroidEventMap(
             }
         }
 
-        // Auto-download map once when requested by caller
-        LaunchedEffect(mapState.isMapAvailable, autoMapDownload, mapState.userCanceled) {
+        // Combined map availability check and auto-download logic
+        LaunchedEffect(event.id, mapState.isMapAvailable, autoMapDownload, mapState.userCanceled) {
+            // Initial availability check (runs once per event.id)
+            if (!mapState.isMapAvailable) {
+                mapState.mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
+                mapState.setIsMapAvailable(mapAvailabilityChecker.isMapDownloaded(event.id))
+                Log.i(TAG, "Initial map availability check result: ${event.id} available=${mapState.isMapAvailable}")
+            }
+
+            // Auto-download if needed (reacts to isMapAvailable, autoMapDownload, userCanceled)
             if (!mapState.isMapAvailable && autoMapDownload && !mapState.userCanceled) {
                 Log.i(TAG, "Auto-downloading map: ${event.id}")
                 mapState.mapViewModel.downloadMap(event.id)
@@ -598,106 +589,87 @@ class AndroidEventMap(
         onMapError: () -> Unit = {},
     ) {
         Log.i(TAG, "Loading map for event: ${event.id}")
-        // Ensure SplitCompat is installed before accessing any dynamic feature assets
-        SplitCompat.install(context)
+        // SplitCompat already installed at Activity onCreate level
+        // (AbstractEventAndroidActivity line 81)
 
         scope.launch {
-            withContext(Dispatchers.IO) {
-                // IO actions
-                Log.d(TAG, "🗺️ Resolving style URI for event: ${event.id}")
+            // Resolve style URI on IO thread
+            val (stylePath, uri) =
+                withContext(Dispatchers.IO) {
+                    Log.d(TAG, "🗺️ Resolving style URI for event: ${event.id}")
 
-                // Try to get style URI (with single retry for timing issues)
-                var stylePath: String? = event.map.getStyleUri()
+                    // Get style URI (uses cached value on subsequent calls)
+                    val path: String? = event.map.getStyleUri()
 
-                // Single retry if first attempt fails (handles async file operations)
-                if (stylePath == null || !File(stylePath).exists()) {
-                    Log.d(TAG, "First attempt failed, retrying style URI resolution...")
-                    delay(100L) // Brief delay for async operations
-                    stylePath = event.map.getStyleUri()
+                    if (path == null) {
+                        Log.e(TAG, "Failed to resolve style URI for event ${event.id}")
+                        return@withContext null to null
+                    }
+
+                    // Verify file exists on disk (validation only, not for retry)
+                    val fileExists = File(path).exists()
+                    if (!fileExists) {
+                        Log.e(TAG, "Style file doesn't exist at path: $path")
+                        return@withContext null to null
+                    }
+
+                    Log.i(TAG, "✅ Style URI resolved successfully: $path")
+                    path to Uri.fromFile(File(path))
                 }
 
-                if (stylePath == null) {
-                    Log.e(TAG, "Failed to resolve style URI for event ${event.id}")
-                    onMapError()
-                    return@withContext
-                }
+            if (stylePath == null || uri == null) {
+                onMapError()
+                return@launch
+            }
 
-                // Verify file exists on disk
-                val fileExists = File(stylePath).exists()
-                if (!fileExists) {
-                    Log.e(TAG, "Style file doesn't exist at path: $stylePath")
-                    onMapError()
-                    return@withContext
-                }
-
-                Log.i(TAG, "✅ Style URI resolved successfully: $stylePath")
-
-                val uri = Uri.fromFile(File(stylePath))
-
-                scope.launch {
-                    // UI actions
-                    // Encapsulate the original logic so we can call it from multiple places
-                    fun invokeGetMapAsync() {
-                        mapLibreView.getMapAsync { map ->
-                            Log.i(TAG, "MapLibreMap instance received")
-                            // Save reference so we can refresh location component later
-                            currentMap = map
-                            // Setup Map
-                            this@AndroidEventMap.setupMap(
-                                map,
-                                scope,
-                                uri.toString(),
-                                onMapLoaded = {
-                                    Log.i(TAG, "Map setup complete, initializing location if needed")
-                                    // Initialize location component only if permission granted
-                                    // and the lifecycle is at least STARTED (Activity/Fragment visible).
-                                    if (hasLocationPermission &&
-                                        lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
-                                    ) {
-                                        setupMapLocationComponent(map, context)
-                                    }
-                                    onMapLoaded()
-                                },
-                                onMapClick = { _, _ ->
-                                    context.startActivity(
-                                        Intent(context, EventFullMapActivity::class.java).apply {
-                                            putExtra("eventId", event.id)
-                                        },
-                                    )
+            // UI actions - continue on Main dispatcher
+            // Encapsulate the original logic so we can call it from multiple places
+            fun invokeGetMapAsync() {
+                mapLibreView.getMapAsync { map ->
+                    Log.i(TAG, "MapLibreMap instance received")
+                    // Save reference so we can refresh location component later
+                    currentMap = map
+                    // Setup Map
+                    this@AndroidEventMap.setupMap(
+                        map,
+                        scope,
+                        uri.toString(),
+                        onMapLoaded = {
+                            Log.i(TAG, "Map setup complete, initializing location if needed")
+                            // Initialize location component only if permission granted
+                            // and the lifecycle is at least STARTED (Activity/Fragment visible).
+                            if (hasLocationPermission &&
+                                lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
+                            ) {
+                                setupMapLocationComponent(map, context)
+                            }
+                            onMapLoaded()
+                        },
+                        onMapClick = { _, _ ->
+                            context.startActivity(
+                                Intent(context, EventFullMapActivity::class.java).apply {
+                                    putExtra("eventId", event.id)
                                 },
                             )
-                        }
-                    }
-
-                    if (mapLibreView.isAttachedToWindow) {
-                        invokeGetMapAsync()
-                    } else {
-                        // Listener to detect when the view gets attached
-                        val listener =
-                            object : View.OnAttachStateChangeListener {
-                                override fun onViewAttachedToWindow(v: View) {
-                                    v.removeOnAttachStateChangeListener(this)
-                                    v.post { invokeGetMapAsync() }
-                                }
-
-                                override fun onViewDetachedFromWindow(v: View) = Unit
-                            }
-                        mapLibreView.addOnAttachStateChangeListener(listener)
-
-                        // Safety timeout in case attachment never happens
-                        Handler(Looper.getMainLooper()).postDelayed({
-                            if (mapLibreView.isAttachedToWindow.not()) {
-                                Log.w(TAG, "MapView still not attached after timeout; forcing getMapAsync")
-                                try {
-                                    mapLibreView.removeOnAttachStateChangeListener(listener)
-                                } catch (_: IllegalStateException) {
-                                    // ignore listener removal errors
-                                }
-                                invokeGetMapAsync()
-                            }
-                        }, MAP_ATTACH_TIMEOUT_MS)
-                    }
+                        },
+                    )
                 }
+            }
+
+            if (mapLibreView.isAttachedToWindow) {
+                invokeGetMapAsync()
+            } else {
+                // Listener to detect when the view gets attached
+                val listener =
+                    object : View.OnAttachStateChangeListener {
+                        override fun onViewAttachedToWindow(v: View) {
+                            v.removeOnAttachStateChangeListener(this)
+                            invokeGetMapAsync()
+                        }
+
+                        override fun onViewDetachedFromWindow(v: View) = Unit
+                    }
+                mapLibreView.addOnAttachStateChangeListener(listener)
             }
         }
     }
@@ -915,8 +887,8 @@ class AndroidEventMap(
             tiltGesturesEnabled(false)
         }
 
-        // Ensure MapLibre initialises with a split-aware AssetManager
-        SplitCompat.install(context)
+        // SplitCompat already installed at Activity onCreate level
+        // (AbstractEventAndroidActivity line 81)
         MapLibre.getInstance(context) // Required by the API
 
         // The key makes Compose recreate the MapView when it changes
