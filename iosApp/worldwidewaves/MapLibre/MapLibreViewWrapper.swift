@@ -1133,94 +1133,11 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         to newCamera: MLNMapCamera,
         reason: MLNCameraChangeReason
     ) -> Bool {
-        // PREVENTIVE VIEWPORT CLAMPING: Block movement that would show out-of-bounds areas
-        // This is the iOS equivalent of Android's preventive clamping
-        guard let bounds = currentConstraintBounds else {
-            // No constraints set yet - allow all movements
-            return true
-        }
-
-        // Calculate what the viewport bounds would be with the new camera position
-        let newViewportBounds = getViewportBoundsForCamera(newCamera, in: mapView)
-
-        // Check if new viewport would show any area outside constraint bounds
-        let viewportExceedsBounds =
-            newViewportBounds.ne.latitude > bounds.ne.latitude ||
-            newViewportBounds.sw.latitude < bounds.sw.latitude ||
-            newViewportBounds.ne.longitude > bounds.ne.longitude ||
-            newViewportBounds.sw.longitude < bounds.sw.longitude
-
-        if !viewportExceedsBounds {
-            // Viewport entirely within bounds - allow movement
-            return true
-        }
-
-        // Viewport would exceed bounds - calculate clamped position
-        let clampedCenter = clampCenterToKeepViewportInBounds(
-            center: newCamera.centerCoordinate,
-            viewportBounds: newViewportBounds,
-            constraintBounds: bounds,
-            in: mapView
-        )
-
-        // Check zoom constraints
-        let zoom = log2(40_075_016.686 * cos(clampedCenter.latitude * .pi / 180.0) / newCamera.altitude) - 1.0
-        if zoom < mapView.minimumZoomLevel || zoom > mapView.maximumZoomLevel {
-            // Zoom out of bounds - reject movement entirely
-            return false
-        }
-
-        // Apply clamped camera INSTANTLY (no animation) to prevent any out-of-bounds view
-        let clampedCamera = MLNMapCamera(
-            lookingAtCenter: clampedCenter,
-            altitude: newCamera.altitude,
-            pitch: newCamera.pitch,
-            heading: newCamera.heading
-        )
-        mapView.setCamera(clampedCamera, animated: false)
-
-        // Return false to prevent the original (unclamped) camera change
-        return false
-    }
-
-    /// Clamps camera center to keep entire viewport within constraint bounds
-    private func clampCenterToKeepViewportInBounds(
-        center: CLLocationCoordinate2D,
-        viewportBounds: MLNCoordinateBounds,
-        constraintBounds: MLNCoordinateBounds,
-        in mapView: MLNMapView
-    ) -> CLLocationCoordinate2D {
-        var clampedLat = center.latitude
-        var clampedLng = center.longitude
-
-        // Calculate viewport dimensions
-        let viewportLatHeight = viewportBounds.ne.latitude - viewportBounds.sw.latitude
-        let viewportLngWidth = viewportBounds.ne.longitude - viewportBounds.sw.longitude
-
-        // Clamp latitude: ensure viewport doesn't exceed constraint bounds
-        let maxCenterLat = constraintBounds.ne.latitude - (viewportLatHeight / 2.0)
-        let minCenterLat = constraintBounds.sw.latitude + (viewportLatHeight / 2.0)
-
-        // If viewport is larger than bounds, center on bounds center (can't clamp)
-        if maxCenterLat < minCenterLat {
-            // Viewport is too large - center on bounds center
-            clampedLat = (constraintBounds.sw.latitude + constraintBounds.ne.latitude) / 2.0
-        } else {
-            clampedLat = max(minCenterLat, min(maxCenterLat, clampedLat))
-        }
-
-        // Clamp longitude: ensure viewport doesn't exceed constraint bounds
-        let maxCenterLng = constraintBounds.ne.longitude - (viewportLngWidth / 2.0)
-        let minCenterLng = constraintBounds.sw.longitude + (viewportLngWidth / 2.0)
-
-        if maxCenterLng < minCenterLng {
-            // Viewport is too large - center on bounds center
-            clampedLng = (constraintBounds.sw.longitude + constraintBounds.ne.longitude) / 2.0
-        } else {
-            clampedLng = max(minCenterLng, min(maxCenterLng, clampedLng))
-        }
-
-        return CLLocationCoordinate2D(latitude: clampedLat, longitude: clampedLng)
+        // Allow all camera changes - min/max zoom constraints are sufficient
+        // The reactive MapBoundsEnforcer updates constraints on camera idle,
+        // maintaining proper viewport clamping without fighting user gestures
+        // This matches Android's behavior (native setLatLngBoundsForCameraTarget + minZoom)
+        return true
     }
 
     /// Get viewport bounds for a camera using MapLibre's accurate calculation

@@ -123,8 +123,8 @@ abstract class AbstractEventMap<T>(
             "AbstractEventMap",
             "📐 moveToMapBounds: Starting for event ${event.id}, bounds=${event.area.bbox()}",
         )
-        // Initialize constraint manager (same as moveToWindowBounds)
-        constraintManager = MapBoundsEnforcer(event.area.bbox(), mapLibreAdapter) { suppressCorrections }
+        // Initialize constraint manager with BOUNDS mode (zero padding for tight fit)
+        constraintManager = MapBoundsEnforcer(event.area.bbox(), mapLibreAdapter, isWindowMode = false) { suppressCorrections }
 
         val bounds = event.area.bbox()
         com.worldwidewaves.shared.utils.Log.d(
@@ -178,9 +178,8 @@ abstract class AbstractEventMap<T>(
         // Capture event bbox before animation (needed for callback which is not suspend)
         val eventBbox = event.area.bbox()
 
-        // Prepare bounds enforcer – actual constraints will be applied
-        // after the initial animation finishes (see onFinish below).
-        constraintManager = MapBoundsEnforcer(eventBbox, mapLibreAdapter) { suppressCorrections }
+        // Prepare bounds enforcer with WINDOW mode (uses viewport padding for constraints)
+        constraintManager = MapBoundsEnforcer(eventBbox, mapLibreAdapter, isWindowMode = true) { suppressCorrections }
 
         val (sw, ne) = eventBbox
         val eventMapWidth = ne.lng - sw.lng

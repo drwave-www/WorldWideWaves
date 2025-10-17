@@ -33,10 +33,16 @@ import kotlin.math.min
 /**
  * Platform-independent map bounds enforcement that handles the logic
  * for keeping the map view within bounds.
+ *
+ * @param mapBounds The event area bounding box to constrain the map to
+ * @param mapLibreAdapter Platform-specific map adapter
+ * @param isWindowMode True for WINDOW mode (full map with gestures), false for BOUNDS mode (event detail, no gestures)
+ * @param isSuppressed Lambda that returns true when constraint enforcement should be suppressed (during animations)
  */
 class MapBoundsEnforcer(
     private val mapBounds: BoundingBox,
     private val mapLibreAdapter: MapLibreAdapter<*>,
+    private val isWindowMode: Boolean = false,
     /**
      * When this lambda returns true the enforcer will not attempt to correct /
      * move the camera.  Used while a user-initiated or automatic animation is
@@ -205,6 +211,17 @@ class MapBoundsEnforcer(
     }
 
     private fun calculateVisibleRegionPadding(): VisibleRegionPadding {
+        // BOUNDS mode (Event Detail screen): Zero padding for pixel-perfect fit
+        // Event area should fill the entire viewport with no visible padding
+        if (!isWindowMode) {
+            Log.d(
+                "MapBoundsEnforcer",
+                "BOUNDS mode: Using zero padding for tight fit (event detail screen)",
+            )
+            return VisibleRegionPadding(0.0, 0.0)
+        }
+
+        // WINDOW mode (Full Map screen): Calculate padding from visible viewport
         // Get the visible region from the current map view
         val visibleRegion = mapLibreAdapter.getVisibleRegion()
 
@@ -225,20 +242,27 @@ class MapBoundsEnforcer(
         val mapLatSpan = mapBounds.northeast.latitude - mapBounds.southwest.latitude
         val mapLngSpan = mapBounds.northeast.longitude - mapBounds.southwest.longitude
 
-        // Clamp padding to very tight values (max 10% of map dimensions)
-        // This ensures viewport edges stay very close to event boundaries
-        // Higher values (like 50%) were allowing visible padding around event area
-        val clampedLatPadding = latPadding.coerceIn(0.0, mapLatSpan * 0.1)
-        val clampedLngPadding = lngPadding.coerceIn(0.0, mapLngSpan * 0.1)
+        // CRITICAL: Use ZERO padding when viewport approaches event area size
+        // This prevents constraint bounds from collapsing when user zooms out
+        // When viewport = event area, padding should be 0 to keep minZoom stable
+        // Max padding: 20% of event dimensions (allows 2x zoom out range)
+        val maxPaddingRatio = 0.20
+
+        val clampedLatPadding = latPadding.coerceIn(0.0, mapLatSpan * maxPaddingRatio)
+        val clampedLngPadding = lngPadding.coerceIn(0.0, mapLngSpan * maxPaddingRatio)
 
         if (latPadding != clampedLatPadding || lngPadding != clampedLngPadding) {
             Log.w(
                 "MapBoundsEnforcer",
-                "Clamped excessive padding: " +
-                    "lat $latPadding→$clampedLatPadding, lng $lngPadding→$clampedLngPadding " +
-                    "(map not fully initialized)",
+                "WINDOW mode: Clamped padding (max ${maxPaddingRatio * 100}%): " +
+                    "lat $latPadding→$clampedLatPadding, lng $lngPadding→$clampedLngPadding",
             )
         }
+
+        Log.d(
+            "MapBoundsEnforcer",
+            "WINDOW mode: Calculated padding lat=$clampedLatPadding, lng=$clampedLngPadding",
+        )
 
         return VisibleRegionPadding(clampedLatPadding, clampedLngPadding)
     }
