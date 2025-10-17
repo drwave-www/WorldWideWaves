@@ -307,28 +307,30 @@ import Shared
         let northeast = CLLocationCoordinate2D(latitude: neLat, longitude: neLng)
         let bounds = MLNCoordinateBounds(sw: southwest, ne: northeast)
 
-        // MapLibre iOS cameraThatFitsCoordinateBounds adds implicit padding
-        // Use NEGATIVE padding to compensate and show full bounds (matches Android behavior)
-        // Note: Using -16.0 for small map views (event/wave screens), may need adjustment for different sizes
         let edgePadding = UIEdgeInsets(
-            top: CGFloat(padding) - 16.0,
-            left: CGFloat(padding) - 16.0,
-            bottom: CGFloat(padding) - 16.0,
-            right: CGFloat(padding) - 16.0
+            top: CGFloat(padding),
+            left: CGFloat(padding),
+            bottom: CGFloat(padding),
+            right: CGFloat(padding)
         )
 
         // Note: cameraThatFitsCoordinateBounds can throw C++ std::domain_error, but Swift can't catch C++ exceptions
         // We validate bounds above to prevent invalid calls
         let camera = mapView.cameraThatFitsCoordinateBounds(bounds, edgePadding: edgePadding)
 
-        let calculatedZoom = log2(
-            40_075_016.686 * cos(camera.centerCoordinate.latitude * .pi / 180.0) / camera.altitude
-        ) - 1.0
+        // Calculate zoom from camera altitude using MapLibre's standard formula
+        // Formula: altitude = earthCircumference * cos(latitude) / (2^(zoom + 1))
+        // Solving for zoom: zoom = log2(earthCircumference * cos(latitude) / altitude) - 1
+        let earthCircumference = 40_075_016.686  // Earth's equatorial circumference in meters
+        let centerLat = camera.centerCoordinate.latitude
+        let latRadians = centerLat * .pi / 180.0
+        let calculatedZoom = log2(earthCircumference * cos(latRadians) / camera.altitude) - 1.0
+
         WWWLog.d(
             Self.tag,
             """
             Camera calculated: center=(\(camera.centerCoordinate.latitude), \
-            \(camera.centerCoordinate.longitude)), zoom=\(calculatedZoom)
+            \(camera.centerCoordinate.longitude)), altitude=\(camera.altitude), zoom=\(calculatedZoom)
             """
         )
 

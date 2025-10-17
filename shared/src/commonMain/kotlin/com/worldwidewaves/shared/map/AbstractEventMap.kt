@@ -142,6 +142,7 @@ abstract class AbstractEventMap<T>(
         runCameraAnimation { cb ->
             mapLibreAdapter.animateCameraToBounds(
                 bounds,
+                padding = 40, // Add padding to ensure entire event area is visible (matches Android behavior)
                 callback =
                     object : MapCameraCallback {
                         override fun onFinish() {
