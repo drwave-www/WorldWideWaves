@@ -93,31 +93,23 @@ abstract class AbstractEventMap<T>(
 
     /**
      * Executes a map-camera animation while temporarily disabling
-     * constraint corrections so that the ConstraintManager does not
+     * reactive constraint corrections so that the ConstraintManager does not
      * fight against the animation.
+     *
+     * NOTE: Does NOT relax bounds - constraints remain enforced during animation
+     * to prevent zooming out beyond event area (preventive clamping).
      */
     private suspend inline fun runCameraAnimation(crossinline block: (MapCameraCallback) -> Unit) {
         suppressCorrections = true
-
-        // Save current constraint manager (may be null) and relax bounds to full event area
-        val originalConstraintManager = constraintManager
-        if (originalConstraintManager != null) {
-            // Allow the camera to move freely inside the full event area during animation
-            mapLibreAdapter.setBoundsForCameraTarget(event.area.bbox())
-        }
 
         block(
             object : MapCameraCallback {
                 override fun onFinish() {
                     suppressCorrections = false
-                    // Re-apply constraints if they were configured
-                    originalConstraintManager?.applyConstraints()
                 }
 
                 override fun onCancel() {
                     suppressCorrections = false
-                    // Ensure constraints are reapplied even if animation is cancelled
-                    originalConstraintManager?.applyConstraints()
                 }
             },
         )

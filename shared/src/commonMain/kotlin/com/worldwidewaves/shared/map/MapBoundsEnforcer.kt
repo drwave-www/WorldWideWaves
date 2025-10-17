@@ -225,9 +225,11 @@ class MapBoundsEnforcer(
         val mapLatSpan = mapBounds.northeast.latitude - mapBounds.southwest.latitude
         val mapLngSpan = mapBounds.northeast.longitude - mapBounds.southwest.longitude
 
-        // Clamp padding to reasonable values (max 50% of map dimensions)
-        val clampedLatPadding = latPadding.coerceIn(0.0, mapLatSpan * 0.5)
-        val clampedLngPadding = lngPadding.coerceIn(0.0, mapLngSpan * 0.5)
+        // Clamp padding to very tight values (max 10% of map dimensions)
+        // This ensures viewport edges stay very close to event boundaries
+        // Higher values (like 50%) were allowing visible padding around event area
+        val clampedLatPadding = latPadding.coerceIn(0.0, mapLatSpan * 0.1)
+        val clampedLngPadding = lngPadding.coerceIn(0.0, mapLngSpan * 0.1)
 
         if (latPadding != clampedLatPadding || lngPadding != clampedLngPadding) {
             Log.w(

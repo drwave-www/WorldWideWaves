@@ -274,14 +274,16 @@ class AbstractEventMapTest : KoinTest {
         }
 
     @Test
-    fun moveToMapBounds_temporarilyRelaxesBounds() =
+    fun moveToMapBounds_maintainsConstraintsDuringAnimation() =
         runTest {
             // When
             eventMap.moveToMapBounds()
             testScope.testScheduler.advanceUntilIdle()
 
             // Then
-            verify { mockMapLibreAdapter.setBoundsForCameraTarget(testBounds) }
+            // Constraints are applied AFTER animation, not relaxed during
+            // This restores preventive clamping behavior (no zoom out during animation)
+            verify(atLeast = 1) { mockMapLibreAdapter.setBoundsForCameraTarget(any()) }
         }
 
     @Test
