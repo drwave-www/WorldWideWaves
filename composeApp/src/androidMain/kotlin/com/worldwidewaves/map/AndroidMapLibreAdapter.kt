@@ -400,29 +400,41 @@ class AndroidMapLibreAdapter(
         // This ensures we calculate from ORIGINAL bounds (not shrunk), preventing infinite zoom out
         val shouldCalculateMinZoom = !minZoomLocked || (originalEventBounds != null && !minZoomLocked)
 
-        if (shouldCalculateMinZoom) {
-            // CRITICAL FIX: Calculate min zoom from ORIGINAL EVENT BOUNDS, not shrunk constraint bounds!
-            // Using shrunk bounds gives wrong (higher) min zoom that doesn't prevent seeing outside event area
-            val boundsForMinZoom = originalEventBounds ?: constraintBounds
+        if (shouldCalculateMinZoom && originalEventBounds != null) {
+            // CRITICAL: Calculate min zoom using SAME logic as moveToWindowBounds
+            // getCameraForLatLngBounds() gives zoom to fit BOTH dimensions (the LOWER zoom)
+            // But we need zoom to fit the CONSTRAINING dimension (might be higher)
+
+            val boundsForMinZoom = originalEventBounds
+            val eventWidth = boundsForMinZoom.ne.lng - boundsForMinZoom.sw.lng
+            val eventHeight = boundsForMinZoom.ne.lat - boundsForMinZoom.sw.lat
+
+            val mapWidth = getWidth()
+            val mapHeight = getHeight()
+
+            // Calculate zoom for each dimension (same formula as moveToWindowBounds)
+            val zoomForWidth = kotlin.math.log2((mapWidth * 360.0) / (eventWidth * 256.0))
+            val zoomForHeight = kotlin.math.log2((mapHeight * 180.0) / (eventHeight * 256.0))
+
+            // CRITICAL: Use the SMALLER zoom (ensures BOTH dimensions fit)
+            // This matches what moveToWindowBounds does
+            val baseMinZoom = kotlin.math.min(zoomForWidth, zoomForHeight)
 
             Log.i(
                 "Camera",
-                "🎯 Calculating min zoom from bounds: SW=(${boundsForMinZoom.sw.lat},${boundsForMinZoom.sw.lng}) " +
-                    "NE=(${boundsForMinZoom.ne.lat},${boundsForMinZoom.ne.lng}) " +
-                    if (originalEventBounds != null) {
-                        "(ORIGINAL EVENT BOUNDS - PREVENTS INFINITE ZOOM OUT)"
-                    } else {
-                        "(constraint bounds)"
-                    },
+                "🎯 Calculating min zoom from ORIGINAL EVENT BOUNDS: " +
+                    "SW=(${boundsForMinZoom.sw.lat},${boundsForMinZoom.sw.lng}) " +
+                    "NE=(${boundsForMinZoom.ne.lat},${boundsForMinZoom.ne.lng}), " +
+                    "eventSize=${eventWidth}x$eventHeight, screenSize=${mapWidth}x$mapHeight",
             )
 
-            // Calculate min zoom that fits the ORIGINAL EVENT bounds (not shrunk constraint bounds)
-            val latLngBounds = boundsForMinZoom.toLatLngBounds()
-            val cameraPosition = mapLibreMap!!.getCameraForLatLngBounds(latLngBounds, intArrayOf(0, 0, 0, 0))
-            val baseMinZoom = cameraPosition?.zoom ?: mapLibreMap!!.minZoomLevel
+            Log.i(
+                "Camera",
+                "Min zoom calculation: forWidth=$zoomForWidth, forHeight=$zoomForHeight, " +
+                    "base=min(both)=$baseMinZoom",
+            )
 
-            // CRITICAL: Only add safety margin for WINDOW mode (full map with gestures)
-            // BOUNDS mode (event details) should show entire event at exact calculated zoom
+            // CRITICAL: Add safety margin for WINDOW mode
             calculatedMinZoom =
                 if (applyZoomSafetyMargin) {
                     baseMinZoom + ZOOM_SAFETY_MARGIN
@@ -432,35 +444,30 @@ class AndroidMapLibreAdapter(
 
             Log.i(
                 "Camera",
-                "🎯 Calculated min zoom from ${if (originalEventBounds != null) "ORIGINAL EVENT bounds" else "constraint bounds"}: " +
-                    "base=$baseMinZoom, final=$calculatedMinZoom " +
+                "🎯 Final min zoom: base=$baseMinZoom, final=$calculatedMinZoom " +
                     if (applyZoomSafetyMargin) {
-                        "(WINDOW mode: +$ZOOM_SAFETY_MARGIN safety margin)"
+                        "(WINDOW mode: +$ZOOM_SAFETY_MARGIN margin)"
                     } else {
                         "(BOUNDS mode: no margin)"
                     },
             )
 
-            // CRITICAL: Set min zoom IMMEDIATELY to prevent zooming out beyond event area
-            // THIS IS THE CRITICAL LINE THAT PREVENTS INFINITE ZOOM OUT
+            // CRITICAL: Set min zoom IMMEDIATELY
             mapLibreMap!!.setMinZoomPreference(calculatedMinZoom)
             Log.e(
                 "Camera",
-                "🚨 SET MIN ZOOM PREFERENCE: $calculatedMinZoom - NO PIXELS OUTSIDE EVENT AREA ALLOWED 🚨",
+                "🚨 SET MIN ZOOM PREFERENCE: $calculatedMinZoom - NO PIXELS OUTSIDE EVENT AREA 🚨",
             )
 
-            // Only lock if we calculated from original event bounds (prevents wrong locking)
-            if (originalEventBounds != null) {
-                minZoomLocked = true
-                Log.i("Camera", "✅ Min zoom LOCKED (calculated from original event bounds)")
-            } else {
-                Log.w("Camera", "⚠️ Min zoom NOT locked (waiting for original event bounds)")
-            }
-        } else {
+            minZoomLocked = true
+            Log.i("Camera", "✅ Min zoom LOCKED at $calculatedMinZoom")
+        } else if (!shouldCalculateMinZoom) {
             Log.v(
                 "Camera",
                 "Min zoom already locked at $calculatedMinZoom, skipping recalculation",
             )
+        } else {
+            Log.w("Camera", "⚠️ Min zoom NOT calculated (originalEventBounds is null)")
         }
 
         // Set the underlying MapLibre bounds (constrains camera center only)
