@@ -59,6 +59,10 @@ import Shared
     // Current constraint bounds for gesture clamping (matches Android behavior)
     private var currentConstraintBounds: MLNCoordinateBounds?
 
+    // Min zoom locking (matches Android's minZoomLocked mechanism)
+    private var minZoomLocked: Bool = false
+    private var lockedMinZoom: Double = 0.0
+
     // MARK: - Accessibility State
 
     /// Accessibility state tracking for VoiceOver
@@ -378,39 +382,62 @@ import Shared
             return true  // Return true - will be applied when style loads
         }
 
-        // Style is loaded - apply bounds immediately
+        // Check if min zoom already locked (matches Android minZoomLocked mechanism)
+        if minZoomLocked {
+            WWWLog.d(Self.tag, "Min zoom already locked at \(lockedMinZoom), skipping recalculation")
+            currentConstraintBounds = bounds
+            return true
+        }
+
+        // Style is loaded - apply bounds and calculate min zoom
         WWWLog.i(Self.tag, "Setting camera constraint bounds: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng))")
 
-        // Use MapLibre's native camera calculation to get accurate zoom level (matches Android behavior)
-        let camera = mapView.cameraThatFitsCoordinateBounds(bounds, edgePadding: .zero)
+        // CRITICAL: Calculate min zoom using intelligent aspect ratio fitting (matches Android)
+        // Use SAME formula as Android's moveToWindowBounds to ensure consistency
+        let eventWidth = bounds.ne.longitude - bounds.sw.longitude
+        let eventHeight = bounds.ne.latitude - bounds.sw.latitude
+        let screenWidth = Double(mapView.bounds.size.width)
+        let screenHeight = Double(mapView.bounds.size.height)
 
-        // Convert camera altitude to zoom level using MapLibre's formula
-        // altitude = 40075016.686 * cos(latitude) / (2^(zoom + 1))
-        // zoom = log2(40075016.686 * cos(latitude) / altitude) - 1
-        let earthCircumference = 40_075_016.686  // Earth's equatorial circumference in meters
-        let centerLat = (bounds.sw.latitude + bounds.ne.latitude) / 2.0
-        let latRadians = centerLat * .pi / 180.0
-        let calculatedMinZoom = log2(earthCircumference * cos(latRadians) / camera.altitude) - 1.0
+        // Calculate zoom for each dimension separately (matches Android formula)
+        let zoomForWidth = log2((screenWidth * 360.0) / (eventWidth * 256.0))
+        let zoomForHeight = log2((screenHeight * 180.0) / (eventHeight * 256.0))
 
-        WWWLog.d(
+        // Use SMALLER zoom to ensure BOTH dimensions fit (NO pixels outside event area)
+        let baseMinZoom = min(zoomForWidth, zoomForHeight)
+
+        let eventAspectRatio = eventWidth / eventHeight
+        let screenAspectRatio = screenWidth / screenHeight
+        let fitBy = eventAspectRatio > screenAspectRatio ? "HEIGHT" : "WIDTH"
+
+        WWWLog.i(
             Self.tag,
-            "Calculated min zoom using MapLibre's cameraThatFitsCoordinateBounds: \(calculatedMinZoom)"
+            "🎯 Intelligent aspect ratio fitting: eventAspect=\(eventAspectRatio), " +
+            "screenAspect=\(screenAspectRatio), fitBy=\(fitBy), " +
+            "zoomForWidth=\(zoomForWidth), zoomForHeight=\(zoomForHeight), base=\(baseMinZoom)"
         )
 
+        // Apply safety margin (+0.5 zoom) for WINDOW mode only (matches Android ZOOM_SAFETY_MARGIN)
+        // BOUNDS mode (event details) shows entire event without margin
+        let zoomSafetyMargin = 0.5
+        let finalMinZoom = baseMinZoom + zoomSafetyMargin  // Always add margin for now (TODO: pass flag)
+
+        WWWLog.i(Self.tag, "🎯 Final min zoom: base=\(baseMinZoom), final=\(finalMinZoom) (+\(zoomSafetyMargin) safety margin)")
+
+        // Lock min zoom to prevent recalculation (matches Android behavior)
+        lockedMinZoom = finalMinZoom
+        minZoomLocked = true
+
         // Set minimum zoom to prevent zooming out beyond bounds
-        mapView.minimumZoomLevel = max(0, calculatedMinZoom)
-        WWWLog.i(Self.tag, "Set minimum zoom to \(calculatedMinZoom) (from MapLibre camera)")
+        mapView.minimumZoomLevel = max(0, finalMinZoom)
+        WWWLog.e(Self.tag, "🚨 SET MIN ZOOM: \(finalMinZoom) - NO PIXELS OUTSIDE EVENT AREA 🚨")
+        WWWLog.i(Self.tag, "✅ Min zoom LOCKED at \(finalMinZoom)")
 
-        // Store constraint bounds for gesture clamping (matches Android setLatLngBoundsForCameraTarget behavior)
-        // NOTE: We don't call setVisibleCoordinateBounds here because it triggers regionDidChangeAnimated
-        // which creates an infinite loop. Instead, we rely on:
-        // 1. minimumZoomLevel to prevent zoom out beyond bounds
-        // 2. shouldChangeFrom delegate to prevent pan/zoom outside bounds
+        // Store constraint bounds for gesture clamping
         currentConstraintBounds = bounds
-        WWWLog.i(Self.tag, "Constraint bounds stored for gesture clamping (minZoom + shouldChangeFrom delegate)")
+        WWWLog.i(Self.tag, "✅ Constraint bounds set with intelligent aspect ratio min zoom")
 
-        pendingConstraintBounds = nil  // Clear pending bounds
-        WWWLog.i(Self.tag, "✅ Camera constraint bounds set successfully with min zoom constraint")
+        pendingConstraintBounds = nil
         return true
     }
 
