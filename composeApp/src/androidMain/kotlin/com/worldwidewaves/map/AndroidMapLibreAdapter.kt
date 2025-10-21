@@ -359,6 +359,9 @@ class AndroidMapLibreAdapter(
     // Track constraint bounds for viewport clamping (matches iOS pattern)
     private var currentConstraintBounds: BoundingBox? = null
     private var calculatedMinZoom: Double = 0.0
+    private var eventBounds: BoundingBox? = null // Original event bounds (not shrunk)
+    private var isGestureInProgress = false
+    private var lastValidCameraPosition: org.maplibre.android.geometry.LatLng? = null
 
     override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
         require(mapLibreMap != null)
@@ -410,6 +413,133 @@ class AndroidMapLibreAdapter(
 
         // Set the underlying MapLibre bounds (constrains camera center only)
         mapLibreMap!!.setLatLngBoundsForCameraTarget(constraintBounds.toLatLngBounds())
+
+        // CRITICAL: Setup preventive gesture interception
+        setupPreventiveGestureConstraints()
+    }
+
+    /**
+     * Setup preventive gesture constraints to prevent camera from moving outside bounds.
+     * This provides iOS-like "shouldChangeFrom" behavior by intercepting gestures during movement.
+     */
+    private fun setupPreventiveGestureConstraints() {
+        val map = mapLibreMap ?: return
+        val constraintBounds = currentConstraintBounds ?: return
+
+        Log.i(TAG, "Setting up preventive gesture constraints")
+
+        // Remove any existing listeners first
+        map.removeOnCameraMoveStartedListener { /* no-op */ }
+        map.removeOnCameraMoveListener { /* no-op */ }
+        map.removeOnCameraIdleListener { /* no-op */ }
+
+        // Track when gestures start
+        map.addOnCameraMoveStartedListener { reason ->
+            isGestureInProgress =
+                when (reason) {
+                    MapLibreMap.OnCameraMoveStartedListener.REASON_API_GESTURE,
+                    MapLibreMap.OnCameraMoveStartedListener.REASON_DEVELOPER_ANIMATION,
+                    -> false
+                    else -> true // REASON_API_ANIMATION or other user gestures
+                }
+
+            if (!isGestureInProgress) {
+                // Save position before programmatic animation
+                lastValidCameraPosition = map.cameraPosition.target
+            }
+        }
+
+        // Intercept camera movements during gestures (PREVENTIVE)
+        map.addOnCameraMoveListener {
+            if (!isGestureInProgress) return@addOnCameraMoveListener
+
+            val currentCamera = map.cameraPosition.target ?: return@addOnCameraMoveListener
+            val viewport = getVisibleRegion()
+
+            // Check if viewport exceeds event bounds
+            if (!isViewportWithinBounds(viewport, constraintBounds)) {
+                // Viewport exceeds bounds - clamp camera position IMMEDIATELY
+                val clampedPosition =
+                    clampCameraToKeepViewportInside(
+                        Position(currentCamera.latitude, currentCamera.longitude),
+                        viewport,
+                        constraintBounds,
+                    )
+
+                // Only move if position actually changed (avoid infinite loop)
+                if (kotlin.math.abs(clampedPosition.latitude - currentCamera.latitude) > 0.000001 ||
+                    kotlin.math.abs(clampedPosition.longitude - currentCamera.longitude) > 0.000001
+                ) {
+                    Log.v(TAG, "Gesture intercepted: viewport would exceed bounds, clamping camera")
+
+                    // Move camera to clamped position WITHOUT animation (instant)
+                    map.cameraPosition =
+                        CameraPosition
+                            .Builder()
+                            .target(
+                                org.maplibre.android.geometry
+                                    .LatLng(clampedPosition.latitude, clampedPosition.longitude),
+                            ).zoom(map.cameraPosition.zoom)
+                            .build()
+                }
+            }
+        }
+
+        // Track when gesture ends
+        map.addOnCameraIdleListener {
+            if (isGestureInProgress) {
+                // Gesture ended - save this as last valid position
+                lastValidCameraPosition = map.cameraPosition.target
+                isGestureInProgress = false
+                Log.v(TAG, "Gesture ended, saved valid position")
+            }
+        }
+
+        Log.i(TAG, "✅ Preventive gesture constraints active")
+    }
+
+    /**
+     * Check if entire viewport is within event bounds.
+     */
+    private fun isViewportWithinBounds(
+        viewport: BoundingBox,
+        eventBounds: BoundingBox,
+    ): Boolean =
+        viewport.southLatitude >= eventBounds.southwest.latitude &&
+            viewport.northLatitude <= eventBounds.northeast.latitude &&
+            viewport.westLongitude >= eventBounds.southwest.longitude &&
+            viewport.eastLongitude <= eventBounds.northeast.longitude
+
+    /**
+     * Clamp camera position to ensure viewport stays within event bounds.
+     */
+    private fun clampCameraToKeepViewportInside(
+        currentCamera: Position,
+        currentViewport: BoundingBox,
+        eventBounds: BoundingBox,
+    ): Position {
+        // Calculate viewport half-dimensions
+        val viewportHalfHeight = (currentViewport.northLatitude - currentViewport.southLatitude) / 2.0
+        val viewportHalfWidth = (currentViewport.eastLongitude - currentViewport.westLongitude) / 2.0
+
+        // Calculate valid camera center range
+        val minValidLat = eventBounds.southwest.latitude + viewportHalfHeight
+        val maxValidLat = eventBounds.northeast.latitude - viewportHalfHeight
+        val minValidLng = eventBounds.southwest.longitude + viewportHalfWidth
+        val maxValidLng = eventBounds.northeast.longitude - viewportHalfWidth
+
+        // Handle case where viewport > event bounds (shouldn't happen with min zoom)
+        if (minValidLat > maxValidLat || minValidLng > maxValidLng) {
+            val centerLat = (eventBounds.southwest.latitude + eventBounds.northeast.latitude) / 2.0
+            val centerLng = (eventBounds.southwest.longitude + eventBounds.northeast.longitude) / 2.0
+            return Position(centerLat, centerLng)
+        }
+
+        // Clamp camera position to valid range
+        val clampedLat = currentCamera.latitude.coerceIn(minValidLat, maxValidLat)
+        val clampedLng = currentCamera.longitude.coerceIn(minValidLng, maxValidLng)
+
+        return Position(clampedLat, clampedLng)
     }
 
     // -- Add the Wave polygons to the map
