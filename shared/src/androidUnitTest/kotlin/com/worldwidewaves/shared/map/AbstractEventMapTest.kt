@@ -295,13 +295,9 @@ class AbstractEventMapTest : KoinTest {
             eventMap.moveToWindowBounds()
             testScope.testScheduler.advanceUntilIdle()
 
-            // Then
-            val slot = slot<BoundingBox>()
-            coEvery { mockMapLibreAdapter.animateCameraToBounds(capture(slot), any(), any()) }
-            testScope.testScheduler.advanceUntilIdle()
-
-            // Verify bounds were adjusted for aspect ratio
-            verify { mockMapLibreAdapter.animateCameraToBounds(any(), 0, any()) }
+            // Then - now uses animateCamera with calculated zoom (not animateCameraToBounds)
+            // Verify camera was animated to event center with intelligent zoom
+            verify(atLeast = 1) { mockMapLibreAdapter.animateCamera(any(), any(), any()) }
         }
 
     @Test

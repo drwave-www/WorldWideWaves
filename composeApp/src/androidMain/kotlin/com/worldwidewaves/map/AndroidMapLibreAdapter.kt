@@ -75,9 +75,11 @@ class AndroidMapLibreAdapter(
         private const val MIN_LONGITUDE = -180.0
         private const val MAX_LONGITUDE = 180.0
 
-        // Safety margin added to min zoom to ensure viewport is smaller than event bounds
+        // Safety margin added to min zoom to ensure viewport is SMALLER than event bounds
         // This prevents viewport edge overflow even when combined with shrunk constraint bounds
-        private const val ZOOM_SAFETY_MARGIN = 0.2
+        // CRITICAL: Must be large enough to ensure NO pixels outside event area are visible
+        // 0.5 zoom levels ≈ 40% smaller viewport than event area (safe margin)
+        private const val ZOOM_SAFETY_MARGIN = 0.5
     }
 
     // -- Public/Override properties

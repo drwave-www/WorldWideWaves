@@ -174,8 +174,12 @@ abstract class AbstractEventMap<T>(
 
     /**
      * Adjusts the camera to fit the event area with strict bounds (no expansion beyond event area).
-     * In WINDOW mode (full map screen), the camera shows as much of the event as possible
-     * while respecting screen aspect ratio, but NEVER shows pixels outside the event bounds.
+     * CRITICAL RULE: NO PIXELS OUTSIDE EVENT AREA ALLOWED
+     *
+     * Intelligently chooses fit mode based on aspect ratio:
+     * - Event WIDER than screen → fit by HEIGHT (event height fills screen)
+     * - Event TALLER than screen → fit by WIDTH (event width fills screen)
+     * This ensures the dimension that would overflow is the one that gets constrained.
      */
     suspend fun moveToWindowBounds(onComplete: () -> Unit = {}) {
         // Capture event bbox before animation (needed for callback which is not suspend)
@@ -193,23 +197,37 @@ abstract class AbstractEventMap<T>(
         val eventAspectRatio = eventMapWidth / eventMapHeight
         val screenComponentRatio = screenWidth / screenHeight
 
-        // STRICT BOUNDS: Always use event bounds exactly, never expand
-        // The camera will show the full event area, possibly with some padding on one axis
-        // depending on aspect ratio mismatch, but NEVER show area outside event bounds
-        val strictBounds = eventBbox
+        // CRITICAL: Determine which dimension to fit by
+        // Rule: The dimension that would cause overflow must be the constraining dimension
+        val fitByHeight = eventAspectRatio > screenComponentRatio
 
         com.worldwidewaves.shared.utils.Log.i(
             "AbstractEventMap",
-            "📐 moveToWindowBounds (STRICT): event=${event.id}, " +
+            "📐 moveToWindowBounds: event=${event.id}, " +
                 "eventAspect=$eventAspectRatio, screenAspect=$screenComponentRatio, " +
-                "bounds=SW(${strictBounds.sw.lat},${strictBounds.sw.lng}) " +
-                "NE(${strictBounds.ne.lat},${strictBounds.ne.lng})",
+                "fitBy=${if (fitByHeight) "HEIGHT" else "WIDTH"} " +
+                "(ensures NO pixels outside event area)",
         )
 
         runCameraAnimation { cb ->
-            mapLibreAdapter.animateCameraToBounds(
-                strictBounds,
-                padding = 0,
+            // CRITICAL: Calculate exact zoom to fit the constraining dimension
+            // Do NOT use animateCameraToBounds (lets MapLibre decide) - we must control it
+            val zoomForWidth = kotlin.math.log2((screenWidth * 360.0) / (eventMapWidth * 256.0))
+            val zoomForHeight = kotlin.math.log2((screenHeight * 180.0) / (eventMapHeight * 256.0))
+
+            // Choose zoom that ensures NO dimension exceeds bounds (the SMALLER zoom)
+            val targetZoom = kotlin.math.min(zoomForWidth, zoomForHeight)
+
+            com.worldwidewaves.shared.utils.Log.i(
+                "AbstractEventMap",
+                "Calculated zoom: forWidth=$zoomForWidth, forHeight=$zoomForHeight, " +
+                    "using=${if (targetZoom == zoomForHeight) "HEIGHT-fit" else "WIDTH-fit"} zoom=$targetZoom",
+            )
+
+            // Animate to event center at calculated zoom
+            mapLibreAdapter.animateCamera(
+                Position(centerLat, centerLng),
+                targetZoom,
                 object : MapCameraCallback {
                     override fun onFinish() {
                         // Apply strict constraints - this sets min zoom to prevent viewport exceeding event area
@@ -219,7 +237,7 @@ abstract class AbstractEventMap<T>(
                         val calculatedMinZoom = mapLibreAdapter.getMinZoomLevel()
                         com.worldwidewaves.shared.utils.Log.d(
                             "AbstractEventMap",
-                            "WINDOW mode (STRICT): Min zoom from constraints: $calculatedMinZoom",
+                            "WINDOW mode: Min zoom from constraints: $calculatedMinZoom",
                         )
 
                         mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
