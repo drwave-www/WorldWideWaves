@@ -284,7 +284,8 @@ class AbstractEventMapTest : KoinTest {
             // Then
             // Constraints are applied AFTER animation, not relaxed during
             // This restores preventive clamping behavior (no zoom out during animation)
-            verify(atLeast = 1) { mockMapLibreAdapter.setBoundsForCameraTarget(any()) }
+            // UPDATED: Now expects originalEventBounds parameter (always passed)
+            verify(atLeast = 1) { mockMapLibreAdapter.setBoundsForCameraTarget(any(), any(), any()) }
         }
 
     @Test

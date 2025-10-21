@@ -41,6 +41,10 @@ struct EventMapView: UIViewRepresentable {
         let mapView = MLNMapView(frame: .zero)
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
+        // Ensure no content insets (prevents borders/margins in map content)
+        mapView.contentInset = .zero
+        mapView.automaticallyAdjustsContentInset = false
+
         WWWLog.d(Self.tag, "Map view created, frame: \(mapView.frame)")
 
         // Configure gestures (matches Android behavior)

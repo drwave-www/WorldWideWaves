@@ -122,6 +122,12 @@ import Shared
         let hostingController = UIHostingController(rootView: mapView)
         hostingController.view.backgroundColor = UIColor.clear
 
+        // Disable safe area insets to prevent borders/margins on map content
+        // This ensures the map fills the entire allocated space without insets
+        if #available(iOS 16.4, *) {
+            hostingController.safeAreaRegions = []
+        }
+
         WWWLog.d("MapViewBridge", "Map view controller created successfully")
         return hostingController
     }
@@ -190,6 +196,12 @@ import Shared
 
         let controller = UIHostingController(rootView: mapView)
         controller.view.backgroundColor = UIColor.clear
+
+        // Disable safe area insets to prevent borders/margins on map content
+        // This ensures the map fills the entire allocated space without insets
+        if #available(iOS 16.4, *) {
+            controller.safeAreaRegions = []
+        }
 
         WWWLog.d("MapViewBridge", "Map view controller created with registryKey: \(registryKey)")
         return controller

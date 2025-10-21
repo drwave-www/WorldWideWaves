@@ -135,7 +135,12 @@ class MapBoundsEnforcer(
             // Apply bounds & min-zoom to the map – no immediate camera move
             // NOTE: setBoundsForCameraTarget() now sets min zoom IMMEDIATELY (preventive enforcement)
             // Pass isWindowMode to apply safety margin only for full map screen (not event details)
-            mapLibreAdapter.setBoundsForCameraTarget(paddedBounds, applyZoomSafetyMargin = isWindowMode)
+            // CRITICAL: Pass ORIGINAL event bounds for min zoom calculation (not shrunk paddedBounds)
+            mapLibreAdapter.setBoundsForCameraTarget(
+                constraintBounds = paddedBounds,
+                applyZoomSafetyMargin = isWindowMode,
+                originalEventBounds = mapBounds, // CRITICAL: Original event bounds for min zoom
+            )
 
             // Get the calculated min zoom for logging (already set by adapter)
             val minZoom = mapLibreAdapter.getMinZoomLevel()
