@@ -69,7 +69,11 @@ class WaveProgressionObserver(
             // Initial observation setup
             when {
                 event.isRunning() -> startPolygonsObservation(event, eventMap)
-                event.isDone() -> addFullWavePolygons(event, eventMap)
+                event.isDone() -> {
+                    // Event is already done - show polygons once and don't observe progression
+                    addFullWavePolygons(event, eventMap)
+                    Log.d("WaveObserver", "Event already DONE - showing final polygons without observation")
+                }
                 else -> { /* wait for RUNNING status */ }
             }
 
@@ -128,7 +132,13 @@ class WaveProgressionObserver(
                     .collect { status ->
                         when (status) {
                             IWWWEvent.Status.RUNNING -> startPolygonsObservation(event, eventMap)
-                            IWWWEvent.Status.DONE -> addFullWavePolygons(event, eventMap)
+                            IWWWEvent.Status.DONE -> {
+                                // Stop polygon observation to prevent continuous updates
+                                polygonsJob?.cancel()
+                                polygonsJob = null
+                                // Show full wave polygons once
+                                addFullWavePolygons(event, eventMap)
+                            }
                             else -> { /* No-op */ }
                         }
                     }

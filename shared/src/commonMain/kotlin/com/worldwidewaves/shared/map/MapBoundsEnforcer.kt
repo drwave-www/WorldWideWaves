@@ -201,14 +201,26 @@ class MapBoundsEnforcer(
             // Viewport extends beyond event bounds - clamp camera to keep viewport inside
             val clampedPosition = clampCameraToKeepViewportInside(target, viewport)
 
-            Log.d(
-                "MapBoundsEnforcer",
-                "${if (isWindowMode) "WINDOW" else "BOUNDS"} mode: Viewport exceeded event bounds, " +
-                    "clamping camera from (${target.latitude}, ${target.longitude}) to " +
-                    "(${clampedPosition.latitude}, ${clampedPosition.longitude})",
-            )
+            // Only animate if position actually changed (avoid infinite loop)
+            val positionChanged =
+                abs(clampedPosition.latitude - target.latitude) > 0.000001 ||
+                    abs(clampedPosition.longitude - target.longitude) > 0.000001
 
-            mapLibreAdapter.animateCamera(clampedPosition)
+            if (positionChanged) {
+                Log.d(
+                    "MapBoundsEnforcer",
+                    "${if (isWindowMode) "WINDOW" else "BOUNDS"} mode: Viewport exceeded event bounds, " +
+                        "clamping camera from (${target.latitude}, ${target.longitude}) to " +
+                        "(${clampedPosition.latitude}, ${clampedPosition.longitude})",
+                )
+
+                mapLibreAdapter.animateCamera(clampedPosition)
+            } else {
+                Log.v(
+                    "MapBoundsEnforcer",
+                    "Viewport exceeds bounds but camera already at clamped position - skipping animation",
+                )
+            }
             return
         }
 
