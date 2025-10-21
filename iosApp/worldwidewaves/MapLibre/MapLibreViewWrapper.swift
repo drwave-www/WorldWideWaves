@@ -392,35 +392,59 @@ import Shared
         // Style is loaded - apply bounds and calculate min zoom
         WWWLog.i(Self.tag, "Setting camera constraint bounds: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng))")
 
-        // CRITICAL: Calculate min zoom using intelligent aspect ratio fitting (matches Android)
-        // Use SAME formula as Android's moveToWindowBounds to ensure consistency
+        // CRITICAL: Detect if these are SHRUNK constraint bounds (not original event bounds)
+        // Shrunk bounds are very small (< 0.01° span) and would give wrong (too high) min zoom
         let eventWidth = bounds.ne.longitude - bounds.sw.longitude
         let eventHeight = bounds.ne.latitude - bounds.sw.latitude
+
+        // If bounds are suspiciously small, these are SHRUNK constraint bounds (viewport padding applied)
+        // Don't calculate min zoom from them - skip and wait for original bounds or use reasonable default
+        if eventWidth < 0.01 || eventHeight < 0.01 {
+            WWWLog.w(
+                Self.tag,
+                "⚠️ Bounds too small (\(eventHeight)° x \(eventWidth)°) - these are SHRUNK constraint bounds. " +
+                "Skipping min zoom calculation (waiting for original event bounds or using default)."
+            )
+            currentConstraintBounds = bounds
+            return true
+        }
         let screenWidth = Double(mapView.bounds.size.width)
         let screenHeight = Double(mapView.bounds.size.height)
 
-        // Calculate zoom for each dimension separately (matches Android formula)
-        let zoomForWidth = log2((screenWidth * 360.0) / (eventWidth * 256.0))
-        let zoomForHeight = log2((screenHeight * 180.0) / (eventHeight * 256.0))
+        // CRITICAL: Different calculation for BOUNDS vs WINDOW mode (matches Android)
+        let baseMinZoom: Double
 
-        // Use SMALLER zoom to ensure BOTH dimensions fit (NO pixels outside event area)
-        let baseMinZoom = min(zoomForWidth, zoomForHeight)
-
-        let eventAspectRatio = eventWidth / eventHeight
-        let screenAspectRatio = screenWidth / screenHeight
-        let fitBy = eventAspectRatio > screenAspectRatio ? "HEIGHT" : "WIDTH"
-
-        WWWLog.i(
-            Self.tag,
-            "🎯 Intelligent aspect ratio fitting: eventAspect=\(eventAspectRatio), " +
-            "screenAspect=\(screenAspectRatio), fitBy=\(fitBy), " +
-            "zoomForWidth=\(zoomForWidth), zoomForHeight=\(zoomForHeight), base=\(baseMinZoom)"
-        )
-
-        // CRITICAL: Only apply safety margin for WINDOW mode (matches Android)
-        // Detect mode from event ID: "paris_france-fullmap" vs "paris_france-event"
-        let zoomSafetyMargin = 0.5
+        // Detect mode from eventId suffix
         let isWindowMode = eventId?.hasSuffix("-fullmap") ?? false
+
+        if isWindowMode {
+            // WINDOW MODE: Use intelligent aspect ratio fitting (matches Android)
+            let zoomForWidth = log2((screenWidth * 360.0) / (eventWidth * 256.0))
+            let zoomForHeight = log2((screenHeight * 180.0) / (eventHeight * 256.0))
+            baseMinZoom = min(zoomForWidth, zoomForHeight)
+
+            let eventAspectRatio = eventWidth / eventHeight
+            let screenAspectRatio = screenWidth / screenHeight
+            let fitBy = eventAspectRatio > screenAspectRatio ? "HEIGHT" : "WIDTH"
+
+            WWWLog.i(
+                Self.tag,
+                "🎯 WINDOW mode: eventAspect=\(eventAspectRatio), screenAspect=\(screenAspectRatio), " +
+                "fitBy=\(fitBy), zoomForWidth=\(zoomForWidth), zoomForHeight=\(zoomForHeight), base=\(baseMinZoom)"
+            )
+        } else {
+            // BOUNDS MODE: Use MapLibre's calculation (shows entire event)
+            let camera = mapView.cameraThatFitsCoordinateBounds(bounds, edgePadding: .zero)
+            let earthCircumference = 40_075_016.686
+            let centerLat = (bounds.sw.latitude + bounds.ne.latitude) / 2.0
+            let latRadians = centerLat * .pi / 180.0
+            baseMinZoom = log2(earthCircumference * cos(latRadians) / camera.altitude) - 1.0
+
+            WWWLog.i(Self.tag, "🎯 BOUNDS mode: base=\(baseMinZoom) (entire event visible)")
+        }
+
+        // Apply safety margin only for WINDOW mode
+        let zoomSafetyMargin = 0.5
         let finalMinZoom = isWindowMode ? (baseMinZoom + zoomSafetyMargin) : baseMinZoom
 
         WWWLog.i(
