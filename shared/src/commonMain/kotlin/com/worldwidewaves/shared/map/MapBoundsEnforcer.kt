@@ -181,10 +181,25 @@ class MapBoundsEnforcer(
     }
 
     /**
-     * Constrain the camera to the valid bounds if needed
+     * Constrain the camera to the valid bounds if needed.
+     * Only applies reactive correction in BOUNDS mode (event detail screens without gestures).
+     * WINDOW mode (full map with gestures) relies on passive constraints only (minZoom + platform bounds).
      */
+    @Suppress("ReturnCount") // Early returns are guard clauses for cleaner code
     fun constrainCamera() {
         if (isSuppressed()) return
+
+        // WINDOW mode: Skip reactive camera correction to allow free gesture navigation
+        // Constraints are enforced via:
+        // 1. minimumZoomLevel (prevents zooming out beyond event area)
+        // 2. Android's setLatLngBoundsForCameraTarget (passive center constraint)
+        // 3. iOS minimumZoomLevel only (no platform equivalent to setLatLngBoundsForCameraTarget)
+        if (isWindowMode) {
+            Log.v("MapBoundsEnforcer", "WINDOW mode: Skipping reactive camera correction (gesture-enabled map)")
+            return
+        }
+
+        // BOUNDS mode: Apply reactive correction for non-gesture maps
         val target = mapLibreAdapter.getCameraPosition() ?: return
         if (constraintBounds != null && !isCameraWithinConstraints(target)) {
             val mapPosition = Position(target.latitude, target.longitude)

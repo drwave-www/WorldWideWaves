@@ -1133,10 +1133,11 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         to newCamera: MLNMapCamera,
         reason: MLNCameraChangeReason
     ) -> Bool {
-        // Allow all camera changes - min/max zoom constraints are sufficient
-        // The reactive MapBoundsEnforcer updates constraints on camera idle,
-        // maintaining proper viewport clamping without fighting user gestures
-        // This matches Android's behavior (native setLatLngBoundsForCameraTarget + minZoom)
+        // No constraint enforcement in shouldChangeFrom
+        // Constraints are enforced via:
+        // 1. minimumZoomLevel (prevents zooming out beyond bounds)
+        // 2. Reactive MapBoundsEnforcer on camera idle (corrects if needed)
+        // This allows smooth gestures without fighting user interaction
         return true
     }
 

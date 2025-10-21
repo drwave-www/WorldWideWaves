@@ -60,3 +60,23 @@ fun MapZoomAndLocationUpdate(
         }
     }
 }
+
+/**
+ * Displays wave polygons on map WITHOUT camera movement.
+ * Used in EventDetailScreen where map shows wave progression but stays on static BOUNDS view.
+ * Similar to MapZoomAndLocationUpdate but only renders polygons (no auto-follow).
+ *
+ * Note: Parameters are unused but kept for API consistency with MapZoomAndLocationUpdate.
+ * The AbstractEventMap automatically observes event.wave.polygonSets and renders them.
+ */
+@Suppress("UnusedParameter")
+@Composable
+fun MapPolygonDisplay(
+    event: IWWWEvent,
+    eventMap: AbstractEventMap<*>?,
+) {
+    // No camera movement - just let the wave observer update polygons via eventMap
+    // The AbstractEventMap already observes event.wave.polygonSets and renders them
+    // This is a placeholder to document the intentional lack of camera tracking
+    // Camera remains on initial BOUNDS position set during map initialization
+}
