@@ -362,6 +362,7 @@ class AndroidMapLibreAdapter(
     private var eventBounds: BoundingBox? = null // Original event bounds (not shrunk)
     private var isGestureInProgress = false
     private var gestureConstraintsActive = false // Track if gesture listeners are already set up
+    private var minZoomLocked = false // Track if min zoom has been set (to prevent zoom-in spiral)
     private var lastValidCameraPosition: org.maplibre.android.geometry.LatLng? = null
 
     override fun setBoundsForCameraTarget(
@@ -392,38 +393,50 @@ class AndroidMapLibreAdapter(
         // Store constraint bounds for viewport clamping (matches iOS pattern)
         currentConstraintBounds = constraintBounds
 
-        // Calculate min zoom that fits bounds perfectly (matches iOS implementation)
-        // Use MapLibre's camera calculation to get accurate zoom
-        val latLngBounds = constraintBounds.toLatLngBounds()
-        val cameraPosition = mapLibreMap!!.getCameraForLatLngBounds(latLngBounds, intArrayOf(0, 0, 0, 0))
-        val baseMinZoom = cameraPosition?.zoom ?: mapLibreMap!!.minZoomLevel
+        // CRITICAL: Only calculate and set min zoom ONCE (on first call, not on padding recalculations)
+        // Prevents zoom-in spiral where shrinking constraint bounds → higher min zoom → more zoom in → repeat
+        if (!minZoomLocked) {
+            // Calculate min zoom that fits bounds perfectly (matches iOS implementation)
+            // Use MapLibre's camera calculation to get accurate zoom
+            val latLngBounds = constraintBounds.toLatLngBounds()
+            val cameraPosition = mapLibreMap!!.getCameraForLatLngBounds(latLngBounds, intArrayOf(0, 0, 0, 0))
+            val baseMinZoom = cameraPosition?.zoom ?: mapLibreMap!!.minZoomLevel
 
-        // CRITICAL: Only add safety margin for WINDOW mode (full map with gestures)
-        // BOUNDS mode (event details) should show entire event at exact calculated zoom
-        calculatedMinZoom =
-            if (applyZoomSafetyMargin) {
-                baseMinZoom + ZOOM_SAFETY_MARGIN
-            } else {
-                baseMinZoom
-            }
-
-        Log.d(
-            "Camera",
-            "Calculated min zoom: base=$baseMinZoom, final=$calculatedMinZoom " +
+            // CRITICAL: Only add safety margin for WINDOW mode (full map with gestures)
+            // BOUNDS mode (event details) should show entire event at exact calculated zoom
+            calculatedMinZoom =
                 if (applyZoomSafetyMargin) {
-                    "(WINDOW mode: safety margin=$ZOOM_SAFETY_MARGIN prevents viewport edge overflow)"
+                    baseMinZoom + ZOOM_SAFETY_MARGIN
                 } else {
-                    "(BOUNDS mode: no safety margin, show entire event)"
-                },
-        )
+                    baseMinZoom
+                }
 
-        // CRITICAL: Set min zoom IMMEDIATELY to prevent zooming out beyond event area
-        // This provides PREVENTIVE constraint enforcement (not reactive)
-        mapLibreMap!!.setMinZoomPreference(calculatedMinZoom)
-        Log.i(
-            "Camera",
-            "✅ Set min zoom preference immediately: $calculatedMinZoom (preventive enforcement)",
-        )
+            Log.d(
+                "Camera",
+                "Calculated min zoom (ONCE): base=$baseMinZoom, final=$calculatedMinZoom " +
+                    if (applyZoomSafetyMargin) {
+                        "(WINDOW mode: safety margin=$ZOOM_SAFETY_MARGIN prevents viewport edge overflow)"
+                    } else {
+                        "(BOUNDS mode: no safety margin, show entire event)"
+                    },
+            )
+
+            // CRITICAL: Set min zoom IMMEDIATELY to prevent zooming out beyond event area
+            // This provides PREVENTIVE constraint enforcement (not reactive)
+            mapLibreMap!!.setMinZoomPreference(calculatedMinZoom)
+            Log.i(
+                "Camera",
+                "✅ Set min zoom preference (LOCKED): $calculatedMinZoom (preventive enforcement)",
+            )
+
+            // Lock min zoom to prevent recalculation on padding updates
+            minZoomLocked = true
+        } else {
+            Log.v(
+                "Camera",
+                "Min zoom already locked at $calculatedMinZoom, skipping recalculation (prevents zoom-in spiral)",
+            )
+        }
 
         // Set the underlying MapLibre bounds (constrains camera center only)
         mapLibreMap!!.setLatLngBoundsForCameraTarget(constraintBounds.toLatLngBounds())

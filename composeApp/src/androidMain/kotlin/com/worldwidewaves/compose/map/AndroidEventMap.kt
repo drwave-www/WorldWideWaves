@@ -862,9 +862,12 @@ class AndroidEventMap(
         // Build the MapLibre view
         val maplibreMapOptions = MapLibreMapOptions.createFromAttributes(context)
         maplibreMapOptions.apply {
+            // Set initial zoom to avoid zoom-out flash on load
+            // Start at city-level zoom (will be animated to final position by moveToWindowBounds/moveToMapBounds)
             camera(
                 CameraPosition
                     .Builder()
+                    .zoom(11.0) // City-level zoom to avoid world-view flash (final zoom set by constraints)
                     .padding(0.0, 0.0, 0.0, 0.0)
                     .bearing(0.0)
                     .tilt(0.0)
