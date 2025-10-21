@@ -401,40 +401,41 @@ class AndroidMapLibreAdapter(
         val shouldCalculateMinZoom = !minZoomLocked || (originalEventBounds != null && !minZoomLocked)
 
         if (shouldCalculateMinZoom && originalEventBounds != null) {
-            // CRITICAL: Calculate min zoom using SAME logic as moveToWindowBounds
-            // getCameraForLatLngBounds() gives zoom to fit BOTH dimensions (the LOWER zoom)
-            // But we need zoom to fit the CONSTRAINING dimension (might be higher)
-
             val boundsForMinZoom = originalEventBounds
-            val eventWidth = boundsForMinZoom.ne.lng - boundsForMinZoom.sw.lng
-            val eventHeight = boundsForMinZoom.ne.lat - boundsForMinZoom.sw.lat
 
-            val mapWidth = getWidth()
-            val mapHeight = getHeight()
+            // CRITICAL: Different calculation for WINDOW vs BOUNDS mode
+            val baseMinZoom: Double
 
-            // Calculate zoom for each dimension (same formula as moveToWindowBounds)
-            val zoomForWidth = kotlin.math.log2((mapWidth * 360.0) / (eventWidth * 256.0))
-            val zoomForHeight = kotlin.math.log2((mapHeight * 180.0) / (eventHeight * 256.0))
+            if (applyZoomSafetyMargin) {
+                // WINDOW MODE: Use same formula as moveToWindowBounds to match animation zoom
+                val eventWidth = boundsForMinZoom.ne.lng - boundsForMinZoom.sw.lng
+                val eventHeight = boundsForMinZoom.ne.lat - boundsForMinZoom.sw.lat
+                val mapWidth = getWidth()
+                val mapHeight = getHeight()
 
-            // CRITICAL: Use the SMALLER zoom (ensures BOTH dimensions fit)
-            // This matches what moveToWindowBounds does
-            val baseMinZoom = kotlin.math.min(zoomForWidth, zoomForHeight)
+                val zoomForWidth = kotlin.math.log2((mapWidth * 360.0) / (eventWidth * 256.0))
+                val zoomForHeight = kotlin.math.log2((mapHeight * 180.0) / (eventHeight * 256.0))
 
-            Log.i(
-                "Camera",
-                "🎯 Calculating min zoom from ORIGINAL EVENT BOUNDS: " +
-                    "SW=(${boundsForMinZoom.sw.lat},${boundsForMinZoom.sw.lng}) " +
-                    "NE=(${boundsForMinZoom.ne.lat},${boundsForMinZoom.ne.lng}), " +
-                    "eventSize=${eventWidth}x$eventHeight, screenSize=${mapWidth}x$mapHeight",
-            )
+                // Use SMALLER zoom (ensures BOTH dimensions fit)
+                baseMinZoom = kotlin.math.min(zoomForWidth, zoomForHeight)
 
-            Log.i(
-                "Camera",
-                "Min zoom calculation: forWidth=$zoomForWidth, forHeight=$zoomForHeight, " +
-                    "base=min(both)=$baseMinZoom",
-            )
+                Log.i(
+                    "Camera",
+                    "🎯 WINDOW mode min zoom: forWidth=$zoomForWidth, forHeight=$zoomForHeight, base=$baseMinZoom",
+                )
+            } else {
+                // BOUNDS MODE: Use MapLibre's calculation (shows entire event)
+                val latLngBounds = boundsForMinZoom.toLatLngBounds()
+                val cameraPosition = mapLibreMap!!.getCameraForLatLngBounds(latLngBounds, intArrayOf(0, 0, 0, 0))
+                baseMinZoom = cameraPosition?.zoom ?: mapLibreMap!!.minZoomLevel
 
-            // CRITICAL: Add safety margin for WINDOW mode
+                Log.i(
+                    "Camera",
+                    "🎯 BOUNDS mode min zoom: base=$baseMinZoom (entire event visible)",
+                )
+            }
+
+            // Add safety margin only for WINDOW mode
             calculatedMinZoom =
                 if (applyZoomSafetyMargin) {
                     baseMinZoom + ZOOM_SAFETY_MARGIN
@@ -448,15 +449,15 @@ class AndroidMapLibreAdapter(
                     if (applyZoomSafetyMargin) {
                         "(WINDOW mode: +$ZOOM_SAFETY_MARGIN margin)"
                     } else {
-                        "(BOUNDS mode: no margin)"
+                        "(BOUNDS mode: no margin, shows entire event)"
                     },
             )
 
-            // CRITICAL: Set min zoom IMMEDIATELY
+            // Set min zoom IMMEDIATELY
             mapLibreMap!!.setMinZoomPreference(calculatedMinZoom)
             Log.e(
                 "Camera",
-                "🚨 SET MIN ZOOM PREFERENCE: $calculatedMinZoom - NO PIXELS OUTSIDE EVENT AREA 🚨",
+                "🚨 SET MIN ZOOM: $calculatedMinZoom - ${if (applyZoomSafetyMargin) "NO PIXELS OUTSIDE" else "ENTIRE EVENT"} 🚨",
             )
 
             minZoomLocked = true
