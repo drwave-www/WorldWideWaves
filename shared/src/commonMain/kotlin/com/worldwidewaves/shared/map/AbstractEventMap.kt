@@ -209,6 +209,17 @@ abstract class AbstractEventMap<T>(
                 "(ensures NO pixels outside event area)",
         )
 
+        // CRITICAL: Apply constraints BEFORE animation
+        // This ensures min zoom is set IMMEDIATELY (preventive enforcement)
+        constraintManager?.applyConstraints()
+
+        // Get the calculated min zoom
+        val calculatedMinZoom = mapLibreAdapter.getMinZoomLevel()
+        com.worldwidewaves.shared.utils.Log.i(
+            "AbstractEventMap",
+            "WINDOW mode: Min zoom applied BEFORE animation: $calculatedMinZoom",
+        )
+
         runCameraAnimation { cb ->
             // CRITICAL: Calculate exact zoom to fit the constraining dimension
             // Do NOT use animateCameraToBounds (lets MapLibre decide) - we must control it
@@ -230,22 +241,20 @@ abstract class AbstractEventMap<T>(
                 targetZoom,
                 object : MapCameraCallback {
                     override fun onFinish() {
-                        // Apply strict constraints - this sets min zoom to prevent viewport exceeding event area
-                        constraintManager?.applyConstraints()
-
-                        // Get the calculated min zoom
-                        val calculatedMinZoom = mapLibreAdapter.getMinZoomLevel()
-                        com.worldwidewaves.shared.utils.Log.d(
+                        com.worldwidewaves.shared.utils.Log.i(
                             "AbstractEventMap",
-                            "WINDOW mode: Min zoom from constraints: $calculatedMinZoom",
+                            "✅ moveToWindowBounds animation completed",
                         )
-
                         mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
                         cb.onFinish()
                         onComplete()
                     }
 
                     override fun onCancel() {
+                        com.worldwidewaves.shared.utils.Log.w(
+                            "AbstractEventMap",
+                            "⚠️ moveToWindowBounds animation CANCELLED",
+                        )
                         cb.onCancel()
                         onComplete()
                     }
