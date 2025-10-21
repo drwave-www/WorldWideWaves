@@ -442,6 +442,31 @@ import Shared
         currentConstraintBounds = bounds
         WWWLog.i(Self.tag, "✅ Constraint bounds set with intelligent aspect ratio min zoom")
 
+        // CRITICAL: Update visible region with ESTIMATED viewport to prevent fallback bounds issue
+        // Before regionDidChangeAnimated fires, provide reasonable estimate for padding calculations
+        // Estimate viewport size at the min zoom we just calculated
+        let estimatedViewportLatSpan = (screenHeight / 256.0) / pow(2.0, finalMinZoom) * 180.0
+        let estimatedViewportLngSpan = (screenWidth / 256.0) / pow(2.0, finalMinZoom) * 360.0
+
+        let centerLat = (bounds.sw.latitude + bounds.ne.latitude) / 2.0
+        let centerLng = (bounds.sw.longitude + bounds.ne.longitude) / 2.0
+
+        let estimatedViewport = BoundingBox(
+            swLat: centerLat - estimatedViewportLatSpan / 2.0,
+            swLng: centerLng - estimatedViewportLngSpan / 2.0,
+            neLat: centerLat + estimatedViewportLatSpan / 2.0,
+            neLng: centerLng + estimatedViewportLngSpan / 2.0
+        )
+
+        if let eventId = eventId {
+            Shared.MapWrapperRegistry.shared.updateVisibleRegion(eventId: eventId, bbox: estimatedViewport)
+            WWWLog.i(
+                Self.tag,
+                "Estimated viewport updated: \(estimatedViewportLatSpan)° x \(estimatedViewportLngSpan)° " +
+                "(prevents fallback bounds from causing tiny constraint area)"
+            )
+        }
+
         pendingConstraintBounds = nil
         return true
     }
@@ -1249,13 +1274,25 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
 
             // Update visible region in registry (for getVisibleRegion calls)
             let bounds = mapView.visibleCoordinateBounds
-            let bbox = BoundingBox(
-                swLat: bounds.sw.latitude,
-                swLng: bounds.sw.longitude,
-                neLat: bounds.ne.latitude,
-                neLng: bounds.ne.longitude
-            )
-            Shared.MapWrapperRegistry.shared.updateVisibleRegion(eventId: eventId, bbox: bbox)
+
+            // Validate bounds are reasonable (not fallback world bounds)
+            let latSpan = bounds.ne.latitude - bounds.sw.latitude
+            let lngSpan = bounds.ne.longitude - bounds.sw.longitude
+
+            // Only update if bounds are reasonable (< 10 degrees span)
+            // This prevents fallback bounds (-87 to 87 lat) from polluting registry
+            if latSpan < 10.0 && lngSpan < 10.0 {
+                let bbox = BoundingBox(
+                    swLat: bounds.sw.latitude,
+                    swLng: bounds.sw.longitude,
+                    neLat: bounds.ne.latitude,
+                    neLng: bounds.ne.longitude
+                )
+                Shared.MapWrapperRegistry.shared.updateVisibleRegion(eventId: eventId, bbox: bbox)
+                WWWLog.v(Self.tag, "Visible region updated: \(latSpan)° x \(lngSpan)°")
+            } else {
+                WWWLog.w(Self.tag, "Skipping invalid visible region update: \(latSpan)° x \(lngSpan)° (too large)")
+            }
 
             // Update min zoom in registry
             Shared.MapWrapperRegistry.shared.updateMinZoom(eventId: eventId, minZoom: mapView.minimumZoomLevel)
