@@ -134,8 +134,18 @@ class MapBoundsEnforcer(
 
             // Apply bounds & min-zoom to the map – no immediate camera move
             mapLibreAdapter.setBoundsForCameraTarget(paddedBounds)
+
+            // CRITICAL: Get the calculated min zoom from the adapter (it calculates based on bounds)
+            // This ensures the viewport can never exceed the event area
             val minZoom = mapLibreAdapter.getMinZoomLevel()
             mapLibreAdapter.setMinZoomPreference(minZoom)
+
+            Log.i(
+                "MapBoundsEnforcer",
+                "✅ Applied strict constraints: minZoom=$minZoom, " +
+                    "bounds=SW(${paddedBounds.sw.lat},${paddedBounds.sw.lng}) " +
+                    "NE(${paddedBounds.ne.lat},${paddedBounds.ne.lng})",
+            )
 
             // Track the bounds we just applied
             lastAppliedBounds = paddedBounds

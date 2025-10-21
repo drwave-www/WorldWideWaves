@@ -395,8 +395,8 @@ class AndroidMapLibreAdapter(
         // Set the underlying MapLibre bounds (constrains camera center only)
         mapLibreMap!!.setLatLngBoundsForCameraTarget(constraintBounds.toLatLngBounds())
 
-        // Set the calculated min zoom to prevent viewport from exceeding bounds
-        mapLibreMap!!.setMinZoomPreference(calculatedMinZoom)
+        // NOTE: Do NOT set min zoom here - let MapBoundsEnforcer manage it via setMinZoomPreference()
+        // This avoids conflicts and ensures consistent behavior across platforms
     }
 
     // -- Add the Wave polygons to the map
