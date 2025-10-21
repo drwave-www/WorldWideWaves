@@ -394,18 +394,24 @@ class AndroidMapLibreAdapter(
         // Store constraint bounds for viewport clamping (matches iOS pattern)
         currentConstraintBounds = constraintBounds
 
-        // CRITICAL: Only calculate and set min zoom ONCE (on first call, not on padding recalculations)
-        // Prevents zoom-in spiral where shrinking constraint bounds → higher min zoom → more zoom in → repeat
-        if (!minZoomLocked) {
+        // CRITICAL: Only calculate min zoom if not locked OR if we're now getting originalEventBounds
+        // This ensures we calculate from ORIGINAL bounds (not shrunk), preventing infinite zoom out
+        val shouldCalculateMinZoom = !minZoomLocked || (originalEventBounds != null && !minZoomLocked)
+
+        if (shouldCalculateMinZoom) {
             // CRITICAL FIX: Calculate min zoom from ORIGINAL EVENT BOUNDS, not shrunk constraint bounds!
             // Using shrunk bounds gives wrong (higher) min zoom that doesn't prevent seeing outside event area
             val boundsForMinZoom = originalEventBounds ?: constraintBounds
 
-            Log.d(
+            Log.i(
                 "Camera",
-                "Calculating min zoom from bounds: SW=(${boundsForMinZoom.sw.lat},${boundsForMinZoom.sw.lng}) " +
+                "🎯 Calculating min zoom from bounds: SW=(${boundsForMinZoom.sw.lat},${boundsForMinZoom.sw.lng}) " +
                     "NE=(${boundsForMinZoom.ne.lat},${boundsForMinZoom.ne.lng}) " +
-                    if (originalEventBounds != null) "(ORIGINAL event bounds)" else "(constraint bounds)",
+                    if (originalEventBounds != null) {
+                        "(ORIGINAL EVENT BOUNDS - PREVENTS INFINITE ZOOM OUT)"
+                    } else {
+                        "(constraint bounds)"
+                    },
             )
 
             // Calculate min zoom that fits the ORIGINAL EVENT bounds (not shrunk constraint bounds)
@@ -422,32 +428,36 @@ class AndroidMapLibreAdapter(
                     baseMinZoom
                 }
 
-            Log.d(
+            Log.i(
                 "Camera",
-                "Calculated min zoom (ONCE) from ${if (originalEventBounds != null) "ORIGINAL EVENT bounds" else "constraint bounds"}: " +
+                "🎯 Calculated min zoom from ${if (originalEventBounds != null) "ORIGINAL EVENT bounds" else "constraint bounds"}: " +
                     "base=$baseMinZoom, final=$calculatedMinZoom " +
                     if (applyZoomSafetyMargin) {
-                        "(WINDOW mode: safety margin=$ZOOM_SAFETY_MARGIN prevents viewport edge overflow)"
+                        "(WINDOW mode: +$ZOOM_SAFETY_MARGIN safety margin)"
                     } else {
-                        "(BOUNDS mode: no safety margin, show entire event)"
+                        "(BOUNDS mode: no margin)"
                     },
             )
 
             // CRITICAL: Set min zoom IMMEDIATELY to prevent zooming out beyond event area
-            // This provides PREVENTIVE constraint enforcement (not reactive)
+            // THIS IS THE CRITICAL LINE THAT PREVENTS INFINITE ZOOM OUT
             mapLibreMap!!.setMinZoomPreference(calculatedMinZoom)
-            Log.i(
+            Log.e(
                 "Camera",
-                "✅ Set min zoom preference (LOCKED): $calculatedMinZoom - " +
-                    "PREVENTS ZOOMING OUT BEYOND ENTIRE EVENT AREA",
+                "🚨 SET MIN ZOOM PREFERENCE: $calculatedMinZoom - NO PIXELS OUTSIDE EVENT AREA ALLOWED 🚨",
             )
 
-            // Lock min zoom to prevent recalculation on padding updates
-            minZoomLocked = true
+            // Only lock if we calculated from original event bounds (prevents wrong locking)
+            if (originalEventBounds != null) {
+                minZoomLocked = true
+                Log.i("Camera", "✅ Min zoom LOCKED (calculated from original event bounds)")
+            } else {
+                Log.w("Camera", "⚠️ Min zoom NOT locked (waiting for original event bounds)")
+            }
         } else {
             Log.v(
                 "Camera",
-                "Min zoom already locked at $calculatedMinZoom, skipping recalculation (prevents zoom-in spiral)",
+                "Min zoom already locked at $calculatedMinZoom, skipping recalculation",
             )
         }
 
