@@ -1133,10 +1133,34 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         to newCamera: MLNMapCamera,
         reason: MLNCameraChangeReason
     ) -> Bool {
-        // Allow all camera changes - min/max zoom constraints are sufficient
-        // The reactive MapBoundsEnforcer updates constraints on camera idle,
-        // maintaining proper viewport clamping without fighting user gestures
-        // This matches Android's behavior (native setLatLngBoundsForCameraTarget + minZoom)
+        // Match Android's setLatLngBoundsForCameraTarget behavior:
+        // Constrain camera CENTER to stay within (shrunk) constraint bounds
+        // Viewport CAN extend outside event area (controlled by minZoom)
+        guard let bounds = currentConstraintBounds else {
+            // No constraints set - allow all movements
+            return true
+        }
+
+        // Check if camera CENTER would be outside constraint bounds
+        let newCenter = newCamera.centerCoordinate
+        let centerOutOfBounds =
+            newCenter.latitude > bounds.ne.latitude ||
+            newCenter.latitude < bounds.sw.latitude ||
+            newCenter.longitude > bounds.ne.longitude ||
+            newCenter.longitude < bounds.sw.longitude
+
+        // Check zoom constraints
+        let earthCircumference = 40_075_016.686
+        let latitude = newCenter.latitude
+        let zoom = log2(earthCircumference * cos(latitude * .pi / 180.0) / newCamera.altitude) - 1.0
+        let zoomOutOfBounds = zoom < mapView.minimumZoomLevel || zoom > mapView.maximumZoomLevel
+
+        if centerOutOfBounds || zoomOutOfBounds {
+            // Reject movement - camera center or zoom violates constraints
+            return false
+        }
+
+        // Camera center and zoom within constraints - allow movement
         return true
     }
 

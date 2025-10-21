@@ -33,6 +33,7 @@ import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.ui.components.AlertMapNotDownloadedOnSimulationLaunch
 import com.worldwidewaves.shared.ui.components.EventLayout
+import com.worldwidewaves.shared.ui.components.MapPolygonDisplay
 import com.worldwidewaves.shared.ui.formatters.calculateEventMapHeight
 import com.worldwidewaves.shared.viewmodels.MapViewModel
 import kotlin.time.ExperimentalTime
@@ -60,6 +61,10 @@ class EventDetailScreen(
 
         // Calculate responsive map height
         val calculatedHeight = calculateEventMapHeight()
+
+        // Display wave polygons on map (like WaveScreen) but WITHOUT auto-follow camera
+        // This allows users to see wave progression visually while keeping camera static on event bounds
+        MapPolygonDisplay(event, eventMap)
 
         // Use simplified shared standard event layout
         EventLayout(
