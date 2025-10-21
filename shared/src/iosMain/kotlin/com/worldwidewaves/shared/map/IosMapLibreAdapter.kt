@@ -373,4 +373,10 @@ class IosMapLibreAdapter(
         MapWrapperRegistry.setUserPositionOnWrapper(eventId, position.lat, position.lng)
         Log.v(TAG, "✅ setUserPositionOnWrapper called for event: $eventId")
     }
+
+    override fun setGesturesEnabled(enabled: Boolean) {
+        Log.i(TAG, "setGesturesEnabled: $enabled for event: $eventId")
+        // Call Swift wrapper via registry callback
+        MapWrapperRegistry.setGesturesEnabledOnWrapper(eventId, enabled)
+    }
 }

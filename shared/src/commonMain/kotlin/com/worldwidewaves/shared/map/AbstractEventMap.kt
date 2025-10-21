@@ -47,6 +47,7 @@ interface MapCameraCallback { // Call back for camera animations
 data class EventMapConfig( // Type of EventMap initial view setup
     val initialCameraPosition: MapCameraPosition = MapCameraPosition.BOUNDS,
     val autoTargetUserOnFirstLocation: Boolean = false,
+    val gesturesEnabled: Boolean = false, // Controls whether user can interact with map (pan/zoom/rotate)
 )
 
 enum class MapCameraPosition {
@@ -299,7 +300,6 @@ abstract class AbstractEventMap<T>(
      * Moves the camera to the current user position
      */
     suspend fun targetUser() {
-        // FIXED: Use unified PositionManager (respects SIMULATION > GPS priority)
         val userPosition = positionManager.getCurrentPosition() ?: return
         runCameraAnimation { _ ->
             mapLibreAdapter.animateCamera(userPosition, MapDisplay.TARGET_USER_ZOOM)
@@ -320,15 +320,8 @@ abstract class AbstractEventMap<T>(
      * Respects constraint bounds to prevent fighting with MapBoundsEnforcer.
      */
     suspend fun targetUserAndWave() {
-        // FIXED: Use unified PositionManager instead of locationProvider
-        // PositionManager respects SIMULATION > GPS priority
         val userPosition = positionManager.getCurrentPosition()
         val closestWaveLongitude = event.wave.userClosestWaveLongitude()
-
-        com.worldwidewaves.shared.utils.Log.i(
-            "AbstractEventMap",
-            "🎯 targetUserAndWave called for event: ${event.id}, userPos=$userPosition, waveLng=$closestWaveLongitude",
-        )
 
         if (userPosition == null || closestWaveLongitude == null) {
             com.worldwidewaves.shared.utils.Log.w(
@@ -454,6 +447,9 @@ abstract class AbstractEventMap<T>(
         mapLibreAdapter.setStyle(stylePath) {
             // Set Attribution margins to 0
             mapLibreAdapter.setAttributionMargins(0, 0, 0, 0)
+
+            // Configure gesture interaction based on map config
+            mapLibreAdapter.setGesturesEnabled(mapConfig.gesturesEnabled)
 
             // Enable location component to show user position marker
             mapLibreAdapter.enableLocationComponent(true)

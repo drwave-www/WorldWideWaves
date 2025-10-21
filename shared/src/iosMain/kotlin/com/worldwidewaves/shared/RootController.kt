@@ -348,6 +348,7 @@ fun makeFullMapViewController(eventId: String): UIViewController =
                         EventMapConfig(
                             initialCameraPosition = MapCameraPosition.WINDOW,
                             autoTargetUserOnFirstLocation = true,
+                            gesturesEnabled = true, // Full map allows user interaction
                         ),
                     registryKey = "${event.id}-fullmap", // Unique key to prevent conflicts
                 )

@@ -209,6 +209,10 @@ class MapBoundsEnforcerTest {
             // Test stub - no-op
         }
 
+        override fun setGesturesEnabled(enabled: Boolean) {
+            // Test stub - no-op
+        }
+
         fun triggerCameraIdle() {
             cameraIdleListeners.forEach { it() }
         }

@@ -217,6 +217,8 @@ object MapWrapperRegistry {
         setUserPositionCallbacks.remove(eventId)
         pendingLocationComponentStates.remove(eventId)
         pendingUserPositions.remove(eventId)
+        setGesturesEnabledCallbacks.remove(eventId)
+        pendingGesturesStates.remove(eventId)
 
         Log.i(TAG, "✅ Wrapper unregistered and cleanup complete for: $eventId")
     }
@@ -820,8 +822,14 @@ object MapWrapperRegistry {
     private val locationComponentCallbacks = mutableMapOf<String, (Boolean) -> Unit>()
     private val setUserPositionCallbacks = mutableMapOf<String, (Double, Double) -> Unit>()
 
+    // Store callbacks for gesture control
+    private val setGesturesEnabledCallbacks = mutableMapOf<String, (Boolean) -> Unit>()
+
     // Store pending user position (for race condition handling)
     private val pendingUserPositions = mutableMapOf<String, Pair<Double, Double>>()
+
+    // Store pending gestures state (for race condition handling)
+    private val pendingGesturesStates = mutableMapOf<String, Boolean>()
 
     /**
      * Register callback for enabling/disabling location component.
@@ -920,6 +928,50 @@ object MapWrapperRegistry {
             Log.w(TAG, "⚠️ No user position callback registered for event: $eventId - storing latest position")
             // Store only the latest position (overwrites previous)
             pendingUserPositions[eventId] = Pair(latitude, longitude)
+        }
+    }
+
+    /**
+     * Register callback for enabling/disabling gestures.
+     * Swift wrapper registers this to receive gesture enable/disable commands.
+     */
+    fun setGesturesEnabledCallback(
+        eventId: String,
+        callback: (Boolean) -> Unit,
+    ) {
+        setGesturesEnabledCallbacks[eventId] = callback
+        Log.d(TAG, "Gestures callback registered for event: $eventId")
+
+        // Apply pending gestures state if it was set before callback registered
+        val pendingState = pendingGesturesStates[eventId]
+        if (pendingState != null) {
+            Log.i(TAG, "✅ Applying pending gestures state: $pendingState for event: $eventId")
+            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+                callback.invoke(pendingState)
+            }
+            pendingGesturesStates.remove(eventId)
+        }
+    }
+
+    /**
+     * Enable or disable gestures on the map wrapper.
+     */
+    fun setGesturesEnabledOnWrapper(
+        eventId: String,
+        enabled: Boolean,
+    ) {
+        val callback = setGesturesEnabledCallbacks[eventId]
+        if (callback != null) {
+            Log.d(TAG, "Invoking gestures callback: $enabled for event: $eventId")
+            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+                callback.invoke(enabled)
+            }
+            // Clear pending state after successful invocation
+            pendingGesturesStates.remove(eventId)
+        } else {
+            Log.w(TAG, "No gestures callback registered for event: $eventId - storing pending state")
+            // Store pending state to apply when callback is registered
+            pendingGesturesStates[eventId] = enabled
         }
     }
 
@@ -1025,5 +1077,7 @@ object MapWrapperRegistry {
         setUserPositionCallbacks.clear()
         pendingLocationComponentStates.clear()
         pendingUserPositions.clear()
+        setGesturesEnabledCallbacks.clear()
+        pendingGesturesStates.clear()
     }
 }

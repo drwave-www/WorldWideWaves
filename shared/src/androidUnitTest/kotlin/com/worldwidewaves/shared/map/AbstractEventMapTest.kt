@@ -112,6 +112,7 @@ class AbstractEventMapTest : KoinTest {
             callback()
         }
         every { mockMapLibreAdapter.setAttributionMargins(any(), any(), any(), any()) } just Runs
+        every { mockMapLibreAdapter.setGesturesEnabled(any()) } just Runs
         every { mockMapLibreAdapter.setMaxZoomPreference(any()) } just Runs
         every { mockMapLibreAdapter.setMinZoomPreference(any()) } just Runs
         every { mockMapLibreAdapter.setOnMapClickListener(any()) } just Runs

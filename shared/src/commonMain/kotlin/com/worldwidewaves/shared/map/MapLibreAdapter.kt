@@ -103,4 +103,13 @@ interface MapLibreAdapter<T> {
      * On iOS, this manually updates the location marker.
      */
     fun setUserPosition(position: Position)
+
+    /**
+     * Enable or disable user gestures on the map (pan, zoom, rotate, tilt).
+     * When disabled, the map becomes non-interactive - useful for preview/display maps
+     * like event detail and wave screens where user shouldn't manipulate the view.
+     *
+     * @param enabled true to allow gestures, false to disable all map interactions
+     */
+    fun setGesturesEnabled(enabled: Boolean)
 }

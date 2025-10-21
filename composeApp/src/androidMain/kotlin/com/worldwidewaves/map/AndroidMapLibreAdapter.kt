@@ -520,4 +520,20 @@ class AndroidMapLibreAdapter(
         // This is a no-op since the position updates happen through the LocationEngine
         Log.v(TAG, "setUserPosition: (${position.lat}, ${position.lng}) (no-op on Android, managed by LocationEngineProxy)")
     }
+
+    override fun setGesturesEnabled(enabled: Boolean) {
+        require(mapLibreMap != null)
+        Log.d(TAG, "setGesturesEnabled: $enabled")
+
+        mapLibreMap!!.uiSettings.apply {
+            // Scroll gestures (pan/drag)
+            isScrollGesturesEnabled = enabled
+            // Zoom gestures (pinch, double-tap, etc.)
+            isZoomGesturesEnabled = enabled
+            // Rotate gestures (two-finger rotation)
+            isRotateGesturesEnabled = enabled
+            // Tilt gestures (two-finger vertical drag)
+            isTiltGesturesEnabled = enabled
+        }
+    }
 }

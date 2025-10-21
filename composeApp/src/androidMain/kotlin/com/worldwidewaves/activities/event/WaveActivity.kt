@@ -40,11 +40,13 @@ class WaveActivity : AbstractEventAndroidActivity<WaveParticipationScreen>() {
                 context = this,
                 mapConfig =
                     com.worldwidewaves.shared.map.EventMapConfig(
-                        initialCameraPosition = com.worldwidewaves.shared.map.MapCameraPosition.WINDOW,
+                        initialCameraPosition = com.worldwidewaves.shared.map.MapCameraPosition.BOUNDS,
                         autoTargetUserOnFirstLocation = false,
+                        gesturesEnabled = false, // Wave screen map is non-interactive (display only)
                     ),
             )
-            // WINDOW mode: Maximizes view by fitting to screen aspect ratio (width OR height)
-            // Then targetUserAndWave() takes over for continuous user+wave tracking
+            // BOUNDS mode: Shows full event area initially (matches event detail screen)
+            // Then targetUserAndWave() from MapZoomAndLocationUpdate takes over when user enters area
+            // Map is non-interactive - gestures disabled
         }
 }
