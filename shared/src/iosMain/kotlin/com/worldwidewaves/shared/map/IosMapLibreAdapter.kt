@@ -255,6 +255,7 @@ class IosMapLibreAdapter(
     override fun setBoundsForCameraTarget(
         constraintBounds: BoundingBox,
         applyZoomSafetyMargin: Boolean,
+        originalEventBounds: BoundingBox?,
     ) {
         Log.d(TAG, "Setting camera constraint bounds for event: $eventId, applyZoomSafetyMargin=$applyZoomSafetyMargin")
         Log.d(

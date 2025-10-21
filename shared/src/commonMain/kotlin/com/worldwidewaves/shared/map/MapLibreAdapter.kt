@@ -64,6 +64,7 @@ interface MapLibreAdapter<T> {
     fun setBoundsForCameraTarget(
         constraintBounds: BoundingBox,
         applyZoomSafetyMargin: Boolean = false,
+        originalEventBounds: BoundingBox? = null,
     )
 
     fun getMinZoomLevel(): Double
