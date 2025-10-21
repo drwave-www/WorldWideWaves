@@ -161,7 +161,10 @@ class MapBoundsEnforcerTest {
             callback?.onFinish()
         }
 
-        override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
+        override fun setBoundsForCameraTarget(
+            constraintBounds: BoundingBox,
+            applyZoomSafetyMargin: Boolean,
+        ) {
             this.constraintBounds = constraintBounds
             // UPDATED: Match real AndroidMapLibreAdapter behavior (preventive enforcement)
             // Calculate and set min zoom immediately to prevent viewport exceeding bounds

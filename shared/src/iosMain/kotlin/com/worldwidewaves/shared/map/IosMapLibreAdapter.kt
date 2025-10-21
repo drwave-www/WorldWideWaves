@@ -252,8 +252,11 @@ class IosMapLibreAdapter(
         )
     }
 
-    override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
-        Log.d(TAG, "Setting camera constraint bounds for event: $eventId")
+    override fun setBoundsForCameraTarget(
+        constraintBounds: BoundingBox,
+        applyZoomSafetyMargin: Boolean,
+    ) {
+        Log.d(TAG, "Setting camera constraint bounds for event: $eventId, applyZoomSafetyMargin=$applyZoomSafetyMargin")
         Log.d(
             TAG,
             "BBox details: minLat=${constraintBounds.minLatitude}, maxLat=${constraintBounds.maxLatitude}, " +
@@ -263,6 +266,8 @@ class IosMapLibreAdapter(
             TAG,
             "SW/NE: SW(${constraintBounds.sw.lat},${constraintBounds.sw.lng}) NE(${constraintBounds.ne.lat},${constraintBounds.ne.lng})",
         )
+        // Note: iOS implementation handles zoom safety via Swift (not passed through command)
+        // The applyZoomSafetyMargin parameter is Android-specific for now
         MapWrapperRegistry.setPendingCameraCommand(
             eventId,
             CameraCommand.SetConstraintBounds(constraintBounds),

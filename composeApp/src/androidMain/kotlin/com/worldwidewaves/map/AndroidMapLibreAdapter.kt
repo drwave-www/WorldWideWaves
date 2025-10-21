@@ -361,9 +361,13 @@ class AndroidMapLibreAdapter(
     private var calculatedMinZoom: Double = 0.0
     private var eventBounds: BoundingBox? = null // Original event bounds (not shrunk)
     private var isGestureInProgress = false
+    private var gestureConstraintsActive = false // Track if gesture listeners are already set up
     private var lastValidCameraPosition: org.maplibre.android.geometry.LatLng? = null
 
-    override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
+    override fun setBoundsForCameraTarget(
+        constraintBounds: BoundingBox,
+        applyZoomSafetyMargin: Boolean,
+    ) {
         require(mapLibreMap != null)
 
         // Validate bounds before setting (matches iOS pattern)
@@ -381,7 +385,8 @@ class AndroidMapLibreAdapter(
             "Camera",
             "Setting camera target bounds constraint: SW=${constraintBounds.southwest.latitude}," +
                 "${constraintBounds.southwest.longitude} " +
-                "NE=${constraintBounds.northeast.latitude},${constraintBounds.northeast.longitude}",
+                "NE=${constraintBounds.northeast.latitude},${constraintBounds.northeast.longitude}, " +
+                "applyZoomSafetyMargin=$applyZoomSafetyMargin",
         )
 
         // Store constraint bounds for viewport clamping (matches iOS pattern)
@@ -393,14 +398,23 @@ class AndroidMapLibreAdapter(
         val cameraPosition = mapLibreMap!!.getCameraForLatLngBounds(latLngBounds, intArrayOf(0, 0, 0, 0))
         val baseMinZoom = cameraPosition?.zoom ?: mapLibreMap!!.minZoomLevel
 
-        // CRITICAL: Add safety margin to ensure viewport is SMALLER than event bounds
-        // Without this, viewport can equal bounds, allowing edge overflow when panning to corners
-        calculatedMinZoom = baseMinZoom + ZOOM_SAFETY_MARGIN
+        // CRITICAL: Only add safety margin for WINDOW mode (full map with gestures)
+        // BOUNDS mode (event details) should show entire event at exact calculated zoom
+        calculatedMinZoom =
+            if (applyZoomSafetyMargin) {
+                baseMinZoom + ZOOM_SAFETY_MARGIN
+            } else {
+                baseMinZoom
+            }
 
         Log.d(
             "Camera",
-            "Calculated min zoom: base=$baseMinZoom, with margin=$calculatedMinZoom " +
-                "(safety margin=$ZOOM_SAFETY_MARGIN prevents viewport from equaling/exceeding event bounds)",
+            "Calculated min zoom: base=$baseMinZoom, final=$calculatedMinZoom " +
+                if (applyZoomSafetyMargin) {
+                    "(WINDOW mode: safety margin=$ZOOM_SAFETY_MARGIN prevents viewport edge overflow)"
+                } else {
+                    "(BOUNDS mode: no safety margin, show entire event)"
+                },
         )
 
         // CRITICAL: Set min zoom IMMEDIATELY to prevent zooming out beyond event area
@@ -408,30 +422,29 @@ class AndroidMapLibreAdapter(
         mapLibreMap!!.setMinZoomPreference(calculatedMinZoom)
         Log.i(
             "Camera",
-            "✅ Set min zoom preference immediately: $calculatedMinZoom (preventive enforcement with safety margin)",
+            "✅ Set min zoom preference immediately: $calculatedMinZoom (preventive enforcement)",
         )
 
         // Set the underlying MapLibre bounds (constrains camera center only)
         mapLibreMap!!.setLatLngBoundsForCameraTarget(constraintBounds.toLatLngBounds())
 
-        // CRITICAL: Setup preventive gesture interception
-        setupPreventiveGestureConstraints()
+        // CRITICAL: Setup preventive gesture interception ONCE (only if gestures enabled and not already active)
+        // Avoid re-registering listeners on every constraint update (causes post-gesture fighting)
+        if (applyZoomSafetyMargin && !gestureConstraintsActive) {
+            setupPreventiveGestureConstraints()
+            gestureConstraintsActive = true
+        }
     }
 
     /**
      * Setup preventive gesture constraints to prevent camera from moving outside bounds.
      * This provides iOS-like "shouldChangeFrom" behavior by intercepting gestures during movement.
+     * Called ONCE when constraints are first applied (not on every constraint update).
      */
     private fun setupPreventiveGestureConstraints() {
         val map = mapLibreMap ?: return
-        val constraintBounds = currentConstraintBounds ?: return
 
-        Log.i(TAG, "Setting up preventive gesture constraints")
-
-        // Remove any existing listeners first
-        map.removeOnCameraMoveStartedListener { /* no-op */ }
-        map.removeOnCameraMoveListener { /* no-op */ }
-        map.removeOnCameraIdleListener { /* no-op */ }
+        Log.i(TAG, "Setting up preventive gesture constraints (one-time setup)")
 
         // Track when gestures start
         map.addOnCameraMoveStartedListener { reason ->
@@ -455,6 +468,7 @@ class AndroidMapLibreAdapter(
 
             val currentCamera = map.cameraPosition.target ?: return@addOnCameraMoveListener
             val viewport = getVisibleRegion()
+            val constraintBounds = currentConstraintBounds ?: return@addOnCameraMoveListener
 
             // Check if viewport exceeds event bounds
             if (!isViewportWithinBounds(viewport, constraintBounds)) {
