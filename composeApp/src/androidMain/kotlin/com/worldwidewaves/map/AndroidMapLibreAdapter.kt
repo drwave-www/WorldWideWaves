@@ -383,7 +383,6 @@ class AndroidMapLibreAdapter(
         // Calculate min zoom that fits bounds perfectly (matches iOS implementation)
         // Use MapLibre's camera calculation to get accurate zoom
         val latLngBounds = constraintBounds.toLatLngBounds()
-        val cameraUpdate = CameraUpdateFactory.newLatLngBounds(latLngBounds, 0)
         val cameraPosition = mapLibreMap!!.getCameraForLatLngBounds(latLngBounds, intArrayOf(0, 0, 0, 0))
         calculatedMinZoom = cameraPosition?.zoom ?: mapLibreMap!!.minZoomLevel
 
@@ -392,11 +391,16 @@ class AndroidMapLibreAdapter(
             "Calculated min zoom from bounds: $calculatedMinZoom (prevents zoom out beyond event area)",
         )
 
+        // CRITICAL: Set min zoom IMMEDIATELY to prevent zooming out beyond event area
+        // This provides PREVENTIVE constraint enforcement (not reactive)
+        mapLibreMap!!.setMinZoomPreference(calculatedMinZoom)
+        Log.i(
+            "Camera",
+            "✅ Set min zoom preference immediately: $calculatedMinZoom (preventive enforcement)",
+        )
+
         // Set the underlying MapLibre bounds (constrains camera center only)
         mapLibreMap!!.setLatLngBoundsForCameraTarget(constraintBounds.toLatLngBounds())
-
-        // NOTE: Do NOT set min zoom here - let MapBoundsEnforcer manage it via setMinZoomPreference()
-        // This avoids conflicts and ensures consistent behavior across platforms
     }
 
     // -- Add the Wave polygons to the map
