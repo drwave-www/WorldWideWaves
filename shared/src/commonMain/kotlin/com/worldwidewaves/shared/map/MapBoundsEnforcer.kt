@@ -361,21 +361,36 @@ class MapBoundsEnforcer(
     }
 
     private fun calculateVisibleRegionPadding(): VisibleRegionPadding {
-        // CRITICAL: Get actual viewport dimensions to shrink constraint bounds
-        // setLatLngBoundsForCameraTarget() only constrains camera CENTER, not viewport EDGES
-        // By shrinking constraint bounds by viewport half-size, we ensure viewport stays inside event area
-        val viewport = mapLibreAdapter.getVisibleRegion()
+        // CRITICAL DISTINCTION: WINDOW mode vs BOUNDS mode
+        //
+        // WINDOW mode (full map screen with gestures):
+        //   - Need viewport padding to prevent edge overflow
+        //   - setLatLngBoundsForCameraTarget() only constrains camera CENTER
+        //   - Shrink bounds by viewport half-size to keep viewport inside event area
+        //
+        // BOUNDS mode (event detail screen, no gestures):
+        //   - Want to show ENTIRE event area
+        //   - No viewport padding needed (gestures disabled, no panning to edges)
+        //   - Zero padding = constraint bounds = event bounds = entire event visible
 
-        // Calculate half-dimensions (padding needed to keep viewport edges inside event bounds)
+        if (!isWindowMode) {
+            // BOUNDS mode: No padding, show entire event
+            Log.d(
+                "MapBoundsEnforcer",
+                "BOUNDS mode: Using zero padding (want entire event visible, gestures disabled)",
+            )
+            return VisibleRegionPadding(0.0, 0.0)
+        }
+
+        // WINDOW mode: Calculate viewport padding to prevent edge overflow
+        val viewport = mapLibreAdapter.getVisibleRegion()
         val viewportHalfHeight = (viewport.northLatitude - viewport.southLatitude) / 2.0
         val viewportHalfWidth = (viewport.eastLongitude - viewport.westLongitude) / 2.0
 
         Log.d(
             "MapBoundsEnforcer",
-            "${if (isWindowMode) "WINDOW" else "BOUNDS"} mode: " +
-                "Calculated viewport padding from actual dimensions: " +
-                "halfHeight=$viewportHalfHeight, halfWidth=$viewportHalfWidth " +
-                "(ensures camera center stays far enough from edges that viewport fits inside event bounds)",
+            "WINDOW mode: Calculated viewport padding: halfHeight=$viewportHalfHeight, " +
+                "halfWidth=$viewportHalfWidth (prevents viewport edges from exceeding event bounds)",
         )
 
         return VisibleRegionPadding(viewportHalfHeight, viewportHalfWidth)

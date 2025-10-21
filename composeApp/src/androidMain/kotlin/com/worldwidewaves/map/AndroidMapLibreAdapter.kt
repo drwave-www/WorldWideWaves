@@ -543,10 +543,10 @@ class AndroidMapLibreAdapter(
             isScrollGesturesEnabled = enabled
             // Zoom gestures (pinch, double-tap, etc.)
             isZoomGesturesEnabled = enabled
-            // Rotate gestures (two-finger rotation)
-            isRotateGesturesEnabled = enabled
-            // Tilt gestures (two-finger vertical drag)
-            isTiltGesturesEnabled = enabled
+            // CRITICAL: Rotation and tilt ALWAYS disabled (not controlled by enabled parameter)
+            // Map rotation breaks the constrained window concept for full map screen
+            isRotateGesturesEnabled = false // ALWAYS false
+            isTiltGesturesEnabled = false // ALWAYS false
         }
     }
 }
