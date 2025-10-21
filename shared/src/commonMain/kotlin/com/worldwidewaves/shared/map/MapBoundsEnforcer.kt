@@ -264,6 +264,9 @@ class MapBoundsEnforcer(
     /**
      * Clamps the camera position to ensure the viewport stays completely within event bounds.
      * Calculates the nearest valid camera position that keeps all viewport edges inside the event area.
+     *
+     * Special case: If the viewport is larger than the event bounds (e.g., zoomed out too far),
+     * center the camera on the event bounds instead of trying to constrain to an invalid range.
      */
     private fun clampCameraToKeepViewportInside(
         currentCamera: Position,
@@ -280,7 +283,27 @@ class MapBoundsEnforcer(
         val minValidLng = mapBounds.southwest.longitude + viewportHalfWidth
         val maxValidLng = mapBounds.northeast.longitude - viewportHalfWidth
 
-        // Clamp camera position to valid range
+        // Check if viewport is larger than bounds (invalid range where min > max)
+        // This happens when the user is zoomed out too far
+        val isViewportTooLarge = minValidLat > maxValidLat || minValidLng > maxValidLng
+
+        if (isViewportTooLarge) {
+            // Viewport is larger than event bounds - center camera on event bounds
+            val centerLat = (mapBounds.southwest.latitude + mapBounds.northeast.latitude) / 2.0
+            val centerLng = (mapBounds.southwest.longitude + mapBounds.northeast.longitude) / 2.0
+
+            Log.d(
+                "MapBoundsEnforcer",
+                "Viewport larger than bounds (viewport: ${viewportHalfHeight * 2}° x ${viewportHalfWidth * 2}°, " +
+                    "bounds: ${mapBounds.northeast.latitude - mapBounds.southwest.latitude}° x " +
+                    "${mapBounds.northeast.longitude - mapBounds.southwest.longitude}°), " +
+                    "centering camera on event bounds",
+            )
+
+            return Position(centerLat, centerLng)
+        }
+
+        // Clamp camera position to valid range (normal case)
         val clampedLat = currentCamera.latitude.coerceIn(minValidLat, maxValidLat)
         val clampedLng = currentCamera.longitude.coerceIn(minValidLng, maxValidLng)
 
