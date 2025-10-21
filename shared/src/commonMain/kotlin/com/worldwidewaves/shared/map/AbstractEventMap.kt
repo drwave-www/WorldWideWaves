@@ -173,13 +173,15 @@ abstract class AbstractEventMap<T>(
     }
 
     /**
-     * Adjusts the camera to fit the bounds of the event map with proper aspect ratio
+     * Adjusts the camera to fit the event area with strict bounds (no expansion beyond event area).
+     * In WINDOW mode (full map screen), the camera shows as much of the event as possible
+     * while respecting screen aspect ratio, but NEVER shows pixels outside the event bounds.
      */
     suspend fun moveToWindowBounds(onComplete: () -> Unit = {}) {
         // Capture event bbox before animation (needed for callback which is not suspend)
         val eventBbox = event.area.bbox()
 
-        // Prepare bounds enforcer with WINDOW mode (uses viewport padding for constraints)
+        // Prepare bounds enforcer with WINDOW mode (strict viewport enforcement)
         constraintManager = MapBoundsEnforcer(eventBbox, mapLibreAdapter, isWindowMode = true) { suppressCorrections }
 
         val (sw, ne) = eventBbox
@@ -187,59 +189,37 @@ abstract class AbstractEventMap<T>(
         val eventMapHeight = ne.lat - sw.lat
         val (centerLat, centerLng) = event.area.getCenter()
 
-        // Calculate the aspect ratios of the event map and MapLibre component.
+        // Calculate the aspect ratios of the event map and screen
         val eventAspectRatio = eventMapWidth / eventMapHeight
-
-        // Calculate the new southwest and northeast longitudes or latitudes,
-        // depending on whether the event map is wider or taller than the MapLibre component.
         val screenComponentRatio = screenWidth / screenHeight
-        val newSwLat: Double
-        val newNeLat: Double
-        val newSwLng: Double
-        val newNeLng: Double
 
-        // When event is WIDER than screen (eventAspectRatio > screenComponentRatio):
-        // - Keep event width (longitude span) unchanged
-        // - Expand height (latitude span) to match screen aspect ratio
-        // When event is TALLER than screen (eventAspectRatio < screenComponentRatio):
-        // - Keep event height (latitude span) unchanged
-        // - Expand width (longitude span) to match screen aspect ratio
-        if (eventAspectRatio > screenComponentRatio) {
-            // Event is wider - expand latitude to fill screen height
-            val latDiff = eventMapWidth / screenComponentRatio / 2
-            newSwLat = centerLat - latDiff
-            newNeLat = centerLat + latDiff
-            newSwLng = sw.lng
-            newNeLng = ne.lng
-        } else {
-            // Event is taller - expand longitude to fill screen width
-            val lngDiff = eventMapHeight * screenComponentRatio / 2
-            newSwLat = sw.lat
-            newNeLat = ne.lat
-            newSwLng = centerLng - lngDiff
-            newNeLng = centerLng + lngDiff
-        }
+        // STRICT BOUNDS: Always use event bounds exactly, never expand
+        // The camera will show the full event area, possibly with some padding on one axis
+        // depending on aspect ratio mismatch, but NEVER show area outside event bounds
+        val strictBounds = eventBbox
 
-        val expandedBounds =
-            BoundingBox.fromCorners(
-                Position(newSwLat, newSwLng),
-                Position(newNeLat, newNeLng),
-            )
+        com.worldwidewaves.shared.utils.Log.i(
+            "AbstractEventMap",
+            "📐 moveToWindowBounds (STRICT): event=${event.id}, " +
+                "eventAspect=$eventAspectRatio, screenAspect=$screenComponentRatio, " +
+                "bounds=SW(${strictBounds.sw.lat},${strictBounds.sw.lng}) " +
+                "NE(${strictBounds.ne.lat},${strictBounds.ne.lng})",
+        )
 
         runCameraAnimation { cb ->
             mapLibreAdapter.animateCameraToBounds(
-                expandedBounds,
+                strictBounds,
                 padding = 0,
                 object : MapCameraCallback {
                     override fun onFinish() {
-                        // Apply constraints - this will set min zoom based on expanded WINDOW bounds
+                        // Apply strict constraints - this sets min zoom to prevent viewport exceeding event area
                         constraintManager?.applyConstraints()
 
                         // Get the calculated min zoom
                         val calculatedMinZoom = mapLibreAdapter.getMinZoomLevel()
                         com.worldwidewaves.shared.utils.Log.d(
                             "AbstractEventMap",
-                            "WINDOW mode: Min zoom from constraints: $calculatedMinZoom",
+                            "WINDOW mode (STRICT): Min zoom from constraints: $calculatedMinZoom",
                         )
 
                         mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
