@@ -74,6 +74,10 @@ class AndroidMapLibreAdapter(
         private const val MAX_LATITUDE = 90.0
         private const val MIN_LONGITUDE = -180.0
         private const val MAX_LONGITUDE = 180.0
+
+        // Safety margin added to min zoom to ensure viewport is smaller than event bounds
+        // This prevents viewport edge overflow even when combined with shrunk constraint bounds
+        private const val ZOOM_SAFETY_MARGIN = 0.2
     }
 
     // -- Public/Override properties
@@ -384,11 +388,16 @@ class AndroidMapLibreAdapter(
         // Use MapLibre's camera calculation to get accurate zoom
         val latLngBounds = constraintBounds.toLatLngBounds()
         val cameraPosition = mapLibreMap!!.getCameraForLatLngBounds(latLngBounds, intArrayOf(0, 0, 0, 0))
-        calculatedMinZoom = cameraPosition?.zoom ?: mapLibreMap!!.minZoomLevel
+        val baseMinZoom = cameraPosition?.zoom ?: mapLibreMap!!.minZoomLevel
+
+        // CRITICAL: Add safety margin to ensure viewport is SMALLER than event bounds
+        // Without this, viewport can equal bounds, allowing edge overflow when panning to corners
+        calculatedMinZoom = baseMinZoom + ZOOM_SAFETY_MARGIN
 
         Log.d(
             "Camera",
-            "Calculated min zoom from bounds: $calculatedMinZoom (prevents zoom out beyond event area)",
+            "Calculated min zoom: base=$baseMinZoom, with margin=$calculatedMinZoom " +
+                "(safety margin=$ZOOM_SAFETY_MARGIN prevents viewport from equaling/exceeding event bounds)",
         )
 
         // CRITICAL: Set min zoom IMMEDIATELY to prevent zooming out beyond event area
@@ -396,7 +405,7 @@ class AndroidMapLibreAdapter(
         mapLibreMap!!.setMinZoomPreference(calculatedMinZoom)
         Log.i(
             "Camera",
-            "✅ Set min zoom preference immediately: $calculatedMinZoom (preventive enforcement)",
+            "✅ Set min zoom preference immediately: $calculatedMinZoom (preventive enforcement with safety margin)",
         )
 
         // Set the underlying MapLibre bounds (constrains camera center only)

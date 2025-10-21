@@ -361,15 +361,24 @@ class MapBoundsEnforcer(
     }
 
     private fun calculateVisibleRegionPadding(): VisibleRegionPadding {
-        // STRICT VIEWPORT MODE: Zero padding for both BOUNDS and WINDOW modes
-        // This ensures the viewport constraint bounds equal the event bounds exactly,
-        // preventing any pixels outside the event area from being visible.
-        // The reactive constrainCamera() function handles viewport edge clamping dynamically.
+        // CRITICAL: Get actual viewport dimensions to shrink constraint bounds
+        // setLatLngBoundsForCameraTarget() only constrains camera CENTER, not viewport EDGES
+        // By shrinking constraint bounds by viewport half-size, we ensure viewport stays inside event area
+        val viewport = mapLibreAdapter.getVisibleRegion()
+
+        // Calculate half-dimensions (padding needed to keep viewport edges inside event bounds)
+        val viewportHalfHeight = (viewport.northLatitude - viewport.southLatitude) / 2.0
+        val viewportHalfWidth = (viewport.eastLongitude - viewport.westLongitude) / 2.0
+
         Log.d(
             "MapBoundsEnforcer",
-            "${if (isWindowMode) "WINDOW" else "BOUNDS"} mode: Using zero padding for strict viewport bounds",
+            "${if (isWindowMode) "WINDOW" else "BOUNDS"} mode: " +
+                "Calculated viewport padding from actual dimensions: " +
+                "halfHeight=$viewportHalfHeight, halfWidth=$viewportHalfWidth " +
+                "(ensures camera center stays far enough from edges that viewport fits inside event bounds)",
         )
-        return VisibleRegionPadding(0.0, 0.0)
+
+        return VisibleRegionPadding(viewportHalfHeight, viewportHalfWidth)
     }
 
     private fun calculatePaddedBounds(padding: VisibleRegionPadding): BoundingBox {
