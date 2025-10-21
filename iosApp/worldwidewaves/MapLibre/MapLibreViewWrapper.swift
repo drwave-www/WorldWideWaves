@@ -417,12 +417,17 @@ import Shared
             "zoomForWidth=\(zoomForWidth), zoomForHeight=\(zoomForHeight), base=\(baseMinZoom)"
         )
 
-        // Apply safety margin (+0.5 zoom) for WINDOW mode only (matches Android ZOOM_SAFETY_MARGIN)
-        // BOUNDS mode (event details) shows entire event without margin
+        // CRITICAL: Only apply safety margin for WINDOW mode (matches Android)
+        // Detect mode from event ID: "paris_france-fullmap" vs "paris_france-event"
         let zoomSafetyMargin = 0.5
-        let finalMinZoom = baseMinZoom + zoomSafetyMargin  // Always add margin for now (TODO: pass flag)
+        let isWindowMode = eventId?.hasSuffix("-fullmap") ?? false
+        let finalMinZoom = isWindowMode ? (baseMinZoom + zoomSafetyMargin) : baseMinZoom
 
-        WWWLog.i(Self.tag, "🎯 Final min zoom: base=\(baseMinZoom), final=\(finalMinZoom) (+\(zoomSafetyMargin) safety margin)")
+        WWWLog.i(
+            Self.tag,
+            "🎯 Final min zoom: base=\(baseMinZoom), final=\(finalMinZoom) " +
+            "(\(isWindowMode ? "WINDOW: +\(zoomSafetyMargin)" : "BOUNDS: no margin"))"
+        )
 
         // Lock min zoom to prevent recalculation (matches Android behavior)
         lockedMinZoom = finalMinZoom
