@@ -188,12 +188,24 @@ import Shared
         }
         WWWLog.d(Self.tag, "User position callback registered for: \(eventId)")
 
-        // Register setGesturesEnabled callback (enables/disables map interaction)
+        // Register setGesturesEnabled callback (enables/disables map pan/zoom/rotate interaction)
         Shared.MapWrapperRegistry.shared.setGesturesEnabledCallback(eventId: eventId) { [weak self] enabled in
             guard let self = self, let mapView = self.mapView else { return }
             let swiftEnabled = enabled.boolValue  // Convert KotlinBoolean to Bool
             WWWLog.i(Self.tag, "Gestures callback: \(swiftEnabled) for: \(eventId)")
-            mapView.isUserInteractionEnabled = swiftEnabled
+
+            // CRITICAL: Don't disable isUserInteractionEnabled (would block tap gestures for navigation)
+            // Instead, control specific MapLibre gestures (pan, zoom, rotate, pitch)
+            mapView.allowsScrolling = swiftEnabled      // Pan gesture
+            mapView.allowsZooming = swiftEnabled        // Zoom gestures (pinch, double-tap)
+            mapView.allowsRotating = swiftEnabled       // Rotation gesture
+            mapView.allowsTilting = swiftEnabled        // Pitch/tilt gesture
+
+            WWWLog.d(
+                Self.tag,
+                "MapLibre gestures: scroll=\(swiftEnabled), zoom=\(swiftEnabled), " +
+                "rotate=\(swiftEnabled), tilt=\(swiftEnabled)"
+            )
         }
         WWWLog.d(Self.tag, "Gestures enabled callback registered for: \(eventId)")
     }
