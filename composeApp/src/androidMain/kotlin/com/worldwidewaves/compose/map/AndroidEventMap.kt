@@ -179,10 +179,10 @@ class AndroidEventMap(
         // Track current MapView instance so we can detect recreations
         var lastMapView by remember { mutableStateOf<MapView?>(null) }
 
-        // Re-create the MapView whenever availability flips so a fresh
-        // split-aware AssetManager is used.
+        // MapView should be created once and reused (don't recreate on map availability change)
+        // The style will be set/updated when map becomes available
         val mapLibreView: MapView =
-            rememberMapLibreViewWithLifecycle(key = "${event.id}-$isMapAvailable")
+            rememberMapLibreViewWithLifecycle(key = event.id)
 
         val mapViewModel: AndroidMapViewModel = viewModel()
         val mapFeatureState by mapViewModel.featureState.collectAsState()
