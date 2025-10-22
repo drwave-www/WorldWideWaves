@@ -476,7 +476,8 @@ abstract class AbstractEventMap<T>(
 
             // Apply bounds constraints if required
             mapLibreAdapter.addOnCameraIdleListener {
-                constraintManager?.constrainCamera()
+                // Note: constrainCamera() is deprecated - using preventive constraints instead
+                // Preventive constraints (setBoundsForCameraTarget + minZoom) are applied in applyConstraints()
 
                 // WINDOW mode: Recalculate bounds when dimensions change significantly
                 if (windowBoundsNeedRecalculation && mapConfig.initialCameraPosition == MapCameraPosition.WINDOW) {

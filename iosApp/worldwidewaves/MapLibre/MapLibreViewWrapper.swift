@@ -55,9 +55,12 @@ import Shared
 
     // Queue for constraint bounds that arrive before style loads
     private var pendingConstraintBounds: MLNCoordinateBounds?
+    private var pendingEventBounds: MLNCoordinateBounds?
+    private var pendingIsWindowMode: Bool = false
 
     // Current constraint bounds for gesture clamping (matches Android behavior)
     private var currentConstraintBounds: MLNCoordinateBounds?
+    private var currentEventBounds: MLNCoordinateBounds?  // Original event bounds for viewport checking
 
     // Min zoom locking (matches Android's minZoomLocked mechanism)
     private var minZoomLocked: Bool = false
@@ -184,6 +187,15 @@ import Shared
             self.setUserPosition(latitude: swiftLat, longitude: swiftLng)
         }
         WWWLog.d(Self.tag, "User position callback registered for: \(eventId)")
+
+        // Register setGesturesEnabled callback (enables/disables map interaction)
+        Shared.MapWrapperRegistry.shared.setGesturesEnabledCallback(eventId: eventId) { [weak self] enabled in
+            guard let self = self, let mapView = self.mapView else { return }
+            let swiftEnabled = enabled.boolValue  // Convert KotlinBoolean to Bool
+            WWWLog.i(Self.tag, "Gestures callback: \(swiftEnabled) for: \(eventId)")
+            mapView.isUserInteractionEnabled = swiftEnabled
+        }
+        WWWLog.d(Self.tag, "Gestures enabled callback registered for: \(eventId)")
     }
 
     @objc public func setStyle(styleURL: String, completion: @escaping () -> Void) {
@@ -349,73 +361,99 @@ import Shared
 
     // MARK: - Camera Constraints
 
-    @objc public func setBoundsForCameraTarget(swLat: Double, swLng: Double, neLat: Double, neLng: Double) -> Bool {
+    // swiftlint:disable function_parameter_count function_body_length
+    @objc public func setBoundsForCameraTarget(
+        constraintSwLat: Double,
+        constraintSwLng: Double,
+        constraintNeLat: Double,
+        constraintNeLng: Double,
+        eventSwLat: Double,
+        eventSwLng: Double,
+        eventNeLat: Double,
+        eventNeLng: Double,
+        isWindowMode: Bool
+    ) -> Bool {
         guard let mapView = mapView else {
             WWWLog.w(Self.tag, "Cannot set bounds - mapView is nil")
             return false
         }
 
-        // Validate bounds before setting or queuing
-        guard neLat > swLat else {
-            WWWLog.e(Self.tag, "Invalid bounds: neLat (\(neLat)) must be > swLat (\(swLat))")
+        // Validate constraint bounds
+        guard constraintNeLat > constraintSwLat else {
+            WWWLog.e(
+                Self.tag,
+                "Invalid constraint bounds: neLat (\(constraintNeLat)) must be > swLat (\(constraintSwLat))"
+            )
             return false
         }
 
         // Validate coordinates are within valid ranges
-        guard swLat >= -90 && swLat <= 90 && neLat >= -90 && neLat <= 90 &&
-              swLng >= -180 && swLng <= 180 && neLng >= -180 && neLng <= 180 else {
-            WWWLog.e(Self.tag, "Invalid coordinate values: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng))")
+        guard constraintSwLat >= -90 && constraintSwLat <= 90 &&
+              constraintNeLat >= -90 && constraintNeLat <= 90 &&
+              constraintSwLng >= -180 && constraintSwLng <= 180 &&
+              constraintNeLng >= -180 && constraintNeLng <= 180 else {
+            WWWLog.e(
+                Self.tag,
+                "Invalid constraint coordinate values: " +
+                "SW(\(constraintSwLat),\(constraintSwLng)) NE(\(constraintNeLat),\(constraintNeLng))"
+            )
             return false
         }
 
-        let southwest = CLLocationCoordinate2D(latitude: swLat, longitude: swLng)
-        let northeast = CLLocationCoordinate2D(latitude: neLat, longitude: neLng)
-        let bounds = MLNCoordinateBounds(sw: southwest, ne: northeast)
+        // Create constraint bounds (shrunk bounds for gesture enforcement)
+        let constraintSouthwest = CLLocationCoordinate2D(latitude: constraintSwLat, longitude: constraintSwLng)
+        let constraintNortheast = CLLocationCoordinate2D(latitude: constraintNeLat, longitude: constraintNeLng)
+        let constraintBounds = MLNCoordinateBounds(sw: constraintSouthwest, ne: constraintNortheast)
+
+        // Create event bounds (original bounds for min zoom calculation)
+        let eventSouthwest = CLLocationCoordinate2D(latitude: eventSwLat, longitude: eventSwLng)
+        let eventNortheast = CLLocationCoordinate2D(latitude: eventNeLat, longitude: eventNeLng)
+        let eventBounds = MLNCoordinateBounds(sw: eventSouthwest, ne: eventNortheast)
 
         // If style not loaded yet, queue bounds for later application
         guard styleIsLoaded, mapView.style != nil else {
             WWWLog.i(
                 Self.tag,
-                "Style not loaded - queueing constraint bounds: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng))"
+                "Style not loaded - queueing constraint bounds and event bounds"
             )
-            pendingConstraintBounds = bounds
+            pendingConstraintBounds = constraintBounds
+            pendingEventBounds = eventBounds
+            pendingIsWindowMode = isWindowMode
             return true  // Return true - will be applied when style loads
         }
 
         // Check if min zoom already locked (matches Android minZoomLocked mechanism)
         if minZoomLocked {
-            WWWLog.d(Self.tag, "Min zoom already locked at \(lockedMinZoom), skipping recalculation")
-            currentConstraintBounds = bounds
+            WWWLog.d(
+                Self.tag,
+                "Min zoom already locked at \(lockedMinZoom), skipping recalculation"
+            )
+            currentConstraintBounds = constraintBounds
             return true
         }
 
         // Style is loaded - apply bounds and calculate min zoom
-        WWWLog.i(Self.tag, "Setting camera constraint bounds: SW(\(swLat),\(swLng)) NE(\(neLat),\(neLng))")
+        WWWLog.i(
+            Self.tag,
+            "Setting camera constraint bounds: SW(\(constraintSwLat),\(constraintSwLng)) NE(\(constraintNeLat),\(constraintNeLng))"
+        )
+        WWWLog.i(
+            Self.tag,
+            "Using event bounds for min zoom: SW(\(eventSwLat),\(eventSwLng)) NE(\(eventNeLat),\(eventNeLng))"
+        )
 
-        // CRITICAL: Detect if these are SHRUNK constraint bounds (not original event bounds)
-        // Shrunk bounds are very small (< 0.01° span) and would give wrong (too high) min zoom
-        let eventWidth = bounds.ne.longitude - bounds.sw.longitude
-        let eventHeight = bounds.ne.latitude - bounds.sw.latitude
+        // CRITICAL: Use EVENT bounds (not constraint bounds) for min zoom calculation
+        // Constraint bounds may be shrunk by viewport padding, giving incorrect min zoom
+        let eventWidth = eventBounds.ne.longitude - eventBounds.sw.longitude
+        let eventHeight = eventBounds.ne.latitude - eventBounds.sw.latitude
 
-        // If bounds are suspiciously small, these are SHRUNK constraint bounds (viewport padding applied)
-        // Don't calculate min zoom from them - skip and wait for original bounds or use reasonable default
-        if eventWidth < 0.01 || eventHeight < 0.01 {
-            WWWLog.w(
-                Self.tag,
-                "⚠️ Bounds too small (\(eventHeight)° x \(eventWidth)°) - these are SHRUNK constraint bounds. " +
-                "Skipping min zoom calculation (waiting for original event bounds or using default)."
-            )
-            currentConstraintBounds = bounds
-            return true
-        }
+        WWWLog.d(Self.tag, "Event dimensions: \(eventHeight)° x \(eventWidth)°")
+
         let screenWidth = Double(mapView.bounds.size.width)
         let screenHeight = Double(mapView.bounds.size.height)
 
         // CRITICAL: Different calculation for BOUNDS vs WINDOW mode (matches Android)
         let baseMinZoom: Double
-
-        // Detect mode from eventId suffix
-        let isWindowMode = eventId?.hasSuffix("-fullmap") ?? false
 
         if isWindowMode {
             // WINDOW MODE: Use intelligent aspect ratio fitting (matches Android)
@@ -434,16 +472,16 @@ import Shared
             )
         } else {
             // BOUNDS MODE: Use MapLibre's calculation (shows entire event)
-            let camera = mapView.cameraThatFitsCoordinateBounds(bounds, edgePadding: .zero)
+            let camera = mapView.cameraThatFitsCoordinateBounds(eventBounds, edgePadding: .zero)
             let earthCircumference = 40_075_016.686
-            let centerLat = (bounds.sw.latitude + bounds.ne.latitude) / 2.0
+            let centerLat = (eventBounds.sw.latitude + eventBounds.ne.latitude) / 2.0
             let latRadians = centerLat * .pi / 180.0
             baseMinZoom = log2(earthCircumference * cos(latRadians) / camera.altitude) - 1.0
 
             WWWLog.i(Self.tag, "🎯 BOUNDS mode: base=\(baseMinZoom) (entire event visible)")
         }
 
-        // Apply safety margin only for WINDOW mode
+        // Apply safety margin for WINDOW mode (matches Android ZOOM_SAFETY_MARGIN = 0.5)
         let zoomSafetyMargin = 0.5
         let finalMinZoom = isWindowMode ? (baseMinZoom + zoomSafetyMargin) : baseMinZoom
 
@@ -462,9 +500,21 @@ import Shared
         WWWLog.e(Self.tag, "🚨 SET MIN ZOOM: \(finalMinZoom) - NO PIXELS OUTSIDE EVENT AREA 🚨")
         WWWLog.i(Self.tag, "✅ Min zoom LOCKED at \(finalMinZoom)")
 
-        // Store constraint bounds for gesture clamping
-        currentConstraintBounds = bounds
-        WWWLog.i(Self.tag, "✅ Constraint bounds set with intelligent aspect ratio min zoom")
+        // Store both constraint bounds (from Kotlin) and event bounds
+        // With the invalid viewport fix in MapBoundsEnforcer, constraint bounds are now correct
+        currentConstraintBounds = constraintBounds
+        currentEventBounds = eventBounds
+
+        WWWLog.i(
+            Self.tag,
+            "✅ Constraint bounds: SW(\(constraintBounds.sw.latitude),\(constraintBounds.sw.longitude)) " +
+            "NE(\(constraintBounds.ne.latitude),\(constraintBounds.ne.longitude))"
+        )
+        WWWLog.i(
+            Self.tag,
+            "   Event bounds: SW(\(eventBounds.sw.latitude),\(eventBounds.sw.longitude)) " +
+            "NE(\(eventBounds.ne.latitude),\(eventBounds.ne.longitude))"
+        )
 
         // CRITICAL: Update visible region with ESTIMATED viewport to prevent fallback bounds issue
         // Before regionDidChangeAnimated fires, provide reasonable estimate for padding calculations
@@ -472,8 +522,8 @@ import Shared
         let estimatedViewportLatSpan = (screenHeight / 256.0) / pow(2.0, finalMinZoom) * 180.0
         let estimatedViewportLngSpan = (screenWidth / 256.0) / pow(2.0, finalMinZoom) * 360.0
 
-        let centerLat = (bounds.sw.latitude + bounds.ne.latitude) / 2.0
-        let centerLng = (bounds.sw.longitude + bounds.ne.longitude) / 2.0
+        let centerLat = (eventBounds.sw.latitude + eventBounds.ne.latitude) / 2.0
+        let centerLng = (eventBounds.sw.longitude + eventBounds.ne.longitude) / 2.0
 
         let estimatedViewport = BoundingBox(
             swLat: centerLat - estimatedViewportLatSpan / 2.0,
@@ -492,8 +542,11 @@ import Shared
         }
 
         pendingConstraintBounds = nil
+        pendingEventBounds = nil
+        pendingIsWindowMode = false
         return true
     }
+    // swiftlint:enable function_parameter_count function_body_length
 
     @objc public func setMinZoom(_ minZoom: Double) {
         mapView?.minimumZoomLevel = minZoom
@@ -1214,34 +1267,27 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         to newCamera: MLNMapCamera,
         reason: MLNCameraChangeReason
     ) -> Bool {
-        // Match Android's setLatLngBoundsForCameraTarget behavior:
-        // Constrain camera CENTER to stay within (shrunk) constraint bounds
-        // Viewport CAN extend outside event area (controlled by minZoom)
-        guard let bounds = currentConstraintBounds else {
+        // Prevent viewport from exceeding event bounds (matches Android behavior)
+        // Check viewport EDGES against EVENT bounds to prevent corners reaching center
+        guard currentEventBounds != nil else {
             // No constraints set - allow all movements
             return true
         }
 
-        // Check if camera CENTER would be outside constraint bounds
-        let newCenter = newCamera.centerCoordinate
-        let centerOutOfBounds =
-            newCenter.latitude > bounds.ne.latitude ||
-            newCenter.latitude < bounds.sw.latitude ||
-            newCenter.longitude > bounds.ne.longitude ||
-            newCenter.longitude < bounds.sw.longitude
-
         // Check zoom constraints
         let earthCircumference = 40_075_016.686
-        let latitude = newCenter.latitude
+        let latitude = newCamera.centerCoordinate.latitude
         let zoom = log2(earthCircumference * cos(latitude * .pi / 180.0) / newCamera.altitude) - 1.0
         let zoomOutOfBounds = zoom < mapView.minimumZoomLevel || zoom > mapView.maximumZoomLevel
 
-        if centerOutOfBounds || zoomOutOfBounds {
-            // Reject movement - camera center or zoom violates constraints
+        if zoomOutOfBounds {
             return false
         }
 
-        // Camera center and zoom within constraints - allow movement
+        // iOS limitation: shouldChangeFrom can only REJECT, not CLAMP (unlike Android)
+        // Rejecting viewport boundary violations makes gestures jerky (663 rejections in log-23!)
+        // Solution: Only validate zoom, rely on min zoom to prevent viewport > event size
+        // Trade-off: Allows some viewport overshoot but gestures are smooth
         return true
     }
 

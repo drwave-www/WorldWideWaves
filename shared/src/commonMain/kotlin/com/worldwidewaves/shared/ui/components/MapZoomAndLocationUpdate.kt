@@ -25,16 +25,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.map.AbstractEventMap
-import kotlin.math.floor
+import kotlinx.coroutines.delay
 
 /**
  * Shared map zoom and location update component.
  * Automatically targets the user and wave when the user enters the event area.
- * Continuously updates camera to show user+wave as wave progresses (throttled to every 5% progression).
+ * Continuously updates camera to show user+wave as wave progresses (throttled to 1 second intervals).
  * Works with any AbstractEventMap implementation (Android, iOS).
  */
 @Composable
@@ -43,18 +42,25 @@ fun MapZoomAndLocationUpdate(
     eventMap: AbstractEventMap<*>?,
 ) {
     val isInArea by event.observer.userIsInArea.collectAsState()
-    val progression by event.observer.progression.collectAsState()
 
-    // Throttle progression to every 5 percentage points (avoids animation spam)
-    // This gives ~20 camera updates over entire wave duration (reasonable for smooth tracking)
-    val throttledProgression = remember(progression) { (floor(progression / 5.0) * 5.0).toInt() }
+    // Time-based throttling: Update camera every 1 second (real time, not simulated)
+    // Use LaunchedEffect with delay instead of progression-based throttling
+    LaunchedEffect(isInArea) {
+        if (!isInArea || eventMap == null) return@LaunchedEffect
 
-    // Trigger targetUserAndWave when entering area OR every 5% progression increase
-    LaunchedEffect(isInArea, throttledProgression) {
-        if (isInArea && eventMap != null) {
+        // Initial update when entering area
+        com.worldwidewaves.shared.utils.Log.i(
+            "MapZoomAndLocationUpdate",
+            "Initial targetUserAndWave() for event: ${event.id} (entered area)",
+        )
+        eventMap.targetUserAndWave()
+
+        // Continuous updates every 1 second (real time) while in area
+        while (isInArea) {
+            delay(WWWGlobals.Timing.MAP_CAMERA_UPDATE_INTERVAL_MS.toLong())
             com.worldwidewaves.shared.utils.Log.i(
                 "MapZoomAndLocationUpdate",
-                "Calling targetUserAndWave() for event: ${event.id} (progression=$progression, throttled=$throttledProgression%)",
+                "Periodic targetUserAndWave() for event: ${event.id} (1s throttle)",
             )
             eventMap.targetUserAndWave()
         }

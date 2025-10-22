@@ -608,21 +608,38 @@ import CoreLocation
         _ command: CameraCommand.SetConstraintBounds,
         on wrapper: MapLibreViewWrapper
     ) -> Bool {
-        let bbox = command.bounds
-        WWWLog.i("IOSMapBridge", "Setting camera constraint bounds")
+        let constraintBbox = command.constraintBounds
+        let originalBbox = command.originalEventBounds
+        let isWindowMode = command.applyZoomSafetyMargin
+
+        WWWLog.i("IOSMapBridge", "Setting camera constraint bounds (WINDOW mode: \(isWindowMode))")
         WWWLog.d(
             "IOSMapBridge",
             """
-            Swift sees bbox: minLat=\(bbox.minLatitude), \
-            minLng=\(bbox.minLongitude), maxLat=\(bbox.maxLatitude), \
-            maxLng=\(bbox.maxLongitude)
+            Constraint bounds: SW(\(constraintBbox.minLatitude),\(constraintBbox.minLongitude)) \
+            NE(\(constraintBbox.maxLatitude),\(constraintBbox.maxLongitude))
             """
         )
+        if let origBbox = originalBbox {
+            WWWLog.d(
+                "IOSMapBridge",
+                """
+                Original event bounds: SW(\(origBbox.minLatitude),\(origBbox.minLongitude)) \
+                NE(\(origBbox.maxLatitude),\(origBbox.maxLongitude))
+                """
+            )
+        }
+
         return wrapper.setBoundsForCameraTarget(
-            swLat: bbox.minLatitude,
-            swLng: bbox.minLongitude,
-            neLat: bbox.maxLatitude,
-            neLng: bbox.maxLongitude
+            constraintSwLat: constraintBbox.minLatitude,
+            constraintSwLng: constraintBbox.minLongitude,
+            constraintNeLat: constraintBbox.maxLatitude,
+            constraintNeLng: constraintBbox.maxLongitude,
+            eventSwLat: originalBbox?.minLatitude ?? constraintBbox.minLatitude,
+            eventSwLng: originalBbox?.minLongitude ?? constraintBbox.minLongitude,
+            eventNeLat: originalBbox?.maxLatitude ?? constraintBbox.maxLatitude,
+            eventNeLng: originalBbox?.maxLongitude ?? constraintBbox.maxLongitude,
+            isWindowMode: isWindowMode
         )
     }
 

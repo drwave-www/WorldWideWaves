@@ -1,0 +1,19 @@
+excluded:
+  - iosApp/build
+  - iosApp/Pods
+  - .build
+  - DerivedData
+  - iosApp/worldwidewaves.xcodeproj
+
+# Only lint our source code
+included:
+  - iosApp/worldwidewaves
+
+# Disable rules for comprehensive framework file
+file_length:
+  warning: 1500
+  error: 2000
+
+type_body_length:
+  warning: 400
+  error: 500
