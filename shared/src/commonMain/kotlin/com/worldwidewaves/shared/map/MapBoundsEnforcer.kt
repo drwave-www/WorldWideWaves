@@ -59,6 +59,7 @@ class MapBoundsEnforcer(
     private var constraintBounds: BoundingBox? = null
     private var constraintsApplied = false
     private var lastAppliedBounds: BoundingBox? = null // Track last applied bounds to prevent redundant updates
+    private var skipNextRecalculation = false // Skip one recalculation after programmatic zoom
 
     fun setVisibleRegionPadding(padding: VisibleRegionPadding) {
         visibleRegionPadding = padding
@@ -76,14 +77,22 @@ class MapBoundsEnforcer(
         // Apply the constraints with the current padding
         applyConstraintsWithPadding()
 
-        // Register the camera-idle listener only once (ONLY for BOUNDS mode)
-        // WINDOW mode: Constraint bounds calculated ONCE from initial valid viewport, stay constant
-        // BOUNDS mode: Can update dynamically (gestures disabled, no user zoom changes)
-        if (!constraintsApplied && !isWindowMode) {
+        // Register the camera-idle listener only once
+        // Updates constraint bounds dynamically when viewport changes due to manual zoom
+        if (!constraintsApplied) {
             mapLibreAdapter.addOnCameraIdleListener {
+                // Skip recalculation if programmatic animation just completed
+                if (skipNextRecalculation) {
+                    Log.v("MapBoundsEnforcer", "Skipping recalculation after programmatic zoom")
+                    skipNextRecalculation = false
+                    return@addOnCameraIdleListener
+                }
+
                 // Prevent recalculation if animation/user interaction is in progress
                 if (isSuppressed()) {
                     Log.v("MapBoundsEnforcer", "Camera idle callback suppressed (animation in progress)")
+                    // Set flag to skip NEXT idle after suppression ends
+                    skipNextRecalculation = true
                     return@addOnCameraIdleListener
                 }
 
