@@ -528,9 +528,10 @@ class AndroidMapLibreAdapter(
             isGestureInProgress =
                 when (reason) {
                     MapLibreMap.OnCameraMoveStartedListener.REASON_API_GESTURE,
+                    MapLibreMap.OnCameraMoveStartedListener.REASON_API_ANIMATION,
                     MapLibreMap.OnCameraMoveStartedListener.REASON_DEVELOPER_ANIMATION,
-                    -> false
-                    else -> true // REASON_API_ANIMATION or other user gestures
+                    -> false // All programmatic movements (including button animations)
+                    else -> true // Only user gestures (pan, pinch, etc.)
                 }
 
             if (!isGestureInProgress) {
