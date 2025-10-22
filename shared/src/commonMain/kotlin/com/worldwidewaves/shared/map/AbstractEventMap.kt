@@ -226,8 +226,9 @@ abstract class AbstractEventMap<T>(
             val zoomForWidth = kotlin.math.log2((screenWidth * 360.0) / (eventMapWidth * 256.0))
             val zoomForHeight = kotlin.math.log2((screenHeight * 180.0) / (eventMapHeight * 256.0))
 
-            // Choose zoom that ensures NO dimension exceeds bounds (the SMALLER zoom)
-            val targetZoom = kotlin.math.min(zoomForWidth, zoomForHeight)
+            // Choose zoom that ensures BOTH dimensions fit (the LARGER zoom)
+            // Higher zoom = more zoomed in = both width and height fit in viewport
+            val targetZoom = kotlin.math.max(zoomForWidth, zoomForHeight)
 
             com.worldwidewaves.shared.utils.Log.i(
                 "AbstractEventMap",
