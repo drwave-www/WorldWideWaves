@@ -469,6 +469,20 @@ import Shared
 
         if isWindowMode {
             // WINDOW MODE: Fit the SMALLEST event dimension (prevents outside pixels)
+
+            // Validate dimensions before calculation (prevent division by zero)
+            guard screenWidth > 0 && screenHeight > 0 && eventWidth > 0 && eventHeight > 0 else {
+                WWWLog.w(
+                    Self.tag,
+                    "Invalid dimensions: screen=\(screenWidth)x\(screenHeight), event=\(eventWidth)x\(eventHeight), " +
+                    "queueing bounds for retry"
+                )
+                pendingConstraintBounds = constraintBounds
+                pendingEventBounds = eventBounds
+                pendingIsWindowMode = isWindowMode
+                return true
+            }
+
             let eventAspect = eventWidth / eventHeight
             let screenAspect = screenWidth / screenHeight
 

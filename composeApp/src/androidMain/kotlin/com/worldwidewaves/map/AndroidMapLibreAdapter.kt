@@ -409,10 +409,25 @@ class AndroidMapLibreAdapter(
                 // For tall event on wide screen: fit width (smaller)
                 val eventWidth = boundsForMinZoom.ne.lng - boundsForMinZoom.sw.lng
                 val eventHeight = boundsForMinZoom.ne.lat - boundsForMinZoom.sw.lat
+                val mapWidth = getWidth()
+                val mapHeight = getHeight()
+
+                // Validate dimensions before calculation (prevent division by zero)
+                if (mapWidth <= 0 || mapHeight <= 0 || eventWidth <= 0 || eventHeight <= 0) {
+                    Log.w(
+                        "Camera",
+                        "Invalid dimensions: map=${mapWidth}x$mapHeight, event=${eventWidth}x$eventHeight, " +
+                            "using fallback min zoom",
+                    )
+                    calculatedMinZoom = mapLibreMap!!.minZoomLevel
+                    mapLibreMap!!.setMinZoomPreference(calculatedMinZoom)
+                    minZoomLocked = true
+                    return
+                }
 
                 // Determine which dimension is constraining
                 val eventAspect = eventWidth / eventHeight
-                val screenAspect = getWidth() / getHeight()
+                val screenAspect = mapWidth / mapHeight
 
                 // Use MapLibre to calculate zoom for the constraining dimension
                 // Wide event on tall screen: use height-constrained bounds
