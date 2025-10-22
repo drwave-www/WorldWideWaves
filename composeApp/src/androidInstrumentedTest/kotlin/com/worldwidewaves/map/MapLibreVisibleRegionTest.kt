@@ -28,9 +28,7 @@ import com.worldwidewaves.shared.map.MapTestFixtures.PORTRAIT_PHONE
 import com.worldwidewaves.shared.map.MapTestFixtures.TOLERANCE_DIMENSION
 import com.worldwidewaves.shared.map.MapTestFixtures.TOLERANCE_POSITION
 import com.worldwidewaves.shared.map.MapTestFixtures.center
-import com.worldwidewaves.shared.map.MapTestFixtures.height
 import com.worldwidewaves.shared.map.MapTestFixtures.isApproximately
-import com.worldwidewaves.shared.map.MapTestFixtures.width
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Test

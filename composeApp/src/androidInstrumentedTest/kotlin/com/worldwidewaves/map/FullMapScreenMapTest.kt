@@ -29,8 +29,6 @@ import com.worldwidewaves.shared.map.MapTestFixtures.TALL_EVENT_BOUNDS
 import com.worldwidewaves.shared.map.MapTestFixtures.WIDE_EVENT_BOUNDS
 import com.worldwidewaves.shared.map.MapTestFixtures.aspectRatio
 import com.worldwidewaves.shared.map.MapTestFixtures.center
-import com.worldwidewaves.shared.map.MapTestFixtures.height
-import com.worldwidewaves.shared.map.MapTestFixtures.width
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Test

@@ -192,19 +192,8 @@ object MapTestFixtures {
     }
 
     /**
-     * Calculate the width of a bounding box (longitude span)
-     */
-    val BoundingBox.width: Double
-        get() = northeast.longitude - southwest.longitude
-
-    /**
-     * Calculate the height of a bounding box (latitude span)
-     */
-    val BoundingBox.height: Double
-        get() = northeast.latitude - southwest.latitude
-
-    /**
      * Calculate the aspect ratio of a bounding box (width / height)
+     * Note: BoundingBox already has width and height properties
      */
     val BoundingBox.aspectRatio: Double
         get() = width / height
