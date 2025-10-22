@@ -445,4 +445,156 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
                 actualPosition != null && actualPosition.longitude < outsidePosition.longitude,
             )
         }
+
+    // ============================================================
+    // REAL MAPLIBRE VISIBLE REGION CLAMPING TESTS (CRITICAL)
+    // ============================================================
+
+    @Test
+    fun testFullMap_visibleRegionStaysWithinBounds_atDifferentZoomLevels() =
+        runBlocking {
+            applyConstraintsAndVerify(eventBounds, isWindowMode = true)
+
+            val minZoom = adapter.getMinZoomLevel()
+            val zoomLevels = listOf(minZoom, minZoom + 1, minZoom + 2, minZoom + 3)
+
+            zoomLevels.forEach { zoom ->
+                // Test at event center
+                animateCameraAndWait(eventBounds.center(), zoom)
+                var visibleRegion = adapter.getVisibleRegion()
+
+                assertVisibleRegionWithinBounds(
+                    "Visible region at zoom $zoom (center) should stay within event bounds",
+                )
+
+                // Test at NE corner
+                val neCorner =
+                    Position(
+                        eventBounds.northeast.latitude - 0.001,
+                        eventBounds.northeast.longitude - 0.001,
+                    )
+                animateCameraAndWait(neCorner, zoom)
+                visibleRegion = adapter.getVisibleRegion()
+
+                assertVisibleRegionWithinBounds(
+                    "Visible region at zoom $zoom (NE corner) should stay within event bounds",
+                )
+
+                // Test at SW corner
+                val swCorner =
+                    Position(
+                        eventBounds.southwest.latitude + 0.001,
+                        eventBounds.southwest.longitude + 0.001,
+                    )
+                animateCameraAndWait(swCorner, zoom)
+                visibleRegion = adapter.getVisibleRegion()
+
+                assertVisibleRegionWithinBounds(
+                    "Visible region at zoom $zoom (SW corner) should stay within event bounds",
+                )
+            }
+        }
+
+    @Test
+    fun testFullMap_cameraClampedWhenPanningTowardBoundary() =
+        runBlocking {
+            applyConstraintsAndVerify(eventBounds, isWindowMode = true)
+
+            val minZoom = adapter.getMinZoomLevel()
+
+            // Start at center
+            animateCameraAndWait(eventBounds.center(), minZoom)
+
+            // Aggressively try to pan north beyond boundary
+            val farNorthPosition =
+                Position(
+                    eventBounds.northeast.latitude + 1.0, // Way outside
+                    eventBounds.center().longitude,
+                )
+
+            animateCameraAndWait(farNorthPosition, minZoom)
+
+            val clampedPosition = adapter.getCameraPosition()
+            val clampedVisibleRegion = adapter.getVisibleRegion()
+
+            // Verify camera was clamped (not at requested position)
+            assertTrue(
+                "Camera should be clamped south of requested position",
+                clampedPosition != null && clampedPosition.latitude < farNorthPosition.latitude,
+            )
+
+            // Verify visible region never exceeded event bounds
+            assertVisibleRegionWithinBounds(
+                "Clamped visible region should stay within event bounds",
+            )
+
+            // Verify visible region north edge is near event north edge
+            val northEdgeDistance =
+                kotlin.math.abs(clampedVisibleRegion.northeast.latitude - eventBounds.northeast.latitude)
+
+            assertTrue(
+                "Clamped viewport north edge should be close to event north edge (within 0.01°)",
+                northEdgeDistance < 0.01,
+            )
+        }
+
+    @Test
+    fun testFullMap_visibleRegionAtMinZoom_matchesConstrainingDimension() =
+        runBlocking {
+            applyConstraintsAndVerify(eventBounds, isWindowMode = true)
+
+            val minZoom = adapter.getMinZoomLevel()
+
+            // Move to center at min zoom
+            animateCameraAndWait(eventBounds.center(), minZoom)
+
+            val visibleRegion = adapter.getVisibleRegion()
+
+            // Determine constraining dimension
+            val eventAspect = eventBounds.aspectRatio
+            val screenAspect = MapTestFixtures.PORTRAIT_PHONE.aspectRatio
+
+            if (eventAspect > screenAspect) {
+                // Wide event - HEIGHT is constraining dimension
+                // Visible region height should approximately match event height
+                val heightDifference =
+                    kotlin.math.abs(visibleRegion.height - eventBounds.height) / eventBounds.height
+
+                assertTrue(
+                    "At min zoom, visible region HEIGHT should match event HEIGHT (±10%)\n" +
+                        "  Event height: ${eventBounds.height}\n" +
+                        "  Viewport height: ${visibleRegion.height}\n" +
+                        "  Difference: ${heightDifference * 100}%",
+                    heightDifference < 0.1, // 10% tolerance
+                )
+
+                // Width should be less than event width (partially visible)
+                assertTrue(
+                    "At min zoom, visible region WIDTH should be less than event WIDTH",
+                    visibleRegion.width < eventBounds.width,
+                )
+            } else {
+                // Tall event - WIDTH is constraining dimension
+                val widthDifference = kotlin.math.abs(visibleRegion.width - eventBounds.width) / eventBounds.width
+
+                assertTrue(
+                    "At min zoom, visible region WIDTH should match event WIDTH (±10%)\n" +
+                        "  Event width: ${eventBounds.width}\n" +
+                        "  Viewport width: ${visibleRegion.width}\n" +
+                        "  Difference: ${widthDifference * 100}%",
+                    widthDifference < 0.1,
+                )
+
+                // Height should be less than event height (partially visible)
+                assertTrue(
+                    "At min zoom, visible region HEIGHT should be less than event HEIGHT",
+                    visibleRegion.height < eventBounds.height,
+                )
+            }
+
+            // Most critical: NO outside pixels
+            assertVisibleRegionWithinBounds(
+                "At min zoom, visible region must stay within event bounds (no outside pixels)",
+            )
+        }
 }
