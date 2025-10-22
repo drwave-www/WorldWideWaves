@@ -410,6 +410,12 @@ class AndroidMapLibreAdapter(
                 val mapWidth = getWidth()
                 val mapHeight = getHeight()
 
+                Log.d(
+                    "Camera",
+                    "Min zoom calc: eventHeight=$eventHeight°, eventWidth=$eventWidth°, " +
+                        "mapHeight=$mapHeight px, mapWidth=$mapWidth px",
+                )
+
                 val zoomForWidth = kotlin.math.log2((mapWidth * 360.0) / (eventWidth * 256.0))
                 val zoomForHeight = kotlin.math.log2((mapHeight * 180.0) / (eventHeight * 256.0))
 
