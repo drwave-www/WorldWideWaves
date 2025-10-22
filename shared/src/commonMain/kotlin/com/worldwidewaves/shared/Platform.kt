@@ -117,6 +117,9 @@ interface PlatformEnabler {
 
     fun openFullMapActivity(eventId: String)
 
+    // Close the current activity (used for back navigation)
+    fun finishActivity()
+
     fun toast(message: String)
 
     @Composable fun OpenUrl(url: String)

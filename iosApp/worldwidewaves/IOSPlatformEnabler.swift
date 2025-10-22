@@ -56,6 +56,27 @@ final class IOSPlatformEnabler: PlatformEnabler {
         routeTo(urlString: url)
     }
 
+    func finishActivity() {
+        NSLog("[\(tag)] ⬅️ finishActivity: dismissing top view controller")
+        guard let topVC = Self.topViewController() else {
+            NSLog("[\(tag)] ⚠️ finishActivity: no top VC to dismiss")
+            return
+        }
+
+        // If presented modally, dismiss it
+        if topVC.presentingViewController != nil {
+            NSLog("[\(tag)] → dismissing presented view controller")
+            topVC.dismiss(animated: true)
+        }
+        // If in navigation stack, pop it
+        else if let navController = topVC.navigationController {
+            NSLog("[\(tag)] → popping from navigation controller")
+            navController.popViewController(animated: true)
+        } else {
+            NSLog("[\(tag)] ⚠️ finishActivity: VC not in modal or nav stack")
+        }
+    }
+
     func toast(message: String) {
         NSLog("[\(tag)] 🔔 toast: \"\(message)\"")
         guard let hostView = Self.topViewController()?.view else {

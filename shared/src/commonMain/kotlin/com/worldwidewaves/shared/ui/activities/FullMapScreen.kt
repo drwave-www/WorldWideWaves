@@ -31,6 +31,7 @@ class FullMapScreen(
     eventId: String,
     platformEnabler: PlatformEnabler,
     showSplash: Boolean = false,
+    private val shouldFinishOnWaveNavigation: Boolean = false,
 ) : BaseWaveActivityScreen(eventId, platformEnabler, showSplash) {
     // Disable scrolling for full map screen to allow map to take full height
     override val isScrollable: Boolean = false
@@ -45,7 +46,15 @@ class FullMapScreen(
             event = event,
             eventMap = eventMap,
             modifier = modifier,
-            onNavigateToWave = { eventId -> platformEnabler.openWaveActivity(eventId) },
+            onNavigateToWave = { eventId ->
+                if (shouldFinishOnWaveNavigation) {
+                    // Close this screen to return to the calling WaveActivity
+                    platformEnabler.finishActivity()
+                } else {
+                    // Navigate to a new WaveActivity
+                    platformEnabler.openWaveActivity(eventId)
+                }
+            },
         )
     }
 }
