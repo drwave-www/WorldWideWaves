@@ -413,8 +413,9 @@ class AndroidMapLibreAdapter(
                 val zoomForWidth = kotlin.math.log2((mapWidth * 360.0) / (eventWidth * 256.0))
                 val zoomForHeight = kotlin.math.log2((mapHeight * 180.0) / (eventHeight * 256.0))
 
-                // Use LARGER zoom to ensure BOTH dimensions fit (higher zoom = more zoomed in)
-                baseMinZoom = kotlin.math.max(zoomForWidth, zoomForHeight)
+                // Use SMALLER zoom to allow zooming out to see entire event
+                // Lower zoom = more zoomed out = see more area
+                baseMinZoom = kotlin.math.min(zoomForWidth, zoomForHeight)
 
                 Log.i(
                     "Camera",
@@ -462,8 +463,9 @@ class AndroidMapLibreAdapter(
         // Set the underlying MapLibre bounds (constrains camera center only)
         mapLibreMap!!.setLatLngBoundsForCameraTarget(constraintBounds.toLatLngBounds())
 
-        // CRITICAL: Setup preventive gesture interception ONCE (only if gestures enabled and not already active)
-        // Avoid re-registering listeners on every constraint update (causes post-gesture fighting)
+        // Setup preventive gesture constraints to enforce viewport bounds
+        // Constraint bounds are now calculated from viewport at MIN ZOOM (not current)
+        // This allows zooming to min zoom while preventing viewport overflow
         if (applyZoomSafetyMargin && !gestureConstraintsActive) {
             setupPreventiveGestureConstraints()
             gestureConstraintsActive = true

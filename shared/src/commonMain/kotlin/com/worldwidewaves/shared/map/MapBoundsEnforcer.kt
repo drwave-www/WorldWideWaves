@@ -29,6 +29,7 @@ import io.github.aakira.napier.Napier
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.pow
 
 /**
  * Platform-independent map bounds enforcement that handles the logic
@@ -392,27 +393,28 @@ class MapBoundsEnforcer(
             return VisibleRegionPadding(0.0, 0.0)
         }
 
-        // WINDOW mode: Calculate viewport padding to prevent edge overflow
-        val viewport = mapLibreAdapter.getVisibleRegion()
-        val viewportHalfHeight = (viewport.northLatitude - viewport.southLatitude) / 2.0
-        val viewportHalfWidth = (viewport.eastLongitude - viewport.westLongitude) / 2.0
+        // WINDOW mode: Calculate viewport padding based on MIN ZOOM (not current viewport)
+        // This ensures constraint bounds remain constant and don't shrink when zooming in
+        // Viewport at min zoom is the largest possible viewport size
 
-        // VALIDATION: Reject absurd viewport values (indicates map not fully initialized)
-        // Early in initialization, getVisibleRegion() may return invalid data (90°, 180°)
-        // Use zero padding until map renders valid viewport data
-        if (viewportHalfHeight > 10.0 || viewportHalfWidth > 10.0) {
-            Log.w(
-                "MapBoundsEnforcer",
-                "WINDOW mode: Viewport data invalid (halfHeight=$viewportHalfHeight, halfWidth=$viewportHalfWidth), " +
-                    "using zero padding until map fully initializes",
-            )
-            return VisibleRegionPadding(0.0, 0.0)
-        }
+        val minZoom = mapLibreAdapter.getMinZoomLevel()
+
+        // Calculate viewport dimensions at min zoom using Web Mercator formulas
+        val mapWidth = mapLibreAdapter.getWidth()
+        val mapHeight = mapLibreAdapter.getHeight()
+
+        // Viewport height/width at a given zoom level (Web Mercator)
+        val zoomFactor = 2.0.pow(minZoom)
+        val viewportHeightAtMinZoom = (mapHeight / 256.0) / zoomFactor * 180.0
+        val viewportWidthAtMinZoom = (mapWidth / 256.0) / zoomFactor * 360.0
+
+        val viewportHalfHeight = viewportHeightAtMinZoom / 2.0
+        val viewportHalfWidth = viewportWidthAtMinZoom / 2.0
 
         Log.d(
             "MapBoundsEnforcer",
-            "WINDOW mode: Calculated viewport padding: halfHeight=$viewportHalfHeight, " +
-                "halfWidth=$viewportHalfWidth (prevents viewport edges from exceeding event bounds)",
+            "WINDOW mode: Viewport at min zoom ($minZoom): $viewportHeightAtMinZoom° × $viewportWidthAtMinZoom°, " +
+                "padding: halfHeight=$viewportHalfHeight, halfWidth=$viewportHalfWidth",
         )
 
         return VisibleRegionPadding(viewportHalfHeight, viewportHalfWidth)

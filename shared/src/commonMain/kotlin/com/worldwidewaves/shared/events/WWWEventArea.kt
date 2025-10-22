@@ -243,7 +243,7 @@ data class WWWEventArea(
         // Fast path: if cache is already populated, return immediately
         cachedAreaPolygons?.let {
             val totalPoints = it.sumOf { polygon -> polygon.size }
-            Log.v("WWWEventArea", "getPolygons: ${event.id} returning ${it.size} cached polygons with $totalPoints points")
+            // Log.v("WWWEventArea", "getPolygons: ${event.id} returning ${it.size} cached polygons with $totalPoints points")
             return it
         }
 
