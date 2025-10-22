@@ -122,7 +122,9 @@ EventMapConfig(
 - **Wave Polygons**: Rendered on map (via `MapZoomAndLocationUpdate` component)
 - **Polygon Updates**: Active - polygons trigger camera movement (auto-tracking)
 - **Wave Progression**: Actively tracked (camera follows wave front)
-- **Throttling**: Camera updates every 5% progression to prevent animation spam
+- **Throttling**: Camera updates every **1 second (real time)** to prevent animation spam
+- **Throttle Implementation**: Uses `kotlinx.coroutines.delay(WWWGlobals.Timing.MAP_CAMERA_UPDATE_INTERVAL_MS)`
+- **Independent of Simulation**: Throttling uses wall clock time, not simulated/progression time
 
 #### 2.2.5 Boundary Enforcement
 - **Mode**: BOUNDS mode (zero padding for constraint calculation)
@@ -142,19 +144,27 @@ EventMapConfig(
 ### 2.3 Full Map Screen
 
 #### 2.3.1 Camera Behavior
-- **Initial Position**: WINDOW mode - fits event to screen with aspect ratio matching
+- **Initial Position**: WINDOW mode - fits **constraining dimension** to screen
 - **Camera Movement**: Manual - user controls camera via gestures and buttons
 - **Auto-Target First Location**: YES - targets user on first GPS fix (only if no user interaction yet)
+  - **WINDOW Mode Override**: `targetUser()` keeps current zoom (null parameter), doesn't zoom to 16.0
 - **User Interaction Detection**: `markUserInteracted()` prevents auto-targeting after user gesture/button
-- **Fitting Strategy**: Intelligent aspect ratio matching
-  - Event WIDER than screen → fit by HEIGHT (event height fills screen)
-  - Event TALLER than screen → fit by WIDTH (event width fills screen)
-- **Zoom Calculation**: Manual calculation (not delegated to MapLibre)
+- **Fitting Strategy**: Intelligent aspect ratio matching (constraining dimension only)
+  - Event WIDER than screen (eventAspect > screenAspect) → fit by **HEIGHT** (smallest dimension)
+  - Event TALLER than screen (eventAspect < screenAspect) → fit by **WIDTH** (smallest dimension)
+- **Zoom Calculation**: Uses MapLibre's `getCameraForLatLngBounds` with aspect-matched bounds
   ```kotlin
-  zoomForWidth = log2((screenWidth * 360.0) / (eventMapWidth * 256.0))
-  zoomForHeight = log2((screenHeight * 180.0) / (eventMapHeight * 256.0))
-  targetZoom = min(zoomForWidth, zoomForHeight) // Ensures NO dimension exceeds bounds
+  // Create bounds matching constraining dimension
+  if (eventAspect > screenAspect) {
+      constrainedWidth = eventHeight * screenAspect
+      bounds = BoundingBox(fullHeight, constrainedWidth)
+  } else {
+      constrainedHeight = eventWidth / screenAspect
+      bounds = BoundingBox(constrainedHeight, fullWidth)
+  }
+  minZoom = mapLibre.getCameraForLatLngBounds(bounds).zoom
   ```
+- **Key Principle**: Show **smallest dimension fully**, prevent outside pixels
 
 #### 2.3.2 Gesture Handling
 - **All Gestures**: Enabled (`gesturesEnabled = true`)
@@ -172,26 +182,40 @@ EventMapConfig(
 - **MapLibre Native**: Uses `setLatLngBoundsForCameraTarget()` + `setMinZoomPreference()`
 - **Gesture Prevention**: Invalid gestures rejected at platform level (not animated back)
 - **Smooth Enforcement**: User never sees viewport exceeding bounds then snapping back
+- **Invalid Viewport Detection**: Viewport >10° rejected as uninitialized, zero padding used
 
 ##### 2.3.3.2 Constraint Mechanisms
 
 **Min Zoom Constraint**:
-- **Purpose**: Prevents zooming out beyond event area
-- **Calculation**: Based on event bounds and viewport size
-- **Safety Margin**: Applied in WINDOW mode to account for viewport padding
-- **Enforcement**: Set BEFORE animation, blocks zoom-out gestures
+- **Purpose**: Prevents zooming out beyond showing smallest event dimension
+- **Calculation**: MapLibre's `getCameraForLatLngBounds()` with constraining-dimension bounds
+  - Wide event on tall screen: bounds with full height, width = height × screenAspect
+  - Tall event on wide screen: bounds with full width, height = width / screenAspect
+- **Safety Margin**: **REMOVED** - constraining dimension already prevents outside pixels
+- **Enforcement**: Set BEFORE animation via `setMinZoomPreference()`, blocks zoom-out gestures
+- **Dimension Validation**: Validates screen and event dimensions >0 to prevent division by zero
 
-**Camera Center Bounds**:
-- **Purpose**: Prevents panning beyond event edges
-- **Calculation**: Event bounds shrunk by viewport half-size (viewport edge clamping)
+**Camera Center Bounds (Dynamic)**:
+- **Purpose**: Prevents panning where viewport edges would exceed event area
+- **Calculation**: Event bounds shrunk by **CURRENT viewport half-size** (recalculates with zoom)
   ```
+  currentViewport = getVisibleRegion()
+  viewportHalfHeight = currentViewport.height / 2
+  viewportHalfWidth = currentViewport.width / 2
+
   constraintBounds = {
-      sw: eventBounds.sw + viewportHalfSize,
-      ne: eventBounds.ne - viewportHalfSize
+      sw: eventBounds.sw + (viewportHalfHeight, viewportHalfWidth),
+      ne: eventBounds.ne - (viewportHalfHeight, viewportHalfWidth)
   }
   ```
-- **Effect**: Camera center cannot move where viewport edges would exceed event area
-- **Enforcement**: MapLibre's `setLatLngBoundsForCameraTarget()` blocks invalid pan gestures
+- **Dynamic Behavior**:
+  - Zoom IN: viewport smaller → constraint bounds expand → MORE pan area
+  - Zoom OUT: viewport larger → constraint bounds shrink → LESS pan area
+  - At min zoom: viewport = constraining dimension → minimal pan area (edges reachable)
+- **Enforcement**:
+  - Android: `setLatLngBoundsForCameraTarget()` + preventive gesture constraints (clamps camera)
+  - iOS: `minimumZoomLevel` only (shouldChangeFrom validates zoom only, not viewport)
+- **iOS Limitation**: shouldChangeFrom can only REJECT, not CLAMP → removed viewport validation for smooth gestures
 
 ##### 2.3.3.3 Edge & Corner Behavior
 
@@ -262,14 +286,67 @@ EventMapConfig(
   - **Accessibility**: `event_target_me_on` / `event_target_me_off`
 
 #### 2.3.7 One Full Dimension Visibility
-- **Requirement**: User can zoom out to see fully one dimension (width OR height)
-- **Implementation**: Min zoom calculated to fit constraining dimension
-- **Example**: For wide event (16:9 aspect) on tall screen (9:16), user can zoom to see full width
-- **Verification**: Min zoom = min(zoomForWidth, zoomForHeight)
+- **Requirement**: User can zoom out to see fully the **SMALLEST dimension** (width OR height)
+- **Implementation**: Min zoom calculated from constraining dimension only
+- **Example**: For wide event (Paris 2.84:1) on tall screen (0.62:1), user can zoom to see full **HEIGHT** (smallest)
+- **Prevents**: Outside pixels from being visible (larger dimension partially visible)
+- **Verification**: Min zoom = getCameraForLatLngBounds(constrainingDimensionBounds).zoom
 
 ---
 
-## 3. Platform-Specific Implementation Details
+## 3. Critical Implementation Details (October 2025)
+
+### 3.0 Recent Fixes and Learnings
+
+#### 3.0.1 MapBoundsEnforcer Invalid Viewport Detection
+**Issue**: Early in initialization, `getVisibleRegion()` returns invalid data (90°×180° - bigger than Earth!)
+**Fix**: Validate viewport half-size >10° and return zero padding until map initializes
+**Location**: `MapBoundsEnforcer.kt:406-413`
+**Impact**: Prevents microscopic constraint bounds (0.0017°×0.0049°) that block all gestures
+
+#### 3.0.2 Min Zoom Calculation from Constraining Dimension
+**Issue**: Using full event bounds for min zoom showed BOTH dimensions, causing outside pixels
+**Fix**: Create aspect-ratio-matched bounds for smallest dimension only
+**Formula**:
+```kotlin
+if (eventAspect > screenAspect) {
+    // Wide event → constrained by HEIGHT (smallest)
+    constrainedWidth = eventHeight * screenAspect
+} else {
+    // Tall event → constrained by WIDTH (smallest)
+    constrainedHeight = eventWidth / screenAspect
+}
+```
+**Impact**: Min zoom now allows seeing smallest dimension fully without outside pixels
+
+#### 3.0.3 Dynamic Constraint Bounds
+**Issue**: Using viewport at min zoom for constraints created FIXED bounds that blocked zoom
+**Fix**: Calculate constraint bounds from CURRENT viewport (changes with zoom)
+**Impact**: Pan area expands when zoomed in, shrinks when zoomed out (correct behavior)
+
+#### 3.0.4 Wave Throttling Change
+**Issue**: 5% progression throttling gave ~20 updates per wave (tied to wave speed)
+**Fix**: Changed to 1 second real time using `kotlinx.coroutines.delay(1000)`
+**Location**: `MapZoomAndLocationUpdate.kt:58-65`
+**Impact**: Consistent update frequency independent of simulation speed
+
+#### 3.0.5 iOS Gesture Validation Removed
+**Issue**: iOS `shouldChangeFrom` can only REJECT, not CLAMP like Android
+**Finding**: Validating viewport boundaries caused 663 rejections, making gestures unusable
+**Fix**: Removed viewport validation, kept only zoom validation
+**Trade-off**: iOS allows slight viewport overshoot for smooth gestures (Android clamps perfectly)
+**Location**: `MapLibreViewWrapper.swift:1296-1324`
+
+#### 3.0.6 Screen Dimension Units
+**Finding**: Android uses physical pixels, iOS uses points (density-independent)
+**Status**: Both correct - aspect ratios are unitless, MapLibre handles density internally
+**Validation Added**: Check dimensions >0 before aspect ratio calculation to prevent division by zero
+
+#### 3.0.7 targetUser() Zoom Override in WINDOW Mode
+**Issue**: `targetUser()` was zooming to 16.0, overriding min zoom (14.23)
+**Fix**: In WINDOW mode, `targetUser()` passes null zoom to keep current zoom
+**Location**: `AbstractEventMap.kt:315-320`
+**Impact**: Full map stays at min zoom showing smallest dimension fully
 
 ### 3.1 Android Implementation
 
@@ -534,26 +611,28 @@ class IosMapTestRobot(viewController: UIViewController) {
   - Viewport contains both user marker and wave front
   - Viewport has ~20% horizontal padding, ~10% vertical padding
 
-#### 5.2.3 Auto-Tracking Throttling (5% Progression)
-**Test**: `test_wave_autoTrackingThrottledToFivePercent`
+#### 5.2.3 Auto-Tracking Throttling (1 Second Real Time)
+**Test**: `test_wave_autoTrackingThrottledToOneSecond`
 - **Preconditions**:
   - Map loaded
   - Event status = RUNNING
   - User in area
-  - Wave progression = 0%
+  - Wave started
 - **Actions**:
-  - Wait for wave progression 1% (record camera)
-  - Wait for wave progression 2% (record camera)
-  - Wait for wave progression 4% (record camera)
-  - Wait for wave progression 5% (record camera)
-  - Wait for wave progression 9% (record camera)
-  - Wait for wave progression 10% (record camera)
+  - Record initial camera position and timestamp
+  - Wait 500ms (record camera)
+  - Wait 500ms more (total 1000ms, record camera)
+  - Wait 500ms more (total 1500ms, record camera)
+  - Wait 500ms more (total 2000ms, record camera)
+  - Wait 500ms more (total 2500ms, record camera)
 - **Assertions**:
-  - Camera unchanged at 1%, 2%, 4% (throttled)
-  - Camera moved at 5% (threshold crossed)
-  - Camera unchanged at 6%, 7%, 8%, 9% (throttled)
-  - Camera moved at 10% (threshold crossed)
-  - Total camera updates ≈ 20 over entire wave (0%, 5%, 10%, ..., 95%, 100%)
+  - Camera unchanged at 500ms (throttled)
+  - Camera moved at 1000ms (1 second elapsed) ✅
+  - Camera unchanged at 1500ms (throttled)
+  - Camera moved at 2000ms (2 seconds elapsed) ✅
+  - Camera unchanged at 2500ms (throttled)
+  - Update interval = 1 second real time (independent of simulation speed)
+  - Uses `WWWGlobals.Timing.MAP_CAMERA_UPDATE_INTERVAL_MS` constant
 
 #### 5.2.4 Auto-Tracking Bounds Constraints
 **Test**: `test_wave_autoTrackingRespectsBoundsConstraints`
@@ -923,29 +1002,37 @@ class IosMapTestRobot(viewController: UIViewController) {
 
 #### 5.3.7 One Full Dimension Visibility
 
-**Test**: `test_fullMap_canZoomToShowFullWidth`
+**Test**: `test_fullMap_canZoomToShowSmallestDimension_wideEvent`
 - **Preconditions**:
-  - Event is wide (aspect ratio > screen aspect)
+  - Event is wide (eventAspect > screenAspect) - e.g., Paris
   - Map loaded
 - **Actions**:
-  - Zoom out to min zoom
+  - Zoom out to min zoom (attempt to zoom further should be blocked)
   - Center camera on event center
+  - Query visible region
 - **Assertions**:
-  - Entire event width visible (viewport west ≤ event west, viewport east ≥ event east)
-  - Event height may be partially visible (viewport taller than event height)
-  - Viewport completely within event bounds (no north/south overflow)
+  - Entire event **HEIGHT** visible (smallest dimension) ✅
+  - Event **width** partially visible (NO outside pixels at edges)
+  - Viewport height ≈ event height (tolerance ±5%)
+  - Viewport completely within event bounds
+  - Can pan horizontally to see different parts of width
+  - Cannot pan vertically much (height fills viewport)
 
-**Test**: `test_fullMap_canZoomToShowFullHeight`
+**Test**: `test_fullMap_canZoomToShowSmallestDimension_tallEvent`
 - **Preconditions**:
-  - Event is tall (aspect ratio < screen aspect)
+  - Event is tall (eventAspect < screenAspect)
   - Map loaded
 - **Actions**:
   - Zoom out to min zoom
   - Center camera on event center
+  - Query visible region
 - **Assertions**:
-  - Entire event height visible (viewport south ≤ event south, viewport north ≥ event north)
-  - Event width may be partially visible (viewport wider than event width)
-  - Viewport completely within event bounds (no east/west overflow)
+  - Entire event **WIDTH** visible (smallest dimension) ✅
+  - Event **height** partially visible (NO outside pixels at edges)
+  - Viewport width ≈ event width (tolerance ±5%)
+  - Viewport completely within event bounds
+  - Can pan vertically to see different parts of height
+  - Cannot pan horizontally much (width fills viewport)
 
 #### 5.3.8 Dimension Change Recalculation
 
