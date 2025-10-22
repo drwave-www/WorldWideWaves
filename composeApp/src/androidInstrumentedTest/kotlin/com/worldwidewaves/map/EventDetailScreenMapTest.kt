@@ -23,13 +23,14 @@ package com.worldwidewaves.map
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.map.MapTestFixtures
 import com.worldwidewaves.shared.map.MapTestFixtures.center
 import com.worldwidewaves.shared.map.MapTestFixtures.isCompletelyWithin
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 /**
  * Integration tests for Event Detail Screen map behavior.
@@ -81,10 +82,10 @@ class EventDetailScreenMapTest : BaseMapIntegrationTest() {
 
             // Visible region should contain entire event (tight fit)
             assertTrue(
-                eventBounds.isCompletelyWithin(visibleRegion),
                 "Entire event should be visible in BOUNDS mode\n" +
                     "  Event bounds: SW(${eventBounds.southwest}) NE(${eventBounds.northeast})\n" +
                     "  Visible region: SW(${visibleRegion.southwest}) NE(${visibleRegion.northeast})",
+                eventBounds.isCompletelyWithin(visibleRegion),
             )
 
             assertValidVisibleRegion(
@@ -120,24 +121,24 @@ class EventDetailScreenMapTest : BaseMapIntegrationTest() {
             val finalZoom = adapter.currentZoom.value
 
             assertEquals(
-                initialCamera?.latitude,
-                finalCamera?.latitude,
-                MapTestFixtures.TOLERANCE_POSITION,
                 "Camera latitude should not change after user position update",
-            )
-
-            assertEquals(
-                initialCamera?.longitude,
-                finalCamera?.longitude,
+                initialCamera?.latitude ?: 0.0,
+                finalCamera?.latitude ?: 0.0,
                 MapTestFixtures.TOLERANCE_POSITION,
-                "Camera longitude should not change after user position update",
             )
 
             assertEquals(
+                "Camera longitude should not change after user position update",
+                initialCamera?.longitude ?: 0.0,
+                finalCamera?.longitude ?: 0.0,
+                MapTestFixtures.TOLERANCE_POSITION,
+            )
+
+            assertEquals(
+                "Zoom level should not change after user position update",
                 initialZoom,
                 finalZoom,
                 MapTestFixtures.TOLERANCE_ZOOM,
-                "Zoom level should not change after user position update",
             )
         }
 
@@ -173,10 +174,10 @@ class EventDetailScreenMapTest : BaseMapIntegrationTest() {
 
                 // Entire event should always be visible
                 assertTrue(
-                    eventBounds.isCompletelyWithin(visibleRegion),
                     "Entire event should be visible at camera position $position\n" +
                         "  Event bounds: SW(${eventBounds.southwest}) NE(${eventBounds.northeast})\n" +
                         "  Visible region: SW(${visibleRegion.southwest}) NE(${visibleRegion.northeast})",
+                    eventBounds.isCompletelyWithin(visibleRegion),
                 )
             }
         }
@@ -201,11 +202,11 @@ class EventDetailScreenMapTest : BaseMapIntegrationTest() {
 
             // Zoom should be clamped to min zoom
             assertTrue(
-                actualZoom >= minZoom - MapTestFixtures.TOLERANCE_ZOOM,
                 "Zoom should not go below min zoom\n" +
                     "  Min zoom: $minZoom\n" +
                     "  Attempted: ${minZoom - 2.0}\n" +
                     "  Actual: $actualZoom",
+                actualZoom >= minZoom - MapTestFixtures.TOLERANCE_ZOOM,
             )
         }
 }

@@ -32,10 +32,10 @@ import com.worldwidewaves.shared.map.MapTestFixtures.height
 import com.worldwidewaves.shared.map.MapTestFixtures.isApproximately
 import com.worldwidewaves.shared.map.MapTestFixtures.width
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.math.abs
-import kotlin.test.assertTrue
 
 /**
  * Integration tests for MapLibre visible region queries.
@@ -106,10 +106,10 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
 
         // Assertions
         assertTrue(
-            regionAfterPan.northeast.latitude > initialRegion.northeast.latitude,
             "After panning north, visible region should move north\n" +
                 "  Initial NE lat: ${initialRegion.northeast.latitude}\n" +
                 "  After pan NE lat: ${regionAfterPan.northeast.latitude}",
+            regionAfterPan.northeast.latitude > initialRegion.northeast.latitude,
         )
 
         assertVisibleRegionWithinBounds(
@@ -138,10 +138,10 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
 
         // Assertions
         assertTrue(
-            regionAfterPan.northeast.longitude > initialRegion.northeast.longitude,
             "After panning east, visible region should move east\n" +
                 "  Initial NE lng: ${initialRegion.northeast.longitude}\n" +
                 "  After pan NE lng: ${regionAfterPan.northeast.longitude}",
+            regionAfterPan.northeast.longitude > initialRegion.northeast.longitude,
         )
 
         assertVisibleRegionWithinBounds(
@@ -174,17 +174,17 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
 
         // Assertions for zoom in
         assertTrue(
-            zoomedInWidth < initialWidth,
             "After zooming in, visible region width should decrease\n" +
                 "  Initial width: $initialWidth\n" +
                 "  Zoomed in width: $zoomedInWidth",
+            zoomedInWidth < initialWidth,
         )
 
         assertTrue(
-            zoomedInHeight < initialHeight,
             "After zooming in, visible region height should decrease\n" +
                 "  Initial height: $initialHeight\n" +
                 "  Zoomed in height: $zoomedInHeight",
+            zoomedInHeight < initialHeight,
         )
 
         assertVisibleRegionWithinBounds(
@@ -202,19 +202,19 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
         val heightDifference = abs(zoomedOutHeight - initialHeight) / initialHeight
 
         assertTrue(
-            widthDifference < TOLERANCE_DIMENSION,
             "After zooming back out, visible region width should match initial width\n" +
                 "  Initial width: $initialWidth\n" +
                 "  Zoomed out width: $zoomedOutWidth\n" +
                 "  Difference: ${widthDifference * 100}%",
+            widthDifference < TOLERANCE_DIMENSION,
         )
 
         assertTrue(
-            heightDifference < TOLERANCE_DIMENSION,
             "After zooming back out, visible region height should match initial height\n" +
                 "  Initial height: $initialHeight\n" +
                 "  Zoomed out height: $zoomedOutHeight\n" +
                 "  Difference: ${heightDifference * 100}%",
+            heightDifference < TOLERANCE_DIMENSION,
         )
     }
 
@@ -248,26 +248,26 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
         val heightDifference = abs(actualHeight - expectedHeight) / expectedHeight
 
         assertTrue(
-            actualCenter.isApproximately(cameraPosition, TOLERANCE_POSITION),
             "Actual region center should match camera position\n" +
                 "  Camera: (${cameraPosition.latitude}, ${cameraPosition.longitude})\n" +
                 "  Region center: (${actualCenter.latitude}, ${actualCenter.longitude})",
+            actualCenter.isApproximately(cameraPosition, TOLERANCE_POSITION),
         )
 
         assertTrue(
-            widthDifference < TOLERANCE_DIMENSION,
             "Actual region width should match calculated width\n" +
                 "  Expected width: $expectedWidth\n" +
                 "  Actual width: $actualWidth\n" +
                 "  Difference: ${widthDifference * 100}%",
+            widthDifference < TOLERANCE_DIMENSION,
         )
 
         assertTrue(
-            heightDifference < TOLERANCE_DIMENSION,
             "Actual region height should match calculated height\n" +
                 "  Expected height: $expectedHeight\n" +
                 "  Actual height: $actualHeight\n" +
                 "  Difference: ${heightDifference * 100}%",
+            heightDifference < TOLERANCE_DIMENSION,
         )
     }
 
@@ -303,17 +303,17 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
         val smallerHeight = smallerRegion.height
 
         assertTrue(
-            smallerWidth < currentWidth,
             "Higher zoom should result in smaller visible region width\n" +
                 "  Zoom $targetZoom width: $currentWidth\n" +
                 "  Zoom $higherZoom width: $smallerWidth",
+            smallerWidth < currentWidth,
         )
 
         assertTrue(
-            smallerHeight < currentHeight,
             "Higher zoom should result in smaller visible region height\n" +
                 "  Zoom $targetZoom height: $currentHeight\n" +
                 "  Zoom $higherZoom height: $smallerHeight",
+            smallerHeight < currentHeight,
         )
     }
 
@@ -407,24 +407,24 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
 
             // Validate no inverted bounds
             assertTrue(
-                visibleRegion.northeast.latitude > visibleRegion.southwest.latitude,
                 "Visible region should not have inverted latitude bounds",
+                visibleRegion.northeast.latitude > visibleRegion.southwest.latitude,
             )
             assertTrue(
-                visibleRegion.northeast.longitude > visibleRegion.southwest.longitude,
                 "Visible region should not have inverted longitude bounds",
+                visibleRegion.northeast.longitude > visibleRegion.southwest.longitude,
             )
 
             // Validate positive dimensions
             val width = visibleRegion.width
             val height = visibleRegion.height
 
-            assertTrue(width > 0.0, "Visible region width should be positive")
-            assertTrue(height > 0.0, "Visible region height should be positive")
+            assertTrue("Visible region width should be positive", width > 0.0)
+            assertTrue("Visible region height should be positive", height > 0.0)
 
             // Validate reasonable dimensions (not absurd)
-            assertTrue(width < 10.0, "Visible region width should not exceed 10°")
-            assertTrue(height < 10.0, "Visible region height should not exceed 10°")
+            assertTrue("Visible region width should not exceed 10°", width < 10.0)
+            assertTrue("Visible region height should not exceed 10°", height < 10.0)
 
             // Validate within event bounds
             assertVisibleRegionWithinBounds(
@@ -455,9 +455,9 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
 
         // Average query should be under 5ms
         assertTrue(
-            averageTimeMs < 5.0,
             "Average getVisibleRegion() query time should be < 5ms\n" +
                 "  Actual: ${averageTimeMs}ms",
+            averageTimeMs < 5.0,
         )
 
         // Validate all queries returned valid regions

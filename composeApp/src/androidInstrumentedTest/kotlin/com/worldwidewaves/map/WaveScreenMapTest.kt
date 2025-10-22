@@ -29,9 +29,9 @@ import com.worldwidewaves.shared.map.MapTestFixtures.height
 import com.worldwidewaves.shared.map.MapTestFixtures.isCompletelyWithin
 import com.worldwidewaves.shared.map.MapTestFixtures.width
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.test.assertTrue
 
 /**
  * Integration tests for Wave Participation Screen map behavior.
@@ -81,10 +81,10 @@ class WaveScreenMapTest : BaseMapIntegrationTest() {
 
             // Entire event should be visible
             assertTrue(
-                eventBounds.isCompletelyWithin(visibleRegion),
                 "Entire event should be visible initially in Wave screen\n" +
                     "  Event bounds: SW(${eventBounds.southwest}) NE(${eventBounds.northeast})\n" +
                     "  Visible region: SW(${visibleRegion.southwest}) NE(${visibleRegion.northeast})",
+                eventBounds.isCompletelyWithin(visibleRegion),
             )
         }
 
@@ -146,21 +146,21 @@ class WaveScreenMapTest : BaseMapIntegrationTest() {
 
             // Assertions
             assertTrue(
-                visibleRegion.isCompletelyWithin(eventBounds),
                 "Auto-tracking viewport should remain within event bounds\n" +
                     "  Event bounds: SW(${eventBounds.southwest}) NE(${eventBounds.northeast})\n" +
                     "  Visible region: SW(${visibleRegion.southwest}) NE(${visibleRegion.northeast})",
+                visibleRegion.isCompletelyWithin(eventBounds),
             )
 
             // Check that both user and wave positions are visible
             assertTrue(
-                visibleRegion.contains(userPosition),
                 "User position should be visible in auto-tracking viewport",
+                visibleRegion.contains(userPosition),
             )
 
             assertTrue(
-                visibleRegion.contains(wavePosition),
                 "Wave position should be visible in auto-tracking viewport",
+                visibleRegion.contains(wavePosition),
             )
         }
 
@@ -242,19 +242,19 @@ class WaveScreenMapTest : BaseMapIntegrationTest() {
 
             // Assertions - should be limited to 50% of event area
             assertTrue(
-                visibleRegion.height <= eventBounds.height * 0.51, // Small tolerance
                 "Auto-tracking viewport height should not exceed 50% of event area\n" +
                     "  Event height: ${eventBounds.height}\n" +
                     "  Viewport height: ${visibleRegion.height}\n" +
                     "  Max allowed: ${eventBounds.height * 0.5}",
+                visibleRegion.height <= eventBounds.height * 0.51, // Small tolerance
             )
 
             assertTrue(
-                visibleRegion.width <= eventBounds.width * 0.51,
                 "Auto-tracking viewport width should not exceed 50% of event area\n" +
                     "  Event width: ${eventBounds.width}\n" +
                     "  Viewport width: ${visibleRegion.width}\n" +
                     "  Max allowed: ${eventBounds.width * 0.5}",
+                visibleRegion.width <= eventBounds.width * 0.51,
             )
         }
 
@@ -312,13 +312,13 @@ class WaveScreenMapTest : BaseMapIntegrationTest() {
                 )
 
                 assertTrue(
-                    visibleRegion.contains(userPos),
                     "Viewport should contain user position",
+                    visibleRegion.contains(userPos),
                 )
 
                 assertTrue(
-                    visibleRegion.contains(wavePos),
                     "Viewport should contain wave position",
+                    visibleRegion.contains(wavePos),
                 )
             }
         }

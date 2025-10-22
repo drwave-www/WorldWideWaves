@@ -32,9 +32,9 @@ import com.worldwidewaves.shared.map.MapTestFixtures.center
 import com.worldwidewaves.shared.map.MapTestFixtures.height
 import com.worldwidewaves.shared.map.MapTestFixtures.width
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.test.assertTrue
 
 /**
  * Integration tests for Full Map Screen behavior.
@@ -68,8 +68,8 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
             val screenAspect = MapTestFixtures.PORTRAIT_PHONE.aspectRatio
 
             assertTrue(
-                eventAspect > screenAspect,
                 "Test requires wide event (eventAspect=$eventAspect should be > screenAspect=$screenAspect)",
+                eventAspect > screenAspect,
             )
 
             // Calculate min zoom for constraining dimension (HEIGHT for wide events)
@@ -101,11 +101,11 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
             val heightDifference = kotlin.math.abs(visibleRegion.height - eventBounds.height) / eventBounds.height
 
             assertTrue(
-                heightDifference < MapTestFixtures.TOLERANCE_DIMENSION,
                 "For wide event, HEIGHT (smallest dimension) should fit completely\n" +
                     "  Event height: ${eventBounds.height}\n" +
                     "  Viewport height: ${visibleRegion.height}\n" +
                     "  Difference: ${heightDifference * 100}%",
+                heightDifference < MapTestFixtures.TOLERANCE_DIMENSION,
             )
 
             // WIDTH should be partially visible (NO outside pixels)
@@ -123,8 +123,8 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
             val screenAspect = MapTestFixtures.PORTRAIT_PHONE.aspectRatio
 
             assertTrue(
-                eventAspect < screenAspect,
                 "Test requires tall event (eventAspect=$eventAspect should be < screenAspect=$screenAspect)",
+                eventAspect < screenAspect,
             )
 
             // Calculate min zoom for constraining dimension (WIDTH for tall events)
@@ -156,11 +156,11 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
             val widthDifference = kotlin.math.abs(visibleRegion.width - eventBounds.width) / eventBounds.width
 
             assertTrue(
-                widthDifference < MapTestFixtures.TOLERANCE_DIMENSION,
                 "For tall event, WIDTH (smallest dimension) should fit completely\n" +
                     "  Event width: ${eventBounds.width}\n" +
                     "  Viewport width: ${visibleRegion.width}\n" +
                     "  Difference: ${widthDifference * 100}%",
+                widthDifference < MapTestFixtures.TOLERANCE_DIMENSION,
             )
 
             // HEIGHT should be partially visible (NO outside pixels)
@@ -187,8 +187,8 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
 
             val northRegion = adapter.getVisibleRegion()
             assertTrue(
-                northRegion.northeast.latitude <= eventBounds.northeast.latitude + MapTestFixtures.TOLERANCE_EDGE,
                 "Viewport north edge should align with event north edge",
+                northRegion.northeast.latitude <= eventBounds.northeast.latitude + MapTestFixtures.TOLERANCE_EDGE,
             )
             assertVisibleRegionWithinBounds("North edge viewport should stay within bounds")
 
@@ -198,8 +198,8 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
 
             val southRegion = adapter.getVisibleRegion()
             assertTrue(
-                southRegion.southwest.latitude >= eventBounds.southwest.latitude - MapTestFixtures.TOLERANCE_EDGE,
                 "Viewport south edge should align with event south edge",
+                southRegion.southwest.latitude >= eventBounds.southwest.latitude - MapTestFixtures.TOLERANCE_EDGE,
             )
             assertVisibleRegionWithinBounds("South edge viewport should stay within bounds")
 
@@ -209,8 +209,8 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
 
             val eastRegion = adapter.getVisibleRegion()
             assertTrue(
-                eastRegion.northeast.longitude <= eventBounds.northeast.longitude + MapTestFixtures.TOLERANCE_EDGE,
                 "Viewport east edge should align with event east edge",
+                eastRegion.northeast.longitude <= eventBounds.northeast.longitude + MapTestFixtures.TOLERANCE_EDGE,
             )
             assertVisibleRegionWithinBounds("East edge viewport should stay within bounds")
 
@@ -220,8 +220,8 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
 
             val westRegion = adapter.getVisibleRegion()
             assertTrue(
-                westRegion.southwest.longitude >= eventBounds.southwest.longitude - MapTestFixtures.TOLERANCE_EDGE,
                 "Viewport west edge should align with event west edge",
+                westRegion.southwest.longitude >= eventBounds.southwest.longitude - MapTestFixtures.TOLERANCE_EDGE,
             )
             assertVisibleRegionWithinBounds("West edge viewport should stay within bounds")
         }
@@ -328,22 +328,22 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
                 val heightDifference = kotlin.math.abs(visibleRegion.height - eventBounds.height) / eventBounds.height
 
                 assertTrue(
-                    heightDifference < MapTestFixtures.TOLERANCE_DIMENSION,
                     "For wide event, HEIGHT (smallest dimension) should be fully visible at min zoom\n" +
                         "  Event height: ${eventBounds.height}\n" +
                         "  Viewport height: ${visibleRegion.height}\n" +
                         "  Difference: ${heightDifference * 100}%",
+                    heightDifference < MapTestFixtures.TOLERANCE_DIMENSION,
                 )
             } else {
                 // Tall event - WIDTH is smallest dimension
                 val widthDifference = kotlin.math.abs(visibleRegion.width - eventBounds.width) / eventBounds.width
 
                 assertTrue(
-                    widthDifference < MapTestFixtures.TOLERANCE_DIMENSION,
                     "For tall event, WIDTH (smallest dimension) should be fully visible at min zoom\n" +
                         "  Event width: ${eventBounds.width}\n" +
                         "  Viewport width: ${visibleRegion.width}\n" +
                         "  Difference: ${widthDifference * 100}%",
+                    widthDifference < MapTestFixtures.TOLERANCE_DIMENSION,
                 )
             }
 
@@ -369,11 +369,11 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
             val actualZoom = adapter.currentZoom.value
 
             assertTrue(
-                actualZoom >= minZoom - MapTestFixtures.TOLERANCE_ZOOM,
                 "Zoom should not go below min zoom\n" +
                     "  Min zoom: $minZoom\n" +
                     "  Attempted: ${minZoom - 2.0}\n" +
                     "  Actual: $actualZoom",
+                actualZoom >= minZoom - MapTestFixtures.TOLERANCE_ZOOM,
             )
 
             assertVisibleRegionWithinBounds(
@@ -436,13 +436,13 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
 
             // Camera should NOT be at the requested outside position
             assertTrue(
-                actualPosition != null && actualPosition.latitude < outsidePosition.latitude,
                 "Camera latitude should be clamped inward from outside request",
+                actualPosition != null && actualPosition.latitude < outsidePosition.latitude,
             )
 
             assertTrue(
-                actualPosition != null && actualPosition.longitude < outsidePosition.longitude,
                 "Camera longitude should be clamped inward from outside request",
+                actualPosition != null && actualPosition.longitude < outsidePosition.longitude,
             )
         }
 }

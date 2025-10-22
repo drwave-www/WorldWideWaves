@@ -25,11 +25,9 @@ import android.content.Context
 import android.view.View
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.mapbox.mapboxsdk.maps.MapView
-import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.map.MapTestFixtures
 import com.worldwidewaves.shared.map.MapTestFixtures.PORTRAIT_PHONE
 import com.worldwidewaves.shared.map.MapTestFixtures.STANDARD_EVENT_BOUNDS
@@ -39,13 +37,15 @@ import com.worldwidewaves.shared.map.MapTestFixtures.isApproximately
 import com.worldwidewaves.shared.map.MapTestFixtures.isCompletelyWithin
 import kotlinx.coroutines.runBlocking
 import org.junit.After
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.runner.RunWith
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
-import kotlin.test.fail
 
 /**
  * Base class for Android MapLibre integration tests using headless MapView.
@@ -56,20 +56,8 @@ import kotlin.test.fail
  * - Programmatic camera control (no gesture simulation)
  * - Direct API access for validation
  *
- * Usage:
- * ```kotlin
- * @RunWith(AndroidJUnit4::class)
- * class MyMapTest : BaseMapIntegrationTest() {
- *     @Test
- *     fun testSomething() {
- *         // mapView and adapter are ready to use
- *         adapter.animateCamera(Position(48.8566, 2.3522), zoom = 15.0)
- *         waitForIdle()
- *         val visibleRegion = adapter.getVisibleRegion()
- *         // assertions...
- *     }
- * }
- * ```
+ * Usage example shows how to extend this base class for specific map tests.
+ * Subclasses can use mapView and adapter properties directly after setup.
  */
 @RunWith(AndroidJUnit4::class)
 abstract class BaseMapIntegrationTest {
@@ -79,7 +67,7 @@ abstract class BaseMapIntegrationTest {
 
     protected lateinit var context: Context
     protected lateinit var mapView: MapView
-    protected lateinit var mapboxMap: MapboxMap
+    protected lateinit var mapLibreMap: MapLibreMap
     protected lateinit var adapter: AndroidMapLibreAdapter
 
     protected var eventBounds: BoundingBox = STANDARD_EVENT_BOUNDS
@@ -103,14 +91,14 @@ abstract class BaseMapIntegrationTest {
         // Create headless MapView (no activity needed)
         mapView = createHeadlessMapView()
 
-        // Initialize adapter
-        adapter = AndroidMapLibreAdapter(testEventId)
+        // Initialize adapter (will set map reference later)
+        adapter = AndroidMapLibreAdapter()
 
         // Load map asynchronously and wait
         val mapLoadedLatch = CountDownLatch(1)
 
         mapView.getMapAsync { map ->
-            mapboxMap = map
+            mapLibreMap = map
             adapter.setMap(map)
 
             // Load style and wait
@@ -222,15 +210,15 @@ abstract class BaseMapIntegrationTest {
      */
     protected fun assertVisibleRegionWithinBounds(message: String = "Visible region should be completely within event bounds") {
         val visibleRegion = adapter.getVisibleRegion()
-        assertNotNull(visibleRegion, "Visible region should not be null")
+        assertNotNull("Visible region should not be null", visibleRegion)
 
         assertTrue(
-            visibleRegion.isCompletelyWithin(eventBounds),
             "$message\n" +
                 "  Visible: SW(${visibleRegion.southwest.latitude}, ${visibleRegion.southwest.longitude}) " +
                 "NE(${visibleRegion.northeast.latitude}, ${visibleRegion.northeast.longitude})\n" +
                 "  Event: SW(${eventBounds.southwest.latitude}, ${eventBounds.southwest.longitude}) " +
                 "NE(${eventBounds.northeast.latitude}, ${eventBounds.northeast.longitude})",
+            visibleRegion.isCompletelyWithin(eventBounds),
         )
     }
 
@@ -243,14 +231,14 @@ abstract class BaseMapIntegrationTest {
         message: String = "Camera should be at expected position",
     ) {
         val actualPosition = adapter.getCameraPosition()
-        assertNotNull(actualPosition, "Camera position should not be null")
+        assertNotNull("Camera position should not be null", actualPosition)
 
         assertTrue(
-            actualPosition.isApproximately(expectedPosition, tolerance),
             "$message\n" +
                 "  Expected: (${expectedPosition.latitude}, ${expectedPosition.longitude})\n" +
-                "  Actual: (${actualPosition.latitude}, ${actualPosition.longitude})\n" +
+                "  Actual: (${actualPosition!!.latitude}, ${actualPosition.longitude})\n" +
                 "  Tolerance: $tolerance",
+            actualPosition.isApproximately(expectedPosition, tolerance),
         )
     }
 
@@ -264,17 +252,17 @@ abstract class BaseMapIntegrationTest {
         val visibleRegion = adapter.getVisibleRegion()
         val cameraPosition = adapter.getCameraPosition()
 
-        assertNotNull(visibleRegion, "Visible region should not be null")
-        assertNotNull(cameraPosition, "Camera position should not be null")
+        assertNotNull("Visible region should not be null", visibleRegion)
+        assertNotNull("Camera position should not be null", cameraPosition)
 
         val regionCenter = visibleRegion.center()
 
         assertTrue(
-            regionCenter.isApproximately(cameraPosition, tolerance),
             "$message\n" +
                 "  Region center: (${regionCenter.latitude}, ${regionCenter.longitude})\n" +
-                "  Camera: (${cameraPosition.latitude}, ${cameraPosition.longitude})\n" +
+                "  Camera: (${cameraPosition!!.latitude}, ${cameraPosition.longitude})\n" +
                 "  Tolerance: $tolerance",
+            regionCenter.isApproximately(cameraPosition, tolerance),
         )
     }
 
@@ -290,12 +278,12 @@ abstract class BaseMapIntegrationTest {
 
         val difference = kotlin.math.abs(actualZoom - expectedZoom)
         assertTrue(
-            difference <= tolerance,
             "$message\n" +
                 "  Expected: $expectedZoom\n" +
                 "  Actual: $actualZoom\n" +
                 "  Tolerance: $tolerance\n" +
                 "  Difference: $difference",
+            difference <= tolerance,
         )
     }
 
@@ -304,23 +292,23 @@ abstract class BaseMapIntegrationTest {
      */
     protected fun assertValidVisibleRegion(message: String = "Visible region should have valid bounds") {
         val visibleRegion = adapter.getVisibleRegion()
-        assertNotNull(visibleRegion, "Visible region should not be null")
+        assertNotNull("Visible region should not be null", visibleRegion)
 
         assertTrue(
-            visibleRegion.northeast.latitude > visibleRegion.southwest.latitude,
             "$message: NE latitude should be > SW latitude",
+            visibleRegion.northeast.latitude > visibleRegion.southwest.latitude,
         )
         assertTrue(
-            visibleRegion.northeast.longitude > visibleRegion.southwest.longitude,
             "$message: NE longitude should be > SW longitude",
+            visibleRegion.northeast.longitude > visibleRegion.southwest.longitude,
         )
 
         val width = visibleRegion.northeast.longitude - visibleRegion.southwest.longitude
         val height = visibleRegion.northeast.latitude - visibleRegion.southwest.latitude
 
-        assertTrue(width > 0.0, "$message: Width should be positive")
-        assertTrue(height > 0.0, "$message: Height should be positive")
-        assertTrue(width < 10.0, "$message: Width should not be absurd (>10°)")
-        assertTrue(height < 10.0, "$message: Height should not be absurd (>10°)")
+        assertTrue("$message: Width should be positive", width > 0.0)
+        assertTrue("$message: Height should be positive", height > 0.0)
+        assertTrue("$message: Width should not be absurd (>10°)", width < 10.0)
+        assertTrue("$message: Height should not be absurd (>10°)", height < 10.0)
     }
 }
