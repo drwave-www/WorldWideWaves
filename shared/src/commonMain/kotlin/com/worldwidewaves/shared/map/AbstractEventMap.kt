@@ -310,7 +310,15 @@ abstract class AbstractEventMap<T>(
     suspend fun targetUser() {
         val userPosition = positionManager.getCurrentPosition() ?: return
         runCameraAnimation { _ ->
-            mapLibreAdapter.animateCamera(userPosition, MapDisplay.TARGET_USER_ZOOM)
+            // In WINDOW mode, don't override zoom (stay at min zoom to see full event)
+            // In other modes, zoom in to user position
+            val targetZoom =
+                if (mapConfig.initialCameraPosition == MapCameraPosition.WINDOW) {
+                    null // Keep current zoom (typically min zoom)
+                } else {
+                    MapDisplay.TARGET_USER_ZOOM
+                }
+            mapLibreAdapter.animateCamera(userPosition, targetZoom)
         }
     }
 
