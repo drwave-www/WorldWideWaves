@@ -615,6 +615,83 @@ class MapBoundsEnforcerUnitTest {
     }
 
     // ============================================================
+    // DYNAMIC CONSTRAINT BOUNDS TESTS
+    // ============================================================
+
+    @Test
+    fun testWindowMode_constraintBoundsChangeWithZoom() {
+        val adapter = MockMapLibreAdapter()
+
+        // Small viewport (zoomed in)
+        adapter.mockVisibleRegion =
+            BoundingBox.fromCorners(
+                Position(48.860, 2.360),
+                Position(48.862, 2.362),
+            )
+
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = true,
+            )
+
+        enforcer.applyConstraints()
+        val constraintsWhenZoomedIn = enforcer.calculateConstraintBounds()
+
+        // Larger viewport (zoomed out)
+        adapter.mockVisibleRegion =
+            BoundingBox.fromCorners(
+                Position(48.855, 2.350),
+                Position(48.867, 2.372),
+            )
+
+        enforcer.setVisibleRegionPadding(
+            MapBoundsEnforcer.VisibleRegionPadding(0.006, 0.011),
+        )
+
+        val constraintsWhenZoomedOut = enforcer.calculateConstraintBounds()
+
+        // When zoomed in (small viewport), constraint bounds should be larger (more pan area)
+        assertTrue(
+            constraintsWhenZoomedIn.width > constraintsWhenZoomedOut.width,
+            "Zoomed in (small viewport) should have larger constraint bounds (more pan area)",
+        )
+        assertTrue(
+            constraintsWhenZoomedIn.height > constraintsWhenZoomedOut.height,
+            "Zoomed in (small viewport) should have larger constraint bounds (more pan area)",
+        )
+    }
+
+    @Test
+    fun testWindowMode_invalidViewportDetection_usesZeroPadding() {
+        val adapter = MockMapLibreAdapter()
+
+        // Simulate invalid viewport (>10 degrees - uninitialized map)
+        adapter.mockVisibleRegion =
+            BoundingBox.fromCorners(
+                Position(0.0, 0.0),
+                Position(90.0, 180.0), // Absurd viewport (entire hemisphere!)
+            )
+
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = true,
+            )
+
+        val constraintBounds = enforcer.calculateConstraintBounds()
+
+        // Should use zero padding (fallback) for invalid viewport
+        // This means constraint bounds ≈ event bounds
+        assertTrue(
+            constraintBounds.isApproximately(STANDARD_EVENT_BOUNDS, 0.001),
+            "Invalid viewport (>10°) should trigger zero padding fallback",
+        )
+    }
+
+    // ============================================================
     // PADDING CHANGE DETECTION TESTS
     // ============================================================
 
