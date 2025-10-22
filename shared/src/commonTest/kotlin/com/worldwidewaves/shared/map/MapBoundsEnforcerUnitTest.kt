@@ -226,18 +226,16 @@ class MapBoundsEnforcerUnitTest {
 
         val constraintBounds = enforcer.calculateConstraintBounds()
 
-        // WINDOW mode: constraint bounds should be smaller than event bounds (shrunk by padding)
+        // NEW BEHAVIOR: WINDOW mode now uses zero padding (relies on preventive gesture constraints)
+        // Constraint bounds should EQUAL event bounds, not be smaller
         assertTrue(
-            constraintBounds.width < STANDARD_EVENT_BOUNDS.width,
-            "Constraint bounds width should be smaller than event bounds in WINDOW mode",
+            constraintBounds.isApproximately(STANDARD_EVENT_BOUNDS, TOLERANCE_POSITION),
+            "WINDOW mode should have constraint bounds equal to event bounds (zero padding)",
         )
         assertTrue(
-            constraintBounds.height < STANDARD_EVENT_BOUNDS.height,
-            "Constraint bounds height should be smaller than event bounds in WINDOW mode",
-        )
-        assertTrue(
-            constraintBounds.isCompletelyWithin(STANDARD_EVENT_BOUNDS),
-            "Constraint bounds should be within event bounds",
+            constraintBounds.isCompletelyWithin(STANDARD_EVENT_BOUNDS) ||
+                constraintBounds.isApproximately(STANDARD_EVENT_BOUNDS, TOLERANCE_POSITION),
+            "Constraint bounds should be within or equal to event bounds",
         )
     }
 

@@ -194,7 +194,8 @@ class BoundsWindowModeTest {
     }
 
     /**
-     * WINDOW mode must calculate viewport padding to prevent edge overflow.
+     * WINDOW mode uses zero padding (relies on preventive gesture constraints).
+     * The key difference from BOUNDS mode is the zoom safety margin.
      */
     @Test
     fun `WINDOW mode calculates viewport padding`() {
@@ -205,27 +206,32 @@ class BoundsWindowModeTest {
         // When: Apply constraints
         enforcer.applyConstraints()
 
-        // Then: Constraint bounds should be SMALLER than original (padding applied)
+        // Then: Constraint bounds should EQUAL original bounds (zero padding in new implementation)
+        // NEW BEHAVIOR: WINDOW mode uses zero padding and relies on preventive gesture constraints
+        // instead of shrinking bounds
         val constraintBounds = adapter.constraintBounds
         assertNotNull(constraintBounds, "Constraint bounds should be set")
 
-        // Padding = viewport half-dimensions (approximately 0.05 degrees from getVisibleRegion mock)
-        assertTrue(
-            constraintBounds.sw.lat > TEST_BOUNDS.sw.lat,
-            "WINDOW mode should shrink SW latitude inward (padding applied)",
+        assertEquals(
+            TEST_BOUNDS.sw.lat,
+            constraintBounds.sw.lat,
+            0.0001,
+            "WINDOW mode now uses zero padding (SW lat unchanged)",
         )
-        assertTrue(
-            constraintBounds.ne.lat < TEST_BOUNDS.ne.lat,
-            "WINDOW mode should shrink NE latitude inward (padding applied)",
+        assertEquals(
+            TEST_BOUNDS.ne.lat,
+            constraintBounds.ne.lat,
+            0.0001,
+            "WINDOW mode now uses zero padding (NE lat unchanged)",
         )
 
-        // Then: Should apply zoom safety margin for WINDOW mode
+        // Then: Should apply zoom safety margin for WINDOW mode (this is the key difference from BOUNDS)
         assertTrue(
             adapter.applyZoomSafetyMarginCalled,
             "WINDOW mode should apply zoom safety margin",
         )
 
-        println("✅ WINDOW mode: viewport padding applied, safety margin enabled")
+        println("✅ WINDOW mode: zero padding (preventive gestures), safety margin enabled")
     }
 
     /**
