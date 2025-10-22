@@ -471,8 +471,9 @@ import Shared
             // WINDOW MODE: Use intelligent aspect ratio fitting (matches Android)
             let zoomForWidth = log2((screenWidth * 360.0) / (eventWidth * 256.0))
             let zoomForHeight = log2((screenHeight * 180.0) / (eventHeight * 256.0))
-            // Use MIN to show maximum area (lower zoom = more zoomed out = see more)
-            baseMinZoom = min(zoomForWidth, zoomForHeight)
+            // Use MAX to ensure BOTH dimensions fit in viewport
+            // Higher zoom = more zoomed in = ensures both width AND height fit
+            baseMinZoom = max(zoomForWidth, zoomForHeight)
 
             let eventAspectRatio = eventWidth / eventHeight
             let screenAspectRatio = screenWidth / screenHeight

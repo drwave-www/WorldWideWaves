@@ -413,9 +413,9 @@ class AndroidMapLibreAdapter(
                 val zoomForWidth = kotlin.math.log2((mapWidth * 360.0) / (eventWidth * 256.0))
                 val zoomForHeight = kotlin.math.log2((mapHeight * 180.0) / (eventHeight * 256.0))
 
-                // Use SMALLER zoom to allow zooming out to see entire event
-                // Lower zoom = more zoomed out = see more area
-                baseMinZoom = kotlin.math.min(zoomForWidth, zoomForHeight)
+                // Use LARGER zoom to ensure BOTH dimensions fit
+                // Higher zoom number = more zoomed in = fits both width and height in viewport
+                baseMinZoom = kotlin.math.max(zoomForWidth, zoomForHeight)
 
                 Log.i(
                     "Camera",

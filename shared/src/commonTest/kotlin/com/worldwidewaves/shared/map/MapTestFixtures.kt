@@ -19,7 +19,6 @@ package com.worldwidewaves.shared.map
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 
