@@ -35,7 +35,17 @@ class EventFullMapActivity : AbstractEventAndroidActivity<FullMapScreen>() {
     override fun createActivityImpl(
         eventId: String,
         platformEnabler: AndroidPlatformEnabler,
-    ): FullMapScreen = FullMapScreen(eventId, platformEnabler)
+    ): FullMapScreen {
+        // Detect if launched from WaveActivity to enable back navigation instead of new activity
+        val callingActivity = callingActivity?.className
+        val isFromWaveScreen = callingActivity == WaveActivity::class.java.name
+
+        return FullMapScreen(
+            eventId = eventId,
+            platformEnabler = platformEnabler,
+            shouldFinishOnWaveNavigation = isFromWaveScreen,
+        )
+    }
 
     override fun createEventMapBuilder(): (IWWWEvent) -> AndroidEventMap =
         { event ->

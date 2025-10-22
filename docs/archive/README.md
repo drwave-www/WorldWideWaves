@@ -2,7 +2,7 @@
 
 This directory contains historical documentation that has been superseded or completed.
 
-**Last Updated**: October 14, 2025
+**Last Updated**: October 27, 2025
 
 ---
 
@@ -12,7 +12,7 @@ This directory contains historical documentation that has been superseded or com
 Historical documentation from the iOS MapLibre implementation and refactoring effort (September-October 2025).
 
 **Status**: ✅ Work completed October 8, 2025
-**Current documentation**: See `/iOS_MAP_IMPLEMENTATION_STATUS.md` (root) and `CLAUDE_iOS.md`
+**Current documentation**: See `docs/ios/ios-map-implementation-status.md` and `CLAUDE_iOS.md`
 
 **Contents** (10 documents):
 - `ANDROID_VS_IOS_EVENTMAP_ANALYSIS.md` - Deep architecture comparison
@@ -31,7 +31,7 @@ Historical documentation from the iOS MapLibre implementation and refactoring ef
 Historical test execution reports and verification documentation.
 
 **Status**: Superseded by continuous CI/CD testing
-**Current documentation**: See `docs/TESTING_STRATEGY.md` and `docs/ci-cd.md`
+**Current documentation**: See `docs/testing-strategy.md` and `docs/ci-cd.md`
 
 **Contents** (5 documents):
 - `E2E_TEST_RESULTS.md` - End-to-end test results
@@ -65,6 +65,27 @@ Historical session summaries and progress reports from development work (2025).
 - Workflow enhancement documentation
 - Comprehensive testing plans (historical)
 
+### `/assessment-reports/`
+Documentation quality assessments and improvement tracking (October 2025).
+
+**Status**: Completed assessments from Q4 2025 documentation review
+**Current documentation**: See `docs/INDEX.md` for active documentation
+
+**Contents** (3 documents):
+- `DOCUMENTATION_IMPROVEMENTS_SUMMARY.md` - Q4 2025 improvement summary
+- `DOCUMENTATION_REVIEW_2025-10-27.md` - Comprehensive review report
+- `FINAL_DOCUMENTATION_GRADE_REPORT.md` - Final grading analysis (A+ achieved)
+
+### `/action-plans/`
+Documentation improvement action plans and roadmaps (October 2025).
+
+**Status**: Completed plans from documentation improvement initiative
+**Current documentation**: See `docs/future-work-plan.md` for ongoing improvements
+
+**Contents** (2 documents):
+- `A_PLUS_GRADE_ACTION_PLAN.md` - Path to A+ documentation grade
+- `LOGGING_A_PLUS_ACTION_PLAN.md` - Logging system improvements
+
 ---
 
 ## Why These Were Archived
@@ -77,9 +98,9 @@ Most documents represent completed work:
 
 ### Superseded
 Better documentation now exists:
-- `iOS_MAP_IMPLEMENTATION_STATUS.md` - Current iOS map status
+- `docs/ios/ios-map-implementation-status.md` - Current iOS map status
 - `CLAUDE_iOS.md` - Complete iOS development guide
-- `docs/TESTING_STRATEGY.md` - Testing approach
+- `docs/testing-strategy.md` - Testing approach
 - `docs/ci-cd.md` - CI/CD pipeline documentation
 
 ### Historical Value
@@ -99,17 +120,14 @@ For current, maintained documentation, see:
 - `README.md` - Project overview
 - `CLAUDE.md` - Development instructions
 - `CLAUDE_iOS.md` - iOS-specific guide
-- `iOS_MAP_IMPLEMENTATION_STATUS.md` - Current iOS map status
-- `TODO_NEXT.md` - Next session priorities
-- `TODO_ACCESSIBILITY.md` - Accessibility implementation plan
-- `TODO_FIREBASE_UI.md` - Firebase integration plan
 
 **`/docs/` Directory**:
 - `docs/README.md` - Documentation index
 - `docs/architecture.md` - System architecture
 - `docs/development.md` - Development workflow
-- `docs/TESTING_STRATEGY.md` - Testing approach
+- `docs/testing-strategy.md` - Testing approach
 - `docs/ci-cd.md` - CI/CD pipeline
+- `docs/ios/ios-map-implementation-status.md` - Current iOS map status
 - `docs/iOS_*.md` - iOS-specific documentation
 
 ---

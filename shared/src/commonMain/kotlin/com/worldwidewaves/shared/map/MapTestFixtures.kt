@@ -19,6 +19,7 @@ package com.worldwidewaves.shared.map
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
+import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 
@@ -192,19 +193,8 @@ object MapTestFixtures {
     }
 
     /**
-     * Calculate the width of a bounding box (longitude span)
-     */
-    val BoundingBox.width: Double
-        get() = northeast.longitude - southwest.longitude
-
-    /**
-     * Calculate the height of a bounding box (latitude span)
-     */
-    val BoundingBox.height: Double
-        get() = northeast.latitude - southwest.latitude
-
-    /**
      * Calculate the aspect ratio of a bounding box (width / height)
+     * Note: BoundingBox already has width and height properties
      */
     val BoundingBox.aspectRatio: Double
         get() = width / height
@@ -270,7 +260,7 @@ object MapTestFixtures {
      * Shrink a bounding box by a percentage
      */
     fun BoundingBox.shrink(percentage: Double): BoundingBox {
-        require(percentage < 0.5) { "Cannot shrink by more than 50%" }
+        require(percentage < WWWGlobals.MapDisplay.MAX_SHRINKAGE_PERCENTAGE) { "Cannot shrink by more than 50%" }
 
         val latShrinkage = height * percentage / 2.0
         val lngShrinkage = width * percentage / 2.0

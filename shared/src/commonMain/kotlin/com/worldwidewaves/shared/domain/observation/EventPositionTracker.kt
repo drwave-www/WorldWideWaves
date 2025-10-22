@@ -74,28 +74,16 @@ class EventPositionTracker(
      * @return True if user is in event area, false otherwise (including errors)
      */
     suspend fun isUserInArea(event: IWWWEvent): Boolean {
-        val userPosition = positionManager.getCurrentPosition()
-
-        if (userPosition == null) {
-            Log.d("EventPositionTracker", "isUserInArea: ${event.id} no user position")
-            return false
-        }
+        val userPosition = positionManager.getCurrentPosition() ?: return false
 
         return try {
             // Check if polygon data is available first
             val polygons = event.area.getPolygons()
-            Log.d(
-                "EventPositionTracker",
-                "isUserInArea: ${event.id} has ${polygons.size} polygons, position=(${userPosition.lat}, ${userPosition.lng})",
-            )
 
             if (polygons.isNotEmpty()) {
                 // Now call the actual area detection with pre-fetched polygons (performance optimization)
-                val isInArea = waveProgressionTracker.isUserInWaveArea(userPosition, event.area, polygons)
-                Log.i("EventPositionTracker", "isUserInArea: ${event.id} isInArea=$isInArea")
-                isInArea
+                waveProgressionTracker.isUserInWaveArea(userPosition, event.area, polygons)
             } else {
-                Log.d("EventPositionTracker", "isUserInArea: ${event.id} has no polygons yet")
                 false
             }
         } catch (e: IllegalStateException) {

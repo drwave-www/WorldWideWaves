@@ -84,7 +84,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Crashlytics is automatically enabled when FirebaseApp.configure() is called
         // and will automatically collect crash reports
 
-        NSLog("[AppDelegate] ✅ Firebase configured successfully")
+        WWWLog.i("AppDelegate", "Firebase configured successfully")
 
         return true
     }
@@ -141,7 +141,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ app: UIApplication,
                      open url: URL,
                      options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        NSLog("[AppDelegate] 🔗 application:openURL: \(url.absoluteString)")
+        #if DEBUG
+        WWWLog.d("AppDelegate", "application:openURL: \(url.absoluteString)")
+        #endif
         if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let sceneDelegate = scene.delegate as? SceneDelegate,
            let viewController = sceneDelegate.perform(#selector(getter: SceneDelegate.window)) != nil

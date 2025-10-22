@@ -5,9 +5,6 @@
  * https://www.apache.org/licenses/LICENSE-2.0
  */
 
-// Note: File exceeds limits due to comprehensive camera command handling
-// swiftlint:disable file_length type_body_length
-
 import Foundation
 import Shared
 import CoreLocation
@@ -146,20 +143,29 @@ import CoreLocation
         WWWLog.v("IOSMapBridge", "renderPendingPolygons called for: \(eventId)")
 
         guard let wrapper = Shared.MapWrapperRegistry.shared.getWrapper(eventId: eventId) as? MapLibreViewWrapper else {
+            WWWLog.w("IOSMapBridge", "[WARNING] No wrapper found for event: \(eventId)")
             return false
         }
 
         let hasPending = Shared.MapWrapperRegistry.shared.hasPendingPolygons(eventId: eventId)
 
         guard hasPending else {
+            WWWLog.v("IOSMapBridge", "No pending polygons for event: \(eventId)")
             return false
         }
 
         guard let polygonData = Shared.MapWrapperRegistry.shared.getPendingPolygons(eventId: eventId) else {
+            WWWLog.w(
+                "IOSMapBridge",
+                "[WARNING] hasPendingPolygons=true but getPendingPolygons returned nil for event: \(eventId)"
+            )
             return false
         }
 
-        WWWLog.i("IOSMapBridge", "🌊 Rendering \(polygonData.coordinates.count) pending polygons for event: \(eventId)")
+        WWWLog.i(
+            "IOSMapBridge",
+            "[WAVE] Rendering \(polygonData.coordinates.count) pending polygons for event: \(eventId)"
+        )
 
         // Convert coordinate pairs to CLLocationCoordinate2D arrays
         let coordinateArrays: [[CLLocationCoordinate2D]] = polygonData.coordinates.map { polygon in
@@ -177,7 +183,7 @@ import CoreLocation
         // Clear after rendering - next update will overwrite with latest state
         // This is OK: we only need to show the LATEST wave state, intermediate updates can be skipped
         Shared.MapWrapperRegistry.shared.clearPendingPolygons(eventId: eventId)
-        WWWLog.i("IOSMapBridge", "✅ Rendered \(polygonData.coordinates.count) polygons, cleared from registry")
+        WWWLog.i("IOSMapBridge", "[SUCCESS] Rendered \(polygonData.coordinates.count) polygons, cleared from registry")
         return true
     }
 
@@ -474,13 +480,19 @@ import CoreLocation
                                  command is CameraCommand.SetMaxZoom ||
                                  command is CameraCommand.SetAttributionMargins
 
-            WWWLog.i("IOSMapBridge", "📸 Executing camera command for event: \(eventId), type: \(type(of: command))")
+            WWWLog.i(
+                "IOSMapBridge",
+                "[CAMERA] Executing camera command for event: \(eventId), type: \(type(of: command))"
+            )
             let success = executeCommand(command, on: wrapper)
 
             // Only clear command if execution succeeded
             if success {
                 Shared.MapWrapperRegistry.shared.clearPendingCameraCommand(eventId: eventId)
-                WWWLog.i("IOSMapBridge", "✅ Camera command executed and cleared for event: \(eventId)")
+                WWWLog.i(
+                    "IOSMapBridge",
+                    "[SUCCESS] Camera command executed and cleared for event: \(eventId)"
+                )
                 executedCount += 1
 
                 // If this was an animation command, stop batching (animations are asynchronous)
@@ -489,7 +501,10 @@ import CoreLocation
                     break
                 }
             } else {
-                WWWLog.w("IOSMapBridge", "⚠️ Camera command execution failed, will retry later for event: \(eventId)")
+                WWWLog.w(
+                    "IOSMapBridge",
+                    "[WARNING] Camera command execution failed, will retry later for event: \(eventId)"
+                )
                 break
             }
         }
@@ -676,5 +691,3 @@ import CoreLocation
         return true
     }
 }
-
-// swiftlint:enable file_length type_body_length

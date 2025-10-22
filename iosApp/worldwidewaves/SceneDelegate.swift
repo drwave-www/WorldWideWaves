@@ -21,9 +21,6 @@
 import UIKit
 import Shared
 
-// swiftlint:disable file_length
-// File length justified: Comprehensive documentation for critical platform initialization
-
 /// The primary scene coordinator for WorldWideWaves iOS app, responsible for managing
 /// the app's window lifecycle and routing.
 ///
@@ -97,16 +94,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     /// - Note: Returns nil for unsupported schemes, unknown hosts, or missing ID parameters
     /// - Important: RootController factory methods must be called after platform initialization
     func viewController(for url: URL) -> UIViewController? {
-        NSLog("[\(tag)] 🧭 route request: \(url.absoluteString)")
+        #if DEBUG
+        WWWLog.d(tag, "route request: \(url.absoluteString)")
+        #endif
         guard url.scheme?.lowercased() == "worldwidewaves" else {
-            NSLog("[\(tag)] ❌ unsupported scheme: \(url.scheme ?? "nil")")
+            WWWLog.e(tag, "unsupported scheme: \(url.scheme ?? "nil")")
             return nil
         }
 
         let host = url.host?.lowercased()
         let comps = URLComponents(url: url, resolvingAgainstBaseURL: false)
         let id = comps?.queryItems?.first(where: { $0.name == "id" })?.value
-        NSLog("[\(tag)] 🔎 host=\(host ?? "nil"), id=\(id ?? "nil")")
+        #if DEBUG
+        WWWLog.d(tag, "host=\(host ?? "nil"), id=\(id ?? "nil")")
+        #endif
 
         switch host {
         case "event":
@@ -116,7 +117,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         case "fullmap":
             return makeFullMapViewController(id: id)
         default:
-            NSLog("[\(tag)] ❓ unknown host: \(host ?? "nil")")
+            WWWLog.w(tag, "unknown host: \(host ?? "nil")")
             return nil
         }
     }
@@ -125,45 +126,45 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     private func makeEventViewController(id: String?) -> UIViewController? {
         guard let id = id else {
-            NSLog("[\(tag)] ❌ event route missing id")
+            WWWLog.e(tag, "event route missing id")
             return nil
         }
         do {
             let viewController = try RootControllerKt.makeEventViewController(eventId: id)
-            NSLog("[\(tag)] ✅ routed -> EventViewController(id=\(id))")
+            WWWLog.i(tag, "routed -> EventViewController(id=\(id))")
             return viewController
         } catch {
-            NSLog("[\(tag)] ❌ Error creating EventViewController: \(error)")
+            WWWLog.e(tag, "Error creating EventViewController", error: error)
             return nil
         }
     }
 
     private func makeWaveViewController(id: String?) -> UIViewController? {
         guard let id = id else {
-            NSLog("[\(tag)] ❌ wave route missing id")
+            WWWLog.e(tag, "wave route missing id")
             return nil
         }
         do {
             let viewController = try RootControllerKt.makeWaveViewController(eventId: id)
-            NSLog("[\(tag)] ✅ routed -> WaveViewController(id=\(id))")
+            WWWLog.i(tag, "routed -> WaveViewController(id=\(id))")
             return viewController
         } catch {
-            NSLog("[\(tag)] ❌ Error creating WaveViewController: \(error)")
+            WWWLog.e(tag, "Error creating WaveViewController", error: error)
             return nil
         }
     }
 
     private func makeFullMapViewController(id: String?) -> UIViewController? {
         guard let id = id else {
-            NSLog("[\(tag)] ❌ full map route missing id")
+            WWWLog.e(tag, "full map route missing id")
             return nil
         }
         do {
             let viewController = try RootControllerKt.makeFullMapViewController(eventId: id)
-            NSLog("[\(tag)] ✅ routed -> FullMapViewController(id=\(id))")
+            WWWLog.i(tag, "routed -> FullMapViewController(id=\(id))")
             return viewController
         } catch {
-            NSLog("[\(tag)] ❌ Error creating FullMapViewController: \(error)")
+            WWWLog.e(tag, "Error creating FullMapViewController", error: error)
             return nil
         }
     }
@@ -204,30 +205,32 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     /// - Important: Must be called before any view controllers are created
     /// - Note: This method is idempotent - calling multiple times has no effect after first success
     private func installPlatform() {
-        NSLog("[\(tag)] 🎯 installPlatform: init platform (Koin/Moko/Logger)")
+        #if DEBUG
+        WWWLog.d(tag, "installPlatform: init platform (Koin/Moko/Logger)")
+        #endif
         do {
             try Platform_iosKt.doInitPlatform()
-            NSLog("[\(tag)] ✅ doInitPlatform done")
+            WWWLog.i(tag, "doInitPlatform done")
         } catch let error as NSError {
-            NSLog("[\(tag)] ❌ Platform init failed: \(error.localizedDescription)")
-            NSLog("[\(tag)] Details: \(error)")
+            WWWLog.e(tag, "Platform init failed: \(error.localizedDescription)")
+            WWWLog.e(tag, "Details: \(error)")
             // App cannot proceed without platform initialization
             fatalError("Cannot proceed without platform initialization: \(error)")
         }
 
         do {
             try IosLifecycleHookKt.installIosLifecycleHook()
-            NSLog("[\(tag)] ✅ iOS lifecycle hook installed")
+            WWWLog.i(tag, "iOS lifecycle hook installed")
 
             try IosPlatformEnablerKt.registerPlatformEnabler(enabler: IOSPlatformEnabler())
-            NSLog("[\(tag)] ✅ PlatformEnabler (Swift) registered into Koin")
+            WWWLog.i(tag, "PlatformEnabler (Swift) registered into Koin")
 
             try NativeMapViewProviderRegistrationKt.registerNativeMapViewProvider(
                 provider: SwiftNativeMapViewProvider()
             )
-            NSLog("[\(tag)] ✅ NativeMapViewProvider (Swift) registered into Koin")
+            WWWLog.i(tag, "NativeMapViewProvider (Swift) registered into Koin")
         } catch {
-            NSLog("[\(tag)] ❌ Error during registration: \(error)")
+            WWWLog.e(tag, "Error during registration", error: error)
             fatalError("Cannot proceed without registration: \(error)")
         }
     }
@@ -269,7 +272,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     /// - Important: View controller must be fully initialized before calling this method
     /// - Note: Navigation bar is hidden to allow Compose UI full-screen control
     func setRoot(_ viewController: UIViewController, in windowScene: UIWindowScene) {
-        NSLog("[\(tag)] 🪟 setRoot: \(type(of: viewController))")
+        #if DEBUG
+        WWWLog.d(tag, "setRoot: \(type(of: viewController))")
+        #endif
         let window = self.window ?? UIWindow(windowScene: windowScene)
 
         window.backgroundColor = .systemBackground
@@ -285,7 +290,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.nav = navigationController
         self.window = window
         window.makeKeyAndVisible()
-        NSLog("[\(tag)] ✅ window visible with root=\(type(of: viewController))")
+        WWWLog.i(tag, "window visible with root=\(type(of: viewController))")
     }
 
     /// UISceneDelegate lifecycle method called when the scene connects to the session.
@@ -331,34 +336,38 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                willConnectTo session: UISceneSession,
                options connectionOptions: UIScene.ConnectionOptions) {
 
-        NSLog("[\(tag)] 🚀 willConnectToScene")
+        WWWLog.i(tag, "willConnectToScene")
         guard let windowScene = scene as? UIWindowScene else {
-            NSLog("[\(tag)] ❌ not a UIWindowScene")
+            WWWLog.e(tag, "not a UIWindowScene")
             return
         }
 
         setenv("SKIKO_RENDER_API", "METAL", 1)
-        NSLog("[\(tag)] 🧩 SKIKO_RENDER_API=METAL")
+        #if DEBUG
+        WWWLog.d(tag, "SKIKO_RENDER_API=METAL")
+        #endif
 
         installPlatform()
 
         if let ctx = connectionOptions.urlContexts.first {
-            NSLog("[\(tag)] 🔗 deep link detected")
+            #if DEBUG
+            WWWLog.d(tag, "deep link detected")
+            #endif
             if let targetVC = viewController(for: ctx.url) {
                 setRoot(targetVC, in: windowScene)
                 return
             } else {
-                NSLog("[\(tag)] ⚠️ deep link not handled; falling back to main")
+                WWWLog.w(tag, "deep link not handled; falling back to main")
             }
         } else {
-            NSLog("[\(tag)] ℹ️ no deep link; launching main")
+            WWWLog.i(tag, "no deep link; launching main")
         }
 
         do {
             let mainVC = try RootControllerKt.makeMainViewController()
             setRoot(mainVC, in: windowScene)
         } catch {
-            NSLog("[\(tag)] ❌ Error creating MainViewController: \(error)")
+            WWWLog.e(tag, "Error creating MainViewController", error: error)
             fatalError("Cannot create main view controller: \(error)")
         }
     }
@@ -391,20 +400,28 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     /// - Note: Ignores URLs that cannot be parsed into valid view controllers
     /// - Note: Called on iOS 13+ for scene-based apps (replaces AppDelegate application:openURL:)
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-        NSLog("[SceneDelegate] 🔗 scene:openURLContexts count=\(URLContexts.count)")
+        #if DEBUG
+        WWWLog.d(tag, "scene:openURLContexts count=\(URLContexts.count)")
+        #endif
         guard let ctx = URLContexts.first else { return }
-        NSLog("[SceneDelegate] 🧭 route request (running): \(ctx.url.absoluteString)")
+        #if DEBUG
+        WWWLog.d(tag, "route request (running): \(ctx.url.absoluteString)")
+        #endif
 
         if let targetVC = viewController(for: ctx.url) {
             if let nav = self.nav {
-                NSLog("[SceneDelegate] ➡️ push \(type(of: targetVC))")
+                #if DEBUG
+                WWWLog.d(tag, "push \(type(of: targetVC))")
+                #endif
                 nav.pushViewController(targetVC, animated: true)
             } else if let windowScene = scene as? UIWindowScene {
-                NSLog("[SceneDelegate] 🪟 no nav; setRoot to \(type(of: targetVC))")
+                #if DEBUG
+                WWWLog.d(tag, "no nav; setRoot to \(type(of: targetVC))")
+                #endif
                 setRoot(targetVC, in: windowScene)
             }
         } else {
-            NSLog("[SceneDelegate] ⚠️ no VC for URL")
+            WWWLog.w(tag, "no VC for URL")
         }
     }
 

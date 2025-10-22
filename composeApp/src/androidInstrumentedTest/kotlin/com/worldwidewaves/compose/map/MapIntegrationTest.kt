@@ -23,7 +23,9 @@ package com.worldwidewaves.compose.map
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -650,28 +652,28 @@ private fun TestMapDownloadFlow(
         val state by stateFlow.collectAsState()
         when (state) {
             is MapFeatureState.NotAvailable -> {
-                androidx.compose.material3.Button(
+                Button(
                     onClick = onDownloadComplete,
                     modifier = Modifier.testTag("download-button"),
                 ) {
-                    androidx.compose.material3.Text("Download Map")
+                    Text("Download Map")
                 }
             }
             is MapFeatureState.Downloading -> {
                 val currentState = state as MapFeatureState.Downloading
-                androidx.compose.material3.Text(
+                Text(
                     "Downloading... ${currentState.progress}%",
                     modifier = Modifier.testTag("download-progress"),
                 )
             }
             is MapFeatureState.Installing -> {
-                androidx.compose.material3.Text(
+                Text(
                     "Installing...",
                     modifier = Modifier.testTag("install-status"),
                 )
             }
             is MapFeatureState.Installed -> {
-                androidx.compose.material3.Text(
+                Text(
                     "Map Ready",
                     modifier = Modifier.testTag("map-ready"),
                 )
@@ -679,7 +681,7 @@ private fun TestMapDownloadFlow(
             }
             is MapFeatureState.Failed -> {
                 val currentState = state as MapFeatureState.Failed
-                androidx.compose.material3.Text(
+                Text(
                     "Download Failed: ${currentState.errorMessage}",
                     modifier = Modifier.testTag("download-error"),
                 )
@@ -687,21 +689,21 @@ private fun TestMapDownloadFlow(
             }
             is MapFeatureState.Retrying -> {
                 val currentState = state as MapFeatureState.Retrying
-                androidx.compose.material3.Text(
+                Text(
                     "Retrying... ${currentState.attempt}/${currentState.maxAttempts}",
                     modifier = Modifier.testTag("retry-status"),
                 )
                 onRetry()
             }
             is MapFeatureState.Canceling -> {
-                androidx.compose.material3.Text(
+                Text(
                     "Canceling...",
                     modifier = Modifier.testTag("cancel-status"),
                 )
                 onCancel()
             }
             else -> {
-                androidx.compose.material3.Text(
+                Text(
                     "Unknown State",
                     modifier = Modifier.testTag("unknown-state"),
                 )
@@ -725,7 +727,7 @@ private fun TestLocationIntegration(
                 .fillMaxSize()
                 .testTag("location-integration"),
     ) {
-        androidx.compose.material3.Text(
+        Text(
             text = currentLocation?.let { "Location: ${it.latitude}, ${it.longitude}" } ?: "No Location",
             modifier = Modifier.testTag("location-display"),
         )
@@ -747,7 +749,7 @@ private fun TestLocationPermissionFlow(
     }
 
     Box(modifier = Modifier.testTag("permission-flow")) {
-        androidx.compose.material3.Text(
+        Text(
             text = if (hasPermission) "Permission Granted" else "Permission Denied",
         )
     }
@@ -775,7 +777,7 @@ private fun TestLocationAccuracy(
     }
 
     Box(modifier = Modifier.testTag("accuracy-test")) {
-        androidx.compose.material3.Text("Testing Accuracy...")
+        Text("Testing Accuracy...")
     }
 }
 
@@ -793,7 +795,7 @@ private fun TestCameraOperations(
     }
 
     Box(modifier = Modifier.testTag("camera-operations")) {
-        androidx.compose.material3.Text("Camera: ${targetPosition.latitude}, ${targetPosition.longitude} @ ${targetZoom}x")
+        Text("Camera: ${targetPosition.latitude}, ${targetPosition.longitude} @ ${targetZoom}x")
     }
 }
 
@@ -808,7 +810,7 @@ private fun TestCameraBounds(
     }
 
     Box(modifier = Modifier.testTag("camera-bounds")) {
-        androidx.compose.material3.Text("Testing Bounds Constraints")
+        Text("Testing Bounds Constraints")
     }
 }
 
@@ -826,7 +828,7 @@ private fun TestCameraAnimations(
     }
 
     Box(modifier = Modifier.testTag("camera-animations")) {
-        androidx.compose.material3.Text("Testing Smooth Animations")
+        Text("Testing Smooth Animations")
     }
 }
 
@@ -848,7 +850,7 @@ private fun TestWaveVisualization(
     }
 
     Box(modifier = Modifier.testTag("wave-visualization")) {
-        androidx.compose.material3.Text("Rendered ${wavePolygons.size} polygons")
+        Text("Rendered ${wavePolygons.size} polygons")
     }
 }
 
@@ -869,7 +871,7 @@ private fun TestWaveProgressionUpdates(
     }
 
     Box(modifier = Modifier.testTag("progression-updates")) {
-        androidx.compose.material3.Text("Processing ${progressionUpdates.size} updates")
+        Text("Processing ${progressionUpdates.size} updates")
     }
 }
 
@@ -891,7 +893,7 @@ private fun TestLargeDatasetHandling(
     }
 
     Box(modifier = Modifier.testTag("large-dataset")) {
-        androidx.compose.material3.Text("Processing ${polygons.size} polygons")
+        Text("Processing ${polygons.size} polygons")
     }
 }
 
@@ -909,7 +911,7 @@ private fun TestFrameRatePerformance(
     }
 
     Box(modifier = Modifier.testTag("frame-rate-test")) {
-        androidx.compose.material3.Text("Testing Frame Rate")
+        Text("Testing Frame Rate")
     }
 }
 
@@ -929,7 +931,7 @@ private fun TestNetworkErrorHandling(
     }
 
     Box(modifier = Modifier.testTag("network-error-test")) {
-        androidx.compose.material3.Text("Testing Network Error Handling")
+        Text("Testing Network Error Handling")
     }
 }
 
@@ -946,6 +948,6 @@ private fun TestResourceManagement(
     }
 
     Box(modifier = Modifier.testTag("resource-management")) {
-        androidx.compose.material3.Text("Testing Resource Management")
+        Text("Testing Resource Management")
     }
 }

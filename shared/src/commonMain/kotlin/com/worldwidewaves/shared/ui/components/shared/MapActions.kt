@@ -34,6 +34,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
@@ -92,6 +96,9 @@ fun MapActions(
                             if (isRunning && (clock.now() > event.getWaveStartDateTime())) {
                                 onTargetWave()
                             }
+                        }.semantics {
+                            role = Role.Button
+                            stateDescription = if (isRunning) "Active" else "Inactive"
                         },
                 painter = painterResource(if (isRunning) Res.drawable.target_wave_active else Res.drawable.target_wave_inactive),
                 contentDescription =
@@ -107,6 +114,9 @@ fun MapActions(
                             if (isInArea) {
                                 onTargetUser()
                             }
+                        }.semantics {
+                            role = Role.Button
+                            stateDescription = if (isInArea) "Active" else "Inactive"
                         },
                 painter = painterResource(if (isInArea) Res.drawable.target_me_active else Res.drawable.target_me_inactive),
                 contentDescription =

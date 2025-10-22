@@ -41,6 +41,7 @@ object WWWGlobals {
         val ENABLE_VERBOSE_LOGGING: Boolean = BuildKonfig.ENABLE_VERBOSE_LOGGING
         val ENABLE_DEBUG_LOGGING: Boolean = BuildKonfig.ENABLE_DEBUG_LOGGING
         val ENABLE_PERFORMANCE_LOGGING: Boolean = BuildKonfig.ENABLE_PERFORMANCE_LOGGING
+        val ENABLE_POSITION_TRACKING_LOGGING: Boolean = BuildKonfig.ENABLE_POSITION_TRACKING_LOGGING
     }
 
     // ============================================================================================
@@ -175,8 +176,36 @@ object WWWGlobals {
         /** Threshold for significant padding/constraint changes (10%) */
         const val CHANGE_THRESHOLD = 0.1
 
+        /** Maximum shrinkage percentage for bounding box transformations (50%) */
+        const val MAX_SHRINKAGE_PERCENTAGE = 0.5
+
         /** Angle conversion constants */
         const val DEGREES_TO_RADIANS_FACTOR = 180.0
+
+        // Adaptive Camera Constants
+        /** Wave progression threshold for Phase 2 (balanced view) - 40% */
+        const val ADAPTIVE_CAMERA_PHASE_2_START = 0.4
+
+        /** Wave progression threshold for Phase 3 (full coverage) - 70% */
+        const val ADAPTIVE_CAMERA_PHASE_3_START = 0.7
+
+        /** Maximum span ratio for Phase 1 (early wave, tight focus) - 50% of event area */
+        const val ADAPTIVE_CAMERA_PHASE_1_MAX_SPAN = 0.5
+
+        /** Maximum span ratio for Phase 2 (mid wave, balanced view) - 70% of event area */
+        const val ADAPTIVE_CAMERA_PHASE_2_MAX_SPAN = 0.7
+
+        /** Maximum span ratio for Phase 3 (late wave, full coverage) - 100% of event area */
+        const val ADAPTIVE_CAMERA_PHASE_3_MAX_SPAN = 1.0
+
+        /** Edge detection threshold - within 20% of event boundary */
+        const val ADAPTIVE_CAMERA_EDGE_THRESHOLD = 0.2
+
+        /** Distance padding ratio - adds 20% extra space when distance overrides phase limit */
+        const val ADAPTIVE_CAMERA_DISTANCE_PADDING = 1.2
+
+        /** Minimum span when user or wave is near edge - 70% of event area */
+        const val ADAPTIVE_CAMERA_EDGE_MIN_SPAN = 0.7
     }
 
     // ============================================================================================

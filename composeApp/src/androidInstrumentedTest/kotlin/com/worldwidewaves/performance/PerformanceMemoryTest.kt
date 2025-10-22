@@ -21,9 +21,13 @@
 
 package com.worldwidewaves.performance
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -37,6 +41,7 @@ import com.worldwidewaves.testing.BaseIntegrationTest
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertTrue
@@ -207,7 +212,7 @@ class PerformanceMemoryTest : BaseIntegrationTest() {
         showMap: Boolean,
         showDetails: Boolean,
     ) {
-        androidx.compose.foundation.layout.Column {
+        Column {
             if (showMap) {
                 Surface(
                     modifier = Modifier.height(200.dp),
@@ -228,11 +233,11 @@ class PerformanceMemoryTest : BaseIntegrationTest() {
     @Composable
     private fun ComplexEventCard(event: IWWWEvent) {
         Card {
-            androidx.compose.foundation.layout.Column {
+            Column {
                 Text("Event: ${event.id}")
-                androidx.compose.foundation.layout.Row {
+                Row {
                     repeat(3) { index ->
-                        androidx.compose.material3.Button(
+                        Button(
                             onClick = { },
                         ) {
                             Text("Action $index")
@@ -253,7 +258,7 @@ class PerformanceMemoryTest : BaseIntegrationTest() {
             onResourceAllocated("data-cache-$screenId")
         }
 
-        androidx.compose.foundation.layout.Column {
+        Column {
             Text("Screen: $screenId")
             repeat(50) { index ->
                 Card {
@@ -265,8 +270,7 @@ class PerformanceMemoryTest : BaseIntegrationTest() {
 
     @Composable
     private fun EmptyScreen() {
-        androidx.compose.foundation.layout
-            .Box {}
+        Box {}
     }
 
     @Composable
@@ -346,7 +350,7 @@ class PerformanceMemoryTest : BaseIntegrationTest() {
         fun executeAsync(
             taskType: String,
             durationMs: Long,
-        ): kotlinx.coroutines.Deferred<TaskResult>
+        ): Deferred<TaskResult>
     }
 
     interface MapPerformanceMonitor {

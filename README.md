@@ -1,15 +1,76 @@
-# WorldWideWaves
+<p align="center">
+  <img src="misc/www-logo.png" width="200" alt="WorldWideWaves Logo">
+  <h1 align="center">WorldWideWaves</h1>
+  <p align="center"><em>Orchestrate synchronized human waves worldwide</em></p>
+</p>
 
-[![Overall Status](https://github.com/mglcel/WorldWideWaves/actions/workflows/99-pipeline-status.yml/badge.svg)](https://github.com/mglcel/WorldWideWaves/actions/workflows/99-pipeline-status.yml)
-[![Quality & Security](https://github.com/mglcel/WorldWideWaves/actions/workflows/03-code-quality.yml/badge.svg)](https://github.com/mglcel/WorldWideWaves/actions/workflows/03-code-quality.yml)
-[![Android Build](https://github.com/mglcel/WorldWideWaves/actions/workflows/01-build-android.yml/badge.svg)](https://github.com/mglcel/WorldWideWaves/actions/workflows/01-build-android.yml)
-[![iOS Build](https://github.com/mglcel/WorldWideWaves/actions/workflows/02-build-ios.yml/badge.svg)](https://github.com/mglcel/WorldWideWaves/actions/workflows/02-build-ios.yml)
+<p align="center">
+  <a href="https://github.com/mglcel/WorldWideWaves/actions/workflows/99-pipeline-status.yml"><img src="https://github.com/mglcel/WorldWideWaves/actions/workflows/99-pipeline-status.yml/badge.svg" alt="Overall Status"></a>
+  <a href="https://github.com/mglcel/WorldWideWaves/actions/workflows/03-code-quality.yml"><img src="https://github.com/mglcel/WorldWideWaves/actions/workflows/03-code-quality.yml/badge.svg" alt="Quality & Security"></a>
+  <a href="https://github.com/mglcel/WorldWideWaves/actions/workflows/01-build-android.yml"><img src="https://github.com/mglcel/WorldWideWaves/actions/workflows/01-build-android.yml/badge.svg" alt="Android Build"></a>
+  <a href="https://github.com/mglcel/WorldWideWaves/actions/workflows/02-build-ios.yml"><img src="https://github.com/mglcel/WorldWideWaves/actions/workflows/02-build-ios.yml/badge.svg" alt="iOS Build"></a>
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License"></a>
+  <img src="https://img.shields.io/badge/Kotlin-2.2.0-7F52FF.svg" alt="Kotlin">
+  <img src="https://img.shields.io/badge/Platform-Android%20%7C%20iOS-green.svg" alt="Platform">
+  <img src="https://img.shields.io/badge/Tests-722%20passing-success.svg" alt="Tests">
+</p>
 
 A Kotlin Multiplatform mobile application orchestrating synchronized human waves through cities worldwide, fostering unity and shared human experience through real-time coordination and location-based services.
 
 ## Overview
 
 WorldWideWaves enables participants to join synchronized wave events at specific times and locations. The app leverages offline maps for 40+ major cities, real-time position tracking, and choreographed animations to create coordinated experiences across devices and geographies.
+
+### Architecture Overview
+
+```mermaid
+graph TB
+    subgraph "Mobile Apps - Kotlin Multiplatform"
+        ANDROID[Android App<br/>Jetpack Compose]
+        IOS[iOS App<br/>Compose Multiplatform]
+    end
+
+    subgraph "Shared Business Logic - 70% Code Reuse"
+        UI[UI Layer<br/>Compose Screens & ViewModels]
+        DOMAIN[Domain Layer<br/>Event Observation, Wave Progression]
+        DATA[Data Layer<br/>Repositories, Position Management]
+    end
+
+    subgraph "Platform Services"
+        GPS[Device GPS<br/>CoreLocation / FusedLocation]
+        MAPS[MapLibre<br/>Offline Vector Tiles]
+        AUDIO[MIDI Audio<br/>AVAudioEngine / AudioTrack]
+    end
+
+    subgraph "Backend & Data"
+        FIREBASE[Firebase<br/>Analytics & Crashlytics]
+        API[Event API<br/>Configuration & Events]
+        TILES[Map Data<br/>40+ Cities Offline]
+    end
+
+    ANDROID --> UI
+    IOS --> UI
+    UI --> DOMAIN
+    DOMAIN --> DATA
+
+    DATA --> GPS
+    DATA --> MAPS
+    DATA --> AUDIO
+
+    ANDROID --> FIREBASE
+    IOS --> FIREBASE
+    DATA --> API
+    MAPS --> TILES
+
+    style ANDROID fill:#3DDC84,color:#000
+    style IOS fill:#007AFF,color:#fff
+    style UI fill:#4285f4,color:#fff
+    style DOMAIN fill:#34a853,color:#fff
+    style DATA fill:#ea4335,color:#fff
+```
 
 ## Key Features
 
@@ -20,20 +81,35 @@ WorldWideWaves enables participants to join synchronized wave events at specific
 - Cross-platform business logic sharing (70% code reuse)
 - Comprehensive CI/CD pipeline with multi-stage quality gates
 
+## 📱 App Preview
+
+<p align="center">
+  <img src="misc/iOS-Screenshot-1.jpg" width="250" alt="Event List - Discover upcoming wave events">
+  <img src="misc/iOS-Screenshot-3.jpg" width="250" alt="Wave Participation - Join synchronized waves">
+  <img src="misc/iOS-Screenshot-5.jpg" width="250" alt="Offline Maps - 40+ cities available">
+</p>
+
+<p align="center">
+  <em>iOS app running on iPhone 15 Pro simulator</em>
+</p>
+
+> **Demo**: Animated demo coming soon - watch this space!
+
 ## Project Structure
 
 ```
 WorldWideWaves/
 ├── composeApp/              # Android app (Compose UI)
 ├── shared/                  # Kotlin Multiplatform business logic
-├── iosApp/                  # iOS app (SwiftUI)
+├── iosApp/                  # iOS app (Compose UI via ComposeUIViewController)
 ├── maps/                    # 40+ city offline map modules
 │   ├── paris_france/
 │   ├── new_york_usa/
 │   └── ...
 ├── scripts/                 # Build tools and map generation
 ├── docs/                    # Documentation
-└── .github/workflows/       # CI/CD pipelines
+├── .github/workflows/       # CI/CD pipelines
+└── .git-hooks/              # Custom git hooks
 ```
 
 ### Key Modules
@@ -41,9 +117,9 @@ WorldWideWaves/
 | Module | Description |
 |--------|-------------|
 | `composeApp/` | Android app with Compose Multiplatform UI |
-| `shared/` | Cross-platform business logic, ViewModels, and domain layer |
-| `iosApp/` | iOS app with SwiftUI calling Kotlin business logic |
-| `maps/` | Android Dynamic Feature modules with offline map data |
+| `shared/` | Cross-platform business logic, ViewModels, and domain layer (70% code reuse) |
+| `iosApp/` | iOS app with Compose UI via ComposeUIViewController |
+| `maps/` | Android Dynamic Feature modules with offline map data (40+ cities) |
 
 ## Tech Stack
 
@@ -61,8 +137,9 @@ WorldWideWaves/
 
 **iOS:**
 - Deployment target: iOS 14+
-- SwiftUI
-- MapLibre iOS (in progress)
+- Compose Multiplatform via ComposeUIViewController
+- MapLibre iOS 6.8.0 (95% feature parity with Android)
+- Native Swift wrappers for platform services
 
 **Backend:**
 - Firebase Analytics & Crashlytics
@@ -151,7 +228,7 @@ emulator -avd Pixel_3a_API_30 &
 ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
 
 # Open and run in Xcode
-open iosApp/iosApp.xcodeproj
+open iosApp/worldwidewaves.xcodeproj
 ```
 
 ### 6. Setup Git Hooks (Optional)
@@ -238,10 +315,10 @@ See [docs/contributing.md](docs/contributing.md) for complete guidelines.
 
 ### Specialized Topics
 
-- [Firebase Setup](docs/setup/FIREBASE_SETUP.md) - Firebase project configuration and security
-- [Map Architecture](docs/architecture/MAP_ARCHITECTURE_ANALYSIS.md) - Shared vs platform-specific map system design
+- [Firebase Setup](docs/setup/firebase-setup.md) - Firebase project configuration and security
+- [Map Architecture](docs/architecture/map-architecture-analysis.md) - Shared vs platform-specific map system design
 - [iOS Development](CLAUDE_iOS.md) - Complete iOS development guide
-- [iOS Map Status](iOS_MAP_IMPLEMENTATION_STATUS.md) - iOS map feature parity (95%)
+- [iOS Documentation](docs/ios/) - iOS-specific guides, debugging, and accessibility
 
 See [docs/README.md](docs/README.md) for complete documentation map.
 
@@ -257,53 +334,49 @@ See [docs/README.md](docs/README.md) for complete documentation map.
 - Never disable tests - always fix root causes
 - Tests validate business requirements, not implementation details
 
-### Test Coverage ✅
-
-**Status**: **535 unit tests, 100% pass rate in ~22s**
-
-| Phase | Focus | Tests | Status |
-|-------|-------|-------|--------|
-| **Phase 1** | Critical Paths | 51 | ✅ Complete |
-| **Phase 2** | Data/State | 51 | ✅ Complete |
-| **Phase 3** | ViewModels | 49 | ✅ Complete |
-| **Phase 4** | iOS Safety | 12 | ✅ Complete |
-
-**Coverage by Layer:**
-- **Domain**: State management (36 tests), Scheduling (30 tests), Progression (18 tests)
-- **ViewModels**: Events UI (29 tests), Map downloads (20 tests)
-- **Data**: Favorites (24 tests), Map storage (14 tests)
-- **Events**: Core logic (106 tests), Wave calculations
-- **iOS**: Deadlock prevention (12 tests), Exception handling validated
-- **Sound**: Waveform generation (47 tests), MIDI parsing
-- **Position**: GPS tracking (12 tests), PositionManager
-
-**Key Achievements:**
-- ✅ 1 critical production bug discovered and fixed (wave hit timing)
-- ✅ Zero test flakiness
-- ✅ Comprehensive iOS safety validation
-- ✅ Geometric accuracy proven (Haversine, point-in-polygon)
-- ✅ Battery optimization validated (adaptive intervals)
-
-See [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) and [docs/TEST_COVERAGE_FINAL_REPORT.md](docs/TEST_COVERAGE_FINAL_REPORT.md) for complete test coverage analysis.
-
 ### Running Tests
 
 ```bash
-# Full unit test suite (535 tests)
+# Unit tests
 ./gradlew :shared:testDebugUnitTest
-
-# Specific test suite
-./gradlew :shared:testDebugUnitTest --tests "*WaveHitAccuracyTest*"
 
 # Android instrumented tests
 ./gradlew :composeApp:connectedDebugAndroidTest
 
 # iOS safety verification
-./scripts/verify-ios-safety.sh
+./scripts/dev/verification/verify-ios-safety.sh
 
 # All quality checks
 ./gradlew :shared:testDebugUnitTest ktlintCheck detekt
 ```
+
+See [docs/testing-strategy.md](docs/testing-strategy.md) for complete testing approach.
+
+## Documentation
+
+Comprehensive documentation is available in the `docs/` directory:
+
+### Core Documentation
+- **[CLAUDE.md](CLAUDE.md)** - Complete project development guide (start here for development)
+- **[CLAUDE_iOS.md](CLAUDE_iOS.md)** - iOS-specific development rules and deadlock prevention
+
+### Documentation Hub
+- **[docs/](docs/)** - Complete documentation index
+  - [Architecture](docs/architecture.md) - System design and patterns
+  - [iOS Development](docs/ios/) - iOS-specific guides and debugging
+  - [Android Development](docs/android/) - Android MapLibre implementation reference
+  - [Testing Strategy](docs/TESTING_STRATEGY.md) - Test architecture and approach
+  - [Accessibility Guide](docs/ACCESSIBILITY_GUIDE.md) - WCAG 2.1 Level AA compliance
+  - [CI/CD Pipeline](docs/ci-cd.md) - GitHub Actions workflows
+  - [Environment Setup](docs/environment-setup.md) - Complete development environment configuration
+  - [Contributing](docs/contributing.md) - Contribution guidelines
+
+### Quick Links
+- [Setup Firebase](docs/setup/) - Firebase configuration guides
+- [Development Workflows](docs/development.md) - Daily development tasks
+- [Map Architecture](docs/architecture/map-architecture-analysis.md) - MapLibre integration deep dive
+
+---
 
 ## License
 

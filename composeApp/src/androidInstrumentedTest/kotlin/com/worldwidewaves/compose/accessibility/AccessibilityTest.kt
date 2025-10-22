@@ -59,6 +59,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -195,9 +197,9 @@ class AccessibilityTest {
                 .fetchSemanticsNodes()
                 .filter { node ->
                     val hasAction =
-                        node.config.contains(androidx.compose.ui.semantics.SemanticsActions.OnClick) ||
-                            node.config.contains(androidx.compose.ui.semantics.SemanticsActions.RequestFocus)
-                    val hasDescription = node.config.contains(androidx.compose.ui.semantics.SemanticsProperties.ContentDescription)
+                        node.config.contains(SemanticsActions.OnClick) ||
+                            node.config.contains(SemanticsActions.RequestFocus)
+                    val hasDescription = node.config.contains(SemanticsProperties.ContentDescription)
                     hasAction && !hasDescription
                 }
 
@@ -876,8 +878,7 @@ class AccessibilityTest {
     // HELPER FUNCTIONS
     // ========================================================================
 
-    private fun hasRole(role: Role): SemanticsMatcher =
-        SemanticsMatcher.expectValue(androidx.compose.ui.semantics.SemanticsProperties.Role, role)
+    private fun hasRole(role: Role): SemanticsMatcher = SemanticsMatcher.expectValue(SemanticsProperties.Role, role)
 }
 
 // ========================================================================
