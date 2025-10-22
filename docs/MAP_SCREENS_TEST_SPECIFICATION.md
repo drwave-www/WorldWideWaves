@@ -344,6 +344,15 @@ if (eventAspect > screenAspect) {
 **Location**: `AndroidMapLibreAdapter.kt:527-535`
 **Impact**: Button animations (Target User, Target Wave) now work smoothly without jumping
 
+#### 3.0.9 MapBoundsEnforcer Camera Idle Recalculation in WINDOW Mode
+**Issue**: After button animations (zoom 16), camera idle triggered constraint recalculation
+**Finding**: Recalculation used tiny viewport (0.0055° at zoom 16), creating microscopic constraints
+**Symptom**: After targetUser, couldn't pan south/north (locked by tiny bounds 0.0017°×0.0049°)
+**Fix**: Disable MapBoundsEnforcer camera idle listener in WINDOW mode (line 82)
+**Rationale**: WINDOW mode constraints are INITIAL bounds (from first viewport), not dynamic
+**Location**: `MapBoundsEnforcer.kt:79-107`
+**Impact**: Constraints stay constant after button animations, full pan area available
+
 #### 3.0.6 Screen Dimension Units
 **Finding**: Android uses physical pixels, iOS uses points (density-independent)
 **Status**: Both correct - aspect ratios are unitless, MapLibre handles density internally

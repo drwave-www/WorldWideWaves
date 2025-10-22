@@ -76,8 +76,10 @@ class MapBoundsEnforcer(
         // Apply the constraints with the current padding
         applyConstraintsWithPadding()
 
-        // Register the camera-idle listener only once
-        if (!constraintsApplied) {
+        // Register the camera-idle listener only once (ONLY for BOUNDS mode)
+        // WINDOW mode: Constraints should NOT update on viewport/zoom changes
+        // Only update on screen dimension changes (handled in AbstractEventMap)
+        if (!constraintsApplied && !isWindowMode) {
             mapLibreAdapter.addOnCameraIdleListener {
                 // Prevent recalculation if animation/user interaction is in progress
                 if (isSuppressed()) {
