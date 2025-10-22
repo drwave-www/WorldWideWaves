@@ -25,6 +25,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import com.worldwidewaves.activities.event.EventActivity
@@ -62,6 +63,15 @@ class AndroidPlatformEnabler(
                 putExtra("eventId", eventId)
             },
         )
+    }
+
+    override fun finishActivity() {
+        val currentContext = context ?: KoinPlatform.getKoin().get<Context>()
+        if (currentContext is AppCompatActivity) {
+            currentContext.finish()
+        } else {
+            Log.w("AndroidPlatformEnabler", "Cannot finish activity - context is not an Activity")
+        }
     }
 
     override fun toast(message: String) {

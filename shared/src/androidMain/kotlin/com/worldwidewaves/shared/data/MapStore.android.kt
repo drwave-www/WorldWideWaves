@@ -23,10 +23,10 @@ package com.worldwidewaves.shared.data
 
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker
 import com.worldwidewaves.shared.events.data.GeoJsonDataProvider
+import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -320,14 +320,14 @@ actual fun cacheStringToFile(
     val root = platformCacheRoot()
     val f = File(root, fileName)
     f.parentFile?.mkdirs()
-    Log.v("cacheStringToFile", "Caching data to $fileName")
+    Log.v(TAG, "cacheStringToFile: Caching data to $fileName")
     return try {
         f.writeText(content)
         val absolutePath = f.toURI().path
-        Log.d("cacheStringToFile", "Successfully cached to: $absolutePath")
+        Log.d(TAG, "cacheStringToFile: Successfully cached to: $absolutePath")
         absolutePath
     } catch (e: Exception) {
-        Log.e("cacheStringToFile", "Failed to cache $fileName: ${e.message}", e)
+        Log.e(TAG, "cacheStringToFile: Failed to cache $fileName: ${e.message}", e)
         null
     }
 }

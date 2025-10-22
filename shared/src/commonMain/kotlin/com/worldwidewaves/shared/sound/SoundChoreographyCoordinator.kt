@@ -51,7 +51,7 @@ class SoundChoreographyCoordinator(
     private val coroutineScopeProvider: CoroutineScopeProvider = DefaultCoroutineScopeProvider(),
 ) : KoinComponent {
     companion object {
-        private const val TAG = "SoundChoreographyCoordinator"
+        private const val TAG = "WWW.Sound.Choir"
     }
 
     @Suppress("UnusedPrivateProperty", "UnusedPrivateMember") // Injected for future clock-based features

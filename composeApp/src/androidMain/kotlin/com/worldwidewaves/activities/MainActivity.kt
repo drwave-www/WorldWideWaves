@@ -35,6 +35,7 @@ import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.ui.activities.MainScreen
 import com.worldwidewaves.utils.AndroidPlatformEnabler
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 // ----------------------------
@@ -66,7 +67,7 @@ open class MainActivity : AppCompatActivity() {
         splashScreen.setKeepOnScreenCondition {
             if (!isOfficialSplashDismissed) {
                 lifecycleScope.launch {
-                    kotlinx.coroutines.delay(WWWGlobals.Timing.SYSTEM_SPLASH_DURATION.inWholeMilliseconds)
+                    delay(WWWGlobals.Timing.SYSTEM_SPLASH_DURATION.inWholeMilliseconds)
                     isOfficialSplashDismissed = true
                 }
                 true // keep the official splash right now

@@ -194,7 +194,8 @@ class BoundsWindowModeTest {
     }
 
     /**
-     * WINDOW mode must calculate viewport padding to prevent edge overflow.
+     * WINDOW mode uses zero padding (relies on preventive gesture constraints).
+     * The key difference from BOUNDS mode is the zoom safety margin.
      */
     @Test
     fun `WINDOW mode calculates viewport padding`() {
@@ -205,27 +206,38 @@ class BoundsWindowModeTest {
         // When: Apply constraints
         enforcer.applyConstraints()
 
-        // Then: Constraint bounds should be SMALLER than original (padding applied)
+        // Then: Constraint bounds should be SMALLER than original bounds (viewport-based padding)
+        // WINDOW mode uses viewport-based padding (half viewport size) to constrain camera center
+        // iOS: Relies on these bounds (no runtime clamping)
+        // Android: Initial bounds, preventive gesture system provides additional runtime clamping
         val constraintBounds = adapter.constraintBounds
         assertNotNull(constraintBounds, "Constraint bounds should be set")
 
-        // Padding = viewport half-dimensions (approximately 0.05 degrees from getVisibleRegion mock)
-        assertTrue(
-            constraintBounds.sw.lat > TEST_BOUNDS.sw.lat,
-            "WINDOW mode should shrink SW latitude inward (padding applied)",
+        // Constraint bounds should be shrunk by half viewport size
+        val viewport = adapter.getVisibleRegion()
+        val viewportHalfHeight = (viewport.ne.lat - viewport.sw.lat) / 2.0
+        val viewportHalfWidth = (viewport.ne.lng - viewport.sw.lng) / 2.0
+
+        assertEquals(
+            TEST_BOUNDS.sw.lat + viewportHalfHeight,
+            constraintBounds.sw.lat,
+            0.0001,
+            "WINDOW mode shrinks SW by half viewport height",
         )
-        assertTrue(
-            constraintBounds.ne.lat < TEST_BOUNDS.ne.lat,
-            "WINDOW mode should shrink NE latitude inward (padding applied)",
+        assertEquals(
+            TEST_BOUNDS.ne.lat - viewportHalfHeight,
+            constraintBounds.ne.lat,
+            0.0001,
+            "WINDOW mode shrinks NE by half viewport height",
         )
 
-        // Then: Should apply zoom safety margin for WINDOW mode
+        // Then: Should apply zoom safety margin for WINDOW mode (this is the key difference from BOUNDS)
         assertTrue(
             adapter.applyZoomSafetyMarginCalled,
             "WINDOW mode should apply zoom safety margin",
         )
 
-        println("✅ WINDOW mode: viewport padding applied, safety margin enabled")
+        println("✅ WINDOW mode: viewport-based padding (iOS compatibility), safety margin enabled")
     }
 
     /**

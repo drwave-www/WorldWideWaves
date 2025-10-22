@@ -162,7 +162,7 @@ val helpersModule =
          * **Scope**: Singleton - single state holder for all events
          * **Thread-safety**: Yes - uses StateFlow for state updates
          * **Lifecycle**: Lives for entire app lifecycle
-         * **Dependencies**: WaveProgressionTracker, ObservationScheduler
+         * **Dependencies**: WaveProgressionTracker
          *
          * EventStateHolder coordinates event state transitions:
          * - Scheduled -> Observing -> Active -> Completed
@@ -171,7 +171,7 @@ val helpersModule =
          *
          * @see EventStateHolder for state management API
          */
-        single<EventStateHolder> { DefaultEventStateHolder(get(), get()) }
+        single<EventStateHolder> { DefaultEventStateHolder(get()) }
 
         /**
          * Provides [ObservationScheduler] for scheduling observation windows.
@@ -196,7 +196,9 @@ val helpersModule =
          * **Scope**: Factory - new instance per cleanup request
          * **Thread-safety**: Yes - each instance is independent
          * **Lifecycle**: Created on-demand, disposed after cleanup completes
-         * **Dependencies**: CloseableCoroutineScope for coroutine cleanup
+         * **Dependencies**:
+         * - CoroutineScopeProvider for coroutine cleanup
+         * - WWWEvents for event loading job cancellation
          *
          * Factory scope is used because cleanup is a transient operation:
          * - Each cleanup operation gets fresh handler
@@ -205,7 +207,7 @@ val helpersModule =
          *
          * @see WWWShutdownHandler for cleanup API
          */
-        factory { WWWShutdownHandler(get()) }
+        factory { WWWShutdownHandler(get(), get()) }
 
         /**
          * Provides [IClock] abstraction for time-based operations.

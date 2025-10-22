@@ -253,6 +253,35 @@ class WWWEvents : KoinComponent {
     }
 
     // --------------------------------------------------------------------
+    //  Lifecycle Management
+    // --------------------------------------------------------------------
+
+    /**
+     * Cleanup method to prevent memory leaks.
+     * Cancels the current load job and clears internal state.
+     *
+     * ## When to Call
+     * This method should be called during app shutdown lifecycle:
+     * - **Android**: In `MainApplication.onTerminate()` via WWWShutdownHandler
+     * - **iOS**: In `AppDelegate.applicationWillTerminate()` or SceneDelegate cleanup
+     * - **Tests**: In `@AfterTest` tearDown methods
+     *
+     * ## What it Does
+     * - Cancels the ongoing `currentLoadJob` if still running
+     * - Prevents memory leaks from long-lived coroutines
+     * - Ensures clean shutdown of event loading infrastructure
+     *
+     * ## Thread Safety
+     * This method is thread-safe and can be called from any thread.
+     */
+    fun cleanup() {
+        Log.v("WWWEvents.cleanup", "Cancelling current load job if running")
+        currentLoadJob?.cancel()
+        currentLoadJob = null
+        Log.v("WWWEvents.cleanup", "Cleanup complete")
+    }
+
+    // --------------------------------------------------------------------
     //  Simulation helpers
     // --------------------------------------------------------------------
 

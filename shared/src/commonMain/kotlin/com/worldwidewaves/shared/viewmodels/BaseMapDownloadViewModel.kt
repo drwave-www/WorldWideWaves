@@ -36,7 +36,7 @@ abstract class BaseMapDownloadViewModel :
     BaseViewModel(),
     IMapDownloadManager {
     companion object {
-        private const val TAG = "BaseMapDownloadViewModel"
+        private const val TAG = "WWW.ViewModel.Map"
     }
 
     private val featureStateMutable = MutableStateFlow<MapFeatureState>(MapFeatureState.NotChecked)

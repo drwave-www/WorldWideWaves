@@ -22,6 +22,7 @@ package com.worldwidewaves.shared
  */
 
 import androidx.compose.runtime.Composable
+import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.position.PositionManager
 import com.worldwidewaves.shared.utils.Log
@@ -95,11 +96,42 @@ class WWWPlatform(
     fun isOnSimulation(): Boolean = _simulation != null
 }
 
+/**
+ * Handles application shutdown lifecycle to prevent memory leaks.
+ *
+ * ## Purpose
+ * Coordinates cleanup of all long-lived components during app termination:
+ * - Cancels ongoing coroutines
+ * - Cancels event loading jobs
+ * - Ensures clean resource release
+ *
+ * ## Usage
+ * - **Android**: Called in `MainApplication.onTerminate()`
+ * - **iOS**: Should be called in `AppDelegate.applicationWillTerminate()` or scene cleanup
+ * - **Tests**: Called in test tearDown methods
+ *
+ * @property coroutineScopeProvider Provides access to coroutine scopes for cancellation
+ * @property wwwEvents Events repository that needs cleanup
+ */
 class WWWShutdownHandler(
     private val coroutineScopeProvider: CoroutineScopeProvider,
+    private val wwwEvents: WWWEvents,
 ) {
+    /**
+     * Performs app shutdown cleanup to prevent memory leaks.
+     *
+     * ## Cleanup Operations
+     * 1. Cancels all running coroutines via CoroutineScopeProvider
+     * 2. Cancels WWWEvents load job if still running
+     *
+     * ## Thread Safety
+     * Safe to call from any thread. All cleanup operations are thread-safe.
+     */
     fun onAppShutdown() {
+        Log.i("WWWShutdownHandler", "Starting app shutdown cleanup")
+        wwwEvents.cleanup()
         coroutineScopeProvider.cancelAllCoroutines()
+        Log.i("WWWShutdownHandler", "App shutdown cleanup complete")
     }
 }
 
@@ -116,6 +148,9 @@ interface PlatformEnabler {
     fun openWaveActivity(eventId: String)
 
     fun openFullMapActivity(eventId: String)
+
+    // Close the current activity (used for back navigation)
+    fun finishActivity()
 
     fun toast(message: String)
 

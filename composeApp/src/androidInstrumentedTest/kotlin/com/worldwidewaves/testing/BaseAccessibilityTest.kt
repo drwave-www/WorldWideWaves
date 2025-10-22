@@ -21,6 +21,8 @@
 
 package com.worldwidewaves.testing
 
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasScrollAction
@@ -48,9 +50,9 @@ abstract class BaseAccessibilityTest : BaseComponentTest() {
         val elementsWithoutDescriptions =
             allNodes.filter { node ->
                 val hasAction =
-                    node.config.contains(androidx.compose.ui.semantics.SemanticsActions.OnClick) ||
-                        node.config.contains(androidx.compose.ui.semantics.SemanticsActions.RequestFocus)
-                val hasDescription = node.config.contains(androidx.compose.ui.semantics.SemanticsProperties.ContentDescription)
+                    node.config.contains(SemanticsActions.OnClick) ||
+                        node.config.contains(SemanticsActions.RequestFocus)
+                val hasDescription = node.config.contains(SemanticsProperties.ContentDescription)
                 hasAction && !hasDescription
             }
 
@@ -103,14 +105,14 @@ abstract class BaseAccessibilityTest : BaseComponentTest() {
      */
     protected fun hasInteractiveAction(): SemanticsMatcher =
         SemanticsMatcher("has interactive action") { node ->
-            node.config.contains(androidx.compose.ui.semantics.SemanticsActions.OnClick) ||
-                node.config.contains(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) ||
-                node.config.contains(androidx.compose.ui.semantics.SemanticsActions.OnLongClick)
+            node.config.contains(SemanticsActions.OnClick) ||
+                node.config.contains(SemanticsActions.RequestFocus) ||
+                node.config.contains(SemanticsActions.OnLongClick)
         }
 
     protected fun hasContentDescription(): SemanticsMatcher =
         SemanticsMatcher("has content description") { node ->
-            node.config.contains(androidx.compose.ui.semantics.SemanticsProperties.ContentDescription)
+            node.config.contains(SemanticsProperties.ContentDescription)
         }
 
     /**

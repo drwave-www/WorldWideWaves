@@ -295,9 +295,10 @@ class AbstractEventMapTest : KoinTest {
             eventMap.moveToWindowBounds()
             testScope.testScheduler.advanceUntilIdle()
 
-            // Then - now uses animateCamera with calculated zoom (not animateCameraToBounds)
-            // Verify camera was animated to event center with intelligent zoom
-            verify(atLeast = 1) { mockMapLibreAdapter.animateCamera(any(), any(), any()) }
+            // Then - WINDOW mode applies constraints but does NOT animate camera
+            // Initial camera position is controlled by autoTargetUserOnFirstLocation or user interaction
+            verify(exactly = 0) { mockMapLibreAdapter.animateCamera(any(), any(), any()) }
+            verify { mockMapLibreAdapter.setBoundsForCameraTarget(any(), any(), any()) }
         }
 
     @Test
@@ -309,9 +310,10 @@ class AbstractEventMapTest : KoinTest {
 
             // Then
             // Constraints calculate and set min zoom based on expanded WINDOW bounds
-            // AbstractEventMap just sets max zoom and lets constraints handle min zoom
-            verify { mockMapLibreAdapter.getMinZoomLevel() }
+            // AbstractEventMap sets max zoom and applies constraints
+            // No polling for min zoom in new implementation (no camera animation)
             verify { mockMapLibreAdapter.setMaxZoomPreference(18.0) }
+            verify { mockMapLibreAdapter.setBoundsForCameraTarget(any(), any(), any()) }
         }
 
     @Test

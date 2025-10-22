@@ -26,18 +26,12 @@ private const val DEFAULT_WIDTH = 375.0
 private const val DEFAULT_HEIGHT = 812.0
 
 /**
- * iOS implementation of MapLibreAdapter using iOS MapLibre SDK via Swift wrapper.
+ * iOS MapLibreAdapter implementation.
  *
- * This adapter bridges Kotlin shared logic to Swift MapLibreViewWrapper via MapWrapperRegistry.
- * Camera commands are stored in the registry and polled/executed by Swift.
+ * Bridges Kotlin shared logic to Swift MapLibreViewWrapper via MapWrapperRegistry.
+ * Camera commands are stored in registry and executed immediately via callbacks.
  *
- * Architecture:
- * - Kotlin (this class) → MapWrapperRegistry (camera commands) → Swift MapLibreViewWrapper → MapLibre SDK
- *
- * Similar to polygon rendering, camera commands use the registry pattern for Kotlin-Swift coordination.
- *
- * Note: Each IosEventMap creates its own adapter instance with event-specific ID for
- * proper camera command routing through the registry.
+ * Architecture: Kotlin → MapWrapperRegistry → Swift MapLibreViewWrapper → MapLibre SDK
  */
 class IosMapLibreAdapter(
     private val eventId: String,
@@ -76,44 +70,18 @@ class IosMapLibreAdapter(
         callback.invoke()
     }
 
-    @Suppress("ReturnCount") // Multiple returns for guard clauses (null wrapper, zero dimension, valid dimension)
+    @Suppress("ReturnCount")
     override fun getWidth(): Double {
-        // Get actual map view dimensions from Swift wrapper (not hardcoded defaults)
-        val wrapper = MapWrapperRegistry.getWrapper(eventId)
-        if (wrapper == null) {
-            Log.w(TAG, "getWidth: wrapper is null, returning default: $DEFAULT_WIDTH")
-            return DEFAULT_WIDTH
-        }
-
-        // Synchronously get width from Swift wrapper
+        val wrapper = MapWrapperRegistry.getWrapper(eventId) ?: return DEFAULT_WIDTH
         val actualWidth = MapWrapperRegistry.getMapWidth(eventId)
-        if (actualWidth > 0) {
-            Log.v(TAG, "getWidth: returning actual map width: $actualWidth")
-            return actualWidth
-        }
-
-        Log.w(TAG, "getWidth: actual width is 0, returning default: $DEFAULT_WIDTH")
-        return DEFAULT_WIDTH
+        return if (actualWidth > 0) actualWidth else DEFAULT_WIDTH
     }
 
-    @Suppress("ReturnCount") // Multiple returns for guard clauses (null wrapper, zero dimension, valid dimension)
+    @Suppress("ReturnCount")
     override fun getHeight(): Double {
-        // Get actual map view dimensions from Swift wrapper (not hardcoded defaults)
-        val wrapper = MapWrapperRegistry.getWrapper(eventId)
-        if (wrapper == null) {
-            Log.w(TAG, "getHeight: wrapper is null, returning default: $DEFAULT_HEIGHT")
-            return DEFAULT_HEIGHT
-        }
-
-        // Synchronously get height from Swift wrapper
+        val wrapper = MapWrapperRegistry.getWrapper(eventId) ?: return DEFAULT_HEIGHT
         val actualHeight = MapWrapperRegistry.getMapHeight(eventId)
-        if (actualHeight > 0) {
-            Log.v(TAG, "getHeight: returning actual map height: $actualHeight")
-            return actualHeight
-        }
-
-        Log.w(TAG, "getHeight: actual height is 0, returning default: $DEFAULT_HEIGHT")
-        return DEFAULT_HEIGHT
+        return if (actualHeight > 0) actualHeight else DEFAULT_HEIGHT
     }
 
     override fun getCameraPosition(): Position? {
@@ -125,23 +93,10 @@ class IosMapLibreAdapter(
         return _currentPosition.value
     }
 
-    @Suppress("ReturnCount") // Early returns for guard clauses - improves readability
+    @Suppress("ReturnCount")
     override fun getVisibleRegion(): BoundingBox {
-        val w = wrapper
-        if (w == null) {
-            Log.w(TAG, "getVisibleRegion: wrapper is null, returning fallback")
-            return createFallbackBounds()
-        }
-
-        // Get visible region from Swift wrapper
-        val visibleRegion = MapWrapperRegistry.getVisibleRegion(eventId)
-        if (visibleRegion == null) {
-            Log.w(TAG, "getVisibleRegion: no visible region available, returning fallback")
-            return createFallbackBounds()
-        }
-
-        Log.d(TAG, "getVisibleRegion: got region from Swift wrapper")
-        return visibleRegion
+        if (wrapper == null) return createFallbackBounds()
+        return MapWrapperRegistry.getVisibleRegion(eventId) ?: createFallbackBounds()
     }
 
     private fun createFallbackBounds(): BoundingBox =
@@ -152,11 +107,7 @@ class IosMapLibreAdapter(
             ),
         )!!
 
-    /**
-     * Update camera position from Swift delegate callback.
-     * Called by Swift code when map camera changes.
-     * Now bridges from MapWrapperRegistry to StateFlow.
-     */
+    /** Update camera position from Swift delegate callback. */
     fun updateCameraPosition(
         latitude: Double,
         longitude: Double,
@@ -164,40 +115,13 @@ class IosMapLibreAdapter(
         _currentPosition.value = Position(latitude, longitude)
     }
 
-    /**
-     * Update zoom level from Swift delegate callback.
-     * Called by Swift code when map zoom changes.
-     * Now bridges from MapWrapperRegistry to StateFlow.
-     */
+    /** Update zoom level from Swift delegate callback. */
     fun updateZoom(zoom: Double) {
         _currentZoom.value = zoom
     }
 
-    /**
-     * Poll registry for camera updates and update StateFlows.
-     * Called periodically or on demand to sync registry → StateFlow.
-     * Currently unused - camera updates happen via MapWrapperRegistry.updateCameraPosition/Zoom
-     * Kept for potential future use with polling fallback.
-     */
-    @Suppress("UnusedPrivateMember")
-    private fun syncCameraStateFromRegistry() {
-        val position = MapWrapperRegistry.getCameraPosition(eventId)
-        if (position != null) {
-            _currentPosition.value = Position(position.first, position.second)
-        }
-
-        val zoom = MapWrapperRegistry.getCameraZoom(eventId)
-        if (zoom != null) {
-            _currentZoom.value = zoom
-        }
-    }
-
     override fun moveCamera(bounds: BoundingBox) {
-        Log.d(TAG, "Moving camera to bounds for event: $eventId")
-        MapWrapperRegistry.setPendingCameraCommand(
-            eventId,
-            CameraCommand.MoveToBounds(bounds),
-        )
+        MapWrapperRegistry.setPendingCameraCommand(eventId, CameraCommand.MoveToBounds(bounds))
     }
 
     override fun animateCamera(
@@ -205,17 +129,8 @@ class IosMapLibreAdapter(
         zoom: Double?,
         callback: MapCameraCallback?,
     ) {
-        Log.d(TAG, "Animating camera to position: ${position.lat}, ${position.lng}, zoom=$zoom for event: $eventId")
+        val callbackId = if (callback != null) "$eventId-animate-${Random.nextLong()}" else null
 
-        // Generate unique callback ID for this animation
-        val callbackId =
-            if (callback != null) {
-                "$eventId-animate-${Random.nextLong()}"
-            } else {
-                null
-            }
-
-        // Store callback for async completion
         if (callback != null && callbackId != null) {
             MapWrapperRegistry.setCameraAnimationCallback(callbackId, callback)
         }
@@ -231,17 +146,8 @@ class IosMapLibreAdapter(
         padding: Int,
         callback: MapCameraCallback?,
     ) {
-        Log.d(TAG, "Animating camera to bounds with padding: $padding for event: $eventId")
+        val callbackId = if (callback != null) "$eventId-bounds-${Random.nextLong()}" else null
 
-        // Generate unique callback ID for this animation
-        val callbackId =
-            if (callback != null) {
-                "$eventId-bounds-${Random.nextLong()}"
-            } else {
-                null
-            }
-
-        // Store callback for async completion
         if (callback != null && callbackId != null) {
             MapWrapperRegistry.setCameraAnimationCallback(callbackId, callback)
         }
@@ -257,25 +163,7 @@ class IosMapLibreAdapter(
         applyZoomSafetyMargin: Boolean,
         originalEventBounds: BoundingBox?,
     ) {
-        Log.d(TAG, "Setting camera constraint bounds for event: $eventId, applyZoomSafetyMargin=$applyZoomSafetyMargin")
-        Log.d(
-            TAG,
-            "BBox details: minLat=${constraintBounds.minLatitude}, maxLat=${constraintBounds.maxLatitude}, " +
-                "minLng=${constraintBounds.minLongitude}, maxLng=${constraintBounds.maxLongitude}",
-        )
-        Log.d(
-            TAG,
-            "SW/NE: SW(${constraintBounds.sw.lat},${constraintBounds.sw.lng}) NE(${constraintBounds.ne.lat},${constraintBounds.ne.lng})",
-        )
-        if (originalEventBounds != null) {
-            Log.d(
-                TAG,
-                "Original event bounds: SW(${originalEventBounds.sw.lat},${originalEventBounds.sw.lng}) " +
-                    "NE(${originalEventBounds.ne.lat},${originalEventBounds.ne.lng})",
-            )
-        }
-        // Pass both constraint bounds and original event bounds to iOS
-        // iOS uses constraint bounds for gesture enforcement and original bounds for min zoom calculation
+        // Pass constraint bounds (for gestures) and original bounds (for min zoom) to iOS
         MapWrapperRegistry.setPendingCameraCommand(
             eventId,
             CameraCommand.SetConstraintBounds(constraintBounds, originalEventBounds, applyZoomSafetyMargin),
@@ -283,29 +171,16 @@ class IosMapLibreAdapter(
     }
 
     override fun getMinZoomLevel(): Double {
-        val wrapper = MapWrapperRegistry.getWrapper(eventId)
-        if (wrapper == null) {
-            Log.w(TAG, "getMinZoomLevel: wrapper is null, returning 0.0")
-            return 0.0
-        }
-
-        // Synchronously update actualMinZoom from Swift before querying
-        // This prevents race condition where cached registry value returns 0.0
-        // while map view has the correct constraint-based min zoom
+        val wrapper = MapWrapperRegistry.getWrapper(eventId) ?: return 0.0
         MapWrapperRegistry.syncActualMinZoomFromWrapper(eventId)
-
-        val actualMinZoom = MapWrapperRegistry.getActualMinZoom(eventId)
-        Log.d(TAG, "getMinZoomLevel: returning actual map value: $actualMinZoom for event: $eventId")
-        return actualMinZoom
+        return MapWrapperRegistry.getActualMinZoom(eventId)
     }
 
     override fun setMinZoomPreference(minZoom: Double) {
-        Log.d(TAG, "Setting minimum zoom preference: $minZoom for event: $eventId")
         MapWrapperRegistry.setMinZoomCommand(eventId, minZoom)
     }
 
     override fun setMaxZoomPreference(maxZoom: Double) {
-        Log.d(TAG, "Setting maximum zoom preference: $maxZoom for event: $eventId")
         MapWrapperRegistry.setMaxZoomCommand(eventId, maxZoom)
     }
 
@@ -315,7 +190,6 @@ class IosMapLibreAdapter(
         right: Int,
         bottom: Int,
     ) {
-        Log.d(TAG, "Setting attribution margins: left=$left, top=$top, right=$right, bottom=$bottom for event: $eventId")
         MapWrapperRegistry.setAttributionMarginsCommand(eventId, left, top, right, bottom)
     }
 
@@ -323,17 +197,11 @@ class IosMapLibreAdapter(
         polygons: List<Any>,
         clearExisting: Boolean,
     ) {
-        Log.d(TAG, "addWavePolygons called - delegated to IosEventMap.updateWavePolygons()")
-        // Note: Polygon rendering is handled by IosEventMap.updateWavePolygons()
-        // which stores polygons in MapWrapperRegistry for Swift to render.
-        // This method is not called in the current iOS architecture.
+        // Polygon rendering handled by IosEventMap.updateWavePolygons()
     }
 
     override fun setOnMapClickListener(listener: ((Double, Double) -> Unit)?) {
-        Log.d(TAG, "Setting map click coordinate listener for event: $eventId")
-
         if (listener != null) {
-            // Store listener in registry, Swift wrapper will invoke with coordinates
             MapWrapperRegistry.setMapClickCoordinateListener(eventId, listener)
         } else {
             MapWrapperRegistry.clearMapClickCoordinateListener(eventId)
@@ -341,55 +209,32 @@ class IosMapLibreAdapter(
     }
 
     override fun addOnCameraIdleListener(callback: () -> Unit) {
-        Log.d(TAG, "Adding camera idle listener for event: $eventId")
         MapWrapperRegistry.setCameraIdleListener(eventId, callback)
     }
 
     override fun drawOverridenBbox(bbox: BoundingBox) {
-        Log.d(TAG, "Drawing override bounding box for event: $eventId")
-
-        // Trigger bbox drawing via registry
         MapWrapperRegistry.drawDebugBbox(eventId, bbox)
     }
 
     override fun onMapSet(callback: (MapLibreAdapter<*>) -> Unit) {
-        Log.d(TAG, "Registering onMapSet callback for event: $eventId")
-
-        // Store callback in registry (will be invoked after style loads)
         MapWrapperRegistry.addOnMapReadyCallback(eventId) {
-            Log.d(TAG, "Map ready callback invoked for event: $eventId")
             callback(this)
         }
 
-        // Check if style is already loaded (edge case: callback registered late)
-        val isStyleLoaded = MapWrapperRegistry.isStyleLoaded(eventId)
-        if (isStyleLoaded) {
-            Log.i(TAG, "Style already loaded, invoking callback immediately for event: $eventId")
+        if (MapWrapperRegistry.isStyleLoaded(eventId)) {
             MapWrapperRegistry.invokeMapReadyCallbacks(eventId)
         }
     }
 
     override fun enableLocationComponent(enabled: Boolean) {
-        Log.i(TAG, "enableLocationComponent: $enabled for event: $eventId")
-        // Call Swift wrapper via registry callback
         MapWrapperRegistry.enableLocationComponentOnWrapper(eventId, enabled)
     }
 
     override fun setUserPosition(position: Position) {
-        Log.i(TAG, "📍 setUserPosition: (${position.lat}, ${position.lng}) for event: $eventId")
-
-        // Verify callback is registered
-        val hasCallback = MapWrapperRegistry.hasUserPositionCallback(eventId)
-        Log.d(TAG, "User position callback registered: $hasCallback")
-
-        // Call Swift wrapper via registry callback
         MapWrapperRegistry.setUserPositionOnWrapper(eventId, position.lat, position.lng)
-        Log.v(TAG, "✅ setUserPositionOnWrapper called for event: $eventId")
     }
 
     override fun setGesturesEnabled(enabled: Boolean) {
-        Log.i(TAG, "setGesturesEnabled: $enabled for event: $eventId")
-        // Call Swift wrapper via registry callback
         MapWrapperRegistry.setGesturesEnabledOnWrapper(eventId, enabled)
     }
 }
