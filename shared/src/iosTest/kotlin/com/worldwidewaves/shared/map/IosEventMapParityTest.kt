@@ -22,19 +22,26 @@ package com.worldwidewaves.shared.map
  */
 
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.WWWEventArea
 import com.worldwidewaves.shared.events.WWWEventMap
+import com.worldwidewaves.shared.events.WWWEventObserver
 import com.worldwidewaves.shared.events.WWWEventWave
-import com.worldwidewaves.shared.events.utils.BoundingBox
+import com.worldwidewaves.shared.events.WWWEventWaveLinear
+import com.worldwidewaves.shared.events.WWWEventWaveWarming
 import com.worldwidewaves.shared.events.utils.Position
+import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.time.Duration
 
 /**
  * Tests for iOS-specific map parity features in IosEventMap.
@@ -43,6 +50,7 @@ import kotlin.test.assertNull
  * - Polygon rendering queue management
  * - Registry key management for multiple screens
  */
+@OptIn(kotlin.time.ExperimentalTime::class)
 class IosEventMapParityTest {
     private lateinit var mockEvent: TestWWWEvent
     private val testRegistryKey = "test-event-key"
@@ -274,43 +282,85 @@ class IosEventMapParityTest {
     // TEST HELPERS
     // ============================================================
 
+    @Suppress("TooManyFunctions", "LongMethod")
     private class TestWWWEvent : IWWWEvent {
         override val id: String = "test_event"
-        override val name: String = "Test Event"
-        override val description: String = "Test Description"
-        override val area: WWWEventArea = TestEventArea()
-        override val wave: WWWEventWave = TestEventWave()
-        override val map: WWWEventMap = TestEventMap()
-        override val videoUrl: String = ""
+        override val type: String = "test"
+        override val country: String? = null
+        override val community: String? = null
+        override val timeZone: String = "UTC"
+        override val date: String = "2025-01-01"
+        override val startHour: String = "12:00"
+        override val instagramAccount: String = ""
+        override val instagramHashtag: String = ""
+        override val wavedef: WWWEvent.WWWWaveDefinition =
+            WWWEvent.WWWWaveDefinition(
+                linear = WWWEventWaveLinear(0.1, WWWEventWave.Direction.EAST, 60),
+            )
+        override val area: WWWEventArea =
+            WWWEventArea(
+                osmAdminids = emptyList(),
+                bbox = "48.8,2.2,48.9,2.4",
+            )
+        override val warming: WWWEventWaveWarming = WWWEventWaveWarming(this)
+        override val wave: WWWEventWave = wavedef.linear!!
+        override val map: WWWEventMap = WWWEventMap(18.0, "en", "UTC")
+        override var favorite: Boolean = false
 
         var styleUrlProvider: (() -> String?)? = null
 
+        override suspend fun getStatus(): IWWWEvent.Status = IWWWEvent.Status.UNDEFINED
+
+        override suspend fun isDone(): Boolean = false
+
+        override fun isSoon(): Boolean = false
+
+        override suspend fun isRunning(): Boolean = false
+
+        override fun getLocationImage(): Any? = null
+
+        override fun getCommunityImage(): Any? = null
+
+        override fun getCountryImage(): Any? = null
+
         override fun getMapImage(): Any = "test_image"
 
-        override fun getVideoFile(): String = "test_video"
+        override fun getLocation(): StringResource = TODO("Not needed for map tests")
 
-        inner class TestEventArea : WWWEventArea {
-            override val bboxIsOverride: Boolean = false
+        override fun getDescription(): StringResource = TODO("Not needed for map tests")
 
-            override suspend fun bbox(): BoundingBox =
-                BoundingBox.fromCorners(
-                    Position(48.8, 2.2),
-                    Position(48.9, 2.4),
-                )
+        override fun getLiteralCountry(): StringResource = TODO("Not needed for map tests")
 
-            override suspend fun getCenter(): Position = Position(48.85, 2.3)
-        }
+        override fun getLiteralCommunity(): StringResource = TODO("Not needed for map tests")
 
-        inner class TestEventWave : WWWEventWave {
-            override suspend fun userClosestWaveLongitude(): Double? = 2.35
+        override fun getTZ(): TimeZone = TimeZone.UTC
 
-            override suspend fun nextWaveStartTime(): Long? = null
-        }
+        override fun getStartDateTime(): Instant = Instant.fromEpochMilliseconds(0)
 
-        inner class TestEventMap : WWWEventMap {
-            override val maxZoom: Double = 18.0
+        override suspend fun getTotalTime(): Duration = Duration.ZERO
 
-            override fun getStyleUri(): String? = styleUrlProvider?.invoke()
-        }
+        override suspend fun getEndDateTime(): Instant = Instant.fromEpochMilliseconds(0)
+
+        override fun getLiteralTimezone(): String = "UTC"
+
+        override fun getLiteralStartDateSimple(): String = "2025-01-01"
+
+        override fun getLiteralStartTime(): String = "12:00"
+
+        override suspend fun getLiteralEndTime(): String = "13:00"
+
+        override suspend fun getLiteralTotalTime(): String = "1h"
+
+        override fun getWaveStartDateTime(): Instant = Instant.fromEpochMilliseconds(0)
+
+        override fun getWarmingDuration(): Duration = Duration.ZERO
+
+        override fun isNearTime(): Boolean = false
+
+        override suspend fun getAllNumbers(): IWWWEvent.WaveNumbersLiterals = IWWWEvent.WaveNumbersLiterals()
+
+        override fun getEventObserver(): WWWEventObserver = TODO("Not needed for map tests")
+
+        override fun validationErrors(): List<String>? = null
     }
 }

@@ -253,7 +253,7 @@ class MapWrapperRegistryParityTest {
 
         MapWrapperRegistry.setPendingCameraCommand(
             eventId,
-            CameraCommand.SetConstraintBounds(constraintBounds),
+            CameraCommand.SetConstraintBounds(constraintBounds, constraintBounds, true),
         )
 
         val targetPosition = Position(48.5, 2.5)

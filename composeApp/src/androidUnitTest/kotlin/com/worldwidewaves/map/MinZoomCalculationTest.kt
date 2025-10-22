@@ -199,8 +199,8 @@ class MinZoomCalculationTest {
 
         // Given: Shrunk constraint bounds (viewport padding applied)
         val viewportPadding = 0.05 // 5% padding
-        val shrunkWidth = originalWidth - (2 * viewportPadding)
-        val shrunkHeight = originalHeight - (2 * viewportPadding)
+        val shrunkWidth = originalWidth * (1 - 2 * viewportPadding)
+        val shrunkHeight = originalHeight * (1 - 2 * viewportPadding)
 
         val screenWidth = 1080.0
         val screenHeight = 1920.0

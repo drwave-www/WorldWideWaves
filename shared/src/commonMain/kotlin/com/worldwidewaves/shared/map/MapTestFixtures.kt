@@ -297,10 +297,14 @@ object MapTestFixtures {
         screenDimensions: ScreenDimensions,
     ): Pair<Double, Double> {
         // Meters per pixel at given zoom level and latitude
-        // 2^zoom can be calculated using left shift or Math.pow
+        // 2^zoom can be calculated using left shift
         val zoomScale = 1 shl zoom.toInt() // 2^zoom
+
+        // Convert degrees to radians: degrees * PI / 180
+        val cameraLatRadians = cameraLat * kotlin.math.PI / 180.0
+
         val metersPerPixel =
-            156543.03392 * kotlin.math.cos(Math.toRadians(cameraLat)) / zoomScale
+            156543.03392 * kotlin.math.cos(cameraLatRadians) / zoomScale
 
         // Convert to degrees (approximately)
         // 1 degree latitude ≈ 111,320 meters
@@ -308,7 +312,7 @@ object MapTestFixtures {
         val viewportHeight = screenDimensions.height * metersPerPixel / 111320.0
         val viewportWidth =
             screenDimensions.width * metersPerPixel /
-                (111320.0 * kotlin.math.cos(Math.toRadians(cameraLat)))
+                (111320.0 * kotlin.math.cos(cameraLatRadians))
 
         return Pair(viewportWidth, viewportHeight)
     }

@@ -219,7 +219,7 @@ class IosMapLibreIntegrationTest {
     @Test
     fun `constraint bounds command should be stored correctly`() {
         val bounds = BoundingBox(48.8, 2.2, 48.9, 2.4)
-        val command = CameraCommand.SetConstraintBounds(bounds)
+        val command = CameraCommand.SetConstraintBounds(bounds, bounds, true)
 
         MapWrapperRegistry.setPendingCameraCommand(testEventId, command)
 
@@ -228,8 +228,8 @@ class IosMapLibreIntegrationTest {
         assertTrue(retrieved is CameraCommand.SetConstraintBounds)
 
         val constraintCmd = retrieved as CameraCommand.SetConstraintBounds
-        assertEquals(bounds.minLatitude, constraintCmd.bounds.minLatitude, 0.0001)
-        assertEquals(bounds.maxLatitude, constraintCmd.bounds.maxLatitude, 0.0001)
+        assertEquals(bounds.minLatitude, constraintCmd.constraintBounds.minLatitude, 0.0001)
+        assertEquals(bounds.maxLatitude, constraintCmd.constraintBounds.maxLatitude, 0.0001)
     }
 
     // ============================================================

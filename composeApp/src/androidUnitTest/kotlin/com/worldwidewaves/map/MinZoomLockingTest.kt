@@ -28,6 +28,8 @@ import io.mockk.verify
 import org.junit.Before
 import org.junit.Test
 import org.maplibre.android.maps.MapLibreMap
+import kotlin.math.ln
+import kotlin.math.min
 import kotlin.test.assertTrue
 
 /**
@@ -58,20 +60,27 @@ class MinZoomLockingTest {
     @Before
     fun setup() {
         mockMap = mockk(relaxed = true)
-        adapter = AndroidMapLibreAdapter(mockMap)
 
         // Mock map dimensions
-        every { mockMap.width } returns 1080
-        every { mockMap.height } returns 1920
+        every { mockMap.width } returns 1080f
+        every { mockMap.height } returns 1920f
 
-        // Mock getCameraForLatLngBounds response
+        // Mock getCameraForLatLngBounds response - use actual CameraPosition with zoom value
+        val mockPosition =
+            org.maplibre.android.camera.CameraPosition
+                .Builder()
+                .target(
+                    org.maplibre.android.geometry
+                        .LatLng(48.5, 2.5),
+                ).zoom(10.0)
+                .build()
+
         every {
             mockMap.getCameraForLatLngBounds(any(), any())
-        } returns
-            mockk(relaxed = true) {
-                every { zoom } returns 10.0
-            }
+        } returns mockPosition
 
+        // Create adapter and set map
+        adapter = AndroidMapLibreAdapter()
         adapter.setMap(mockMap)
     }
 
@@ -111,7 +120,7 @@ class MinZoomLockingTest {
     }
 
     /**
-     * Verify min zoom is NOT locked when originalEventBounds is null.
+     * Verify min zoom is NOT set when originalEventBounds is null.
      * This allows proper calculation when originalEventBounds arrives later.
      */
     @Test
@@ -123,8 +132,8 @@ class MinZoomLockingTest {
             originalEventBounds = null, // No original bounds yet
         )
 
-        // Then: Min zoom set but not locked (may be wrong value)
-        verify(exactly = 1) { mockMap.setMinZoomPreference(any()) }
+        // Then: Min zoom NOT set (waiting for originalEventBounds)
+        verify(exactly = 0) { mockMap.setMinZoomPreference(any()) }
 
         // When: Second call WITH originalEventBounds
         adapter.setBoundsForCameraTarget(
@@ -133,10 +142,10 @@ class MinZoomLockingTest {
             originalEventBounds = testBounds, // Now provided
         )
 
-        // Then: Min zoom should be RECALCULATED (now with correct value)
-        verify(exactly = 2) { mockMap.setMinZoomPreference(any()) }
+        // Then: Min zoom should be set for the FIRST time (correct value from original bounds)
+        verify(exactly = 1) { mockMap.setMinZoomPreference(any()) }
 
-        println("✅ Min zoom recalculated when originalEventBounds provided (ensures correct value)")
+        println("✅ Min zoom calculated only when originalEventBounds provided (ensures correct value)")
     }
 
     /**
@@ -196,14 +205,14 @@ class MinZoomLockingTest {
         // When: Calculate zoom from each
         val zoomFromOriginal =
             min(
-                log2((screenWidth * 360.0) / (originalWidth * 256.0)),
-                log2((screenHeight * 180.0) / (originalHeight * 256.0)),
+                ln((screenWidth * 360.0) / (originalWidth * 256.0)) / ln(2.0),
+                ln((screenHeight * 180.0) / (originalHeight * 256.0)) / ln(2.0),
             )
 
         val zoomFromShrunk =
             min(
-                log2((screenWidth * 360.0) / (shrunkWidth * 256.0)),
-                log2((screenHeight * 180.0) / (shrunkHeight * 256.0)),
+                ln((screenWidth * 360.0) / (shrunkWidth * 256.0)) / ln(2.0),
+                ln((screenHeight * 180.0) / (shrunkHeight * 256.0)) / ln(2.0),
             )
 
         // Then: Zoom from shrunk bounds is HIGHER (wrong - too restrictive)
