@@ -36,7 +36,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onEach
 import kotlin.math.PI
 import kotlin.math.acos
 import kotlin.math.cos
@@ -70,18 +69,14 @@ class DefaultPositionObserver(
     }
 
     override fun observePositionForEvent(event: IWWWEvent): Flow<PositionObservation> {
-        Log.v("DefaultPositionObserver", "Starting position observation for event ${event.id}")
+        if (WWWGlobals.LogConfig.ENABLE_POSITION_TRACKING_LOGGING) {
+            Log.v("DefaultPositionObserver", "Starting position observation for event ${event.id}")
+        }
         isCurrentlyObserving = true
 
         return combine(
-            positionManager.position
-                .onEach { position ->
-                    Log.performance("DefaultPositionObserver", "Position update: $position for event ${event.id}")
-                },
-            event.area.polygonsLoaded
-                .onEach { loaded ->
-                    Log.v("DefaultPositionObserver", "Polygons loaded state: $loaded for event ${event.id}")
-                },
+            positionManager.position,
+            event.area.polygonsLoaded,
         ) { position, polygonsLoaded ->
 
             val isInArea =
@@ -163,7 +158,9 @@ class DefaultPositionObserver(
     }
 
     override fun stopObservation() {
-        Log.v("DefaultPositionObserver", "Stopping position observation")
+        if (WWWGlobals.LogConfig.ENABLE_POSITION_TRACKING_LOGGING) {
+            Log.v("DefaultPositionObserver", "Stopping position observation")
+        }
         observationJob?.cancel()
         observationJob = null
         isCurrentlyObserving = false
