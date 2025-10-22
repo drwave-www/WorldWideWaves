@@ -221,22 +221,16 @@ abstract class AbstractEventMap<T>(
         )
 
         runCameraAnimation { cb ->
-            // CRITICAL: Calculate exact zoom to fit the constraining dimension
-            // Do NOT use animateCameraToBounds (lets MapLibre decide) - we must control it
-            val zoomForWidth = kotlin.math.log2((screenWidth * 360.0) / (eventMapWidth * 256.0))
-            val zoomForHeight = kotlin.math.log2((screenHeight * 180.0) / (eventMapHeight * 256.0))
-
-            // Choose zoom that ensures BOTH dimensions fit (the LARGER zoom)
-            // Higher zoom = more zoomed in = both width and height fit in viewport
-            val targetZoom = kotlin.math.max(zoomForWidth, zoomForHeight)
+            // Use MapLibre's own calculation to determine zoom for fitting event bounds
+            // This accounts for density scaling, projection, and platform differences
+            val targetZoom = mapLibreAdapter.getMinZoomLevel()
 
             com.worldwidewaves.shared.utils.Log.i(
                 "AbstractEventMap",
-                "Calculated zoom: forWidth=$zoomForWidth, forHeight=$zoomForHeight, " +
-                    "using=${if (targetZoom == zoomForHeight) "HEIGHT-fit" else "WIDTH-fit"} zoom=$targetZoom",
+                "Using min zoom for initial camera: $targetZoom (ensures event fits)",
             )
 
-            // Animate to event center at calculated zoom
+            // Animate to event center at min zoom
             mapLibreAdapter.animateCamera(
                 Position(centerLat, centerLng),
                 targetZoom,

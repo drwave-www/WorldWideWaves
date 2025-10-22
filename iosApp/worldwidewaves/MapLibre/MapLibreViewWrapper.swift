@@ -468,22 +468,15 @@ import Shared
         let baseMinZoom: Double
 
         if isWindowMode {
-            // WINDOW MODE: Use intelligent aspect ratio fitting (matches Android)
-            let zoomForWidth = log2((screenWidth * 360.0) / (eventWidth * 256.0))
-            let zoomForHeight = log2((screenHeight * 180.0) / (eventHeight * 256.0))
-            // Use MAX to ensure BOTH dimensions fit in viewport
-            // Higher zoom = more zoomed in = ensures both width AND height fit
-            baseMinZoom = max(zoomForWidth, zoomForHeight)
+            // WINDOW MODE: Use MapLibre's calculation (same as BOUNDS mode)
+            // MapLibre accounts for density, projection, etc. correctly
+            let camera = mapView.cameraThatFitsCoordinateBounds(eventBounds, edgePadding: .zero)
+            let earthCircumference = 40_075_016.686
+            let centerLat = (eventBounds.sw.latitude + eventBounds.ne.latitude) / 2.0
+            let latRadians = centerLat * .pi / 180.0
+            baseMinZoom = log2(earthCircumference * cos(latRadians) / camera.altitude) - 1.0
 
-            let eventAspectRatio = eventWidth / eventHeight
-            let screenAspectRatio = screenWidth / screenHeight
-            let fitBy = eventAspectRatio > screenAspectRatio ? "HEIGHT" : "WIDTH"
-
-            WWWLog.i(
-                Self.tag,
-                "🎯 WINDOW mode: eventAspect=\(eventAspectRatio), screenAspect=\(screenAspectRatio), " +
-                "fitBy=\(fitBy), zoomForWidth=\(zoomForWidth), zoomForHeight=\(zoomForHeight), base=\(baseMinZoom)"
-            )
+            WWWLog.i(Self.tag, "🎯 WINDOW mode: base=\(baseMinZoom) (from MapLibre calculation)")
         } else {
             // BOUNDS MODE: Use MapLibre's calculation (shows entire event)
             let camera = mapView.cameraThatFitsCoordinateBounds(eventBounds, edgePadding: .zero)

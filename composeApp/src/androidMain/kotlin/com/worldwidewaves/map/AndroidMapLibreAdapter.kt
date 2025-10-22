@@ -404,28 +404,15 @@ class AndroidMapLibreAdapter(
             val baseMinZoom: Double
 
             if (applyZoomSafetyMargin) {
-                // WINDOW MODE: Use same formula as moveToWindowBounds to match animation zoom
-                val eventWidth = boundsForMinZoom.ne.lng - boundsForMinZoom.sw.lng
-                val eventHeight = boundsForMinZoom.ne.lat - boundsForMinZoom.sw.lat
-                val mapWidth = getWidth()
-                val mapHeight = getHeight()
-
-                Log.d(
-                    "Camera",
-                    "Min zoom calc: eventHeight=$eventHeight°, eventWidth=$eventWidth°, " +
-                        "mapHeight=$mapHeight px, mapWidth=$mapWidth px",
-                )
-
-                val zoomForWidth = kotlin.math.log2((mapWidth * 360.0) / (eventWidth * 256.0))
-                val zoomForHeight = kotlin.math.log2((mapHeight * 180.0) / (eventHeight * 256.0))
-
-                // Use LARGER zoom to ensure BOTH dimensions fit
-                // Higher zoom number = more zoomed in = fits both width and height in viewport
-                baseMinZoom = kotlin.math.max(zoomForWidth, zoomForHeight)
+                // WINDOW MODE: Use MapLibre's calculation (same as BOUNDS mode)
+                // MapLibre's getCameraForLatLngBounds accounts for density, projection, etc.
+                val latLngBounds = boundsForMinZoom.toLatLngBounds()
+                val cameraPosition = mapLibreMap!!.getCameraForLatLngBounds(latLngBounds, intArrayOf(0, 0, 0, 0))
+                baseMinZoom = cameraPosition?.zoom ?: mapLibreMap!!.minZoomLevel
 
                 Log.i(
                     "Camera",
-                    "🎯 WINDOW mode min zoom: forWidth=$zoomForWidth, forHeight=$zoomForHeight, base=$baseMinZoom",
+                    "🎯 WINDOW mode min zoom: $baseMinZoom (from MapLibre calculation)",
                 )
             } else {
                 // BOUNDS MODE: Use MapLibre's calculation (shows entire event)
