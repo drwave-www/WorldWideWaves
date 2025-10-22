@@ -521,6 +521,11 @@ class AndroidEventMap(
                         mapState.setMapError(false)
                     }
 
+                    // Read isMapAvailable to create dependency (update block re-runs when it changes)
+                    // but don't require it to be true - map can load from cache
+                    @Suppress("UNUSED_VARIABLE")
+                    val mapAvailabilityTrigger = mapState.isMapAvailable
+
                     if (!mapState.isMapLoaded && !mapState.initStarted) {
                         mapState.setInitStarted(true)
                         Log.i(TAG, "Starting map init from AndroidView.update")
