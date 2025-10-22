@@ -404,15 +404,48 @@ class AndroidMapLibreAdapter(
             val baseMinZoom: Double
 
             if (applyZoomSafetyMargin) {
-                // WINDOW MODE: Use MapLibre's calculation (same as BOUNDS mode)
-                // MapLibre's getCameraForLatLngBounds accounts for density, projection, etc.
-                val latLngBounds = boundsForMinZoom.toLatLngBounds()
+                // WINDOW MODE: Fit the SMALLEST event dimension (prevents outside pixels)
+                // For wide event on tall screen: fit height (smaller)
+                // For tall event on wide screen: fit width (smaller)
+                val eventWidth = boundsForMinZoom.ne.lng - boundsForMinZoom.sw.lng
+                val eventHeight = boundsForMinZoom.ne.lat - boundsForMinZoom.sw.lat
+
+                // Determine which dimension is constraining
+                val eventAspect = eventWidth / eventHeight
+                val screenAspect = getWidth() / getHeight()
+
+                // Use MapLibre to calculate zoom for the constraining dimension
+                // Wide event on tall screen: use height-constrained bounds
+                // Tall event on wide screen: use width-constrained bounds
+                val constrainingBounds =
+                    if (eventAspect > screenAspect) {
+                        // Event is wider than screen aspect → constrained by HEIGHT
+                        // Create bounds with event height but screen-proportional width
+                        val constrainedWidth = eventHeight * screenAspect
+                        val centerLng = (boundsForMinZoom.sw.lng + boundsForMinZoom.ne.lng) / 2.0
+                        BoundingBox.fromCorners(
+                            Position(boundsForMinZoom.sw.lat, centerLng - constrainedWidth / 2),
+                            Position(boundsForMinZoom.ne.lat, centerLng + constrainedWidth / 2),
+                        )
+                    } else {
+                        // Event is taller than screen aspect → constrained by WIDTH
+                        val constrainedHeight = eventWidth / screenAspect
+                        val centerLat = (boundsForMinZoom.sw.lat + boundsForMinZoom.ne.lat) / 2.0
+                        BoundingBox.fromCorners(
+                            Position(centerLat - constrainedHeight / 2, boundsForMinZoom.sw.lng),
+                            Position(centerLat + constrainedHeight / 2, boundsForMinZoom.ne.lng),
+                        )
+                    }
+
+                val latLngBounds = constrainingBounds.toLatLngBounds()
                 val cameraPosition = mapLibreMap!!.getCameraForLatLngBounds(latLngBounds, intArrayOf(0, 0, 0, 0))
                 baseMinZoom = cameraPosition?.zoom ?: mapLibreMap!!.minZoomLevel
 
                 Log.i(
                     "Camera",
-                    "🎯 WINDOW mode min zoom: $baseMinZoom (from MapLibre calculation)",
+                    "🎯 WINDOW mode: eventAspect=$eventAspect, screenAspect=$screenAspect, " +
+                        "constrainedBy=${if (eventAspect > screenAspect) "HEIGHT" else "WIDTH"}, " +
+                        "minZoom=$baseMinZoom",
                 )
             } else {
                 // BOUNDS MODE: Use MapLibre's calculation (shows entire event)
