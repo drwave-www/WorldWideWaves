@@ -1,0 +1,667 @@
+package com.worldwidewaves.shared.map
+
+/* * Copyright 2025 DrWave
+ *
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. */
+
+
+import com.worldwidewaves.shared.events.utils.BoundingBox
+import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.map.MapTestFixtures.STANDARD_EVENT_BOUNDS
+import com.worldwidewaves.shared.map.MapTestFixtures.TOLERANCE_POSITION
+import com.worldwidewaves.shared.map.MapTestFixtures.center
+import com.worldwidewaves.shared.map.MapTestFixtures.height
+import com.worldwidewaves.shared.map.MapTestFixtures.isApproximately
+import com.worldwidewaves.shared.map.MapTestFixtures.isCompletelyWithin
+import com.worldwidewaves.shared.map.MapTestFixtures.isValid
+import com.worldwidewaves.shared.map.MapTestFixtures.width
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+
+/**
+ * Unit tests for MapBoundsEnforcer constraint calculation logic.
+ * These tests validate core logic WITHOUT MapLibre dependencies.
+ *
+ * Test Categories:
+ * - Constraint bounds calculation (BOUNDS vs WINDOW mode)
+ * - Padding calculation from viewport dimensions
+ * - Bounds validation (inverted, invalid, edge cases)
+ * - Bounds shrinking for viewport edge clamping
+ * - Safe bounds calculation for camera positioning
+ */
+class MapBoundsEnforcerUnitTest {
+    // ============================================================
+    // TEST HELPER: MOCK ADAPTER
+    // ============================================================
+
+    /**
+     * Minimal mock adapter for testing MapBoundsEnforcer logic
+     * without real MapLibre dependencies
+     */
+    private class MockMapLibreAdapter : MapLibreAdapter<Unit> {
+        private var _minZoomLevel: Double = 0.0
+        private var _maxZoomLevel: Double = 22.0
+        var mockVisibleRegion: BoundingBox = STANDARD_EVENT_BOUNDS
+        var mockCameraPosition: Position = STANDARD_EVENT_BOUNDS.center()
+        var appliedConstraintBounds: BoundingBox? = null
+
+        override val currentPosition = MutableStateFlow<Position?>(null)
+        override val currentZoom = MutableStateFlow(15.0)
+
+        override fun setMap(map: Unit) {}
+
+        override fun setStyle(
+            stylePath: String,
+            callback: () -> Unit?,
+        ) {
+            callback()
+        }
+
+        override fun getWidth(): Double = 1080.0
+
+        override fun getHeight(): Double = 1920.0
+
+        override fun getCameraPosition(): Position = mockCameraPosition
+
+        override fun getVisibleRegion(): BoundingBox = mockVisibleRegion
+
+        override fun setBoundsForCameraTarget(
+            constraintBounds: BoundingBox,
+            applyZoomSafetyMargin: Boolean,
+            originalEventBounds: BoundingBox?,
+        ) {
+            appliedConstraintBounds = constraintBounds
+        }
+
+        override fun getMinZoomLevel(): Double = _minZoomLevel
+
+        override fun setMinZoomPreference(minZoom: Double) {
+            _minZoomLevel = minZoom
+        }
+
+        override fun setMaxZoomPreference(maxZoom: Double) {
+            _maxZoomLevel = maxZoom
+        }
+
+        // Unused methods for unit tests
+        override fun moveCamera(bounds: BoundingBox) {}
+
+        override fun animateCamera(
+            position: Position,
+            zoom: Double?,
+            callback: MapCameraCallback?,
+        ) {}
+
+        override fun animateCameraToBounds(
+            bounds: BoundingBox,
+            padding: Int,
+            callback: MapCameraCallback?,
+        ) {}
+
+        override fun setAttributionMargins(
+            left: Int,
+            top: Int,
+            right: Int,
+            bottom: Int,
+        ) {}
+
+        override fun addWavePolygons(
+            polygons: List<Any>,
+            clearExisting: Boolean,
+        ) {}
+
+        override fun setOnMapClickListener(listener: ((Double, Double) -> Unit)?) {}
+
+        override fun addOnCameraIdleListener(callback: () -> Unit) {}
+
+        override fun drawOverridenBbox(bbox: BoundingBox) {}
+
+        override fun onMapSet(callback: (MapLibreAdapter<*>) -> Unit) {}
+
+        override fun enableLocationComponent(enabled: Boolean) {}
+
+        override fun setUserPosition(position: Position) {}
+
+        override fun setGesturesEnabled(enabled: Boolean) {}
+    }
+
+    // ============================================================
+    // BOUNDS MODE TESTS (Event Detail / Wave Screens)
+    // ============================================================
+
+    @Test
+    fun testBoundsMode_zeroPadding_constraintBoundsEqualEventBounds() {
+        val adapter = MockMapLibreAdapter()
+        adapter.mockVisibleRegion = STANDARD_EVENT_BOUNDS
+
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = false,
+            )
+
+        val constraintBounds = enforcer.calculateConstraintBounds()
+
+        // BOUNDS mode: zero padding, so constraint bounds = event bounds
+        assertTrue(
+            constraintBounds.isApproximately(STANDARD_EVENT_BOUNDS, TOLERANCE_POSITION),
+            "BOUNDS mode should have constraint bounds equal to event bounds",
+        )
+    }
+
+    @Test
+    fun testBoundsMode_validBoundsCheck() {
+        val adapter = MockMapLibreAdapter()
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = false,
+            )
+
+        val constraintBounds = enforcer.calculateConstraintBounds()
+
+        assertTrue(constraintBounds.isValid(), "Constraint bounds should be valid")
+        assertTrue(
+            constraintBounds.northeast.latitude > constraintBounds.southwest.latitude,
+            "NE latitude should be > SW latitude",
+        )
+        assertTrue(
+            constraintBounds.northeast.longitude > constraintBounds.southwest.longitude,
+            "NE longitude should be > SW longitude",
+        )
+    }
+
+    // ============================================================
+    // WINDOW MODE TESTS (Full Map Screen)
+    // ============================================================
+
+    @Test
+    fun testWindowMode_viewportPadding_shrinksBounds() {
+        val adapter = MockMapLibreAdapter()
+
+        // Simulate viewport smaller than event bounds
+        val viewportHalfHeight = 0.002 // ~220 meters
+        val viewportHalfWidth = 0.002
+
+        adapter.mockVisibleRegion =
+            BoundingBox.fromCorners(
+                Position(
+                    STANDARD_EVENT_BOUNDS.center().latitude - viewportHalfHeight,
+                    STANDARD_EVENT_BOUNDS.center().longitude - viewportHalfWidth,
+                ),
+                Position(
+                    STANDARD_EVENT_BOUNDS.center().latitude + viewportHalfHeight,
+                    STANDARD_EVENT_BOUNDS.center().longitude + viewportHalfWidth,
+                ),
+            )
+
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = true,
+            )
+
+        // Apply constraints to calculate padding
+        enforcer.applyConstraints()
+
+        val constraintBounds = enforcer.calculateConstraintBounds()
+
+        // WINDOW mode: constraint bounds should be smaller than event bounds (shrunk by padding)
+        assertTrue(
+            constraintBounds.width < STANDARD_EVENT_BOUNDS.width,
+            "Constraint bounds width should be smaller than event bounds in WINDOW mode",
+        )
+        assertTrue(
+            constraintBounds.height < STANDARD_EVENT_BOUNDS.height,
+            "Constraint bounds height should be smaller than event bounds in WINDOW mode",
+        )
+        assertTrue(
+            constraintBounds.isCompletelyWithin(STANDARD_EVENT_BOUNDS),
+            "Constraint bounds should be within event bounds",
+        )
+    }
+
+    @Test
+    fun testWindowMode_viewportLargerThanEvent_clampsPadding() {
+        val adapter = MockMapLibreAdapter()
+
+        // Simulate viewport LARGER than event bounds (zoomed out)
+        val viewportHalfHeight = 0.02 // Much larger than event
+        val viewportHalfWidth = 0.02
+
+        adapter.mockVisibleRegion =
+            BoundingBox.fromCorners(
+                Position(
+                    STANDARD_EVENT_BOUNDS.center().latitude - viewportHalfHeight,
+                    STANDARD_EVENT_BOUNDS.center().longitude - viewportHalfWidth,
+                ),
+                Position(
+                    STANDARD_EVENT_BOUNDS.center().latitude + viewportHalfHeight,
+                    STANDARD_EVENT_BOUNDS.center().longitude + viewportHalfWidth,
+                ),
+            )
+
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = true,
+            )
+
+        val constraintBounds = enforcer.calculateConstraintBounds()
+
+        // Padding should be clamped to 49% of event size to prevent invalid bounds
+        assertTrue(constraintBounds.isValid(), "Constraint bounds should remain valid")
+        assertTrue(
+            constraintBounds.width > 0.0,
+            "Constraint bounds should have positive width even with large viewport",
+        )
+        assertTrue(
+            constraintBounds.height > 0.0,
+            "Constraint bounds should have positive height even with large viewport",
+        )
+    }
+
+    @Test
+    fun testWindowMode_paddingClampingPreventsInversion() {
+        val adapter = MockMapLibreAdapter()
+
+        // Extreme case: viewport much larger than event
+        val viewportHalfHeight = 0.1 // 10x larger than event
+        val viewportHalfWidth = 0.1
+
+        adapter.mockVisibleRegion =
+            BoundingBox.fromCorners(
+                Position(
+                    STANDARD_EVENT_BOUNDS.center().latitude - viewportHalfHeight,
+                    STANDARD_EVENT_BOUNDS.center().longitude - viewportHalfWidth,
+                ),
+                Position(
+                    STANDARD_EVENT_BOUNDS.center().latitude + viewportHalfHeight,
+                    STANDARD_EVENT_BOUNDS.center().longitude + viewportHalfWidth,
+                ),
+            )
+
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = true,
+            )
+
+        val constraintBounds = enforcer.calculateConstraintBounds()
+
+        // Should NOT invert bounds (SW > NE)
+        assertTrue(
+            constraintBounds.northeast.latitude > constraintBounds.southwest.latitude,
+            "NE latitude must be > SW latitude (no inversion)",
+        )
+        assertTrue(
+            constraintBounds.northeast.longitude > constraintBounds.southwest.longitude,
+            "NE longitude must be > SW longitude (no inversion)",
+        )
+    }
+
+    // ============================================================
+    // BOUNDS VALIDATION TESTS
+    // ============================================================
+
+    @Test
+    fun testIsValidBounds_validBounds_returnsTrue() {
+        val adapter = MockMapLibreAdapter()
+
+        // Set up visible region - use a small viewport so padding is small
+        val testPosition = STANDARD_EVENT_BOUNDS.center()
+        adapter.mockVisibleRegion =
+            BoundingBox.fromCorners(
+                Position(testPosition.latitude - 0.001, testPosition.longitude - 0.001),
+                Position(testPosition.latitude + 0.001, testPosition.longitude + 0.001),
+            )
+
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = false,
+            )
+
+        // Apply constraints to initialize padding
+        enforcer.applyConstraints()
+
+        // Create valid bounds that contain the test position and have reasonable size
+        val validBounds =
+            BoundingBox.fromCorners(
+                Position(testPosition.latitude - 0.005, testPosition.longitude - 0.005),
+                Position(testPosition.latitude + 0.005, testPosition.longitude + 0.005),
+            )
+
+        assertTrue(
+            enforcer.isValidBounds(validBounds, testPosition),
+            "Valid bounds should pass validation",
+        )
+    }
+
+    @Test
+    fun testIsValidBounds_invertedBounds_returnsFalse() {
+        val adapter = MockMapLibreAdapter()
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = false,
+            )
+
+        // Inverted bounds (NE < SW)
+        val invertedBounds =
+            BoundingBox.fromCorners(
+                Position(48.87, 2.37),
+                Position(48.86, 2.36),
+            )
+
+        assertFalse(
+            enforcer.isValidBounds(invertedBounds, STANDARD_EVENT_BOUNDS.center()),
+            "Inverted bounds should fail validation",
+        )
+    }
+
+    @Test
+    fun testIsValidBounds_nullPosition_returnsFalse() {
+        val adapter = MockMapLibreAdapter()
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = false,
+            )
+
+        val validBounds =
+            BoundingBox.fromCorners(
+                Position(48.86, 2.36),
+                Position(48.87, 2.37),
+            )
+
+        assertFalse(
+            enforcer.isValidBounds(validBounds, null),
+            "Null position should fail validation",
+        )
+    }
+
+    // ============================================================
+    // SAFE BOUNDS CALCULATION TESTS
+    // ============================================================
+
+    @Test
+    fun testCalculateSafeBounds_centerPosition_returnsValidBounds() {
+        val adapter = MockMapLibreAdapter()
+
+        // Set up visible region padding
+        adapter.mockVisibleRegion =
+            BoundingBox.fromCorners(
+                Position(48.86, 2.36),
+                Position(48.862, 2.362),
+            )
+
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = true,
+            )
+
+        enforcer.setVisibleRegionPadding(
+            MapBoundsEnforcer.VisibleRegionPadding(0.001, 0.001),
+        )
+
+        val safeBounds = enforcer.calculateSafeBounds(STANDARD_EVENT_BOUNDS.center())
+
+        assertTrue(safeBounds.isValid(), "Safe bounds should be valid")
+        assertTrue(
+            safeBounds.isCompletelyWithin(STANDARD_EVENT_BOUNDS),
+            "Safe bounds should be within event bounds",
+        )
+    }
+
+    @Test
+    fun testCalculateSafeBounds_edgePosition_constrainedToEvent() {
+        val adapter = MockMapLibreAdapter()
+
+        adapter.mockVisibleRegion =
+            BoundingBox.fromCorners(
+                Position(48.86, 2.36),
+                Position(48.862, 2.362),
+            )
+
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = true,
+            )
+
+        enforcer.setVisibleRegionPadding(
+            MapBoundsEnforcer.VisibleRegionPadding(0.001, 0.001),
+        )
+
+        // Position near event edge
+        val edgePosition = Position(48.8665, 2.3621) // NE corner
+
+        val safeBounds = enforcer.calculateSafeBounds(edgePosition)
+
+        assertTrue(safeBounds.isValid(), "Safe bounds should be valid")
+        assertTrue(
+            safeBounds.isCompletelyWithin(STANDARD_EVENT_BOUNDS),
+            "Safe bounds should be within event bounds even for edge position",
+        )
+    }
+
+    // ============================================================
+    // NEAREST VALID POINT TESTS
+    // ============================================================
+
+    @Test
+    fun testGetNearestValidPoint_insideBounds_returnsSamePoint() {
+        val adapter = MockMapLibreAdapter()
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = false,
+            )
+
+        val insidePoint = STANDARD_EVENT_BOUNDS.center()
+        val nearest = enforcer.getNearestValidPoint(insidePoint, STANDARD_EVENT_BOUNDS)
+
+        assertTrue(
+            nearest.isApproximately(insidePoint, TOLERANCE_POSITION),
+            "Point already inside bounds should remain unchanged",
+        )
+    }
+
+    @Test
+    fun testGetNearestValidPoint_outsideNorth_clampsToNorthEdge() {
+        val adapter = MockMapLibreAdapter()
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = false,
+            )
+
+        val outsidePoint = Position(48.9000, 2.3572) // North of event
+        val nearest = enforcer.getNearestValidPoint(outsidePoint, STANDARD_EVENT_BOUNDS)
+
+        assertEquals(
+            STANDARD_EVENT_BOUNDS.northeast.latitude,
+            nearest.latitude,
+            TOLERANCE_POSITION,
+            "Latitude should be clamped to north edge",
+        )
+        assertEquals(
+            outsidePoint.longitude,
+            nearest.longitude,
+            TOLERANCE_POSITION,
+            "Longitude should remain unchanged",
+        )
+    }
+
+    @Test
+    fun testGetNearestValidPoint_outsideSouth_clampsToSouthEdge() {
+        val adapter = MockMapLibreAdapter()
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = false,
+            )
+
+        val outsidePoint = Position(48.8000, 2.3572) // South of event
+        val nearest = enforcer.getNearestValidPoint(outsidePoint, STANDARD_EVENT_BOUNDS)
+
+        assertEquals(
+            STANDARD_EVENT_BOUNDS.southwest.latitude,
+            nearest.latitude,
+            TOLERANCE_POSITION,
+            "Latitude should be clamped to south edge",
+        )
+    }
+
+    @Test
+    fun testGetNearestValidPoint_outsideEast_clampsToEastEdge() {
+        val adapter = MockMapLibreAdapter()
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = false,
+            )
+
+        val outsidePoint = Position(48.8616, 2.4000) // East of event
+        val nearest = enforcer.getNearestValidPoint(outsidePoint, STANDARD_EVENT_BOUNDS)
+
+        assertEquals(
+            STANDARD_EVENT_BOUNDS.northeast.longitude,
+            nearest.longitude,
+            TOLERANCE_POSITION,
+            "Longitude should be clamped to east edge",
+        )
+    }
+
+    @Test
+    fun testGetNearestValidPoint_outsideWest_clampsToWestEdge() {
+        val adapter = MockMapLibreAdapter()
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = false,
+            )
+
+        val outsidePoint = Position(48.8616, 2.3000) // West of event
+        val nearest = enforcer.getNearestValidPoint(outsidePoint, STANDARD_EVENT_BOUNDS)
+
+        assertEquals(
+            STANDARD_EVENT_BOUNDS.southwest.longitude,
+            nearest.longitude,
+            TOLERANCE_POSITION,
+            "Longitude should be clamped to west edge",
+        )
+    }
+
+    @Test
+    fun testGetNearestValidPoint_outsideCorner_clampsToCorner() {
+        val adapter = MockMapLibreAdapter()
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = false,
+            )
+
+        val outsidePoint = Position(48.9000, 2.4000) // NE of event
+        val nearest = enforcer.getNearestValidPoint(outsidePoint, STANDARD_EVENT_BOUNDS)
+
+        assertEquals(
+            STANDARD_EVENT_BOUNDS.northeast.latitude,
+            nearest.latitude,
+            TOLERANCE_POSITION,
+            "Latitude should be clamped to NE corner",
+        )
+        assertEquals(
+            STANDARD_EVENT_BOUNDS.northeast.longitude,
+            nearest.longitude,
+            TOLERANCE_POSITION,
+            "Longitude should be clamped to NE corner",
+        )
+    }
+
+    // ============================================================
+    // PADDING CHANGE DETECTION TESTS
+    // ============================================================
+
+    @Test
+    fun testHasSignificantPaddingChange_smallChange_returnsFalse() {
+        val adapter = MockMapLibreAdapter()
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = true,
+            )
+
+        enforcer.setVisibleRegionPadding(
+            MapBoundsEnforcer.VisibleRegionPadding(0.001, 0.001),
+        )
+
+        // 5% change (below 10% threshold)
+        val newPadding = MapBoundsEnforcer.VisibleRegionPadding(0.00105, 0.00105)
+
+        assertFalse(
+            enforcer.hasSignificantPaddingChange(newPadding),
+            "5% padding change should not be significant",
+        )
+    }
+
+    @Test
+    fun testHasSignificantPaddingChange_largeChange_returnsTrue() {
+        val adapter = MockMapLibreAdapter()
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = true,
+            )
+
+        enforcer.setVisibleRegionPadding(
+            MapBoundsEnforcer.VisibleRegionPadding(0.001, 0.001),
+        )
+
+        // 20% change (above 10% threshold)
+        val newPadding = MapBoundsEnforcer.VisibleRegionPadding(0.0012, 0.0012)
+
+        assertTrue(
+            enforcer.hasSignificantPaddingChange(newPadding),
+            "20% padding change should be significant",
+        )
+    }
+}
