@@ -76,10 +76,10 @@ class MapBoundsEnforcer(
         // Apply the constraints with the current padding
         applyConstraintsWithPadding()
 
-        // Register the camera-idle listener only once
-        // Updates constraint bounds dynamically as viewport size changes with zoom
-        // Suppressed during animations to prevent fighting with programmatic camera movements
-        if (!constraintsApplied) {
+        // Register the camera-idle listener only once (ONLY for BOUNDS mode)
+        // WINDOW mode: Constraint bounds calculated ONCE from initial valid viewport, stay constant
+        // BOUNDS mode: Can update dynamically (gestures disabled, no user zoom changes)
+        if (!constraintsApplied && !isWindowMode) {
             mapLibreAdapter.addOnCameraIdleListener {
                 // Prevent recalculation if animation/user interaction is in progress
                 if (isSuppressed()) {
