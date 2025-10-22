@@ -337,6 +337,13 @@ if (eventAspect > screenAspect) {
 **Trade-off**: iOS allows slight viewport overshoot for smooth gestures (Android clamps perfectly)
 **Location**: `MapLibreViewWrapper.swift:1296-1324`
 
+#### 3.0.8 Gesture Detection for Button Animations
+**Issue**: Preventive gesture constraints were clamping button animations (targetUser/targetWave)
+**Finding**: `REASON_API_ANIMATION` was treated as user gesture, causing camera to jump back
+**Fix**: Exclude `REASON_API_ANIMATION` from gesture detection (lines 530-534 in AndroidMapLibreAdapter.kt)
+**Location**: `AndroidMapLibreAdapter.kt:527-535`
+**Impact**: Button animations (Target User, Target Wave) now work smoothly without jumping
+
 #### 3.0.6 Screen Dimension Units
 **Finding**: Android uses physical pixels, iOS uses points (density-independent)
 **Status**: Both correct - aspect ratios are unitless, MapLibre handles density internally
