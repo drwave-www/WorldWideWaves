@@ -36,7 +36,9 @@ sealed class CameraCommand {
     ) : CameraCommand()
 
     data class SetConstraintBounds(
-        val bounds: BoundingBox,
+        val constraintBounds: BoundingBox,
+        val originalEventBounds: BoundingBox?,
+        val applyZoomSafetyMargin: Boolean,
     ) : CameraCommand()
 
     data class SetMinZoom(

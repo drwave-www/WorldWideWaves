@@ -435,22 +435,13 @@ class AndroidMapLibreAdapter(
                 )
             }
 
-            // Add safety margin only for WINDOW mode
-            calculatedMinZoom =
-                if (applyZoomSafetyMargin) {
-                    baseMinZoom + ZOOM_SAFETY_MARGIN
-                } else {
-                    baseMinZoom
-                }
+            // No safety margin - base min zoom already ensures event fits in viewport
+            // The min() calculation ensures BOTH dimensions fit, allowing full event visibility
+            calculatedMinZoom = baseMinZoom
 
             Log.i(
                 "Camera",
-                "🎯 Final min zoom: base=$baseMinZoom, final=$calculatedMinZoom " +
-                    if (applyZoomSafetyMargin) {
-                        "(WINDOW mode: +$ZOOM_SAFETY_MARGIN margin)"
-                    } else {
-                        "(BOUNDS mode: no margin, shows entire event)"
-                    },
+                "🎯 Final min zoom: $baseMinZoom (allows seeing full event, no margin)",
             )
 
             // Set min zoom IMMEDIATELY

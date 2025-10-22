@@ -267,11 +267,18 @@ class IosMapLibreAdapter(
             TAG,
             "SW/NE: SW(${constraintBounds.sw.lat},${constraintBounds.sw.lng}) NE(${constraintBounds.ne.lat},${constraintBounds.ne.lng})",
         )
-        // Note: iOS implementation handles zoom safety via Swift (not passed through command)
-        // The applyZoomSafetyMargin parameter is Android-specific for now
+        if (originalEventBounds != null) {
+            Log.d(
+                TAG,
+                "Original event bounds: SW(${originalEventBounds.sw.lat},${originalEventBounds.sw.lng}) " +
+                    "NE(${originalEventBounds.ne.lat},${originalEventBounds.ne.lng})",
+            )
+        }
+        // Pass both constraint bounds and original event bounds to iOS
+        // iOS uses constraint bounds for gesture enforcement and original bounds for min zoom calculation
         MapWrapperRegistry.setPendingCameraCommand(
             eventId,
-            CameraCommand.SetConstraintBounds(constraintBounds),
+            CameraCommand.SetConstraintBounds(constraintBounds, originalEventBounds, applyZoomSafetyMargin),
         )
     }
 

@@ -278,6 +278,7 @@ class MapBoundsEnforcer(
      * Checks if the entire viewport is within the event bounds.
      * Returns true only if all four corners of the viewport are inside the event area.
      */
+    @Suppress("UnusedPrivateMember") // Used in constrainCamera (deprecated but kept for compatibility)
     private fun isViewportWithinEventBounds(viewport: BoundingBox): Boolean {
         // All viewport corners must be within event bounds
         val withinBounds =
@@ -307,6 +308,7 @@ class MapBoundsEnforcer(
      * Special case: If the viewport is larger than the event bounds (e.g., zoomed out too far),
      * center the camera on the event bounds instead of trying to constrain to an invalid range.
      */
+    @Suppress("UnusedPrivateMember") // Used in constrainCamera (deprecated but kept for compatibility)
     private fun clampCameraToKeepViewportInside(
         currentCamera: Position,
         currentViewport: BoundingBox,
@@ -352,6 +354,7 @@ class MapBoundsEnforcer(
     /**
      * Checks if camera is within the constraint bounds
      */
+    @Suppress("UnusedPrivateMember") // Used in constrainCamera (deprecated but kept for compatibility)
     private fun isCameraWithinConstraints(cameraPosition: Position): Boolean = constraintBounds?.contains(cameraPosition) ?: false
 
     // fitMapToBounds removed - was unused
@@ -366,6 +369,7 @@ class MapBoundsEnforcer(
         )
     }
 
+    @Suppress("ReturnCount") // Multiple returns for different modes
     private fun calculateVisibleRegionPadding(): VisibleRegionPadding {
         // CRITICAL DISTINCTION: WINDOW mode vs BOUNDS mode
         //
@@ -392,6 +396,18 @@ class MapBoundsEnforcer(
         val viewport = mapLibreAdapter.getVisibleRegion()
         val viewportHalfHeight = (viewport.northLatitude - viewport.southLatitude) / 2.0
         val viewportHalfWidth = (viewport.eastLongitude - viewport.westLongitude) / 2.0
+
+        // VALIDATION: Reject absurd viewport values (indicates map not fully initialized)
+        // Early in initialization, getVisibleRegion() may return invalid data (90°, 180°)
+        // Use zero padding until map renders valid viewport data
+        if (viewportHalfHeight > 10.0 || viewportHalfWidth > 10.0) {
+            Log.w(
+                "MapBoundsEnforcer",
+                "WINDOW mode: Viewport data invalid (halfHeight=$viewportHalfHeight, halfWidth=$viewportHalfWidth), " +
+                    "using zero padding until map fully initializes",
+            )
+            return VisibleRegionPadding(0.0, 0.0)
+        }
 
         Log.d(
             "MapBoundsEnforcer",

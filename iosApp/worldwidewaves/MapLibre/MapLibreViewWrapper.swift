@@ -493,14 +493,13 @@ import Shared
             WWWLog.i(Self.tag, "🎯 BOUNDS mode: base=\(baseMinZoom) (entire event visible)")
         }
 
-        // Apply safety margin for WINDOW mode (matches Android ZOOM_SAFETY_MARGIN = 0.5)
-        let zoomSafetyMargin = 0.5
-        let finalMinZoom = isWindowMode ? (baseMinZoom + zoomSafetyMargin) : baseMinZoom
+        // No safety margin - base min zoom already ensures event fits in viewport
+        // The min() selection in WINDOW mode ensures BOTH dimensions fit
+        let finalMinZoom = baseMinZoom
 
         WWWLog.i(
             Self.tag,
-            "🎯 Final min zoom: base=\(baseMinZoom), final=\(finalMinZoom) " +
-            "(\(isWindowMode ? "WINDOW: +\(zoomSafetyMargin)" : "BOUNDS: no margin"))"
+            "🎯 Final min zoom: \(finalMinZoom) (allows seeing full event dimension)"
         )
 
         // Lock min zoom to prevent recalculation (matches Android behavior)

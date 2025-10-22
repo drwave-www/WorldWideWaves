@@ -196,6 +196,9 @@ object WWWGlobals {
         /** Camera animation duration for map transitions (milliseconds) */
         const val MAP_CAMERA_ANIMATION_DURATION_MS = 500
 
+        /** Camera update interval for wave tracking (milliseconds, real time) */
+        const val MAP_CAMERA_UPDATE_INTERVAL_MS = 1000
+
         /** GPS update timer interval */
         val GPS_UPDATE_INTERVAL = 3000.milliseconds
 
