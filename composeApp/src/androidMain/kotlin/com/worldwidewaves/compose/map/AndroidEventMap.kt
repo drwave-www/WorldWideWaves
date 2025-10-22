@@ -521,7 +521,7 @@ class AndroidEventMap(
                         mapState.setMapError(false)
                     }
 
-                    if (mapState.isMapAvailable && !mapState.isMapLoaded && !mapState.initStarted) {
+                    if (!mapState.isMapLoaded && !mapState.initStarted) {
                         mapState.setInitStarted(true)
                         Log.i(TAG, "Starting map init from AndroidView.update")
                         loadMap(
