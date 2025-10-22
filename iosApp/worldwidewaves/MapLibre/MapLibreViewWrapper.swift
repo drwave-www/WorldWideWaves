@@ -468,15 +468,41 @@ import Shared
         let baseMinZoom: Double
 
         if isWindowMode {
-            // WINDOW MODE: Use MapLibre's calculation (same as BOUNDS mode)
-            // MapLibre accounts for density, projection, etc. correctly
-            let camera = mapView.cameraThatFitsCoordinateBounds(eventBounds, edgePadding: .zero)
+            // WINDOW MODE: Fit the SMALLEST event dimension (prevents outside pixels)
+            let eventAspect = eventWidth / eventHeight
+            let screenAspect = screenWidth / screenHeight
+
+            // Create bounds matching the constraining dimension
+            let constrainingBounds: MLNCoordinateBounds
+            if eventAspect > screenAspect {
+                // Event wider than screen → constrained by HEIGHT
+                let constrainedWidth = eventHeight * screenAspect
+                let centerLng = (eventBounds.sw.longitude + eventBounds.ne.longitude) / 2.0
+                constrainingBounds = MLNCoordinateBounds(
+                    sw: CLLocationCoordinate2D(latitude: eventBounds.sw.latitude, longitude: centerLng - constrainedWidth / 2),
+                    ne: CLLocationCoordinate2D(latitude: eventBounds.ne.latitude, longitude: centerLng + constrainedWidth / 2)
+                )
+            } else {
+                // Event taller than screen → constrained by WIDTH
+                let constrainedHeight = eventWidth / screenAspect
+                let centerLat = (eventBounds.sw.latitude + eventBounds.ne.latitude) / 2.0
+                constrainingBounds = MLNCoordinateBounds(
+                    sw: CLLocationCoordinate2D(latitude: centerLat - constrainedHeight / 2, longitude: eventBounds.sw.longitude),
+                    ne: CLLocationCoordinate2D(latitude: centerLat + constrainedHeight / 2, longitude: eventBounds.ne.longitude)
+                )
+            }
+
+            let camera = mapView.cameraThatFitsCoordinateBounds(constrainingBounds, edgePadding: .zero)
             let earthCircumference = 40_075_016.686
-            let centerLat = (eventBounds.sw.latitude + eventBounds.ne.latitude) / 2.0
+            let centerLat = (constrainingBounds.sw.latitude + constrainingBounds.ne.latitude) / 2.0
             let latRadians = centerLat * .pi / 180.0
             baseMinZoom = log2(earthCircumference * cos(latRadians) / camera.altitude) - 1.0
 
-            WWWLog.i(Self.tag, "🎯 WINDOW mode: base=\(baseMinZoom) (from MapLibre calculation)")
+            WWWLog.i(
+                Self.tag,
+                "🎯 WINDOW mode: eventAspect=\(eventAspect), screenAspect=\(screenAspect), " +
+                "constrainedBy=\(eventAspect > screenAspect ? "HEIGHT" : "WIDTH"), minZoom=\(baseMinZoom)"
+            )
         } else {
             // BOUNDS MODE: Use MapLibre's calculation (shows entire event)
             let camera = mapView.cameraThatFitsCoordinateBounds(eventBounds, edgePadding: .zero)
