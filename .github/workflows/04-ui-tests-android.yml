@@ -1,4 +1,4 @@
-name: 04 • UI Tests (Android) [DISABLED]
+name: 04 • UI Tests (Android)
 
 on:
   pull_request:
@@ -23,7 +23,6 @@ jobs:
     name: Android UI Tests
     runs-on: ubuntu-latest
     timeout-minutes: 45  # UI tests can take longer
-    if: false  # DISABLED - Workflow temporarily deactivated to save costs
 
     strategy:
       matrix:
@@ -153,7 +152,7 @@ jobs:
     name: Test Results Summary
     runs-on: ubuntu-latest
     needs: instrumented-tests
-    if: false  # DISABLED - Workflow temporarily deactivated to save costs
+    if: always()
 
     steps:
       - name: Download Test Results
@@ -225,7 +224,7 @@ jobs:
     name: UI Test Performance Analysis
     runs-on: ubuntu-latest
     needs: instrumented-tests
-    if: false  # DISABLED - Workflow temporarily deactivated to save costs
+    if: always() && github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout

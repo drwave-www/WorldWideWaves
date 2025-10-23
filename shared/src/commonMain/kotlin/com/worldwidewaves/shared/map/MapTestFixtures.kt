@@ -19,7 +19,6 @@ package com.worldwidewaves.shared.map
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 
@@ -260,7 +259,7 @@ object MapTestFixtures {
      * Shrink a bounding box by a percentage
      */
     fun BoundingBox.shrink(percentage: Double): BoundingBox {
-        require(percentage < WWWGlobals.MapDisplay.MAX_SHRINKAGE_PERCENTAGE) { "Cannot shrink by more than 50%" }
+        require(percentage < 0.5) { "Cannot shrink by more than 50%" }
 
         val latShrinkage = height * percentage / 2.0
         val lngShrinkage = width * percentage / 2.0

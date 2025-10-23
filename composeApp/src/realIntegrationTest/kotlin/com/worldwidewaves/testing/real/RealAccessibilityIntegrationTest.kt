@@ -23,7 +23,6 @@ package com.worldwidewaves.testing.real
 
 import androidx.compose.ui.test.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Test
@@ -107,7 +106,7 @@ class RealAccessibilityIntegrationTest : BaseRealIntegrationTest() {
         try {
             // Trigger a state change that should announce
             composeTestRule.onNode(hasText("talkback_test_event")).performClick()
-            delay(2000)
+            kotlinx.coroutines.delay(2000)
 
             println("✅ Dynamic content interaction tested")
         } catch (e: Exception) {
@@ -205,7 +204,7 @@ class RealAccessibilityIntegrationTest : BaseRealIntegrationTest() {
         val focusManagementWorking = try {
             // Test that focus moves appropriately
             composeTestRule.onNode(hasText("navigation_test_event")).performClick()
-            delay(1000)
+            kotlinx.coroutines.delay(1000)
 
             // Focus should move to opened content or back appropriately
             true
@@ -270,7 +269,7 @@ class RealAccessibilityIntegrationTest : BaseRealIntegrationTest() {
                         hasContentDescription("Participate in wave")
                     ).performClick()
 
-                    delay(2000)
+                    kotlinx.coroutines.delay(2000)
 
                     composeTestRule.onNode(
                         hasContentDescription("Participating in wave") or
@@ -298,7 +297,7 @@ class RealAccessibilityIntegrationTest : BaseRealIntegrationTest() {
         var announcementTestsPassed = 0
 
         for ((testName, test) in announcementTests) {
-            delay(3000) // Allow time for state changes
+            kotlinx.coroutines.delay(3000) // Allow time for state changes
 
             val passed = test()
             if (passed) {
@@ -350,7 +349,7 @@ class RealAccessibilityIntegrationTest : BaseRealIntegrationTest() {
             "New event appears" to {
                 // Create new event and test announcement
                 createTestEvent("new_dynamic_event", 40.7130, -74.0058)
-                delay(3000)
+                kotlinx.coroutines.delay(3000)
 
                 try {
                     composeTestRule.onNode(
@@ -377,7 +376,7 @@ class RealAccessibilityIntegrationTest : BaseRealIntegrationTest() {
             "Location updates" to {
                 // Test location change announcements
                 setTestLocation(40.7135, -74.0055)
-                delay(2000)
+                kotlinx.coroutines.delay(2000)
 
                 try {
                     composeTestRule.onNode(
@@ -462,7 +461,7 @@ class RealAccessibilityIntegrationTest : BaseRealIntegrationTest() {
         val layoutStableWithLargeText = try {
             // Test key interactions still work
             composeTestRule.onNode(hasText("large_text_test")).performClick()
-            delay(1000)
+            kotlinx.coroutines.delay(1000)
 
             // UI should still be functional
             composeTestRule.onNode(hasText("large_text_test")).assertExists()
@@ -519,7 +518,7 @@ class RealAccessibilityIntegrationTest : BaseRealIntegrationTest() {
 
                 // Test that touch target is large enough (by attempting interaction)
                 node.performClick()
-                delay(500)
+                kotlinx.coroutines.delay(500)
 
                 println("✅ Touch target accessible: $targetName")
                 accessibleTouchTargets++
@@ -612,7 +611,7 @@ class RealAccessibilityIntegrationTest : BaseRealIntegrationTest() {
         val reducedMotionSupport = try {
             // App should function without relying on animations
             composeTestRule.onNode(hasText("contrast_test")).performClick()
-            delay(1000)
+            kotlinx.coroutines.delay(1000)
 
             // UI should still update appropriately
             true

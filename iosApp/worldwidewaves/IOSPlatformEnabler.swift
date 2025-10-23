@@ -40,59 +40,47 @@ final class IOSPlatformEnabler: PlatformEnabler {
 
     func openEventActivity(eventId: String) {
         let url = "worldwidewaves://event?id=\(eventId)"
-        #if DEBUG
-        WWWLog.d(tag, "openEventActivity(eventId=\(eventId)) -> \(url)")
-        #endif
+        NSLog("[\(tag)] 🎯 openEventActivity(eventId=\(eventId)) -> \(url)")
         routeTo(urlString: url)
     }
 
     func openWaveActivity(eventId: String) {
         let url = "worldwidewaves://wave?id=\(eventId)"
-        #if DEBUG
-        WWWLog.d(tag, "openWaveActivity(eventId=\(eventId)) -> \(url)")
-        #endif
+        NSLog("[\(tag)] 🎯 openWaveActivity(eventId=\(eventId)) -> \(url)")
         routeTo(urlString: url)
     }
 
     func openFullMapActivity(eventId: String) {
         let url = "worldwidewaves://fullmap?id=\(eventId)"
-        #if DEBUG
-        WWWLog.d(tag, "openFullMapActivity(eventId=\(eventId)) -> \(url)")
-        #endif
+        NSLog("[\(tag)] 🎯 openFullMapActivity(eventId=\(eventId)) -> \(url)")
         routeTo(urlString: url)
     }
 
     func finishActivity() {
-        #if DEBUG
-        WWWLog.d(tag, "finishActivity: dismissing top view controller")
-        #endif
+        NSLog("[\(tag)] ⬅️ finishActivity: dismissing top view controller")
         guard let topVC = Self.topViewController() else {
-            WWWLog.w(tag, "finishActivity: no top VC to dismiss")
+            NSLog("[\(tag)] ⚠️ finishActivity: no top VC to dismiss")
             return
         }
 
         // If presented modally, dismiss it
         if topVC.presentingViewController != nil {
-            #if DEBUG
-            WWWLog.d(tag, "dismissing presented view controller")
-            #endif
+            NSLog("[\(tag)] → dismissing presented view controller")
             topVC.dismiss(animated: true)
         }
         // If in navigation stack, pop it
         else if let navController = topVC.navigationController {
-            #if DEBUG
-            WWWLog.d(tag, "popping from navigation controller")
-            #endif
+            NSLog("[\(tag)] → popping from navigation controller")
             navController.popViewController(animated: true)
         } else {
-            WWWLog.w(tag, "finishActivity: VC not in modal or nav stack")
+            NSLog("[\(tag)] ⚠️ finishActivity: VC not in modal or nav stack")
         }
     }
 
     func toast(message: String) {
-        WWWLog.i(tag, "toast: \"\(message)\"")
+        NSLog("[\(tag)] 🔔 toast: \"\(message)\"")
         guard let hostView = Self.topViewController()?.view else {
-            WWWLog.w(tag, "toast: no top VC/view; dropping message")
+            NSLog("[\(tag)] ⚠️ toast: no top VC/view; dropping message")
             return
         }
         Self.showToast(message: message, in: hostView)
@@ -101,29 +89,23 @@ final class IOSPlatformEnabler: PlatformEnabler {
     }
 
     func openUrl(url: String) {
-        WWWLog.i(tag, "openUrl(url=\(url))")
+        NSLog("[\(tag)] 🌐 openUrl(url=\(url))")
         guard let targetUrl = URL(string: url) else {
-            WWWLog.e(tag, "openUrl: invalid URL string")
+            NSLog("[\(tag)] ❌ openUrl: invalid URL string")
             return
         }
         let scheme = targetUrl.scheme?.lowercased() ?? "(nil)"
         if ["http", "https"].contains(scheme) {
             if let top = Self.topViewController() {
-                #if DEBUG
-                WWWLog.d(tag, "presenting SFSafariViewController from \(type(of: top))")
-                #endif
+                NSLog("[\(tag)] → presenting SFSafariViewController from \(type(of: top))")
                 let safari = SFSafariViewController(url: targetUrl)
                 top.present(safari, animated: true)
             } else {
-                #if DEBUG
-                WWWLog.d(tag, "no top VC; using UIApplication.open()")
-                #endif
+                NSLog("[\(tag)] → no top VC; using UIApplication.open()")
                 UIApplication.shared.open(targetUrl)
             }
         } else {
-            #if DEBUG
-            WWWLog.d(tag, "non-http scheme (\(scheme)); using UIApplication.open()")
-            #endif
+            NSLog("[\(tag)] → non-http scheme (\(scheme)); using UIApplication.open()")
             UIApplication.shared.open(targetUrl)
         }
     }
@@ -132,57 +114,43 @@ final class IOSPlatformEnabler: PlatformEnabler {
 
     /// Announces a message to VoiceOver users.
     @objc public func announceForAccessibility(message: String) {
-        #if DEBUG
-        WWWLog.d(tag, "VoiceOver announcement: \(message)")
-        #endif
+        NSLog("[\(tag)] 📣 VoiceOver announcement: \(message)")
         UIAccessibility.post(notification: .announcement, argument: message)
     }
 
     /// Triggers a haptic success notification.
     @objc public func triggerHapticSuccess() {
-        #if DEBUG
-        WWWLog.d(tag, "Haptic: success")
-        #endif
+        NSLog("[\(tag)] ✅ Haptic: success")
         notificationFeedback.notificationOccurred(.success)
     }
 
     /// Triggers a haptic warning notification.
     @objc public func triggerHapticWarning() {
-        #if DEBUG
-        WWWLog.d(tag, "Haptic: warning")
-        #endif
+        NSLog("[\(tag)] ⚠️ Haptic: warning")
         notificationFeedback.notificationOccurred(.warning)
     }
 
     /// Triggers a haptic impact feedback.
     @objc public func triggerHapticImpact() {
-        #if DEBUG
-        WWWLog.d(tag, "Haptic: impact")
-        #endif
+        NSLog("[\(tag)] 💥 Haptic: impact")
         impactFeedback.impactOccurred()
     }
 
     // MARK: - Helpers
 
     private func routeTo(urlString: String) {
-        #if DEBUG
-        WWWLog.d(tag, "routeTo(\(urlString))")
-        #endif
+        NSLog("[\(tag)] 🧭 routeTo(\(urlString))")
         guard let url = URL(string: urlString) else {
-            WWWLog.e(tag, "routeTo: invalid URL string")
+            NSLog("[\(tag)] ❌ routeTo: invalid URL string")
             return
         }
         if UIApplication.shared.canOpenURL(url) {
-            #if DEBUG
-            WWWLog.d(tag, "canOpenURL -> opening")
-            #endif
+            NSLog("[\(tag)] ✅ canOpenURL -> opening")
             UIApplication.shared.open(url) { success in
-                #if DEBUG
-                WWWLog.d(self.tag, "openURL completion: \(success ? "success" : "failed")")
-                #endif
+                NSLog("[\(self.tag)] 📬 openURL completion: \(success ? "success" : "failed")")
             }
         } else {
-            WWWLog.e(tag, "cannot open URL (scheme not registered?)")
+            NSLog("[\(tag)] ❌ cannot open URL (scheme not registered?)")
             toast(message: "Cannot handle: \(urlString)")
         }
     }
@@ -197,31 +165,21 @@ final class IOSPlatformEnabler: PlatformEnabler {
 
         func dive(_ viewController: UIViewController?) -> UIViewController? {
             if let nav = viewController as? UINavigationController {
-                #if DEBUG
-                WWWLog.d("IOSPlatformEnabler", "topVC: UINavigationController -> visibleViewController")
-                #endif
+                NSLog("[IOSPlatformEnabler] 🔎 topVC: UINavigationController -> visibleViewController")
                 return dive(nav.visibleViewController)
             }
             if let tab = viewController as? UITabBarController {
-                #if DEBUG
-                WWWLog.d("IOSPlatformEnabler", "topVC: UITabBarController -> selectedViewController")
-                #endif
+                NSLog("[IOSPlatformEnabler] 🔎 topVC: UITabBarController -> selectedViewController")
                 return dive(tab.selectedViewController)
             }
             if let presented = viewController?.presentedViewController {
-                #if DEBUG
-                WWWLog.d("IOSPlatformEnabler", "topVC: presentedViewController -> \(type(of: presented))")
-                #endif
+                NSLog("[IOSPlatformEnabler] 🔎 topVC: presentedViewController -> \(type(of: presented))")
                 return dive(presented)
             }
             if let final = viewController {
-                #if DEBUG
-                WWWLog.d("IOSPlatformEnabler", "topVC resolved: \(type(of: final))")
-                #endif
+                NSLog("[IOSPlatformEnabler] 🔝 topVC resolved: \(type(of: final))")
             } else {
-                #if DEBUG
-                WWWLog.d("IOSPlatformEnabler", "topVC: none found")
-                #endif
+                NSLog("[IOSPlatformEnabler] ⚠️ topVC: none found")
             }
             return viewController
         }
@@ -230,9 +188,7 @@ final class IOSPlatformEnabler: PlatformEnabler {
     }
 
     private static func showToast(message: String, in container: UIView) {
-        #if DEBUG
-        WWWLog.d("IOSPlatformEnabler", "showToast begin")
-        #endif
+        NSLog("[IOSPlatformEnabler] 🍞 showToast begin")
         let label = PaddingLabel()
         label.text = message
         label.numberOfLines = 0
@@ -255,9 +211,7 @@ final class IOSPlatformEnabler: PlatformEnabler {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                 UIView.animate(withDuration: 0.25, animations: { label.alpha = 0 }, completion: { _ in
                     label.removeFromSuperview()
-                    #if DEBUG
-                    WWWLog.d("IOSPlatformEnabler", "showToast end (removed)")
-                    #endif
+                    NSLog("[IOSPlatformEnabler] 🍞 showToast end (removed)")
                 })
             }
         })

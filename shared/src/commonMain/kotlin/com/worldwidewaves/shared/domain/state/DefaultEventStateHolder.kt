@@ -27,6 +27,7 @@ import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
+import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.utils.Log
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.INFINITE
@@ -46,6 +47,8 @@ import kotlin.time.Instant.Companion.DISTANT_FUTURE
  */
 class DefaultEventStateHolder(
     private val waveProgressionTracker: WaveProgressionTracker,
+    @Suppress("UnusedPrivateProperty") // Injected for timing-critical state calculations
+    private val clock: IClock,
 ) : EventStateHolder {
     override suspend fun calculateEventState(
         event: IWWWEvent,

@@ -1,4 +1,4 @@
-name: 01 • Build Android [DISABLED]
+name: 01 • Build Android
 
 on:
   push:
@@ -16,7 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: []  # Removed dependency to run in parallel with quality gates
-    if: false  # DISABLED - Workflow temporarily deactivated to save costs
 
     steps:
       - name: Checkout

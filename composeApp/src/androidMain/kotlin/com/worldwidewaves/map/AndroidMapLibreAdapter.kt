@@ -69,7 +69,7 @@ class AndroidMapLibreAdapter(
     private var mapLibreMap: MapLibreMap? = null,
 ) : MapLibreAdapter<MapLibreMap> {
     companion object {
-        private const val TAG = "WWW.Map.Android"
+        private const val TAG = "AndroidMapLibreAdapter"
         private const val MIN_LATITUDE = -90.0
         private const val MAX_LATITUDE = 90.0
         private const val MIN_LONGITUDE = -180.0
@@ -122,6 +122,14 @@ class AndroidMapLibreAdapter(
         // Update adapter with initial camera position
         updateCameraInfo()
 
+        // Debug: log initial camera details
+        Log.d(
+            "Camera",
+            "Initial camera: target=${map.cameraPosition.target?.latitude}," +
+                "${map.cameraPosition.target?.longitude} " +
+                "zoom=${map.cameraPosition.zoom}",
+        )
+
         // Set camera movement listener to update position
         map.addOnCameraIdleListener {
             updateCameraInfo()
@@ -139,15 +147,18 @@ class AndroidMapLibreAdapter(
         callback: () -> Unit?,
     ) {
         require(mapLibreMap != null)
-        Log.i(TAG, "Applying style from URI: $stylePath")
+        // Log style application start – helps diagnose early style failures
+        Log.d(TAG, "Applying style from URI: $stylePath")
 
         mapLibreMap!!.setStyle(Style.Builder().fromUri(stylePath)) { _ ->
+            // Log successful style load – confirms MapLibre has parsed the style
             Log.i(TAG, "Style loaded successfully")
             styleLoaded = true
 
             // Render pending polygons that arrived before style loaded
             // Only the most recent set matters (wave progression contains all previous circles)
             pendingPolygons?.let { polygons ->
+                Log.i(TAG, "Rendering pending polygons: ${polygons.size} polygons")
                 addWavePolygons(polygons, clearExisting = true)
                 pendingPolygons = null
             }
@@ -257,6 +268,11 @@ class AndroidMapLibreAdapter(
 
     override fun moveCamera(bounds: BoundingBox) {
         require(mapLibreMap != null)
+        Log.v(
+            "Camera",
+            "Moving camera to bounds: SW=${bounds.southwest.latitude},${bounds.southwest.longitude} " +
+                "NE=${bounds.northeast.latitude},${bounds.northeast.longitude}",
+        )
         val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds.toLatLngBounds(), 0)
         mapLibreMap!!.moveCamera(cameraUpdate)
     }
@@ -267,6 +283,12 @@ class AndroidMapLibreAdapter(
         callback: MapCameraCallback?,
     ) {
         val map = mapLibreMap ?: return
+
+        Log.v(
+            "Camera",
+            "Animating to position: lat=${position.latitude}, " +
+                "lng=${position.longitude}, zoom=$zoom",
+        )
 
         val builder =
             CameraPosition
@@ -302,6 +324,14 @@ class AndroidMapLibreAdapter(
     ) {
         val map = mapLibreMap ?: return
 
+        Log.v(
+            "Camera",
+            "Animating to bounds: SW=${bounds.southwest.latitude}," +
+                "${bounds.southwest.longitude} " +
+                "NE=${bounds.northeast.latitude},${bounds.northeast.longitude} " +
+                "padding=$padding",
+        )
+
         val latLngBounds =
             LatLngBounds
                 .Builder()
@@ -332,7 +362,7 @@ class AndroidMapLibreAdapter(
     private var isGestureInProgress = false
     private var gestureConstraintsActive = false // Track if gesture listeners are already set up
     private var minZoomLocked = false // Track if min zoom has been set (to prevent zoom-in spiral)
-    private var lastValidCameraPosition: LatLng? = null
+    private var lastValidCameraPosition: org.maplibre.android.geometry.LatLng? = null
 
     override fun setBoundsForCameraTarget(
         constraintBounds: BoundingBox,
@@ -352,27 +382,37 @@ class AndroidMapLibreAdapter(
             "Longitude out of range: must be between $MIN_LONGITUDE and $MAX_LONGITUDE"
         }
 
+        Log.v(
+            "Camera",
+            "Setting camera target bounds constraint: SW=${constraintBounds.southwest.latitude}," +
+                "${constraintBounds.southwest.longitude} " +
+                "NE=${constraintBounds.northeast.latitude},${constraintBounds.northeast.longitude}, " +
+                "applyZoomSafetyMargin=$applyZoomSafetyMargin",
+        )
+
         // Store constraint bounds for viewport clamping (matches iOS pattern)
         currentConstraintBounds = constraintBounds
 
-        // Only calculate min zoom if not locked OR if we're now getting originalEventBounds
+        // CRITICAL: Only calculate min zoom if not locked OR if we're now getting originalEventBounds
         // This ensures we calculate from ORIGINAL bounds (not shrunk), preventing infinite zoom out
         val shouldCalculateMinZoom = !minZoomLocked || (originalEventBounds != null && !minZoomLocked)
 
         if (shouldCalculateMinZoom && originalEventBounds != null) {
             val boundsForMinZoom = originalEventBounds
 
-            // Different calculation for WINDOW vs BOUNDS mode
+            // CRITICAL: Different calculation for WINDOW vs BOUNDS mode
             val baseMinZoom: Double
 
             if (applyZoomSafetyMargin) {
-                // WINDOW MODE: Fit the constraining dimension to prevent viewport overflow
+                // WINDOW MODE: Fit the SMALLEST event dimension (prevents outside pixels)
+                // For wide event on tall screen: fit height (smaller)
+                // For tall event on wide screen: fit width (smaller)
                 val eventWidth = boundsForMinZoom.ne.lng - boundsForMinZoom.sw.lng
                 val eventHeight = boundsForMinZoom.ne.lat - boundsForMinZoom.sw.lat
                 val mapWidth = getWidth()
                 val mapHeight = getHeight()
 
-                // Validate dimensions before calculation
+                // Validate dimensions before calculation (prevent division by zero)
                 if (mapWidth <= 0 || mapHeight <= 0 || eventWidth <= 0 || eventHeight <= 0) {
                     Log.w(
                         "Camera",
@@ -389,10 +429,13 @@ class AndroidMapLibreAdapter(
                 val eventAspect = eventWidth / eventHeight
                 val screenAspect = mapWidth / mapHeight
 
-                // Calculate zoom for the constraining dimension
+                // Use MapLibre to calculate zoom for the constraining dimension
+                // Wide event on tall screen: use height-constrained bounds
+                // Tall event on wide screen: use width-constrained bounds
                 val constrainingBounds =
                     if (eventAspect > screenAspect) {
-                        // Event wider than screen → constrained by HEIGHT
+                        // Event is wider than screen aspect → constrained by HEIGHT
+                        // Create bounds with event height but screen-proportional width
                         val constrainedWidth = eventHeight * screenAspect
                         val centerLng = (boundsForMinZoom.sw.lng + boundsForMinZoom.ne.lng) / 2.0
                         BoundingBox.fromCorners(
@@ -400,7 +443,7 @@ class AndroidMapLibreAdapter(
                             Position(boundsForMinZoom.ne.lat, centerLng + constrainedWidth / 2),
                         )
                     } else {
-                        // Event taller than screen → constrained by WIDTH
+                        // Event is taller than screen aspect → constrained by WIDTH
                         val constrainedHeight = eventWidth / screenAspect
                         val centerLat = (boundsForMinZoom.sw.lat + boundsForMinZoom.ne.lat) / 2.0
                         BoundingBox.fromCorners(
@@ -412,22 +455,50 @@ class AndroidMapLibreAdapter(
                 val latLngBounds = constrainingBounds.toLatLngBounds()
                 val cameraPosition = mapLibreMap!!.getCameraForLatLngBounds(latLngBounds, intArrayOf(0, 0, 0, 0))
                 baseMinZoom = cameraPosition?.zoom ?: mapLibreMap!!.minZoomLevel
+
+                Log.i(
+                    "Camera",
+                    "🎯 WINDOW mode: eventAspect=$eventAspect, screenAspect=$screenAspect, " +
+                        "constrainedBy=${if (eventAspect > screenAspect) "HEIGHT" else "WIDTH"}, " +
+                        "minZoom=$baseMinZoom",
+                )
             } else {
                 // BOUNDS MODE: Use MapLibre's calculation (shows entire event)
                 val latLngBounds = boundsForMinZoom.toLatLngBounds()
                 val cameraPosition = mapLibreMap!!.getCameraForLatLngBounds(latLngBounds, intArrayOf(0, 0, 0, 0))
                 baseMinZoom = cameraPosition?.zoom ?: mapLibreMap!!.minZoomLevel
+
+                Log.i(
+                    "Camera",
+                    "🎯 BOUNDS mode min zoom: base=$baseMinZoom (entire event visible)",
+                )
             }
 
-            // Base min zoom ensures event fits in viewport
+            // No safety margin - base min zoom already ensures event fits in viewport
+            // The max() calculation ensures BOTH dimensions fit, allowing full event visibility
             calculatedMinZoom = baseMinZoom
 
-            // Set min zoom preference
+            Log.i(
+                "Camera",
+                "🎯 Final min zoom: $baseMinZoom (allows seeing full event, no margin)",
+            )
+
+            // Set min zoom IMMEDIATELY
             mapLibreMap!!.setMinZoomPreference(calculatedMinZoom)
+            Log.e(
+                "Camera",
+                "🚨 SET MIN ZOOM: $calculatedMinZoom - ${if (applyZoomSafetyMargin) "NO PIXELS OUTSIDE" else "ENTIRE EVENT"} 🚨",
+            )
+
             minZoomLocked = true
-            Log.i("Camera", "Min zoom set: $calculatedMinZoom (${if (applyZoomSafetyMargin) "window mode" else "bounds mode"})")
+            Log.i("Camera", "✅ Min zoom LOCKED at $calculatedMinZoom")
         } else if (!shouldCalculateMinZoom) {
-            Log.i("Camera", "Min zoom already locked at $calculatedMinZoom")
+            Log.v(
+                "Camera",
+                "Min zoom already locked at $calculatedMinZoom, skipping recalculation",
+            )
+        } else {
+            Log.w("Camera", "⚠️ Min zoom NOT calculated (originalEventBounds is null)")
         }
 
         // Set the underlying MapLibre bounds (constrains camera center only)
@@ -444,13 +515,13 @@ class AndroidMapLibreAdapter(
 
     /**
      * Setup preventive gesture constraints to prevent camera from moving outside bounds.
-     * This provides iOS-like gesture clamping by intercepting movements during gestures.
-     * Called once when constraints are first applied.
+     * This provides iOS-like "shouldChangeFrom" behavior by intercepting gestures during movement.
+     * Called ONCE when constraints are first applied (not on every constraint update).
      */
     private fun setupPreventiveGestureConstraints() {
         val map = mapLibreMap ?: return
 
-        Log.i(TAG, "Setting up preventive gesture constraints")
+        Log.i(TAG, "Setting up preventive gesture constraints (one-time setup)")
 
         // Track when gestures start
         map.addOnCameraMoveStartedListener { reason ->
@@ -479,7 +550,7 @@ class AndroidMapLibreAdapter(
 
             // Check if viewport exceeds event bounds
             if (!isViewportWithinBounds(viewport, constraintBounds)) {
-                // Viewport exceeds bounds - clamp camera position immediately
+                // Viewport exceeds bounds - clamp camera position IMMEDIATELY
                 val clampedPosition =
                     clampCameraToKeepViewportInside(
                         Position(currentCamera.latitude, currentCamera.longitude),
@@ -491,12 +562,16 @@ class AndroidMapLibreAdapter(
                 if (kotlin.math.abs(clampedPosition.latitude - currentCamera.latitude) > 0.000001 ||
                     kotlin.math.abs(clampedPosition.longitude - currentCamera.longitude) > 0.000001
                 ) {
-                    // Move camera to clamped position without animation
+                    Log.v(TAG, "Gesture intercepted: viewport would exceed bounds, clamping camera")
+
+                    // Move camera to clamped position WITHOUT animation (instant)
                     map.cameraPosition =
                         CameraPosition
                             .Builder()
-                            .target(LatLng(clampedPosition.latitude, clampedPosition.longitude))
-                            .zoom(map.cameraPosition.zoom)
+                            .target(
+                                org.maplibre.android.geometry
+                                    .LatLng(clampedPosition.latitude, clampedPosition.longitude),
+                            ).zoom(map.cameraPosition.zoom)
                             .build()
                 }
             }
@@ -508,10 +583,11 @@ class AndroidMapLibreAdapter(
                 // Gesture ended - save this as last valid position
                 lastValidCameraPosition = map.cameraPosition.target
                 isGestureInProgress = false
+                Log.v(TAG, "Gesture ended, saved valid position")
             }
         }
 
-        Log.i(TAG, "Preventive gesture constraints active")
+        Log.i(TAG, "✅ Preventive gesture constraints active")
     }
 
     /**
@@ -632,6 +708,13 @@ class AndroidMapLibreAdapter(
     override fun drawOverridenBbox(bbox: BoundingBox) {
         require(mapLibreMap != null)
 
+        Log.v(
+            "Camera",
+            "Drawing override bbox: SW=${bbox.southwest.latitude}," +
+                "${bbox.southwest.longitude} " +
+                "NE=${bbox.northeast.latitude},${bbox.northeast.longitude}",
+        )
+
         mapLibreMap!!.style?.let { style ->
             val rectangleCoordinates =
                 listOf(
@@ -661,24 +744,31 @@ class AndroidMapLibreAdapter(
 
     override fun enableLocationComponent(enabled: Boolean) {
         // On Android, location component is managed by AndroidEventMap
-        // Location component is activated through setupMapLocationComponent() in AndroidEventMap.kt
+        // This is a no-op since the location component is activated through
+        // setupMapLocationComponent() in AndroidEventMap.kt
+        Log.d(TAG, "enableLocationComponent: $enabled (no-op on Android, managed by AndroidEventMap)")
     }
 
     override fun setUserPosition(position: Position) {
         // On Android, user position is managed automatically by LocationEngineProxy
-        // Position updates flow from LocationProvider through LocationEngine to MapLibre
+        // which feeds positions from LocationProvider to MapLibre's location component
+        // This is a no-op since the position updates happen through the LocationEngine
+        Log.v(TAG, "setUserPosition: (${position.lat}, ${position.lng}) (no-op on Android, managed by LocationEngineProxy)")
     }
 
     override fun setGesturesEnabled(enabled: Boolean) {
         require(mapLibreMap != null)
+        Log.d(TAG, "setGesturesEnabled: $enabled")
 
         mapLibreMap!!.uiSettings.apply {
-            // Enable/disable scroll and zoom gestures
+            // Scroll gestures (pan/drag)
             isScrollGesturesEnabled = enabled
+            // Zoom gestures (pinch, double-tap, etc.)
             isZoomGesturesEnabled = enabled
-            // Rotation and tilt always disabled (not controlled by enabled parameter)
-            isRotateGesturesEnabled = false
-            isTiltGesturesEnabled = false
+            // CRITICAL: Rotation and tilt ALWAYS disabled (not controlled by enabled parameter)
+            // Map rotation breaks the constrained window concept for full map screen
+            isRotateGesturesEnabled = false // ALWAYS false
+            isTiltGesturesEnabled = false // ALWAYS false
         }
     }
 }

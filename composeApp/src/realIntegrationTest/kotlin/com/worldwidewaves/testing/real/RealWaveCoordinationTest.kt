@@ -23,13 +23,12 @@ package com.worldwidewaves.testing.real
 
 import androidx.compose.ui.test.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * Real integration tests for multi-device wave coordination and real-time synchronization.
@@ -181,7 +180,7 @@ class RealWaveCoordinationTest : BaseRealIntegrationTest() {
                 hasText("Join Wave") or
                 hasContentDescription("Participate in wave")
             ).performClick()
-            delay(2000)
+            kotlinx.coroutines.delay(2000)
         } catch (e: Exception) {
             // May auto-join
         }
@@ -306,7 +305,7 @@ class RealWaveCoordinationTest : BaseRealIntegrationTest() {
         // Test progression over time
         val progressionSteps = mutableListOf<String>()
         repeat(3) { step ->
-            delay(3000)
+            kotlinx.coroutines.delay(3000)
 
             val currentProgress = try {
                 composeTestRule.onNode(
@@ -363,7 +362,7 @@ class RealWaveCoordinationTest : BaseRealIntegrationTest() {
         // Monitor timing accuracy over wave duration
         val timingChecks = mutableListOf<Long>()
         repeat(5) { check ->
-            delay(3000)
+            kotlinx.coroutines.delay(3000)
             val currentTime = System.currentTimeMillis() - testStartTime
 
             val timingIndicator = try {
@@ -427,14 +426,14 @@ class RealWaveCoordinationTest : BaseRealIntegrationTest() {
                 hasText("Join Wave") or
                 hasContentDescription("Participate in wave")
             ).performClick()
-            delay(3000)
+            kotlinx.coroutines.delay(3000)
         } catch (e: Exception) {
             // May auto-join
         }
 
         // Simulate network interruption
         simulateNetworkConditions(NetworkCondition.OFFLINE)
-        delay(5000)
+        kotlinx.coroutines.delay(5000)
 
         // Check offline handling
         val offlineHandling = try {
@@ -570,7 +569,7 @@ class RealWaveCoordinationTest : BaseRealIntegrationTest() {
 
         // Test synchronization over time
         repeat(3) { check ->
-            delay(3000)
+            kotlinx.coroutines.delay(3000)
 
             val syncStatus = try {
                 composeTestRule.onNode(
@@ -636,7 +635,7 @@ class RealWaveCoordinationTest : BaseRealIntegrationTest() {
             composeTestRule.onNodeWithContentDescription("Map view").performTouchInput {
                 swipeLeft()
             }
-            delay(1000)
+            kotlinx.coroutines.delay(1000)
 
             // Verify map is still responsive
             composeTestRule.onNodeWithContentDescription("Map view").assertIsDisplayed()

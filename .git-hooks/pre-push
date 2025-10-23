@@ -4,15 +4,6 @@
 command -v git-lfs >/dev/null 2>&1 || { printf >&2 "\n%s\n\n" "This repository is configured for Git LFS but 'git-lfs' was not found on your path. If you no longer wish to use Git LFS, remove this hook by deleting the 'pre-push' file in the hooks directory (set by 'core.hookspath'; usually '.git/hooks')."; exit 2; }
 git lfs pre-push "$@"
 
-# ============================================================
-# DOCUMENTATION AUTOMATION - PRE-PUSH HOOK
-# ============================================================
-# This hook ensures documentation stays up-to-date before push
-# Bypass with: git push --no-verify (NOT recommended)
-# ============================================================
-
-echo "📚 Running pre-push documentation automation..."
-
 # Update translations before push (only if OPENAI_API_KEY is set)
 if [ -n "$OPENAI_API_KEY" ]; then
     echo "Updating translations before push..."
@@ -32,105 +23,6 @@ else
     echo "OPENAI_API_KEY not set. Skipping translation updates."
     echo "To enable automatic translation updates, set your OPENAI_API_KEY environment variable."
 fi
-
-# ============================================================
-# DOKKA API DOCUMENTATION GENERATION
-# ============================================================
-# Generate API documentation to ensure it's always current
-# This runs before push to catch any documentation issues
-# ============================================================
-
-echo "📖 Generating API documentation with Dokka..."
-
-# Run Dokka for the shared module (where most KMM code lives)
-if ./gradlew :shared:dokkaHtml --quiet; then
-    echo "✅ Dokka API documentation generated successfully"
-    dokka_output="shared/build/dokka"
-    if [ -d "$dokka_output" ]; then
-        echo "   Documentation available at: $dokka_output/index.html"
-    fi
-else
-    echo "⚠️  Dokka generation failed. This may indicate KDoc issues."
-    echo "   Please check for:"
-    echo "   - Malformed KDoc comments"
-    echo "   - Missing documentation on public APIs"
-    echo "   - Broken @see or @link references"
-    echo ""
-    echo "   You can fix issues and try again, or bypass with --no-verify (not recommended)"
-    exit 1
-fi
-
-# ============================================================
-# DOCUMENTATION UPDATE DETECTION (ADVISORY)
-# ============================================================
-# Detect if code changed without documentation updates
-# This is advisory only - warns but doesn't block
-# ============================================================
-
-echo "🔍 Checking for documentation updates..."
-
-# Get list of modified files in this push
-remote="$1"
-url="$2"
-
-# Get the range of commits being pushed
-while read local_ref local_sha remote_ref remote_sha; do
-    if [ "$local_sha" = "0000000000000000000000000000000000000000" ]; then
-        # Branch deletion, skip
-        continue
-    fi
-
-    if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
-        # New branch, compare against main/master
-        if git rev-parse --verify main >/dev/null 2>&1; then
-            range="main..$local_sha"
-        elif git rev-parse --verify master >/dev/null 2>&1; then
-            range="master..$local_sha"
-        else
-            # Can't determine base, skip check
-            continue
-        fi
-    else
-        # Normal push, compare range
-        range="$remote_sha..$local_sha"
-    fi
-
-    # Get changed files in this range
-    changed_files=$(git diff --name-only "$range" 2>/dev/null)
-
-    # Check if major code files changed
-    major_code_changed=false
-    if echo "$changed_files" | grep -qE 'shared/src/commonMain/kotlin/.*\.(kt|kts)$'; then
-        major_code_changed=true
-    fi
-    if echo "$changed_files" | grep -qE 'composeApp/src/.*\.(kt|kts)$'; then
-        major_code_changed=true
-    fi
-
-    # Check if documentation or changelog changed
-    docs_changed=false
-    if echo "$changed_files" | grep -qE '\.(md|adoc)$'; then
-        docs_changed=true
-    fi
-    if echo "$changed_files" | grep -qE 'CHANGELOG|RELEASE_NOTES'; then
-        docs_changed=true
-    fi
-
-    # Warn if major code changed but no docs/changelog update
-    if [ "$major_code_changed" = true ] && [ "$docs_changed" = false ]; then
-        echo ""
-        echo "⚠️  ADVISORY WARNING:"
-        echo "   Major code files were modified, but no documentation/changelog was updated."
-        echo ""
-        echo "   Consider updating:"
-        echo "   - CLAUDE.md (if architecture/patterns changed)"
-        echo "   - docs/*.md (if features/APIs changed)"
-        echo "   - KDoc comments (for public API changes)"
-        echo ""
-        echo "   This is advisory only - push will continue."
-        echo ""
-    fi
-done
 
 # Function to find Android SDK path
 find_android_sdk() {
@@ -294,7 +186,3 @@ if [ "$test_failed" = true ]; then
 else
     echo "✅ Critical integration tests passed!"
 fi
-
-echo ""
-echo "✅ All pre-push documentation automation complete!"
-echo ""

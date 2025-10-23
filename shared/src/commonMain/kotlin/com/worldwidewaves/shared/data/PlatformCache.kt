@@ -21,55 +21,14 @@ package com.worldwidewaves.shared.data
  * limitations under the License.
  */
 
-/**
- * Checks if a cached file exists in the platform-specific cache directory.
- *
- * @param fileName The name of the file to check (without path)
- * @return true if the file exists in the cache, false otherwise
- */
 expect suspend fun cachedFileExists(fileName: String): Boolean
 
-/**
- * Returns the absolute path to a cached file if it exists.
- *
- * @param fileName The name of the file to locate (without path)
- * @return The absolute path to the file, or null if it doesn't exist
- */
 expect suspend fun cachedFilePath(fileName: String): String?
 
-/**
- * Caches a file from a remote source to the local cache directory.
- * Platform-specific implementation handles network fetching and storage.
- *
- * @param fileName The name of the file to cache
- * @throws Exception if the file cannot be fetched or stored
- */
 expect suspend fun cacheDeepFile(fileName: String)
 
-/**
- * Returns the platform-specific cache directory path.
- *
- * Platform behavior:
- * - Android: Returns Context.cacheDir.absolutePath
- * - iOS: Returns NSCachesDirectory path
- *
- * @return Absolute path to the cache directory
- */
 expect fun getCacheDir(): String
 
-/**
- * Checks if a cached file's metadata indicates it is stale and needs refresh.
- * Staleness is determined by comparing stored app version with current version.
- *
- * @param fileName The name of the file to check (without path)
- * @return true if the file is stale or metadata is missing, false if fresh
- */
 expect fun isCachedFileStale(fileName: String): Boolean
 
-/**
- * Updates the cache metadata for a file to mark it as fresh.
- * Writes current app version stamp to the metadata file.
- *
- * @param fileName The name of the file whose metadata should be updated
- */
 expect fun updateCacheMetadata(fileName: String)

@@ -23,7 +23,6 @@ package com.worldwidewaves.testing.real
 
 import androidx.compose.ui.test.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Test
@@ -117,7 +116,7 @@ class RealOnboardingFlowIntegrationTest : BaseRealIntegrationTest() {
                 hasText("Get Started")
             ).performClick()
 
-            delay(1000)
+            kotlinx.coroutines.delay(1000)
         } catch (e: Exception) {
             // Continue if no welcome screen
         }
@@ -202,7 +201,7 @@ class RealOnboardingFlowIntegrationTest : BaseRealIntegrationTest() {
                     hasText("Continue") or
                     hasText("Skip")
                 ).performClick()
-                delay(1000)
+                kotlinx.coroutines.delay(1000)
             } catch (e: Exception) {
                 // Continue if button not found
             }
@@ -262,7 +261,7 @@ class RealOnboardingFlowIntegrationTest : BaseRealIntegrationTest() {
                         hasText("Next") or
                         hasContentDescription("Next tutorial step")
                     ).performClick()
-                    delay(1500)
+                    kotlinx.coroutines.delay(1500)
                 } catch (e: Exception) {
                     break // End of tutorial
                 }
@@ -292,7 +291,7 @@ class RealOnboardingFlowIntegrationTest : BaseRealIntegrationTest() {
                     hasText("Continue") or
                     hasText("Skip")
                 ).performClick()
-                delay(1000)
+                kotlinx.coroutines.delay(1000)
             } catch (e: Exception) {
                 // Continue if button not found
             }
@@ -344,7 +343,7 @@ class RealOnboardingFlowIntegrationTest : BaseRealIntegrationTest() {
                     hasTestTag("notification-switch")
                 ).performClick()
 
-                delay(500)
+                kotlinx.coroutines.delay(500)
 
                 println("✅ Notification preferences toggle tested")
             }
@@ -398,7 +397,7 @@ class RealOnboardingFlowIntegrationTest : BaseRealIntegrationTest() {
                     hasText("Done") or
                     hasText("Finish")
                 ).performClick()
-                delay(1500)
+                kotlinx.coroutines.delay(1500)
             } catch (e: Exception) {
                 // Continue if button not found
             }
@@ -470,7 +469,7 @@ class RealOnboardingFlowIntegrationTest : BaseRealIntegrationTest() {
                     hasContentDescription("Continue") or
                     hasText("Skip")
                 ).performClick()
-                delay(1000)
+                kotlinx.coroutines.delay(1000)
             } catch (e: Exception) {
                 // Continue if navigation not available
             }

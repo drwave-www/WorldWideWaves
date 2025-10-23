@@ -24,7 +24,6 @@ Complete setup guide for WorldWideWaves development environment across macOS, Li
 
 | Tool | Purpose |
 |------|---------|
-| ripgrep | Code pattern search (required for `./scripts/verify-ios-safety.sh`) |
 | Docker | Map generation (alternative to local Node.js) |
 | gcloud CLI | Firebase Test Lab access |
 
@@ -120,9 +119,6 @@ brew install node@18
 # Verify installation
 node --version
 npm --version
-
-# ripgrep for iOS safety verification
-brew install ripgrep
 ```
 
 ### 7. Install Optional Tools
@@ -189,9 +185,6 @@ sudo apt install nodejs
 # Verify installation
 node --version
 npm --version
-
-# ripgrep for iOS safety verification
-sudo apt install ripgrep
 ```
 
 ### 5. Install Optional Tools

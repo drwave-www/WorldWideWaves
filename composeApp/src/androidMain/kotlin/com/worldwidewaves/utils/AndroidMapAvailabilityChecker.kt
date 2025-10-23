@@ -46,7 +46,7 @@ class AndroidMapAvailabilityChecker(
 ) : MapAvailabilityChecker {
     /** Log tag used throughout this helper for easy filtering. */
     private companion object Companion {
-        private const val TAG = "WWW.Utils.MapAvail"
+        private const val TAG = "MapAvail"
     }
 
     private val splitInstallManager: SplitInstallManager = SplitInstallManagerFactory.create(context)
@@ -78,7 +78,7 @@ class AndroidMapAvailabilityChecker(
             SplitInstallStateUpdatedListener { state ->
                 when (state.status()) {
                     SplitInstallSessionStatus.INSTALLED -> {
-                        Log.d(TAG, "Module installation completed")
+                        Log.d(::AndroidMapAvailabilityChecker.name, "Module installation completed")
                         Log.d(
                             TAG,
                             "session=${state.sessionId()} INSTALLED modules=${state.moduleNames()}",
@@ -94,7 +94,7 @@ class AndroidMapAvailabilityChecker(
                         refreshAvailability()
                     }
                     SplitInstallSessionStatus.FAILED -> {
-                        Log.w(TAG, "Module installation failed: ${state.errorCode()}")
+                        Log.d(::AndroidMapAvailabilityChecker.name, "Module installation failed: ${state.errorCode()}")
                         Log.w(
                             TAG,
                             "session=${state.sessionId()} FAILED code=${state.errorCode()}",
@@ -102,7 +102,7 @@ class AndroidMapAvailabilityChecker(
                         refreshAvailability()
                     }
                     SplitInstallSessionStatus.CANCELED -> {
-                        Log.i(TAG, "Module installation canceled")
+                        Log.d(::AndroidMapAvailabilityChecker.name, "Module installation canceled")
                         Log.i(TAG, "session=${state.sessionId()} CANCELED")
                         refreshAvailability()
                     }
@@ -133,7 +133,7 @@ class AndroidMapAvailabilityChecker(
      */
     override fun refreshAvailability() {
         val installedModules = splitInstallManager.installedModules
-        Log.d(TAG, "Refreshing availability. Installed modules: $installedModules")
+        Log.d(::AndroidMapAvailabilityChecker.name, "Refreshing availability. Installed modules: $installedModules")
         Log.d(TAG, "queried=$queriedMaps forcedUnavailable=$forcedUnavailable")
 
         // Build updated state map
@@ -181,11 +181,11 @@ class AndroidMapAvailabilityChecker(
             val splitInstallManager = SplitInstallManagerFactory.create(context)
             splitInstallManager.installedModules.contains(eventId)
         } catch (ise: IllegalStateException) {
-            Log.e(TAG, "SplitInstallManager in invalid state: ${ise.message}")
+            Log.e("MapAvailabilityChecker", "SplitInstallManager in invalid state: ${ise.message}")
             Log.e(TAG, "canUninstallMap id=$eventId exception=${ise.message}")
             false // If there's an error, assume it can't be uninstalled
         } catch (uoe: UnsupportedOperationException) {
-            Log.e(TAG, "Unsupported operation on SplitInstallManager: ${uoe.message}")
+            Log.e("MapAvailabilityChecker", "Unsupported operation on SplitInstallManager: ${uoe.message}")
             Log.e(TAG, "canUninstallMap id=$eventId exception=${uoe.message}")
             false // If there's an error, assume it can't be uninstalled
         }
@@ -225,27 +225,27 @@ class AndroidMapAvailabilityChecker(
                             // ignore cache cleanup errors
                         }
 
-                        Log.i(TAG, "Uninstall scheduled for map/event: $eventId")
+                        Log.i("MapAvailabilityChecker", "Uninstall scheduled for map/event: $eventId")
                         Log.i(TAG, "uninstallMap success (scheduled) id=$eventId")
                         if (cont.isActive) cont.resume(true)
                     }.addOnFailureListener { e ->
                         Log.e(
-                            TAG,
+                            "MapAvailabilityChecker",
                             "Deferred uninstall failed for $eventId: ${e.message}",
                         )
                         Log.e(TAG, "uninstallMap failure id=$eventId err=${e.message}")
                         if (cont.isActive) cont.resume(false)
                     }
             } catch (ise: IllegalStateException) {
-                Log.e(TAG, "SplitInstallManager in invalid state for $eventId: ${ise.message}")
+                Log.e("MapAvailabilityChecker", "SplitInstallManager in invalid state for $eventId: ${ise.message}")
                 Log.e(TAG, "uninstallMap exception id=$eventId err=${ise.message}")
                 if (cont.isActive) cont.resume(false)
             } catch (iae: IllegalArgumentException) {
-                Log.e(TAG, "Invalid module name for uninstall $eventId: ${iae.message}")
+                Log.e("MapAvailabilityChecker", "Invalid module name for uninstall $eventId: ${iae.message}")
                 Log.e(TAG, "uninstallMap exception id=$eventId err=${iae.message}")
                 if (cont.isActive) cont.resume(false)
             } catch (uoe: UnsupportedOperationException) {
-                Log.e(TAG, "Unsupported operation during uninstall for $eventId: ${uoe.message}")
+                Log.e("MapAvailabilityChecker", "Unsupported operation during uninstall for $eventId: ${uoe.message}")
                 Log.e(TAG, "uninstallMap exception id=$eventId err=${uoe.message}")
                 if (cont.isActive) cont.resume(false)
             }

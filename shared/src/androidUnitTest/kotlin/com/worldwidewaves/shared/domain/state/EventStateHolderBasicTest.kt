@@ -23,6 +23,7 @@ package com.worldwidewaves.shared.domain.state
 
 import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
 import com.worldwidewaves.shared.events.IWWWEvent.Status
+import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Position
 import io.mockk.mockk
 import kotlin.test.Test
@@ -33,10 +34,12 @@ import kotlin.time.Instant.Companion.DISTANT_FUTURE
 
 class EventStateHolderBasicTest {
     private val mockWaveProgressionTracker = mockk<WaveProgressionTracker>()
+    private val mockClock = mockk<IClock>()
 
     private val eventStateHolder =
         DefaultEventStateHolder(
             mockWaveProgressionTracker,
+            mockClock,
         )
 
     @Test

@@ -23,7 +23,6 @@ package com.worldwidewaves.testing.real
 
 import androidx.compose.ui.test.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Test
@@ -82,7 +81,7 @@ class RealMapLibreIntegrationTest : BaseRealIntegrationTest() {
                 true
             } catch (e: AssertionError) {
                 // Fallback: assume tiles loaded if map view is stable
-                delay(3000)
+                kotlinx.coroutines.delay(3000)
                 true
             }
         }
@@ -125,7 +124,7 @@ class RealMapLibreIntegrationTest : BaseRealIntegrationTest() {
             this.pinchIn()
         }
 
-        delay(1000)
+        kotlinx.coroutines.delay(1000)
 
         // Test zoom out operation
         mapView.performTouchInput {
@@ -133,20 +132,20 @@ class RealMapLibreIntegrationTest : BaseRealIntegrationTest() {
             this.pinchOut()
         }
 
-        delay(1000)
+        kotlinx.coroutines.delay(1000)
 
         // Test pan operation
         mapView.performTouchInput {
             this.swipeLeft()
         }
 
-        delay(1000)
+        kotlinx.coroutines.delay(1000)
 
         mapView.performTouchInput {
             this.swipeRight()
         }
 
-        delay(1000)
+        kotlinx.coroutines.delay(1000)
 
         // Verify map is still responsive after operations
         mapView.assertIsDisplayed()
@@ -257,7 +256,7 @@ class RealMapLibreIntegrationTest : BaseRealIntegrationTest() {
             ).performClick()
 
             // Wait for style change
-            delay(3000)
+            kotlinx.coroutines.delay(3000)
 
             // Verify map is still functional after style change
             composeTestRule.onNodeWithContentDescription("Map view").assertIsDisplayed()
@@ -294,7 +293,7 @@ class RealMapLibreIntegrationTest : BaseRealIntegrationTest() {
         }
 
         // Allow tiles to cache
-        delay(5000)
+        kotlinx.coroutines.delay(5000)
 
         // Simulate network loss
         simulateNetworkConditions(NetworkCondition.OFFLINE)
@@ -306,7 +305,7 @@ class RealMapLibreIntegrationTest : BaseRealIntegrationTest() {
             this.swipeLeft()
         }
 
-        delay(2000)
+        kotlinx.coroutines.delay(2000)
 
         // Verify map is still responsive with cached tiles
         mapView.assertIsDisplayed()
@@ -375,17 +374,17 @@ class RealMapLibreIntegrationTest : BaseRealIntegrationTest() {
             mapView.performTouchInput {
                 this.pinchIn()
             }
-            delay(200)
+            kotlinx.coroutines.delay(200)
 
             mapView.performTouchInput {
                 this.pinchOut()
             }
-            delay(200)
+            kotlinx.coroutines.delay(200)
 
             mapView.performTouchInput {
                 this.swipeLeft()
             }
-            delay(200)
+            kotlinx.coroutines.delay(200)
         }
 
         val loadTime = stopPerformanceTrace()
@@ -444,13 +443,13 @@ class RealMapLibreIntegrationTest : BaseRealIntegrationTest() {
         waitForGpsLocation()
 
         // Wait for location update to be reflected
-        delay(5000)
+        kotlinx.coroutines.delay(5000)
 
         // Test location frequency during activity
         val locationUpdates = mutableListOf<Long>()
         repeat(5) {
             locationUpdates.add(System.currentTimeMillis())
-            delay(2000) // Check every 2 seconds
+            kotlinx.coroutines.delay(2000) // Check every 2 seconds
         }
 
         // Verify location tracking continues
@@ -586,7 +585,7 @@ class RealMapLibreIntegrationTest : BaseRealIntegrationTest() {
 
         // Simulate movement during wave
         setTestLocation(40.7130, -74.0058) // Slight movement
-        delay(3000)
+        kotlinx.coroutines.delay(3000)
 
         // Verify location updates continue during wave
         val locationUpdatesInWave = try {
@@ -682,7 +681,7 @@ class RealMapLibreIntegrationTest : BaseRealIntegrationTest() {
         // Test exiting wave area
         setTestLocation(40.7000, -74.0000) // Exit area
         waitForGpsLocation()
-        delay(5000)
+        kotlinx.coroutines.delay(5000)
 
         val geofenceTime = stopPerformanceTrace()
         println("✅ Wave area detection completed in ${geofenceTime}ms")

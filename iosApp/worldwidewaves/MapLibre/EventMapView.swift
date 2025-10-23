@@ -69,16 +69,15 @@ struct EventMapView: UIViewRepresentable {
 
         // Conditional gesture activation (matches Android)
         // Gestures are only enabled when mapConfig.initialCameraPosition == MapCameraPosition.WINDOW
-        // CRITICAL: Use correct MLNMapView property names (isZoomEnabled, isScrollEnabled, etc.)
-        // Must match MapLibreViewWrapper.swift setGesturesEnabled callback for consistency
         mapView.isZoomEnabled = enableGestures
         mapView.isScrollEnabled = enableGestures
 
         // Always disable rotation and tilt (matches Android)
-        mapView.isRotateEnabled = false
-        mapView.isPitchEnabled = false
+        mapView.allowsRotating = false
+        mapView.allowsTilting = false
 
-        // Note: Double-tap to zoom is automatically enabled/disabled with zoomEnabled
+        // Note: MLNMapView doesn't have allowsZoomingWithDoubleTap property
+        // Double-tap to zoom is automatically enabled/disabled with isZoomEnabled
 
         // Remove rotation gesture recognizers if they exist
         if let gestureRecognizers = mapView.gestureRecognizers {
@@ -94,23 +93,15 @@ struct EventMapView: UIViewRepresentable {
 
         let gestureStatus = "Gestures configured: zoom=\(mapView.isZoomEnabled), " +
             "scroll=\(mapView.isScrollEnabled), " +
-            "rotate=\(mapView.isRotateEnabled), " +
-            "pitch=\(mapView.isPitchEnabled)"
+            "rotate=\(mapView.allowsRotating), " +
+            "tilt=\(mapView.allowsTilting)"
         WWWLog.i(Self.tag, gestureStatus)
     }
 
     private func configureStyleURL(for mapView: MLNMapView) {
         let url: URL
         if styleURL.hasPrefix("http://") || styleURL.hasPrefix("https://") {
-            guard let remoteURL = URL(string: styleURL) else {
-                WWWLog.e(Self.tag, "[ERROR] Invalid remote style URL: \(styleURL)")
-                // Fallback to local default style if remote URL is malformed
-                url = URL(fileURLWithPath: styleURL)
-                WWWLog.w(Self.tag, "Falling back to local style path")
-                mapView.styleURL = url
-                return
-            }
-            url = remoteURL
+            url = URL(string: styleURL)!
             WWWLog.d(Self.tag, "Using remote style URL: \(url)")
         } else {
             url = URL(fileURLWithPath: styleURL)
@@ -118,19 +109,19 @@ struct EventMapView: UIViewRepresentable {
             validateStyleFile(at: styleURL)
         }
         mapView.styleURL = url
-        WWWLog.i(Self.tag, "[SUCCESS] Style URL set on map view: \(url.absoluteString)")
+        WWWLog.i(Self.tag, "✅ Style URL set on map view: \(url.absoluteString)")
     }
 
     private func validateStyleFile(at path: String) {
         let fileManager = FileManager.default
         if fileManager.fileExists(atPath: path) {
-            WWWLog.i(Self.tag, "[SUCCESS] Style file EXISTS at path: \(path)")
+            WWWLog.i(Self.tag, "✅ Style file EXISTS at path: \(path)")
             if let attributes = try? fileManager.attributesOfItem(atPath: path),
                let fileSize = attributes[.size] as? UInt64 {
                 WWWLog.d(Self.tag, "Style file size: \(fileSize) bytes")
             }
         } else {
-            WWWLog.e(Self.tag, "[ERROR] Style file DOES NOT EXIST at path: \(path)")
+            WWWLog.e(Self.tag, "❌ Style file DOES NOT EXIST at path: \(path)")
         }
     }
 

@@ -56,15 +56,14 @@ private val unavailable = mutableSetOf<String>()
 private val lock = Mutex()
 
 object MapDownloadGate {
-    private val mutex = Mutex()
     private val allowed = mutableSetOf<String>()
 
-    suspend fun allow(tag: String) {
-        mutex.withLock { allowed += tag }
+    fun allow(tag: String) {
+        allowed += tag
     }
 
-    suspend fun disallow(tag: String) {
-        mutex.withLock { allowed -= tag }
+    fun disallow(tag: String) {
+        allowed -= tag
     }
 
     fun isAllowed(tag: String) = tag in allowed
@@ -87,17 +86,6 @@ private fun metaPath(
     name: String,
 ) = "$root/$name.metadata"
 
-/**
- * Reads the GeoJSON data for a specific event from the local cache.
- *
- * This function:
- * - Locates the cached GeoJSON file for the event
- * - Returns null if the file doesn't exist or is marked unavailable
- * - Logs the read operation for debugging
- *
- * @param eventId The unique identifier of the event
- * @return The GeoJSON string content, or null if unavailable
- */
 suspend fun readGeoJson(eventId: String): String? {
     Log.d("MapStore", "readGeoJson: Reading GeoJSON for $eventId")
     val p = getMapFileAbsolutePath(eventId, MapFileExtension.GEOJSON)
@@ -122,27 +110,7 @@ enum class MapFileExtension(
     override fun toString(): String = value
 }
 
-/**
- * Retrieves the absolute path to a cached map file, fetching it if necessary.
- *
- * This is the single, shared implementation for both Android & iOS that handles:
- * 1. Cache hit: Returns path if file exists with matching version metadata
- * 2. Bundle/ODR copy: Attempts to copy from app bundle/On-Demand Resources if downloads disabled
- * 3. Explicit download: Fetches from remote server if download is allowed
- *
- * Download control:
- * - Respects MapDownloadGate to prevent unwanted network usage
- * - Marks GeoJSON files as unavailable if download fails (prevents retry loops)
- *
- * Thread safety: Uses mutex lock to prevent concurrent cache operations
- *
- * @param eventId The unique identifier of the event
- * @param extension The file extension type (GEOJSON or MBTILES)
- * @return Absolute path to the cached file, or null if unavailable
- *
- * @see MapDownloadGate for download permission control
- * @see clearUnavailableGeoJsonCache to reset unavailability status
- */
+/** Single, shared implementation for both Android & iOS. */
 // commonMain (MapStore)
 suspend fun getMapFileAbsolutePath(
     eventId: String,

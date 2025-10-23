@@ -27,8 +27,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Before
 import org.junit.Test
-import org.maplibre.android.camera.CameraPosition
-import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
 import kotlin.math.ln
 import kotlin.math.min
@@ -69,10 +67,11 @@ class MinZoomLockingTest {
 
         // Mock getCameraForLatLngBounds response - use actual CameraPosition with zoom value
         val mockPosition =
-            CameraPosition
+            org.maplibre.android.camera.CameraPosition
                 .Builder()
                 .target(
-                    LatLng(48.5, 2.5),
+                    org.maplibre.android.geometry
+                        .LatLng(48.5, 2.5),
                 ).zoom(10.0)
                 .build()
 

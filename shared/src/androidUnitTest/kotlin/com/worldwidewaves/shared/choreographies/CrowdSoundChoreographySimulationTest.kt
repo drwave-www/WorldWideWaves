@@ -58,7 +58,7 @@ class CrowdSoundChoreographySimulationTest {
     companion object {
         private const val CROWD_SIZE = 50
         private const val SIMULATION_INTERVAL_MS = 100L
-        private const val TAG = "WWW.Test.Crowd"
+        private const val TAG = "CrowdSimulation"
     }
 
     /**

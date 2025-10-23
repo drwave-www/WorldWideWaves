@@ -206,29 +206,23 @@ class BoundsWindowModeTest {
         // When: Apply constraints
         enforcer.applyConstraints()
 
-        // Then: Constraint bounds should be SMALLER than original bounds (viewport-based padding)
-        // WINDOW mode uses viewport-based padding (half viewport size) to constrain camera center
-        // iOS: Relies on these bounds (no runtime clamping)
-        // Android: Initial bounds, preventive gesture system provides additional runtime clamping
+        // Then: Constraint bounds should EQUAL original bounds (zero padding in new implementation)
+        // NEW BEHAVIOR: WINDOW mode uses zero padding and relies on preventive gesture constraints
+        // instead of shrinking bounds
         val constraintBounds = adapter.constraintBounds
         assertNotNull(constraintBounds, "Constraint bounds should be set")
 
-        // Constraint bounds should be shrunk by half viewport size
-        val viewport = adapter.getVisibleRegion()
-        val viewportHalfHeight = (viewport.ne.lat - viewport.sw.lat) / 2.0
-        val viewportHalfWidth = (viewport.ne.lng - viewport.sw.lng) / 2.0
-
         assertEquals(
-            TEST_BOUNDS.sw.lat + viewportHalfHeight,
+            TEST_BOUNDS.sw.lat,
             constraintBounds.sw.lat,
             0.0001,
-            "WINDOW mode shrinks SW by half viewport height",
+            "WINDOW mode now uses zero padding (SW lat unchanged)",
         )
         assertEquals(
-            TEST_BOUNDS.ne.lat - viewportHalfHeight,
+            TEST_BOUNDS.ne.lat,
             constraintBounds.ne.lat,
             0.0001,
-            "WINDOW mode shrinks NE by half viewport height",
+            "WINDOW mode now uses zero padding (NE lat unchanged)",
         )
 
         // Then: Should apply zoom safety margin for WINDOW mode (this is the key difference from BOUNDS)
@@ -237,7 +231,7 @@ class BoundsWindowModeTest {
             "WINDOW mode should apply zoom safety margin",
         )
 
-        println("✅ WINDOW mode: viewport-based padding (iOS compatibility), safety margin enabled")
+        println("✅ WINDOW mode: zero padding (preventive gestures), safety margin enabled")
     }
 
     /**
