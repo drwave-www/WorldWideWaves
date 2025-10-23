@@ -252,7 +252,7 @@ if (!minZoomLocked && originalEventBounds != null) {
 }
 
 // Rule 2: Bounds Similarity (0.1% tolerance)
-if (lastAppliedBounds != null && 
+if (lastAppliedBounds != null &&
     abs(new.sw.lat - last.sw.lat) + abs(new.ne.lat - last.ne.lat) < 0.001 &&
     abs(new.sw.lng - last.sw.lng) + abs(new.ne.lng - last.ne.lng) < 0.001) {
     return  // Skip update
@@ -422,4 +422,3 @@ For questions about implementation:
 ---
 
 **Happy reading! Start with ANDROID_MAP_CONSTRAINT_ANALYSIS.md for the full story.**
-

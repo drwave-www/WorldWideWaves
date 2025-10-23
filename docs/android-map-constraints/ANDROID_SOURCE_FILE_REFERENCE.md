@@ -196,7 +196,7 @@ AbstractEventMap.moveToWindowBounds()
 ```
 MapBoundsEnforcer.applyConstraintsWithPadding()
   → mapLibreAdapter.setBoundsForCameraTarget(
-      constraintBounds, 
+      constraintBounds,
       applyZoomSafetyMargin=isWindowMode,
       originalEventBounds=mapBounds
     )
@@ -238,4 +238,3 @@ AndroidMapLibreAdapter.setBoundsForCameraTarget()
 - `ANDROID_MAP_CONSTRAINT_ANALYSIS.md` - Complete analysis
 - `ANDROID_CONSTRAINT_CODE_PATTERNS.md` - Code snippets
 - `ANDROID_PATTERNS_QUICK_REFERENCE.md` - One-page reference
-

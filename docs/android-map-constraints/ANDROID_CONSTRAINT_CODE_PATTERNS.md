@@ -608,4 +608,3 @@ mapLibreAdapter.addOnCameraIdleListener {
 4. **Gesture Distinction**: Only clamp user gestures, not programmatic animations
 5. **Bounds Similarity**: Use 0.1% tolerance to prevent infinite loops
 6. **Preventive > Reactive**: Set constraints before gestures, not after
-

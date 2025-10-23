@@ -51,7 +51,7 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class EventDetailScreenMapTest : BaseMapIntegrationTest() {
-    override val stylePath = "asset://test_map_style.json"
+    // Note: styleJson is inherited from BaseMapIntegrationTest (inline minimal style)
 
     // ============================================================
     // INITIAL CAMERA POSITION

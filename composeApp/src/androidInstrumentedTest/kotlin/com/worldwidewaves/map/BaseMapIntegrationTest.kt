@@ -22,10 +22,9 @@
 package com.worldwidewaves.map
 
 import android.content.Context
-import android.view.View
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.MapTestFixtures
@@ -41,6 +40,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Before
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
@@ -48,19 +48,29 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 /**
- * Base class for Android MapLibre integration tests using headless MapView.
+ * Base class for Android MapLibre integration tests using Activity-based MapView.
  *
  * This approach provides:
- * - Real MapLibre map instance (not mocked)
- * - Headless rendering (no UI, faster execution)
+ * - Real MapLibre map instance with OpenGL rendering context
+ * - Activity lifecycle management for MapView initialization
  * - Programmatic camera control (no gesture simulation)
  * - Direct API access for validation
+ *
+ * The MapView requires a real Activity with OpenGL context for getMapAsync
+ * callback to fire. Using ActivityScenarioRule with TestMapActivity solves
+ * the headless MapView callback issue.
  *
  * Usage example shows how to extend this base class for specific map tests.
  * Subclasses can use mapView and adapter properties directly after setup.
  */
 @RunWith(AndroidJUnit4::class)
 abstract class BaseMapIntegrationTest {
+    // ============================================================
+    // ACTIVITY RULE
+    // ============================================================
+
+    @get:Rule
+    val activityRule = ActivityScenarioRule(TestMapActivity::class.java)
     // ============================================================
     // PROTECTED PROPERTIES
     // ============================================================
@@ -74,9 +84,23 @@ abstract class BaseMapIntegrationTest {
     protected var screenWidth: Double = PORTRAIT_PHONE.width
     protected var screenHeight: Double = PORTRAIT_PHONE.height
 
-    // Style path for test maps
-    // Use local asset style to avoid network dependencies
-    protected open val stylePath: String = "asset://test_map_style.json"
+    // Style JSON for test maps
+    // Use inline minimal style (no network or assets required)
+    protected open val styleJson: String =
+        """
+        {
+          "version": 8,
+          "name": "Test Style",
+          "sources": {},
+          "layers": [
+            {
+              "id": "background",
+              "type": "background",
+              "paint": {"background-color": "#f0f0f0"}
+            }
+          ]
+        }
+        """.trimIndent()
 
     // Test event ID
     protected open val testEventId: String = "test-event-001"
@@ -89,110 +113,81 @@ abstract class BaseMapIntegrationTest {
     open fun setUp() {
         context = ApplicationProvider.getApplicationContext()
 
-        // MapView requires UI thread with Looper - use runOnMainSync
+        // Initialize MapLibre (required before creating MapView)
+        org.maplibre.android.MapLibre
+            .getInstance(context)
+
         val mapLoadedLatch = CountDownLatch(1)
         var setupError: Throwable? = null
 
-        androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().runOnMainSync {
+        // Get MapView from Activity
+        activityRule.scenario.onActivity { activity ->
             try {
-                // Initialize MapLibre (required before creating MapView)
-                org.maplibre.android.MapLibre
-                    .getInstance(context)
+                System.out.println("BaseMapIntegrationTest: Getting MapView from TestMapActivity...")
+                mapView = activity.mapView
 
-                // Create headless MapView (must be on main thread)
-                mapView = createHeadlessMapView()
-
-                // Initialize adapter (will set map reference later)
+                System.out.println("BaseMapIntegrationTest: Creating adapter...")
                 adapter = AndroidMapLibreAdapter()
 
+                System.out.println("BaseMapIntegrationTest: Calling getMapAsync...")
                 // Load map asynchronously and wait
                 mapView.getMapAsync { map ->
                     try {
+                        System.out.println("BaseMapIntegrationTest: getMapAsync callback received!")
                         mapLibreMap = map
+                        activity.mapLibreMap = map
                         adapter.setMap(map)
 
-                        // Load style and wait
-                        adapter.setStyle(stylePath) {
+                        System.out.println("BaseMapIntegrationTest: Loading inline JSON style...")
+                        // Load style from inline JSON (no network/assets required)
+                        mapLibreMap.setStyle(
+                            org.maplibre.android.maps.Style
+                                .Builder()
+                                .fromJson(styleJson),
+                        ) {
+                            System.out.println("BaseMapIntegrationTest: Style loaded successfully!")
                             mapLoadedLatch.countDown()
                         }
                     } catch (e: Throwable) {
+                        System.err.println("BaseMapIntegrationTest: Error in getMapAsync callback: ${e.message}")
+                        e.printStackTrace()
                         setupError = e
                         mapLoadedLatch.countDown()
                     }
                 }
+                System.out.println("BaseMapIntegrationTest: getMapAsync called, waiting for callback...")
             } catch (e: Throwable) {
+                System.err.println("BaseMapIntegrationTest: Error in onActivity: ${e.message}")
+                e.printStackTrace()
                 setupError = e
                 mapLoadedLatch.countDown()
             }
         }
 
         try {
-            // Wait up to 15 seconds for map to load (demo tiles might be slower)
+            // Wait up to 15 seconds for map to load
             val loaded = mapLoadedLatch.await(15, TimeUnit.SECONDS)
 
             // Check for errors during setup
             setupError?.let { throw AssertionError("Map setup failed", it) }
 
             if (!loaded) {
-                fail("MapView failed to load within timeout. Style: $stylePath")
+                fail("MapView failed to load within timeout (inline JSON style)")
             }
 
             // Give map time to fully initialize
             Thread.sleep(500)
         } catch (e: Throwable) {
-            // Clean up on failure to avoid tearDown errors
-            if (::mapView.isInitialized) {
-                androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().runOnMainSync {
-                    try {
-                        mapView.onDestroy()
-                    } catch (cleanupError: Throwable) {
-                        // Ignore cleanup errors
-                    }
-                }
-            }
+            // Activity will be cleaned up by ActivityScenarioRule
             throw e
         }
     }
 
     @After
     open fun tearDown() {
-        // Clean up map resources (safe for uninitialized properties)
-        // Must run on main thread since MapView was created there
-        if (::mapView.isInitialized) {
-            androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().runOnMainSync {
-                try {
-                    mapView.onDestroy()
-                } catch (e: Throwable) {
-                    // Log but don't fail tearDown
-                    System.err.println("Error during mapView cleanup: ${e.message}")
-                }
-            }
-        }
-    }
-
-    // ============================================================
-    // HEADLESS MAP CREATION
-    // ============================================================
-
-    /**
-     * Creates a headless MapView without attaching to an activity.
-     * The view is measured and laid out to simulate real rendering dimensions.
-     */
-    private fun createHeadlessMapView(): MapView {
-        val view = MapView(context)
-
-        // Measure and layout the view to set dimensions
-        // This makes MapLibre think it's in a real layout
-        view.measure(
-            View.MeasureSpec.makeMeasureSpec(screenWidth.toInt(), View.MeasureSpec.EXACTLY),
-            View.MeasureSpec.makeMeasureSpec(screenHeight.toInt(), View.MeasureSpec.EXACTLY),
-        )
-        view.layout(0, 0, screenWidth.toInt(), screenHeight.toInt())
-
-        // Trigger onCreate lifecycle event (required for MapView initialization)
-        view.onCreate(null)
-
-        return view
+        // Activity and MapView lifecycle are handled by ActivityScenarioRule
+        // No manual cleanup needed - rule automatically destroys activity
+        System.out.println("BaseMapIntegrationTest: tearDown - activity cleanup handled by rule")
     }
 
     // ============================================================

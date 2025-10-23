@@ -307,6 +307,32 @@ See [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) and [docs/TEST_COVERAGE
 ./gradlew :shared:testDebugUnitTest ktlintCheck detekt
 ```
 
+## Documentation
+
+Comprehensive documentation is available in the `docs/` directory:
+
+### Core Documentation
+- **[CLAUDE.md](CLAUDE.md)** - Complete project development guide (start here for development)
+- **[CLAUDE_iOS.md](CLAUDE_iOS.md)** - iOS-specific development rules and deadlock prevention
+
+### Documentation Hub
+- **[docs/](docs/)** - Complete documentation index
+  - [Architecture](docs/architecture.md) - System design and patterns
+  - [iOS Development](docs/ios/) - iOS-specific guides and debugging
+  - [Android Map Constraints](docs/android-map-constraints/) - Android MapLibre implementation reference
+  - [Testing Strategy](docs/TESTING_STRATEGY.md) - Test architecture and approach
+  - [Accessibility Guide](docs/ACCESSIBILITY_GUIDE.md) - WCAG 2.1 Level AA compliance
+  - [CI/CD Pipeline](docs/ci-cd.md) - GitHub Actions workflows
+  - [Environment Setup](docs/environment-setup.md) - Complete development environment configuration
+  - [Contributing](docs/contributing.md) - Contribution guidelines
+
+### Quick Links
+- [Setup Firebase](docs/setup/) - Firebase configuration guides
+- [Development Workflows](docs/development.md) - Daily development tasks
+- [Map Architecture](docs/architecture/MAP_ARCHITECTURE_ANALYSIS.md) - MapLibre integration deep dive
+
+---
+
 ## License
 
 ```

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        Test manifest for androidInstrumentedTest.
+        Registers test-only activities used by instrumented tests.
+    -->
+
+    <application>
+        <!-- TestMapActivity: Minimal activity for MapView integration tests -->
+        <activity
+            android:name="com.worldwidewaves.map.TestMapActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+    </application>
+
+</manifest>

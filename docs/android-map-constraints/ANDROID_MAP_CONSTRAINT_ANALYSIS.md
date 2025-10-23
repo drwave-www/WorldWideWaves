@@ -16,7 +16,7 @@ This approach prevents invalid states rather than correcting them after-the-fact
 ### Layer 1: MapBoundsEnforcer (Platform-Independent Logic)
 **File**: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapBoundsEnforcer.kt`
 
-**Responsibility**: 
+**Responsibility**:
 - Calculate constraint bounds (padded or zero)
 - Manage viewport padding logic
 - Track constraint state transitions
@@ -60,7 +60,7 @@ fun setMaxZoomPreference(maxZoom: Double)
 **Constraint Application**:
 1. **Zero Padding**: `calculateVisibleRegionPadding()` returns (0, 0)
 2. **Constraint Bounds** = Event bounds (unchanged)
-3. **Min Zoom Calculation**: 
+3. **Min Zoom Calculation**:
    - Uses `getCameraForLatLngBounds(eventBounds, padding=[0,0,0,0])`
    - Shows entire event in viewport
    - No zooming in beyond point where event fills screen
@@ -77,7 +77,7 @@ fun setMaxZoomPreference(maxZoom: Double)
    // Calculate current viewport dimensions
    viewportHalfHeight = (viewportNE.lat - viewportSW.lat) / 2
    viewportHalfWidth = (viewportNE.lng - viewportSW.lng) / 2
-   
+
    // Result: padding shrinks bounds by viewport size
    ```
 2. **Constraint Bounds** = Event bounds shrunk by viewport half-size
@@ -157,11 +157,11 @@ private fun setupPreventiveGestureConstraints() {
     map.addOnCameraMoveStartedListener { reason ->
         isGestureInProgress = (reason == REASON_API_GESTURE) // user pan/pinch
     }
-    
+
     // Intercept camera movement during user gestures
     map.addOnCameraMoveListener {
         if (!isGestureInProgress) return // Skip programmatic moves
-        
+
         val viewport = getVisibleRegion()
         if (!isViewportWithinBounds(viewport, constraintBounds)) {
             // Clamp camera IMMEDIATELY
@@ -194,13 +194,13 @@ private fun clampCameraToKeepViewportInside(
     // Calculate how much camera can move before viewport exceeds bounds
     val viewportHalfHeight = (currentViewport.northLatitude - currentViewport.southLatitude) / 2
     val viewportHalfWidth = (currentViewport.eastLongitude - currentViewport.westLongitude) / 2
-    
+
     // Valid camera center range (keeps viewport inside event)
     val minValidLat = eventBounds.southwest.latitude + viewportHalfHeight
     val maxValidLat = eventBounds.northeast.latitude - viewportHalfHeight
     val minValidLng = eventBounds.southwest.longitude + viewportHalfWidth
     val maxValidLng = eventBounds.northeast.longitude + viewportHalfWidth
-    
+
     // Clamp to valid range
     return Position(
         currentCamera.latitude.coerceIn(minValidLat, maxValidLat),
@@ -219,8 +219,8 @@ private fun clampCameraToKeepViewportInside(
 ```kotlin
 // In AbstractEventMap.moveToWindowBounds()
 constraintManager = MapBoundsEnforcer(
-    eventBbox, 
-    mapLibreAdapter, 
+    eventBbox,
+    mapLibreAdapter,
     isWindowMode = true  // For WINDOW screen
 )
 
@@ -242,7 +242,7 @@ mapLibreAdapter.addOnCameraIdleListener {
         skipNextRecalculation = false
         return@addOnCameraIdleListener
     }
-    
+
     val newPadding = calculateVisibleRegionPadding()
     if (hasSignificantPaddingChange(newPadding)) {
         applyConstraintsWithPadding()
@@ -254,12 +254,12 @@ mapLibreAdapter.addOnCameraIdleListener {
 ```kotlin
 private fun boundsAreSimilar(bounds1: BoundingBox, bounds2: BoundingBox): Boolean {
     val tolerance = 0.001 // 0.1% tolerance
-    
+
     val latDiff = abs(bounds1.southwest.lat - bounds2.southwest.lat) +
                   abs(bounds1.northeast.lat - bounds2.northeast.lat)
     val lngDiff = abs(bounds1.southwest.lng - bounds2.southwest.lng) +
                   abs(bounds1.northeast.lng - bounds2.northeast.lng)
-    
+
     return latDiff < tolerance && lngDiff < tolerance
 }
 ```
@@ -274,16 +274,16 @@ private fun boundsAreSimilar(bounds1: BoundingBox, bounds2: BoundingBox): Boolea
 // BOUNDS Mode (event detail)
 suspend fun moveToMapBounds() {
     constraintManager = MapBoundsEnforcer(..., isWindowMode = false)
-    
+
     // Animate to bounds
     mapLibreAdapter.animateCameraToBounds(bounds, padding = 0)
-    
+
     // Apply constraints AFTER animation
     constraintManager?.applyConstraints()
-    
+
     // Get calculated min zoom
     val minZoom = mapLibreAdapter.getMinZoomLevel()
-    
+
     // Set max zoom
     mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
 }
@@ -291,13 +291,13 @@ suspend fun moveToMapBounds() {
 // WINDOW Mode (full map)
 suspend fun moveToWindowBounds() {
     constraintManager = MapBoundsEnforcer(..., isWindowMode = true)
-    
+
     // Apply constraints BEFORE animation (preventive)
     constraintManager?.applyConstraints()
-    
+
     // Set max zoom
     mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
-    
+
     // No animation - gestures control view
 }
 ```
@@ -449,4 +449,3 @@ Both require viewport validation logic.
 
 4. **AspectRatioFittingTest.kt**
    - Validates min zoom calculations
-

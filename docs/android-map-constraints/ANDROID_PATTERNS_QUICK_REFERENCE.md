@@ -17,7 +17,7 @@ AbstractEventMap (Shared, Platform-Independent)
         └── Preventive gesture clamping
 
         ↓
-        
+
 MapBoundsEnforcer (Shared Platform-Independent Logic)
 ├── applyConstraints()
 ├── calculateConstraintBounds()
@@ -26,7 +26,7 @@ MapBoundsEnforcer (Shared Platform-Independent Logic)
     └── WINDOW: returns (viewportHeight/2, viewportWidth/2)
 
         ↓
-        
+
 AndroidMapLibreAdapter (Android Native Implementation)
 ├── setBoundsForCameraTarget()
 │   ├── Calculate min zoom (aspect ratio fitting)
@@ -120,12 +120,12 @@ On each camera move:
 3. Calculate clamped position:
    viewportHalfHeight = (viewport.north - viewport.south) / 2
    viewportHalfWidth = (viewport.east - viewport.west) / 2
-   
+
    minValidLat = eventBounds.south + viewportHalfHeight
    maxValidLat = eventBounds.north - viewportHalfHeight
    minValidLng = eventBounds.west + viewportHalfWidth
    maxValidLng = eventBounds.east + viewportHalfWidth
-   
+
    clampedPosition.lat = camera.lat.clamp(minValidLat, maxValidLat)
    clampedPosition.lng = camera.lng.clamp(minValidLng, maxValidLng)
 
@@ -180,7 +180,7 @@ if (shouldRecalculate) {
 RULE: Skip redundant updates using 0.1% tolerance
 
 ✅ DO THIS:
-if (lastAppliedBounds != null && 
+if (lastAppliedBounds != null &&
     boundsAreSimilar(lastAppliedBounds, newBounds)) {
     return  // Skip update
 }
@@ -287,4 +287,3 @@ map.addOnCameraMoveListener {
 5. **Locking** prevents recalculation spirals: min zoom locked after first calculation
 
 This prevents invalid states from occurring, rather than correcting them after-the-fact.
-
