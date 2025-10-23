@@ -1417,26 +1417,27 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
             return false
         }
 
-        // Check if new camera center is within constraint bounds
-        // Constraint bounds are calculated as: event bounds - (viewport size / 2)
-        // So if camera center is within constraint bounds, viewport edges stay within event bounds
-        guard let constraintBounds = currentConstraintBounds else {
-            // No constraint bounds set - only enforce zoom
+        // Check if viewport at new camera position would exceed event bounds
+        // This matches Android's preventive gesture constraint behavior
+        guard let eventBounds = currentEventBounds else {
+            // No event bounds set - only enforce zoom
             return true
         }
 
-        let newCenter = newCamera.centerCoordinate
-        let withinConstraintBounds = newCenter.latitude >= constraintBounds.sw.latitude &&
-                                      newCenter.latitude <= constraintBounds.ne.latitude &&
-                                      newCenter.longitude >= constraintBounds.sw.longitude &&
-                                      newCenter.longitude <= constraintBounds.ne.longitude
+        // Calculate what the viewport would be at the new camera position
+        let newViewport = getViewportBoundsForCamera(newCamera, in: mapView)
 
-        if !withinConstraintBounds {
-            // Camera center would move outside constraint bounds
-            // This would cause viewport edges to exceed event bounds - reject movement
+        // Check if viewport edges would exceed event bounds (matches Android logic)
+        let viewportWithinBounds = newViewport.sw.latitude >= eventBounds.sw.latitude &&
+                                    newViewport.ne.latitude <= eventBounds.ne.latitude &&
+                                    newViewport.sw.longitude >= eventBounds.sw.longitude &&
+                                    newViewport.ne.longitude <= eventBounds.ne.longitude
+
+        if !viewportWithinBounds {
+            // Viewport edges would exceed event bounds - reject movement
             WWWLog.v(
                 Self.tag,
-                "Rejecting camera movement: center would exceed constraint bounds"
+                "Rejecting camera movement: viewport edges would exceed event bounds"
             )
             return false
         }
