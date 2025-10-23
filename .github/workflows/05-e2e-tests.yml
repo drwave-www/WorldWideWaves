@@ -1,4 +1,4 @@
-name: 05 • End-to-End Tests
+name: 05 • End-to-End Tests [DISABLED]
 
 on:
   push:
@@ -22,6 +22,7 @@ jobs:
   real-integration-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 90  # Increased from 60 to 90 minutes for emulator boot + tests
+    if: false  # DISABLED - Workflow temporarily deactivated to save costs
 
     strategy:
       matrix:
@@ -163,7 +164,7 @@ jobs:
 
   firebase-test-lab:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: false  # DISABLED - Workflow temporarily deactivated to save costs
     needs: [real-integration-tests]
     # Note: Requires FIREBASE_SERVICE_ACCOUNT_KEY secret to be configured
 
@@ -209,7 +210,7 @@ jobs:
   notify-results:
     runs-on: ubuntu-latest
     needs: [real-integration-tests, firebase-test-lab]
-    if: always()
+    if: false  # DISABLED - Workflow temporarily deactivated to save costs
 
     steps:
     - name: Notify Slack on Success

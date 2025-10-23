@@ -5,9 +5,6 @@
  * https://www.apache.org/licenses/LICENSE-2.0
  */
 
-// Note: File exceeds limits due to comprehensive camera command handling
-// swiftlint:disable file_length type_body_length
-
 import Foundation
 import Shared
 import CoreLocation
@@ -676,5 +673,3 @@ import CoreLocation
         return true
     }
 }
-
-// swiftlint:enable file_length type_body_length
