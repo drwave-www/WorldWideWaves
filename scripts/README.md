@@ -51,17 +51,24 @@ cd scripts/licenses/
 ## Module Details
 
 ### 🗺️ [Maps](./maps/) - **Primary Tool**
-Complete map generation pipeline for offline city maps.
+Complete map generation pipeline for offline city maps using OpenStreetMap and Docker.
+
+**📚 [Full Documentation](./maps/README.md)** - Comprehensive guide to the 5-stage pipeline
 
 **Key Scripts:**
-- `10-download_osm.sh` - Download OpenStreetMap data
-- `20-generate_mbtiles.sh` - Generate offline map tiles
-- `libs/generate_map.dep.sh` - Core map processing logic
+- `10-download_osm.sh` - Download OpenStreetMap `.pbf` data
+- `20-generate_mbtiles.sh` - Generate offline map tiles (Docker + PostgreSQL)
+- `30-retrieve-geojson.sh` - Extract city boundaries
+- `35-generate-default-map-images.sh` - Generate map preview images
+- `40-generate-modules.sh` - Create Android Dynamic Feature Modules
 
 **Generates:**
-- `.mbtiles` files for offline maps  
-- `.geojson` city boundaries
-- MapLibre-compatible tiles
+- `.mbtiles` files for offline maps (100-800MB per city)
+- `.geojson` city boundary polygons
+- MapLibre-compatible vector tiles
+- Android Dynamic Feature Modules for on-demand delivery
+
+**Requirements**: Docker, Docker Compose, 8GB+ RAM
 
 ### 🖼️ [Images](./images/)
 Image processing and asset generation.
