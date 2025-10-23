@@ -144,10 +144,11 @@ EventMapConfig(
 ### 2.3 Full Map Screen
 
 #### 2.3.1 Camera Behavior
-- **Initial Position**: WINDOW mode - fits **constraining dimension** to screen
+- **Initial Position**: WINDOW mode - constraints applied, no initial camera animation
 - **Camera Movement**: Manual - user controls camera via gestures and buttons
-- **Auto-Target First Location**: YES - targets user on first GPS fix (only if no user interaction yet)
-  - **WINDOW Mode Override**: `targetUser()` keeps current zoom (null parameter), doesn't zoom to 16.0
+- **Auto-Target First Location**: YES - targets user at zoom 16.0 on first GPS fix (only if no user interaction yet)
+  - **Initial View**: Controlled by `autoTargetUserOnFirstLocation` (zoom to user) or user interaction (manual gestures)
+  - **WINDOW Mode**: `moveToWindowBounds()` applies constraints but does NOT animate camera (prevents override)
 - **User Interaction Detection**: `markUserInteracted()` prevents auto-targeting after user gesture/button
 - **Fitting Strategy**: Intelligent aspect ratio matching (constraining dimension only)
   - Event WIDER than screen (eventAspect > screenAspect) → fit by **HEIGHT** (smallest dimension)
