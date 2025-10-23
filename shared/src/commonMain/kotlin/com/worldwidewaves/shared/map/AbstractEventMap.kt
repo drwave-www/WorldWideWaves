@@ -71,11 +71,6 @@ abstract class AbstractEventMap<T>(
     companion object {
         // Threshold for detecting significant dimension changes (10%)
         private const val DIMENSION_CHANGE_THRESHOLD = 0.1
-
-        // iOS min zoom polling parameters (workaround for asynchronous command queue)
-        private const val MIN_ZOOM_POLL_THRESHOLD = 1.0 // Min zoom <= 1.0 indicates uninitialized
-        private const val MIN_ZOOM_POLL_DELAY_MS = 50L // Poll every 50ms
-        private const val MIN_ZOOM_POLL_MAX_ATTEMPTS = 20 // Max 1 second total (20 × 50ms)
     }
 
     // Properties that must be implemented by platform-specific subclasses
@@ -217,64 +212,19 @@ abstract class AbstractEventMap<T>(
                 "(ensures NO pixels outside event area)",
         )
 
-        // CRITICAL: Apply constraints BEFORE animation
+        // CRITICAL: Apply constraints BEFORE any camera movement
         // This ensures min zoom is set IMMEDIATELY (preventive enforcement)
         constraintManager?.applyConstraints()
 
-        // iOS FIX: Poll for min zoom to update (SetConstraintBounds executes asynchronously)
-        // Query min zoom in a loop until it changes from the old value
-        // or timeout after 1 second
-        var targetZoom = mapLibreAdapter.getMinZoomLevel()
-        val initialMinZoom = targetZoom
-        var pollAttempts = 0
-        while (targetZoom <= MIN_ZOOM_POLL_THRESHOLD && pollAttempts < MIN_ZOOM_POLL_MAX_ATTEMPTS) {
-            // Min zoom <= 1.0 likely means SetConstraintBounds hasn't executed yet
-            kotlinx.coroutines.delay(MIN_ZOOM_POLL_DELAY_MS)
-            targetZoom = mapLibreAdapter.getMinZoomLevel()
-            pollAttempts++
-        }
-
-        if (pollAttempts > 0) {
-            Log.i(
-                "AbstractEventMap",
-                "iOS: Polled min zoom $pollAttempts times: $initialMinZoom → $targetZoom",
-            )
-        }
-
-        runCameraAnimation { cb ->
-            // Use the polled min zoom value
-
-            Log.i(
-                "AbstractEventMap",
-                "Using min zoom for initial camera: $targetZoom (ensures event fits)",
-            )
-
-            // Animate to event center at min zoom
-            mapLibreAdapter.animateCamera(
-                Position(centerLat, centerLng),
-                targetZoom,
-                object : MapCameraCallback {
-                    override fun onFinish() {
-                        Log.i(
-                            "AbstractEventMap",
-                            "✅ moveToWindowBounds animation completed",
-                        )
-                        mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
-                        cb.onFinish()
-                        onComplete()
-                    }
-
-                    override fun onCancel() {
-                        Log.w(
-                            "AbstractEventMap",
-                            "⚠️ moveToWindowBounds animation CANCELLED",
-                        )
-                        cb.onCancel()
-                        onComplete()
-                    }
-                },
-            )
-        }
+        // WINDOW mode: Don't animate camera - let autoTargetUserOnFirstLocation or manual gestures control initial view
+        // Constraints are still applied to enforce boundaries
+        Log.i(
+            "AbstractEventMap",
+            "✅ moveToWindowBounds: Constraints applied (WINDOW mode - no camera animation, " +
+                "initial view controlled by autoTargetUserOnFirstLocation or user interaction)",
+        )
+        mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
+        onComplete()
     }
 
     /**
