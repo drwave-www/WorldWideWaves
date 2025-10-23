@@ -1,4 +1,4 @@
-name: 06 • Performance Tests [DISABLED]
+name: 06 • Performance Tests
 
 on:
   schedule:
@@ -20,7 +20,6 @@ jobs:
   performance-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    if: false  # DISABLED - Workflow temporarily deactivated to save costs
 
     strategy:
       matrix:
@@ -121,7 +120,7 @@ jobs:
   notify-results:
     runs-on: ubuntu-latest
     needs: [performance-tests]
-    if: false  # DISABLED - Workflow temporarily deactivated to save costs
+    if: always()
 
     steps:
     - name: Notify on Performance Regression

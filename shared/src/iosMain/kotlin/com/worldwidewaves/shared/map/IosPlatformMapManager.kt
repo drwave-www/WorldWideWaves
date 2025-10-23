@@ -158,12 +158,10 @@ class IosPlatformMapManager(
                     if (ok) {
                         Log.i(TAG, "✅ Map download SUCCESS for: $mapId")
                         // Allow future downloads/caching for this event
-                        scope.launch {
-                            com.worldwidewaves.shared.data.MapDownloadGate
-                                .allow(mapId)
-                            Log.d(TAG, "MapDownloadGate.allow called for: $mapId")
-                            onSuccess()
-                        }
+                        com.worldwidewaves.shared.data.MapDownloadGate
+                            .allow(mapId)
+                        Log.d(TAG, "MapDownloadGate.allow called for: $mapId")
+                        onSuccess()
                     } else {
                         val errorCode = nsError?.code?.toInt() ?: -1
                         val errorMsg = nsError?.localizedDescription ?: "ODR/bundle error"

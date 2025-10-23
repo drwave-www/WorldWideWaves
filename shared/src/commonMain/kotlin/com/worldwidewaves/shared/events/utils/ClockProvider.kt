@@ -209,7 +209,7 @@ class SystemClock :
 
     override fun now(): Instant =
         if (getPlatformSafely()?.isOnSimulation() == true) {
-            platform?.getSimulation()?.now() ?: Clock.System.now()
+            platform!!.getSimulation()!!.now()
         } else {
             Clock.System.now()
         }

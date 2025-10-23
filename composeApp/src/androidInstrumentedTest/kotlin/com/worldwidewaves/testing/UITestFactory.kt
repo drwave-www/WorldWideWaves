@@ -25,7 +25,6 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.viewmodels.EventsViewModel
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
@@ -205,7 +204,7 @@ object UITestFactory {
     fun createMockEventsViewModel(events: List<IWWWEvent> = createMockEventsList()): EventsViewModel {
         val mockViewModel = mockk<EventsViewModel>(relaxed = true)
 
-        every { mockViewModel.events } returns MutableStateFlow(events)
+        every { mockViewModel.events } returns kotlinx.coroutines.flow.MutableStateFlow(events)
 
         return mockViewModel
     }

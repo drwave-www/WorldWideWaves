@@ -107,21 +107,18 @@ Android-specific implementation with Compose UI.
 
 ### iOS App Module (`iosApp/`)
 
-iOS-specific implementation using Compose Multiplatform (100% shared UI with Android).
+iOS-specific implementation with SwiftUI.
 
 **Key Components:**
-- `AppDelegate.swift` - App lifecycle, Firebase initialization
-- `SceneDelegate.swift` - UI lifecycle, platform initialization (Koin, Moko, SKIKO Metal)
-- `IOSPlatformEnabler.swift` - Swift-Kotlin bridge for native services (haptics, VoiceOver)
-- `SwiftNativeMapViewProvider.swift` - MapLibre Kotlin-Swift bridge
-- `RootController.kt` - Factory methods creating Compose UIViewControllers
-- Shared Compose UI wrapped in UIViewControllers via `ComposeUIViewController`
-- CoreLocation integration via PositionManager
-- MapLibre iOS 6.8.0 (95% feature parity with Android)
+- `AppDelegate.swift` - App lifecycle management
+- `SceneDelegate.swift` - UI lifecycle management
+- SwiftUI views calling Kotlin business logic
+- CoreLocation integration
+- MapLibre iOS integration (in progress)
 
 ### Map Modules (`maps/`)
 
-Self-contained offline map modules for 42 cities implemented as Android Dynamic Features.
+Self-contained offline map modules for 40+ cities implemented as Android Dynamic Features.
 
 **Structure:**
 - `maps/paris_france/` - Example city module

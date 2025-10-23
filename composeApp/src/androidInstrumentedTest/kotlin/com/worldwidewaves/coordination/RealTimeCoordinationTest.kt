@@ -40,7 +40,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
@@ -153,7 +152,7 @@ class RealTimeCoordinationTest : BaseIntegrationTest() {
             val wave2Participants = (1..15).map { createMockParticipant("w2-user-$it", 40.7829, -73.9654) }
             val wave3Participants = (1..8).map { createMockParticipant("w3-user-$it", 40.7505, -73.9934) }
 
-            coroutineScope {
+            kotlinx.coroutines.coroutineScope {
                 launch { waveManager.coordinateWave(wave1, wave1Participants) }
                 launch { waveManager.coordinateWave(wave2, wave2Participants) }
                 launch { waveManager.coordinateWave(wave3, wave3Participants) }

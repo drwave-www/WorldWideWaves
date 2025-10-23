@@ -23,7 +23,6 @@ package com.worldwidewaves.testing.real
 
 import androidx.compose.ui.test.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Test
@@ -249,7 +248,7 @@ class RealAppStartupIntegrationTest : BaseRealIntegrationTest() {
         composeTestRule.activityRule.scenario.moveToState(androidx.lifecycle.Lifecycle.State.STARTED)
 
         // Wait a moment
-        delay(2000)
+        kotlinx.coroutines.delay(2000)
 
         // Resume app
         composeTestRule.activityRule.scenario.moveToState(androidx.lifecycle.Lifecycle.State.RESUMED)
@@ -330,7 +329,7 @@ class RealAppStartupIntegrationTest : BaseRealIntegrationTest() {
         }
 
         // Wait for orientation change to complete
-        delay(2000)
+        kotlinx.coroutines.delay(2000)
 
         // Verify app continues to load properly
         composeTestRule.waitUntil(timeoutMillis = 20.seconds.inWholeMilliseconds) {
@@ -347,7 +346,7 @@ class RealAppStartupIntegrationTest : BaseRealIntegrationTest() {
             activity.requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
 
-        delay(1000)
+        kotlinx.coroutines.delay(1000)
 
         // Verify app is still functional
         composeTestRule.onNodeWithText("WorldWideWaves").assertIsDisplayed()

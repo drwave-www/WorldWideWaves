@@ -19,7 +19,7 @@ import org.koin.core.logger.Level
 import org.koin.core.logger.PrintLogger
 import org.koin.mp.KoinPlatform
 
-private const val TAG = "WWW.Platform.iOS"
+private const val TAG = "Helper"
 
 /**
  * Initialise Koin (unchanged pattern; keep as used in your app).

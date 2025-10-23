@@ -66,13 +66,15 @@ import kotlin.time.Instant.Companion.DISTANT_FUTURE
  */
 @OptIn(ExperimentalTime::class)
 class EventProgressionState {
-    companion object {
-        // Thresholds for smart state update throttling
-        private const val PROGRESSION_THRESHOLD = 0.1 // Only update if change > 0.1%
-        private const val POSITION_RATIO_THRESHOLD = 0.01 // Only update if change > 1%
-        private const val TIME_THRESHOLD_MS = 1000L // Normal: update if change > 1 second
-        private const val CRITICAL_TIME_THRESHOLD_MS = 50L // Critical: update if change > 50ms
-        private const val CRITICAL_PHASE_SECONDS = 2L // Threshold for critical timing phase
+    /**
+     * Thresholds for smart state update throttling.
+     */
+    private companion object {
+        const val PROGRESSION_THRESHOLD = 0.1 // Only update if change > 0.1%
+        const val POSITION_RATIO_THRESHOLD = 0.01 // Only update if change > 1%
+        const val TIME_THRESHOLD_MS = 1000L // Normal: update if change > 1 second
+        const val CRITICAL_TIME_THRESHOLD_MS = 50L // Critical: update if change > 50ms
+        const val CRITICAL_PHASE_SECONDS = 2L // Threshold for critical timing phase
     }
 
     // -- State Flows --

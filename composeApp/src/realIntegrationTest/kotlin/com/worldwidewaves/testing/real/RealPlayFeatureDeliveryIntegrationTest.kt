@@ -23,13 +23,12 @@ package com.worldwidewaves.testing.real
 
 import androidx.compose.ui.test.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * Real integration tests for Play Feature Delivery (Dynamic Feature Modules).
@@ -205,7 +204,7 @@ class RealPlayFeatureDeliveryIntegrationTest : BaseRealIntegrationTest() {
         val maxProgressChecks = 20
 
         repeat(maxProgressChecks) { check ->
-            delay(3000) // Check every 3 seconds
+            kotlinx.coroutines.delay(3000) // Check every 3 seconds
 
             val hasProgress = try {
                 composeTestRule.onNode(
@@ -280,7 +279,7 @@ class RealPlayFeatureDeliveryIntegrationTest : BaseRealIntegrationTest() {
         }
 
         // Wait for download to start
-        delay(5000)
+        kotlinx.coroutines.delay(5000)
 
         // Simulate network interruption
         simulateNetworkConditions(NetworkCondition.OFFLINE)
@@ -458,7 +457,7 @@ class RealPlayFeatureDeliveryIntegrationTest : BaseRealIntegrationTest() {
                     hasContentDescription("View on map")
                 ).performClick()
 
-                delay(2000)
+                kotlinx.coroutines.delay(2000)
             } catch (e: Exception) {
                 println("ℹ️  Could not trigger $cityName map download")
             }
@@ -510,7 +509,7 @@ class RealPlayFeatureDeliveryIntegrationTest : BaseRealIntegrationTest() {
                 hasText("Settings")
             ).performClick()
 
-            delay(2000)
+            kotlinx.coroutines.delay(2000)
 
             // Look for storage or download management
             composeTestRule.onNode(
@@ -519,7 +518,7 @@ class RealPlayFeatureDeliveryIntegrationTest : BaseRealIntegrationTest() {
                 hasContentDescription("Manage downloads")
             ).performClick()
 
-            delay(1000)
+            kotlinx.coroutines.delay(1000)
 
             // Look for uninstall option
             val uninstallOption = try {

@@ -34,7 +34,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -667,7 +666,7 @@ class EventsListScreenTest {
                         modifier =
                             Modifier
                                 .size(20.dp)
-                                .background(Color.Red, CircleShape)
+                                .background(Color.Red, androidx.compose.foundation.shape.CircleShape)
                                 .testTag("map-event-marker-${event.id}")
                                 .clickable { selectedMarkerId = event.id }
                                 .padding(start = (index * 30).dp, top = (index * 20).dp),

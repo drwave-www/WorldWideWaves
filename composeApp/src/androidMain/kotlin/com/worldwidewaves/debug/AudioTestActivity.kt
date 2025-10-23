@@ -44,10 +44,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.WWWGlobals.FileSystem
 import com.worldwidewaves.shared.sound.AndroidSoundPlayer
-import com.worldwidewaves.shared.sound.MidiNote
 import com.worldwidewaves.shared.sound.MidiParser
 import com.worldwidewaves.shared.sound.MidiTrack
 import com.worldwidewaves.shared.sound.SoundPlayer
@@ -77,7 +75,7 @@ import kotlin.time.Instant
 @OptIn(ExperimentalTime::class)
 class AudioTestActivity : ComponentActivity() {
     companion object {
-        private const val TAG = "WWW.Debug.Audio"
+        private const val TAG = "AudioTest"
     }
 
     private lateinit var soundPlayer: AndroidSoundPlayer
@@ -242,7 +240,7 @@ class AudioTestActivity : ComponentActivity() {
         // C major scale: C4, D4, E4, F4, G4, A4, B4, C5
         val scaleNotes =
             listOf(60, 62, 64, 65, 67, 69, 71, 72).mapIndexed { index, pitch ->
-                MidiNote(
+                com.worldwidewaves.shared.sound.MidiNote(
                     pitch = pitch,
                     velocity = 100,
                     startTime = (index * 800).milliseconds,
@@ -284,7 +282,7 @@ class AudioTestActivity : ComponentActivity() {
         Log.d(TAG, "Playing MIDI sequence: ${track.notes.size} notes")
 
         // Play first DEFAULT_OCTAVE notes to keep demo reasonable
-        track.notes.take(WWWGlobals.Midi.DEFAULT_OCTAVE).forEachIndexed { index, note ->
+        track.notes.take(com.worldwidewaves.shared.WWWGlobals.Midi.DEFAULT_OCTAVE).forEachIndexed { index, note ->
             val frequency = WaveformGenerator.midiPitchToFrequency(note.pitch)
             val amplitude = WaveformGenerator.midiVelocityToAmplitude(note.velocity) * 0.6
 

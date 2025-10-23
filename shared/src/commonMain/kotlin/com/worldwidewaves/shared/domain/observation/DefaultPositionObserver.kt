@@ -31,6 +31,7 @@ import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.position.PositionManager
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -56,6 +57,7 @@ class DefaultPositionObserver(
     private val waveProgressionTracker: WaveProgressionTracker,
     private val clock: IClock,
 ) : PositionObserver {
+    private var observationJob: Job? = null
     private var isCurrentlyObserving = false
 
     companion object {
@@ -159,8 +161,10 @@ class DefaultPositionObserver(
         if (WWWGlobals.LogConfig.ENABLE_POSITION_TRACKING_LOGGING) {
             Log.v("DefaultPositionObserver", "Stopping position observation")
         }
+        observationJob?.cancel()
+        observationJob = null
         isCurrentlyObserving = false
     }
 
-    override fun isObserving(): Boolean = isCurrentlyObserving
+    override fun isObserving(): Boolean = isCurrentlyObserving && observationJob?.isActive == true
 }

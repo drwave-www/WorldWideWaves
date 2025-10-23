@@ -158,13 +158,7 @@ testing and maintenance. No functional changes.
 
 ### Before Opening PR
 
-1. **Setup git hooks (first time only):**
-   ```bash
-   ./dev/setup-git-hooks.sh
-   ```
-   This enables automatic code quality checks, documentation generation, and testing.
-
-2. **Sync with main:**
+1. **Sync with main:**
    ```bash
    git checkout main
    git pull origin main
@@ -172,54 +166,15 @@ testing and maintenance. No functional changes.
    git rebase main
    ```
 
-3. **Run tests:**
+2. **Run tests:**
    ```bash
    ./gradlew :shared:testDebugUnitTest
    ./gradlew ktlintCheck detekt
    ```
 
-4. **Update documentation** if needed:
-   - Update relevant `docs/*.md` files for feature changes
-   - Update `CLAUDE.md` for architecture/pattern changes
-   - Add KDoc comments for new public APIs
-   - Git hooks will generate Dokka API docs automatically on push
+3. **Update documentation** if needed
 
-5. **Add tests** for new functionality
-
-### Git Hooks - Automated Quality Checks
-
-Git hooks run automatically on commit and push. They ensure code quality and documentation stay current.
-
-**What hooks do automatically:**
-
-**On Commit (pre-commit):**
-- Kotlin formatting (ktlint) with auto-fix
-- Static analysis (detekt) with auto-fix where possible
-- Swift linting (swiftlint) with auto-fix
-- Shell script validation (shellcheck)
-- Copyright header addition
-- Trailing whitespace removal
-- Markdown linting (if `markdownlint-cli2` installed)
-
-**On Push (pre-push):**
-- Dokka API documentation generation
-- Documentation update detection (warns if code changed without docs)
-- Translation updates (if `OPENAI_API_KEY` set)
-- Critical integration tests on Android emulator
-- Automatic emulator launch if needed
-
-**Bypass hooks (emergencies only):**
-```bash
-git commit --no-verify   # Skip pre-commit
-git push --no-verify     # Skip pre-push
-```
-
-**Install optional markdown linting:**
-```bash
-npm install -g markdownlint-cli2
-```
-
-See [Development Workflow](development.md#git-hooks-setup) for complete hook documentation.
+4. **Add tests** for new functionality
 
 ### PR Title
 

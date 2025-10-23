@@ -126,7 +126,7 @@ object MapWrapperRegistry {
         // Store strong reference
         wrappers[eventId] = wrapper
 
-        Log.i(TAG, "Wrapper registered with STRONG reference for: $eventId")
+        Log.i(TAG, "✅ Wrapper registered with STRONG reference for: $eventId")
 
         // If there are pending polygons, notify that they should be rendered
         if (pendingPolygons.containsKey(eventId)) {
@@ -162,8 +162,7 @@ object MapWrapperRegistry {
         val totalPoints = coordinates.sumOf { it.size }
         Log.i(
             TAG,
-            "[WAVE] Storing ${coordinates.size} pending polygons for event: $eventId " +
-                "($totalPoints total points, clearExisting=$clearExisting)",
+            "🌊 Storing ${coordinates.size} pending polygons for event: $eventId ($totalPoints total points, clearExisting=$clearExisting)",
         )
         pendingPolygons[eventId] = PendingPolygonData(coordinates, clearExisting)
         Log.d(TAG, "Polygons stored, hasPending=${hasPendingPolygons(eventId)}, registrySize=${pendingPolygons.size}")
@@ -196,7 +195,7 @@ object MapWrapperRegistry {
      * Clears wrapper, pending data, and all callbacks for the event.
      */
     fun unregisterWrapper(eventId: String) {
-        Log.i(TAG, "Unregistering wrapper and cleaning up for event: $eventId")
+        Log.i(TAG, "🧹 Unregistering wrapper and cleaning up for event: $eventId")
 
         // Remove wrapper (releases strong reference)
         wrappers.remove(eventId)
@@ -223,7 +222,7 @@ object MapWrapperRegistry {
         setGesturesEnabledCallbacks.remove(eventId)
         pendingGesturesStates.remove(eventId)
 
-        Log.i(TAG, "Wrapper unregistered and cleanup complete for: $eventId")
+        Log.i(TAG, "✅ Wrapper unregistered and cleanup complete for: $eventId")
     }
 
     // REMOVED: pruneStaleReferences() - no longer needed with strong references
@@ -254,7 +253,7 @@ object MapWrapperRegistry {
                 is CameraCommand.SetAttributionMargins ->
                     "SetAttributionMargins(${command.left},${command.top},${command.right},${command.bottom})"
             }
-        Log.i(TAG, "[CAMERA] Storing camera command for event: $eventId -> $commandDetails")
+        Log.i(TAG, "📸 Storing camera command for event: $eventId → $commandDetails")
 
         // Separate configuration commands (must all execute) from animation commands (latest wins)
         when (command) {
@@ -304,7 +303,7 @@ object MapWrapperRegistry {
     fun requestImmediateCameraExecution(eventId: String) {
         val callback = cameraCallbacks[eventId]
         if (callback != null) {
-            Log.i(TAG, "[CAMERA] Triggering immediate camera execution for event: $eventId")
+            Log.i(TAG, "📸 Triggering immediate camera execution for event: $eventId")
             platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
                 callback.invoke()
             }
@@ -377,7 +376,7 @@ object MapWrapperRegistry {
         eventId: String,
         callback: () -> Unit,
     ) {
-        Log.i(TAG, "Registering map click callback for event: $eventId")
+        Log.i(TAG, "👆 Registering map click callback for event: $eventId")
         mapClickCallbacks[eventId] = callback
         Log.d(TAG, "Map click callback registered, totalCallbacks=${mapClickCallbacks.size}")
     }
@@ -407,7 +406,7 @@ object MapWrapperRegistry {
     ) {
         val registrationCallback = mapClickRegistrationCallbacks[eventId]
         if (registrationCallback != null) {
-            Log.i(TAG, "Triggering map click callback registration for event: $eventId")
+            Log.i(TAG, "🚀 Triggering map click callback registration for event: $eventId")
             platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
                 registrationCallback.invoke(clickCallback)
             }
@@ -778,20 +777,20 @@ object MapWrapperRegistry {
      */
     @Suppress("ReturnCount") // Early returns for error handling - clearer than nested conditionals
     fun invokeMapClickCallback(eventId: String): Boolean {
-        Log.i(TAG, "invokeMapClickCallback called for event: $eventId")
+        Log.i(TAG, "👆 invokeMapClickCallback called for event: $eventId")
         val callback = mapClickCallbacks[eventId]
         if (callback != null) {
-            Log.i(TAG, "Map click callback found, invoking for event: $eventId")
+            Log.i(TAG, "✅ Map click callback found, invoking for event: $eventId")
             try {
                 callback.invoke()
-                Log.i(TAG, "Map click callback invoked successfully for event: $eventId")
+                Log.i(TAG, "✅ Map click callback invoked successfully for event: $eventId")
                 return true
             } catch (e: Exception) {
-                Log.e(TAG, "ERROR: invoking map click callback for event: $eventId", throwable = e)
+                Log.e(TAG, "❌ Error invoking map click callback for event: $eventId", throwable = e)
                 return false
             }
         }
-        Log.w(TAG, "WARNING: No map click callback registered for event: $eventId (available: ${mapClickCallbacks.keys})")
+        Log.w(TAG, "❌ No map click callback registered for event: $eventId (available: ${mapClickCallbacks.keys})")
         return false
     }
 
@@ -848,7 +847,7 @@ object MapWrapperRegistry {
         // Apply pending location component state if it was set before callback registered
         val pendingState = pendingLocationComponentStates[eventId]
         if (pendingState != null) {
-            Log.i(TAG, "Applying pending location component state: $pendingState for event: $eventId")
+            Log.i(TAG, "✅ Applying pending location component state: $pendingState for event: $eventId")
             platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
                 callback.invoke(pendingState)
             }
@@ -870,7 +869,7 @@ object MapWrapperRegistry {
         // Apply pending user position if it was set before callback registered
         val pendingPosition = pendingUserPositions[eventId]
         if (pendingPosition != null) {
-            Log.i(TAG, "Applying pending user position: (${pendingPosition.first}, ${pendingPosition.second}) for event: $eventId")
+            Log.i(TAG, "✅ Applying pending user position: (${pendingPosition.first}, ${pendingPosition.second}) for event: $eventId")
             platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
                 callback.invoke(pendingPosition.first, pendingPosition.second)
             }
@@ -916,19 +915,19 @@ object MapWrapperRegistry {
         latitude: Double,
         longitude: Double,
     ) {
-        Log.i(TAG, "[POSITION] setUserPositionOnWrapper called: ($latitude, $longitude) for event: $eventId")
+        Log.i(TAG, "📍 setUserPositionOnWrapper called: ($latitude, $longitude) for event: $eventId")
 
         val callback = setUserPositionCallbacks[eventId]
         if (callback != null) {
             Log.d(TAG, "Dispatching position update to Swift via callback")
             platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
                 callback.invoke(latitude, longitude)
-                Log.v(TAG, "Position callback invoked on main queue")
+                Log.v(TAG, "✅ Position callback invoked on main queue")
             }
             // Clear pending position after successful dispatch
             pendingUserPositions.remove(eventId)
         } else {
-            Log.w(TAG, "WARNING: No user position callback registered for event: $eventId - storing latest position")
+            Log.w(TAG, "⚠️ No user position callback registered for event: $eventId - storing latest position")
             // Store only the latest position (overwrites previous)
             pendingUserPositions[eventId] = Pair(latitude, longitude)
         }
@@ -948,7 +947,7 @@ object MapWrapperRegistry {
         // Apply pending gestures state if it was set before callback registered
         val pendingState = pendingGesturesStates[eventId]
         if (pendingState != null) {
-            Log.i(TAG, "Applying pending gestures state: $pendingState for event: $eventId")
+            Log.i(TAG, "✅ Applying pending gestures state: $pendingState for event: $eventId")
             platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
                 callback.invoke(pendingState)
             }
@@ -986,7 +985,7 @@ object MapWrapperRegistry {
     fun requestImmediateRender(eventId: String) {
         val callback = renderCallbacks[eventId]
         if (callback != null) {
-            Log.i(TAG, "[RENDER] Triggering immediate render callback for event: $eventId")
+            Log.i(TAG, "🚀 Triggering immediate render callback for event: $eventId")
             // Dispatch to main queue to ensure UI thread execution
             platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
                 callback.invoke()

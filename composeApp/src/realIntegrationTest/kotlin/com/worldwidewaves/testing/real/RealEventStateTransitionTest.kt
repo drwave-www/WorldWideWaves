@@ -23,7 +23,6 @@ package com.worldwidewaves.testing.real
 
 import androidx.compose.ui.test.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Test
@@ -302,7 +301,7 @@ class RealEventStateTransitionTest : BaseRealIntegrationTest() {
         }
 
         // Simulate event cancellation (in real testing, would update Firebase)
-        delay(5000)
+        kotlinx.coroutines.delay(5000)
 
         // Wait for cancellation notification/update
         composeTestRule.waitUntil(timeoutMillis = 15.seconds.inWholeMilliseconds) {
@@ -504,7 +503,7 @@ class RealEventStateTransitionTest : BaseRealIntegrationTest() {
         // Monitor multiple transitions over time
         var transitionsDetected = 0
         repeat(5) { check ->
-            delay(3000)
+            kotlinx.coroutines.delay(3000)
 
             val hasTransitions = try {
                 composeTestRule.onNode(

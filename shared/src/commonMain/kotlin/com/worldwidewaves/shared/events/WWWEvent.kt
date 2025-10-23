@@ -86,13 +86,7 @@ data class WWWEvent(
                         listOfNotNull(linear, deep, linearSplit).size != 1 ->
                             this.add("only one of linear, deep, or linearSplit should be non-null")
 
-                        else -> {
-                            val waveDefinition =
-                                requireNotNull(linear ?: deep ?: linearSplit) {
-                                    "Wave definition should not be null after validation checks"
-                                }
-                            waveDefinition.validationErrors()?.let { addAll(it) }
-                        }
+                        else -> (linear ?: deep ?: linearSplit)!!.validationErrors()?.let { addAll(it) }
                     }
                 }.takeIf { it.isNotEmpty() }
                 ?.map { "${WWWWaveDefinition::class.simpleName}: $it" }

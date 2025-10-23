@@ -66,18 +66,13 @@ class DefaultGeoJsonDataProvider :
         private const val GEOJSON_PREVIEW_LENGTH = 80
     }
 
-    /**
-     * Evict least recently used entries to enforce MAX_CACHE_SIZE limit.
-     * This method ensures cache never exceeds the size limit by evicting
-     * the oldest entries until size is within bounds.
-     */
     private fun evictLRUIfNeeded() {
-        while (cache.size >= MAX_CACHE_SIZE && cacheAccessOrder.isNotEmpty()) {
+        if (cache.size >= MAX_CACHE_SIZE && cacheAccessOrder.isNotEmpty()) {
             val lruKey = cacheAccessOrder.removeAt(0)
             cache.remove(lruKey)
             lastAttemptTime.remove(lruKey)
             attemptCount.remove(lruKey)
-            Log.v("GeoJsonDataProvider", "Evicted LRU cache entry for $lruKey (cache size: ${cache.size})")
+            Log.v("GeoJsonDataProvider", "Evicted LRU cache entry for $lruKey")
         }
     }
 
@@ -258,8 +253,7 @@ class DefaultGeoJsonDataProvider :
         if (cache.remove(eventId) != null) {
             Log.d(::invalidateCache.name, "Invalidated cache for event $eventId")
         }
-        // Clean up all tracking data structures
-        cacheAccessOrder.remove(eventId)
+        // Also reset attempt tracking to allow immediate retry
         lastAttemptTime.remove(eventId)
         attemptCount.remove(eventId)
         Log.d(::invalidateCache.name, "Reset attempt tracking for $eventId")
@@ -268,7 +262,6 @@ class DefaultGeoJsonDataProvider :
     override fun clearCache() {
         val size = cache.size
         cache.clear()
-        cacheAccessOrder.clear()
         lastAttemptTime.clear()
         attemptCount.clear()
         Log.d(::clearCache.name, "Cleared GeoJSON cache ($size entries)")

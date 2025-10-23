@@ -24,7 +24,6 @@ package com.worldwidewaves.testing.real
 import android.content.res.Configuration
 import androidx.compose.ui.test.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Test
@@ -106,7 +105,7 @@ class RealDeviceCompatibilityTest : BaseRealIntegrationTest() {
             "Touch interaction" to {
                 try {
                     composeTestRule.onNode(hasText("phone_test_event")).performClick()
-                    delay(1000)
+                    kotlinx.coroutines.delay(1000)
                     true
                 } catch (e: Exception) {
                     false
@@ -130,7 +129,7 @@ class RealDeviceCompatibilityTest : BaseRealIntegrationTest() {
             composeTestRule.onNodeWithContentDescription("Map view").performTouchInput {
                 swipeUp()
             }
-            delay(1000)
+            kotlinx.coroutines.delay(1000)
             true
         } catch (e: Exception) {
             false
@@ -229,7 +228,7 @@ class RealDeviceCompatibilityTest : BaseRealIntegrationTest() {
             composeTestRule.onNodeWithContentDescription("Map view").performTouchInput {
                 pinchIn() // Pinch gestures should work well on tablets
             }
-            delay(1000)
+            kotlinx.coroutines.delay(1000)
             true
         } catch (e: Exception) {
             false
@@ -280,7 +279,7 @@ class RealDeviceCompatibilityTest : BaseRealIntegrationTest() {
         // Simulate orientation change to landscape
         try {
             deviceStateManager.simulateOrientationChange(Configuration.ORIENTATION_LANDSCAPE)
-            delay(3000) // Allow time for rotation
+            kotlinx.coroutines.delay(3000) // Allow time for rotation
         } catch (e: Exception) {
             println("ℹ️  Could not simulate orientation change, testing current orientation")
         }
@@ -330,7 +329,7 @@ class RealDeviceCompatibilityTest : BaseRealIntegrationTest() {
         // Rotate back to portrait
         try {
             deviceStateManager.simulateOrientationChange(Configuration.ORIENTATION_PORTRAIT)
-            delay(2000)
+            kotlinx.coroutines.delay(2000)
         } catch (e: Exception) {
             println("ℹ️  Could not rotate back to portrait")
         }
@@ -628,7 +627,7 @@ class RealDeviceCompatibilityTest : BaseRealIntegrationTest() {
                 val responseStart = System.currentTimeMillis()
                 try {
                     composeTestRule.onNode(hasText("perf_test_10")).performClick()
-                    delay(1000)
+                    kotlinx.coroutines.delay(1000)
                     val responseTime = System.currentTimeMillis() - responseStart
                     responseTime < 2000 // UI should respond quickly
                 } catch (e: Exception) {

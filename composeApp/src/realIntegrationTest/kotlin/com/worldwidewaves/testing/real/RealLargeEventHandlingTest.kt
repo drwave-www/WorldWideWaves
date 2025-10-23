@@ -23,13 +23,12 @@ package com.worldwidewaves.testing.real
 
 import androidx.compose.ui.test.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * Real integration tests for large-scale event handling and performance under load.
@@ -71,7 +70,7 @@ class RealLargeEventHandlingTest : BaseRealIntegrationTest() {
 
             // Add small delay every 100 events to avoid overwhelming the system
             if (index % 100 == 99) {
-                delay(100)
+                kotlinx.coroutines.delay(100)
                 println("📱 Created ${index + 1} events...")
             }
         }
@@ -133,7 +132,7 @@ class RealLargeEventHandlingTest : BaseRealIntegrationTest() {
             composeTestRule.onNodeWithContentDescription("Map view").performTouchInput {
                 swipeUp()
             }
-            delay(2000)
+            kotlinx.coroutines.delay(2000)
 
             composeTestRule.onNodeWithContentDescription("Map view").assertIsDisplayed()
             true
@@ -202,7 +201,7 @@ class RealLargeEventHandlingTest : BaseRealIntegrationTest() {
                     2 -> mapView.performTouchInput { swipeLeft() }
                     3 -> mapView.performTouchInput { swipeRight() }
                 }
-                delay(500)
+                kotlinx.coroutines.delay(500)
             } catch (e: Exception) {
                 println("⚠️  Map operation ${operation + 1} failed: ${e.message}")
             }
@@ -277,7 +276,7 @@ class RealLargeEventHandlingTest : BaseRealIntegrationTest() {
         val memoryChecks = mutableListOf<Long>()
 
         repeat(10) { check ->
-            delay(3000)
+            kotlinx.coroutines.delay(3000)
 
             val currentMemory = runtime.totalMemory() - runtime.freeMemory()
             val memoryIncrease = currentMemory - initialMemory
@@ -313,7 +312,7 @@ class RealLargeEventHandlingTest : BaseRealIntegrationTest() {
 
         // Test memory doesn't continue growing (no major leaks)
         val memoryStable = try {
-            delay(5000)
+            kotlinx.coroutines.delay(5000)
             val postTestMemory = runtime.totalMemory() - runtime.freeMemory()
             val memoryGrowth = postTestMemory - finalMemory
 
@@ -349,7 +348,7 @@ class RealLargeEventHandlingTest : BaseRealIntegrationTest() {
         }
 
         // Don't wait for full sync - test responsiveness during sync
-        delay(2000) // Brief delay to start sync
+        kotlinx.coroutines.delay(2000) // Brief delay to start sync
 
         // Launch app while sync is happening
         composeTestRule.activityRule.launchActivity(null)
@@ -359,7 +358,7 @@ class RealLargeEventHandlingTest : BaseRealIntegrationTest() {
         val responsivenessTests = mutableListOf<Boolean>()
 
         repeat(15) { test ->
-            delay(2000)
+            kotlinx.coroutines.delay(2000)
 
             val responsive = try {
                 // Test various UI interactions
@@ -422,7 +421,7 @@ class RealLargeEventHandlingTest : BaseRealIntegrationTest() {
             composeTestRule.onNodeWithContentDescription("Map view").performTouchInput {
                 pinchIn()
             }
-            delay(1000)
+            kotlinx.coroutines.delay(1000)
             composeTestRule.onNodeWithContentDescription("Map view").assertIsDisplayed()
             true
         } catch (e: Exception) {
@@ -471,7 +470,7 @@ class RealLargeEventHandlingTest : BaseRealIntegrationTest() {
 
         for ((index, condition) in networkConditions.withIndex()) {
             simulateNetworkConditions(condition)
-            delay(5000)
+            kotlinx.coroutines.delay(5000)
 
             val conditionResult = try {
                 // Test data loading under current network condition
@@ -565,7 +564,7 @@ class RealLargeEventHandlingTest : BaseRealIntegrationTest() {
 
         // Simulate extended usage that would typically drain battery
         repeat(20) { cycle ->
-            delay(3000)
+            kotlinx.coroutines.delay(3000)
 
             // Operations that would use GPS, network, and processing
             try {

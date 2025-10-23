@@ -23,13 +23,12 @@ package com.worldwidewaves.testing.real
 
 import androidx.compose.ui.test.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * Real integration tests for Firebase Firestore integration with actual cloud data.
@@ -127,7 +126,7 @@ class RealFirebaseIntegrationTest : BaseRealIntegrationTest() {
 
         // Simulate event status update in Firebase (in real test, would update Firestore)
         // This would trigger real-time listener
-        delay(3000)
+        kotlinx.coroutines.delay(3000)
 
         // Wait for real-time update to be received
         composeTestRule.waitUntil(timeoutMillis = 15.seconds.inWholeMilliseconds) {
@@ -193,11 +192,11 @@ class RealFirebaseIntegrationTest : BaseRealIntegrationTest() {
         }
 
         // Allow data to be cached
-        delay(5000)
+        kotlinx.coroutines.delay(5000)
 
         // Go offline to test cache
         simulateNetworkConditions(NetworkCondition.OFFLINE)
-        delay(2000)
+        kotlinx.coroutines.delay(2000)
 
         // Verify cached data is still available offline
         val cachedDataAvailable = try {
@@ -217,7 +216,7 @@ class RealFirebaseIntegrationTest : BaseRealIntegrationTest() {
 
         // Restore network connectivity
         simulateNetworkConditions(NetworkCondition.FAST_NETWORK)
-        delay(3000)
+        kotlinx.coroutines.delay(3000)
 
         // Wait for sync after reconnect
         composeTestRule.waitUntil(timeoutMillis = 20.seconds.inWholeMilliseconds) {
@@ -395,7 +394,7 @@ class RealFirebaseIntegrationTest : BaseRealIntegrationTest() {
 
         for (condition in networkConditions) {
             simulateNetworkConditions(condition)
-            delay(3000)
+            kotlinx.coroutines.delay(3000)
 
             // Verify app handles the condition gracefully
             val handlesCondition = try {
@@ -458,7 +457,7 @@ class RealFirebaseIntegrationTest : BaseRealIntegrationTest() {
         assertTrue("Firebase data consistency should be maintained", dataIntegrityMaintained)
 
         // Test data updates and consistency
-        delay(5000)
+        kotlinx.coroutines.delay(5000)
 
         val consistencyTime = stopPerformanceTrace()
         println("✅ Firebase data consistency completed in ${consistencyTime}ms")

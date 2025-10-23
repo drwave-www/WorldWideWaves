@@ -19,12 +19,8 @@ package com.worldwidewaves.shared.domain.usecases
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import platform.Foundation.NSBundleResourceRequest
 import platform.Foundation.NSOperationQueue
 
@@ -34,7 +30,6 @@ import platform.Foundation.NSOperationQueue
  * or assets are present as Initial Install Tags.
  */
 class IosMapAvailabilityChecker : MapAvailabilityChecker {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val tracked = mutableSetOf<String>()
     private val _mapStates = MutableStateFlow<Map<String, Boolean>>(emptyMap())
     override val mapStates: StateFlow<Map<String, Boolean>> = _mapStates
@@ -94,10 +89,8 @@ class IosMapAvailabilityChecker : MapAvailabilityChecker {
                 onMain {
                     val ok = (error == null)
                     if (ok) {
-                        scope.launch {
-                            com.worldwidewaves.shared.data.MapDownloadGate
-                                .allow(eventId)
-                        }
+                        com.worldwidewaves.shared.data.MapDownloadGate
+                            .allow(eventId)
                     }
                     val m = _mapStates.value.toMutableMap()
                     m[eventId] = ok || inPersistentCache(eventId)
@@ -117,10 +110,8 @@ class IosMapAvailabilityChecker : MapAvailabilityChecker {
     // Call this when you want to allow purge:
     fun releaseDownloadedMap(eventId: String) {
         onMain {
-            scope.launch {
-                com.worldwidewaves.shared.data.MapDownloadGate
-                    .disallow(eventId)
-            }
+            com.worldwidewaves.shared.data.MapDownloadGate
+                .disallow(eventId)
             pinnedRequests.remove(eventId)?.let {
                 try {
                     it.endAccessingResources()

@@ -51,7 +51,7 @@ class IosSoundPlayer :
     SoundPlayer,
     VolumeController {
     companion object {
-        private const val TAG = "WWW.Sound.iOS"
+        private const val TAG = "IosSoundPlayer"
     }
 
     private val audioSession = AVAudioSession.sharedInstance()

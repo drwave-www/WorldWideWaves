@@ -22,10 +22,6 @@
 
 package com.worldwidewaves.activities.event
 
-import com.worldwidewaves.compose.map.AndroidEventMap
-import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.map.EventMapConfig
-import com.worldwidewaves.shared.map.MapCameraPosition
 import com.worldwidewaves.shared.ui.activities.WaveParticipationScreen
 import com.worldwidewaves.utils.AndroidPlatformEnabler
 import kotlin.time.ExperimentalTime
@@ -37,14 +33,14 @@ class WaveActivity : AbstractEventAndroidActivity<WaveParticipationScreen>() {
         platformEnabler: AndroidPlatformEnabler,
     ): WaveParticipationScreen = WaveParticipationScreen(eventId, platformEnabler)
 
-    override fun createEventMapBuilder(): (IWWWEvent) -> AndroidEventMap =
+    override fun createEventMapBuilder(): (com.worldwidewaves.shared.events.IWWWEvent) -> com.worldwidewaves.compose.map.AndroidEventMap =
         { event ->
-            AndroidEventMap(
+            com.worldwidewaves.compose.map.AndroidEventMap(
                 event,
                 context = this,
                 mapConfig =
-                    EventMapConfig(
-                        initialCameraPosition = MapCameraPosition.BOUNDS,
+                    com.worldwidewaves.shared.map.EventMapConfig(
+                        initialCameraPosition = com.worldwidewaves.shared.map.MapCameraPosition.BOUNDS,
                         autoTargetUserOnFirstLocation = false,
                         gesturesEnabled = false, // Wave screen map is non-interactive (display only)
                     ),

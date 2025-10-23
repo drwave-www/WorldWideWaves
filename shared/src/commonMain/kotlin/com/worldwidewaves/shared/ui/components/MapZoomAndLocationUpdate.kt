@@ -28,7 +28,6 @@ import androidx.compose.runtime.getValue
 import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.map.AbstractEventMap
-import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.delay
 
 /**
@@ -50,7 +49,7 @@ fun MapZoomAndLocationUpdate(
         if (!isInArea || eventMap == null) return@LaunchedEffect
 
         // Initial update when entering area
-        Log.d(
+        com.worldwidewaves.shared.utils.Log.i(
             "MapZoomAndLocationUpdate",
             "Initial targetUserAndWave() for event: ${event.id} (entered area)",
         )
@@ -59,7 +58,7 @@ fun MapZoomAndLocationUpdate(
         // Continuous updates every 1 second (real time) while in area
         while (isInArea) {
             delay(WWWGlobals.Timing.MAP_CAMERA_UPDATE_INTERVAL_MS.toLong())
-            Log.v(
+            com.worldwidewaves.shared.utils.Log.i(
                 "MapZoomAndLocationUpdate",
                 "Periodic targetUserAndWave() for event: ${event.id} (1s throttle)",
             )

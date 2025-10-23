@@ -26,7 +26,6 @@ import androidx.compose.ui.Modifier
 import com.worldwidewaves.shared.WWWGlobals.MapDisplay
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.BoundingBox
-import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.position.PositionManager
@@ -62,27 +61,7 @@ enum class MapCameraPosition {
 // ----------------------------------------------------------------------------
 
 /**
- * Abstract base class for EventMap functionality that's shared across platforms.
- *
- * This class provides the core map interaction logic for event visualization, including:
- * - Camera positioning and animation (bounds, center, user/wave targeting)
- * - Constraint enforcement to keep map view within event area
- * - Location tracking and position updates via PositionManager
- * - Wave polygon rendering and progression tracking
- * - Gesture control and user interaction handling
- *
- * Platform-specific subclasses provide:
- * - MapLibreAdapter implementation for native map library
- * - LocationProvider for platform-specific GPS/location services
- *
- * Architecture documentation:
- * - See docs/architecture/map-architecture-analysis.md for detailed system design
- * - See docs/ios/ios-map-implementation-status.md for iOS-specific implementation
- *
- * @param T The platform-specific map type (e.g., MapView on Android, MLNMapView on iOS)
- * @param event The event to display on the map
- * @param mapConfig Configuration for initial camera position and gesture control
- * @param onLocationUpdate Callback invoked when user position changes
+ * Abstract base class for EventMap functionality that's shared across platforms
  */
 abstract class AbstractEventMap<T>(
     protected val event: IWWWEvent,
@@ -92,6 +71,11 @@ abstract class AbstractEventMap<T>(
     companion object {
         // Threshold for detecting significant dimension changes (10%)
         private const val DIMENSION_CHANGE_THRESHOLD = 0.1
+
+        // iOS min zoom polling parameters (workaround for asynchronous command queue)
+        private const val MIN_ZOOM_POLL_THRESHOLD = 1.0 // Min zoom <= 1.0 indicates uninitialized
+        private const val MIN_ZOOM_POLL_DELAY_MS = 50L // Poll every 50ms
+        private const val MIN_ZOOM_POLL_MAX_ATTEMPTS = 20 // Max 1 second total (20 × 50ms)
     }
 
     // Properties that must be implemented by platform-specific subclasses
@@ -143,10 +127,18 @@ abstract class AbstractEventMap<T>(
      * Moves the camera to view the event bounds
      */
     suspend fun moveToMapBounds(onComplete: () -> Unit = {}) {
+        Log.i(
+            "AbstractEventMap",
+            "📐 moveToMapBounds: Starting for event ${event.id}, bounds=${event.area.bbox()}",
+        )
         // Initialize constraint manager with BOUNDS mode (zero padding for tight fit)
         constraintManager = MapBoundsEnforcer(event.area.bbox(), mapLibreAdapter, isWindowMode = false) { suppressCorrections }
 
         val bounds = event.area.bbox()
+        Log.d(
+            "AbstractEventMap",
+            "Animating camera to bounds: SW(${bounds.sw.lat}, ${bounds.sw.lng}) NE(${bounds.ne.lat}, ${bounds.ne.lng})",
+        )
         runCameraAnimation { cb ->
             mapLibreAdapter.animateCameraToBounds(
                 bounds,
@@ -154,12 +146,20 @@ abstract class AbstractEventMap<T>(
                 callback =
                     object : MapCameraCallback {
                         override fun onFinish() {
+                            Log.i(
+                                "AbstractEventMap",
+                                "✅ moveToMapBounds animation completed for event ${event.id}",
+                            )
                             // Apply constraints FIRST - this calculates and sets the correct min zoom
                             // based on bounds that fit perfectly without padding
                             constraintManager?.applyConstraints()
 
-                            // Verify min zoom was calculated (required by tests)
-                            mapLibreAdapter.getMinZoomLevel()
+                            // Get the calculated min zoom from constraints
+                            val calculatedMinZoom = mapLibreAdapter.getMinZoomLevel()
+                            Log.d(
+                                "AbstractEventMap",
+                                "BOUNDS mode: Min zoom from constraints: $calculatedMinZoom",
+                            )
 
                             mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
                             cb.onFinish()
@@ -167,6 +167,10 @@ abstract class AbstractEventMap<T>(
                         }
 
                         override fun onCancel() {
+                            Log.w(
+                                "AbstractEventMap",
+                                "⚠️ moveToMapBounds animation CANCELLED for event ${event.id}",
+                            )
                             cb.onCancel()
                             onComplete()
                         }
@@ -177,11 +181,12 @@ abstract class AbstractEventMap<T>(
 
     /**
      * Adjusts the camera to fit the event area with strict bounds (no expansion beyond event area).
+     * CRITICAL RULE: NO PIXELS OUTSIDE EVENT AREA ALLOWED
      *
-     * WINDOW mode (full map with gestures):
-     * - Constraints are applied to prevent viewport from exceeding event boundaries
-     * - No initial camera animation - view controlled by autoTargetUserOnFirstLocation or user gestures
-     * - Min zoom calculated to prevent zooming out beyond event area
+     * Intelligently chooses fit mode based on aspect ratio:
+     * - Event WIDER than screen → fit by HEIGHT (event height fills screen)
+     * - Event TALLER than screen → fit by WIDTH (event width fills screen)
+     * This ensures the dimension that would overflow is the one that gets constrained.
      */
     suspend fun moveToWindowBounds(onComplete: () -> Unit = {}) {
         // Capture event bbox before animation (needed for callback which is not suspend)
@@ -190,14 +195,86 @@ abstract class AbstractEventMap<T>(
         // Prepare bounds enforcer with WINDOW mode (strict viewport enforcement)
         constraintManager = MapBoundsEnforcer(eventBbox, mapLibreAdapter, isWindowMode = true) { suppressCorrections }
 
-        // Apply constraints BEFORE any camera movement
+        val (sw, ne) = eventBbox
+        val eventMapWidth = ne.lng - sw.lng
+        val eventMapHeight = ne.lat - sw.lat
+        val (centerLat, centerLng) = event.area.getCenter()
+
+        // Calculate the aspect ratios of the event map and screen
+        val eventAspectRatio = eventMapWidth / eventMapHeight
+        val screenComponentRatio = screenWidth / screenHeight
+
+        // CRITICAL: Determine which dimension to fit by
+        // Rule: The dimension that would cause overflow must be the constraining dimension
+        val fitByHeight = eventAspectRatio > screenComponentRatio
+
+        Log.i(
+            "AbstractEventMap",
+            "📐 moveToWindowBounds: event=${event.id}, " +
+                "eventSize=$eventMapWidth°x$eventMapHeight° (aspect=$eventAspectRatio), " +
+                "screenSize=${screenWidth}x${screenHeight}px (aspect=$screenComponentRatio), " +
+                "fitBy=${if (fitByHeight) "HEIGHT" else "WIDTH"} " +
+                "(ensures NO pixels outside event area)",
+        )
+
+        // CRITICAL: Apply constraints BEFORE animation
         // This ensures min zoom is set IMMEDIATELY (preventive enforcement)
         constraintManager?.applyConstraints()
 
-        // WINDOW mode: Don't animate camera - let autoTargetUserOnFirstLocation or manual gestures control initial view
-        // Constraints are still applied to enforce boundaries
-        mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
-        onComplete()
+        // iOS FIX: Poll for min zoom to update (SetConstraintBounds executes asynchronously)
+        // Query min zoom in a loop until it changes from the old value
+        // or timeout after 1 second
+        var targetZoom = mapLibreAdapter.getMinZoomLevel()
+        val initialMinZoom = targetZoom
+        var pollAttempts = 0
+        while (targetZoom <= MIN_ZOOM_POLL_THRESHOLD && pollAttempts < MIN_ZOOM_POLL_MAX_ATTEMPTS) {
+            // Min zoom <= 1.0 likely means SetConstraintBounds hasn't executed yet
+            kotlinx.coroutines.delay(MIN_ZOOM_POLL_DELAY_MS)
+            targetZoom = mapLibreAdapter.getMinZoomLevel()
+            pollAttempts++
+        }
+
+        if (pollAttempts > 0) {
+            Log.i(
+                "AbstractEventMap",
+                "iOS: Polled min zoom $pollAttempts times: $initialMinZoom → $targetZoom",
+            )
+        }
+
+        runCameraAnimation { cb ->
+            // Use the polled min zoom value
+
+            Log.i(
+                "AbstractEventMap",
+                "Using min zoom for initial camera: $targetZoom (ensures event fits)",
+            )
+
+            // Animate to event center at min zoom
+            mapLibreAdapter.animateCamera(
+                Position(centerLat, centerLng),
+                targetZoom,
+                object : MapCameraCallback {
+                    override fun onFinish() {
+                        Log.i(
+                            "AbstractEventMap",
+                            "✅ moveToWindowBounds animation completed",
+                        )
+                        mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
+                        cb.onFinish()
+                        onComplete()
+                    }
+
+                    override fun onCancel() {
+                        Log.w(
+                            "AbstractEventMap",
+                            "⚠️ moveToWindowBounds animation CANCELLED",
+                        )
+                        cb.onCancel()
+                        onComplete()
+                    }
+                },
+            )
+        }
     }
 
     /**
@@ -230,13 +307,13 @@ abstract class AbstractEventMap<T>(
      * Moves the camera to the current wave longitude, keeping current latitude
      */
     suspend fun targetWave() {
-        // Use unified PositionManager (respects SIMULATION > GPS priority)
+        // FIXED: Use unified PositionManager (respects SIMULATION > GPS priority)
         val currentLocation = positionManager.getCurrentPosition() ?: return
         val closestWaveLongitude = event.wave.userClosestWaveLongitude() ?: return
 
         val wavePosition = Position(currentLocation.latitude, closestWaveLongitude)
-        runCameraAnimation { cb ->
-            mapLibreAdapter.animateCamera(wavePosition, MapDisplay.TARGET_WAVE_ZOOM, cb)
+        runCameraAnimation { _ ->
+            mapLibreAdapter.animateCamera(wavePosition, MapDisplay.TARGET_WAVE_ZOOM)
         }
     }
 
@@ -245,8 +322,8 @@ abstract class AbstractEventMap<T>(
      */
     suspend fun targetUser() {
         val userPosition = positionManager.getCurrentPosition() ?: return
-        runCameraAnimation { cb ->
-            mapLibreAdapter.animateCamera(userPosition, MapDisplay.TARGET_USER_ZOOM, cb)
+        runCameraAnimation { _ ->
+            mapLibreAdapter.animateCamera(userPosition, MapDisplay.TARGET_USER_ZOOM)
         }
     }
 
@@ -260,11 +337,8 @@ abstract class AbstractEventMap<T>(
     }
 
     /**
-     * Moves the camera to show both the user and wave positions with adaptive zoom.
-     * Uses intelligent zoom strategy based on:
-     * - Wave progression (early = tight focus, late = full coverage)
-     * - User-wave distance (expands if needed)
-     * - Event edge proximity (ensures boundary visibility)
+     * Moves the camera to show both the user and wave positions with good padding.
+     * Respects constraint bounds to prevent fighting with MapBoundsEnforcer.
      */
     suspend fun targetUserAndWave() {
         val userPosition = positionManager.getCurrentPosition()
@@ -273,7 +347,7 @@ abstract class AbstractEventMap<T>(
         if (userPosition == null || closestWaveLongitude == null) {
             Log.w(
                 "AbstractEventMap",
-                "WARNING: targetUserAndWave: missing data (userPos=$userPosition, waveLng=$closestWaveLongitude)",
+                "⚠️ targetUserAndWave: missing data (userPos=$userPosition, waveLng=$closestWaveLongitude)",
             )
             return
         }
@@ -283,80 +357,32 @@ abstract class AbstractEventMap<T>(
         // Create the bounds containing user and wave positions
         val bounds = BoundingBox.fromCorners(listOf(userPosition, wavePosition))
         if (bounds == null) {
-            Log.e("AbstractEventMap", "Failed to create bounds from user+wave positions")
+            Log
+                .e("AbstractEventMap", "Failed to create bounds from user+wave positions")
             return
         }
 
-        // Get the area's bounding box
+        Log.d(
+            "AbstractEventMap",
+            "User+Wave bounds: SW(${bounds.sw.lat}, ${bounds.sw.lng}) NE(${bounds.ne.lat}, ${bounds.ne.lng})",
+        )
+
+        // Get the area's bounding box (or constraint bounds if more restrictive)
         val areaBbox = event.area.bbox()
-
-        // ============================================================
-        // ADAPTIVE LOGIC: Calculate context-aware maximum span
-        // ============================================================
-
-        val eventLatSpan = areaBbox.ne.lat - areaBbox.sw.lat
-        val eventLngSpan = areaBbox.ne.lng - areaBbox.sw.lng
-
-        // 1. Calculate wave progression (0.0 = start, 1.0 = end)
-        val waveProgression = calculateWaveProgression()
-
-        // 2. Calculate user-wave distance as percentage of event size
-        val userWaveLatDistance = kotlin.math.abs(userPosition.latitude - wavePosition.latitude)
-        val userWaveLngDistance = kotlin.math.abs(userPosition.longitude - wavePosition.longitude)
-        val latDistanceRatio = userWaveLatDistance / eventLatSpan
-        val lngDistanceRatio = userWaveLngDistance / eventLngSpan
-
-        // 3. Check if user or wave is near event edges
-        val userNearEdge = isNearEdge(userPosition, areaBbox, MapDisplay.ADAPTIVE_CAMERA_EDGE_THRESHOLD)
-        val waveNearEdge = isNearEdge(wavePosition, areaBbox, MapDisplay.ADAPTIVE_CAMERA_EDGE_THRESHOLD)
-
-        // 4. Determine adaptive maximum span based on progression phase
-        val baseMaxSpanRatio =
-            when {
-                // Phase 3: Late wave (70-100%) - prioritize visibility
-                waveProgression >= MapDisplay.ADAPTIVE_CAMERA_PHASE_3_START -> MapDisplay.ADAPTIVE_CAMERA_PHASE_3_MAX_SPAN
-
-                // Phase 2: Mid wave (40-70%) - balanced view
-                waveProgression >= MapDisplay.ADAPTIVE_CAMERA_PHASE_2_START -> MapDisplay.ADAPTIVE_CAMERA_PHASE_2_MAX_SPAN
-
-                // Phase 1: Early wave (0-40%) - tight focus
-                else -> MapDisplay.ADAPTIVE_CAMERA_PHASE_1_MAX_SPAN
-            }
-
-        // 5. Apply adaptive overrides
-        val adaptiveMaxLatRatio =
-            when {
-                // Override: User-wave distance requires more space
-                latDistanceRatio > baseMaxSpanRatio ->
-                    kotlin.math.min(latDistanceRatio * MapDisplay.ADAPTIVE_CAMERA_DISTANCE_PADDING, 1.0)
-
-                // Override: Near edge - need more context
-                userNearEdge || waveNearEdge ->
-                    kotlin.math.max(baseMaxSpanRatio, MapDisplay.ADAPTIVE_CAMERA_EDGE_MIN_SPAN)
-
-                // Normal: Use phase-based maximum
-                else -> baseMaxSpanRatio
-            }
-
-        val adaptiveMaxLngRatio =
-            when {
-                lngDistanceRatio > baseMaxSpanRatio ->
-                    kotlin.math.min(lngDistanceRatio * MapDisplay.ADAPTIVE_CAMERA_DISTANCE_PADDING, 1.0)
-                userNearEdge || waveNearEdge ->
-                    kotlin.math.max(baseMaxSpanRatio, MapDisplay.ADAPTIVE_CAMERA_EDGE_MIN_SPAN)
-                else -> baseMaxSpanRatio
-            }
-
-        val maxLatSpan = eventLatSpan * adaptiveMaxLatRatio
-        val maxLngSpan = eventLngSpan * adaptiveMaxLngRatio
-
-        // ============================================================
-        // EXISTING PADDING AND BOUNDS LOGIC
-        // ============================================================
+        val constraintBbox = constraintManager?.calculateConstraintBounds() ?: areaBbox
+        Log.d(
+            "AbstractEventMap",
+            "Area bbox: SW(${areaBbox.sw.lat}, ${areaBbox.sw.lng}) NE(${areaBbox.ne.lat}, ${areaBbox.ne.lng})",
+        )
+        Log.d(
+            "AbstractEventMap",
+            "Constraint bbox: SW(${constraintBbox.sw.lat}, ${constraintBbox.sw.lng}) " +
+                "NE(${constraintBbox.ne.lat}, ${constraintBbox.ne.lng})",
+        )
 
         // Calculate padding as percentages of the area's dimensions
-        val horizontalPadding = eventLngSpan * 0.2
-        val verticalPadding = eventLatSpan * 0.1
+        val horizontalPadding = (areaBbox.ne.lng - areaBbox.sw.lng) * 0.2
+        val verticalPadding = (areaBbox.ne.lat - areaBbox.sw.lat) * 0.1
 
         // Create new bounds with padding, constrained by the area's bounding box
         val paddedBounds =
@@ -371,13 +397,24 @@ abstract class AbstractEventMap<T>(
                 ),
             )
 
-        val currentLatSpan = paddedBounds!!.ne.lat - paddedBounds.sw.lat
+        Log.d(
+            "AbstractEventMap",
+            "Padded bounds: SW(${paddedBounds!!.sw.lat}, ${paddedBounds.sw.lng}) " +
+                "NE(${paddedBounds.ne.lat}, ${paddedBounds.ne.lng})",
+        )
+
+        // Limit bounds to a reasonable size to keep camera focused on user+wave
+        // Without this, bounds can become too large when user is far from event area
+        // Max size: 50% of event area in each dimension (keeps focus tight)
+        val maxLatSpan = (areaBbox.ne.lat - areaBbox.sw.lat) * 0.5
+        val maxLngSpan = (areaBbox.ne.lng - areaBbox.sw.lng) * 0.5
+
+        val currentLatSpan = paddedBounds.ne.lat - paddedBounds.sw.lat
         val currentLngSpan = paddedBounds.ne.lng - paddedBounds.sw.lng
 
-        // Apply adaptive maximum span
         val finalBounds =
             if (currentLatSpan > maxLatSpan || currentLngSpan > maxLngSpan) {
-                // Bounds exceed adaptive maximum - center on user+wave midpoint with max span
+                // Bounds too large - center on user+wave midpoint with max span
                 val midLat = (paddedBounds.sw.lat + paddedBounds.ne.lat) / 2.0
                 val midLng = (paddedBounds.sw.lng + paddedBounds.ne.lng) / 2.0
 
@@ -397,6 +434,12 @@ abstract class AbstractEventMap<T>(
             } else {
                 paddedBounds
             }
+
+        Log.i(
+            "AbstractEventMap",
+            "🎬 targetUserAndWave: Final bounds " +
+                "SW(${finalBounds.sw.lat}, ${finalBounds.sw.lng}) NE(${finalBounds.ne.lat}, ${finalBounds.ne.lng})",
+        )
 
         runCameraAnimation { _ ->
             mapLibreAdapter.animateCameraToBounds(finalBounds)
@@ -424,7 +467,7 @@ abstract class AbstractEventMap<T>(
 
         Log.i(
             "AbstractEventMap",
-            "DIMENSIONS: Screen dimensions set on map init: ${screenWidth}x$screenHeight px (aspect: ${screenWidth / screenHeight})",
+            "📐 Screen dimensions set on map init: ${screenWidth}x$screenHeight px (aspect: ${screenWidth / screenHeight})",
         )
 
         mapLibreAdapter.setStyle(stylePath) {
@@ -450,8 +493,11 @@ abstract class AbstractEventMap<T>(
             // Set the max zoom level from the event configuration
             mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
 
-            // Camera idle listener for WINDOW mode dimension changes
+            // Apply bounds constraints if required
             mapLibreAdapter.addOnCameraIdleListener {
+                // Note: constrainCamera() is deprecated - using preventive constraints instead
+                // Preventive constraints (setBoundsForCameraTarget + minZoom) are applied in applyConstraints()
+
                 // WINDOW mode: Recalculate bounds when dimensions change significantly
                 if (windowBoundsNeedRecalculation && mapConfig.initialCameraPosition == MapCameraPosition.WINDOW) {
                     val currentWidth = mapLibreAdapter.getWidth()
@@ -464,8 +510,8 @@ abstract class AbstractEventMap<T>(
                     if (widthChange > DIMENSION_CHANGE_THRESHOLD || heightChange > DIMENSION_CHANGE_THRESHOLD) {
                         Log.i(
                             "AbstractEventMap",
-                            "DIMENSIONS: Dimensions changed significantly " +
-                                "(${screenWidth}x$screenHeight -> ${currentWidth}x$currentHeight), recalculating WINDOW bounds",
+                            "📐 Dimensions changed significantly (${screenWidth}x$screenHeight → ${currentWidth}x$currentHeight), " +
+                                "recalculating WINDOW bounds",
                         )
                         screenWidth = currentWidth
                         screenHeight = currentHeight
@@ -481,24 +527,40 @@ abstract class AbstractEventMap<T>(
 
             // Configure initial camera position
             scope.launch {
-                // Wait for initial camera setup to complete before starting position updates
-                // This prevents race conditions between constraint setup and auto-target animations
+                Log.i(
+                    "AbstractEventMap",
+                    "🎥 Setting initial camera position: ${mapConfig.initialCameraPosition} for event: ${event.id}",
+                )
+                // iOS FIX: For WINDOW mode, wait for initial camera setup to complete
+                // before starting position updates. This prevents auto-target animation
+                // from being queued before SetConstraintBounds, which would cause
+                // SetConstraintBounds to be skipped (batch stops after animation)
                 val cameraSetupComplete = CompletableDeferred<Unit>()
 
                 when (mapConfig.initialCameraPosition) {
                     MapCameraPosition.DEFAULT_CENTER -> {
+                        Log
+                            .d("AbstractEventMap", "Calling moveToCenter")
                         moveToCenter {
                             onMapLoaded()
                             cameraSetupComplete.complete(Unit)
                         }
                     }
                     MapCameraPosition.BOUNDS -> {
+                        Log.d(
+                            "AbstractEventMap",
+                            "Calling moveToMapBounds for event: ${event.id}",
+                        )
                         moveToMapBounds {
                             onMapLoaded()
                             cameraSetupComplete.complete(Unit)
                         }
                     }
                     MapCameraPosition.WINDOW -> {
+                        Log.d(
+                            "AbstractEventMap",
+                            "Calling moveToWindowBounds (initial, dimensions may change)",
+                        )
                         // Mark that we should watch for dimension changes and recalculate
                         windowBoundsNeedRecalculation = true
                         moveToWindowBounds {
@@ -578,56 +640,6 @@ abstract class AbstractEventMap<T>(
      * Gets the current position source from PositionManager
      */
     fun getCurrentPositionSource(): PositionManager.PositionSource? = positionManager.getCurrentSource()
-
-    // ============================================================
-    // ADAPTIVE CAMERA HELPER FUNCTIONS
-    // ============================================================
-
-    /**
-     * Calculate current wave progression as ratio (0.0 to 1.0)
-     * 0.0 = wave just started, 1.0 = wave completed
-     */
-    @OptIn(kotlin.time.ExperimentalTime::class)
-    @Suppress("ReturnCount") // Early returns for guard clauses are appropriate
-    private suspend fun calculateWaveProgression(): Double {
-        val clock: IClock by inject()
-        val now = clock.now()
-        val waveStart = event.getWaveStartDateTime()
-        val waveEnd = event.getEndDateTime()
-
-        if (now < waveStart) return 0.0
-        if (now >= waveEnd) return 1.0
-
-        val elapsed = (now - waveStart).inWholeMilliseconds.toDouble()
-        val total = (waveEnd - waveStart).inWholeMilliseconds.toDouble()
-
-        return (elapsed / total).coerceIn(0.0, 1.0)
-    }
-
-    /**
-     * Check if position is near event area edges
-     * @param position Position to check
-     * @param bbox Event area bounding box
-     * @param threshold Distance from edge as ratio (0.2 = within 20% of boundary)
-     * @return true if position is within threshold distance from any edge
-     */
-    private fun isNearEdge(
-        position: Position,
-        bbox: BoundingBox,
-        threshold: Double,
-    ): Boolean {
-        val latMargin = (bbox.ne.lat - bbox.sw.lat) * threshold
-        val lngMargin = (bbox.ne.lng - bbox.sw.lng) * threshold
-
-        val nearSouth = position.latitude < (bbox.sw.lat + latMargin)
-        val nearNorth = position.latitude > (bbox.ne.lat - latMargin)
-        val nearWest = position.longitude < (bbox.sw.lng + lngMargin)
-        val nearEast = position.longitude > (bbox.ne.lng - lngMargin)
-
-        return nearSouth || nearNorth || nearWest || nearEast
-    }
-
-    // ============================================================
 
     abstract fun updateWavePolygons(
         wavePolygons: List<Polygon>,

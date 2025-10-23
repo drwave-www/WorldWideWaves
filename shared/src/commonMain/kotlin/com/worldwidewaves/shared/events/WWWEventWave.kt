@@ -168,7 +168,7 @@ abstract class WWWEventWave :
             Napier.w("${WWWEventWave::class.simpleName}: Platform not found, simulation disabled")
         }
         return if (platform?.isOnSimulation() == true) {
-            platform.getSimulation()?.getUserPosition()
+            platform.getSimulation()!!.getUserPosition()
         } else {
             positionRequester?.invoke()
         }

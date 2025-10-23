@@ -25,8 +25,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.MapTestFixtures.center
+import com.worldwidewaves.shared.map.MapTestFixtures.height
 import com.worldwidewaves.shared.map.MapTestFixtures.isCompletelyWithin
-// Note: BoundingBox.height and BoundingBox.width are built-in properties, not from MapTestFixtures
+import com.worldwidewaves.shared.map.MapTestFixtures.width
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -60,19 +61,17 @@ class WaveScreenMapTest : BaseMapIntegrationTest() {
     fun testWave_initialCameraShowsEntireEventArea() =
         runBlocking {
             // Apply BOUNDS mode configuration
-            runOnUiThread {
-                adapter.setBoundsForCameraTarget(
-                    constraintBounds = eventBounds,
-                    applyZoomSafetyMargin = false,
-                    originalEventBounds = eventBounds,
-                )
-            }
+            adapter.setBoundsForCameraTarget(
+                constraintBounds = eventBounds,
+                applyZoomSafetyMargin = false,
+                originalEventBounds = eventBounds,
+            )
 
             // Move to bounds (simulates WaveScreen initial setup)
             animateCameraAndWait(eventBounds.center(), zoom = 13.0)
 
             // Assertions
-            val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
+            val visibleRegion = adapter.getVisibleRegion()
 
             // Camera should be centered on event
             assertCameraAt(
@@ -140,12 +139,10 @@ class WaveScreenMapTest : BaseMapIntegrationTest() {
                 )
 
             // Animate to padded bounds
-            runOnUiThread {
-                adapter.animateCameraToBounds(paddedBounds!!)
-            }
+            adapter.animateCameraToBounds(paddedBounds!!)
             waitForIdle()
 
-            val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
+            val visibleRegion = adapter.getVisibleRegion()
 
             // Assertions
             assertTrue(
@@ -238,12 +235,10 @@ class WaveScreenMapTest : BaseMapIntegrationTest() {
                     )!!
             }
 
-            runOnUiThread {
-                adapter.animateCameraToBounds(paddedBounds)
-            }
+            adapter.animateCameraToBounds(paddedBounds)
             waitForIdle()
 
-            val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
+            val visibleRegion = adapter.getVisibleRegion()
 
             // Assertions - should be limited to 50% of event area
             assertTrue(
@@ -306,12 +301,10 @@ class WaveScreenMapTest : BaseMapIntegrationTest() {
                         ),
                     )!!
 
-                runOnUiThread {
-                    adapter.animateCameraToBounds(paddedBounds)
-                }
+                adapter.animateCameraToBounds(paddedBounds)
                 waitForIdle()
 
-                val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
+                val visibleRegion = adapter.getVisibleRegion()
 
                 // Assertions
                 assertVisibleRegionWithinBounds(
@@ -345,12 +338,10 @@ class WaveScreenMapTest : BaseMapIntegrationTest() {
                 )
 
             // Initial camera shows entire event (BOUNDS mode)
-            runOnUiThread {
-                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
-            }
+            adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
             animateCameraAndWait(eventBounds.center(), zoom = 13.0)
 
-            val initialRegion = runOnUiThread { adapter.getVisibleRegion() }
+            val initialRegion = adapter.getVisibleRegion()
 
             // Verify entire event is visible initially
             assertTrue(
@@ -399,12 +390,10 @@ class WaveScreenMapTest : BaseMapIntegrationTest() {
                 )!!
 
             // Animate to auto-tracking bounds
-            runOnUiThread {
-                adapter.animateCameraToBounds(paddedBounds)
-            }
+            adapter.animateCameraToBounds(paddedBounds)
             waitForIdle()
 
-            val regionAfterEntering = runOnUiThread { adapter.getVisibleRegion() }
+            val regionAfterEntering = adapter.getVisibleRegion()
 
             // Assertions
             assertTrue(
@@ -468,12 +457,10 @@ class WaveScreenMapTest : BaseMapIntegrationTest() {
                     ),
                 )!!
 
-            runOnUiThread {
-                adapter.animateCameraToBounds(paddedBounds1)
-            }
+            adapter.animateCameraToBounds(paddedBounds1)
             waitForIdle()
 
-            val cameraAfterFirst = runOnUiThread { adapter.getCameraPosition() }
+            val cameraAfterFirst = adapter.getCameraPosition()
             val timestampFirst = System.currentTimeMillis()
 
             // Immediately try to update position (should be throttled)
@@ -510,12 +497,10 @@ class WaveScreenMapTest : BaseMapIntegrationTest() {
 
             // Try immediate update (within 1 second)
             Thread.sleep(100) // Small delay to ensure distinct timestamp
-            runOnUiThread {
-                adapter.animateCameraToBounds(paddedBounds2)
-            }
+            adapter.animateCameraToBounds(paddedBounds2)
             waitForIdle()
 
-            val cameraAfterImmediate = runOnUiThread { adapter.getCameraPosition() }
+            val cameraAfterImmediate = adapter.getCameraPosition()
             val timestampImmediate = System.currentTimeMillis()
 
             // Camera should NOT have moved significantly (throttled)
@@ -533,12 +518,10 @@ class WaveScreenMapTest : BaseMapIntegrationTest() {
             Thread.sleep(1100)
 
             // Update again (should succeed after throttle period)
-            runOnUiThread {
-                adapter.animateCameraToBounds(paddedBounds2)
-            }
+            adapter.animateCameraToBounds(paddedBounds2)
             waitForIdle()
 
-            val cameraAfterThrottle = runOnUiThread { adapter.getCameraPosition() }
+            val cameraAfterThrottle = adapter.getCameraPosition()
 
             // Camera should have moved after throttle period
             // (In real implementation, MapZoomAndLocationUpdate throttles updates to 1 second)
@@ -546,10 +529,9 @@ class WaveScreenMapTest : BaseMapIntegrationTest() {
                 "Auto-tracking viewport should remain within bounds after throttle period",
             )
 
-            val finalVisibleRegion = runOnUiThread { adapter.getVisibleRegion() }
             assertTrue(
                 "User position should be visible after throttle period update",
-                finalVisibleRegion.contains(userPosition2),
+                adapter.getVisibleRegion().contains(userPosition2),
             )
         }
 }

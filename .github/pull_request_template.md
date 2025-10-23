@@ -43,7 +43,7 @@
 - [ ] Manual VoiceOver testing completed (iOS)
 - [ ] Text scales properly (Android: 200%, iOS: 300%)
 
-See **[Accessibility Guide](../docs/accessibility-guide.md)** for implementation patterns.
+See **[Accessibility Guide](../docs/ACCESSIBILITY_GUIDE.md)** for implementation patterns.
 
 ## Code Quality
 - [ ] Code follows project conventions (see CLAUDE.md)

@@ -49,7 +49,7 @@ import platform.darwin.NSObject
 @OptIn(ExperimentalForeignApi::class)
 class IosLocationProvider : LocationProvider {
     companion object {
-        private const val TAG = "WWW.Location.iOS"
+        private const val TAG = "IosLocationProvider"
     }
 
     private val _currentLocation = MutableStateFlow<Position?>(null)

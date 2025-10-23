@@ -28,13 +28,35 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.java.KoinJavaComponent.inject
 import java.io.File
 
-/**
- * Checks if a cached file exists in the application's cache directory.
+/*
+ * Copyright 2025 DrWave
  *
- * This function determines whether a file with the specified name exists in the cache directory.
- * It also considers whether the application is running in development mode, in which case it always
- * returns `false` to simulate the absence of cached files.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
+// /**
+// * Checks if a cached file exists in the application's cache directory.
+// *
+// * This function determines whether a file with the specified name exists in the cache directory.
+// * It also considers whether the application is running in development mode, in which case it always
+// * returns `false` to simulate the absence of cached files.
+// *
+// */
 actual suspend fun cachedFileExists(fileName: String): Boolean {
     val context: Context by inject(Context::class.java)
     val isDevelopmentMode = Build.HARDWARE == "ranchu" || Build.HARDWARE == "goldfish"
