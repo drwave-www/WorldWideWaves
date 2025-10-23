@@ -153,7 +153,7 @@ emulator -avd Pixel_3a_API_30 &
 ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
 
 # Open and run in Xcode
-open iosApp/iosApp.xcodeproj
+open iosApp/worldwidewaves.xcodeproj
 ```
 
 ### 6. Setup Git Hooks (Optional)
@@ -243,7 +243,7 @@ See [docs/contributing.md](docs/contributing.md) for complete guidelines.
 - [Firebase Setup](docs/setup/FIREBASE_SETUP.md) - Firebase project configuration and security
 - [Map Architecture](docs/architecture/MAP_ARCHITECTURE_ANALYSIS.md) - Shared vs platform-specific map system design
 - [iOS Development](CLAUDE_iOS.md) - Complete iOS development guide
-- [iOS Map Status](iOS_MAP_IMPLEMENTATION_STATUS.md) - iOS map feature parity (95%)
+- [iOS Documentation](docs/ios/) - iOS-specific guides, debugging, and accessibility
 
 See [docs/README.md](docs/README.md) for complete documentation map.
 
