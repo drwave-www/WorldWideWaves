@@ -1,0 +1,25 @@
+{
+  "version": 8,
+  "name": "Test Map Style",
+  "metadata": {
+    "test": "Minimal MapLibre style for instrumented tests"
+  },
+  "sources": {
+    "test-source": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": []
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#f0f0f0"
+      }
+    }
+  ]
+}

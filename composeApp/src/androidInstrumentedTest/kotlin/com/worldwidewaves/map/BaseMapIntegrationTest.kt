@@ -74,7 +74,8 @@ abstract class BaseMapIntegrationTest {
     protected var screenWidth: Double = PORTRAIT_PHONE.width
     protected var screenHeight: Double = PORTRAIT_PHONE.height
 
-    // Style path for test maps (using local test tiles)
+    // Style path for test maps
+    // Use local asset style to avoid network dependencies
     protected open val stylePath: String = "asset://test_map_style.json"
 
     // Test event ID
@@ -96,31 +97,60 @@ abstract class BaseMapIntegrationTest {
 
         // Load map asynchronously and wait
         val mapLoadedLatch = CountDownLatch(1)
+        var setupError: Throwable? = null
 
-        mapView.getMapAsync { map ->
-            mapLibreMap = map
-            adapter.setMap(map)
+        try {
+            mapView.getMapAsync { map ->
+                try {
+                    mapLibreMap = map
+                    adapter.setMap(map)
 
-            // Load style and wait
-            adapter.setStyle(stylePath) {
-                mapLoadedLatch.countDown()
+                    // Load style and wait
+                    adapter.setStyle(stylePath) {
+                        mapLoadedLatch.countDown()
+                    }
+                } catch (e: Throwable) {
+                    setupError = e
+                    mapLoadedLatch.countDown()
+                }
             }
-        }
 
-        // Wait up to 10 seconds for map to load
-        val loaded = mapLoadedLatch.await(10, TimeUnit.SECONDS)
-        if (!loaded) {
-            fail("MapView failed to load within timeout")
-        }
+            // Wait up to 15 seconds for map to load (demo tiles might be slower)
+            val loaded = mapLoadedLatch.await(15, TimeUnit.SECONDS)
 
-        // Give map time to fully initialize
-        Thread.sleep(500)
+            // Check for errors during setup
+            setupError?.let { throw AssertionError("Map setup failed", it) }
+
+            if (!loaded) {
+                fail("MapView failed to load within timeout. Style: $stylePath")
+            }
+
+            // Give map time to fully initialize
+            Thread.sleep(500)
+        } catch (e: Throwable) {
+            // Clean up on failure to avoid tearDown errors
+            if (::mapView.isInitialized) {
+                try {
+                    mapView.onDestroy()
+                } catch (cleanupError: Throwable) {
+                    // Ignore cleanup errors
+                }
+            }
+            throw e
+        }
     }
 
     @After
     open fun tearDown() {
-        // Clean up map resources
-        mapView.onDestroy()
+        // Clean up map resources (safe for uninitialized properties)
+        if (::mapView.isInitialized) {
+            try {
+                mapView.onDestroy()
+            } catch (e: Throwable) {
+                // Log but don't fail tearDown
+                System.err.println("Error during mapView cleanup: ${e.message}")
+            }
+        }
     }
 
     // ============================================================

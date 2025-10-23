@@ -756,4 +756,205 @@ class MapBoundsEnforcerUnitTest {
             "20% padding change should be significant",
         )
     }
+
+    // ============================================================
+    // PADDING VERIFICATION TESTS (Priority 3 - 3 tests)
+    // ============================================================
+
+    @Test
+    fun testPaddingCalculation_constraintBoundsShrinkByExactPaddingAmount() {
+        val adapter = MockMapLibreAdapter()
+
+        // Set specific visible region to control padding calculation
+        val viewportHalfHeight = 0.003 // ~330 meters
+        val viewportHalfWidth = 0.003
+
+        val centerPosition = STANDARD_EVENT_BOUNDS.center()
+        adapter.mockVisibleRegion =
+            BoundingBox.fromCorners(
+                Position(
+                    centerPosition.latitude - viewportHalfHeight,
+                    centerPosition.longitude - viewportHalfWidth,
+                ),
+                Position(
+                    centerPosition.latitude + viewportHalfHeight,
+                    centerPosition.longitude + viewportHalfWidth,
+                ),
+            )
+
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = true,
+            )
+
+        enforcer.applyConstraints()
+        val constraintBounds = enforcer.calculateConstraintBounds()
+
+        // Constraint bounds should be event bounds shrunk by half viewport size
+        val expectedSwLat = STANDARD_EVENT_BOUNDS.southwest.latitude + viewportHalfHeight
+        val expectedSwLng = STANDARD_EVENT_BOUNDS.southwest.longitude + viewportHalfWidth
+        val expectedNeLat = STANDARD_EVENT_BOUNDS.northeast.latitude - viewportHalfHeight
+        val expectedNeLng = STANDARD_EVENT_BOUNDS.northeast.longitude - viewportHalfWidth
+
+        assertTrue(
+            kotlin.math.abs(constraintBounds.southwest.latitude - expectedSwLat) < TOLERANCE_POSITION,
+            "SW latitude should be shrunk by viewport half height " +
+                "(expected=$expectedSwLat, got=${constraintBounds.southwest.latitude})",
+        )
+        assertTrue(
+            kotlin.math.abs(constraintBounds.southwest.longitude - expectedSwLng) < TOLERANCE_POSITION,
+            "SW longitude should be shrunk by viewport half width " +
+                "(expected=$expectedSwLng, got=${constraintBounds.southwest.longitude})",
+        )
+        assertTrue(
+            kotlin.math.abs(constraintBounds.northeast.latitude - expectedNeLat) < TOLERANCE_POSITION,
+            "NE latitude should be shrunk by viewport half height " +
+                "(expected=$expectedNeLat, got=${constraintBounds.northeast.latitude})",
+        )
+        assertTrue(
+            kotlin.math.abs(constraintBounds.northeast.longitude - expectedNeLng) < TOLERANCE_POSITION,
+            "NE longitude should be shrunk by viewport half width " +
+                "(expected=$expectedNeLng, got=${constraintBounds.northeast.longitude})",
+        )
+
+        println("✅ Padding calculation verified: constraint bounds shrink by exact padding amount")
+        println("   Viewport half: height=$viewportHalfHeight, width=$viewportHalfWidth")
+    }
+
+    @Test
+    fun testPaddingSymmetry_constraintBoundsCenteredWithinEventBounds() {
+        val adapter = MockMapLibreAdapter()
+
+        // Set viewport with specific padding
+        val viewportHalfHeight = 0.002
+        val viewportHalfWidth = 0.0015
+
+        val centerPosition = STANDARD_EVENT_BOUNDS.center()
+        adapter.mockVisibleRegion =
+            BoundingBox.fromCorners(
+                Position(
+                    centerPosition.latitude - viewportHalfHeight,
+                    centerPosition.longitude - viewportHalfWidth,
+                ),
+                Position(
+                    centerPosition.latitude + viewportHalfHeight,
+                    centerPosition.longitude + viewportHalfWidth,
+                ),
+            )
+
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = true,
+            )
+
+        enforcer.applyConstraints()
+        val constraintBounds = enforcer.calculateConstraintBounds()
+
+        // Verify constraint bounds are centered within event bounds
+        val eventCenter = STANDARD_EVENT_BOUNDS.center()
+        val constraintCenter = constraintBounds.center()
+
+        assertTrue(
+            constraintCenter.isApproximately(eventCenter, TOLERANCE_POSITION),
+            "Constraint bounds should be centered within event bounds " +
+                "(event center=$eventCenter, constraint center=$constraintCenter)",
+        )
+
+        // Verify symmetric shrinkage
+        val northShrinkage = STANDARD_EVENT_BOUNDS.northeast.latitude - constraintBounds.northeast.latitude
+        val southShrinkage = constraintBounds.southwest.latitude - STANDARD_EVENT_BOUNDS.southwest.latitude
+        val eastShrinkage = STANDARD_EVENT_BOUNDS.northeast.longitude - constraintBounds.northeast.longitude
+        val westShrinkage = constraintBounds.southwest.longitude - STANDARD_EVENT_BOUNDS.southwest.longitude
+
+        assertTrue(
+            kotlin.math.abs(northShrinkage - southShrinkage) < TOLERANCE_POSITION,
+            "North and south shrinkage should be equal (north=$northShrinkage, south=$southShrinkage)",
+        )
+        assertTrue(
+            kotlin.math.abs(eastShrinkage - westShrinkage) < TOLERANCE_POSITION,
+            "East and west shrinkage should be equal (east=$eastShrinkage, west=$westShrinkage)",
+        )
+
+        println("✅ Padding symmetry verified: constraint bounds centered with symmetric shrinkage")
+        println("   Shrinkage: N/S=$northShrinkage, E/W=$eastShrinkage")
+    }
+
+    @Test
+    fun testPaddingPreventsInvalidBounds_clampedAt49Percent() {
+        val adapter = MockMapLibreAdapter()
+
+        // Set viewport MUCH larger than event (extreme zoom out)
+        val viewportHalfHeight = 0.05 // 5x larger than event
+        val viewportHalfWidth = 0.05
+
+        val centerPosition = STANDARD_EVENT_BOUNDS.center()
+        adapter.mockVisibleRegion =
+            BoundingBox.fromCorners(
+                Position(
+                    centerPosition.latitude - viewportHalfHeight,
+                    centerPosition.longitude - viewportHalfWidth,
+                ),
+                Position(
+                    centerPosition.latitude + viewportHalfHeight,
+                    centerPosition.longitude + viewportHalfWidth,
+                ),
+            )
+
+        val enforcer =
+            MapBoundsEnforcer(
+                mapBounds = STANDARD_EVENT_BOUNDS,
+                mapLibreAdapter = adapter,
+                isWindowMode = true,
+            )
+
+        enforcer.applyConstraints()
+        val constraintBounds = enforcer.calculateConstraintBounds()
+
+        // Verify padding was clamped to prevent invalid bounds
+        // Padding should be at most 49% of event size (prevents inversion)
+        val eventHeight = STANDARD_EVENT_BOUNDS.height
+        val eventWidth = STANDARD_EVENT_BOUNDS.width
+
+        val actualHeightShrinkage =
+            (STANDARD_EVENT_BOUNDS.northeast.latitude - constraintBounds.northeast.latitude) +
+                (constraintBounds.southwest.latitude - STANDARD_EVENT_BOUNDS.southwest.latitude)
+        val actualWidthShrinkage =
+            (STANDARD_EVENT_BOUNDS.northeast.longitude - constraintBounds.northeast.longitude) +
+                (constraintBounds.southwest.longitude - STANDARD_EVENT_BOUNDS.southwest.longitude)
+
+        // Use lenient comparison for floating-point precision (allow 0.1% tolerance)
+        val maxHeightShrinkage = eventHeight * 0.98 * 1.001 // 0.1% tolerance
+        val maxWidthShrinkage = eventWidth * 0.98 * 1.001
+
+        assertTrue(
+            actualHeightShrinkage <= maxHeightShrinkage,
+            "Height shrinkage should be clamped to prevent invalid bounds " +
+                "(shrinkage=$actualHeightShrinkage, max=${eventHeight * 0.98})",
+        )
+        assertTrue(
+            actualWidthShrinkage <= maxWidthShrinkage,
+            "Width shrinkage should be clamped to prevent invalid bounds " +
+                "(shrinkage=$actualWidthShrinkage, max=${eventWidth * 0.98})",
+        )
+
+        // Verify constraint bounds remain valid (not inverted)
+        assertTrue(constraintBounds.isValid(), "Constraint bounds should remain valid despite extreme viewport")
+        assertTrue(
+            constraintBounds.northeast.latitude > constraintBounds.southwest.latitude,
+            "NE latitude should be > SW latitude (no inversion)",
+        )
+        assertTrue(
+            constraintBounds.northeast.longitude > constraintBounds.southwest.longitude,
+            "NE longitude should be > SW longitude (no inversion)",
+        )
+
+        println("✅ Padding clamping verified: prevents invalid bounds with extreme viewport")
+        println("   Viewport half: $viewportHalfHeight (5x event size)")
+        println("   Actual shrinkage: height=$actualHeightShrinkage, width=$actualWidthShrinkage")
+        println("   Bounds remain valid: ${constraintBounds.isValid()}")
+    }
 }
