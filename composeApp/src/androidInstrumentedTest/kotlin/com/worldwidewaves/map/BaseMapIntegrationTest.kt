@@ -142,10 +142,14 @@ abstract class BaseMapIntegrationTest {
                         System.out.println("BaseMapIntegrationTest: getMapAsync callback received!")
                         mapLibreMap = map
                         activity.mapLibreMap = map
-                        adapter.setMap(map)
+
+                        // Set map on UI thread (MapLibre requirement)
+                        androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                            adapter.setMap(map)
+                        }
 
                         System.out.println("BaseMapIntegrationTest: Loading inline JSON style...")
-                        // Load style from inline JSON (no network/assets required)
+                        // Load style from inline JSON (no network/assets required) - already on UI thread
                         mapLibreMap.setStyle(
                             org.maplibre.android.maps.Style
                                 .Builder()
@@ -263,7 +267,7 @@ abstract class BaseMapIntegrationTest {
     }
 
     /**
-     * Set camera constraints and verify they were applied
+     * Set camera constraints and verify they were applied (already wrapped in UI thread)
      */
     protected fun applyConstraintsAndVerify(
         constraintBounds: BoundingBox,
@@ -279,6 +283,41 @@ abstract class BaseMapIntegrationTest {
 
         // Give MapLibre time to apply constraints
         Thread.sleep(300)
+    }
+
+    /**
+     * Set min/max zoom preferences on UI thread
+     */
+    protected fun setZoomPreferences(
+        minZoom: Double? = null,
+        maxZoom: Double? = null,
+    ) {
+        runOnUiThread {
+            minZoom?.let { adapter.setMinZoomPreference(it) }
+            maxZoom?.let { adapter.setMaxZoomPreference(it) }
+        }
+    }
+
+    /**
+     * Set user position on UI thread
+     */
+    protected fun setUserPosition(position: Position) {
+        runOnUiThread {
+            adapter.setUserPosition(position)
+        }
+    }
+
+    /**
+     * Animate camera to bounds and wait for completion
+     */
+    protected fun animateCameraToBoundsAndWait(
+        bounds: BoundingBox,
+        timeoutMs: Long = 2000,
+    ) {
+        runOnUiThread {
+            adapter.animateCameraToBounds(bounds)
+        }
+        waitForIdle(timeoutMs)
     }
 
     // ============================================================

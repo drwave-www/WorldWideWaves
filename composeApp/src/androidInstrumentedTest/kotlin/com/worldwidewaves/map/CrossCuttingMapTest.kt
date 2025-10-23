@@ -79,18 +79,20 @@ class CrossCuttingMapTest : BaseMapIntegrationTest() {
     @Test
     fun testMapLoadsSuccessfully_Wave() =
         runBlocking {
-            // Simulate WaveScreen setup (BOUNDS mode)
-            adapter.setBoundsForCameraTarget(
-                constraintBounds = eventBounds,
-                applyZoomSafetyMargin = false,
-                originalEventBounds = eventBounds,
-            )
+            // Simulate WaveScreen setup (BOUNDS mode) - wrap in UI thread
+            runOnUiThread {
+                adapter.setBoundsForCameraTarget(
+                    constraintBounds = eventBounds,
+                    applyZoomSafetyMargin = false,
+                    originalEventBounds = eventBounds,
+                )
+            }
 
             // Move to bounds
             animateCameraAndWait(eventBounds.center(), zoom = 13.0)
 
             // Verify map is functional
-            val visibleRegion = adapter.getVisibleRegion()
+            val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
             assertNotNull("Visible region should be available for WaveScreen", visibleRegion)
 
             assertValidVisibleRegion(message = "WaveScreen visible region should be valid")

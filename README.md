@@ -286,7 +286,7 @@ See [docs/README.md](docs/README.md) for complete documentation map.
 - ✅ Geometric accuracy proven (Haversine, point-in-polygon)
 - ✅ Battery optimization validated (adaptive intervals)
 
-See [docs/testing-strategy.md](docs/testing-strategy.md) and [docs/test-coverage-final-report.md](docs/test-coverage-final-report.md) for complete test coverage analysis.
+See [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) and [docs/TEST_COVERAGE_FINAL_REPORT.md](docs/TEST_COVERAGE_FINAL_REPORT.md) for complete test coverage analysis.
 
 ### Running Tests
 
@@ -320,8 +320,8 @@ Comprehensive documentation is available in the `docs/` directory:
   - [Architecture](docs/architecture.md) - System design and patterns
   - [iOS Development](docs/ios/) - iOS-specific guides and debugging
   - [Android Development](docs/android/) - Android MapLibre implementation reference
-  - [Testing Strategy](docs/testing-strategy.md) - Test architecture and approach
-  - [Accessibility Guide](docs/accessibility-guide.md) - WCAG 2.1 Level AA compliance
+  - [Testing Strategy](docs/TESTING_STRATEGY.md) - Test architecture and approach
+  - [Accessibility Guide](docs/ACCESSIBILITY_GUIDE.md) - WCAG 2.1 Level AA compliance
   - [CI/CD Pipeline](docs/ci-cd.md) - GitHub Actions workflows
   - [Environment Setup](docs/environment-setup.md) - Complete development environment configuration
   - [Contributing](docs/contributing.md) - Contribution guidelines
