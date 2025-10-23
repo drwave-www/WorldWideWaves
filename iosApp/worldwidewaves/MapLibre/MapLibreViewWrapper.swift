@@ -1427,11 +1427,16 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         // Calculate what the viewport would be at the new camera position
         let newViewport = getViewportBoundsForCamera(newCamera, in: mapView)
 
+        // Add small tolerance for floating-point precision errors (~1 meter)
+        // Without this, viewport calculation rounding causes false rejections
+        let epsilon = 0.00001  // degrees (~1 meter at Paris latitude)
+
         // Check if viewport edges would exceed event bounds (matches Android logic)
-        let viewportWithinBounds = newViewport.sw.latitude >= eventBounds.sw.latitude &&
-                                    newViewport.ne.latitude <= eventBounds.ne.latitude &&
-                                    newViewport.sw.longitude >= eventBounds.sw.longitude &&
-                                    newViewport.ne.longitude <= eventBounds.ne.longitude
+        // Tolerance allows tiny precision errors while preventing meaningful violations
+        let viewportWithinBounds = newViewport.sw.latitude >= (eventBounds.sw.latitude - epsilon) &&
+                                    newViewport.ne.latitude <= (eventBounds.ne.latitude + epsilon) &&
+                                    newViewport.sw.longitude >= (eventBounds.sw.longitude - epsilon) &&
+                                    newViewport.ne.longitude <= (eventBounds.ne.longitude + epsilon)
 
         if !viewportWithinBounds {
             // Viewport edges would exceed event bounds - reject movement
