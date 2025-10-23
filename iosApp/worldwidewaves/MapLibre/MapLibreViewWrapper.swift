@@ -132,6 +132,8 @@ import Shared
         WWWLog.d(Self.tag, "Map view configured successfully for event: \(eventId ?? "nil")")
     }
 
+    // swiftlint:disable function_body_length
+    // Justified: Initial setup with multiple callbacks registration (hard to split without breaking flow)
     @objc public func setEventId(_ eventId: String) {
         self.eventId = eventId
         WWWLog.d(Self.tag, "Event ID set: \(eventId)")
@@ -200,19 +202,26 @@ import Shared
 
             // CRITICAL: Don't disable isUserInteractionEnabled (would block tap gestures for navigation)
             // Instead, control specific MapLibre gestures (pan, zoom, rotate, pitch)
-            mapView.allowsScrolling = swiftEnabled      // Pan gesture
-            mapView.allowsZooming = swiftEnabled        // Zoom gestures (pinch, double-tap)
-            mapView.allowsRotating = swiftEnabled       // Rotation gesture
-            mapView.allowsTilting = swiftEnabled        // Pitch/tilt gesture
+            mapView.isScrollEnabled = swiftEnabled      // Pan gesture
+            mapView.isZoomEnabled = swiftEnabled        // Zoom gestures (pinch, double-tap)
+            mapView.isRotateEnabled = swiftEnabled      // Rotation gesture
+            mapView.isPitchEnabled = swiftEnabled       // Pitch/tilt gesture
 
             WWWLog.d(
                 Self.tag,
                 "MapLibre gestures: scroll=\(swiftEnabled), zoom=\(swiftEnabled), " +
-                "rotate=\(swiftEnabled), tilt=\(swiftEnabled)"
+                "rotate=\(swiftEnabled), pitch=\(swiftEnabled)"
+            )
+            WWWLog.i(
+                Self.tag,
+                "Gesture verification: scrollEnabled=\(mapView.isScrollEnabled), " +
+                "zoomEnabled=\(mapView.isZoomEnabled), " +
+                "isUserInteractionEnabled=\(mapView.isUserInteractionEnabled)"
             )
         }
         WWWLog.d(Self.tag, "Gestures enabled callback registered for: \(eventId)")
     }
+    // swiftlint:enable function_body_length
 
     @objc public func setStyle(styleURL: String, completion: @escaping () -> Void) {
         WWWLog.d(Self.tag, "setStyle called with URL: \(styleURL)")
@@ -377,7 +386,8 @@ import Shared
 
     // MARK: - Camera Constraints
 
-    // swiftlint:disable function_parameter_count function_body_length
+    // swiftlint:disable function_parameter_count function_body_length cyclomatic_complexity
+    // Justified: Camera constraint logic requires validation, bounds setup, and multiple conditionals
     @objc public func setBoundsForCameraTarget(
         constraintSwLat: Double,
         constraintSwLng: Double,
@@ -665,37 +675,21 @@ import Shared
             "NE(\(eventBounds.ne.latitude),\(eventBounds.ne.longitude))"
         )
 
-        // CRITICAL: Update visible region with ESTIMATED viewport to prevent fallback bounds issue
-        // Before regionDidChangeAnimated fires, provide reasonable estimate for padding calculations
-        // Estimate viewport size at the min zoom we just calculated
-        let estimatedViewportLatSpan = (screenHeight / 256.0) / pow(2.0, finalMinZoom) * 180.0
-        let estimatedViewportLngSpan = (screenWidth / 256.0) / pow(2.0, finalMinZoom) * 360.0
-
-        let centerLat = (eventBounds.sw.latitude + eventBounds.ne.latitude) / 2.0
-        let centerLng = (eventBounds.sw.longitude + eventBounds.ne.longitude) / 2.0
-
-        let estimatedViewport = BoundingBox(
-            swLat: centerLat - estimatedViewportLatSpan / 2.0,
-            swLng: centerLng - estimatedViewportLngSpan / 2.0,
-            neLat: centerLat + estimatedViewportLatSpan / 2.0,
-            neLng: centerLng + estimatedViewportLngSpan / 2.0
+        // NOTE: Do NOT set estimated viewport here - it creates stale data issues
+        // The estimated viewport at MIN ZOOM is too large for when camera is zoomed IN
+        // regionDidChangeAnimated will update with ACTUAL viewport shortly after
+        // MapBoundsEnforcer has >10° invalid viewport detection to handle initialization
+        WWWLog.d(
+            Self.tag,
+            "Skipping estimated viewport update - will use actual viewport from regionDidChangeAnimated"
         )
-
-        if let eventId = eventId {
-            Shared.MapWrapperRegistry.shared.updateVisibleRegion(eventId: eventId, bbox: estimatedViewport)
-            WWWLog.i(
-                Self.tag,
-                "Estimated viewport updated: \(estimatedViewportLatSpan)° x \(estimatedViewportLngSpan)° " +
-                "(prevents fallback bounds from causing tiny constraint area)"
-            )
-        }
 
         pendingConstraintBounds = nil
         pendingEventBounds = nil
         pendingIsWindowMode = false
         return true
     }
-    // swiftlint:enable function_parameter_count function_body_length
+    // swiftlint:enable function_parameter_count function_body_length cyclomatic_complexity
 
     @objc public func setMinZoom(_ minZoom: Double) {
         mapView?.minimumZoomLevel = minZoom
@@ -1416,47 +1410,77 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         to newCamera: MLNMapCamera,
         reason: MLNCameraChangeReason
     ) -> Bool {
+        // Use actual current zoom from mapView (not stale camera altitude)
+        // Camera altitude can be stale after programmatic animations (zoom desync bug)
+        let currentZoom = mapView.zoomLevel  // ✅ Always fresh, updated immediately
+        let earthCircumference = 40_075_016.686
+        let centerLat = newCamera.centerCoordinate.latitude
+        let targetZoom = log2(
+            earthCircumference * cos(centerLat * .pi / 180.0) / newCamera.altitude
+        ) - 1.0
+
+        WWWLog.d(
+            Self.tag,
+            "📸 shouldChangeFrom: currentZoom=\(String(format: "%.2f", currentZoom)) → " +
+            "targetZoom=\(String(format: "%.2f", targetZoom)), " +
+            "reason=\(reason.rawValue), minZoom=\(String(format: "%.2f", mapView.minimumZoomLevel)) " +
+            "maxZoom=\(String(format: "%.2f", mapView.maximumZoomLevel))"
+        )
+
         // Prevent viewport from exceeding event bounds (matches Android behavior)
         // Check viewport EDGES against EVENT bounds to prevent corners reaching center
-        guard currentEventBounds != nil else {
+        guard let eventBounds = currentEventBounds else {
             // No constraints set - allow all movements
+            WWWLog.v(Self.tag, "✅ Allowing: No event bounds set")
             return true
         }
 
-        // Check zoom constraints
-        let earthCircumference = 40_075_016.686
-        let latitude = newCamera.centerCoordinate.latitude
-        let zoom = log2(earthCircumference * cos(latitude * .pi / 180.0) / newCamera.altitude) - 1.0
-        let zoomOutOfBounds = zoom < mapView.minimumZoomLevel || zoom > mapView.maximumZoomLevel
+        // Check if TARGET zoom (where gesture wants to go) is out of bounds
+        // Don't check current zoom - we're already there, it's valid
+        let targetZoomOutOfBounds = targetZoom < mapView.minimumZoomLevel || targetZoom > mapView.maximumZoomLevel
 
-        if zoomOutOfBounds {
-            return false
-        }
-
-        // Check if new camera center is within constraint bounds
-        // Constraint bounds are calculated as: event bounds - (viewport size / 2)
-        // So if camera center is within constraint bounds, viewport edges stay within event bounds
-        guard let constraintBounds = currentConstraintBounds else {
-            // No constraint bounds set - only enforce zoom
-            return true
-        }
-
-        let newCenter = newCamera.centerCoordinate
-        let withinConstraintBounds = newCenter.latitude >= constraintBounds.sw.latitude &&
-                                      newCenter.latitude <= constraintBounds.ne.latitude &&
-                                      newCenter.longitude >= constraintBounds.sw.longitude &&
-                                      newCenter.longitude <= constraintBounds.ne.longitude
-
-        if !withinConstraintBounds {
-            // Camera center would move outside constraint bounds
-            // This would cause viewport edges to exceed event bounds - reject movement
-            WWWLog.v(
+        if targetZoomOutOfBounds {
+            WWWLog.d(
                 Self.tag,
-                "Rejecting camera movement: center would exceed constraint bounds"
+                "❌ Rejecting: Target zoom out of bounds (targetZoom=\(String(format: "%.2f", targetZoom)), " +
+                "min=\(String(format: "%.2f", mapView.minimumZoomLevel)), " +
+                "max=\(String(format: "%.2f", mapView.maximumZoomLevel)))"
             )
             return false
         }
 
+        // Calculate what the viewport would be at the new camera position
+        let newViewport = getViewportBoundsForCamera(newCamera, in: mapView)
+
+        // Add small tolerance for floating-point precision errors (~1 meter)
+        // Without this, viewport calculation rounding causes false rejections
+        let epsilon = 0.00001  // degrees (~1 meter at Paris latitude)
+
+        // Check if viewport edges would exceed event bounds (matches Android logic)
+        // Tolerance allows tiny precision errors while preventing meaningful violations
+        let viewportWithinBounds = newViewport.sw.latitude >= (eventBounds.sw.latitude - epsilon) &&
+                                    newViewport.ne.latitude <= (eventBounds.ne.latitude + epsilon) &&
+                                    newViewport.sw.longitude >= (eventBounds.sw.longitude - epsilon) &&
+                                    newViewport.ne.longitude <= (eventBounds.ne.longitude + epsilon)
+
+        if !viewportWithinBounds {
+            // Viewport edges would exceed event bounds - reject movement
+            WWWLog.d(
+                Self.tag,
+                "❌ Rejecting: Viewport exceeds bounds - " +
+                "newViewport SW(\(String(format: "%.6f", newViewport.sw.latitude))," +
+                "\(String(format: "%.6f", newViewport.sw.longitude))) " +
+                "NE(\(String(format: "%.6f", newViewport.ne.latitude))," +
+                "\(String(format: "%.6f", newViewport.ne.longitude))), " +
+                "eventBounds SW(\(String(format: "%.6f", eventBounds.sw.latitude))," +
+                "\(String(format: "%.6f", eventBounds.sw.longitude))) " +
+                "NE(\(String(format: "%.6f", eventBounds.ne.latitude))," +
+                "\(String(format: "%.6f", eventBounds.ne.longitude)))"
+            )
+            return false
+        }
+
+        WWWLog.v(Self.tag, "✅ Allowing: Viewport within bounds")
         return true
     }
 
