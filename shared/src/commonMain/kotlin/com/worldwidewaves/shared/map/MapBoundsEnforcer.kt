@@ -403,17 +403,35 @@ class MapBoundsEnforcer(
             return VisibleRegionPadding(0.0, 0.0)
         }
 
-        // WINDOW mode: Use zero padding (rely on preventive gesture constraints)
-        // The preventive gesture constraints check CURRENT viewport vs event bounds in real-time
-        // setLatLngBoundsForCameraTarget with zero padding just prevents gross violations
-        // This avoids 49% clamping that creates microscopic constraint bounds at min zoom
+        // WINDOW mode: Calculate padding from current viewport to constrain camera center
+        // iOS: Uses these bounds directly (no runtime clamping, shouldChangeFrom only checks zoom)
+        // Android: Initial constraints, then preventive gesture system clamps in real-time
+        // Padding = viewport half-size ensures camera center range keeps viewport inside event bounds
+
+        val viewport = mapLibreAdapter.getVisibleRegion()
+
+        // Detect invalid viewport (>10° span indicates uninitialized map)
+        val viewportLatSpan = viewport.ne.lat - viewport.sw.lat
+        val viewportLngSpan = viewport.ne.lng - viewport.sw.lng
+
+        if (viewportLatSpan > 10.0 || viewportLngSpan > 10.0) {
+            Log.d(
+                "MapBoundsEnforcer",
+                "WINDOW mode: Invalid viewport detected ($viewportLatSpan° x $viewportLngSpan°), using zero padding until initialized",
+            )
+            return VisibleRegionPadding(0.0, 0.0)
+        }
+
+        val viewportHalfHeight = viewportLatSpan / 2.0
+        val viewportHalfWidth = viewportLngSpan / 2.0
 
         Log.d(
             "MapBoundsEnforcer",
-            "WINDOW mode: Using zero padding (preventive gestures enforce viewport bounds dynamically)",
+            "WINDOW mode: Viewport-based padding (viewport: $viewportLatSpan° x $viewportLngSpan°, " +
+                "padding: $viewportHalfHeight° x $viewportHalfWidth°)",
         )
 
-        return VisibleRegionPadding(0.0, 0.0)
+        return VisibleRegionPadding(viewportHalfHeight, viewportHalfWidth)
     }
 
     private fun calculatePaddedBounds(padding: VisibleRegionPadding): BoundingBox {

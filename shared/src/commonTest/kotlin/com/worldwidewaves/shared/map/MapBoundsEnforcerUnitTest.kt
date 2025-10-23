@@ -24,11 +24,9 @@ import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.MapTestFixtures.STANDARD_EVENT_BOUNDS
 import com.worldwidewaves.shared.map.MapTestFixtures.TOLERANCE_POSITION
 import com.worldwidewaves.shared.map.MapTestFixtures.center
-import com.worldwidewaves.shared.map.MapTestFixtures.height
 import com.worldwidewaves.shared.map.MapTestFixtures.isApproximately
 import com.worldwidewaves.shared.map.MapTestFixtures.isCompletelyWithin
 import com.worldwidewaves.shared.map.MapTestFixtures.isValid
-import com.worldwidewaves.shared.map.MapTestFixtures.width
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -226,16 +224,31 @@ class MapBoundsEnforcerUnitTest {
 
         val constraintBounds = enforcer.calculateConstraintBounds()
 
-        // NEW BEHAVIOR: WINDOW mode now uses zero padding (relies on preventive gesture constraints)
-        // Constraint bounds should EQUAL event bounds, not be smaller
+        // WINDOW mode uses viewport-based padding (half viewport size)
+        // Constraint bounds should be smaller than event bounds (shrunk by half viewport)
+        val expectedPaddingLat = viewportHalfHeight
+        val expectedPaddingLng = viewportHalfWidth
+
+        // Constraint bounds = event bounds shrunk by padding
+        val expectedBounds =
+            BoundingBox.fromCorners(
+                Position(
+                    STANDARD_EVENT_BOUNDS.sw.lat + expectedPaddingLat,
+                    STANDARD_EVENT_BOUNDS.sw.lng + expectedPaddingLng,
+                ),
+                Position(
+                    STANDARD_EVENT_BOUNDS.ne.lat - expectedPaddingLat,
+                    STANDARD_EVENT_BOUNDS.ne.lng - expectedPaddingLng,
+                ),
+            )
+
         assertTrue(
-            constraintBounds.isApproximately(STANDARD_EVENT_BOUNDS, TOLERANCE_POSITION),
-            "WINDOW mode should have constraint bounds equal to event bounds (zero padding)",
+            constraintBounds.isApproximately(expectedBounds, TOLERANCE_POSITION),
+            "WINDOW mode should shrink bounds by half viewport size for camera center constraints",
         )
         assertTrue(
-            constraintBounds.isCompletelyWithin(STANDARD_EVENT_BOUNDS) ||
-                constraintBounds.isApproximately(STANDARD_EVENT_BOUNDS, TOLERANCE_POSITION),
-            "Constraint bounds should be within or equal to event bounds",
+            constraintBounds.isCompletelyWithin(STANDARD_EVENT_BOUNDS),
+            "Constraint bounds should be within event bounds",
         )
     }
 
@@ -271,11 +284,11 @@ class MapBoundsEnforcerUnitTest {
         // Padding should be clamped to 49% of event size to prevent invalid bounds
         assertTrue(constraintBounds.isValid(), "Constraint bounds should remain valid")
         assertTrue(
-            constraintBounds.width > 0.0,
+            (constraintBounds.ne.lng - constraintBounds.sw.lng) > 0.0,
             "Constraint bounds should have positive width even with large viewport",
         )
         assertTrue(
-            constraintBounds.height > 0.0,
+            (constraintBounds.ne.lat - constraintBounds.sw.lat) > 0.0,
             "Constraint bounds should have positive height even with large viewport",
         )
     }
@@ -651,12 +664,17 @@ class MapBoundsEnforcerUnitTest {
         val constraintsWhenZoomedOut = enforcer.calculateConstraintBounds()
 
         // When zoomed in (small viewport), constraint bounds should be larger (more pan area)
+        val zoomedInWidth = constraintsWhenZoomedIn.ne.lng - constraintsWhenZoomedIn.sw.lng
+        val zoomedOutWidth = constraintsWhenZoomedOut.ne.lng - constraintsWhenZoomedOut.sw.lng
+        val zoomedInHeight = constraintsWhenZoomedIn.ne.lat - constraintsWhenZoomedIn.sw.lat
+        val zoomedOutHeight = constraintsWhenZoomedOut.ne.lat - constraintsWhenZoomedOut.sw.lat
+
         assertTrue(
-            constraintsWhenZoomedIn.width > constraintsWhenZoomedOut.width,
+            zoomedInWidth > zoomedOutWidth,
             "Zoomed in (small viewport) should have larger constraint bounds (more pan area)",
         )
         assertTrue(
-            constraintsWhenZoomedIn.height > constraintsWhenZoomedOut.height,
+            zoomedInHeight > zoomedOutHeight,
             "Zoomed in (small viewport) should have larger constraint bounds (more pan area)",
         )
     }
