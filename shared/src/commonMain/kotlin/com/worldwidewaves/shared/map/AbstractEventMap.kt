@@ -29,6 +29,8 @@ import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.position.PositionManager
+import com.worldwidewaves.shared.utils.Log
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -69,6 +71,11 @@ abstract class AbstractEventMap<T>(
     companion object {
         // Threshold for detecting significant dimension changes (10%)
         private const val DIMENSION_CHANGE_THRESHOLD = 0.1
+
+        // iOS min zoom polling parameters (workaround for asynchronous command queue)
+        private const val MIN_ZOOM_POLL_THRESHOLD = 1.0 // Min zoom <= 1.0 indicates uninitialized
+        private const val MIN_ZOOM_POLL_DELAY_MS = 50L // Poll every 50ms
+        private const val MIN_ZOOM_POLL_MAX_ATTEMPTS = 20 // Max 1 second total (20 × 50ms)
     }
 
     // Properties that must be implemented by platform-specific subclasses
@@ -120,7 +127,7 @@ abstract class AbstractEventMap<T>(
      * Moves the camera to view the event bounds
      */
     suspend fun moveToMapBounds(onComplete: () -> Unit = {}) {
-        com.worldwidewaves.shared.utils.Log.i(
+        Log.i(
             "AbstractEventMap",
             "📐 moveToMapBounds: Starting for event ${event.id}, bounds=${event.area.bbox()}",
         )
@@ -128,7 +135,7 @@ abstract class AbstractEventMap<T>(
         constraintManager = MapBoundsEnforcer(event.area.bbox(), mapLibreAdapter, isWindowMode = false) { suppressCorrections }
 
         val bounds = event.area.bbox()
-        com.worldwidewaves.shared.utils.Log.d(
+        Log.d(
             "AbstractEventMap",
             "Animating camera to bounds: SW(${bounds.sw.lat}, ${bounds.sw.lng}) NE(${bounds.ne.lat}, ${bounds.ne.lng})",
         )
@@ -139,7 +146,7 @@ abstract class AbstractEventMap<T>(
                 callback =
                     object : MapCameraCallback {
                         override fun onFinish() {
-                            com.worldwidewaves.shared.utils.Log.i(
+                            Log.i(
                                 "AbstractEventMap",
                                 "✅ moveToMapBounds animation completed for event ${event.id}",
                             )
@@ -149,7 +156,7 @@ abstract class AbstractEventMap<T>(
 
                             // Get the calculated min zoom from constraints
                             val calculatedMinZoom = mapLibreAdapter.getMinZoomLevel()
-                            com.worldwidewaves.shared.utils.Log.d(
+                            Log.d(
                                 "AbstractEventMap",
                                 "BOUNDS mode: Min zoom from constraints: $calculatedMinZoom",
                             )
@@ -160,7 +167,7 @@ abstract class AbstractEventMap<T>(
                         }
 
                         override fun onCancel() {
-                            com.worldwidewaves.shared.utils.Log.w(
+                            Log.w(
                                 "AbstractEventMap",
                                 "⚠️ moveToMapBounds animation CANCELLED for event ${event.id}",
                             )
@@ -201,10 +208,11 @@ abstract class AbstractEventMap<T>(
         // Rule: The dimension that would cause overflow must be the constraining dimension
         val fitByHeight = eventAspectRatio > screenComponentRatio
 
-        com.worldwidewaves.shared.utils.Log.i(
+        Log.i(
             "AbstractEventMap",
             "📐 moveToWindowBounds: event=${event.id}, " +
-                "eventAspect=$eventAspectRatio, screenAspect=$screenComponentRatio, " +
+                "eventSize=$eventMapWidth°x$eventMapHeight° (aspect=$eventAspectRatio), " +
+                "screenSize=${screenWidth}x${screenHeight}px (aspect=$screenComponentRatio), " +
                 "fitBy=${if (fitByHeight) "HEIGHT" else "WIDTH"} " +
                 "(ensures NO pixels outside event area)",
         )
@@ -213,19 +221,30 @@ abstract class AbstractEventMap<T>(
         // This ensures min zoom is set IMMEDIATELY (preventive enforcement)
         constraintManager?.applyConstraints()
 
-        // Get the calculated min zoom
-        val calculatedMinZoom = mapLibreAdapter.getMinZoomLevel()
-        com.worldwidewaves.shared.utils.Log.i(
-            "AbstractEventMap",
-            "WINDOW mode: Min zoom applied BEFORE animation: $calculatedMinZoom",
-        )
+        // iOS FIX: Poll for min zoom to update (SetConstraintBounds executes asynchronously)
+        // Query min zoom in a loop until it changes from the old value
+        // or timeout after 1 second
+        var targetZoom = mapLibreAdapter.getMinZoomLevel()
+        val initialMinZoom = targetZoom
+        var pollAttempts = 0
+        while (targetZoom <= MIN_ZOOM_POLL_THRESHOLD && pollAttempts < MIN_ZOOM_POLL_MAX_ATTEMPTS) {
+            // Min zoom <= 1.0 likely means SetConstraintBounds hasn't executed yet
+            kotlinx.coroutines.delay(MIN_ZOOM_POLL_DELAY_MS)
+            targetZoom = mapLibreAdapter.getMinZoomLevel()
+            pollAttempts++
+        }
+
+        if (pollAttempts > 0) {
+            Log.i(
+                "AbstractEventMap",
+                "iOS: Polled min zoom $pollAttempts times: $initialMinZoom → $targetZoom",
+            )
+        }
 
         runCameraAnimation { cb ->
-            // Use MapLibre's own calculation to determine zoom for fitting event bounds
-            // This accounts for density scaling, projection, and platform differences
-            val targetZoom = mapLibreAdapter.getMinZoomLevel()
+            // Use the polled min zoom value
 
-            com.worldwidewaves.shared.utils.Log.i(
+            Log.i(
                 "AbstractEventMap",
                 "Using min zoom for initial camera: $targetZoom (ensures event fits)",
             )
@@ -236,7 +255,7 @@ abstract class AbstractEventMap<T>(
                 targetZoom,
                 object : MapCameraCallback {
                     override fun onFinish() {
-                        com.worldwidewaves.shared.utils.Log.i(
+                        Log.i(
                             "AbstractEventMap",
                             "✅ moveToWindowBounds animation completed",
                         )
@@ -246,7 +265,7 @@ abstract class AbstractEventMap<T>(
                     }
 
                     override fun onCancel() {
-                        com.worldwidewaves.shared.utils.Log.w(
+                        Log.w(
                             "AbstractEventMap",
                             "⚠️ moveToWindowBounds animation CANCELLED",
                         )
@@ -326,7 +345,7 @@ abstract class AbstractEventMap<T>(
         val closestWaveLongitude = event.wave.userClosestWaveLongitude()
 
         if (userPosition == null || closestWaveLongitude == null) {
-            com.worldwidewaves.shared.utils.Log.w(
+            Log.w(
                 "AbstractEventMap",
                 "⚠️ targetUserAndWave: missing data (userPos=$userPosition, waveLng=$closestWaveLongitude)",
             )
@@ -338,12 +357,12 @@ abstract class AbstractEventMap<T>(
         // Create the bounds containing user and wave positions
         val bounds = BoundingBox.fromCorners(listOf(userPosition, wavePosition))
         if (bounds == null) {
-            com.worldwidewaves.shared.utils.Log
+            Log
                 .e("AbstractEventMap", "Failed to create bounds from user+wave positions")
             return
         }
 
-        com.worldwidewaves.shared.utils.Log.d(
+        Log.d(
             "AbstractEventMap",
             "User+Wave bounds: SW(${bounds.sw.lat}, ${bounds.sw.lng}) NE(${bounds.ne.lat}, ${bounds.ne.lng})",
         )
@@ -351,11 +370,11 @@ abstract class AbstractEventMap<T>(
         // Get the area's bounding box (or constraint bounds if more restrictive)
         val areaBbox = event.area.bbox()
         val constraintBbox = constraintManager?.calculateConstraintBounds() ?: areaBbox
-        com.worldwidewaves.shared.utils.Log.d(
+        Log.d(
             "AbstractEventMap",
             "Area bbox: SW(${areaBbox.sw.lat}, ${areaBbox.sw.lng}) NE(${areaBbox.ne.lat}, ${areaBbox.ne.lng})",
         )
-        com.worldwidewaves.shared.utils.Log.d(
+        Log.d(
             "AbstractEventMap",
             "Constraint bbox: SW(${constraintBbox.sw.lat}, ${constraintBbox.sw.lng}) " +
                 "NE(${constraintBbox.ne.lat}, ${constraintBbox.ne.lng})",
@@ -378,7 +397,7 @@ abstract class AbstractEventMap<T>(
                 ),
             )
 
-        com.worldwidewaves.shared.utils.Log.d(
+        Log.d(
             "AbstractEventMap",
             "Padded bounds: SW(${paddedBounds!!.sw.lat}, ${paddedBounds.sw.lng}) " +
                 "NE(${paddedBounds.ne.lat}, ${paddedBounds.ne.lng})",
@@ -416,7 +435,7 @@ abstract class AbstractEventMap<T>(
                 paddedBounds
             }
 
-        com.worldwidewaves.shared.utils.Log.i(
+        Log.i(
             "AbstractEventMap",
             "🎬 targetUserAndWave: Final bounds " +
                 "SW(${finalBounds.sw.lat}, ${finalBounds.sw.lng}) NE(${finalBounds.ne.lat}, ${finalBounds.ne.lng})",
@@ -445,6 +464,11 @@ abstract class AbstractEventMap<T>(
         // Set screen dimensions
         this.screenWidth = mapLibreAdapter.getWidth()
         this.screenHeight = mapLibreAdapter.getHeight()
+
+        Log.i(
+            "AbstractEventMap",
+            "📐 Screen dimensions set on map init: ${screenWidth}x$screenHeight px (aspect: ${screenWidth / screenHeight})",
+        )
 
         mapLibreAdapter.setStyle(stylePath) {
             // Set Attribution margins to 0
@@ -484,7 +508,7 @@ abstract class AbstractEventMap<T>(
                     val heightChange = kotlin.math.abs(currentHeight - screenHeight) / screenHeight
 
                     if (widthChange > DIMENSION_CHANGE_THRESHOLD || heightChange > DIMENSION_CHANGE_THRESHOLD) {
-                        com.worldwidewaves.shared.utils.Log.i(
+                        Log.i(
                             "AbstractEventMap",
                             "📐 Dimensions changed significantly (${screenWidth}x$screenHeight → ${currentWidth}x$currentHeight), " +
                                 "recalculating WINDOW bounds",
@@ -503,33 +527,51 @@ abstract class AbstractEventMap<T>(
 
             // Configure initial camera position
             scope.launch {
-                com.worldwidewaves.shared.utils.Log.i(
+                Log.i(
                     "AbstractEventMap",
                     "🎥 Setting initial camera position: ${mapConfig.initialCameraPosition} for event: ${event.id}",
                 )
+                // iOS FIX: For WINDOW mode, wait for initial camera setup to complete
+                // before starting position updates. This prevents auto-target animation
+                // from being queued before SetConstraintBounds, which would cause
+                // SetConstraintBounds to be skipped (batch stops after animation)
+                val cameraSetupComplete = CompletableDeferred<Unit>()
+
                 when (mapConfig.initialCameraPosition) {
                     MapCameraPosition.DEFAULT_CENTER -> {
-                        com.worldwidewaves.shared.utils.Log
+                        Log
                             .d("AbstractEventMap", "Calling moveToCenter")
-                        moveToCenter(onMapLoaded)
+                        moveToCenter {
+                            onMapLoaded()
+                            cameraSetupComplete.complete(Unit)
+                        }
                     }
                     MapCameraPosition.BOUNDS -> {
-                        com.worldwidewaves.shared.utils.Log.d(
+                        Log.d(
                             "AbstractEventMap",
                             "Calling moveToMapBounds for event: ${event.id}",
                         )
-                        moveToMapBounds(onMapLoaded)
+                        moveToMapBounds {
+                            onMapLoaded()
+                            cameraSetupComplete.complete(Unit)
+                        }
                     }
                     MapCameraPosition.WINDOW -> {
-                        com.worldwidewaves.shared.utils.Log.d(
+                        Log.d(
                             "AbstractEventMap",
                             "Calling moveToWindowBounds (initial, dimensions may change)",
                         )
                         // Mark that we should watch for dimension changes and recalculate
                         windowBoundsNeedRecalculation = true
-                        moveToWindowBounds(onMapLoaded)
+                        moveToWindowBounds {
+                            onMapLoaded()
+                            cameraSetupComplete.complete(Unit)
+                        }
                     }
                 }
+
+                // Wait for camera setup to complete before starting position updates
+                cameraSetupComplete.await()
             }
 
             // Start location updates and integrate with PositionManager

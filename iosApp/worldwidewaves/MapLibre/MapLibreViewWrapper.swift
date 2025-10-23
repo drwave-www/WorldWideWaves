@@ -66,6 +66,10 @@ import Shared
     private var minZoomLocked: Bool = false
     private var lockedMinZoom: Double = 0.0
 
+    // iOS-SPECIFIC: Track if min zoom was calculated with invalid dimensions
+    // Allows recalculation when real dimensions become available
+    private var minZoomUsedInvalidDimensions: Bool = false
+
     // MARK: - Accessibility State
 
     /// Accessibility state tracking for VoiceOver
@@ -435,19 +439,35 @@ import Shared
         }
 
         // Check if min zoom already locked (matches Android minZoomLocked mechanism)
+        // iOS-SPECIFIC: Allow recalculation if previously used invalid dimensions
         if minZoomLocked {
-            WWWLog.d(
-                Self.tag,
-                "Min zoom already locked at \(lockedMinZoom), skipping recalculation"
-            )
-            currentConstraintBounds = constraintBounds
-            return true
+            let currentScreenWidth = Double(mapView.bounds.size.width)
+            let currentScreenHeight = Double(mapView.bounds.size.height)
+            let nowHaveValidDimensions = currentScreenWidth > 0 && currentScreenHeight > 0
+
+            if minZoomUsedInvalidDimensions && nowHaveValidDimensions {
+                WWWLog.i(
+                    Self.tag,
+                    "🔓 Unlocking min zoom - real dimensions available: \(currentScreenWidth)x\(currentScreenHeight)"
+                )
+                minZoomLocked = false
+                minZoomUsedInvalidDimensions = false
+                // Fall through to recalculate with real dimensions
+            } else {
+                WWWLog.d(
+                    Self.tag,
+                    "Min zoom already locked at \(lockedMinZoom), skipping recalculation"
+                )
+                currentConstraintBounds = constraintBounds
+                return true
+            }
         }
 
         // Style is loaded - apply bounds and calculate min zoom
         WWWLog.i(
             Self.tag,
-            "Setting camera constraint bounds: SW(\(constraintSwLat),\(constraintSwLng)) NE(\(constraintNeLat),\(constraintNeLng))"
+            "Setting camera constraint bounds: " +
+            "SW(\(constraintSwLat),\(constraintSwLng)) NE(\(constraintNeLat),\(constraintNeLng))"
         )
         WWWLog.i(
             Self.tag,
@@ -463,6 +483,22 @@ import Shared
 
         let screenWidth = Double(mapView.bounds.size.width)
         let screenHeight = Double(mapView.bounds.size.height)
+        let screenScale = Double(UIScreen.main.scale)
+
+        WWWLog.d(
+            Self.tag,
+            "Screen dimensions: \(screenWidth)x\(screenHeight) points, scale: \(screenScale)x " +
+            "(pixels: \(screenWidth * screenScale)x\(screenHeight * screenScale))"
+        )
+
+        // iOS-SPECIFIC: Detect if MapView hasn't been laid out yet (returns <= 0)
+        let hasInvalidDimensions = screenWidth <= 0 || screenHeight <= 0
+        if hasInvalidDimensions {
+            WWWLog.w(
+                Self.tag,
+                "⚠️ MapView not laid out: \(screenWidth)x\(screenHeight) - min zoom may need recalculation"
+            )
+        }
 
         // CRITICAL: Different calculation for BOUNDS vs WINDOW mode (matches Android)
         let baseMinZoom: Double
@@ -493,24 +529,78 @@ import Shared
                 let constrainedWidth = eventHeight * screenAspect
                 let centerLng = (eventBounds.sw.longitude + eventBounds.ne.longitude) / 2.0
                 constrainingBounds = MLNCoordinateBounds(
-                    sw: CLLocationCoordinate2D(latitude: eventBounds.sw.latitude, longitude: centerLng - constrainedWidth / 2),
-                    ne: CLLocationCoordinate2D(latitude: eventBounds.ne.latitude, longitude: centerLng + constrainedWidth / 2)
+                    sw: CLLocationCoordinate2D(
+                        latitude: eventBounds.sw.latitude,
+                        longitude: centerLng - constrainedWidth / 2
+                    ),
+                    ne: CLLocationCoordinate2D(
+                        latitude: eventBounds.ne.latitude,
+                        longitude: centerLng + constrainedWidth / 2
+                    )
+                )
+                WWWLog.d(
+                    Self.tag,
+                    "Constraining bounds (HEIGHT-constrained): \(eventHeight)° x \(constrainedWidth)° " +
+                    "(event width \(eventWidth)° reduced to \(constrainedWidth)°)"
                 )
             } else {
                 // Event taller than screen → constrained by WIDTH
                 let constrainedHeight = eventWidth / screenAspect
                 let centerLat = (eventBounds.sw.latitude + eventBounds.ne.latitude) / 2.0
                 constrainingBounds = MLNCoordinateBounds(
-                    sw: CLLocationCoordinate2D(latitude: centerLat - constrainedHeight / 2, longitude: eventBounds.sw.longitude),
-                    ne: CLLocationCoordinate2D(latitude: centerLat + constrainedHeight / 2, longitude: eventBounds.ne.longitude)
+                    sw: CLLocationCoordinate2D(
+                        latitude: centerLat - constrainedHeight / 2,
+                        longitude: eventBounds.sw.longitude
+                    ),
+                    ne: CLLocationCoordinate2D(
+                        latitude: centerLat + constrainedHeight / 2,
+                        longitude: eventBounds.ne.longitude
+                    )
+                )
+                WWWLog.d(
+                    Self.tag,
+                    "Constraining bounds (WIDTH-constrained): \(constrainedHeight)° x \(eventWidth)° " +
+                    "(event height \(eventHeight)° reduced to \(constrainedHeight)°)"
                 )
             }
 
-            let camera = mapView.cameraThatFitsCoordinateBounds(constrainingBounds, edgePadding: .zero)
-            let earthCircumference = 40_075_016.686
+            // iOS FIX: cameraThatFitsCoordinateBounds produces wrong altitude (9.2x too high)
+            // Calculate zoom directly using the constraining dimension and screen size
             let centerLat = (constrainingBounds.sw.latitude + constrainingBounds.ne.latitude) / 2.0
             let latRadians = centerLat * .pi / 180.0
-            baseMinZoom = log2(earthCircumference * cos(latRadians) / camera.altitude) - 1.0
+
+            // For wide event (fit by HEIGHT): calculate zoom from HEIGHT dimension only
+            // For tall event (fit by WIDTH): calculate zoom from WIDTH dimension only
+            let boundsHeight = constrainingBounds.ne.latitude - constrainingBounds.sw.latitude
+            let boundsWidth = constrainingBounds.ne.longitude - constrainingBounds.sw.longitude
+
+            // Web Mercator: degrees per point at zoom level Z
+            // degreesPerPoint = (360 / (256 * 2^Z)) for latitude (no cos adjustment)
+            // degreesPerPoint = (360 / (256 * 2^Z)) * cos(lat) for longitude
+            //
+            // Rearranged to solve for Z:
+            // 2^Z = (screenPoints * 360) / (bounds * 256) for latitude
+            // 2^Z = (screenPoints * 360 * cos(lat)) / (bounds * 256) for longitude
+
+            let zoomForHeight = log2((screenHeight * 360.0) / (boundsHeight * 256.0))
+            let zoomForWidth = log2((screenWidth * 360.0 * cos(latRadians)) / (boundsWidth * 256.0))
+
+            // Use the constraining dimension zoom (ensures that dimension fills screen)
+            if eventAspect > screenAspect {
+                // Wide event → HEIGHT constrains
+                baseMinZoom = zoomForHeight
+                WWWLog.d(
+                    Self.tag,
+                    "WINDOW (HEIGHT): zoomH=\(zoomForHeight), zoomW=\(zoomForWidth), using HEIGHT zoom"
+                )
+            } else {
+                // Tall event → WIDTH constrains
+                baseMinZoom = zoomForWidth
+                WWWLog.d(
+                    Self.tag,
+                    "WINDOW (WIDTH): zoomH=\(zoomForHeight), zoomW=\(zoomForWidth), using WIDTH zoom"
+                )
+            }
 
             WWWLog.i(
                 Self.tag,
@@ -520,10 +610,14 @@ import Shared
         } else {
             // BOUNDS MODE: Use MapLibre's calculation (shows entire event)
             let camera = mapView.cameraThatFitsCoordinateBounds(eventBounds, edgePadding: .zero)
-            let earthCircumference = 40_075_016.686
+            WWWLog.d(
+                Self.tag,
+                "BOUNDS: cameraThatFitsCoordinateBounds altitude=\(camera.altitude)m"
+            )
+
             let centerLat = (eventBounds.sw.latitude + eventBounds.ne.latitude) / 2.0
             let latRadians = centerLat * .pi / 180.0
-            baseMinZoom = log2(earthCircumference * cos(latRadians) / camera.altitude) - 1.0
+            baseMinZoom = log2(40_075_016.686 * cos(latRadians) / camera.altitude) - 1.0
 
             WWWLog.i(Self.tag, "🎯 BOUNDS mode: base=\(baseMinZoom) (entire event visible)")
         }
@@ -540,6 +634,15 @@ import Shared
         // Lock min zoom to prevent recalculation (matches Android behavior)
         lockedMinZoom = finalMinZoom
         minZoomLocked = true
+
+        // iOS-SPECIFIC: Track if invalid dimensions were used (allows future recalculation)
+        minZoomUsedInvalidDimensions = hasInvalidDimensions
+        if hasInvalidDimensions {
+            WWWLog.w(
+                Self.tag,
+                "⚠️ Min zoom locked with INVALID dimensions - will unlock when real dimensions arrive"
+            )
+        }
 
         // Set minimum zoom to prevent zooming out beyond bounds
         mapView.minimumZoomLevel = max(0, finalMinZoom)
