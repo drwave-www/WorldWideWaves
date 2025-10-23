@@ -59,17 +59,20 @@ class CrossCuttingMapTest : BaseMapIntegrationTest() {
             assertNotNull("MapLibreMap should be loaded", mapLibreMap)
             assertNotNull("Adapter should be initialized", adapter)
 
-            // Verify style loaded
-            val styleLoaded = mapLibreMap.style?.isFullyLoaded ?: false
+            // Verify style loaded (must access on UI thread)
+            val styleLoaded =
+                runOnUiThread {
+                    mapLibreMap.style?.isFullyLoaded ?: false
+                }
             assertTrue("Map style should be fully loaded for EventDetailScreen", styleLoaded)
 
             // Verify camera is functional
             animateCameraAndWait(eventBounds.center(), zoom = 13.0)
-            val cameraPosition = adapter.getCameraPosition()
+            val cameraPosition = runOnUiThread { adapter.getCameraPosition() }
             assertNotNull("Camera position should be available after animation", cameraPosition)
 
             // Verify visible region query works
-            val visibleRegion = adapter.getVisibleRegion()
+            val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
             assertValidVisibleRegion(message = "EventDetailScreen visible region should be valid after load")
         }
 

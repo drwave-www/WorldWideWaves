@@ -22,8 +22,8 @@
 package com.worldwidewaves.map
 
 import android.content.Context
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
@@ -40,7 +40,6 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Before
-import org.junit.Rule
 import org.junit.runner.RunWith
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
@@ -66,11 +65,10 @@ import java.util.concurrent.TimeUnit
 @RunWith(AndroidJUnit4::class)
 abstract class BaseMapIntegrationTest {
     // ============================================================
-    // ACTIVITY RULE
+    // ACTIVITY SCENARIO
     // ============================================================
 
-    @get:Rule
-    val activityRule = ActivityScenarioRule(TestMapActivity::class.java)
+    protected lateinit var activityScenario: ActivityScenario<TestMapActivity>
     // ============================================================
     // PROTECTED PROPERTIES
     // ============================================================
@@ -120,8 +118,16 @@ abstract class BaseMapIntegrationTest {
         val mapLoadedLatch = CountDownLatch(1)
         var setupError: Throwable? = null
 
+        // Launch activity without LAUNCHER intent category
+        val intent =
+            android.content.Intent(context, TestMapActivity::class.java).apply {
+                // Clear default flags to avoid process mismatch
+                flags = 0
+            }
+        activityScenario = ActivityScenario.launch(intent)
+
         // Get MapView from Activity
-        activityRule.scenario.onActivity { activity ->
+        activityScenario.onActivity { activity ->
             try {
                 System.out.println("BaseMapIntegrationTest: Getting MapView from TestMapActivity...")
                 mapView = activity.mapView
@@ -178,21 +184,47 @@ abstract class BaseMapIntegrationTest {
             // Give map time to fully initialize
             Thread.sleep(500)
         } catch (e: Throwable) {
-            // Activity will be cleaned up by ActivityScenarioRule
+            // Clean up activity on failure
+            if (::activityScenario.isInitialized) {
+                activityScenario.close()
+            }
             throw e
         }
     }
 
     @After
     open fun tearDown() {
-        // Activity and MapView lifecycle are handled by ActivityScenarioRule
-        // No manual cleanup needed - rule automatically destroys activity
-        System.out.println("BaseMapIntegrationTest: tearDown - activity cleanup handled by rule")
+        // Close activity scenario to clean up resources
+        if (::activityScenario.isInitialized) {
+            activityScenario.close()
+            System.out.println("BaseMapIntegrationTest: tearDown - activity scenario closed")
+        }
     }
 
     // ============================================================
     // TEST HELPER METHODS
     // ============================================================
+
+    /**
+     * Run code on UI thread (required for MapLibre operations).
+     * Uses Instrumentation.runOnMainSync to ensure execution on main thread.
+     */
+    protected fun <T> runOnUiThread(block: () -> T): T {
+        var result: T? = null
+        var error: Throwable? = null
+
+        androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            try {
+                result = block()
+            } catch (e: Throwable) {
+                error = e
+            }
+        }
+
+        error?.let { throw it }
+        @Suppress("UNCHECKED_CAST")
+        return result as T
+    }
 
     /**
      * Wait for map camera to become idle.
@@ -201,8 +233,10 @@ abstract class BaseMapIntegrationTest {
     protected fun waitForIdle(timeoutMs: Long = 2000) {
         val idleLatch = CountDownLatch(1)
 
-        adapter.addOnCameraIdleListener {
-            idleLatch.countDown()
+        runOnUiThread {
+            adapter.addOnCameraIdleListener {
+                idleLatch.countDown()
+            }
         }
 
         val idle = idleLatch.await(timeoutMs, TimeUnit.MILLISECONDS)
@@ -222,7 +256,9 @@ abstract class BaseMapIntegrationTest {
         zoom: Double? = null,
         timeoutMs: Long = 2000,
     ) {
-        adapter.animateCamera(position, zoom)
+        runOnUiThread {
+            adapter.animateCamera(position, zoom)
+        }
         waitForIdle(timeoutMs)
     }
 
@@ -233,11 +269,13 @@ abstract class BaseMapIntegrationTest {
         constraintBounds: BoundingBox,
         isWindowMode: Boolean = false,
     ) {
-        adapter.setBoundsForCameraTarget(
-            constraintBounds = constraintBounds,
-            applyZoomSafetyMargin = isWindowMode,
-            originalEventBounds = eventBounds,
-        )
+        runOnUiThread {
+            adapter.setBoundsForCameraTarget(
+                constraintBounds = constraintBounds,
+                applyZoomSafetyMargin = isWindowMode,
+                originalEventBounds = eventBounds,
+            )
+        }
 
         // Give MapLibre time to apply constraints
         Thread.sleep(300)
@@ -251,7 +289,7 @@ abstract class BaseMapIntegrationTest {
      * Assert that visible region is completely within event bounds
      */
     protected fun assertVisibleRegionWithinBounds(message: String = "Visible region should be completely within event bounds") {
-        val visibleRegion = adapter.getVisibleRegion()
+        val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
         assertNotNull("Visible region should not be null", visibleRegion)
 
         assertTrue(
@@ -272,7 +310,7 @@ abstract class BaseMapIntegrationTest {
         tolerance: Double = TOLERANCE_POSITION,
         message: String = "Camera should be at expected position",
     ) {
-        val actualPosition = adapter.getCameraPosition()
+        val actualPosition = runOnUiThread { adapter.getCameraPosition() }
         assertNotNull("Camera position should not be null", actualPosition)
 
         assertTrue(
@@ -291,8 +329,10 @@ abstract class BaseMapIntegrationTest {
         tolerance: Double = TOLERANCE_POSITION,
         message: String = "Visible region center should match camera position",
     ) {
-        val visibleRegion = adapter.getVisibleRegion()
-        val cameraPosition = adapter.getCameraPosition()
+        val (visibleRegion, cameraPosition) =
+            runOnUiThread {
+                adapter.getVisibleRegion() to adapter.getCameraPosition()
+            }
 
         assertNotNull("Visible region should not be null", visibleRegion)
         assertNotNull("Camera position should not be null", cameraPosition)
@@ -333,7 +373,7 @@ abstract class BaseMapIntegrationTest {
      * Assert that visible region has valid bounds (not inverted or invalid)
      */
     protected fun assertValidVisibleRegion(message: String = "Visible region should have valid bounds") {
-        val visibleRegion = adapter.getVisibleRegion()
+        val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
         assertNotNull("Visible region should not be null", visibleRegion)
 
         assertTrue(

@@ -321,7 +321,7 @@ error: no such module 'FirebaseCore'
 - [Firebase iOS SDK Documentation](https://firebase.google.com/docs/ios/setup)
 - [Crashlytics for iOS](https://firebase.google.com/docs/crashlytics/get-started?platform=ios)
 - [Upload dSYMs](https://firebase.google.com/docs/crashlytics/get-deobfuscated-reports?platform=ios)
-- [Android implementation](./FIREBASE_SETUP.md)
+- [Android implementation](./firebase-setup.md)
 
 ## Support
 

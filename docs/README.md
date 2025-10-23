@@ -36,10 +36,10 @@ For deployment and production:
 
 ### Specialized Topics
 
-7. **[Firebase Setup](setup/FIREBASE_SETUP.md)**
+7. **[Firebase Setup](setup/firebase-setup.md)**
    Firebase project configuration, security rules, and environment-specific setup.
 
-8. **[Map Architecture Analysis](architecture/MAP_ARCHITECTURE_ANALYSIS.md)**
+8. **[Map Architecture Analysis](architecture/map-architecture-analysis.md)**
    Detailed analysis of shared vs platform-specific map system design.
 
 ## Quick Links
@@ -65,13 +65,13 @@ For deployment and production:
 
 **Architects & Lead Developers:**
 1. [Architecture](architecture.md)
-2. [Map Architecture Analysis](architecture/MAP_ARCHITECTURE_ANALYSIS.md)
+2. [Map Architecture Analysis](architecture/map-architecture-analysis.md)
 3. [CI/CD Pipeline](ci-cd.md)
 
 **DevOps & SRE:**
 1. [CI/CD Pipeline](ci-cd.md)
 2. [Operations Guide](operations.md)
-3. [Firebase Setup](setup/FIREBASE_SETUP.md)
+3. [Firebase Setup](setup/firebase-setup.md)
 
 ## Documentation Standards
 

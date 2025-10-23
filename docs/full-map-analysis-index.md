@@ -271,7 +271,7 @@ Not reactive (which would feel laggy and fight user input)
 - **CLAUDE.md**: Project-wide development guidelines
 - **docs/architecture.md**: Overall system architecture
 - **docs/development.md**: Development workflows
-- **docs/COMPREHENSIVE_TEST_SPECIFICATIONS.md**: General testing strategy
+- **docs/comprehensive-test-specifications.md**: General testing strategy
 - **docs/iOS_ANDROID_MAP_PARITY_GAP_ANALYSIS.md**: Platform comparison
 
 ---

@@ -1226,10 +1226,10 @@ PositionManager.positionFlow
 
 ### Essential Documentation
 - [CLAUDE.md](./CLAUDE.md) - Main development guide
-- [docs/iOS_VIOLATION_TRACKER.md](docs/iOS_VIOLATION_TRACKER.md) - Historical violations
-- [docs/iOS_SUCCESS_STATE.md](docs/iOS_SUCCESS_STATE.md) - Success criteria
-- [docs/iOS_DEBUGGING_GUIDE.md](docs/iOS_DEBUGGING_GUIDE.md) - Advanced debugging
-- [iOS_MAP_IMPLEMENTATION_STATUS.md](docs/ios/IOS_MAP_IMPLEMENTATION_STATUS.md) - Map status
+- [docs/ios/ios-violation-tracker.md](docs/ios/ios-violation-tracker.md) - Historical violations
+- [docs/ios/ios-success-state.md](docs/ios/ios-success-state.md) - Success criteria
+- [docs/ios/ios-debugging-guide.md](docs/ios/ios-debugging-guide.md) - Advanced debugging
+- [docs/ios/ios-map-implementation-status.md](docs/ios/ios-map-implementation-status.md) - Map status
 
 ### External Resources
 - [Kotlin Multiplatform Mobile](https://kotlinlang.org/docs/multiplatform-mobile-getting-started.html)

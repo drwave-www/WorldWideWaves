@@ -6,7 +6,7 @@ Detailed architectural analysis and design documentation for WorldWideWaves.
 
 ## Documents
 
-### [Map Architecture Analysis](MAP_ARCHITECTURE_ANALYSIS.md)
+### [Map Architecture Analysis](map-architecture-analysis.md)
 **Status**: ✅ Current (October 2025)
 
 Complete 97-point iOS/Android parity comparison:
@@ -34,4 +34,4 @@ High-level system design:
 
 - [iOS Implementation](../ios/) - iOS-specific architecture details
 - [Development Guide](../development.md) - Development workflows
-- [Testing Strategy](../TESTING_STRATEGY.md) - Test architecture
+- [Testing Strategy](../testing-strategy.md) - Test architecture

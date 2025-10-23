@@ -27,7 +27,7 @@ open -a "Android Studio" /path/to/WorldWideWaves
 ```bash
 # Run with debugger attached
 ./gradlew :composeApp:installDebug
-adb shell am start -D -n com.worldwidewaves/.MainActivity
+adb shell am start -D -n com.worldwidewaves/.activities.MainActivity
 
 # Attach debugger in Android Studio
 Run > Attach Debugger to Android Process
@@ -41,7 +41,7 @@ Run > Attach Debugger to Android Process
 ./gradlew :shared:embedAndSignAppleFrameworkForXcode
 
 # Open Xcode project
-open iosApp/iosApp.xcodeproj
+open iosApp/worldwidewaves.xcodeproj
 
 # Build in Xcode: Cmd+B
 # Run on Simulator: Cmd+R

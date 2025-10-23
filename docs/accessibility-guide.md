@@ -490,10 +490,10 @@ actual fun rememberDynamicTypeScale(): Float {
 ## Resources
 
 ### Internal Documentation
-- [iOS Map Accessibility](./iOS_MAP_ACCESSIBILITY.md)
-- [iOS Semantic Bridging](./IOS_SEMANTIC_BRIDGING.md) - Compose → iOS accessibility mapping
-- [Testing Strategy](./TESTING_STRATEGY.md)
-- [UI Testing Guide](./UI_TESTING_GUIDE.md)
+- [iOS Map Accessibility](./ios/ios-map-accessibility.md)
+- [iOS Semantic Bridging](./archive/session-summaries/ios-semantic-bridging.md) - Compose → iOS accessibility mapping
+- [Testing Strategy](./testing-strategy.md)
+- [UI Testing Guide](./ui-testing-guide.md)
 
 ### External Standards
 - [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)

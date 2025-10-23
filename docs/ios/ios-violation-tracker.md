@@ -177,7 +177,7 @@ rg -n -A 5 "init\s*\{" shared/src/commonMain --type kotlin | rg "get\(\)|inject\
 
 - [CLAUDE.md](../CLAUDE.md) - Main development guidelines
 - [CLAUDE_iOS.md](../CLAUDE_iOS.md) - Complete iOS development guide
-- [iOS_SUCCESS_STATE.md](./iOS_SUCCESS_STATE.md) - iOS success criteria
-- [iOS_DEBUGGING_GUIDE.md](./iOS_DEBUGGING_GUIDE.md) - Advanced debugging
+- [ios-success-state.md](./ios-success-state.md) - iOS success criteria
+- [ios-debugging-guide.md](./ios-debugging-guide.md) - Advanced debugging
 
 **Automated Verification**: Run `./scripts/verify-ios-safety.sh` before committing shared code changes.

@@ -302,8 +302,8 @@ xcrun simctl spawn booted defaults write com.apple.Accessibility VoiceOverTouchE
 ## Related Documentation
 
 - [iOS Development Guide](../CLAUDE_iOS.md)
-- [Map Architecture Analysis](../MAP_ARCHITECTURE_ANALYSIS.md)
-- [iOS Map Implementation Status](../iOS_MAP_IMPLEMENTATION_STATUS.md)
+- [Map Architecture Analysis](../architecture/map-architecture-analysis.md)
+- [iOS Map Implementation Status](./ios-map-implementation-status.md)
 
 ## Build & Test
 

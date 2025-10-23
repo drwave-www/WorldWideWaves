@@ -65,7 +65,7 @@ class TestMapActivity : AppCompatActivity() {
      * Exposed for test access.
      */
     var mapLibreMap: MapLibreMap? = null
-        private set
+        internal set
 
     // ============================================================
     // LIFECYCLE

@@ -240,8 +240,8 @@ See [docs/contributing.md](docs/contributing.md) for complete guidelines.
 
 ### Specialized Topics
 
-- [Firebase Setup](docs/setup/FIREBASE_SETUP.md) - Firebase project configuration and security
-- [Map Architecture](docs/architecture/MAP_ARCHITECTURE_ANALYSIS.md) - Shared vs platform-specific map system design
+- [Firebase Setup](docs/setup/firebase-setup.md) - Firebase project configuration and security
+- [Map Architecture](docs/architecture/map-architecture-analysis.md) - Shared vs platform-specific map system design
 - [iOS Development](CLAUDE_iOS.md) - Complete iOS development guide
 - [iOS Documentation](docs/ios/) - iOS-specific guides, debugging, and accessibility
 
@@ -286,7 +286,7 @@ See [docs/README.md](docs/README.md) for complete documentation map.
 - ✅ Geometric accuracy proven (Haversine, point-in-polygon)
 - ✅ Battery optimization validated (adaptive intervals)
 
-See [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) and [docs/TEST_COVERAGE_FINAL_REPORT.md](docs/TEST_COVERAGE_FINAL_REPORT.md) for complete test coverage analysis.
+See [docs/testing-strategy.md](docs/testing-strategy.md) and [docs/test-coverage-final-report.md](docs/test-coverage-final-report.md) for complete test coverage analysis.
 
 ### Running Tests
 
@@ -320,8 +320,8 @@ Comprehensive documentation is available in the `docs/` directory:
   - [Architecture](docs/architecture.md) - System design and patterns
   - [iOS Development](docs/ios/) - iOS-specific guides and debugging
   - [Android Development](docs/android/) - Android MapLibre implementation reference
-  - [Testing Strategy](docs/TESTING_STRATEGY.md) - Test architecture and approach
-  - [Accessibility Guide](docs/ACCESSIBILITY_GUIDE.md) - WCAG 2.1 Level AA compliance
+  - [Testing Strategy](docs/testing-strategy.md) - Test architecture and approach
+  - [Accessibility Guide](docs/accessibility-guide.md) - WCAG 2.1 Level AA compliance
   - [CI/CD Pipeline](docs/ci-cd.md) - GitHub Actions workflows
   - [Environment Setup](docs/environment-setup.md) - Complete development environment configuration
   - [Contributing](docs/contributing.md) - Contribution guidelines
@@ -329,7 +329,7 @@ Comprehensive documentation is available in the `docs/` directory:
 ### Quick Links
 - [Setup Firebase](docs/setup/) - Firebase configuration guides
 - [Development Workflows](docs/development.md) - Daily development tasks
-- [Map Architecture](docs/architecture/MAP_ARCHITECTURE_ANALYSIS.md) - MapLibre integration deep dive
+- [Map Architecture](docs/architecture/map-architecture-analysis.md) - MapLibre integration deep dive
 
 ---
 

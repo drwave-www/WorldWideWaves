@@ -7,10 +7,13 @@
     -->
 
     <application>
-        <!-- TestMapActivity: Minimal activity for MapView integration tests -->
+        <!--
+            TestMapActivity: Minimal activity for MapView integration tests.
+            Note: Do not specify android:exported="false" or intent-filters here.
+            ActivityScenarioRule will launch this activity directly for testing.
+        -->
         <activity
             android:name="com.worldwidewaves.map.TestMapActivity"
-            android:exported="false"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
 

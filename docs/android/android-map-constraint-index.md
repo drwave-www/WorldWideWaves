@@ -10,7 +10,7 @@ This documentation provides a comprehensive analysis of the Android map constrai
 
 ## Documentation Files (4 Documents, 1,594 lines)
 
-### 1. ANDROID_MAP_CONSTRAINT_ANALYSIS.md (452 lines)
+### 1. android-map-constraint-analysis.md (452 lines)
 **Purpose**: Executive overview and architectural deep-dive
 
 **Contents**:
@@ -30,7 +30,7 @@ This documentation provides a comprehensive analysis of the Android map constrai
 
 ---
 
-### 2. ANDROID_CONSTRAINT_CODE_PATTERNS.md (611 lines)
+### 2. android-constraint-code-patterns.md (611 lines)
 **Purpose**: Working code snippets showing exact implementation
 
 **Contains**:
@@ -55,7 +55,7 @@ This documentation provides a comprehensive analysis of the Android map constrai
 
 ---
 
-### 3. ANDROID_PATTERNS_QUICK_REFERENCE.md (290 lines)
+### 3. android-patterns-quick-reference.md (290 lines)
 **Purpose**: One-page reference for developers
 
 **Contains**:
@@ -77,7 +77,7 @@ This documentation provides a comprehensive analysis of the Android map constrai
 
 ---
 
-### 4. ANDROID_SOURCE_FILE_REFERENCE.md (241 lines)
+### 4. android-source-file-reference.md (241 lines)
 **Purpose**: Detailed file paths and code locations
 
 **Contains**:
@@ -103,41 +103,41 @@ This documentation provides a comprehensive analysis of the Android map constrai
 ## How to Use This Documentation
 
 ### For Understanding the Overall Design
-1. Read **ANDROID_MAP_CONSTRAINT_ANALYSIS.md** sections:
+1. Read **android-map-constraint-analysis.md** sections:
    - Architecture Overview
    - Mode-Specific Constraint Logic
    - Key Takeaways for iOS Implementation
 
-2. Reference **ANDROID_PATTERNS_QUICK_REFERENCE.md**:
+2. Reference **android-patterns-quick-reference.md**:
    - Architecture at a Glance diagram
    - One-page summary
 
 ### For Implementation
-1. Start with **ANDROID_PATTERNS_QUICK_REFERENCE.md**:
+1. Start with **android-patterns-quick-reference.md**:
    - Min Zoom Calculation Decision Tree
    - Critical Implementation Rules
 
-2. Use **ANDROID_CONSTRAINT_CODE_PATTERNS.md** to:
+2. Use **android-constraint-code-patterns.md** to:
    - Copy exact code patterns
    - Understand algorithms
    - See logging patterns
 
-3. Reference **ANDROID_SOURCE_FILE_REFERENCE.md** to:
+3. Reference **android-source-file-reference.md** to:
    - Find source files
    - Locate specific code sections
    - Understand integrations
 
 ### For Debugging
-1. Use **ANDROID_PATTERNS_QUICK_REFERENCE.md**:
+1. Use **android-patterns-quick-reference.md**:
    - Debugging Checklist
    - Look for specific log messages
 
-2. Reference **ANDROID_SOURCE_FILE_REFERENCE.md**:
+2. Reference **android-source-file-reference.md**:
    - Find test files
    - Review test patterns
 
 ### For iOS Implementation
-1. Read **ANDROID_MAP_CONSTRAINT_ANALYSIS.md** section:
+1. Read **android-map-constraint-analysis.md** section:
    - Key Takeaways for iOS Implementation
 
 2. Understand patterns from:
@@ -406,7 +406,7 @@ INDEX (You are here)
 
 - `CLAUDE.md` - Project-wide development instructions
 - `CLAUDE_iOS.md` - iOS-specific guidelines
-- `docs/iOS_VIOLATION_TRACKER.md` - iOS deadlock prevention
+- `docs/ios/ios-violation-tracker.md` - iOS deadlock prevention
 - `docs/architecture.md` - Overall system architecture
 
 ---

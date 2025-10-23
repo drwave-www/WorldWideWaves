@@ -72,10 +72,10 @@
 ## 📚 Key Documentation Files
 
 ### iOS Map Implementation
-- **iOS_MAP_IMPLEMENTATION_STATUS.md** (root) - Complete status (95% parity)
+- **docs/ios/ios-map-implementation-status.md** - Complete status (95% parity)
 - **CLAUDE_iOS.md** - iOS development guide and deadlock prevention
-- **docs/iOS_VIOLATION_TRACKER.md** - Historical deadlock violations (all fixed)
-- **docs/iOS_SUCCESS_STATE.md** - iOS success criteria verification
+- **docs/ios/ios-violation-tracker.md** - Historical deadlock violations (all fixed)
+- **docs/ios/ios-success-state.md** - iOS success criteria verification
 
 ### Project Overview
 - **CLAUDE.md** - Main development instructions
@@ -201,7 +201,7 @@ open iosApp/worldwidewaves.xcodeproj
 git status
 
 # Review iOS map status
-cat iOS_MAP_IMPLEMENTATION_STATUS.md
+cat docs/ios/ios-map-implementation-status.md
 ```
 
 ---
@@ -218,4 +218,4 @@ cat iOS_MAP_IMPLEMENTATION_STATUS.md
 
 **Context**: All iOS map critical and high-priority work is complete. Remaining items are optional polish and low-priority enhancements.
 
-See `iOS_MAP_IMPLEMENTATION_STATUS.md` for complete details on iOS map implementation.
+See `docs/ios/ios-map-implementation-status.md` for complete details on iOS map implementation.

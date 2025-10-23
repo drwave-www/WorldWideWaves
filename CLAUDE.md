@@ -251,7 +251,7 @@ class MyClass : KoinComponent {
 }
 ```
 
-**📋 TRACKING**: See [docs/iOS_VIOLATION_TRACKER.md](docs/iOS_VIOLATION_TRACKER.md) for comprehensive history
+**📋 TRACKING**: See [docs/ios/ios-violation-tracker.md](docs/ios/ios-violation-tracker.md) for comprehensive history
 **✅ STATUS**: All 11 critical violations fixed (October 2025)
 **🎯 MAINTENANCE**: Run verification commands regularly to prevent regressions
 
@@ -302,9 +302,9 @@ xcrun simctl spawn booted log stream \
 
 For complete iOS setup, debugging, and troubleshooting:
 - **[CLAUDE_iOS.md](./CLAUDE_iOS.md)** - Complete iOS development guide
-- **[docs/iOS_SUCCESS_STATE.md](./docs/iOS_SUCCESS_STATE.md)** - Current working state verification
-- **[docs/iOS_VIOLATION_TRACKER.md](./docs/iOS_VIOLATION_TRACKER.md)** - Historical violations and fixes
-- **[docs/iOS_DEBUGGING_GUIDE.md](./docs/iOS_DEBUGGING_GUIDE.md)** - Advanced debugging
+- **[docs/ios/ios-success-state.md](./docs/ios/ios-success-state.md)** - Current working state verification
+- **[docs/ios/ios-violation-tracker.md](./docs/ios/ios-violation-tracker.md)** - Historical violations and fixes
+- **[docs/ios/ios-debugging-guide.md](./docs/ios/ios-debugging-guide.md)** - Advanced debugging
 
 ---
 
@@ -393,8 +393,8 @@ platformEnabler.triggerHapticWarning()
 
 ### Documentation
 
-- **[Accessibility Guide](./docs/ACCESSIBILITY_GUIDE.md)** - Complete implementation patterns
-- **[iOS Map Accessibility](./docs/iOS_MAP_ACCESSIBILITY.md)** - Map-specific implementation
+- **[Accessibility Guide](./docs/accessibility-guide.md)** - Complete implementation patterns
+- **[iOS Map Accessibility](./docs/ios/ios-map-accessibility.md)** - Map-specific implementation
 - **Test Script**: `./scripts/test_accessibility.sh`
 
 **⚠️ CRITICAL**: Accessibility is not optional. All new UI components must follow these patterns before merging.
@@ -1000,23 +1000,23 @@ WorldWideWaves/
 ### iOS Development
 - [CLAUDE_iOS.md](./CLAUDE_iOS.md) - Complete iOS development guide
 - [docs/ios/](docs/ios/) - iOS-specific documentation hub
-- [docs/ios/iOS_VIOLATION_TRACKER.md](docs/ios/iOS_VIOLATION_TRACKER.md) - Deadlock violation status
-- [docs/ios/iOS_SUCCESS_STATE.md](docs/ios/iOS_SUCCESS_STATE.md) - iOS success criteria
-- [docs/ios/iOS_DEBUGGING_GUIDE.md](docs/ios/iOS_DEBUGGING_GUIDE.md) - Advanced debugging
-- [iOS_MAP_IMPLEMENTATION_STATUS.md](iOS_MAP_IMPLEMENTATION_STATUS.md) - Map feature status
-- [REMAINING_THREATS_AFTER_iOS_FIXES.md](REMAINING_THREATS_AFTER_iOS_FIXES.md) - Post-fix analysis
+- [docs/ios/ios-violation-tracker.md](docs/ios/ios-violation-tracker.md) - Deadlock violation status
+- [docs/ios/ios-success-state.md](docs/ios/ios-success-state.md) - iOS success criteria
+- [docs/ios/ios-debugging-guide.md](docs/ios/ios-debugging-guide.md) - Advanced debugging
+- [docs/ios/ios-map-implementation-status.md](docs/ios/ios-map-implementation-status.md) - Map feature status
+- [docs/ios/remaining-threats-after-ios-fixes.md](docs/ios/remaining-threats-after-ios-fixes.md) - Post-fix analysis
 
 ### Testing
-- [docs/TEST_GAP_ANALYSIS.md](docs/TEST_GAP_ANALYSIS.md) - Coverage analysis
-- [docs/COMPREHENSIVE_TEST_TODO.md](docs/COMPREHENSIVE_TEST_TODO.md) - Testing roadmap
-- [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) - Testing approach
-- [docs/UI_TESTING_GUIDE.md](docs/UI_TESTING_GUIDE.md) - UI testing guide
+- [docs/test-gap-analysis.md](docs/test-gap-analysis.md) - Coverage analysis
+- [docs/comprehensive-test-specifications.md](docs/comprehensive-test-specifications.md) - Testing specifications
+- [docs/testing-strategy.md](docs/testing-strategy.md) - Testing approach
+- [docs/ui-testing-guide.md](docs/ui-testing-guide.md) - UI testing guide
 
 ### Architecture
 - [docs/architecture.md](docs/architecture.md) - System architecture
 - [docs/ci-cd.md](docs/ci-cd.md) - CI/CD pipeline
 - [docs/development.md](docs/development.md) - Development workflows
-- [MAP_ARCHITECTURE_ANALYSIS.md](MAP_ARCHITECTURE_ANALYSIS.md) - Map subsystem
+- [docs/architecture/map-architecture-analysis.md](docs/architecture/map-architecture-analysis.md) - Map subsystem
 
 ---
 
