@@ -1433,10 +1433,30 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
             return false
         }
 
-        // iOS limitation: shouldChangeFrom can only REJECT, not CLAMP (unlike Android)
-        // Rejecting viewport boundary violations makes gestures jerky (663 rejections in log-23!)
-        // Solution: Only validate zoom, rely on min zoom to prevent viewport > event size
-        // Trade-off: Allows some viewport overshoot but gestures are smooth
+        // Check if new camera center is within constraint bounds
+        // Constraint bounds are calculated as: event bounds - (viewport size / 2)
+        // So if camera center is within constraint bounds, viewport edges stay within event bounds
+        guard let constraintBounds = currentConstraintBounds else {
+            // No constraint bounds set - only enforce zoom
+            return true
+        }
+
+        let newCenter = newCamera.centerCoordinate
+        let withinConstraintBounds = newCenter.latitude >= constraintBounds.sw.latitude &&
+                                      newCenter.latitude <= constraintBounds.ne.latitude &&
+                                      newCenter.longitude >= constraintBounds.sw.longitude &&
+                                      newCenter.longitude <= constraintBounds.ne.longitude
+
+        if !withinConstraintBounds {
+            // Camera center would move outside constraint bounds
+            // This would cause viewport edges to exceed event bounds - reject movement
+            WWWLog.v(
+                Self.tag,
+                "Rejecting camera movement: center would exceed constraint bounds"
+            )
+            return false
+        }
+
         return true
     }
 
