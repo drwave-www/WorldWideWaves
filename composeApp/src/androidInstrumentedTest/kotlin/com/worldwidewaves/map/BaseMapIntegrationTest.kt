@@ -89,32 +89,44 @@ abstract class BaseMapIntegrationTest {
     open fun setUp() {
         context = ApplicationProvider.getApplicationContext()
 
-        // Create headless MapView (no activity needed)
-        mapView = createHeadlessMapView()
-
-        // Initialize adapter (will set map reference later)
-        adapter = AndroidMapLibreAdapter()
-
-        // Load map asynchronously and wait
+        // MapView requires UI thread with Looper - use runOnMainSync
         val mapLoadedLatch = CountDownLatch(1)
         var setupError: Throwable? = null
 
-        try {
-            mapView.getMapAsync { map ->
-                try {
-                    mapLibreMap = map
-                    adapter.setMap(map)
+        androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            try {
+                // Initialize MapLibre (required before creating MapView)
+                org.maplibre.android.MapLibre
+                    .getInstance(context)
 
-                    // Load style and wait
-                    adapter.setStyle(stylePath) {
+                // Create headless MapView (must be on main thread)
+                mapView = createHeadlessMapView()
+
+                // Initialize adapter (will set map reference later)
+                adapter = AndroidMapLibreAdapter()
+
+                // Load map asynchronously and wait
+                mapView.getMapAsync { map ->
+                    try {
+                        mapLibreMap = map
+                        adapter.setMap(map)
+
+                        // Load style and wait
+                        adapter.setStyle(stylePath) {
+                            mapLoadedLatch.countDown()
+                        }
+                    } catch (e: Throwable) {
+                        setupError = e
                         mapLoadedLatch.countDown()
                     }
-                } catch (e: Throwable) {
-                    setupError = e
-                    mapLoadedLatch.countDown()
                 }
+            } catch (e: Throwable) {
+                setupError = e
+                mapLoadedLatch.countDown()
             }
+        }
 
+        try {
             // Wait up to 15 seconds for map to load (demo tiles might be slower)
             val loaded = mapLoadedLatch.await(15, TimeUnit.SECONDS)
 
@@ -130,10 +142,12 @@ abstract class BaseMapIntegrationTest {
         } catch (e: Throwable) {
             // Clean up on failure to avoid tearDown errors
             if (::mapView.isInitialized) {
-                try {
-                    mapView.onDestroy()
-                } catch (cleanupError: Throwable) {
-                    // Ignore cleanup errors
+                androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                    try {
+                        mapView.onDestroy()
+                    } catch (cleanupError: Throwable) {
+                        // Ignore cleanup errors
+                    }
                 }
             }
             throw e
@@ -143,12 +157,15 @@ abstract class BaseMapIntegrationTest {
     @After
     open fun tearDown() {
         // Clean up map resources (safe for uninitialized properties)
+        // Must run on main thread since MapView was created there
         if (::mapView.isInitialized) {
-            try {
-                mapView.onDestroy()
-            } catch (e: Throwable) {
-                // Log but don't fail tearDown
-                System.err.println("Error during mapView cleanup: ${e.message}")
+            androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                try {
+                    mapView.onDestroy()
+                } catch (e: Throwable) {
+                    // Log but don't fail tearDown
+                    System.err.println("Error during mapView cleanup: ${e.message}")
+                }
             }
         }
     }

@@ -61,7 +61,9 @@ WorldWideWaves iOS uses **Compose Multiplatform** with native UIKit integration:
 │                                                   │
 │  ┌──────────────────────────────────────────┐   │
 │  │  AppDelegate.swift                        │   │
-│  │  - URL routing                            │   │
+│  │  - Firebase initialization                │   │
+│  │  - Crashlytics setup                      │   │
+│  │  - URL routing (legacy)                   │   │
 │  │  - App lifecycle                          │   │
 │  └──────────────────────────────────────────┘   │
 │                                                   │
@@ -69,13 +71,25 @@ WorldWideWaves iOS uses **Compose Multiplatform** with native UIKit integration:
 │  │  SceneDelegate.swift                      │   │
 │  │  - Scene/window management                │   │
 │  │  - Platform initialization (Koin, Moko)   │   │
-│  │  - SKIKO configuration                    │   │
+│  │  - SKIKO configuration (Metal)            │   │
+│  │  - iOS lifecycle hook registration        │   │
+│  │  - NativeMapViewProvider registration     │   │
+│  │  - Deep link routing                      │   │
 │  └──────────────────────────────────────────┘   │
 │                                                   │
 │  ┌──────────────────────────────────────────┐   │
 │  │  IOSPlatformEnabler.swift                 │   │
 │  │  - Swift-Kotlin bridge                    │   │
 │  │  - Native services (haptics, etc.)        │   │
+│  │  - VoiceOver announcements                │   │
+│  │  - Navigation & URL handling              │   │
+│  └──────────────────────────────────────────┘   │
+│                                                   │
+│  ┌──────────────────────────────────────────┐   │
+│  │  SwiftNativeMapViewProvider.swift         │   │
+│  │  - Kotlin→Swift map bridge                │   │
+│  │  - Creates MapLibre UIViewControllers     │   │
+│  │  - Registered in Koin DI                  │   │
 │  └──────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────┘
                       │
@@ -935,10 +949,15 @@ When working on WorldWideWaves:
 
 ```
 WorldWideWaves/
+├── .github/workflows/          # CI/CD pipelines (7 workflows)
+├── .git-hooks/                 # Custom git hooks (pre-commit, pre-push)
 ├── shared/                     # KMM shared code
 │   ├── src/commonMain/         # Common business logic
-│   │   ├── kotlin/
+│   │   ├── kotlin/com/worldwidewaves/shared/
 │   │   │   ├── domain/         # Business logic
+│   │   │   │   ├── observation/    # EventObserver
+│   │   │   │   ├── progression/    # WaveProgressionTracker
+│   │   │   │   └── scheduling/     # ObservationScheduler
 │   │   │   ├── data/           # Data layer
 │   │   │   ├── ui/             # Shared UI (Compose)
 │   │   │   ├── di/             # Dependency injection
@@ -946,9 +965,9 @@ WorldWideWaves/
 │   │   │   └── map/            # Map abstraction
 │   ├── src/androidMain/        # Android-specific implementations
 │   ├── src/iosMain/            # iOS-specific implementations
-│   │   └── kotlin/
-│   │       └── ui/
-│   │           └── RootController.kt  # iOS ViewControllers
+│   │   └── kotlin/com/worldwidewaves/shared/
+│   │       ├── RootController.kt   # iOS ViewControllers
+│   │       └── ui/             # iOS-specific UI
 │   └── src/commonTest/         # Shared tests
 ├── composeApp/                 # Main application module
 │   ├── src/androidMain/        # Android app implementation
@@ -958,11 +977,20 @@ WorldWideWaves/
 │   ├── worldwidewaves/
 │   │   ├── AppDelegate.swift
 │   │   ├── SceneDelegate.swift
-│   │   └── IOSPlatformEnabler.swift
-├── maps/                       # Map data modules
+│   │   ├── IOSPlatformEnabler.swift
+│   │   ├── MapLibre/        # MapLibre Swift wrappers
+│   │   └── Maps/            # iOS map city data
+│   └── worldwidewavesUITests/ # iOS UI tests
+├── maps/                       # 40+ city offline map modules
+├── config/                     # Detekt configuration
+├── dev/                        # Development tools
 ├── scripts/                    # Build and verification scripts
 │   └── verify-ios-safety.sh   # iOS deadlock verification
 └── docs/                       # Additional documentation
+    ├── architecture/           # Architecture documents
+    ├── ios/                    # iOS-specific docs
+    ├── setup/                  # Setup guides
+    └── development/            # Development workflows
 ```
 
 ---
@@ -971,9 +999,10 @@ WorldWideWaves/
 
 ### iOS Development
 - [CLAUDE_iOS.md](./CLAUDE_iOS.md) - Complete iOS development guide
-- [docs/iOS_VIOLATION_TRACKER.md](docs/iOS_VIOLATION_TRACKER.md) - Deadlock violation status
-- [docs/iOS_SUCCESS_STATE.md](docs/iOS_SUCCESS_STATE.md) - iOS success criteria
-- [docs/iOS_DEBUGGING_GUIDE.md](docs/iOS_DEBUGGING_GUIDE.md) - Advanced debugging
+- [docs/ios/](docs/ios/) - iOS-specific documentation hub
+- [docs/ios/iOS_VIOLATION_TRACKER.md](docs/ios/iOS_VIOLATION_TRACKER.md) - Deadlock violation status
+- [docs/ios/iOS_SUCCESS_STATE.md](docs/ios/iOS_SUCCESS_STATE.md) - iOS success criteria
+- [docs/ios/iOS_DEBUGGING_GUIDE.md](docs/ios/iOS_DEBUGGING_GUIDE.md) - Advanced debugging
 - [iOS_MAP_IMPLEMENTATION_STATUS.md](iOS_MAP_IMPLEMENTATION_STATUS.md) - Map feature status
 - [REMAINING_THREATS_AFTER_iOS_FIXES.md](REMAINING_THREATS_AFTER_iOS_FIXES.md) - Post-fix analysis
 

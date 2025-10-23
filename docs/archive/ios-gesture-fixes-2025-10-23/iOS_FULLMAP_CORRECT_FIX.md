@@ -286,4 +286,3 @@ Fixes: Zoom blocking reported in /tmp/log-67
 **Status**: ✅ READY FOR TESTING
 **Confidence**: Very high - matches Android's working pattern
 **Risk**: Minimal - removed broken code, relying on native behavior
-

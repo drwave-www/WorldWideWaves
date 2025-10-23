@@ -26,14 +26,15 @@ WorldWideWaves enables participants to join synchronized wave events at specific
 WorldWideWaves/
 ├── composeApp/              # Android app (Compose UI)
 ├── shared/                  # Kotlin Multiplatform business logic
-├── iosApp/                  # iOS app (SwiftUI)
+├── iosApp/                  # iOS app (Compose UI via ComposeUIViewController)
 ├── maps/                    # 40+ city offline map modules
 │   ├── paris_france/
 │   ├── new_york_usa/
 │   └── ...
 ├── scripts/                 # Build tools and map generation
 ├── docs/                    # Documentation
-└── .github/workflows/       # CI/CD pipelines
+├── .github/workflows/       # CI/CD pipelines
+└── .git-hooks/              # Custom git hooks
 ```
 
 ### Key Modules
@@ -41,9 +42,9 @@ WorldWideWaves/
 | Module | Description |
 |--------|-------------|
 | `composeApp/` | Android app with Compose Multiplatform UI |
-| `shared/` | Cross-platform business logic, ViewModels, and domain layer |
-| `iosApp/` | iOS app with SwiftUI calling Kotlin business logic |
-| `maps/` | Android Dynamic Feature modules with offline map data |
+| `shared/` | Cross-platform business logic, ViewModels, and domain layer (70% code reuse) |
+| `iosApp/` | iOS app with Compose UI via ComposeUIViewController |
+| `maps/` | Android Dynamic Feature modules with offline map data (40+ cities) |
 
 ## Tech Stack
 
@@ -61,8 +62,9 @@ WorldWideWaves/
 
 **iOS:**
 - Deployment target: iOS 14+
-- SwiftUI
-- MapLibre iOS (in progress)
+- Compose Multiplatform via ComposeUIViewController
+- MapLibre iOS 6.8.0 (95% feature parity with Android)
+- Native Swift wrappers for platform services
 
 **Backend:**
 - Firebase Analytics & Crashlytics
