@@ -1,18 +1,25 @@
-# iOS/Android Map Parity - Remaining 20% Gap Analysis
+# iOS/Android Map Parity - Current State Analysis
 
-**Last Updated**: 2025-10-14
-**Current Parity**: 80% (78/97 properties matching)
-**Remaining Gap**: 20% (19/97 properties)
+**Last Updated**: 2025-10-23 (Post Gesture Fixes)
+**Current Parity**: 80%+ functional (78/97 properties matching)
+**Status**: ✅ **WORKING** - All critical gesture issues resolved
 
 ---
 
 ## Executive Summary
 
+**Recent Fixes (October 2025)**:
+1. ✅ **Gesture API Fixed** - Changed to correct property names (`isZoomEnabled/isScrollEnabled`)
+2. ✅ **Camera Validation Working** - Center-based validation prevents out-of-bounds panning
+3. ✅ **Min Zoom Optimized** - Uses 512px tile size for acceptable viewport coverage
+4. ✅ **Edge Touch Working** - Users can touch map edges without gesture rejection
+
+**Remaining Gap Analysis**:
 Of the 19 remaining properties (20% gap):
 - **17 properties (18%)**: Acceptable platform differences - different APIs achieving same functionality
 - **2 properties (2%)**: MapLibre iOS API limitations - features don't exist
 
-**Conclusion**: Actual missing functionality is **2%**, not 20%. The platforms are **functionally equivalent**.
+**Conclusion**: Actual missing functionality is **2%**, not 20%. The platforms are **functionally equivalent** with all critical gestures working smoothly.
 
 ---
 
@@ -155,3 +162,110 @@ This analysis should replace the "80% parity" messaging with "98% functional par
 - **SDK limitations** (feature doesn't exist in library) ← Not fixable without upstream changes
 
 WorldWideWaves iOS/Android maps have **functional parity** despite API differences.
+
+---
+
+## Recent iOS Gesture Fixes (October 2025)
+
+### Problem Statement
+Users reported three critical iOS map gesture issues:
+1. Cannot reach event edges during panning
+2. Zoom blocked after reaching zoom 16
+3. Panning blocked after targetWave animation
+
+### Root Cause Analysis
+
+**Issue 1: Wrong Property Names**
+```swift
+// ❌ WRONG - These properties don't exist in MLNMapView
+mapView.allowsZooming = true  // Silently fails!
+mapView.allowsScrolling = true  // Silently fails!
+```
+
+When Swift tries to set non-existent properties, it **silently fails**. Result: Gestures were never actually enabled/disabled.
+
+**Correct Property Names** (from MLNMapView.h):
+```swift
+// ✅ CORRECT - These properties exist
+mapView.isZoomEnabled = true
+mapView.isScrollEnabled = true
+mapView.isRotateEnabled = false
+mapView.isPitchEnabled = false
+```
+
+**Issue 2: Viewport Bounds Rejection**
+Previous implementation validated all 4 viewport corners against constraint bounds. This caused:
+- Edge touches rejected (corner outside bounds by 1px)
+- Zoom rejected even when camera center was valid
+- Poor user experience (map felt "stuck")
+
+**Issue 3: Removed Zoom Rejection Logic**
+Explicit zoom rejection logic was removed because:
+- MapLibre already clamps natively to min/max zoom
+- No need to manually reject zoom gestures
+- Smoother user experience
+
+### Solutions Implemented
+
+**Fix 1: Correct Property Names**
+```swift
+// EventMapView.swift & MapLibreViewWrapper.swift
+mapView.isZoomEnabled = enableGestures
+mapView.isScrollEnabled = enableGestures
+```
+
+**Fix 2: Camera Center Validation**
+```swift
+// Validate camera center only (not viewport corners)
+public func mapView(_ mapView: MLNMapView, shouldChangeFrom oldCamera: MLNMapCamera,
+                   to newCamera: MLNMapCamera, reason: MLNCameraChangeReason) -> Bool {
+    guard let bounds = currentConstraintBounds else { return true }
+
+    let center = newCamera.centerCoordinate
+    if center.latitude < bounds.sw.latitude || center.latitude > bounds.ne.latitude ||
+       center.longitude < bounds.sw.longitude || center.longitude > bounds.ne.longitude {
+        return false
+    }
+    return true
+}
+```
+
+**Fix 3: Removed Manual Zoom Rejection**
+- Let MapLibre handle zoom clamping natively
+- No explicit zoom rejection logic needed
+
+**Fix 4: 512px Tile Size in Min Zoom Calculation**
+```swift
+// Calculate min zoom using 512px tiles (MapLibre iOS default)
+let zoomForHeight = log2((screenHeight * 360.0) / (boundsHeight * 512.0))
+let zoomForWidth = log2((screenWidth * 360.0 * cos(latRadians)) / (boundsWidth * 512.0))
+let minZoom = min(zoomForHeight, zoomForWidth)
+```
+
+### Results
+
+**Before Fixes**:
+- ❌ Gestures silently disabled (wrong property names)
+- ❌ Edge touches rejected (viewport validation)
+- ❌ Zoom blocked at zoom 16 (explicit rejection)
+- ❌ Panning blocked after targetWave (constraint application timing)
+
+**After Fixes**:
+- ✅ Gestures work correctly (correct property names)
+- ✅ Can touch map edges (camera center validation)
+- ✅ Smooth zoom (MapLibre native clamping)
+- ✅ Panning works immediately after targetWave
+- ✅ Near-full event height visible at minZoom (~90-95%)
+
+### Known Limitation
+
+**Min Zoom Coverage**: iOS min zoom uses 512px tiles, resulting in slightly higher min zoom than theoretical. User sees ~90-95% of event height at minZoom instead of 100%.
+
+**Rationale**: Prioritizes preventing excessive zoom-out over perfect height visibility. Acceptable per user decision.
+
+### Commits
+- `92f1a5e1` - Fix gesture property names
+- `4a4fba64` - Fix gesture API mismatch
+- `df43401c` - Fix zoom desync
+- `f1f7cc5e` - Add epsilon tolerance to viewport bounds
+- Prior commits - Camera center validation implementation

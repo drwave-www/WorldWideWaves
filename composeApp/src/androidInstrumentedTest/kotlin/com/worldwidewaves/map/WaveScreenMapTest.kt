@@ -25,9 +25,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.MapTestFixtures.center
-import com.worldwidewaves.shared.map.MapTestFixtures.height
 import com.worldwidewaves.shared.map.MapTestFixtures.isCompletelyWithin
-import com.worldwidewaves.shared.map.MapTestFixtures.width
+// Note: BoundingBox.height and BoundingBox.width are built-in properties, not from MapTestFixtures
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Test

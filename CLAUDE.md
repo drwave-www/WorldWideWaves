@@ -281,6 +281,8 @@ xcrun simctl spawn booted log stream \
 | Koin initialization fails | Missing IOSModule | Check SceneDelegate `installPlatform()` |
 | Compose UI crash | SKIKO not set | Verify `setenv("SKIKO_RENDER_API", "METAL", 1)` |
 | Resources not loading | MokoRes bundle issue | Check `doInitPlatform()` logs |
+| Map gestures not working | Wrong property names | Use `isZoomEnabled/isScrollEnabled` not `allowsZooming/allowsScrolling` |
+| User can pan outside event | Camera validation disabled | Check `shouldChangeFrom` delegate validates bounds |
 
 ### 📚 Detailed iOS Documentation
 
@@ -514,40 +516,55 @@ class MyComponent {
    - Solution: Implement equivalent behavior using available APIs (gesture clamping via delegate)
    - Document why platforms differ when APIs aren't equivalent
 
-2. **Polygon Queue Optimization**
+2. **Gesture Property Names Matter**
+   - iOS MapLibre uses `isZoomEnabled/isScrollEnabled` (NOT `allowsZooming/allowsScrolling`)
+   - Wrong property names silently fail in Swift - gestures remain enabled/disabled unexpectedly
+   - Always verify property names against MapLibre API documentation
+
+3. **Min Zoom Calculation**
+   - iOS uses 512px tiles (not 256px) in zoom calculation: `log2((screenHeight * 360) / (boundsHeight * 512))`
+   - Android uses `getCameraForLatLngBounds()` for constraint-based calculation
+   - Result: iOS min zoom slightly higher than theoretical, but provides acceptable viewport coverage
+
+4. **Camera Validation Approach**
+   - iOS: Validates camera center against constraint bounds in `shouldChangeFrom` delegate
+   - Android: Uses viewport bounds checking (all 4 corners must be inside constraints)
+   - Both prevent out-of-bounds panning, different techniques
+
+5. **Polygon Queue Optimization**
    - Wave progression is cumulative - each set contains all previous circles
    - Only store most recent polygon set, not entire history
    - Reduces memory usage and simplifies logic
 
-3. **Race Condition Patterns**
+6. **Race Condition Patterns**
    - iOS requires comprehensive pending state queues (polygons, bounds, positions)
    - Android can rely on initialization order but benefits from same pattern
    - Always queue operations that depend on async style loading
 
-4. **Validation Everywhere**
+7. **Validation Everywhere**
    - iOS validates bounds (ne > sw, lat/lng ranges) - prevents crashes
    - Android lacked validation - add it proactively
    - Validation prevents obscure C++ exceptions from native MapLibre code
 
-5. **UUID for Dynamic Layers**
+8. **UUID for Dynamic Layers**
    - Simple index-based IDs can conflict during rapid updates
    - Use UUID suffix: `"wave-polygons-source-{index}-{uuid}"`
    - Prevents layer/source conflicts in both platforms
 
-6. **Command Pattern for iOS**
+9. **Command Pattern for iOS**
    - MapWrapperRegistry uses command pattern for Kotlin→Swift coordination
    - Configuration commands queue (all execute), animation commands use single slot (latest wins)
    - Attribution margins, camera constraints, zoom all use this pattern
 
-7. **Platform-Specific Architectures Are OK**
-   - iOS: Custom MLNPointAnnotation (manual updates via PositionManager)
-   - Android: Native LocationComponent (automatic via LocationEngineProxy)
-   - Document differences, don't force artificial parity
+10. **Platform-Specific Architectures Are OK**
+    - iOS: Custom MLNPointAnnotation (manual updates via PositionManager)
+    - Android: Native LocationComponent (automatic via LocationEngineProxy)
+    - Document differences, don't force artificial parity
 
-8. **Comprehensive Documentation Prevents Repetition**
-   - 97-point systematic comparison revealed all gaps
-   - Standalone prompt document enables efficient future sessions
-   - Architecture diagrams show flow differences clearly
+11. **Comprehensive Documentation Prevents Repetition**
+    - 97-point systematic comparison revealed all gaps
+    - Standalone prompt document enables efficient future sessions
+    - Architecture diagrams show flow differences clearly
 
 ---
 

@@ -2,11 +2,12 @@
 
 > **STANDALONE PROMPT**: This document is a complete, self-contained guide for implementing iOS map feature parity with Android. Use this as your primary reference for the next work session.
 
-**Last Updated**: 2025-10-14
+**Last Updated**: 2025-10-23 (Post Gesture Fixes)
 **Analysis Date**: 2025-10-14
-**Implementation Date**: 2025-10-14
-**Status**: ✅ **PRODUCTION READY** - 80% feature parity achieved (P0+P1+P2 partial complete)
+**Implementation Date**: 2025-10-14 to 2025-10-23
+**Status**: ✅ **PRODUCTION READY** - 80%+ feature parity, all critical gestures working
 **Test Status**: ✅ All 902 unit tests passing, iOS Kotlin/Swift compile, zero warnings
+**Gesture Status**: ✅ **WORKING** - Correct property names, camera center validation, smooth operation
 
 ---
 
@@ -807,6 +808,21 @@ swiftlint lint --quiet
 - **High Priority Issues**: 0 (all P1 complete)
 - **Production Ready**: ✅ **YES**
 
+### 🎯 Gesture Fixes (October 23, 2025):
+- [x] **Gesture Property Names** - Fixed to use `isZoomEnabled/isScrollEnabled` (not `allowsZooming/allowsScrolling`)
+- [x] **Camera Center Validation** - Changed from viewport bounds to center validation (replicates Android)
+- [x] **Removed Zoom Rejection** - Let MapLibre clamp natively (smoother UX)
+- [x] **512px Tile Size** - Adjusted min zoom calculation for correct MapLibre iOS behavior
+- [x] **Edge Touch Working** - Users can now touch map edges without rejection
+- [x] **Panning After TargetWave** - Works immediately, no blocking
+
+### 🔧 Current Working State:
+1. ✅ **Gestures**: Pan, zoom work correctly with proper property names
+2. ✅ **Bounds**: Camera center constrained to event area
+3. ✅ **Min Zoom**: ~90-95% event height visible (acceptable trade-off)
+4. ✅ **User Experience**: Smooth gesture operation, can reach edges
+5. ⚠️ **Known Limitation**: Min zoom slightly higher than theoretical (512px tile assumption)
+
 ### Summary:
 - **10 tasks completed** (P0.1-P0.3, P1.1-P1.5, P2.2-P2.3)
 - **2 tasks deferred** (P2.1, P2.4) - require MapLibre iOS API research
@@ -839,7 +855,33 @@ Initial investigation revealed iOS implementation had diverged from Android, byp
 
 ---
 
-**Status**: ✅ **PRODUCTION READY** - 80% feature parity achieved
+## 🐛 RESOLVED ISSUES (October 23, 2025)
+
+### User-Reported Problems (All Fixed)
+1. ✅ **Cannot reach event edges** - Fixed by camera center validation
+2. ✅ **Zoom blocked at zoom 16** - Fixed by removing explicit zoom rejection
+3. ✅ **Panning blocked after targetWave** - Fixed by proper constraint application timing
+
+### Root Causes Identified
+1. **Wrong MLNMapView Property Names** - Using non-existent properties caused silent failures
+2. **Viewport Bounds Validation** - Overly strict, rejected valid gestures at edges
+3. **Explicit Zoom Rejection** - Unnecessary, MapLibre handles natively
+4. **Zoom Desync** - Constraint bounds applied before zoom updated
+
+### Commits Implementing Fixes
+- `92f1a5e1` - Fix gesture property names (isZoomEnabled/isScrollEnabled)
+- `4a4fba64` - Fix gesture API mismatch
+- `df43401c` - Fix zoom desync causing gesture blocking
+- `64808a27` - Add comprehensive logging for diagnostics
+- `f1f7cc5e` - Add epsilon tolerance to viewport bounds
+- `98ce80b4` - Check viewport edges vs event bounds
+- `bde429cd` - Remove estimated viewport
+- `f0fb3f0a` - Enforce constraint bounds in shouldChangeFrom
+
+---
+
+**Status**: ✅ **PRODUCTION READY** - 80%+ feature parity, all gesture issues resolved
 **Next Action**: Research P2.1/P2.4 APIs (optional improvements)
 **Test Coverage**: All 902 tests passing, zero warnings
 **Testing Requirement**: Maintained throughout implementation
+**User Experience**: Smooth gesture operation, can reach edges, proper bounds enforcement
