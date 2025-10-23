@@ -210,6 +210,12 @@ import Shared
                 "MapLibre gestures: scroll=\(swiftEnabled), zoom=\(swiftEnabled), " +
                 "rotate=\(swiftEnabled), tilt=\(swiftEnabled)"
             )
+            WWWLog.i(
+                Self.tag,
+                "Gesture verification: allowsScrolling=\(mapView.allowsScrolling), " +
+                "allowsZooming=\(mapView.allowsZooming), " +
+                "isUserInteractionEnabled=\(mapView.isUserInteractionEnabled)"
+            )
         }
         WWWLog.d(Self.tag, "Gestures enabled callback registered for: \(eventId)")
     }
@@ -1400,28 +1406,39 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         to newCamera: MLNMapCamera,
         reason: MLNCameraChangeReason
     ) -> Bool {
+        // Calculate zoom levels for logging
+        let earthCircumference = 40_075_016.686
+        let oldZoom = log2(earthCircumference * cos(oldCamera.centerCoordinate.latitude * .pi / 180.0) / oldCamera.altitude) - 1.0
+        let newZoom = log2(earthCircumference * cos(newCamera.centerCoordinate.latitude * .pi / 180.0) / newCamera.altitude) - 1.0
+
+        WWWLog.d(
+            Self.tag,
+            "📸 shouldChangeFrom: oldZoom=\(String(format: "%.2f", oldZoom)) → newZoom=\(String(format: "%.2f", newZoom)), " +
+            "reason=\(reason.rawValue), minZoom=\(String(format: "%.2f", mapView.minimumZoomLevel)) " +
+            "maxZoom=\(String(format: "%.2f", mapView.maximumZoomLevel))"
+        )
+
         // Prevent viewport from exceeding event bounds (matches Android behavior)
         // Check viewport EDGES against EVENT bounds to prevent corners reaching center
-        guard currentEventBounds != nil else {
+        guard let eventBounds = currentEventBounds else {
             // No constraints set - allow all movements
+            WWWLog.v(Self.tag, "✅ Allowing: No event bounds set")
             return true
         }
 
         // Check zoom constraints
-        let earthCircumference = 40_075_016.686
         let latitude = newCamera.centerCoordinate.latitude
-        let zoom = log2(earthCircumference * cos(latitude * .pi / 180.0) / newCamera.altitude) - 1.0
+        let zoom = newZoom
         let zoomOutOfBounds = zoom < mapView.minimumZoomLevel || zoom > mapView.maximumZoomLevel
 
         if zoomOutOfBounds {
+            WWWLog.d(
+                Self.tag,
+                "❌ Rejecting: Zoom out of bounds (zoom=\(String(format: "%.2f", zoom)), " +
+                "min=\(String(format: "%.2f", mapView.minimumZoomLevel)), " +
+                "max=\(String(format: "%.2f", mapView.maximumZoomLevel)))"
+            )
             return false
-        }
-
-        // Check if viewport at new camera position would exceed event bounds
-        // This matches Android's preventive gesture constraint behavior
-        guard let eventBounds = currentEventBounds else {
-            // No event bounds set - only enforce zoom
-            return true
         }
 
         // Calculate what the viewport would be at the new camera position
@@ -1440,13 +1457,22 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
 
         if !viewportWithinBounds {
             // Viewport edges would exceed event bounds - reject movement
-            WWWLog.v(
+            WWWLog.d(
                 Self.tag,
-                "Rejecting camera movement: viewport edges would exceed event bounds"
+                "❌ Rejecting: Viewport exceeds bounds - " +
+                "newViewport SW(\(String(format: "%.6f", newViewport.sw.latitude))," +
+                "\(String(format: "%.6f", newViewport.sw.longitude))) " +
+                "NE(\(String(format: "%.6f", newViewport.ne.latitude))," +
+                "\(String(format: "%.6f", newViewport.ne.longitude))), " +
+                "eventBounds SW(\(String(format: "%.6f", eventBounds.sw.latitude))," +
+                "\(String(format: "%.6f", eventBounds.sw.longitude))) " +
+                "NE(\(String(format: "%.6f", eventBounds.ne.latitude))," +
+                "\(String(format: "%.6f", eventBounds.ne.longitude)))"
             )
             return false
         }
 
+        WWWLog.v(Self.tag, "✅ Allowing: Viewport within bounds")
         return true
     }
 
