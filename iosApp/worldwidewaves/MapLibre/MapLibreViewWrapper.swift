@@ -665,30 +665,14 @@ import Shared
             "NE(\(eventBounds.ne.latitude),\(eventBounds.ne.longitude))"
         )
 
-        // CRITICAL: Update visible region with ESTIMATED viewport to prevent fallback bounds issue
-        // Before regionDidChangeAnimated fires, provide reasonable estimate for padding calculations
-        // Estimate viewport size at the min zoom we just calculated
-        let estimatedViewportLatSpan = (screenHeight / 256.0) / pow(2.0, finalMinZoom) * 180.0
-        let estimatedViewportLngSpan = (screenWidth / 256.0) / pow(2.0, finalMinZoom) * 360.0
-
-        let centerLat = (eventBounds.sw.latitude + eventBounds.ne.latitude) / 2.0
-        let centerLng = (eventBounds.sw.longitude + eventBounds.ne.longitude) / 2.0
-
-        let estimatedViewport = BoundingBox(
-            swLat: centerLat - estimatedViewportLatSpan / 2.0,
-            swLng: centerLng - estimatedViewportLngSpan / 2.0,
-            neLat: centerLat + estimatedViewportLatSpan / 2.0,
-            neLng: centerLng + estimatedViewportLngSpan / 2.0
+        // NOTE: Do NOT set estimated viewport here - it creates stale data issues
+        // The estimated viewport at MIN ZOOM is too large for when camera is zoomed IN
+        // regionDidChangeAnimated will update with ACTUAL viewport shortly after
+        // MapBoundsEnforcer has >10° invalid viewport detection to handle initialization
+        WWWLog.d(
+            Self.tag,
+            "Skipping estimated viewport update - will use actual viewport from regionDidChangeAnimated"
         )
-
-        if let eventId = eventId {
-            Shared.MapWrapperRegistry.shared.updateVisibleRegion(eventId: eventId, bbox: estimatedViewport)
-            WWWLog.i(
-                Self.tag,
-                "Estimated viewport updated: \(estimatedViewportLatSpan)° x \(estimatedViewportLngSpan)° " +
-                "(prevents fallback bounds from causing tiny constraint area)"
-            )
-        }
 
         pendingConstraintBounds = nil
         pendingEventBounds = nil
