@@ -319,7 +319,7 @@ Comprehensive documentation is available in the `docs/` directory:
 - **[docs/](docs/)** - Complete documentation index
   - [Architecture](docs/architecture.md) - System design and patterns
   - [iOS Development](docs/ios/) - iOS-specific guides and debugging
-  - [Android Map Constraints](docs/android-map-constraints/) - Android MapLibre implementation reference
+  - [Android Development](docs/android/) - Android MapLibre implementation reference
   - [Testing Strategy](docs/TESTING_STRATEGY.md) - Test architecture and approach
   - [Accessibility Guide](docs/ACCESSIBILITY_GUIDE.md) - WCAG 2.1 Level AA compliance
   - [CI/CD Pipeline](docs/ci-cd.md) - GitHub Actions workflows

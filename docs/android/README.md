@@ -1,4 +1,4 @@
-# Android Map Constraints Documentation
+# Android Development Documentation
 
 **Purpose**: Complete reference for Android MapLibre constraint implementation, created October 2025 to support iOS feature parity.
 
