@@ -1406,14 +1406,15 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         to newCamera: MLNMapCamera,
         reason: MLNCameraChangeReason
     ) -> Bool {
-        // Calculate zoom levels for logging
+        // Use actual current zoom from mapView (not stale camera altitude)
+        // Camera altitude can be stale after programmatic animations (zoom desync bug)
+        let currentZoom = mapView.zoomLevel  // ✅ Always fresh, updated immediately
         let earthCircumference = 40_075_016.686
-        let oldZoom = log2(earthCircumference * cos(oldCamera.centerCoordinate.latitude * .pi / 180.0) / oldCamera.altitude) - 1.0
-        let newZoom = log2(earthCircumference * cos(newCamera.centerCoordinate.latitude * .pi / 180.0) / newCamera.altitude) - 1.0
+        let targetZoom = log2(earthCircumference * cos(newCamera.centerCoordinate.latitude * .pi / 180.0) / newCamera.altitude) - 1.0
 
         WWWLog.d(
             Self.tag,
-            "📸 shouldChangeFrom: oldZoom=\(String(format: "%.2f", oldZoom)) → newZoom=\(String(format: "%.2f", newZoom)), " +
+            "📸 shouldChangeFrom: currentZoom=\(String(format: "%.2f", currentZoom)) → targetZoom=\(String(format: "%.2f", targetZoom)), " +
             "reason=\(reason.rawValue), minZoom=\(String(format: "%.2f", mapView.minimumZoomLevel)) " +
             "maxZoom=\(String(format: "%.2f", mapView.maximumZoomLevel))"
         )
@@ -1426,15 +1427,14 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
             return true
         }
 
-        // Check zoom constraints
-        let latitude = newCamera.centerCoordinate.latitude
-        let zoom = newZoom
-        let zoomOutOfBounds = zoom < mapView.minimumZoomLevel || zoom > mapView.maximumZoomLevel
+        // Check if TARGET zoom (where gesture wants to go) is out of bounds
+        // Don't check current zoom - we're already there, it's valid
+        let targetZoomOutOfBounds = targetZoom < mapView.minimumZoomLevel || targetZoom > mapView.maximumZoomLevel
 
-        if zoomOutOfBounds {
+        if targetZoomOutOfBounds {
             WWWLog.d(
                 Self.tag,
-                "❌ Rejecting: Zoom out of bounds (zoom=\(String(format: "%.2f", zoom)), " +
+                "❌ Rejecting: Target zoom out of bounds (targetZoom=\(String(format: "%.2f", targetZoom)), " +
                 "min=\(String(format: "%.2f", mapView.minimumZoomLevel)), " +
                 "max=\(String(format: "%.2f", mapView.maximumZoomLevel)))"
             )
