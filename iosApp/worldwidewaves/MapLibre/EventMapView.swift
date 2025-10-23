@@ -69,17 +69,16 @@ struct EventMapView: UIViewRepresentable {
 
         // Conditional gesture activation (matches Android)
         // Gestures are only enabled when mapConfig.initialCameraPosition == MapCameraPosition.WINDOW
-        // CRITICAL: Use allowsZooming/allowsScrolling (not deprecated isZoomEnabled/isScrollEnabled)
+        // CRITICAL: Use correct MLNMapView property names (isZoomEnabled, isScrollEnabled, etc.)
         // Must match MapLibreViewWrapper.swift setGesturesEnabled callback for consistency
-        mapView.allowsZooming = enableGestures
-        mapView.allowsScrolling = enableGestures
+        mapView.isZoomEnabled = enableGestures
+        mapView.isScrollEnabled = enableGestures
 
         // Always disable rotation and tilt (matches Android)
-        mapView.allowsRotating = false
-        mapView.allowsTilting = false
+        mapView.isRotateEnabled = false
+        mapView.isPitchEnabled = false
 
-        // Note: MLNMapView doesn't have allowsZoomingWithDoubleTap property
-        // Double-tap to zoom is automatically enabled/disabled with allowsZooming
+        // Note: Double-tap to zoom is automatically enabled/disabled with zoomEnabled
 
         // Remove rotation gesture recognizers if they exist
         if let gestureRecognizers = mapView.gestureRecognizers {
@@ -93,10 +92,10 @@ struct EventMapView: UIViewRepresentable {
             }
         }
 
-        let gestureStatus = "Gestures configured: zoom=\(mapView.allowsZooming), " +
-            "scroll=\(mapView.allowsScrolling), " +
-            "rotate=\(mapView.allowsRotating), " +
-            "tilt=\(mapView.allowsTilting)"
+        let gestureStatus = "Gestures configured: zoom=\(mapView.isZoomEnabled), " +
+            "scroll=\(mapView.isScrollEnabled), " +
+            "rotate=\(mapView.isRotateEnabled), " +
+            "pitch=\(mapView.isPitchEnabled)"
         WWWLog.i(Self.tag, gestureStatus)
     }
 

@@ -202,20 +202,20 @@ import Shared
 
             // CRITICAL: Don't disable isUserInteractionEnabled (would block tap gestures for navigation)
             // Instead, control specific MapLibre gestures (pan, zoom, rotate, pitch)
-            mapView.allowsScrolling = swiftEnabled      // Pan gesture
-            mapView.allowsZooming = swiftEnabled        // Zoom gestures (pinch, double-tap)
-            mapView.allowsRotating = swiftEnabled       // Rotation gesture
-            mapView.allowsTilting = swiftEnabled        // Pitch/tilt gesture
+            mapView.isScrollEnabled = swiftEnabled      // Pan gesture
+            mapView.isZoomEnabled = swiftEnabled        // Zoom gestures (pinch, double-tap)
+            mapView.isRotateEnabled = swiftEnabled      // Rotation gesture
+            mapView.isPitchEnabled = swiftEnabled       // Pitch/tilt gesture
 
             WWWLog.d(
                 Self.tag,
                 "MapLibre gestures: scroll=\(swiftEnabled), zoom=\(swiftEnabled), " +
-                "rotate=\(swiftEnabled), tilt=\(swiftEnabled)"
+                "rotate=\(swiftEnabled), pitch=\(swiftEnabled)"
             )
             WWWLog.i(
                 Self.tag,
-                "Gesture verification: allowsScrolling=\(mapView.allowsScrolling), " +
-                "allowsZooming=\(mapView.allowsZooming), " +
+                "Gesture verification: scrollEnabled=\(mapView.isScrollEnabled), " +
+                "zoomEnabled=\(mapView.isZoomEnabled), " +
                 "isUserInteractionEnabled=\(mapView.isUserInteractionEnabled)"
             )
         }
