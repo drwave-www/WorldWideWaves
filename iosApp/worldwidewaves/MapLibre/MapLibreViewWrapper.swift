@@ -132,6 +132,8 @@ import Shared
         WWWLog.d(Self.tag, "Map view configured successfully for event: \(eventId ?? "nil")")
     }
 
+    // swiftlint:disable function_body_length
+    // Justified: Initial setup with multiple callbacks registration (hard to split without breaking flow)
     @objc public func setEventId(_ eventId: String) {
         self.eventId = eventId
         WWWLog.d(Self.tag, "Event ID set: \(eventId)")
@@ -219,6 +221,7 @@ import Shared
         }
         WWWLog.d(Self.tag, "Gestures enabled callback registered for: \(eventId)")
     }
+    // swiftlint:enable function_body_length
 
     @objc public func setStyle(styleURL: String, completion: @escaping () -> Void) {
         WWWLog.d(Self.tag, "setStyle called with URL: \(styleURL)")
@@ -383,7 +386,8 @@ import Shared
 
     // MARK: - Camera Constraints
 
-    // swiftlint:disable function_parameter_count function_body_length
+    // swiftlint:disable function_parameter_count function_body_length cyclomatic_complexity
+    // Justified: Camera constraint logic requires validation, bounds setup, and multiple conditionals
     @objc public func setBoundsForCameraTarget(
         constraintSwLat: Double,
         constraintSwLng: Double,
@@ -685,7 +689,7 @@ import Shared
         pendingIsWindowMode = false
         return true
     }
-    // swiftlint:enable function_parameter_count function_body_length
+    // swiftlint:enable function_parameter_count function_body_length cyclomatic_complexity
 
     @objc public func setMinZoom(_ minZoom: Double) {
         mapView?.minimumZoomLevel = minZoom
@@ -1410,11 +1414,15 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
         // Camera altitude can be stale after programmatic animations (zoom desync bug)
         let currentZoom = mapView.zoomLevel  // ✅ Always fresh, updated immediately
         let earthCircumference = 40_075_016.686
-        let targetZoom = log2(earthCircumference * cos(newCamera.centerCoordinate.latitude * .pi / 180.0) / newCamera.altitude) - 1.0
+        let centerLat = newCamera.centerCoordinate.latitude
+        let targetZoom = log2(
+            earthCircumference * cos(centerLat * .pi / 180.0) / newCamera.altitude
+        ) - 1.0
 
         WWWLog.d(
             Self.tag,
-            "📸 shouldChangeFrom: currentZoom=\(String(format: "%.2f", currentZoom)) → targetZoom=\(String(format: "%.2f", targetZoom)), " +
+            "📸 shouldChangeFrom: currentZoom=\(String(format: "%.2f", currentZoom)) → " +
+            "targetZoom=\(String(format: "%.2f", targetZoom)), " +
             "reason=\(reason.rawValue), minZoom=\(String(format: "%.2f", mapView.minimumZoomLevel)) " +
             "maxZoom=\(String(format: "%.2f", mapView.maximumZoomLevel))"
         )
