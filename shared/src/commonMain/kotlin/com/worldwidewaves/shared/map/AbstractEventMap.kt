@@ -312,8 +312,8 @@ abstract class AbstractEventMap<T>(
         val closestWaveLongitude = event.wave.userClosestWaveLongitude() ?: return
 
         val wavePosition = Position(currentLocation.latitude, closestWaveLongitude)
-        runCameraAnimation { _ ->
-            mapLibreAdapter.animateCamera(wavePosition, MapDisplay.TARGET_WAVE_ZOOM)
+        runCameraAnimation { cb ->
+            mapLibreAdapter.animateCamera(wavePosition, MapDisplay.TARGET_WAVE_ZOOM, cb)
         }
     }
 
@@ -322,8 +322,8 @@ abstract class AbstractEventMap<T>(
      */
     suspend fun targetUser() {
         val userPosition = positionManager.getCurrentPosition() ?: return
-        runCameraAnimation { _ ->
-            mapLibreAdapter.animateCamera(userPosition, MapDisplay.TARGET_USER_ZOOM)
+        runCameraAnimation { cb ->
+            mapLibreAdapter.animateCamera(userPosition, MapDisplay.TARGET_USER_ZOOM, cb)
         }
     }
 
