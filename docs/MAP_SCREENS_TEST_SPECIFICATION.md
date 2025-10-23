@@ -345,14 +345,21 @@ if (eventAspect > screenAspect) {
 **Location**: `AndroidMapLibreAdapter.kt:527-535`
 **Impact**: Button animations (Target User, Target Wave) now work smoothly without jumping
 
-#### 3.0.9 MapBoundsEnforcer Camera Idle Recalculation in WINDOW Mode
-**Issue**: After button animations (zoom 16), camera idle triggered constraint recalculation
-**Finding**: Recalculation used tiny viewport (0.0055° at zoom 16), creating microscopic constraints
-**Symptom**: After targetUser, couldn't pan south/north (locked by tiny bounds 0.0017°×0.0049°)
-**Fix**: Disable MapBoundsEnforcer camera idle listener in WINDOW mode (line 82)
-**Rationale**: WINDOW mode constraints are INITIAL bounds (from first viewport), not dynamic
-**Location**: `MapBoundsEnforcer.kt:79-107`
-**Impact**: Constraints stay constant after button animations, full pan area available
+#### 3.0.9 MapBoundsEnforcer Dynamic Viewport Padding in WINDOW Mode
+**Issue**: iOS had zero padding for WINDOW mode, blocking all panning
+**Root Cause**: Zero padding assumes Android-style preventive gesture clamping (which iOS doesn't have)
+**Fix**: Calculate padding from current viewport (viewport_size / 2) in WINDOW mode
+**Behavior**:
+  - Viewport-based padding: constraint bounds = event bounds shrunk by half viewport size
+  - Dynamic recalculation: Updates when zoom changes (viewport size changes)
+  - Zoom IN (e.g., 16): Small viewport → small padding → large pan area ✅
+  - At min zoom (e.g., 13.35): Larger viewport → larger padding → smaller pan area ✅
+  - Invalid viewport detection: Uses zero padding if viewport >10° (uninitialized)
+**Platform Differences**:
+  - **iOS**: Relies on these calculated constraint bounds (no runtime gesture clamping)
+  - **Android**: Uses as initial bounds, preventive gesture system provides additional runtime clamping
+**Location**: `MapBoundsEnforcer.kt:406-434`
+**Impact**: iOS panning now works at all zoom levels while respecting event boundaries
 
 #### 3.0.6 Screen Dimension Units
 **Finding**: Android uses physical pixels, iOS uses points (density-independent)
