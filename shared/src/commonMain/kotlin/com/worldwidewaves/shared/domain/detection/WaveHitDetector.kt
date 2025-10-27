@@ -30,7 +30,6 @@ import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.position.PositionManager
 import com.worldwidewaves.shared.utils.Log
-import com.worldwidewaves.shared.utils.PerformanceTracer
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.ExperimentalTime
 
@@ -95,9 +94,8 @@ class WaveHitDetector(
         progression: Double,
         status: Status,
         userIsInArea: Boolean,
-    ): EventState? {
-        val trace = PerformanceTracer.startTrace("wave_hit_detection")
-        return try {
+    ): EventState? =
+        try {
             val stateInput =
                 EventStateInput(
                     progression = progression,
@@ -106,32 +104,20 @@ class WaveHitDetector(
                     currentTime = clock.now(),
                 )
 
-            val result =
-                eventStateHolder.calculateEventState(
-                    event = event,
-                    input = stateInput,
-                    userIsInArea = userIsInArea,
-                )
-
-            trace.putMetric("user_in_area", if (userIsInArea) 1 else 0)
-            trace.putMetric("user_hit", if (result?.userHasBeenHit == true) 1 else 0)
-            trace.putMetric("progression_percent", progression.toLong())
-            result
+            eventStateHolder.calculateEventState(
+                event = event,
+                input = stateInput,
+                userIsInArea = userIsInArea,
+            )
         } catch (e: IllegalStateException) {
             Log.e("WaveHitDetector", "State error calculating event state: $e")
-            trace.putMetric("error", 1)
             null
         } catch (e: CancellationException) {
-            trace.stop()
             throw e // Re-throw cancellation
         } catch (e: Exception) {
             Log.e("WaveHitDetector", "Unexpected error calculating event state: $e")
-            trace.putMetric("error", 1)
             null
-        } finally {
-            trace.stop()
         }
-    }
 
     /**
      * Validates the calculated state against the input parameters.
