@@ -68,24 +68,22 @@ echo ""
 # ============================================================================
 echo "1️⃣  Checking for Composable-scoped KoinComponent..."
 
-TEMP_FILE=$(mktemp)
-rg -B10 "object.*KoinComponent" "$SHARED_MAIN" --type kotlin 2>/dev/null > "$TEMP_FILE" || true
+# Search for actual object declarations (not in comments)
+# Exclude IosSafeDI.kt as it's a documentation/helper file with safe patterns
+COMPOSABLE_OBJECTS=$(rg -B10 "^[^/]*object.*KoinComponent" "$SHARED_MAIN" --type kotlin 2>/dev/null | \
+    grep -v "IosSafeDI.kt" | \
+    rg "@Composable" -A10 | \
+    rg "^[^/]*object.*KoinComponent" || true)
 
-if grep -q "@Composable" "$TEMP_FILE"; then
-    if grep -A10 "@Composable" "$TEMP_FILE" | grep -q "object.*KoinComponent"; then
-        echo "   ❌ FAIL: Found Composable-scoped KoinComponent"
-        echo ""
-        rg -B10 "object.*KoinComponent" "$SHARED_MAIN" --type kotlin | rg "@Composable" -A10
-        echo ""
-        violations=$((violations + 1))
-    else
-        echo "   ✅ PASS: No Composable-scoped KoinComponent"
-    fi
+if [ -n "$COMPOSABLE_OBJECTS" ]; then
+    echo "   ❌ FAIL: Found Composable-scoped KoinComponent"
+    echo ""
+    echo "$COMPOSABLE_OBJECTS"
+    echo ""
+    violations=$((violations + 1))
 else
     echo "   ✅ PASS: No Composable-scoped KoinComponent"
 fi
-
-rm "$TEMP_FILE"
 
 # ============================================================================
 # CHECK 2: init{} blocks with coroutine launches

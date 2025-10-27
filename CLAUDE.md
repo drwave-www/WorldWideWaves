@@ -1,276 +1,360 @@
 # WorldWideWaves - Claude Code Instructions
 
-> **Quick Links**: [iOS Requirements](#-ios-requirements-critical) | [Build Commands](#build-and-testing-commands) | [Testing](#testing-requirements) | [Debugging](#common-issue-prevention)
-
-## Project Overview
-
-WorldWideWaves is an **ephemeral mobile app** designed to orchestrate human waves through cities and countries. The app creates synchronized, location-based human wave events that transcend physical and cultural boundaries, fostering unity, community, and shared human experience through real-time coordination.
-
-**Key Concept**: Events are ephemeral - they exist briefly, creating shared moments without permanent data storage.
-
-### Technology Stack
-
-#### Core Framework
-- **Platform**: Kotlin Multiplatform Mobile (KMM) 1.9+
-- **UI**: Compose Multiplatform (shared between Android and iOS)
-- **Architecture**: Clean Architecture + MVVM + Reactive Programming
-
-#### UI Layer
-- **Android**: Jetpack Compose (100% shared with iOS)
-- **iOS**: Compose Multiplatform via ComposeUIViewController
-- **Navigation**: Custom navigation with deep linking support
-- **State**: StateFlow + Compose state management
-
-#### Platform Services
-- **Maps**: MapLibre (open-source, self-hosted tiles)
-- **Location**: Native GPS with custom PositionManager abstraction
-- **Sound**: MIDI-based sound choreography (shared code)
-- **Resources**: MokoResources for multiplatform assets
-
-#### Backend & Data
-- **Backend**: Firebase (Firestore, Storage)
-- **Local Storage**: Multiplatform settings
-- **Networking**: Ktor client
-- **Serialization**: Kotlinx Serialization
-
-#### Testing
-- **Unit Tests**: 902+ tests with Kotlin Test + Turbine
-- **Android Instrumented**: Compose UI testing
-- **iOS Testing**: In progress
-- **Coverage**: High coverage on domain/data layers
-
-#### Development Tools
-- **Build**: Gradle 8.5+ with version catalogs
-- **CI/CD**: GitHub Actions (Android + iOS)
-- **Code Quality**: Detekt, SwiftLint
-- **Logging**: Napier (multiplatform) + custom Log wrapper
+> **Quick Links**: [iOS Safety](#ios-requirements-critical) | [Testing](#testing-requirements) | [Build Commands](#build-commands) | [Code Quality](#code-quality-standards)
 
 ---
 
-## 🍎 iOS Requirements [CRITICAL - READ FIRST]
+## Project Overview
 
-> **Status**: ✅ STABLE (October 2025) | **Bundle**: com.worldwidewaves | **Tests**: Pending
+WorldWideWaves is an **ephemeral mobile app** for orchestrating synchronized, location-based human wave events. Events exist briefly, creating shared moments without permanent data storage.
 
-### Current Working Architecture
+### Technology Stack
 
-WorldWideWaves iOS uses **Compose Multiplatform** with native UIKit integration:
+- **Platform**: Kotlin Multiplatform Mobile (KMM) 1.9+
+- **UI**: Compose Multiplatform (100% shared Android/iOS)
+- **Maps**: MapLibre (open-source, self-hosted)
+- **Backend**: Firebase (Firestore, Storage)
+- **DI**: Koin
+- **Testing**: 902+ unit tests (Kotlin Test + Turbine)
+- **CI/CD**: GitHub Actions (Android + iOS)
 
-```
-┌─────────────────────────────────────────────────┐
-│         iOS App (Swift/UIKit)                    │
-│                                                   │
-│  ┌──────────────────────────────────────────┐   │
-│  │  AppDelegate.swift                        │   │
-│  │  - Firebase initialization                │   │
-│  │  - Crashlytics setup                      │   │
-│  │  - URL routing (legacy)                   │   │
-│  │  - App lifecycle                          │   │
-│  └──────────────────────────────────────────┘   │
-│                                                   │
-│  ┌──────────────────────────────────────────┐   │
-│  │  SceneDelegate.swift                      │   │
-│  │  - Scene/window management                │   │
-│  │  - Platform initialization (Koin, Moko)   │   │
-│  │  - SKIKO configuration (Metal)            │   │
-│  │  - iOS lifecycle hook registration        │   │
-│  │  - NativeMapViewProvider registration     │   │
-│  │  - Deep link routing                      │   │
-│  └──────────────────────────────────────────┘   │
-│                                                   │
-│  ┌──────────────────────────────────────────┐   │
-│  │  IOSPlatformEnabler.swift                 │   │
-│  │  - Swift-Kotlin bridge                    │   │
-│  │  - Native services (haptics, etc.)        │   │
-│  │  - VoiceOver announcements                │   │
-│  │  - Navigation & URL handling              │   │
-│  └──────────────────────────────────────────┘   │
-│                                                   │
-│  ┌──────────────────────────────────────────┐   │
-│  │  SwiftNativeMapViewProvider.swift         │   │
-│  │  - Kotlin→Swift map bridge                │   │
-│  │  - Creates MapLibre UIViewControllers     │   │
-│  │  - Registered in Koin DI                  │   │
-│  └──────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────┘
-                      │
-                      ▼
-┌─────────────────────────────────────────────────┐
-│     Shared Kotlin Code (Compose UI + Logic)      │
-│                                                   │
-│  ┌──────────────────────────────────────────┐   │
-│  │  RootController.kt                        │   │
-│  │  - makeMainViewController()               │   │
-│  │  - makeEventViewController(id)            │   │
-│  │  - makeWaveViewController(id)             │   │
-│  │  - makeFullMapViewController(id)          │   │
-│  └──────────────────────────────────────────┘   │
-│                                                   │
-│  ┌──────────────────────────────────────────┐   │
-│  │  Screen Classes (activities/)             │   │
-│  │  - MainScreen, EventDetailScreen          │   │
-│  │  - WaveParticipationScreen, FullMapScreen │   │
-│  │  - Compose UI content                     │   │
-│  └──────────────────────────────────────────┘   │
-│                                                   │
-│  ┌──────────────────────────────────────────┐   │
-│  │  Shared Compose UI Components             │   │
-│  │  - EventsScreen, WaveScreen, etc.         │   │
-│  │  - 100% shared between platforms          │   │
-│  └──────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────┘
-```
+### Architecture
 
-### 🚨 iOS Deadlock Prevention Rules [MANDATORY]
+- **Pattern**: Clean Architecture + MVVM + Reactive Programming
+- **State Management**: StateFlow + Compose
+- **Position**: PositionManager as single source of truth (SIMULATION > GPS)
+- **Navigation**: Custom deep linking
 
-iOS Kotlin/Native has **strict threading requirements**. Violating these rules causes **immediate deadlocks** on app launch.
+---
 
-#### ❌ NEVER DO THIS:
+## iOS Requirements [CRITICAL]
+
+> **Status**: ✅ STABLE | **Tests**: 902/902 passing | **Violations**: 0/11
+
+### 🚨 iOS Deadlock Prevention [MANDATORY]
+
+iOS Kotlin/Native has **strict threading requirements**. Violations cause **immediate deadlocks** on app launch.
+
+#### The 6 Absolute Rules
+
+**❌ NEVER**:
+1. `object : KoinComponent` inside @Composable scopes
+2. `by inject()` during Compose composition
+3. `runBlocking` before ComposeUIViewController
+4. Coroutine launches in `init{}` blocks
+5. DI access (`get<T>()`) in `init{}` blocks
+6. `Dispatchers.Main` in property initialization
+
+**✅ ALWAYS**:
+1. Use IOSSafeDI singleton for Composable DI access
+2. Use parameter injection or LocalKoin.current.get<T>()
+3. Use suspend functions with LaunchedEffect
+4. Use constructor injection, not init{} DI
+5. Use lazy initialization: `by lazy { CoroutineScope(Dispatchers.Main) }`
+
+#### Quick Example
 
 ```kotlin
-// ❌ WRONG: Object inside @Composable function
+// ❌ DEADLOCKS iOS!
 @Composable
-fun MyScreen() {
+fun Screen() {
     val deps = object : KoinComponent {
-        val clock by inject()  // DEADLOCKS iOS!
+        val clock by inject()  // DEADLOCK
     }
 }
 
-// ❌ WRONG: Coroutine launch in init{}
-class MyClass {
-    init {
-        CoroutineScope.launch {  // DEADLOCKS iOS!
-            doWork()
-        }
-    }
-}
-
-// ❌ WRONG: DI access in init{}
-class MyClass {
-    init {
-        val dep = get<SomeDependency>()  // DEADLOCKS iOS!
-    }
+// ✅ SAFE
+@Composable
+fun Screen() {
+    val clock = getIOSSafeClock()  // IOSSafeDI wrapper
 }
 ```
 
-#### ✅ ALWAYS DO THIS:
+#### Verification
 
-```kotlin
-// ✅ CORRECT: Use IOSSafeDI singleton (file-level)
-object IOSSafeDI : KoinComponent {  // File-level is OK
-    val platform: WWWPlatform by inject()
-    val clock: IClock by inject()
-}
-
-@Composable
-fun MyScreen() {
-    val clock = getIOSSafeClock()  // Safe wrapper function
-}
-
-// ✅ CORRECT: Parameter injection
-@Composable
-fun MyScreen(viewModel: MyViewModel) {
-    // Use viewModel
-}
-
-@Composable
-fun ParentScreen() {
-    val viewModel = LocalKoin.current.get<MyViewModel>()
-    MyScreen(viewModel)
-}
-
-// ✅ CORRECT: Suspend initialization
-class MyClass {
-    private lateinit var data: Data
-
-    suspend fun initialize() {
-        data = loadData()
-    }
-}
-
-@Composable
-fun UseClass() {
-    val instance = remember { MyClass() }
-    LaunchedEffect(Unit) {
-        instance.initialize()
-    }
-}
-```
-
-#### ✅ CORRECT: Kotlin-Swift Exception Handling
-
-```kotlin
-@Throws(Throwable::class)
-fun makeMainViewController(): UIViewController { ... }
-```
-
-```swift
-do {
-    let vc = try RootControllerKt.makeMainViewController()
-} catch let e as NSError {
-    NSLog("❌ Error: \(e.localizedDescription)")
-}
-```
-
-### 🧪 Automated Verification
-
-**Before every commit to shared code, run**:
+**Before EVERY commit** touching shared code:
 ```bash
 ./scripts/verify-ios-safety.sh
 ```
 
-**Manual verification**:
-```bash
-# 1. Find Composable-scoped KoinComponent (SHOULD RETURN ZERO)
-rg -B10 "object.*KoinComponent" shared/src/commonMain --type kotlin \
-  | rg "@Composable" -A10 | rg "object.*KoinComponent"
+**Expected**: Zero violations in all checks.
 
-# 2. Find init{} blocks with coroutine launches (SHOULD RETURN ZERO)
-rg -n -A 5 "init\s*\{" shared/src/commonMain --type kotlin \
-  | rg "launch\{|async\{|scope\."
+**See**: [CLAUDE_iOS.md](./CLAUDE_iOS.md) for comprehensive iOS guide
+**See**: [docs/patterns/ios-safety-patterns.md](docs/patterns/ios-safety-patterns.md) for all patterns
 
-# 3. Find init{} blocks with DI access (SHOULD RETURN ZERO)
-rg -n -A 3 "init\s*\{" shared/src/commonMain --type kotlin \
-  | rg "get\(\)|inject\(\)" | rg -v "// iOS FIX"
+---
 
-# 4. Verify IOSSafeDI singleton exists (SHOULD RETURN ONE)
-rg "object IOSSafeDI : KoinComponent" shared/src/commonMain --type kotlin
+## Accessibility Requirements [MANDATORY]
 
-# 5. Find file-level KoinComponent objects (LEGITIMATE - for review)
-rg "^object.*: KoinComponent" shared/src/commonMain --type kotlin
+> **Status**: ✅ WCAG 2.1 Level AA Compliant | **Tests**: 27+ passing
+
+### All UI Components Must
+
+- ✅ **contentDescription**: Localized via MokoRes.strings
+- ✅ **semantics**: `role`, `contentDescription`, `stateDescription`
+- ✅ **Touch targets**: 48dp (Android) / 44pt (iOS) minimum
+- ✅ **Text scaling**: Use `.sp` units (respects system font size)
+- ✅ **Screen readers**: TalkBack (Android) and VoiceOver (iOS)
+- ✅ **Color contrast**: 4.5:1 minimum ratio (WCAG AA)
+- ✅ **Heading hierarchy**: `semantics { heading = true }`
+
+### Example
+
+```kotlin
+Button(
+    onClick = { action() },
+    modifier = Modifier
+        .size(48.dp)
+        .semantics {
+            role = Role.Button
+            contentDescription = "Join wave event"
+        }
+)
 ```
 
-**Expected Results**:
-- Commands 1-3: **ZERO results** (no violations)
-- Command 4: **ONE result** (IOSSafeDI.kt)
-- Command 5: **Review results** (file-level singletons are OK, verify intentional)
+### Testing
 
-**Note**: Class-level `by inject()` is SAFE and expected:
+```bash
+./scripts/test_accessibility.sh  # Before each PR
+```
+
+**See**: [docs/accessibility-guide.md](docs/accessibility-guide.md) for complete patterns
+
+---
+
+## Mandatory Development Requirements
+
+### Platform Compatibility
+
+- **Cross-platform**: macOS + Linux required
+- **Scripts**: Use `#!/usr/bin/env bash`, avoid macOS-only commands
+- **Testing**: Verify on both platforms before commit
+
+### Build System
+
+- ❌ **NEVER modify `gradle.build.kt` without approval**
+- ❌ **NEVER disable tests without permission**
+- ✅ **ALWAYS run tests before commit**
+
+### Testing Philosophy
+
+- **Tests validate business requirements**, not implementation details
+- **Test failures** mean: (1) business logic issue OR (2) requirements changed
+- **Test modifications require approval** with explanation
+- **Test deletion absolutely forbidden** without explicit consent
+
+### Security
+
+- ❌ Never log, store, or transmit API keys/tokens/secrets
+- ✅ Validate all user inputs (coordinates: lat±90, lng±180)
+- ✅ Use proper exception handling without exposing sensitive data
+- ✅ All network requests must use HTTPS
+- ✅ Handle location data with appropriate privacy measures
+
+---
+
+## Testing Requirements
+
+### Test Organization
+
+```
+shared/src/
+├── commonTest/          # Platform-independent (NO MockK, NO JVM APIs)
+├── androidUnitTest/     # Android-specific (CAN use MockK)
+└── iosTest/             # iOS-specific (NO MockK, Kotlin/Native only)
+```
+
+### Critical: Run Before Every Commit
+
+```bash
+./gradlew clean :shared:testDebugUnitTest :composeApp:assembleDebug
+# Expected: 902+ tests, 100% pass rate, ~22s execution
+```
+
+### Requirements
+
+- **All changes must pass existing test suite** (902+ tests)
+- **New functionality requires tests** - no test debt
+- **Run ALL tests**, not just relevant ones
+- **Performance**: Monitor test execution time
+- **iOS safety**: `./scripts/verify-ios-safety.sh` for shared code changes
+
+### Key Test Patterns
+
 ```kotlin
-class MyClass : KoinComponent {
-    private val dependency by inject()  // ✅ SAFE - class property
+// Infinite flows - Don't use advanceUntilIdle()!
+observer.startObservation()
+testScheduler.runCurrent()  // Process current only
+// ... assertions ...
+observer.stopObservation()  // Cancel first
+testScheduler.advanceUntilIdle()  // Now safe
+
+// Test isolation - Prevent flaky tests
+@AfterTest
+fun tearDown() {
+    runBlocking {
+        testScopeProvider.cancelAllCoroutines()
+        delay(500)  // Cleanup propagation
+    }
+    stopKoin()
 }
 ```
 
-**📋 TRACKING**: See [docs/ios/ios-violation-tracker.md](docs/ios/ios-violation-tracker.md) for comprehensive history
-**✅ STATUS**: All 11 critical violations fixed (October 2025)
-**🎯 MAINTENANCE**: Run verification commands regularly to prevent regressions
+**See**: [docs/testing/test-patterns.md](docs/testing/test-patterns.md) for comprehensive patterns
 
-### 🔧 iOS Build & Run
+---
 
-#### From Xcode (Recommended):
+## Code Quality Standards
+
+### 🚨 Zero-Warnings Policy [MANDATORY]
+
+**BEFORE EVERY COMMIT**: ALL platforms MUST compile with ZERO warnings.
+
 ```bash
-cd iosApp
-open worldwidewaves.xcodeproj
-# Select worldwidewaves scheme, iPhone 15 Pro simulator
-# Press Cmd+R to build and run
+# Pre-commit verification checklist
+./gradlew :shared:compileKotlinIosSimulatorArm64        # iOS Kotlin
+./gradlew :shared:compileDebugKotlinAndroid            # Android Kotlin
+./gradlew :shared:testDebugUnitTest                     # All tests
+cd iosApp && xcodebuild -project worldwidewaves.xcodeproj -scheme worldwidewaves build  # iOS Swift
+swiftlint lint --quiet                                  # SwiftLint (0 warnings)
+./gradlew detekt                                        # Detekt (0 warnings)
 ```
 
-#### From Command Line:
+**NO EXCEPTIONS** - Fix ALL warnings, even in files you didn't modify.
+
+### Null Safety
+
+**Rule**: NEVER use `!!` in production code.
+
+```kotlin
+// ❌ UNSAFE
+val position = simulation!!.getUserPosition()
+
+// ✅ SAFE
+val position = simulation?.getUserPosition() ?: Position.UNKNOWN
+
+// ✅ SAFE with context
+val wave = requireNotNull(linear ?: deep ?: linearSplit) {
+    "Wave definition must exist after validation"
+}
+```
+
+**See**: [docs/patterns/null-safety-patterns.md](docs/patterns/null-safety-patterns.md)
+
+### Thread Safety
+
+Any mutable shared state MUST have explicit synchronization:
+
+```kotlin
+object SharedState {
+    private val mutex = Mutex()
+    private val data = mutableSetOf<String>()
+
+    suspend fun add(item: String) {
+        mutex.withLock { data += item }
+    }
+}
+```
+
+### Detekt Suppressions (When Justified)
+
+```kotlin
+@Suppress("ReturnCount")  // Guard clauses OK
+@Suppress("TooGenericExceptionCaught")  // When catching IndexOutOfBoundsException
+@Suppress("MatchingDeclarationName")  // expect/actual files (*.android.kt)
+```
+
+**Always add comment explaining WHY.**
+
+### Code Style
+
+- **Kotlin conventions**: Follow official Kotlin coding conventions
+- **Import organization**: Run `./gradlew :shared:ktlintFormat`
+- **Class order**: companion → properties → init → public → private → nested
+- **File size**: Target <300 lines, warning >500, must split >600
+
+**See**: [docs/code-style/class-organization.md](docs/code-style/class-organization.md)
+
+---
+
+## Architecture Patterns
+
+### Dependency Injection
+
+- **Framework**: Koin for all DI
+- **iOS Safety**: Use IOSSafeDI singleton for Composable access
+- **Modules**: CommonModule, AndroidModule, IOSModule
+
+### Position System
+
+**Critical Rule**: PositionManager is the **single source of truth** for user position.
+
+- ✅ Components **observe** position via `positionManager.positionFlow`
+- ❌ Components **never set** position directly
+- **Priority**: SIMULATION > GPS (testing > real device)
+- **Pattern**: Reactive updates via StateFlow
+
+```kotlin
+// ✅ CORRECT
+positionManager.positionFlow.collect { position ->
+    handlePosition(position)
+}
+
+// ❌ WRONG
+val gpsProvider = GPSProvider()  // Don't create separate sources!
+```
+
+### Error Handling
+
+```kotlin
+// ✅ CORRECT
+@Throws(Throwable::class)
+fun performOperation() {
+    try {
+        val result = doWork()
+        Log.v(TAG, "Success")
+    } catch (e: SpecificException) {
+        Log.e(TAG, "Failed", throwable = e)
+        // Handle without exposing sensitive data
+    }
+}
+```
+
+---
+
+## Build Commands
+
+### Essential Commands
+
 ```bash
-# Build framework
+# Run unit tests
+./gradlew :shared:testDebugUnitTest
+
+# Build debug version
+./gradlew assembleDebug
+
+# Run lint checks
+./gradlew detekt
+
+# Verify iOS safety (shared code changes)
+./scripts/verify-ios-safety.sh
+
+# Accessibility tests
+./scripts/test_accessibility.sh
+```
+
+### iOS Build
+
+```bash
+# Build Kotlin framework
 ./gradlew :shared:embedAndSignAppleFrameworkForXcode
 
-# Build app
+# From Xcode (recommended)
+cd iosApp
+open worldwidewaves.xcodeproj
+# Cmd+R to build and run
+
+# From command line
 cd iosApp
 xcodebuild -project worldwidewaves.xcodeproj \
   -scheme worldwidewaves \
@@ -278,959 +362,25 @@ xcodebuild -project worldwidewaves.xcodeproj \
   build
 ```
 
-### 🐛 iOS Debugging
+### Clean Build
 
-#### View Logs:
 ```bash
-xcrun simctl spawn booted log stream \
-  --predicate 'process == "WorldWideWaves"' \
-  --level debug
-```
-
-#### Common Issues:
-
-| Symptom | Cause | Solution |
-|---------|-------|----------|
-| App freezes on launch | DI violation | Run `verify-ios-safety.sh` |
-| Koin initialization fails | Missing IOSModule | Check SceneDelegate `installPlatform()` |
-| Compose UI crash | SKIKO not set | Verify `setenv("SKIKO_RENDER_API", "METAL", 1)` |
-| Resources not loading | MokoRes bundle issue | Check `doInitPlatform()` logs |
-| Map gestures not working | Wrong property names | Use `isZoomEnabled/isScrollEnabled` not `allowsZooming/allowsScrolling` |
-| User can pan outside event | Camera validation disabled | Check `shouldChangeFrom` delegate validates bounds |
-
-### 📚 Detailed iOS Documentation
-
-For complete iOS setup, debugging, and troubleshooting:
-- **[CLAUDE_iOS.md](./CLAUDE_iOS.md)** - Complete iOS development guide
-- **[docs/ios/ios-success-state.md](./docs/ios/ios-success-state.md)** - Current working state verification
-- **[docs/ios/ios-violation-tracker.md](./docs/ios/ios-violation-tracker.md)** - Historical violations and fixes
-- **[docs/ios/ios-debugging-guide.md](./docs/ios/ios-debugging-guide.md)** - Advanced debugging
-
----
-
-## Accessibility Requirements [MANDATORY]
-
-> **Status**: ✅ WCAG 2.1 Level AA Compliant | **Last Updated**: October 2025
-
-### All UI Components Must:
-
-- ✅ **Have contentDescription**: All images/icons must have meaningful descriptions (localized via MokoRes.strings when available)
-- ✅ **Use semantics blocks**: All interactive elements need `Modifier.semantics { role, contentDescription, stateDescription }`
-- ✅ **Meet touch target minimums**: 48dp (Android) / 44pt (iOS) on all interactive elements
-- ✅ **Support text scaling**: Use `.sp` units for all text sizes (respects system font size)
-- ✅ **Announce state changes**: Use live regions for dynamic content (`liveRegion = LiveRegionMode.Polite`)
-- ✅ **Work with screen readers**: TalkBack (Android) and VoiceOver (iOS) must fully function
-- ✅ **Meet color contrast**: 4.5:1 minimum ratio for all text (WCAG AA standard)
-- ✅ **Include heading hierarchy**: Mark screen titles with `semantics { heading = true }`
-
-### Code Pattern Examples
-
-```kotlin
-// Button with semantics
-Button(
-    onClick = { action() },
-    modifier = Modifier.semantics {
-        role = Role.Button
-        contentDescription = "Clear action description"
-    }
-)
-
-// Touch target compliance (48dp minimum)
-Box(
-    modifier = Modifier
-        .size(48.dp)  // Minimum touch target
-        .clickable { action() }
-        .semantics { role = Role.Button },
-    contentAlignment = Alignment.Center
-) {
-    Icon(
-        modifier = Modifier.size(24.dp),  // Visual size smaller
-        imageVector = icon,
-        contentDescription = description
-    )
-}
-
-// iOS VoiceOver announcement
-val platformEnabler = getIosSafePlatformEnabler()
-platformEnabler.announceForAccessibility("Wave starting in 5 seconds")
-platformEnabler.triggerHapticWarning()
-```
-
-### Testing Requirements
-
-**Before each PR**:
-```bash
-# Run accessibility test suite
-./scripts/test_accessibility.sh
-
-# Manual testing
-# Android: Enable TalkBack, navigate entire app
-# iOS: Enable VoiceOver, test with Dynamic Type at max size
-```
-
-**Required validations**:
-- [ ] All 27+ accessibility tests pass
-- [ ] TalkBack navigation works without manual mode
-- [ ] VoiceOver announces all critical events
-- [ ] Touch targets verified ≥ 48dp/44pt
-- [ ] Color contrast verified ≥ 4.5:1
-- [ ] Text scales properly (Android: 200%, iOS: 300%)
-
-### Platform-Specific Requirements
-
-**Android**:
-- Semantics: `Role.Button`, `Role.Tab`, `Role.Checkbox`
-- State descriptions for all toggles/selections
-- Live regions for progress indicators
-- Focus indicators for keyboard navigation
-
-**iOS**:
-- VoiceOver announcements for wave timing
-- Haptic feedback (success/warning/impact)
-- Dynamic Type support (12 text size levels)
-- Map accessibility (VoiceOver can navigate map)
-- Toast announcements via accessibility API
-
-### Documentation
-
-- **[Accessibility Guide](./docs/accessibility-guide.md)** - Complete implementation patterns
-- **[iOS Map Accessibility](./docs/ios/ios-map-accessibility.md)** - Map-specific implementation
-- **Test Script**: `./scripts/test_accessibility.sh`
-
-**⚠️ CRITICAL**: Accessibility is not optional. All new UI components must follow these patterns before merging.
-
----
-
-## Recent Major Updates
-
-### Accessibility Implementation (October 2025)
-Comprehensive WCAG 2.1 Level AA compliance achieved:
-- **Android**: Complete semantics, touch targets, color contrast, live regions
-- **iOS**: VoiceOver, haptics, Dynamic Type (0.8x-3.0x), map accessibility
-- **Testing**: 27+ automated tests, manual TalkBack/VoiceOver procedures
-- **Wave Coordination**: Fully accessible to blind users via audio + haptics
-
-### Position System Refactor (September 2025)
-A comprehensive position system refactor has been completed to improve performance, maintainability, and reliability:
-
-- **Unified Observer Architecture**: Replaced 3 separate observation streams with single efficient stream
-- **PositionManager Integration**: Centralized position management with source priority and debouncing
-- **Map Integration**: Enhanced AbstractEventMap integration with unified position handling
-- **Performance Optimizations**: Conservative architectural improvements maintaining test compatibility
-- **Status**: ✅ Completed (902/902 unit tests passing, instrumented tests in progress)
-
-#### Key Principles
-
-1. **Single Source of Truth**: PositionManager is the only source of user position
-2. **No Direct Position Setting**: Components observe position, don't set it
-3. **Priority Handling**: Simulation positions override GPS (for testing)
-4. **Reactive Updates**: All position changes flow through StateFlow streams
-
-#### Usage Pattern
-
-```kotlin
-// ✅ CORRECT: Observe positions from PositionManager
-class MyComponent(
-    private val positionManager: PositionManager
-) {
-    fun observePosition() {
-        positionManager.positionFlow.collect { position ->
-            handlePosition(position)
-        }
-    }
-}
-
-// ❌ WRONG: Don't create separate position sources
-class MyComponent {
-    private val gpsProvider = GPSProvider()  // WRONG!
-}
+./gradlew clean
+rm -rf ~/Library/Developer/Xcode/DerivedData/worldwidewaves-*
+./gradlew :shared:embedAndSignAppleFrameworkForXcode
 ```
 
 ---
 
-## Mandatory Development Requirements
-
-### Platform Compatibility
-- **Cross-platform development**: All development must be compatible with **both macOS and Linux** environments
-- **Script compatibility**: Bash scripts must use `#!/usr/bin/env bash` and avoid macOS-specific commands
-- **Path handling**: Use POSIX-compliant path operations (avoid hardcoded paths)
-- **Tool availability**: Verify tool availability and provide installation instructions for both platforms
-- **Testing**: Test scripts and builds on both macOS and Linux before committing
-
-### Build System Restrictions
-- **NEVER modify gradle.build.kt files**: Always ask before making changes to build configuration files
-- **Dependency changes**: Coordinate any dependency updates or additions
-- **Build script modifications**: Require explicit approval before altering build logic
-
-### Testing Requirements
-- **ALWAYS run tests after commits**: Ensure no regressions were introduced
-- **NEVER disable tests without permission**: Always ask user permission before disabling, skipping, or renaming any test files
-- **NEVER disable tests to make them pass**: Tests must be logical and business-oriented, not mirror current code implementation
-- **Test failure philosophy**: If tests fail, either there's a business logic issue in the code OR the business requirements changed and tests need adaptation
-- **Test-first thinking**: Tests validate business requirements, not implementation details
-- **Test modifications**: Changing test logic requires explanation and user approval - explain what business requirement changed
-- **Test deletion**: Absolutely forbidden without explicit user consent
-- **Always run tests before pushing**: Verify all tests pass locally before pushing to origin
-- **Self-verification requirement**: If you can test fixes yourself by running scripts, apps in simulators, or automated tests without requesting the user to do it, then you MUST do it. Only ask the user to test when it requires physical device interaction or manual user-specific actions
-
-### Security Patterns
-- **NO credential exposure**: Never log, store, or transmit API keys, tokens, or secrets
-- **Input validation**: All user inputs must be validated and sanitized
-- **Error handling**: Use proper exception handling without exposing sensitive information
-- **Secure communication**: All network requests must use HTTPS
-- **Data protection**: Personal location data must be handled with appropriate privacy measures
-
-### Architecture Patterns
-- **Dependency Injection**: Use Koin for dependency management
-- **Reactive Programming**: Leverage Kotlin Coroutines and Flow for async operations
-- **State Management**: Use StateFlow for reactive state management
-- **Clean Architecture**: Maintain clear separation between data, domain, and presentation layers
-- **Testing**: Write comprehensive unit tests and maintain existing test coverage
-
-### Development Workflow Requirements
-
-#### Critical Rules
-- **Use agents for complex tasks**: Create specialized agents when needed for specific tasks
-- **Check all implications**: When making changes, analyze callers, documentation, signatures
-- **Always clean temporary files**: Remove files created during development if not required
-- **Git push has costs**: GitHub Actions workflows are not free - only push when asked or required
-- **Search for similar patterns**: When fixing bugs, search for similar error patterns in other parts of codebase
-- **Never bypass hooks**: Never bypass git commit and push hooks
-- **Use short names**: Don't call objects/classes by long names (use imports for readability)
-- **Fix warnings immediately**: Don't keep build or lint warnings - correct them to prevent accumulation
-
-### Code Modification Best Practices
-
-#### Import Management (CRITICAL)
-- **ALWAYS check existing imports BEFORE modifying code**
-- When adding new function calls, classes, or language features:
-  1. First check if the required import exists in the file
-  2. Add missing imports immediately in the same change
-  3. Verify compilation before committing
-- This prevents compilation errors and reduces iteration cycles
-
-**Common imports to check:**
-- Coroutines: `kotlinx.coroutines.runBlocking`, `kotlinx.coroutines.withContext`, etc.
-- Compose: `androidx.compose.runtime.key`, `androidx.compose.runtime.LaunchedEffect`, etc.
-- Platform: `platform.UIKit.*`, `platform.Foundation.*` for iOS
-- Logging: `com.worldwidewaves.shared.utils.Log`
-
-### Position System Guidelines
-- **PositionManager**: Use centralized position management for all location-related operations
-- **Source Priority**: SIMULATION > GPS (simulation for testing, GPS for real device location)
-- **No Map Click Positioning**: User position comes from GPS only, not map interactions
-- **Reactive Updates**: Use unified position streams rather than direct position setting
-
-### iOS/Android Map Parity Guidelines
-
-**Critical Lessons from Map Parity Implementation (October 2025)**:
-
-1. **Platform API Limitations Are Real**
-   - Not all Android MapLibre features have iOS equivalents (e.g., `setLatLngBoundsForCameraTarget`)
-   - Solution: Implement equivalent behavior using available APIs (gesture clamping via delegate)
-   - Document why platforms differ when APIs aren't equivalent
-
-2. **Gesture Property Names Matter**
-   - iOS MapLibre uses `isZoomEnabled/isScrollEnabled` (NOT `allowsZooming/allowsScrolling`)
-   - Wrong property names silently fail in Swift - gestures remain enabled/disabled unexpectedly
-   - Always verify property names against MapLibre API documentation
-
-3. **Min Zoom Calculation**
-   - iOS uses 512px tiles (not 256px) in zoom calculation: `log2((screenHeight * 360) / (boundsHeight * 512))`
-   - Android uses `getCameraForLatLngBounds()` for constraint-based calculation
-   - Result: iOS min zoom slightly higher than theoretical, but provides acceptable viewport coverage
-
-4. **Camera Validation Approach**
-   - iOS: Validates camera center against constraint bounds in `shouldChangeFrom` delegate
-   - Android: Uses viewport bounds checking (all 4 corners must be inside constraints)
-   - Both prevent out-of-bounds panning, different techniques
-
-5. **Polygon Queue Optimization**
-   - Wave progression is cumulative - each set contains all previous circles
-   - Only store most recent polygon set, not entire history
-   - Reduces memory usage and simplifies logic
-
-6. **Race Condition Patterns**
-   - iOS requires comprehensive pending state queues (polygons, bounds, positions)
-   - Android can rely on initialization order but benefits from same pattern
-   - Always queue operations that depend on async style loading
-
-7. **Validation Everywhere**
-   - iOS validates bounds (ne > sw, lat/lng ranges) - prevents crashes
-   - Android lacked validation - add it proactively
-   - Validation prevents obscure C++ exceptions from native MapLibre code
-
-8. **UUID for Dynamic Layers**
-   - Simple index-based IDs can conflict during rapid updates
-   - Use UUID suffix: `"wave-polygons-source-{index}-{uuid}"`
-   - Prevents layer/source conflicts in both platforms
-
-9. **Command Pattern for iOS**
-   - MapWrapperRegistry uses command pattern for Kotlin→Swift coordination
-   - Configuration commands queue (all execute), animation commands use single slot (latest wins)
-   - Attribution margins, camera constraints, zoom all use this pattern
-
-10. **Platform-Specific Architectures Are OK**
-    - iOS: Custom MLNPointAnnotation (manual updates via PositionManager)
-    - Android: Native LocationComponent (automatic via LocationEngineProxy)
-    - Document differences, don't force artificial parity
-
-11. **Comprehensive Documentation Prevents Repetition**
-    - 97-point systematic comparison revealed all gaps
-    - Standalone prompt document enables efficient future sessions
-    - Architecture diagrams show flow differences clearly
-
----
-
-## Performance Considerations for KMM
-
-### Memory Management
-- Use appropriate coroutine scopes and cancel jobs properly
-- Avoid memory leaks in long-running operations
-- Properly dispose of reactive streams and observers
-
-### Battery Optimization
-- Minimize GPS usage frequency through debouncing and deduplication
-- Use appropriate location providers based on accuracy requirements
-- Implement proper background/foreground state handling
-
-### Cross-Platform Compatibility
-- Test implementations on both Android and iOS
-- Use expect/actual declarations for platform-specific code
-- Maintain consistent behavior across platforms
-
----
-
-## Error Handling Patterns
-
-```kotlin
-// ✅ CORRECT: Proper error handling
-@Throws(Throwable::class)
-fun performOperation() {
-    try {
-        val result = doWork()
-        Log.v("Component", "Operation successful")
-    } catch (e: Exception) {
-        Log.e("Component", "Operation failed", throwable = e)
-        // Handle error appropriately without exposing sensitive data
-    }
-}
-
-// ❌ WRONG: Generic exception exposure
-catch (e: Exception) {
-    throw e // Don't re-throw without handling
-}
-```
-
----
-
-## Input Validation Requirements
-
-- Validate all geographic coordinates (latitude: -90 to 90, longitude: -180 to 180)
-- Sanitize all user-provided text inputs
-- Validate time/duration inputs for reasonable ranges
-- Check file paths and prevent directory traversal attacks
-- Validate network URLs and prevent SSRF attacks
-
----
-
-## Critical Asset Protection
-
-### Location Data
-- Never log precise user coordinates in production
-- Use appropriate precision levels for different use cases
-- Implement proper data retention policies
-- Respect user privacy preferences
-
-### API Keys and Secrets
-- Store in secure configuration (not in code)
-- Use BuildConfig or equivalent for environment-specific values
-- Never commit secrets to version control
-- Implement proper key rotation procedures
-
----
-
-## Common Issue Prevention
-
-### Position/Location Issues
-- Always check for null positions before use
-- Implement proper fallback mechanisms for missing GPS
-- Use PositionManager for all position operations
-- Test position flows with both real and simulated data
-
-### Coroutine Management
-- Always use appropriate CoroutineScope
-- Cancel jobs when components are destroyed
-- Use proper exception handling in coroutines
-- Avoid blocking operations on main thread
-
-### Testing Best Practices
-- Mock external dependencies properly
-- Use TestCoroutineScheduler for testing time-dependent code
-- Maintain test isolation and avoid test interdependencies
-- Run both unit and instrumented tests before committing
-
----
-
-## Code Style Guidelines
-
-### Kotlin Style
-- Follow official Kotlin coding conventions
-- Use meaningful variable and function names
-- Prefer immutable data structures where possible
-- Use extension functions appropriately
-
-### Documentation
-- Document complex algorithms and business logic
-- Use KDoc for public APIs
-- Include examples in documentation where helpful
-- Maintain up-to-date README files
-
-### Class Organization Standards
-
-**Standard Class Structure** (top to bottom):
-```kotlin
-class MyClass {
-    // 1. COMPANION OBJECT (always first)
-    companion object {
-        private const val TAG = "MyClass"
-        fun create(): MyClass = MyClass()
-    }
-
-    // 2. PROPERTIES
-    // Public properties first
-    val publicProperty: String
-
-    // Private properties second
-    private val privateProperty: Int
-
-    // 3. INIT BLOCKS
-    init {
-        // Initialization logic
-    }
-
-    // 4. PUBLIC API METHODS
-    fun publicMethod() {
-        // Implementation
-    }
-
-    // 5. INTERNAL/PROTECTED METHODS
-    internal fun internalMethod() {
-        // Implementation
-    }
-
-    // 6. PRIVATE HELPER METHODS
-    private fun helperMethod() {
-        // Implementation
-    }
-
-    // 7. NESTED CLASSES/OBJECTS
-    data class NestedData(val value: String)
-}
-```
-
-**Section Comments for Large Files** (>200 lines):
-```kotlin
-// ============================================================
-// PUBLIC API
-// ============================================================
-
-fun publicMethod1() { }
-fun publicMethod2() { }
-
-// ============================================================
-// PRIVATE HELPERS
-// ============================================================
-
-private fun helper1() { }
-private fun helper2() { }
-
-// ============================================================
-// DATA CLASSES
-// ============================================================
-
-data class Result(val value: String)
-```
-
-**Method Grouping Principles**:
-- Group related methods together
-- Keep public API methods near the top
-- Place lifecycle methods (onCreate, onDestroy) in logical order
-- Group by feature/responsibility, not alphabetically
-- Use section comments for files >200 lines
-
-**File Size Guidelines**:
-- Target: <300 lines per file
-- Warning: >500 lines (consider splitting)
-- Maximum: <600 lines (must split if exceeded)
-
-### Code Quality Best Practices
-
-**🚨 CRITICAL: Zero-Warnings & Full Compilation Policy (MANDATORY)**:
-- **BEFORE EVERY COMMIT**: ALL platforms MUST compile successfully with ZERO warnings
-- **NO EXCEPTIONS**: There are ZERO acceptable warnings or compilation errors
-- **Fix ALL warnings in ENTIRE codebase, not just modified files**
-  - ❌ UNACCEPTABLE: "All remaining lint warnings are in files I didn't modify"
-  - ✅ REQUIRED: Fix ALL warnings even in unmodified files during your commit
-  - **Why**: Prevents warning accumulation and maintains zero-warning policy
-  - **How**: Run full lint check, fix all warnings before committing
-- **Pre-commit verification checklist**:
-  1. ✅ Run `./gradlew :shared:compileKotlinIosSimulatorArm64` (iOS Kotlin)
-  2. ✅ Run `./gradlew :shared:compileDebugKotlinAndroid` (Android Kotlin)
-  3. ✅ Run `./gradlew :shared:testDebugUnitTest` (All unit tests)
-  4. ✅ Run `cd iosApp && xcodebuild -project worldwidewaves.xcodeproj -scheme worldwidewaves build` (iOS Swift)
-  5. ✅ Run `swiftlint lint --quiet` on ENTIRE codebase and verify 0 warnings
-  6. ✅ Run detekt on ENTIRE codebase and verify 0 warnings
-- **SwiftLint**: Fix ALL warnings (line length, function length, file length, etc.) in ALL files
-- **Detekt**: Fix ALL warnings in ALL files or add justified `@Suppress` with explanation
-- **Compilation**: Fix ALL compiler errors on BOTH platforms (Kotlin + Swift)
-- **Why**: Prevents breaking iOS when modifying Kotlin expect/actual declarations
-- This requirement is NON-NEGOTIABLE and applies to ALL commits
-
-**Detekt Warnings**:
-- Fix all unused properties and variables (remove dead code)
-- Use specific exception types (avoid `catch (e: Exception)` when possible)
-- Add logging for swallowed exceptions
-- Use `check()` or `error()` instead of throwing IllegalStateException
-- Create data classes for functions with >6 parameters
-- Break long lines (keep under max line length)
-- Extract magic numbers to named constants
-- Extract long functions into smaller helpers to meet length limits
-
-**Acceptable Detekt Suppressions** (when justified):
-- `@Suppress("ReturnCount")` - Multiple returns OK for guard clauses and early exits
-- `@Suppress("TooGenericExceptionCaught")` - When catching specific exception like IndexOutOfBoundsException that detekt considers generic
-- `@Suppress("MatchingDeclarationName")` - For expect/actual files (BaseViewModel.android.kt, etc.)
-- `@Suppress("ThrowsCount")` - For validation functions that need multiple throw types
-- `@Suppress("UnusedParameter")` - For API consistency or future use (document why)
-- `@Suppress("USELESS_IS_CHECK")` - For intentional runtime type verification in tests
-
-**Suppression Rules**:
-- Always add comment explaining WHY suppression is needed
-- Place suppression close to the violation (function/file level)
-- Document in commit message when adding suppressions
-
-**Acceptable SwiftLint Suppressions** (when justified):
-- `// swiftlint:disable file_length` - For critical platform files with comprehensive documentation
-- `// swiftlint:disable function_body_length` with `// swiftlint:enable function_body_length` - For E2E tests covering many steps
-- `// swiftlint:disable:next line_length` - For specific long lines that cannot be broken
-- Use `disable`/`enable` pairs to limit suppression scope
-- Always add justification comment above suppression
-
-**Import Management**:
-- Run `./gradlew :shared:ktlintFormat` to organize imports
-- Remove unused imports regularly
-- Group imports: stdlib → KMM/Compose → project → platform
-
-**Git Best Practices**:
-- Use `git mv` for file renames/moves (preserves history)
-- Commit frequently with descriptive messages
-- Run tests before every commit
-- Update documentation when changing files
-
-**Refactoring Patterns**:
-- Use delegation/facade patterns for large file splits
-- Maintain backward compatibility (no breaking changes)
-- Preserve all tests (don't disable to make them pass)
-- Document decisions in commit messages
-
----
-
-## Build and Testing Commands
-
-### Essential Commands
-```bash
-# Run unit tests
-./gradlew :shared:testDebugUnitTest
-
-# Run Android instrumented tests
-ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest
-
-# Build debug version
-./gradlew assembleDebug
-
-# Run lint checks
-./gradlew lint
-
-# Verify iOS safety (before committing shared code)
-./scripts/verify-ios-safety.sh
-```
-
-### Testing Requirements
-
-**CRITICAL**: Always run ALL tests before ANY commit:
-```bash
-# MANDATORY before every commit
-./gradlew clean :shared:testDebugUnitTest :composeApp:assembleDebug
-
-# Verify all pass before committing
-# Expected: 535+ tests, 100% pass rate in ~22s
-```
-
-- **All changes must pass existing test suite** (535+ unit tests, 100% pass rate)
-- **New functionality requires corresponding tests** - No test debt allowed
-- **Run ALL tests before commit** - Not just the tests you think are relevant
-- **Instrumented tests must pass** before committing
-- **Performance regressions must be addressed** - Monitor test execution time
-- **iOS safety verification must pass** for shared code changes
-- **NEVER disable tests without permission** - Fix issues, don't hide them
-
-**Test Organization**:
-- `shared/src/commonTest`: Platform-independent tests (no MockK, no JVM-only APIs)
-- `shared/src/androidUnitTest`: Android-specific tests (can use MockK)
-- `shared/src/iosTest`: iOS-specific tests (no MockK, Kotlin/Native compatible)
-
-**Test coverage**: Comprehensive coverage across all phases (Phases 1-4 complete)
-  - Phase 1 (Critical): Wave detection, scheduling, accuracy ✅
-  - Phase 2 (Data/State): State management, persistence ✅
-  - Phase 3 (ViewModels): UI logic, download lifecycle ✅
-  - Phase 4 (iOS): Deadlock prevention, exception handling ✅
-
-### Test Patterns to Follow
-
-#### Testing Infinite Flows:
-```kotlin
-// ✅ CORRECT: Proper infinite flow testing
-observer.startObservation()
-testScheduler.runCurrent() // Don't use advanceUntilIdle()!
-// ... test logic ...
-observer.stopObservation() // Cancel infinite flow first
-testScheduler.advanceUntilIdle() // Now safe to wait
-```
-
-#### Testing ViewModels:
-```kotlin
-// ✅ CORRECT: Wait for async ViewModel state
-viewModel.loadEvents()
-waitForEvents(viewModel, expectedSize, timeoutMs = 3000)
-waitForState(viewModel.isLoading, false)
-```
-
-#### Test Isolation with Koin:
-```kotlin
-// ✅ CORRECT: Proper cleanup prevents test interference
-@AfterTest
-fun tearDown() {
-    runBlocking {
-        testScopeProvider.cancelAllCoroutines()
-        delay(500) // Wait for cleanup propagation
-    }
-    stopKoin()
-}
-```
-
-#### iOS Safety Testing:
-```kotlin
-// ✅ CORRECT: Validate no violations with code scanning
-@Test
-fun testNoDeadlockPatterns() {
-    val violations = Grep.search("object.*KoinComponent", "@Composable")
-    assertEquals(0, violations.size)
-}
-```
-
----
-
-## Learning Protocol
-
-When working on WorldWideWaves:
-
-1. **Understand the Context**: Read existing code and documentation thoroughly
-2. **Follow Patterns**: Use established architectural patterns and conventions
-3. **Test Early**: Write tests alongside implementation
-4. **Document Changes**: Update documentation for significant changes
-5. **Performance First**: Consider performance implications of all changes
-6. **Security Always**: Never compromise on security requirements
-7. **Documentation update**: When you change a file then scan it to keep its documentation up-to-date once finished
-
----
-
-## Project Structure
-
-```
-WorldWideWaves/
-├── .github/workflows/          # CI/CD pipelines (7 workflows)
-├── .git-hooks/                 # Custom git hooks (pre-commit, pre-push)
-├── shared/                     # KMM shared code
-│   ├── src/commonMain/         # Common business logic
-│   │   ├── kotlin/com/worldwidewaves/shared/
-│   │   │   ├── domain/         # Business logic
-│   │   │   │   ├── observation/    # EventObserver
-│   │   │   │   ├── progression/    # WaveProgressionTracker
-│   │   │   │   └── scheduling/     # ObservationScheduler
-│   │   │   ├── data/           # Data layer
-│   │   │   ├── ui/             # Shared UI (Compose)
-│   │   │   ├── di/             # Dependency injection
-│   │   │   ├── position/       # Position management
-│   │   │   └── map/            # Map abstraction
-│   ├── src/androidMain/        # Android-specific implementations
-│   ├── src/iosMain/            # iOS-specific implementations
-│   │   └── kotlin/com/worldwidewaves/shared/
-│   │       ├── RootController.kt   # iOS ViewControllers
-│   │       └── ui/             # iOS-specific UI
-│   └── src/commonTest/         # Shared tests
-├── composeApp/                 # Main application module
-│   ├── src/androidMain/        # Android app implementation
-│   └── src/androidInstrumentedTest/ # Android instrumented tests
-├── iosApp/                     # iOS app
-│   ├── worldwidewaves.xcodeproj
-│   ├── worldwidewaves/
-│   │   ├── AppDelegate.swift
-│   │   ├── SceneDelegate.swift
-│   │   ├── IOSPlatformEnabler.swift
-│   │   ├── MapLibre/        # MapLibre Swift wrappers
-│   │   └── Maps/            # iOS map city data
-│   └── worldwidewavesUITests/ # iOS UI tests
-├── maps/                       # 40+ city offline map modules
-├── config/                     # Detekt configuration
-├── dev/                        # Development tools
-├── scripts/                    # Build and verification scripts
-│   └── verify-ios-safety.sh   # iOS deadlock verification
-└── docs/                       # Additional documentation
-    ├── architecture/           # Architecture documents
-    ├── ios/                    # iOS-specific docs
-    ├── setup/                  # Setup guides
-    └── development/            # Development workflows
-```
-
----
-
-## Production Readiness Lessons (October 2025)
-
-> **Context**: Comprehensive pre-release code review conducted before App Store/Play Store submission
-> **Scope**: 232+ files reviewed (~30,000 lines of code)
-> **Outcome**: Production readiness increased from 70% → 98%
-
-### Critical Pre-Release Patterns
-
-#### 1. **Systematic Code Review Approach**
-
-**Lesson**: Use parallel agent-based reviews for large codebases
-- Launch 6+ specialized agents simultaneously for different layers
-- Each agent focuses on specific concerns (iOS safety, accessibility, thread safety, etc.)
-- Agents return detailed reports with file:line references
-- Dramatically reduces review time (6 hours → 3 hours with agents)
-
-**Pattern**:
-```bash
-# Review different layers in parallel
-- Agent 1: shared/domain layer
-- Agent 2: shared/data layer
-- Agent 3: shared/ui layer
-- Agent 4: Android-specific code
-- Agent 5: iOS-specific code
-- Agent 6: Documentation accuracy
-```
-
-#### 2. **Force Unwrap (!!) Elimination is Critical**
-
-**Issue Found**: 8 unsafe `!!` operators that could crash in production
-**Impact**: Potential NullPointerException crashes during runtime
-
-**Critical Locations**:
-- Event loading paths (WWWEvent.kt, WWWEventWave.kt)
-- Clock providers (ClockProvider.kt)
-- Geometry calculations (Polygon.kt)
-
-**Solution Pattern**:
-```kotlin
-// ❌ UNSAFE
-platform.getSimulation()!!.getUserPosition()
-
-// ✅ SAFE
-platform.getSimulation()?.getUserPosition() ?: fallbackValue
-
-// ✅ SAFE with context
-val waveDefinition = requireNotNull(linear ?: deep ?: linearSplit) {
-    "Wave definition must exist after validation"
-}
-```
-
-**Rule**: NEVER use `!!` in production code. Always use:
-1. Safe calls with elvis operator (`?.` with `?:`)
-2. `requireNotNull()` with descriptive error message
-3. Explicit null checks with early returns
-
-#### 3. **Thread Safety Must Be Explicit**
-
-**Issue Found**: MapDownloadGate mutable set without synchronization
-**Impact**: Race conditions in concurrent environments
-
-**Solution**:
-```kotlin
-object MapDownloadGate {
-    private val mutex = Mutex()
-    private val allowed = mutableSetOf<String>()
-
-    suspend fun allow(tag: String) {
-        mutex.withLock { allowed += tag }
-    }
-}
-```
-
-**Rule**: Any mutable shared state must have explicit synchronization:
-- Use `Mutex` for coroutine-based synchronization
-- Make mutation functions `suspend`
-- Document thread safety guarantees
-
-#### 4. **License Header Consistency is Critical**
-
-**Issues Found**:
-- Duplicate headers in PlatformCache.android.kt
-- Typo "LiBooleancense" in FavoriteEventsStore.kt
-- Incomplete header in IosFileSystemUtils.kt
-
-**Impact**: Legal compliance, professionalism
-
-**Rule**: Run header verification in pre-commit hooks (✅ already implemented)
-
-#### 5. **Accessibility is Not Optional**
-
-**Issue Found**: 2 clickable images missing accessibility semantics
-**Impact**: Screen reader users cannot interact with features
-
-**Solution**:
-```kotlin
-Image(
-    modifier = Modifier
-        .size(48.dp)
-        .clickable { action() }
-        .semantics {
-            role = Role.Button
-            stateDescription = if (active) "Active" else "Inactive"
-        },
-    contentDescription = stringResource(...)
-)
-```
-
-**Checklist for ALL interactive elements**:
-- ✅ `contentDescription` from MokoResources
-- ✅ `semantics { role = Role.Button }`
-- ✅ `stateDescription` for dynamic states
-- ✅ Minimum 48dp touch target
-- ✅ 4.5:1 color contrast ratio
-
-#### 6. **Property Initialization vs init{} Blocks (iOS)**
-
-**Issue Found**: `Dispatchers.Main` accessed during property initialization
-**Impact**: Potential iOS deadlock during object construction
-
-**Critical Distinction**:
-```kotlin
-// ❌ RISKY on iOS
-private val scope = CoroutineScope(Dispatchers.Main)  // Accessed during construction
-
-// ✅ SAFE on iOS
-private val scope by lazy { CoroutineScope(Dispatchers.Main) }  // Lazy evaluation
-
-// ✅ SAFE on iOS
-private lateinit var scope: CoroutineScope
-suspend fun initialize() {
-    scope = CoroutineScope(Dispatchers.Main)
-}
-```
-
-**Rule**: On iOS, NEVER access dispatchers during property initialization. Use:
-1. Lazy initialization
-2. Late initialization in suspend function
-3. Parameter injection
-
-#### 7. **Dead Code Accumulates Silently**
-
-**Found During Review**:
-- Unused `clock: IClock` parameter (injected but never used)
-- Unused `observationJob: Job?` property (declared but never assigned)
-- Unused `interval: Duration` parameter (suppressed)
-- Unused `constraintBbox` variable (calculated but not used)
-
-**Impact**: Confusing code, unnecessary dependencies, maintenance burden
-
-**Prevention**:
-```bash
-# Run before every commit
-./gradlew detekt  # Catches unused parameters/properties
-./gradlew :shared:compileKotlinIosSimulatorArm64  # Catches unused imports
-```
-
-**Rule**: Address ALL detekt `UnusedPrivateProperty` and `UnusedParameter` warnings immediately. Don't suppress unless absolutely justified with clear comment.
-
-#### 8. **Constants Centralization Prevents Magic Numbers**
-
-**Found**: Scattered magic numbers and duplicated constants
-**Solution**: All constants moved to WWWGlobals
-
-**Before**:
-```kotlin
-// Scattered across files
-private const val MAX_SHRINKAGE = 0.5
-private const val PROGRESSION_THRESHOLD = 0.1
-```
-
-**After**:
-```kotlin
-// Centralized in WWWGlobals.kt
-object MapDisplay {
-    const val MAX_SHRINKAGE_PERCENTAGE = 0.5
-    const val CHANGE_THRESHOLD = 0.1
-}
-```
-
-**Rule**: ALL magic numbers/strings must go in WWWGlobals, organized by domain:
-- Geodetic (earth radius, coordinates)
-- MapDisplay (zoom, thresholds)
-- WaveTiming (durations)
-- Dimensions (UI sizes)
-
-#### 9. **Pre-Release Checklist Must Be Comprehensive**
-
-**Minimum Required Checks**:
-```bash
-# 1. Unit tests (must pass 100%)
-./gradlew :shared:testDebugUnitTest
-
-# 2. iOS Kotlin compilation (zero warnings)
-./gradlew :shared:compileKotlinIosSimulatorArm64
-
-# 3. Android Kotlin compilation (zero warnings)
-./gradlew :shared:compileDebugKotlinAndroid
-
-# 4. Detekt (zero warnings)
-./gradlew detekt
-
-# 5. SwiftLint (zero errors, warnings acceptable if justified)
-swiftlint lint iosApp/worldwidewaves --quiet
-
-# 6. iOS safety verification
-./scripts/verify-ios-safety.sh
-```
-
-**All checks must pass with ZERO errors** before release.
-
-#### 10. **Code Review Metrics to Track**
-
-From this review session:
-- **232 files reviewed** in 3 hours using agents
-- **23 issues identified** (8 critical, 15 optional)
-- **Production readiness**: 70% → 98% improvement
-- **4 commits** with focused, descriptive messages
-
-**Key Metrics**:
-- Issues found per 1000 LOC
-- Detekt/SwiftLint warning density
-- Test coverage percentage
-- Dead code percentage
-- Force unwrap count (Swift)
-- `!!` operator count (Kotlin)
-
-### Production-Ready Definition
+## Production-Ready Definition
 
 A file/module is production-ready when:
+
 - ✅ All unit tests passing (100%)
 - ✅ Zero compilation warnings (iOS + Android)
-- ✅ Zero detekt warnings (or justified suppressions)
+- ✅ Zero detekt/SwiftLint warnings (or justified suppressions)
 - ✅ File header present and correct
-- ✅ No unsafe `!!` operators
-- ✅ No force unwraps `!` in Swift (except justified)
+- ✅ No unsafe `!!` operators (Kotlin) or force unwraps (Swift)
 - ✅ Thread safety explicit (Mutex, synchronized)
 - ✅ Accessibility semantics on interactive elements
 - ✅ No hardcoded user-facing strings
@@ -1238,98 +388,158 @@ A file/module is production-ready when:
 - ✅ Memory leak prevention (cleanup methods)
 - ✅ iOS safety compliance (no deadlock patterns)
 
-### Quick Reference: Common Issues Found
+---
 
-| Issue Type | Instances Found | Fix Time | Prevention |
-|------------|-----------------|----------|------------|
-| Force unwraps (`!!`) | 8 | 45 min | Code review, detekt rule |
-| Missing thread safety | 1 | 30 min | Review mutable shared state |
-| License header issues | 3 | 15 min | Pre-commit hook (✅ working) |
-| Accessibility gaps | 2 | 30 min | Accessibility test suite |
-| Dead code | 4 | 30 min | Regular detekt runs |
-| iOS threading issues | 2 | 30 min | iOS safety verification script |
+## Development Workflow
 
-**Total Issues**: 20 items, ~3 hours to fix
+### Critical Rules
+
+- **Use agents** for complex multi-step tasks
+- **Check all implications** when changing code (callers, documentation, signatures)
+- **Clean temporary files** after development
+- **Git push has costs** - GitHub Actions not free, only push when asked/required
+- **Search for similar patterns** when fixing bugs (find other instances)
+- **Never bypass git hooks** (pre-commit, pre-push)
+- **Use short names** in code (imports for readability, not long qualified names)
+- **Fix warnings immediately** - prevent accumulation
+
+### Import Management [CRITICAL]
+
+**ALWAYS check existing imports BEFORE modifying code.**
+
+When adding function calls/classes:
+1. Check if required import exists
+2. Add missing imports in same change
+3. Verify compilation before commit
+
+**Common imports**:
+- Coroutines: `kotlinx.coroutines.runBlocking`, `withContext`, etc.
+- Compose: `androidx.compose.runtime.key`, `LaunchedEffect`, etc.
+- Platform: `platform.UIKit.*`, `platform.Foundation.*` (iOS)
+- Logging: `com.worldwidewaves.shared.utils.Log`
+
+### Git Workflow
+
+#### Committing Changes
+
+**ONLY commit when user explicitly requests it.**
+
+```bash
+# 1. Check status and changes
+git status && git diff
+
+# 2. Run ALL tests
+./gradlew clean :shared:testDebugUnitTest
+
+# 3. Stage relevant files
+git add <files>
+
+# 4. Commit with descriptive message
+git commit -m "$(cat <<'EOF'
+feat: add wave scheduling feature
+
+- Implement ObservationScheduler for wave timing
+- Add timezone-aware scheduling
+- Add 100% test coverage
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)"
+
+# 5. Verify tests still pass
+./gradlew :shared:testDebugUnitTest
+```
+
+**DO NOT push to origin** unless user explicitly requests it.
+
+#### Creating Pull Requests
+
+```bash
+# 1. Understand full branch context
+git status
+git diff main...HEAD
+git log main..HEAD
+
+# 2. Draft PR summary (analyze ALL commits, not just latest)
+
+# 3. Create PR
+gh pr create --title "Title" --body "$(cat <<'EOF'
+## Summary
+- Bullet points of changes
+
+## Test plan
+- [ ] Checklist of testing steps
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)"
+```
 
 ---
 
-## Pre-Release Code Review Protocol
+## Common Issues
 
-### When to Run Comprehensive Review
+| Symptom | Cause | Solution |
+|---------|-------|----------|
+| iOS app freezes on launch | DI violation | Run `./scripts/verify-ios-safety.sh` |
+| Tests failing | Business logic issue or requirements changed | Analyze failure, ask before changing tests |
+| Compilation warnings | Code quality issue | Fix ALL warnings, not just in modified files |
+| Map gestures not working (iOS) | Wrong property names | Use `isZoomEnabled/isScrollEnabled` |
+| Null pointer crash | Force unwrap `!!` | Use `?.` with `?:` or `requireNotNull()` |
 
-**Mandatory Triggers**:
-1. Before App Store/Play Store submission
-2. Before major version releases (1.x, 2.x)
-3. After large refactoring (>1000 LOC changed)
-4. After adding new modules/features
-5. Quarterly (every 3 months minimum)
+---
 
-### Review Checklist
+## Project Structure
 
-**Phase 1: Automated Checks** (15 minutes)
-- [ ] Run all unit tests (must pass 100%)
-- [ ] Run Detekt on entire codebase
-- [ ] Run SwiftLint on entire codebase
-- [ ] Compile iOS + Android with zero warnings
-- [ ] Run iOS safety verification script
-
-**Phase 2: Agent-Based Code Review** (2-3 hours)
-- [ ] Launch parallel review agents for each layer
-- [ ] Review agent reports for critical issues
-- [ ] Prioritize issues (blocking vs optional)
-- [ ] Create action plan with time estimates
-
-**Phase 3: Critical Fixes** (1-2 hours)
-- [ ] Fix all blocking issues (crashes, safety violations)
-- [ ] Fix all high-priority issues (memory leaks, accessibility)
-- [ ] Commit fixes incrementally
-- [ ] Re-run automated checks after each commit
-
-**Phase 4: Documentation** (30 minutes)
-- [ ] Create future work plan for optional improvements
-- [ ] Update CLAUDE.md with learnings
-- [ ] Document production-readiness score
-
-**Total Time**: 4-6 hours for comprehensive pre-release review
+```
+WorldWideWaves/
+├── shared/                     # KMM shared code
+│   ├── src/commonMain/         # Business logic
+│   │   ├── domain/             # EventObserver, WaveProgressionTracker
+│   │   ├── data/               # Repositories, data sources
+│   │   ├── ui/                 # Compose UI (100% shared)
+│   │   ├── position/           # PositionManager
+│   │   └── map/                # Map abstraction
+│   ├── src/androidMain/        # Android implementations
+│   ├── src/iosMain/            # iOS implementations (RootController)
+│   └── src/commonTest/         # Platform-independent tests
+├── composeApp/                 # Android app
+├── iosApp/                     # iOS app (Swift/UIKit)
+│   ├── AppDelegate.swift       # App lifecycle
+│   ├── SceneDelegate.swift     # Platform initialization
+│   └── IOSPlatformEnabler.swift  # Swift-Kotlin bridge
+├── maps/                       # 40+ city offline map modules
+├── scripts/                    # Build/verification scripts
+└── docs/                       # Documentation
+```
 
 ---
 
 ## Related Documentation
 
 ### iOS Development
-- [CLAUDE_iOS.md](./CLAUDE_iOS.md) - Complete iOS development guide
-- [docs/ios/](docs/ios/) - iOS-specific documentation hub
-- [docs/ios/ios-violation-tracker.md](docs/ios/ios-violation-tracker.md) - Deadlock violation status
-- [docs/ios/ios-success-state.md](docs/ios/ios-success-state.md) - iOS success criteria
-- [docs/ios/ios-debugging-guide.md](docs/ios/ios-debugging-guide.md) - Advanced debugging
-- [docs/ios/ios-map-implementation-status.md](docs/ios/ios-map-implementation-status.md) - Map feature status
-- [docs/ios/remaining-threats-after-ios-fixes.md](docs/ios/remaining-threats-after-ios-fixes.md) - Post-fix analysis
+- **[CLAUDE_iOS.md](./CLAUDE_iOS.md)** - Complete iOS development guide
+- **[docs/ios/](docs/ios/)** - iOS-specific documentation hub
+- **[docs/patterns/ios-safety-patterns.md](docs/patterns/ios-safety-patterns.md)** - All iOS safety patterns
 
 ### Testing
-- [docs/test-gap-analysis.md](docs/test-gap-analysis.md) - Coverage analysis
-- [docs/comprehensive-test-specifications.md](docs/comprehensive-test-specifications.md) - Testing specifications
-- [docs/testing-strategy.md](docs/testing-strategy.md) - Testing approach
-- [docs/ui-testing-guide.md](docs/ui-testing-guide.md) - UI testing guide
+- **[docs/testing/test-patterns.md](docs/testing/test-patterns.md)** - Comprehensive test patterns
+- **[docs/testing-strategy.md](docs/testing-strategy.md)** - Testing approach
 
-### Architecture
-- [docs/architecture.md](docs/architecture.md) - System architecture
-- [docs/ci-cd.md](docs/ci-cd.md) - CI/CD pipeline
-- [docs/development.md](docs/development.md) - Development workflows
-- [docs/architecture/map-architecture-analysis.md](docs/architecture/map-architecture-analysis.md) - Map subsystem
+### Patterns & Architecture
+- **[docs/patterns/null-safety-patterns.md](docs/patterns/null-safety-patterns.md)** - Null handling patterns
+- **[docs/code-style/class-organization.md](docs/code-style/class-organization.md)** - Class structure standards
+- **[docs/architecture.md](docs/architecture.md)** - System architecture
+- **[docs/accessibility-guide.md](docs/accessibility-guide.md)** - Complete accessibility patterns
 
----
-
-## Support and Escalation
-
-For complex issues or architectural decisions:
-1. Consult existing documentation and code patterns
-2. Review similar implementations in the codebase
-3. Consider performance and security implications
-4. Test thoroughly with both unit and instrumented tests
-5. Document decisions and rationale
+### CI/CD & Operations
+- **[docs/ci-cd.md](docs/ci-cd.md)** - CI/CD pipeline
+- **[docs/development.md](docs/development.md)** - Development workflows
 
 ---
 
 **Last Updated**: October 27, 2025
-**Version**: 2.2 (Pre-Release Code Review + Production Readiness Lessons)
+**Version**: 3.0 (Optimized for AI context efficiency)
 **Maintainer**: WorldWideWaves Development Team

@@ -27,7 +27,7 @@ import Shared
 enum WWWLog {
     /// Verbose logging - disabled in release builds
     static func v(_ tag: String, _ message: String, error: Error? = nil) {
-        let fullMessage = error != nil ? "\(message): \(error!.localizedDescription)" : message
+        let fullMessage = error.map { "\(message): \($0.localizedDescription)" } ?? message
         do {
             try Log.shared.v(tag: tag, message: fullMessage)
         } catch {
@@ -37,7 +37,7 @@ enum WWWLog {
 
     /// Debug logging - disabled in release builds
     static func d(_ tag: String, _ message: String, error: Error? = nil) {
-        let fullMessage = error != nil ? "\(message): \(error!.localizedDescription)" : message
+        let fullMessage = error.map { "\(message): \($0.localizedDescription)" } ?? message
         do {
             try Log.shared.d(tag: tag, message: fullMessage)
         } catch {
@@ -47,7 +47,7 @@ enum WWWLog {
 
     /// Info logging - always enabled
     static func i(_ tag: String, _ message: String, error: Error? = nil) {
-        let fullMessage = error != nil ? "\(message): \(error!.localizedDescription)" : message
+        let fullMessage = error.map { "\(message): \($0.localizedDescription)" } ?? message
         do {
             try Log.shared.i(tag: tag, message: fullMessage)
         } catch {
@@ -57,7 +57,7 @@ enum WWWLog {
 
     /// Warning logging - always enabled
     static func w(_ tag: String, _ message: String, error: Error? = nil) {
-        let fullMessage = error != nil ? "\(message): \(error!.localizedDescription)" : message
+        let fullMessage = error.map { "\(message): \($0.localizedDescription)" } ?? message
         do {
             try Log.shared.w(tag: tag, message: fullMessage)
         } catch {
@@ -67,7 +67,7 @@ enum WWWLog {
 
     /// Error logging - always enabled
     static func e(_ tag: String, _ message: String, error: Error? = nil) {
-        let fullMessage = error != nil ? "\(message): \(error!.localizedDescription)" : message
+        let fullMessage = error.map { "\(message): \($0.localizedDescription)" } ?? message
         do {
             try Log.shared.e(tag: tag, message: fullMessage)
         } catch {
@@ -77,7 +77,7 @@ enum WWWLog {
 
     /// Critical error logging - always enabled
     static func wtf(_ tag: String, _ message: String, error: Error? = nil) {
-        let fullMessage = error != nil ? "\(message): \(error!.localizedDescription)" : message
+        let fullMessage = error.map { "\(message): \($0.localizedDescription)" } ?? message
         do {
             try Log.shared.wtf(tag: tag, message: fullMessage)
         } catch {
