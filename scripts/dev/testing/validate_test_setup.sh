@@ -76,7 +76,7 @@ check_item "run_android_firebase_tests.sh exists" "test -x scripts/firebase/run_
 check_item "run_ios_firebase_tests.sh exists" "test -x scripts/firebase/run_ios_firebase_tests.sh"
 check_item "run_all_firebase_tests.sh exists" "test -x scripts/firebase/run_all_firebase_tests.sh"
 check_item "collect_firebase_screenshots.sh exists" "test -x scripts/firebase/collect_firebase_screenshots.sh"
-check_item "generate_test_report.py exists" "test -x scripts/generate_test_report.py"
+check_item "generate_test_report.py exists" "test -x scripts/dev/testing/generate_test_report.py"
 echo ""
 
 # 6. Check documentation
