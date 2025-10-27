@@ -15,7 +15,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License"></a>
   <img src="https://img.shields.io/badge/Kotlin-2.2.0-7F52FF.svg" alt="Kotlin">
   <img src="https://img.shields.io/badge/Platform-Android%20%7C%20iOS-green.svg" alt="Platform">
-  <img src="https://img.shields.io/badge/Tests-902%20passing-success.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-722%20passing-success.svg" alt="Tests">
 </p>
 
 A Kotlin Multiplatform mobile application orchestrating synchronized human waves through cities worldwide, fostering unity and shared human experience through real-time coordination and location-based services.
@@ -344,7 +344,7 @@ See [docs/README.md](docs/README.md) for complete documentation map.
 ./gradlew :composeApp:connectedDebugAndroidTest
 
 # iOS safety verification
-./scripts/verify-ios-safety.sh
+./scripts/dev/verification/verify-ios-safety.sh
 
 # All quality checks
 ./gradlew :shared:testDebugUnitTest ktlintCheck detekt

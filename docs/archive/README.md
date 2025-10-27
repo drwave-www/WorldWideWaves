@@ -2,7 +2,7 @@
 
 This directory contains historical documentation that has been superseded or completed.
 
-**Last Updated**: October 14, 2025
+**Last Updated**: October 27, 2025
 
 ---
 
@@ -64,6 +64,27 @@ Historical session summaries and progress reports from development work (2025).
 - Project analysis and evaluation reports
 - Workflow enhancement documentation
 - Comprehensive testing plans (historical)
+
+### `/assessment-reports/`
+Documentation quality assessments and improvement tracking (October 2025).
+
+**Status**: Completed assessments from Q4 2025 documentation review
+**Current documentation**: See `docs/INDEX.md` for active documentation
+
+**Contents** (3 documents):
+- `DOCUMENTATION_IMPROVEMENTS_SUMMARY.md` - Q4 2025 improvement summary
+- `DOCUMENTATION_REVIEW_2025-10-27.md` - Comprehensive review report
+- `FINAL_DOCUMENTATION_GRADE_REPORT.md` - Final grading analysis (A+ achieved)
+
+### `/action-plans/`
+Documentation improvement action plans and roadmaps (October 2025).
+
+**Status**: Completed plans from documentation improvement initiative
+**Current documentation**: See `docs/future-work-plan.md` for ongoing improvements
+
+**Contents** (2 documents):
+- `A_PLUS_GRADE_ACTION_PLAN.md` - Path to A+ documentation grade
+- `LOGGING_A_PLUS_ACTION_PLAN.md` - Logging system improvements
 
 ---
 
