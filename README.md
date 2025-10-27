@@ -1,9 +1,22 @@
-# WorldWideWaves
+<p align="center">
+  <img src="misc/www-logo.png" width="200" alt="WorldWideWaves Logo">
+  <h1 align="center">WorldWideWaves</h1>
+  <p align="center"><em>Orchestrate synchronized human waves worldwide</em></p>
+</p>
 
-[![Overall Status](https://github.com/mglcel/WorldWideWaves/actions/workflows/99-pipeline-status.yml/badge.svg)](https://github.com/mglcel/WorldWideWaves/actions/workflows/99-pipeline-status.yml)
-[![Quality & Security](https://github.com/mglcel/WorldWideWaves/actions/workflows/03-code-quality.yml/badge.svg)](https://github.com/mglcel/WorldWideWaves/actions/workflows/03-code-quality.yml)
-[![Android Build](https://github.com/mglcel/WorldWideWaves/actions/workflows/01-build-android.yml/badge.svg)](https://github.com/mglcel/WorldWideWaves/actions/workflows/01-build-android.yml)
-[![iOS Build](https://github.com/mglcel/WorldWideWaves/actions/workflows/02-build-ios.yml/badge.svg)](https://github.com/mglcel/WorldWideWaves/actions/workflows/02-build-ios.yml)
+<p align="center">
+  <a href="https://github.com/mglcel/WorldWideWaves/actions/workflows/99-pipeline-status.yml"><img src="https://github.com/mglcel/WorldWideWaves/actions/workflows/99-pipeline-status.yml/badge.svg" alt="Overall Status"></a>
+  <a href="https://github.com/mglcel/WorldWideWaves/actions/workflows/03-code-quality.yml"><img src="https://github.com/mglcel/WorldWideWaves/actions/workflows/03-code-quality.yml/badge.svg" alt="Quality & Security"></a>
+  <a href="https://github.com/mglcel/WorldWideWaves/actions/workflows/01-build-android.yml"><img src="https://github.com/mglcel/WorldWideWaves/actions/workflows/01-build-android.yml/badge.svg" alt="Android Build"></a>
+  <a href="https://github.com/mglcel/WorldWideWaves/actions/workflows/02-build-ios.yml"><img src="https://github.com/mglcel/WorldWideWaves/actions/workflows/02-build-ios.yml/badge.svg" alt="iOS Build"></a>
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License"></a>
+  <img src="https://img.shields.io/badge/Kotlin-2.2.0-7F52FF.svg" alt="Kotlin">
+  <img src="https://img.shields.io/badge/Platform-Android%20%7C%20iOS-green.svg" alt="Platform">
+  <img src="https://img.shields.io/badge/Tests-902%20passing-success.svg" alt="Tests">
+</p>
 
 A Kotlin Multiplatform mobile application orchestrating synchronized human waves through cities worldwide, fostering unity and shared human experience through real-time coordination and location-based services.
 
@@ -67,6 +80,20 @@ graph TB
 - Synchronized wave choreography with audio coordination
 - Cross-platform business logic sharing (70% code reuse)
 - Comprehensive CI/CD pipeline with multi-stage quality gates
+
+## 📱 App Preview
+
+<p align="center">
+  <img src="misc/iOS-Screenshot-1.jpg" width="250" alt="Event List - Discover upcoming wave events">
+  <img src="misc/iOS-Screenshot-3.jpg" width="250" alt="Wave Participation - Join synchronized waves">
+  <img src="misc/iOS-Screenshot-5.jpg" width="250" alt="Offline Maps - 40+ cities available">
+</p>
+
+<p align="center">
+  <em>iOS app running on iPhone 15 Pro simulator</em>
+</p>
+
+> **Demo**: Animated demo coming soon - watch this space!
 
 ## Project Structure
 
