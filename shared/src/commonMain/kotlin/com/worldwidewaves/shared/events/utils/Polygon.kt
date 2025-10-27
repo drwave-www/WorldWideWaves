@@ -175,8 +175,10 @@ open class Polygon(
     // -- Add/Remove positions --------
 
     fun add(position: Position): Position {
-        if (tail != null && position == tail) { // Do not add consecutive same point
-            return tail!!
+        tail?.let { currentTail ->
+            if (position == currentTail) { // Do not add consecutive same point
+                return currentTail
+            }
         }
 
         val addPosition = position.xfer() // Disconnect the position from a possible other polygon
@@ -391,7 +393,9 @@ fun <T : Polygon> T.subList(
     var current = start
     do {
         add(current)
-        current = current.next ?: this@subList.first()!!
+        current = current.next ?: requireNotNull(this@subList.first()) {
+            "First position cannot be null in non-empty polygon during subList iteration"
+        }
         require(current.id != start.id) { "Polygon subList: 'last' cannot be found in the polygon" }
     } while (current.id != lastId)
 }
@@ -401,7 +405,11 @@ fun <T : Polygon> T.withoutLast(n: Int = 1): Polygon =
         val newSize = (this@withoutLast.size - n).coerceAtLeast(0)
         var current = this@withoutLast.head
         repeat(newSize) {
-            add(current!!)
+            val pos =
+                requireNotNull(current) {
+                    "Current position cannot be null during withoutLast iteration"
+                }
+            add(pos)
             current = current.next
         }
     }
