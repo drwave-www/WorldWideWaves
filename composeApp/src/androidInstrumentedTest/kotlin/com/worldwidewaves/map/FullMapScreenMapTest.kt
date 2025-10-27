@@ -483,7 +483,7 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
                         eventBounds.northeast.longitude - 0.001,
                     )
                 animateCameraAndWait(neCorner, zoom)
-                visibleRegion = adapter.getVisibleRegion()
+                visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
 
                 assertVisibleRegionWithinBounds(
                     "Visible region at zoom $zoom (NE corner) should stay within event bounds",
@@ -496,7 +496,7 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
                         eventBounds.southwest.longitude + 0.001,
                     )
                 animateCameraAndWait(swCorner, zoom)
-                visibleRegion = adapter.getVisibleRegion()
+                visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
 
                 assertVisibleRegionWithinBounds(
                     "Visible region at zoom $zoom (SW corner) should stay within event bounds",

@@ -532,9 +532,10 @@ class WaveScreenMapTest : BaseMapIntegrationTest() {
                 "Auto-tracking viewport should remain within bounds after throttle period",
             )
 
+            val visibleRegionAfterThrottle = runOnUiThread { adapter.getVisibleRegion() }
             assertTrue(
                 "User position should be visible after throttle period update",
-                adapter.getVisibleRegion().contains(userPosition2),
+                visibleRegionAfterThrottle.contains(userPosition2),
             )
         }
 }
