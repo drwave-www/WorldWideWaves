@@ -84,7 +84,7 @@ import Shared
     }
 
     deinit {
-        WWWLog.w(Self.tag, "⚠️ Deinitializing MapLibreViewWrapper for event: \(eventId ?? "unknown")")
+        WWWLog.w(Self.tag, "[WARNING] Deinitializing MapLibreViewWrapper for event: \(eventId ?? "unknown")")
     }
 
     // MARK: - Map Setup
@@ -329,7 +329,7 @@ import Shared
         let timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
 
         mapView.setCamera(camera, withDuration: 0.5, animationTimingFunction: timingFunction) { [weak self] in
-            WWWLog.d(Self.tag, "✅ Camera animation to bounds completed")
+            WWWLog.d(Self.tag, "[SUCCESS] Camera animation to bounds completed")
             callback?.onFinish()
             self?.cameraAnimationCallback = nil
         }
@@ -438,7 +438,7 @@ import Shared
         // Detect if MapView hasn't been laid out yet
         let hasInvalidDimensions = screenWidth <= 0 || screenHeight <= 0
         if hasInvalidDimensions {
-            WWWLog.w(Self.tag, "⚠️ MapView not laid out yet - min zoom may need recalculation")
+            WWWLog.w(Self.tag, "[WARNING] MapView not laid out yet - min zoom may need recalculation")
         }
 
         // Calculate min zoom differently for BOUNDS vs WINDOW mode (matches Android)
@@ -545,7 +545,7 @@ import Shared
 
             WWWLog.i(
                 Self.tag,
-                "🎯 WINDOW mode: eventAspect=\(eventAspect), screenAspect=\(screenAspect), " +
+                "[AIM] WINDOW mode: eventAspect=\(eventAspect), screenAspect=\(screenAspect), " +
                 "constrainedBy=\(eventAspect > screenAspect ? "HEIGHT" : "WIDTH"), minZoom=\(baseMinZoom)"
             )
         } else {
@@ -556,7 +556,7 @@ import Shared
             let latRadians = centerLat * .pi / 180.0
             baseMinZoom = log2(40_075_016.686 * cos(latRadians) / camera.altitude) - 1.0
 
-            WWWLog.i(Self.tag, "🎯 BOUNDS mode: base=\(baseMinZoom) (entire event visible)")
+            WWWLog.i(Self.tag, "[AIM] BOUNDS mode: base=\(baseMinZoom) (entire event visible)")
         }
 
         let finalMinZoom = baseMinZoom
@@ -568,7 +568,7 @@ import Shared
 
         // Set minimum zoom to prevent zooming out beyond event bounds
         mapView.minimumZoomLevel = max(0, finalMinZoom)
-        WWWLog.i(Self.tag, "✅ Min zoom set to \(finalMinZoom) (prevents showing pixels outside event area)")
+        WWWLog.i(Self.tag, "[SUCCESS] Min zoom set to \(finalMinZoom) (prevents showing pixels outside event area)")
 
         // Store constraint bounds for gesture enforcement
         currentConstraintBounds = constraintBounds
@@ -658,7 +658,7 @@ import Shared
             )
         ])
 
-        WWWLog.i(Self.tag, "✅ Attribution margins applied successfully")
+        WWWLog.i(Self.tag, "[SUCCESS] Attribution margins applied successfully")
     }
 
     // MARK: - Wave Polygons
@@ -1093,7 +1093,7 @@ import Shared
 
 extension MapLibreViewWrapper: MLNMapViewDelegate {
     public func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
-        WWWLog.i(Self.tag, "🎨 Style loaded successfully for event: \(eventId ?? "unknown")")
+        WWWLog.i(Self.tag, "[STYLE] Style loaded successfully for event: \(eventId ?? "unknown")")
         styleIsLoaded = true
         onStyleLoaded?()
         onStyleLoaded = nil
@@ -1212,36 +1212,36 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
     }
 
     public func mapViewDidFailLoadingMap(_ mapView: MLNMapView, withError error: Error) {
-        WWWLog.e(Self.tag, "❌ FAILED to load map", error: error)
+        WWWLog.e(Self.tag, "[ERROR] FAILED to load map", error: error)
         WWWLog.e(Self.tag, "Error domain: \((error as NSError).domain), code: \((error as NSError).code)")
         WWWLog.e(Self.tag, "Error description: \(error.localizedDescription)")
         WWWLog.e(Self.tag, "Event: \(eventId ?? "unknown")")
     }
 
     @objc public func mapView(_ mapView: MLNMapView, didFailToLoadImage imageName: String) -> UIImage? {
-        WWWLog.w(Self.tag, "⚠️ Failed to load image: \(imageName)")
+        WWWLog.w(Self.tag, "[WARNING] Failed to load image: \(imageName)")
         WWWLog.w(Self.tag, "Event: \(eventId ?? "unknown")")
         return nil // Return nil to let MapLibre use default/fallback
     }
 
     public func mapViewWillStartLoadingMap(_ mapView: MLNMapView) {
-        WWWLog.i(Self.tag, "🔄 Map WILL START loading for event: \(eventId ?? "unknown")")
+        WWWLog.i(Self.tag, "[REFRESH] Map WILL START loading for event: \(eventId ?? "unknown")")
         WWWLog.d(Self.tag, "Style URL: \(mapView.styleURL?.absoluteString ?? "nil")")
     }
 
     public func mapViewDidFinishLoadingMap(_ mapView: MLNMapView) {
-        WWWLog.i(Self.tag, "🗺️ Map DID FINISH loading (tiles, layers) for event: \(eventId ?? "unknown")")
+        WWWLog.i(Self.tag, "[MAP] Map DID FINISH loading (tiles, layers) for event: \(eventId ?? "unknown")")
         // Note: This is different from didFinishLoading style:
         // - didFinishLoadingMap = all tiles and resources loaded
         // - didFinishLoading style: = style JSON parsed and layers created
     }
 
     public func mapViewDidBecomeIdle(_ mapView: MLNMapView) {
-        WWWLog.d(Self.tag, "💤 Map became idle for event: \(eventId ?? "unknown")")
+        WWWLog.d(Self.tag, "[IDLE] Map became idle for event: \(eventId ?? "unknown")")
     }
 
     public func mapView(_ mapView: MLNMapView, didSelect annotation: MLNAnnotation) {
-        WWWLog.d(Self.tag, "📍 Annotation selected: \(annotation)")
+        WWWLog.d(Self.tag, "[LOCATION] Annotation selected: \(annotation)")
     }
 
     /// Add pulse animation to match Android's pulsing location marker.

@@ -142,7 +142,7 @@ class AndroidEventMap(
 ) : AbstractEventMap<MapLibreMap>(event, mapConfig, onLocationUpdate),
     KoinComponent {
     private companion object {
-        private const val TAG = "EventMap"
+        private const val TAG = "WWW.Map.EventMap"
 
         // UI Constants
         private const val DOWNLOAD_PROGRESS_MAX = 100

@@ -222,9 +222,9 @@ private fun handleSimulationClick(
                             simulationStartedText,
                         )
                     } catch (e: Exception) {
+                        Log.e("SimulationButton", "Simulation start failed for event ${event.id}", e)
                         onStateChange("idle")
                         onError(simulationErrorText, e.message ?: "Unknown error")
-                        Log.e("SimulationButton", "Simulation start failed", e)
                     }
                 }
             }
@@ -235,8 +235,8 @@ private fun handleSimulationClick(
                 try {
                     stopSimulation(event, platform, onSimulationStopped, simulationStoppedText)
                 } catch (e: Exception) {
+                    Log.e("SimulationButton", "Simulation stop failed for event ${event.id}", e)
                     onError(stopErrorText, e.message ?: "Unknown error")
-                    Log.e("SimulationButton", "Simulation stop failed", e)
                 }
             }
         }

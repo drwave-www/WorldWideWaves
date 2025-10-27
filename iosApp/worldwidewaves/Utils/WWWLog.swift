@@ -31,7 +31,7 @@ enum WWWLog {
         do {
             try Log.shared.v(tag: tag, message: fullMessage)
         } catch {
-            print("⚠️ [WWWLog] Failed to log verbose: \(error)")
+            print("[WARNING] [WWWLog] Failed to log verbose: \(error)")
         }
     }
 
@@ -41,7 +41,7 @@ enum WWWLog {
         do {
             try Log.shared.d(tag: tag, message: fullMessage)
         } catch {
-            print("⚠️ [WWWLog] Failed to log debug: \(error)")
+            print("[WARNING] [WWWLog] Failed to log debug: \(error)")
         }
     }
 
@@ -51,7 +51,7 @@ enum WWWLog {
         do {
             try Log.shared.i(tag: tag, message: fullMessage)
         } catch {
-            print("⚠️ [WWWLog] Failed to log info: \(error)")
+            print("[WARNING] [WWWLog] Failed to log info: \(error)")
         }
     }
 
@@ -61,7 +61,7 @@ enum WWWLog {
         do {
             try Log.shared.w(tag: tag, message: fullMessage)
         } catch {
-            print("⚠️ [WWWLog] Failed to log warning: \(error)")
+            print("[WARNING] [WWWLog] Failed to log warning: \(error)")
         }
     }
 
@@ -71,7 +71,7 @@ enum WWWLog {
         do {
             try Log.shared.e(tag: tag, message: fullMessage)
         } catch {
-            print("⚠️ [WWWLog] Failed to log error: \(error)")
+            print("[WARNING] [WWWLog] Failed to log error: \(error)")
         }
     }
 
@@ -81,7 +81,7 @@ enum WWWLog {
         do {
             try Log.shared.wtf(tag: tag, message: fullMessage)
         } catch {
-            print("⚠️ [WWWLog] Failed to log wtf: \(error)")
+            print("[WARNING] [WWWLog] Failed to log wtf: \(error)")
         }
     }
 
@@ -90,7 +90,7 @@ enum WWWLog {
         do {
             try Log.shared.performance(tag: tag, message: message)
         } catch {
-            print("⚠️ [WWWLog] Failed to log performance: \(error)")
+            print("[WARNING] [WWWLog] Failed to log performance: \(error)")
         }
     }
 }

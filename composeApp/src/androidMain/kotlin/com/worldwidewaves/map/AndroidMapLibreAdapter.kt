@@ -69,7 +69,7 @@ class AndroidMapLibreAdapter(
     private var mapLibreMap: MapLibreMap? = null,
 ) : MapLibreAdapter<MapLibreMap> {
     companion object {
-        private const val TAG = "AndroidMapLibreAdapter"
+        private const val TAG = "WWW.Map.Android"
         private const val MIN_LATITUDE = -90.0
         private const val MAX_LATITUDE = 90.0
         private const val MIN_LONGITUDE = -180.0
@@ -332,7 +332,7 @@ class AndroidMapLibreAdapter(
     private var isGestureInProgress = false
     private var gestureConstraintsActive = false // Track if gesture listeners are already set up
     private var minZoomLocked = false // Track if min zoom has been set (to prevent zoom-in spiral)
-    private var lastValidCameraPosition: org.maplibre.android.geometry.LatLng? = null
+    private var lastValidCameraPosition: LatLng? = null
 
     override fun setBoundsForCameraTarget(
         constraintBounds: BoundingBox,
@@ -495,10 +495,8 @@ class AndroidMapLibreAdapter(
                     map.cameraPosition =
                         CameraPosition
                             .Builder()
-                            .target(
-                                org.maplibre.android.geometry
-                                    .LatLng(clampedPosition.latitude, clampedPosition.longitude),
-                            ).zoom(map.cameraPosition.zoom)
+                            .target(LatLng(clampedPosition.latitude, clampedPosition.longitude))
+                            .zoom(map.cameraPosition.zoom)
                             .build()
                 }
             }

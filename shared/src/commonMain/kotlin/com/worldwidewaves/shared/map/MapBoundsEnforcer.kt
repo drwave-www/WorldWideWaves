@@ -25,7 +25,6 @@ import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.utils.Log
-import io.github.aakira.napier.Napier
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -181,7 +180,7 @@ class MapBoundsEnforcer(
             // Track the bounds we just applied
             lastAppliedBounds = paddedBounds
         } catch (e: Exception) {
-            Napier.e("Error applying constraints: ${e.message}")
+            Log.e("WWW.Map.BoundsEnforcer", "Error applying constraints", e)
         }
     }
 

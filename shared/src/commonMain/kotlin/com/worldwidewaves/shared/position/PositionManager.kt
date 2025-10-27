@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.position
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.utils.Log
@@ -48,6 +49,10 @@ class PositionManager(
     private val debounceDelay: Duration = 100.milliseconds,
     private val positionEpsilon: Double = 0.0001, // ~10 meters
 ) {
+    private companion object {
+        private const val TAG = "WWW.Position.Manager"
+    }
+
     /**
      * Position source types with implicit priority ordering (lower ordinal = higher priority)
      */
@@ -83,26 +88,34 @@ class PositionManager(
         source: PositionSource,
         newPosition: Position?,
     ) {
-        Log.i("PositionManager", "[DEBUG] Position update from $source: $newPosition")
+        if (WWWGlobals.LogConfig.ENABLE_POSITION_TRACKING_LOGGING) {
+            Log.v(TAG, "[DEBUG] Position update from $source: $newPosition")
+        }
 
         val newState = PositionState(newPosition, if (newPosition == null) null else source)
 
         // Check if this update should be applied based on source priority
         val currentState = _currentState.value
         if (!shouldAcceptUpdate(currentState, newState)) {
-            Log.i("PositionManager", "[DEBUG] Rejected position update from $source (lower priority than ${currentState.source})")
+            if (WWWGlobals.LogConfig.ENABLE_POSITION_TRACKING_LOGGING) {
+                Log.v(TAG, "[DEBUG] Rejected position update from $source (lower priority than ${currentState.source})")
+            }
             return
         }
 
         // Check for position deduplication
         if (isPositionDuplicate(currentState.position, newPosition)) {
-            Log.i("PositionManager", "[DEBUG] Skipped duplicate position update")
+            if (WWWGlobals.LogConfig.ENABLE_POSITION_TRACKING_LOGGING) {
+                Log.v(TAG, "[DEBUG] Skipped duplicate position update")
+            }
             return
         }
 
         // Store pending update and start/restart debounce
         pendingUpdate = newState
-        Log.i("PositionManager", "[DEBUG] Stored pending update: $newState, debounceDelay=$debounceDelay")
+        if (WWWGlobals.LogConfig.ENABLE_POSITION_TRACKING_LOGGING) {
+            Log.v(TAG, "[DEBUG] Stored pending update: $newState, debounceDelay=$debounceDelay")
+        }
 
         debounceJob?.cancel()
         debounceJob =
@@ -113,7 +126,9 @@ class PositionManager(
                 pendingUpdate?.let { finalState ->
                     _currentState.value = finalState
                     _position.value = finalState.position
-                    Log.i("PositionManager", "[DEBUG] Applied debounced position: ${finalState.position} from ${finalState.source}")
+                    if (WWWGlobals.LogConfig.ENABLE_POSITION_TRACKING_LOGGING) {
+                        Log.v(TAG, "[DEBUG] Applied debounced position: ${finalState.position} from ${finalState.source}")
+                    }
                 }
                 pendingUpdate = null
             }

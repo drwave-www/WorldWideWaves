@@ -61,7 +61,7 @@ class AndroidMapViewModel(
 ) : AndroidViewModel(application),
     MapViewModel {
     private companion object {
-        private const val TAG = "MapViewModel"
+        private const val TAG = "WWW.ViewModel.MapAndroid"
         private const val PLAY_STORE_AUTH_ERROR_CODE = -100
     }
 

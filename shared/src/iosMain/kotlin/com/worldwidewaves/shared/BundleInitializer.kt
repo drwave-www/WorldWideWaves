@@ -33,7 +33,7 @@ import platform.Foundation.NSBundle
  * MokoRes tries to access the bundle during static initialization.
  */
 object BundleInitializer {
-    private const val TAG = "BundleInitializer"
+    private const val TAG = "WWW.Platform.Bundle"
 
     private var _isInitialized = false
     private var _bundle: NSBundle? = null
