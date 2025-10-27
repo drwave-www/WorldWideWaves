@@ -25,6 +25,7 @@ import android.content.Context
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.MapTestFixtures
@@ -41,8 +42,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.runner.RunWith
+import org.maplibre.android.MapLibre
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
+import org.maplibre.android.maps.Style
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -113,9 +116,9 @@ abstract class BaseMapIntegrationTest {
 
         // Initialize MapLibre on main thread (MapLibre requires UI thread for getInstance)
         // This must run before ActivityScenario.launch to avoid threading issues
-        androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().run {
+        InstrumentationRegistry.getInstrumentation().run {
             runOnMainSync {
-                org.maplibre.android.MapLibre
+                MapLibre
                     .getInstance(context)
             }
         }
@@ -149,14 +152,14 @@ abstract class BaseMapIntegrationTest {
                         activity.mapLibreMap = map
 
                         // Set map on UI thread (MapLibre requirement)
-                        androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                        InstrumentationRegistry.getInstrumentation().runOnMainSync {
                             adapter.setMap(map)
                         }
 
                         System.out.println("BaseMapIntegrationTest: Loading inline JSON style...")
                         // Load style from inline JSON (no network/assets required) - already on UI thread
                         mapLibreMap.setStyle(
-                            org.maplibre.android.maps.Style
+                            Style
                                 .Builder()
                                 .fromJson(styleJson),
                         ) {
@@ -222,7 +225,7 @@ abstract class BaseMapIntegrationTest {
         var result: T? = null
         var error: Throwable? = null
 
-        androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().runOnMainSync {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
             try {
                 result = block()
             } catch (e: Throwable) {

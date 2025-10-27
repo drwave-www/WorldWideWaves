@@ -29,7 +29,7 @@ set -e
 
 # Get script directory (Linux/macOS compatible)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
-PROJECT_ROOT="$SCRIPT_DIR/.."
+PROJECT_ROOT="$SCRIPT_DIR/../../.."
 SHARED_MAIN="$PROJECT_ROOT/shared/src/commonMain"
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

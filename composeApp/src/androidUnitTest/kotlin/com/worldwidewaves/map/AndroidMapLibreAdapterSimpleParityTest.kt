@@ -15,6 +15,7 @@ import com.worldwidewaves.shared.events.utils.Position
 import io.mockk.mockk
 import io.mockk.verify
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.geojson.Polygon
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
@@ -33,7 +34,7 @@ class AndroidMapLibreAdapterSimpleParityTest {
         val mockMap = mockk<MapLibreMap>(relaxed = true)
         val adapter = AndroidMapLibreAdapter(mockMap)
 
-        val polygon = mockk<org.maplibre.geojson.Polygon>(relaxed = true)
+        val polygon = mockk<Polygon>(relaxed = true)
         val polygons = listOf(polygon)
 
         // When - add polygons before style loads
@@ -49,8 +50,8 @@ class AndroidMapLibreAdapterSimpleParityTest {
         val mockMap = mockk<MapLibreMap>(relaxed = true)
         val adapter = AndroidMapLibreAdapter(mockMap)
 
-        val polygon1 = mockk<org.maplibre.geojson.Polygon>(relaxed = true)
-        val polygon2 = mockk<org.maplibre.geojson.Polygon>(relaxed = true)
+        val polygon1 = mockk<Polygon>(relaxed = true)
+        val polygon2 = mockk<Polygon>(relaxed = true)
 
         // When - queue multiple polygon sets before style loads
         adapter.addWavePolygons(listOf(polygon1), clearExisting = true)

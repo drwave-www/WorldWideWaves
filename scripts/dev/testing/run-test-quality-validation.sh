@@ -49,7 +49,7 @@ echo -e "${GREEN}✅ Unit tests passed${NC}"
 
 # Step 2: Anti-pattern detection
 echo -e "${YELLOW}🔍 Step 2: Running anti-pattern detection${NC}"
-if bash scripts/detect-test-antipatterns.sh; then
+if bash scripts/dev/testing/detect-test-antipatterns.sh; then
     echo -e "${GREEN}✅ No critical anti-patterns detected${NC}"
 else
     echo -e "${YELLOW}⚠️  Warnings found but no critical violations${NC}"

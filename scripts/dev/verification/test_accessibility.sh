@@ -185,7 +185,7 @@ if [ "$IOS_VIOLATIONS" -eq 0 ]; then
     echo -e "${GREEN}✓${NC} No iOS deadlock patterns detected"
 else
     echo -e "${RED}✗${NC} Found $IOS_VIOLATIONS potential iOS deadlock patterns"
-    echo "   Run: ./scripts/verify-ios-safety.sh"
+    echo "   Run: ./scripts/dev/verification/verify-ios-safety.sh"
 fi
 
 echo ""

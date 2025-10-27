@@ -125,8 +125,8 @@ echo "✅ All lint checks passed!"
 # Auto-add headers and validate staged source files
 if [ -n "$staged_source_files" ]; then
     # Check if header script exists
-    if [ ! -f "scripts/add-headers.sh" ]; then
-        echo "ℹ️  Header script not found at scripts/add-headers.sh. Skipping header validation."
+    if [ ! -f "scripts/dev/build/add-headers.sh" ]; then
+        echo "ℹ️  Header script not found at scripts/dev/build/add-headers.sh. Skipping header validation."
         echo "   Copyright headers should be added manually or via IDE templates."
     else
         echo "Auto-adding missing copyright headers..."
@@ -140,7 +140,7 @@ if [ -n "$staged_source_files" ]; then
             cp "$file" "$file.pre_header"
 
             # Add header if missing
-            if ! scripts/add-headers.sh "$file"; then
+            if ! scripts/dev/build/add-headers.sh "$file"; then
                 echo "❌ Failed to process header for $file"
                 rm -f "$file.pre_header"
                 exit 1
