@@ -524,6 +524,10 @@ WorldWideWaves/
 - **[docs/ios/](docs/ios/)** - iOS-specific documentation hub
 - **[docs/patterns/ios-safety-patterns.md](docs/patterns/ios-safety-patterns.md)** - All iOS safety patterns
 
+### Android Development
+- **[docs/android/android-development-guide.md](docs/android/android-development-guide.md)** - Complete Android development guide
+- **[docs/android/](docs/android/)** - Android-specific documentation hub
+
 ### Testing
 - **[docs/testing/test-patterns.md](docs/testing/test-patterns.md)** - Comprehensive test patterns
 - **[docs/testing-strategy.md](docs/testing-strategy.md)** - Testing approach
