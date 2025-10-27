@@ -23,8 +23,10 @@ package com.worldwidewaves.testing.real
 
 import androidx.compose.ui.test.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.uiautomator.UiDevice
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiSelector
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
@@ -77,7 +79,7 @@ class RealLocationPermissionIntegrationTest : BaseRealIntegrationTest() {
             } catch (e: AssertionError) {
                 // Check for system permission dialog using UiAutomator
                 try {
-                    device.findObject(androidx.test.uiautomator.UiSelector().textContains("Allow")).exists()
+                    device.findObject(UiSelector().textContains("Allow")).exists()
                 } catch (e: Exception) {
                     false
                 }
@@ -93,7 +95,7 @@ class RealLocationPermissionIntegrationTest : BaseRealIntegrationTest() {
             true
         } catch (e: AssertionError) {
             // Check system dialog
-            device.findObject(androidx.test.uiautomator.UiSelector().textContains("Allow")).exists()
+            device.findObject(UiSelector().textContains("Allow")).exists()
         }
 
         assertTrue("Permission request should be shown on first launch", permissionRequestShown)
@@ -234,7 +236,7 @@ class RealLocationPermissionIntegrationTest : BaseRealIntegrationTest() {
         composeTestRule.activityRule.scenario.moveToState(androidx.lifecycle.Lifecycle.State.STARTED)
 
         // Wait for background state
-        kotlinx.coroutines.delay(3000)
+        delay(3000)
 
         // Check if background location is being handled
         // In real implementation, this would verify background location services
@@ -273,7 +275,7 @@ class RealLocationPermissionIntegrationTest : BaseRealIntegrationTest() {
 
         testLocations.forEach { (lat, lng) ->
             setTestLocation(lat, lng)
-            kotlinx.coroutines.delay(2000)
+            delay(2000)
 
             val currentLocation = deviceStateManager.getCurrentLocation()
             if (currentLocation != null) {

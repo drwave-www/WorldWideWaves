@@ -31,6 +31,7 @@ import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.geojson.Point
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
+import org.maplibre.geojson.Polygon as MapLibrePolygon
 
 /**
  * Converts a `BoundingBox` to a `LatLngBounds`.
@@ -59,9 +60,9 @@ fun Position.toLocation(now: Instant): Location {
 
 fun LatLng.toPosition(): Position = Position(this.latitude, this.longitude)
 
-fun Polygon.toMapLibrePolygon(): org.maplibre.geojson.Polygon {
+fun Polygon.toMapLibrePolygon(): MapLibrePolygon {
     close()
-    return org.maplibre.geojson.Polygon.fromLngLats(
+    return MapLibrePolygon.fromLngLats(
         listOf(map { Point.fromLngLat(it.lng, it.lat) }),
     )
 }
