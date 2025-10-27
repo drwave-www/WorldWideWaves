@@ -84,7 +84,6 @@ class EventStateHolderIntegrationTest {
         eventStateHolder =
             DefaultEventStateHolder(
                 waveProgressionTracker = mockWaveProgressionTracker,
-                clock = testClock,
             )
     }
 
@@ -861,7 +860,6 @@ class EventStateHolderIntegrationTest {
             val holderWithSpy =
                 DefaultEventStateHolder(
                     waveProgressionTracker = spyTracker,
-                    clock = testClock,
                 )
 
             val event =

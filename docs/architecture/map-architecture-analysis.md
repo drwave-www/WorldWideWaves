@@ -1,24 +1,42 @@
 # WorldWideWaves Map Architecture Analysis
 
+> ⚠️ **HISTORICAL DOCUMENT WARNING**
+>
+> This analysis was created **October 1, 2025** and reflects the state at that time.
+> **Major iOS implementation occurred October 20-24, 2025** (3 weeks after this document).
+>
+> **For current state, see**:
+> - [iOS/Android Map Parity Gap Analysis](../ios/ios-android-map-parity-gap-analysis.md) - Updated October 23, 2025
+> - [iOS Gesture Fixes](../archive/ios-gesture-fixes-2025-10-23/) - Complete implementation details
+>
+> **What changed since October 1**:
+> - iOS maps fully implemented (was "mostly stubs" on Oct 1)
+> - MapLibre iOS 6.8.0 integration complete (95% feature parity)
+> - Major iOS gesture fixes (camera validation, bounds enforcement)
+> - MapWrapperRegistry evolved from 122 → 1,085 lines (command pattern)
+
 **Date:** October 1, 2025
+**Status:** ⚠️ Outdated - Historical baseline, iOS sections need updates
+**Last Verified:** October 1, 2025 (iOS implementation completed October 20-24)
 **Purpose:** Comprehensive analysis of shared vs platform-specific map architecture
 
 ---
 
 ## Executive Summary
 
-WorldWideWaves implements a well-structured map architecture leveraging Kotlin Multiplatform Mobile (KMM) to maximize code sharing between Android and iOS while respecting platform-specific requirements. The architecture achieves approximately **70% code sharing** with clean separation of concerns.
+WorldWideWaves implements a well-structured map architecture leveraging Kotlin Multiplatform to maximize code sharing between Android and iOS while respecting platform-specific requirements. The architecture achieves approximately **37-44% code sharing** with clean separation of concerns.
 
 **Key Strengths:**
-- Excellent business logic sharing (MapDownloadCoordinator, AbstractEventMap)
-- Clean interface boundaries (MapLibreAdapter, WWWLocationProvider, PlatformMapManager)
+- Excellent business logic sharing (AbstractEventMap, MapBoundsEnforcer)
+- Clean interface boundaries (MapLibreAdapter, LocationProvider, PlatformMapManager)
 - Proper expect/actual pattern usage
 - Unified position management integration
+- **iOS maps fully functional** (as of October 24, 2025)
 
-**Key Weaknesses:**
-- iOS map rendering is incomplete (stub implementations in IOSMapLibreAdapter)
-- Some shared logic duplicated in platform layers (download state management)
-- MapStateManager underutilized on Android (uses AndroidMapViewModel instead)
+**Historical Note - iOS Implementation**:
+- **October 1, 2025**: iOS maps were incomplete stub implementations
+- **October 20-24, 2025**: Complete iOS implementation in 4-day sprint
+- **Current state**: iOS has 95% feature parity with Android (78/97 points match)
 
 ---
 

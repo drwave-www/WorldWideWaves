@@ -89,7 +89,9 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
             // Apply constraints
             setZoomPreferences(minZoom = minZoom)
             runOnUiThread {
-                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+                runOnUiThread {
+                    adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+                }
             }
 
             // Zoom to min zoom at event center
@@ -146,7 +148,9 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
             // Apply constraints
             setZoomPreferences(minZoom = minZoom)
             runOnUiThread {
-                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+                runOnUiThread {
+                    adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+                }
             }
 
             // Zoom to min zoom at event center
@@ -182,7 +186,9 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
 
             setZoomPreferences(minZoom = minZoom)
             runOnUiThread {
-                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+                runOnUiThread {
+                    adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+                }
             }
 
             // Test north edge
@@ -237,7 +243,9 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
 
             setZoomPreferences(minZoom = minZoom)
             runOnUiThread {
-                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+                runOnUiThread {
+                    adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+                }
             }
 
             // Test NW corner
@@ -292,7 +300,9 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
 
             setZoomPreferences(minZoom = minZoom)
             runOnUiThread {
-                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+                runOnUiThread {
+                    adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+                }
             }
 
             // Test various camera positions at min zoom
@@ -323,7 +333,9 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
 
             setZoomPreferences(minZoom = minZoom)
             runOnUiThread {
-                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+                runOnUiThread {
+                    adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+                }
             }
 
             animateCameraAndWait(eventBounds.center(), minZoom)
@@ -396,8 +408,7 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
         runBlocking {
             val minZoom = MapTestFixtures.calculateMinZoomToFit(eventBounds, MapTestFixtures.PORTRAIT_PHONE)
 
-            adapter.setMinZoomPreference(minZoom)
-            adapter.setMaxZoomPreference(18.0)
+            setZoomPreferences(minZoom = minZoom, maxZoom = 18.0)
 
             // Zoom in above min zoom
             val targetZoom = minZoom + 3.0
@@ -425,7 +436,7 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
             // Apply preventive constraints
             applyConstraintsAndVerify(eventBounds, isWindowMode = true)
 
-            val minZoom = adapter.getMinZoomLevel()
+            val minZoom = runOnUiThread { adapter.getMinZoomLevel() }
 
             // Try to move camera outside event bounds (should be clamped)
             val outsidePosition =
@@ -436,8 +447,8 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
 
             animateCameraAndWait(outsidePosition, minZoom)
 
-            val actualPosition = adapter.getCameraPosition()
-            val visibleRegion = adapter.getVisibleRegion()
+            val actualPosition = runOnUiThread { adapter.getCameraPosition() }
+            val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
 
             // Camera should be clamped to keep viewport within bounds
             assertVisibleRegionWithinBounds(
@@ -465,13 +476,13 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
         runBlocking {
             applyConstraintsAndVerify(eventBounds, isWindowMode = true)
 
-            val minZoom = adapter.getMinZoomLevel()
+            val minZoom = runOnUiThread { adapter.getMinZoomLevel() }
             val zoomLevels = listOf(minZoom, minZoom + 1, minZoom + 2, minZoom + 3)
 
             zoomLevels.forEach { zoom ->
                 // Test at event center
                 animateCameraAndWait(eventBounds.center(), zoom)
-                var visibleRegion = adapter.getVisibleRegion()
+                var visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
 
                 assertVisibleRegionWithinBounds(
                     "Visible region at zoom $zoom (center) should stay within event bounds",
@@ -510,7 +521,7 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
         runBlocking {
             applyConstraintsAndVerify(eventBounds, isWindowMode = true)
 
-            val minZoom = adapter.getMinZoomLevel()
+            val minZoom = runOnUiThread { adapter.getMinZoomLevel() }
 
             // Start at center
             animateCameraAndWait(eventBounds.center(), minZoom)
@@ -524,8 +535,8 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
 
             animateCameraAndWait(farNorthPosition, minZoom)
 
-            val clampedPosition = adapter.getCameraPosition()
-            val clampedVisibleRegion = adapter.getVisibleRegion()
+            val clampedPosition = runOnUiThread { adapter.getCameraPosition() }
+            val clampedVisibleRegion = runOnUiThread { adapter.getVisibleRegion() }
 
             // Verify camera was clamped (not at requested position)
             assertTrue(
@@ -553,12 +564,12 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
         runBlocking {
             applyConstraintsAndVerify(eventBounds, isWindowMode = true)
 
-            val minZoom = adapter.getMinZoomLevel()
+            val minZoom = runOnUiThread { adapter.getMinZoomLevel() }
 
             // Move to center at min zoom
             animateCameraAndWait(eventBounds.center(), minZoom)
 
-            val visibleRegion = adapter.getVisibleRegion()
+            val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
 
             // Determine constraining dimension
             val eventAspect = eventBounds.aspectRatio
@@ -617,16 +628,17 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
         runBlocking {
             val minZoom = MapTestFixtures.calculateMinZoomToFit(eventBounds, MapTestFixtures.PORTRAIT_PHONE)
 
-            adapter.setMinZoomPreference(minZoom)
-            adapter.setMaxZoomPreference(18.0)
-            adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            setZoomPreferences(minZoom = minZoom, maxZoom = 18.0)
+            runOnUiThread {
+                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            }
 
             // Move to north edge at min zoom
             val northEdgePos = Position(eventBounds.northeast.latitude - 0.001, eventBounds.center().longitude)
             animateCameraAndWait(northEdgePos, minZoom)
 
             // Verify at edge
-            val regionAtMinZoom = adapter.getVisibleRegion()
+            val regionAtMinZoom = runOnUiThread { adapter.getVisibleRegion() }
             assertTrue(
                 "Viewport should be at north edge initially",
                 regionAtMinZoom.northeast.latitude <= eventBounds.northeast.latitude + MapTestFixtures.TOLERANCE_EDGE,
@@ -636,7 +648,7 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
             val higherZoom = minZoom + 2.0
             animateCameraAndWait(northEdgePos, higherZoom)
 
-            val regionAfterZoomIn = adapter.getVisibleRegion()
+            val regionAfterZoomIn = runOnUiThread { adapter.getVisibleRegion() }
 
             // Should still be able to zoom in
             assertZoomLevel(
@@ -663,22 +675,23 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
         runBlocking {
             val minZoom = MapTestFixtures.calculateMinZoomToFit(eventBounds, MapTestFixtures.PORTRAIT_PHONE)
 
-            adapter.setMinZoomPreference(minZoom)
-            adapter.setMaxZoomPreference(18.0)
-            adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            setZoomPreferences(minZoom = minZoom, maxZoom = 18.0)
+            runOnUiThread {
+                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            }
 
             // Move to south edge at higher zoom
             val southEdgePos = Position(eventBounds.southwest.latitude + 0.001, eventBounds.center().longitude)
             val higherZoom = minZoom + 3.0
             animateCameraAndWait(southEdgePos, higherZoom)
 
-            val regionAtHigherZoom = adapter.getVisibleRegion()
+            val regionAtHigherZoom = runOnUiThread { adapter.getVisibleRegion() }
 
             // Zoom out while stuck to edge
             val lowerZoom = minZoom + 1.0
             animateCameraAndWait(southEdgePos, lowerZoom)
 
-            val regionAfterZoomOut = adapter.getVisibleRegion()
+            val regionAfterZoomOut = runOnUiThread { adapter.getVisibleRegion() }
 
             // Should be able to zoom out
             assertZoomLevel(
@@ -705,9 +718,10 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
         runBlocking {
             val minZoom = MapTestFixtures.calculateMinZoomToFit(eventBounds, MapTestFixtures.PORTRAIT_PHONE)
 
-            adapter.setMinZoomPreference(minZoom)
-            adapter.setMaxZoomPreference(18.0)
-            adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            setZoomPreferences(minZoom = minZoom, maxZoom = 18.0)
+            runOnUiThread {
+                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            }
 
             // Move to NE corner at min zoom
             val neCornerPos =
@@ -717,13 +731,13 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
                 )
             animateCameraAndWait(neCornerPos, minZoom)
 
-            val regionAtMinZoom = adapter.getVisibleRegion()
+            val regionAtMinZoom = runOnUiThread { adapter.getVisibleRegion() }
 
             // Zoom in while stuck to corner
             val higherZoom = minZoom + 2.5
             animateCameraAndWait(neCornerPos, higherZoom)
 
-            val regionAfterZoomIn = adapter.getVisibleRegion()
+            val regionAfterZoomIn = runOnUiThread { adapter.getVisibleRegion() }
 
             // Should be able to zoom in
             assertZoomLevel(
@@ -749,9 +763,10 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
         runBlocking {
             val minZoom = MapTestFixtures.calculateMinZoomToFit(eventBounds, MapTestFixtures.PORTRAIT_PHONE)
 
-            adapter.setMinZoomPreference(minZoom)
-            adapter.setMaxZoomPreference(18.0)
-            adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            setZoomPreferences(minZoom = minZoom, maxZoom = 18.0)
+            runOnUiThread {
+                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            }
 
             // Move to SW corner at higher zoom
             val swCornerPos =
@@ -762,13 +777,13 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
             val higherZoom = minZoom + 3.0
             animateCameraAndWait(swCornerPos, higherZoom)
 
-            val regionAtHigherZoom = adapter.getVisibleRegion()
+            val regionAtHigherZoom = runOnUiThread { adapter.getVisibleRegion() }
 
             // Zoom out while stuck to corner
             val lowerZoom = minZoom + 1.0
             animateCameraAndWait(swCornerPos, lowerZoom)
 
-            val regionAfterZoomOut = adapter.getVisibleRegion()
+            val regionAfterZoomOut = runOnUiThread { adapter.getVisibleRegion() }
 
             // Should be able to zoom out
             assertZoomLevel(
@@ -798,12 +813,14 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
         runBlocking {
             val minZoom = MapTestFixtures.calculateMinZoomToFit(eventBounds, MapTestFixtures.PORTRAIT_PHONE)
 
-            adapter.setMinZoomPreference(minZoom)
-            adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            setZoomPreferences(minZoom = minZoom)
+            runOnUiThread {
+                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            }
 
             // Start at event center
             animateCameraAndWait(eventBounds.center(), minZoom)
-            val initialCamera = adapter.getCameraPosition()
+            val initialCamera = runOnUiThread { adapter.getCameraPosition() }
 
             // Simulate first GPS fix (user position update)
             val userPosition =
@@ -811,14 +828,14 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
                     eventBounds.northeast.latitude - 0.002,
                     eventBounds.northeast.longitude - 0.002,
                 )
-            adapter.setUserPosition(userPosition)
+            setUserPosition(userPosition)
 
             // Camera should move to user position automatically
             // (In real implementation, FullMapScreen has autoTargetUserOnFirstLocation = true)
             // For this test, we simulate the auto-targeting behavior
             animateCameraAndWait(userPosition, minZoom + 1.0)
 
-            val cameraAfterGps = adapter.getCameraPosition()
+            val cameraAfterGps = runOnUiThread { adapter.getCameraPosition() }
 
             // Camera should have moved from initial position
             assertTrue(
@@ -878,13 +895,15 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
 
             val minZoom = MapTestFixtures.calculateMinZoomToFit(aspectMatchedBounds, MapTestFixtures.PORTRAIT_PHONE)
 
-            adapter.setMinZoomPreference(minZoom)
-            adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            setZoomPreferences(minZoom = minZoom)
+            runOnUiThread {
+                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            }
 
             // Zoom to min zoom
             animateCameraAndWait(eventBounds.center(), minZoom)
 
-            val visibleRegion = adapter.getVisibleRegion()
+            val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
 
             // HEIGHT (smallest dimension) should fit completely
             val heightDifference = kotlin.math.abs(visibleRegion.height - eventBounds.height) / eventBounds.height
@@ -932,13 +951,15 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
 
             val minZoom = MapTestFixtures.calculateMinZoomToFit(aspectMatchedBounds, MapTestFixtures.PORTRAIT_PHONE)
 
-            adapter.setMinZoomPreference(minZoom)
-            adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            setZoomPreferences(minZoom = minZoom)
+            runOnUiThread {
+                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            }
 
             // Zoom to min zoom
             animateCameraAndWait(eventBounds.center(), minZoom)
 
-            val visibleRegion = adapter.getVisibleRegion()
+            val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
 
             // WIDTH (smallest dimension) should fit completely
             val widthDifference = kotlin.math.abs(visibleRegion.width - eventBounds.width) / eventBounds.width
@@ -966,12 +987,14 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
         runBlocking {
             val minZoom = MapTestFixtures.calculateMinZoomToFit(eventBounds, MapTestFixtures.PORTRAIT_PHONE)
 
-            adapter.setMinZoomPreference(minZoom)
-            adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            setZoomPreferences(minZoom = minZoom)
+            runOnUiThread {
+                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            }
 
             // Set initial camera
             animateCameraAndWait(eventBounds.center(), minZoom)
-            val initialRegion = adapter.getVisibleRegion()
+            val initialRegion = runOnUiThread { adapter.getVisibleRegion() }
 
             // Make minor dimension change (simulate screen rotation with <10% change)
             val minorChange = 1.05 // 5% change
@@ -980,7 +1003,7 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
 
             // Re-query visible region (no recalculation expected)
             Thread.sleep(100) // Small delay to ensure no background recalculation
-            val regionAfterMinorChange = adapter.getVisibleRegion()
+            val regionAfterMinorChange = runOnUiThread { adapter.getVisibleRegion() }
 
             // Visible region should not have changed significantly
             val widthDifference =
