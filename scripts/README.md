@@ -7,7 +7,7 @@ Development tools and automation scripts for WorldWideWaves. Contains utilities 
 ```
 scripts/
 ├── maps/           # Map tile generation and processing
-├── images/         # Image processing and generation  
+├── images/         # Image processing and generation
 ├── instagram/      # Social media content automation
 ├── licenses/       # License management and reporting
 ├── polygons/       # Geographic boundary processing
@@ -16,6 +16,22 @@ scripts/
 ```
 
 ## Quick Start
+
+### Verify Development Environment
+Before using any scripts, verify your development environment is properly configured:
+
+```bash
+# Run setup verification script
+./scripts/verify-setup.sh
+```
+
+This will check:
+- Platform detection (macOS, Linux, Windows)
+- Required tools (Java 17+, Node.js 16+, Git, ripgrep)
+- Platform-specific tools (Xcode on macOS, KVM on Linux)
+- Android SDK configuration
+- Project configuration (local.properties, Firebase)
+- Build system functionality
 
 ### Prerequisites
 - **Docker & Docker Compose** (for map generation)
@@ -49,6 +65,41 @@ cd scripts/licenses/
 ```
 
 ## Module Details
+
+### ✅ verify-setup.sh - **Environment Verification**
+Comprehensive development environment verification script.
+
+**Purpose:**
+- Verify all required development tools are installed
+- Check platform-specific requirements (Xcode, KVM, etc.)
+- Validate Android SDK configuration
+- Confirm project configuration files exist
+- Test Gradle build system functionality
+
+**Usage:**
+```bash
+./scripts/verify-setup.sh
+```
+
+**Checks Performed:**
+- ✅ Platform detection (macOS, Linux, Windows Git Bash)
+- ✅ Java JDK 17+ installation
+- ✅ Node.js 16+ and npm
+- ✅ Git and ripgrep
+- ✅ Android SDK (ANDROID_HOME/ANDROID_SDK_ROOT)
+- ✅ Platform tools (Xcode on macOS, KVM on Linux)
+- ✅ Project files (local.properties, Firebase config)
+- ✅ Gradle wrapper and build system
+- ⚠️  Optional tools (Docker, gcloud, CocoaPods, SwiftLint)
+
+**Exit Codes:**
+- `0` - All required checks passed (warnings allowed)
+- `1` - One or more critical checks failed
+
+**Platform Compatibility:**
+- macOS (tested on macOS 15.6+)
+- Linux (Ubuntu, Debian, Fedora)
+- Windows (Git Bash/MSYS2/Cygwin)
 
 ### 🗺️ [Maps](./maps/) - **Primary Tool**
 Complete map generation pipeline for offline city maps using OpenStreetMap and Docker.
@@ -91,7 +142,7 @@ License compliance and dependency management.
 
 **Purpose:**
 - Generate license reports
-- Check dependency compliance  
+- Check dependency compliance
 - Maintain legal documentation
 
 ### 🌍 [Polygons](./polygons/)
@@ -135,8 +186,8 @@ scripts/licenses/generate_report.sh # Updates licenses
   run: |
     cd scripts/maps
     ./generate_all.sh
-    
-- name: Process Assets  
+
+- name: Process Assets
   run: |
     cd scripts/images
     ./optimize_all.sh
@@ -261,7 +312,7 @@ ls -lat logs/
    ```bash
    # Clean up generated files
    scripts/cleanup.sh
-   
+
    # Check disk usage
    du -sh scripts/*/tmp/
    ```
@@ -284,7 +335,7 @@ Most scripts support parallel execution:
 # Process multiple cities in parallel
 ./generate_maps.sh --parallel 4 city1 city2 city3 city4
 
-# Optimize images concurrently  
+# Optimize images concurrently
 ./optimize_images.sh --jobs 8
 ```
 
