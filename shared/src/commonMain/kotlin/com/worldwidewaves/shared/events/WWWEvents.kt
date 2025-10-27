@@ -100,19 +100,12 @@ class WWWEvents : KoinComponent {
 
             // Launch a coroutine to handle the mutex-protected loading
             coroutineScopeProvider.launchIO {
-                // Check if we need to start loading (outside mutex for quick check)
-                val needsLoading = !eventsLoaded && loadingError == null && currentLoadJob == null
-
-                if (needsLoading) {
-                    loadingMutex.withLock {
-                        // Double-check if events are already loaded after acquiring the lock
-                        if (!eventsLoaded && loadingError == null && currentLoadJob == null) {
-                            currentLoadJob = loadEventsJob()
-                        }
+                loadingMutex.withLock {
+                    // Double-check if events are already loaded after acquiring the lock
+                    if (!eventsLoaded && loadingError == null) {
+                        currentLoadJob = loadEventsJob()
+                        // Don't join here - let the job run asynchronously to prevent deadlock
                     }
-
-                    // Wait for the job to complete outside the mutex to prevent deadlock
-                    currentLoadJob?.join()
                 }
             }
         }
@@ -152,13 +145,11 @@ class WWWEvents : KoinComponent {
                 validatedEvents
                     .filterValues { it?.isNotEmpty() == true } // Log validation errors
                     .forEach { (event, errors) ->
-                        // errors is guaranteed non-null and non-empty by filterValues above
-                        val errorList = errors ?: return@forEach
                         Log.e("WWWEvents.loadEventsJob", "Validation Errors for Event ID: ${event.id}")
-                        errorList.forEach { errorMessage ->
+                        errors?.forEach { errorMessage ->
                             Log.e("WWWEvents.loadEventsJob", errorMessage)
                         }
-                        validationErrors.add(event to errorList)
+                        validationErrors.add(event to errors!!)
                     }
 
                 // Filter out invalid events and initialize favorites
@@ -254,12 +245,10 @@ class WWWEvents : KoinComponent {
     }
 
     fun addOnEventsErrorListener(callback: (Exception) -> Unit) {
-        loadingError?.let { error ->
-            callback(error)
-        } ?: run {
-            if (!pendingErrorCallbacks.contains(callback)) {
-                pendingErrorCallbacks.add(callback)
-            }
+        if (loadingError != null) {
+            callback(loadingError!!)
+        } else if (!pendingErrorCallbacks.contains(callback)) {
+            pendingErrorCallbacks.add(callback)
         }
     }
 

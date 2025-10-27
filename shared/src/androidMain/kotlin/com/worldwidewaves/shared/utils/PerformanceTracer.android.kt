@@ -28,45 +28,26 @@ import com.google.firebase.perf.metrics.Trace
  * Uses Firebase Performance SDK to track custom traces and metrics.
  */
 actual object PerformanceTracer {
-    // Lazy initialization to avoid Firebase access during unit tests
-    private val firebasePerf: FirebasePerformance by lazy {
-        try {
-            FirebasePerformance.getInstance()
-        } catch (e: IllegalStateException) {
-            // Firebase not initialized (unit tests) - return a mock that logs warnings
-            Log.w("PerformanceTracer", "Firebase not initialized, performance tracing disabled")
-            throw e // Re-throw to prevent silent failures in production
-        }
-    }
+    private val firebasePerf = FirebasePerformance.getInstance()
 
-    actual fun startTrace(name: String): PerformanceTrace =
-        try {
-            val trace = firebasePerf.newTrace(name)
-            trace.start()
-            Log.v("PerformanceTracer", "Started trace: $name")
-            AndroidPerformanceTrace(trace)
-        } catch (e: IllegalStateException) {
-            // Firebase not initialized (unit tests)
-            Log.w("PerformanceTracer", "Cannot start trace '$name': Firebase not initialized")
-            NoOpPerformanceTrace()
-        }
+    actual fun startTrace(name: String): PerformanceTrace {
+        val trace = firebasePerf.newTrace(name)
+        trace.start()
+        Log.v("PerformanceTracer", "Started trace: $name")
+        return AndroidPerformanceTrace(trace)
+    }
 
     actual fun recordMetric(
         name: String,
         value: Long,
     ) {
-        try {
-            Log.v("PerformanceTracer", "Recorded metric: $name = $value")
-            // Firebase Performance doesn't have a direct "record metric" API
-            // We create a short-lived trace instead
-            val trace = firebasePerf.newTrace(name)
-            trace.start()
-            trace.putMetric("value", value)
-            trace.stop()
-        } catch (e: IllegalStateException) {
-            // Firebase not initialized (unit tests)
-            Log.w("PerformanceTracer", "Cannot record metric '$name': Firebase not initialized")
-        }
+        Log.v("PerformanceTracer", "Recorded metric: $name = $value")
+        // Firebase Performance doesn't have a direct "record metric" API
+        // We create a short-lived trace instead
+        val trace = firebasePerf.newTrace(name)
+        trace.start()
+        trace.putMetric("value", value)
+        trace.stop()
     }
 }
 
@@ -93,28 +74,5 @@ private class AndroidPerformanceTrace(
     override fun stop() {
         trace.stop()
         Log.v("PerformanceTracer", "Stopped trace: ${trace.name}")
-    }
-}
-
-/**
- * No-op implementation for unit tests when Firebase is not available.
- */
-private class NoOpPerformanceTrace : PerformanceTrace {
-    override fun putMetric(
-        name: String,
-        value: Long,
-    ) {
-        // No-op for unit tests
-    }
-
-    override fun incrementMetric(
-        name: String,
-        by: Long,
-    ) {
-        // No-op for unit tests
-    }
-
-    override fun stop() {
-        // No-op for unit tests
     }
 }
