@@ -595,7 +595,9 @@ override suspend fun downloadMap(...) {
         onProgress(100) // Jump to 100 on completion
 
         if (nsError == null && isMapAvailable(mapId)) {
-            MapDownloadGate.allow(mapId) // Enable caching
+            scope.launch {
+                MapDownloadGate.allow(mapId) // Enable caching (thread-safe)
+            }
             onSuccess()
         } else {
             onError(nsError?.code?.toInt() ?: -1, nsError?.localizedDescription)

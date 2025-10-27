@@ -56,14 +56,15 @@ private val unavailable = mutableSetOf<String>()
 private val lock = Mutex()
 
 object MapDownloadGate {
+    private val mutex = Mutex()
     private val allowed = mutableSetOf<String>()
 
-    fun allow(tag: String) {
-        allowed += tag
+    suspend fun allow(tag: String) {
+        mutex.withLock { allowed += tag }
     }
 
-    fun disallow(tag: String) {
-        allowed -= tag
+    suspend fun disallow(tag: String) {
+        mutex.withLock { allowed -= tag }
     }
 
     fun isAllowed(tag: String) = tag in allowed
