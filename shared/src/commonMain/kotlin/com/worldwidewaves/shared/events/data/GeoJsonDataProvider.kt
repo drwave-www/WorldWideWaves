@@ -24,6 +24,7 @@ package com.worldwidewaves.shared.events.data
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.data.readGeoJson
 import com.worldwidewaves.shared.utils.Log
+import com.worldwidewaves.shared.utils.PerformanceTracer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
@@ -163,17 +164,25 @@ class DefaultGeoJsonDataProvider :
         attemptCount[eventId] = currentAttempts + 1
     }
 
-    private suspend fun loadGeoJsonData(eventId: String): JsonObject? =
-        try {
+    private suspend fun loadGeoJsonData(eventId: String): JsonObject? {
+        val trace = PerformanceTracer.startTrace("geojson_parsing")
+        return try {
             Log.i(::getGeoJsonData.name, "Loading geojson data for event $eventId")
 
             val geojsonData = readGeoJson(eventId)
+            trace.putMetric("geojson_size_bytes", geojsonData?.length?.toLong() ?: 0L)
 
-            parseGeoJsonData(eventId, geojsonData)
+            val result = parseGeoJsonData(eventId, geojsonData)
+            trace.putMetric("parse_success", if (result != null) 1 else 0)
+            result
         } catch (e: Exception) {
             Log.e(::getGeoJsonData.name, "Error loading geojson data for event $eventId: ${e.message}")
+            trace.putMetric("parse_error", 1)
             null
+        } finally {
+            trace.stop()
         }
+    }
 
     private fun parseGeoJsonData(
         eventId: String,
