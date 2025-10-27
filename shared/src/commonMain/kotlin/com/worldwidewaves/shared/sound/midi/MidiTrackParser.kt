@@ -35,7 +35,7 @@ import com.worldwidewaves.shared.utils.Log
  * - Track metadata
  */
 internal object MidiTrackParser {
-    private const val TAG = "MidiTrackParser"
+    private const val TAG = "WWW.Sound.MidiTrack"
 
     // Track constants
     private const val TRACK_CHUNK_ID = "MTrk"

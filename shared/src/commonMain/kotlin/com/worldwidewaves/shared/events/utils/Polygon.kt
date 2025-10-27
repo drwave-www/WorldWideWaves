@@ -88,7 +88,11 @@ open class Polygon(
         val retClockwise =
             when {
                 size < 3 -> true // Two-point polygon is considered clockwise
-                else -> area + (head!!.lng - tail!!.lng) * (head!!.lat + tail!!.lat) > 0 // Ensure closing
+                else -> {
+                    val headPos = requireNotNull(head) { "Head cannot be null for polygon with size >= 3" }
+                    val tailPos = requireNotNull(tail) { "Tail cannot be null for polygon with size >= 3" }
+                    area + (headPos.lng - tailPos.lng) * (headPos.lat + tailPos.lat) > 0 // Ensure closing
+                }
             }
         return retClockwise
     }
@@ -171,8 +175,10 @@ open class Polygon(
     // -- Add/Remove positions --------
 
     fun add(position: Position): Position {
-        if (tail != null && position == tail) { // Do not add consecutive same point
-            return tail!!
+        tail?.let { currentTail ->
+            if (position == currentTail) { // Do not add consecutive same point
+                return currentTail
+            }
         }
 
         val addPosition = position.xfer() // Disconnect the position from a possible other polygon
@@ -387,7 +393,9 @@ fun <T : Polygon> T.subList(
     var current = start
     do {
         add(current)
-        current = current.next ?: this@subList.first()!!
+        current = current.next ?: requireNotNull(this@subList.first()) {
+            "First position cannot be null in non-empty polygon during subList iteration"
+        }
         require(current.id != start.id) { "Polygon subList: 'last' cannot be found in the polygon" }
     } while (current.id != lastId)
 }
@@ -397,7 +405,11 @@ fun <T : Polygon> T.withoutLast(n: Int = 1): Polygon =
         val newSize = (this@withoutLast.size - n).coerceAtLeast(0)
         var current = this@withoutLast.head
         repeat(newSize) {
-            add(current!!)
+            val pos =
+                requireNotNull(current) {
+                    "Current position cannot be null during withoutLast iteration"
+                }
+            add(pos)
             current = current.next
         }
     }
@@ -426,7 +438,11 @@ fun <T : Polygon> T.xferFrom(polygon: Polygon): T {
 
 fun <T : Polygon> T.close(): T {
     if (isNotEmpty() && first() != last()) {
-        add(first()!!.detached())
+        val firstPosition =
+            requireNotNull(first()) {
+                "First position cannot be null in non-empty polygon"
+            }
+        add(firstPosition.detached())
     }
     return this
 }

@@ -19,6 +19,7 @@
 
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.net.URL
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -29,6 +30,7 @@ plugins {
     alias(libs.plugins.icerock.moko.multiplatform)
     alias(libs.plugins.detekt)
     alias(libs.plugins.buildkonfig)
+    alias(libs.plugins.dokka)
 }
 
 kotlin {
@@ -130,6 +132,12 @@ kotlin {
 
             // Coroutines on Android
             implementation(libs.kotlinx.coroutines.android)
+
+            // Firebase for Crashlytics and Remote Config
+            // Note: Use specific versions, BOM doesn't work well in KMM shared modules
+            implementation("com.google.firebase:firebase-crashlytics-ktx:19.2.1")
+            implementation("com.google.firebase:firebase-perf-ktx:21.0.3")
+            implementation("com.google.firebase:firebase-config-ktx:22.0.1")
         }
 
         /*
@@ -302,7 +310,7 @@ tasks.register("detectTestAntipatterns") {
     doLast {
         project.providers.exec {
             workingDir(project.rootDir)
-            commandLine("bash", "scripts/detect-test-antipatterns.sh")
+            commandLine("bash", "scripts/dev/testing/detect-test-antipatterns.sh")
         }
     }
 }
@@ -321,3 +329,21 @@ tasks.register("testQuality") {
 }
 
 // Custom Gradle task for crowd sound choreography simulation
+
+// Dokka API Documentation Configuration
+tasks.named<org.jetbrains.dokka.gradle.DokkaTask>("dokkaHtml").configure {
+    outputDirectory.set(layout.buildDirectory.dir("dokka"))
+    moduleName.set("WorldWideWaves Shared")
+
+    dokkaSourceSets {
+        named("commonMain") {
+            sourceLink {
+                localDirectory.set(file("src/commonMain/kotlin"))
+                remoteUrl.set(
+                    URL("https://github.com/mglcel/WorldWideWaves/tree/main/shared/src/commonMain/kotlin"),
+                )
+                remoteLineSuffix.set("#L")
+            }
+        }
+    }
+}

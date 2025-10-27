@@ -21,6 +21,7 @@
 
 package com.worldwidewaves.shared.testing
 
+import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -416,7 +417,7 @@ open class PerformanceMonitor : IPerformanceMonitor {
                     )
             } catch (e: Exception) {
                 // Log error but don't crash performance monitoring
-                println("PerformanceMonitor: Error updating metrics: ${e.message}")
+                Log.e("WWW.Performance.Monitor", "Error updating metrics", e)
             }
         }
     }

@@ -75,6 +75,12 @@ fun BoxScope.SimulationButton(
     var pendingAction by remember { mutableStateOf<(suspend () -> Unit)?>(null) }
     val isSimulationEnabled by platform.simulationModeEnabled.collectAsState()
 
+    // Localized strings for error messages and notifications
+    val simulationErrorText = stringResource(MokoRes.strings.simulation_error)
+    val stopErrorText = stringResource(MokoRes.strings.simulation_stop_error)
+    val simulationStartedText = stringResource(MokoRes.strings.simulation_started)
+    val simulationStoppedText = stringResource(MokoRes.strings.simulation_stopped)
+
     // Check if map is available for simulation
     val isMapAvailableForSimulation =
         when (mapFeatureState) {
@@ -122,6 +128,10 @@ fun BoxScope.SimulationButton(
                             onSimulationStarted = onSimulationStarted,
                             onSimulationStopped = onSimulationStopped,
                             onError = onError,
+                            simulationErrorText = simulationErrorText,
+                            stopErrorText = stopErrorText,
+                            simulationStartedText = simulationStartedText,
+                            simulationStoppedText = simulationStoppedText,
                         )
                     pendingAction = action
                 }.semantics {
@@ -188,6 +198,10 @@ private fun handleSimulationClick(
     onSimulationStarted: (String) -> Unit,
     onSimulationStopped: (String) -> Unit,
     onError: (String, String) -> Unit,
+    simulationErrorText: String,
+    stopErrorText: String,
+    simulationStartedText: String,
+    simulationStoppedText: String,
 ): (suspend () -> Unit)? =
     when (simulationButtonState) {
         "idle" -> {
@@ -198,11 +212,19 @@ private fun handleSimulationClick(
                 onStateChange("loading")
                 suspend {
                     try {
-                        startSimulation(event, platform, onSimulationStarted, onStateChange, onError)
+                        startSimulation(
+                            event,
+                            platform,
+                            onSimulationStarted,
+                            onStateChange,
+                            onError,
+                            simulationErrorText,
+                            simulationStartedText,
+                        )
                     } catch (e: Exception) {
+                        Log.e("SimulationButton", "Simulation start failed for event ${event.id}", e)
                         onStateChange("idle")
-                        onError("Simulation Error", e.message ?: "Unknown error")
-                        Log.e("SimulationButton", "Simulation start failed", e)
+                        onError(simulationErrorText, e.message ?: "Unknown error")
                     }
                 }
             }
@@ -211,10 +233,10 @@ private fun handleSimulationClick(
             onStateChange("idle")
             suspend {
                 try {
-                    stopSimulation(event, platform, onSimulationStopped)
+                    stopSimulation(event, platform, onSimulationStopped, simulationStoppedText)
                 } catch (e: Exception) {
-                    onError("Stop Error", e.message ?: "Unknown error")
-                    Log.e("SimulationButton", "Simulation stop failed", e)
+                    Log.e("SimulationButton", "Simulation stop failed for event ${event.id}", e)
+                    onError(stopErrorText, e.message ?: "Unknown error")
                 }
             }
         }
@@ -231,6 +253,8 @@ private suspend fun startSimulation(
     onSimulationStarted: (String) -> Unit,
     onStateChange: (String) -> Unit,
     onError: (String, String) -> Unit,
+    simulationErrorText: String,
+    simulationStartedText: String,
 ) {
     try {
         // Prevent concurrent simulation operations for the same event
@@ -266,19 +290,19 @@ private suspend fun startSimulation(
         event.observer.stopObservation()
         event.observer.startObservation()
 
-        onSimulationStarted("Simulation started")
+        onSimulationStarted(simulationStartedText)
         onStateChange("active")
     } catch (ise: IllegalStateException) {
         onStateChange("idle")
-        onError("Invalid State", "Invalid state for simulation setup")
+        onError(simulationErrorText, "Invalid state for simulation setup")
         Log.e("SimulationButton", "Invalid state for simulation setup", ise)
     } catch (iae: IllegalArgumentException) {
         onStateChange("idle")
-        onError("Invalid Parameters", "Invalid simulation parameters")
+        onError(simulationErrorText, "Invalid simulation parameters")
         Log.e("SimulationButton", "Invalid simulation parameters", iae)
     } catch (uoe: UnsupportedOperationException) {
         onStateChange("idle")
-        onError("Unsupported Operation", "Unsupported simulation operation")
+        onError(simulationErrorText, "Unsupported simulation operation")
         Log.e("SimulationButton", "Unsupported simulation operation", uoe)
     }
 }
@@ -290,9 +314,10 @@ private suspend fun stopSimulation(
     event: IWWWEvent,
     platform: WWWPlatform,
     onSimulationStopped: (String) -> Unit,
+    simulationStoppedText: String,
 ) {
     platform.disableSimulation()
     event.observer.stopObservation()
     event.observer.startObservation()
-    onSimulationStopped("Simulation stopped")
+    onSimulationStopped(simulationStoppedText)
 }

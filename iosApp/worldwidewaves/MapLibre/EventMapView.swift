@@ -102,7 +102,15 @@ struct EventMapView: UIViewRepresentable {
     private func configureStyleURL(for mapView: MLNMapView) {
         let url: URL
         if styleURL.hasPrefix("http://") || styleURL.hasPrefix("https://") {
-            url = URL(string: styleURL)!
+            guard let remoteURL = URL(string: styleURL) else {
+                WWWLog.e(Self.tag, "[ERROR] Invalid remote style URL: \(styleURL)")
+                // Fallback to local default style if remote URL is malformed
+                url = URL(fileURLWithPath: styleURL)
+                WWWLog.w(Self.tag, "Falling back to local style path")
+                mapView.styleURL = url
+                return
+            }
+            url = remoteURL
             WWWLog.d(Self.tag, "Using remote style URL: \(url)")
         } else {
             url = URL(fileURLWithPath: styleURL)
@@ -110,19 +118,19 @@ struct EventMapView: UIViewRepresentable {
             validateStyleFile(at: styleURL)
         }
         mapView.styleURL = url
-        WWWLog.i(Self.tag, "✅ Style URL set on map view: \(url.absoluteString)")
+        WWWLog.i(Self.tag, "[SUCCESS] Style URL set on map view: \(url.absoluteString)")
     }
 
     private func validateStyleFile(at path: String) {
         let fileManager = FileManager.default
         if fileManager.fileExists(atPath: path) {
-            WWWLog.i(Self.tag, "✅ Style file EXISTS at path: \(path)")
+            WWWLog.i(Self.tag, "[SUCCESS] Style file EXISTS at path: \(path)")
             if let attributes = try? fileManager.attributesOfItem(atPath: path),
                let fileSize = attributes[.size] as? UInt64 {
                 WWWLog.d(Self.tag, "Style file size: \(fileSize) bytes")
             }
         } else {
-            WWWLog.e(Self.tag, "❌ Style file DOES NOT EXIST at path: \(path)")
+            WWWLog.e(Self.tag, "[ERROR] Style file DOES NOT EXIST at path: \(path)")
         }
     }
 
