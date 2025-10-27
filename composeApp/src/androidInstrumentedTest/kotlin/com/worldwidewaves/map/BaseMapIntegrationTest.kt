@@ -111,9 +111,14 @@ abstract class BaseMapIntegrationTest {
     open fun setUp() {
         context = ApplicationProvider.getApplicationContext()
 
-        // Initialize MapLibre (required before creating MapView)
-        org.maplibre.android.MapLibre
-            .getInstance(context)
+        // Initialize MapLibre on main thread (MapLibre requires UI thread for getInstance)
+        // This must run before ActivityScenario.launch to avoid threading issues
+        androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().run {
+            runOnMainSync {
+                org.maplibre.android.MapLibre
+                    .getInstance(context)
+            }
+        }
 
         val mapLoadedLatch = CountDownLatch(1)
         var setupError: Throwable? = null

@@ -2,45 +2,50 @@
 
 Complete developer documentation for WorldWideWaves - a Kotlin Multiplatform mobile app orchestrating synchronized human waves globally.
 
+> **📚 NEW: [Complete Documentation Index (INDEX.md)](INDEX.md)** - Comprehensive index with 116 files organized by topic, role, and task
+
 ## Documentation Map
 
 ### Getting Started
 
 Start here if you're new to the project:
 
-1. **[Environment Setup](environment-setup.md)**
+1. **[FAQ (Frequently Asked Questions)](FAQ.md)**
+   Quick answers to common questions about setup, development, testing, iOS/Android specifics, and troubleshooting. Great starting point for newcomers.
+
+2. **[Environment Setup](environment-setup.md)**
    Development environment configuration for macOS, Linux, and Windows. Covers JDK, Android Studio, Xcode, Node.js installation, and first-run verification.
    - **[Linux Setup Guide](setup/linux-setup.md)** - Comprehensive Linux-specific setup (Ubuntu, Fedora, Arch) with KVM acceleration
 
-2. **[Development Workflow](development.md)**
+3. **[Development Workflow](development.md)**
    Local dev loop, testing strategies, debugging techniques, and common troubleshooting. Essential for daily development.
 
-3. **[Contributing Guidelines](contributing.md)**
+4. **[Contributing Guidelines](contributing.md)**
    Contribution process, branching model, commit conventions, code style, and pull request requirements.
 
 ### Architecture & Design
 
 Deep technical documentation:
 
-4. **[Architecture](architecture.md)**
+5. **[Architecture](architecture.md)**
    System design, component responsibilities, data flows, concurrency model, and performance optimizations. Includes Mermaid diagrams.
 
-5. **[CI/CD Pipeline](ci-cd.md)**
+6. **[CI/CD Pipeline](ci-cd.md)**
    GitHub Actions workflows, quality gates, testing strategy, secrets management, and release process.
 
 ### Operations
 
 For deployment and production:
 
-6. **[Operations Guide](operations.md)**
+7. **[Operations Guide](operations.md)**
    Runtime configuration, monitoring, observability, deployment procedures, and incident response playbooks.
 
 ### Specialized Topics
 
-7. **[Firebase Setup](setup/firebase-setup.md)**
+8. **[Firebase Setup](setup/firebase-setup.md)**
    Firebase project configuration, security rules, and environment-specific setup.
 
-8. **[Map Architecture Analysis](architecture/map-architecture-analysis.md)**
+9. **[Map Architecture Analysis](architecture/map-architecture-analysis.md)**
    Detailed analysis of shared vs platform-specific map system design.
 
 ## Quick Links
@@ -49,6 +54,7 @@ For deployment and production:
 
 | Task | Documentation |
 |------|--------------|
+| Quick answers to common questions | [FAQ](FAQ.md) |
 | Set up development environment | [Environment Setup](environment-setup.md) |
 | Run tests locally | [Development Workflow](development.md#testing) |
 | Submit a pull request | [Contributing Guidelines](contributing.md#pull-request-process) |
@@ -60,9 +66,10 @@ For deployment and production:
 ### By Role
 
 **New Contributors:**
-1. [Environment Setup](environment-setup.md)
-2. [Development Workflow](development.md)
-3. [Contributing Guidelines](contributing.md)
+1. [FAQ](FAQ.md)
+2. [Environment Setup](environment-setup.md)
+3. [Development Workflow](development.md)
+4. [Contributing Guidelines](contributing.md)
 
 **Architects & Lead Developers:**
 1. [Architecture](architecture.md)
@@ -170,6 +177,7 @@ Historical documentation (iOS map refactoring, test reports, setup guides) has b
 
 | Date | Version | Changes |
 |------|---------|---------|
+| 2025-10-27 | 3.0 | Added comprehensive INDEX.md with multi-dimensional organization |
 | 2025-10-14 | 2.1 | Documentation cleanup - 18 historical docs archived |
 | 2025-10-01 | 2.0 | Complete documentation rewrite with production-grade structure |
 | 2025-09-23 | 1.5 | Post Position System Refactor updates |
@@ -177,6 +185,6 @@ Historical documentation (iOS map refactoring, test reports, setup guides) has b
 
 ---
 
-**Last Updated:** October 14, 2025
+**Last Updated:** October 27, 2025
 **Maintainer:** WorldWideWaves Development Team
-**Status:** Active Development (Android Production-Ready, iOS 95% Feature Parity)
+**Status:** Production-Ready (Android), Near-Parity (iOS 98%)
