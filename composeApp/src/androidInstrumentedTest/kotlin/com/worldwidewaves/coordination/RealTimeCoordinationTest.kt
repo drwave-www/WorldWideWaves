@@ -21,6 +21,10 @@
 
 package com.worldwidewaves.coordination
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Button
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -204,8 +208,8 @@ class RealTimeCoordinationTest : BaseIntegrationTest() {
         syncProgress: Float,
         onStartCoordination: () -> Unit,
     ) {
-        androidx.compose.foundation.layout.Column {
-            androidx.compose.material3.Text(
+        Column {
+            Text(
                 text =
                     when (status) {
                         CoordinationStatus.WAITING -> "Waiting for coordination"
@@ -213,18 +217,18 @@ class RealTimeCoordinationTest : BaseIntegrationTest() {
                         CoordinationStatus.SYNCHRONIZED -> "Wave synchronized!"
                     },
             )
-            androidx.compose.material3.Text("Participants: $participantCount")
-            androidx.compose.material3.LinearProgressIndicator(
+            Text("Participants: $participantCount")
+            LinearProgressIndicator(
                 progress = { syncProgress },
                 modifier =
                     Modifier
                         .semantics { contentDescription = "Sync progress: ${(syncProgress * 100).toInt()}%" },
             )
             if (status == CoordinationStatus.WAITING) {
-                androidx.compose.material3.Button(
+                Button(
                     onClick = onStartCoordination,
                 ) {
-                    androidx.compose.material3.Text("Start Coordination")
+                    Text("Start Coordination")
                 }
             }
         }
