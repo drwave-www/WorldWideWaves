@@ -26,6 +26,7 @@ import com.worldwidewaves.shared.events.config.EventsConfigurationProvider
 import com.worldwidewaves.shared.events.decoding.EventsDecoder
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.utils.Log
+import com.worldwidewaves.shared.utils.PerformanceTracer
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -99,12 +100,19 @@ class WWWEvents : KoinComponent {
 
             // Launch a coroutine to handle the mutex-protected loading
             coroutineScopeProvider.launchIO {
-                loadingMutex.withLock {
-                    // Double-check if events are already loaded after acquiring the lock
-                    if (!eventsLoaded && loadingError == null) {
-                        currentLoadJob = loadEventsJob()
-                        // Don't join here - let the job run asynchronously to prevent deadlock
+                // Check if we need to start loading (outside mutex for quick check)
+                val needsLoading = !eventsLoaded && loadingError == null && currentLoadJob == null
+
+                if (needsLoading) {
+                    loadingMutex.withLock {
+                        // Double-check if events are already loaded after acquiring the lock
+                        if (!eventsLoaded && loadingError == null && currentLoadJob == null) {
+                            currentLoadJob = loadEventsJob()
+                        }
                     }
+
+                    // Wait for the job to complete outside the mutex to prevent deadlock
+                    currentLoadJob?.join()
                 }
             }
         }
@@ -115,6 +123,7 @@ class WWWEvents : KoinComponent {
      */
     private fun loadEventsJob() =
         coroutineScopeProvider.launchIO {
+            val trace = PerformanceTracer.startTrace("event_loading")
             try {
                 Log.i("WWWEvents.loadEventsJob", "=== STARTING loadEventsJob() ===")
                 Log.i("WWWEvents.loadEventsJob", "Calling eventsConfigurationProvider.geoEventsConfiguration()...")
@@ -122,10 +131,12 @@ class WWWEvents : KoinComponent {
                 val eventsJsonString: String = eventsConfigurationProvider.geoEventsConfiguration()
                 Log.i("WWWEvents.loadEventsJob", "Received JSON string: ${eventsJsonString.length} characters")
                 Log.i("WWWEvents.loadEventsJob", "JSON preview: ${eventsJsonString.take(JSON_PREVIEW_LENGTH)}")
+                trace.putMetric("json_size_bytes", eventsJsonString.length.toLong())
 
                 Log.i("WWWEvents.loadEventsJob", "Decoding JSON to events...")
                 val events: List<IWWWEvent> = eventsDecoder.decodeFromJson(eventsJsonString)
                 Log.i("WWWEvents.loadEventsJob", "Successfully decoded ${events.size} events")
+                trace.putMetric("events_decoded", events.size.toLong())
                 Log.i("WWWEvents.loadEventsJob", "Running validation on decoded events...")
 
                 // Restore proper validation but with error handling
@@ -141,11 +152,13 @@ class WWWEvents : KoinComponent {
                 validatedEvents
                     .filterValues { it?.isNotEmpty() == true } // Log validation errors
                     .forEach { (event, errors) ->
+                        // errors is guaranteed non-null and non-empty by filterValues above
+                        val errorList = errors ?: return@forEach
                         Log.e("WWWEvents.loadEventsJob", "Validation Errors for Event ID: ${event.id}")
-                        errors?.forEach { errorMessage ->
+                        errorList.forEach { errorMessage ->
                             Log.e("WWWEvents.loadEventsJob", errorMessage)
                         }
-                        validationErrors.add(event to errors!!)
+                        validationErrors.add(event to errorList)
                     }
 
                 // Filter out invalid events and initialize favorites
@@ -163,6 +176,8 @@ class WWWEvents : KoinComponent {
                         }.toList()
 
                 Log.i("WWWEvents.loadEventsJob", "After validation: ${validEvents.size} valid events out of ${events.size} total")
+                trace.putMetric("events_valid", validEvents.size.toLong())
+                trace.putMetric("events_invalid", (events.size - validEvents.size).toLong())
 
                 Log.i("WWWEvents.loadEventsJob", "About to update events flow with ${validEvents.size} events")
 
@@ -186,7 +201,10 @@ class WWWEvents : KoinComponent {
                 }
             } catch (e: Exception) {
                 Log.e(::WWWEvents.name, "Unexpected error loading events: ${e.message}", e)
+                trace.putMetric("loading_error", 1)
                 onLoadingError(e)
+            } finally {
+                trace.stop()
             }
         }
 
@@ -236,10 +254,12 @@ class WWWEvents : KoinComponent {
     }
 
     fun addOnEventsErrorListener(callback: (Exception) -> Unit) {
-        if (loadingError != null) {
-            callback(loadingError!!)
-        } else if (!pendingErrorCallbacks.contains(callback)) {
-            pendingErrorCallbacks.add(callback)
+        loadingError?.let { error ->
+            callback(error)
+        } ?: run {
+            if (!pendingErrorCallbacks.contains(callback)) {
+                pendingErrorCallbacks.add(callback)
+            }
         }
     }
 
