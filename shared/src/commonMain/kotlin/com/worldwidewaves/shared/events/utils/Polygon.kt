@@ -88,7 +88,11 @@ open class Polygon(
         val retClockwise =
             when {
                 size < 3 -> true // Two-point polygon is considered clockwise
-                else -> area + (head!!.lng - tail!!.lng) * (head!!.lat + tail!!.lat) > 0 // Ensure closing
+                else -> {
+                    val headPos = requireNotNull(head) { "Head cannot be null for polygon with size >= 3" }
+                    val tailPos = requireNotNull(tail) { "Tail cannot be null for polygon with size >= 3" }
+                    area + (headPos.lng - tailPos.lng) * (headPos.lat + tailPos.lat) > 0 // Ensure closing
+                }
             }
         return retClockwise
     }
@@ -426,7 +430,11 @@ fun <T : Polygon> T.xferFrom(polygon: Polygon): T {
 
 fun <T : Polygon> T.close(): T {
     if (isNotEmpty() && first() != last()) {
-        add(first()!!.detached())
+        val firstPosition =
+            requireNotNull(first()) {
+                "First position cannot be null in non-empty polygon"
+            }
+        add(firstPosition.detached())
     }
     return this
 }
