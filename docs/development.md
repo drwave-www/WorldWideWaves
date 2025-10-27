@@ -226,15 +226,50 @@ open build/reports/licenses/licenses-gradle.json
 ./dev/setup-git-hooks.sh
 ```
 
-**Features enabled:**
-- Automatic Android emulator launch for integration testing
-- Translation updates (requires `OPENAI_API_KEY` in `local.properties`)
-- Critical integration tests before push
-- Automatic backup of existing custom hooks
+**Pre-Commit Hooks (automatic code quality):**
+- **Kotlin linting**: ktlint formatting + detekt static analysis
+- **Swift linting**: swiftlint with auto-fix
+- **Shell script validation**: shellcheck
+- **Copyright headers**: Automatic addition to source files
+- **Trailing whitespace**: Auto-removal
+- **Markdown linting**: markdownlint-cli2 (if installed)
 
-**Skip integration tests:**
+**Pre-Push Hooks (documentation & testing):**
+- **Dokka API docs**: Automatic generation before push
+- **Documentation detection**: Warns if code changed without docs update (advisory)
+- **Translation updates**: Auto-update with OPENAI_API_KEY
+- **Integration tests**: Critical tests on Android emulator
+- **Automatic emulator**: Launches if not running
+
+**Bypass hooks (not recommended):**
 ```bash
+# Skip pre-commit checks
+git commit --no-verify
+
+# Skip pre-push checks (including tests)
+git push --no-verify
+
+# Skip only integration tests
 SKIP_INTEGRATION_TESTS=1 git push
+```
+
+**Install optional tools:**
+```bash
+# Markdown linting (recommended)
+npm install -g markdownlint-cli2
+
+# Or use the check script
+./scripts/check-docs-links.sh --install
+```
+
+**Hook maintenance:**
+```bash
+# Update to latest hooks after git pull
+./dev/setup-git-hooks.sh
+
+# Manual hook execution
+./.git-hooks/pre-commit    # Test pre-commit hooks
+./.git-hooks/pre-push      # Test pre-push hooks
 ```
 
 ### Commit Convention

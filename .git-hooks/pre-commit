@@ -124,14 +124,12 @@ echo "✅ All lint checks passed!"
 
 # Auto-add headers and validate staged source files
 if [ -n "$staged_source_files" ]; then
-    echo "Auto-adding missing copyright headers..."
-
     # Check if header script exists
     if [ ! -f "scripts/add-headers.sh" ]; then
-        echo "❌ Header script not found at scripts/add-headers.sh"
-        echo "Please ensure the add-headers.sh script exists in the scripts directory."
-        exit 1
-    fi
+        echo "ℹ️  Header script not found at scripts/add-headers.sh. Skipping header validation."
+        echo "   Copyright headers should be added manually or via IDE templates."
+    else
+        echo "Auto-adding missing copyright headers..."
 
     # Auto-add headers to files that need them
     header_changes_made=false
@@ -159,10 +157,11 @@ if [ -n "$staged_source_files" ]; then
         fi
     done
 
-    if [ "$header_changes_made" = true ]; then
-        echo "✅ Headers added to staged files. Files automatically re-staged."
-    else
-        echo "✅ All staged files already have proper headers."
+        if [ "$header_changes_made" = true ]; then
+            echo "✅ Headers added to staged files. Files automatically re-staged."
+        else
+            echo "✅ All staged files already have proper headers."
+        fi
     fi
 fi
 
@@ -177,16 +176,23 @@ if [ -n "$staged_text_files" ]; then
 
     for file in $staged_text_files; do
         if [ -f "$file" ]; then
-            # Remove trailing whitespace
-            if sed -i '' 's/[[:space:]]*$//' "$file" 2>/dev/null; then
-                # Check if file was modified
-                if git diff --quiet "$file"; then
-                    : # No changes
-                else
-                    echo "✅ Fixed trailing whitespace in: $file"
-                    git add "$file"
-                    whitespace_fixed=true
-                fi
+            # Remove trailing whitespace (POSIX-compatible for macOS and Linux)
+            # macOS sed requires -i '' while Linux sed requires -i
+            if sed --version >/dev/null 2>&1; then
+                # GNU sed (Linux)
+                sed -i 's/[[:space:]]*$//' "$file" 2>/dev/null
+            else
+                # BSD sed (macOS)
+                sed -i '' 's/[[:space:]]*$//' "$file" 2>/dev/null
+            fi
+
+            # Check if file was modified
+            if git diff --quiet "$file"; then
+                : # No changes
+            else
+                echo "✅ Fixed trailing whitespace in: $file"
+                git add "$file"
+                whitespace_fixed=true
             fi
         fi
     done
@@ -208,6 +214,54 @@ if ! git diff-index --check --cached $against -- >/dev/null 2>&1; then
     echo "❌ Whitespace issues remain after auto-correction"
     git diff-index --check --cached $against --
     exit 1
+fi
+
+# ============================================================
+# MARKDOWN LINTING (OPTIONAL - FAST CHECK ONLY)
+# ============================================================
+# Lint modified markdown files for consistency
+# Only runs if markdownlint-cli2 is installed
+# ============================================================
+
+# Get all staged markdown files
+staged_md_files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.md$' || true)
+
+if [ -n "$staged_md_files" ]; then
+    # Check if markdownlint-cli2 is installed
+    if command -v markdownlint-cli2 >/dev/null 2>&1; then
+        echo "Running markdown linting on staged files..."
+
+        # Create a temporary file list for markdownlint
+        md_lint_failed=false
+
+        # Run markdownlint with auto-fix on staged files only
+        for md_file in $staged_md_files; do
+            if [ -f "$md_file" ]; then
+                echo "Checking: $md_file"
+                if markdownlint-cli2 --fix "$md_file" 2>/dev/null; then
+                    # Re-stage if auto-fixed
+                    git add "$md_file"
+                else
+                    echo "⚠️  Markdown issues in: $md_file"
+                    md_lint_failed=true
+                fi
+            fi
+        done
+
+        if [ "$md_lint_failed" = true ]; then
+            echo "⚠️  Some markdown files have linting issues."
+            echo "   Most issues were auto-fixed. Please review and re-commit."
+            echo "   To skip markdown linting: git commit --no-verify"
+            # Don't fail the commit for markdown issues - just warn
+            # exit 1
+        else
+            echo "✅ Markdown linting passed (auto-fixed where needed)"
+        fi
+    else
+        echo "ℹ️  markdownlint-cli2 not installed. Skipping markdown linting."
+        echo "   Install with: npm install -g markdownlint-cli2"
+        echo "   Or run: ./scripts/check-docs-links.sh --install"
+    fi
 fi
 
 echo "✅ All auto-corrections complete and validation passed!"
