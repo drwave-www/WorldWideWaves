@@ -11,6 +11,54 @@ A Kotlin Multiplatform mobile application orchestrating synchronized human waves
 
 WorldWideWaves enables participants to join synchronized wave events at specific times and locations. The app leverages offline maps for 40+ major cities, real-time position tracking, and choreographed animations to create coordinated experiences across devices and geographies.
 
+### Architecture Overview
+
+```mermaid
+graph TB
+    subgraph "Mobile Apps - Kotlin Multiplatform"
+        ANDROID[Android App<br/>Jetpack Compose]
+        IOS[iOS App<br/>Compose Multiplatform]
+    end
+
+    subgraph "Shared Business Logic - 70% Code Reuse"
+        UI[UI Layer<br/>Compose Screens & ViewModels]
+        DOMAIN[Domain Layer<br/>Event Observation, Wave Progression]
+        DATA[Data Layer<br/>Repositories, Position Management]
+    end
+
+    subgraph "Platform Services"
+        GPS[Device GPS<br/>CoreLocation / FusedLocation]
+        MAPS[MapLibre<br/>Offline Vector Tiles]
+        AUDIO[MIDI Audio<br/>AVAudioEngine / AudioTrack]
+    end
+
+    subgraph "Backend & Data"
+        FIREBASE[Firebase<br/>Analytics & Crashlytics]
+        API[Event API<br/>Configuration & Events]
+        TILES[Map Data<br/>40+ Cities Offline]
+    end
+
+    ANDROID --> UI
+    IOS --> UI
+    UI --> DOMAIN
+    DOMAIN --> DATA
+
+    DATA --> GPS
+    DATA --> MAPS
+    DATA --> AUDIO
+
+    ANDROID --> FIREBASE
+    IOS --> FIREBASE
+    DATA --> API
+    MAPS --> TILES
+
+    style ANDROID fill:#3DDC84,color:#000
+    style IOS fill:#007AFF,color:#fff
+    style UI fill:#4285f4,color:#fff
+    style DOMAIN fill:#34a853,color:#fff
+    style DATA fill:#ea4335,color:#fff
+```
+
 ## Key Features
 
 - Offline maps for 40+ global cities using MapLibre

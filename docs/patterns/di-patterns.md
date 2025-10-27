@@ -22,23 +22,43 @@ WorldWideWaves uses a **layered module architecture** with strict dependency ord
 
 ### Module Hierarchy
 
-```
-┌─────────────────────────────────────────────────┐
-│ Application Layer (Platform-Specific)           │
-│ - applicationModule (Android)                   │
-│ - IosModule (iOS)                               │
-└─────────────────────────────────────────────────┘
-                      ▲
-                      │ depends on
-                      │
-┌─────────────────────────────────────────────────┐
-│ Shared Modules (Cross-Platform)                 │
-│                                                  │
-│  1. commonModule    ← Events, Sound             │
-│  2. helpersModule   ← Domain logic, Position    │
-│  3. datastoreModule ← Persistence               │
-│  4. uiModule        ← Repositories, Use Cases   │
-└─────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph "Platform Layer"
+        ANDROID[applicationModule<br/>Android-specific]
+        IOS[IosModule<br/>iOS-specific]
+    end
+
+    subgraph "Shared Modules - Cross-Platform"
+        COMMON[1. commonModule<br/>Events, Sound]
+        HELPERS[2. helpersModule<br/>Domain logic, Position]
+        DATASTORE[3. datastoreModule<br/>Persistence]
+        UI[4. uiModule<br/>Repositories, Use Cases]
+    end
+
+    ANDROID -.->|depends on| COMMON
+    ANDROID -.->|depends on| HELPERS
+    ANDROID -.->|depends on| DATASTORE
+    ANDROID -.->|depends on| UI
+
+    IOS -.->|depends on| COMMON
+    IOS -.->|depends on| HELPERS
+    IOS -.->|depends on| DATASTORE
+    IOS -.->|depends on| UI
+
+    UI --> DATASTORE
+    UI --> HELPERS
+    UI --> COMMON
+    DATASTORE --> HELPERS
+    DATASTORE --> COMMON
+    HELPERS --> COMMON
+
+    style COMMON fill:#e1f5dd
+    style HELPERS fill:#d1ecf1
+    style DATASTORE fill:#fff3cd
+    style UI fill:#f8d7da
+    style ANDROID fill:#fbbc04,color:#000
+    style IOS fill:#fbbc04,color:#000
 ```
 
 ### Load Order (Critical)
