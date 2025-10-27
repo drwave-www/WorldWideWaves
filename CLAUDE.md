@@ -74,7 +74,7 @@ fun Screen() {
 
 **Before EVERY commit** touching shared code:
 ```bash
-./scripts/verify-ios-safety.sh
+./scripts/dev/verification/verify-ios-safety.sh
 ```
 
 **Expected**: Zero violations in all checks.
@@ -115,7 +115,7 @@ Button(
 ### Testing
 
 ```bash
-./scripts/test_accessibility.sh  # Before each PR
+./scripts/dev/verification/test_accessibility.sh  # Before each PR
 ```
 
 **See**: [docs/accessibility-guide.md](docs/accessibility-guide.md) for complete patterns
@@ -177,7 +177,7 @@ shared/src/
 - **New functionality requires tests** - no test debt
 - **Run ALL tests**, not just relevant ones
 - **Performance**: Monitor test execution time
-- **iOS safety**: `./scripts/verify-ios-safety.sh` for shared code changes
+- **iOS safety**: `./scripts/dev/verification/verify-ios-safety.sh` for shared code changes
 
 ### Key Test Patterns
 
@@ -337,10 +337,10 @@ fun performOperation() {
 ./gradlew detekt
 
 # Verify iOS safety (shared code changes)
-./scripts/verify-ios-safety.sh
+./scripts/dev/verification/verify-ios-safety.sh
 
 # Accessibility tests
-./scripts/test_accessibility.sh
+./scripts/dev/verification/test_accessibility.sh
 ```
 
 ### iOS Build
@@ -483,7 +483,7 @@ EOF
 
 | Symptom | Cause | Solution |
 |---------|-------|----------|
-| iOS app freezes on launch | DI violation | Run `./scripts/verify-ios-safety.sh` |
+| iOS app freezes on launch | DI violation | Run `./scripts/dev/verification/verify-ios-safety.sh` |
 | Tests failing | Business logic issue or requirements changed | Analyze failure, ask before changing tests |
 | Compilation warnings | Code quality issue | Fix ALL warnings, not just in modified files |
 | Map gestures not working (iOS) | Wrong property names | Use `isZoomEnabled/isScrollEnabled` |

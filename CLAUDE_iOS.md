@@ -52,7 +52,7 @@ open worldwidewaves.xcodeproj
 
 ```bash
 # Run iOS safety verification
-./scripts/verify-ios-safety.sh
+./scripts/dev/verification/verify-ios-safety.sh
 
 # All checks should pass:
 # ✅ No Composable-scoped KoinComponent
@@ -315,7 +315,7 @@ rg "^object.*: KoinComponent" shared/src/commonMain --type kotlin
 
 **Automated verification**:
 ```bash
-./scripts/verify-ios-safety.sh
+./scripts/dev/verification/verify-ios-safety.sh
 # Exit code 0 = safe
 # Exit code 1 = violations found
 ```
@@ -555,7 +555,7 @@ xcrun simctl spawn booted lldb --attach-name worldwidewaves
 # - "Dispatchers.Main" → Main thread violation
 
 # 3. Run verification
-./scripts/verify-ios-safety.sh
+./scripts/dev/verification/verify-ios-safety.sh
 
 # 4. Check recent changes
 git diff HEAD~1 shared/src/commonMain
@@ -643,7 +643,7 @@ The workspace contains multiple references with the same GUID 'PACKAGE:...'
 **Prevention** (Run regularly):
 ```bash
 # Clean Xcode state (recommended before important work)
-./scripts/clean_xcode.sh
+./scripts/dev/build/clean_xcode.sh
 
 # Or manual cleanup:
 rm -rf ~/Library/Developer/Xcode/DerivedData/worldwidewaves-*
@@ -662,7 +662,7 @@ rm -rf iosApp/worldwidewaves.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
 
 **Immediate Fix** (if error occurs):
 1. Close Xcode completely (Cmd+Q)
-2. Run `./scripts/clean_xcode.sh`
+2. Run `./scripts/dev/build/clean_xcode.sh`
 3. Open Xcode
 4. Let it re-resolve packages (File → Packages → Resolve Package Versions)
 5. Build (Cmd+B)
@@ -687,7 +687,7 @@ rm -rf iosApp/worldwidewaves.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
 **Solutions**:
 ```bash
 # Run verification
-./scripts/verify-ios-safety.sh
+./scripts/dev/verification/verify-ios-safety.sh
 
 # Check recent changes
 git diff HEAD~1 shared/src/commonMain

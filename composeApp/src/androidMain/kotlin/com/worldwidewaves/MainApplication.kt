@@ -32,8 +32,12 @@ import com.worldwidewaves.shared.di.androidModule
 import com.worldwidewaves.shared.di.initializeSimulationMode
 import com.worldwidewaves.shared.di.sharedModule
 import com.worldwidewaves.shared.utils.CloseableCoroutineScope
+import com.worldwidewaves.shared.utils.Log
+import com.worldwidewaves.shared.utils.RuntimeLogConfig
 import com.worldwidewaves.shared.utils.initNapier
 import com.worldwidewaves.shared.utils.setupDebugSimulation
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
@@ -89,6 +93,21 @@ class MainApplication :
         //  Default simulation initialization (runs after Koin properties are ready)
         // -------------------------------------------------------------------- //
         setupDebugSimulation()
+
+        // -------------------------------------------------------------------- //
+        //  Initialize runtime log configuration (async, non-blocking)
+        // -------------------------------------------------------------------- //
+        MainScope().launch {
+            try {
+                RuntimeLogConfig.initialize()
+            } catch (e: Exception) {
+                Log.w(
+                    "MainApplication",
+                    "Failed to initialize RuntimeLogConfig, using defaults",
+                    e,
+                )
+            }
+        }
     }
 
     override fun onTerminate() {
