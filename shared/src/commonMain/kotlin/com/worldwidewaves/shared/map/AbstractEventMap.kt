@@ -31,6 +31,7 @@ import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.position.PositionManager
 import com.worldwidewaves.shared.utils.Log
+import com.worldwidewaves.shared.utils.PerformanceTracer
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
@@ -415,12 +416,15 @@ abstract class AbstractEventMap<T>(
         onMapLoaded: () -> Unit = {},
         onMapClick: ((Double, Double) -> Unit)? = null,
     ) {
+        val trace = PerformanceTracer.startTrace("map_rendering")
         // Pass the map to the adapter
         mapLibreAdapter.setMap(map)
 
         // Set screen dimensions
         this.screenWidth = mapLibreAdapter.getWidth()
         this.screenHeight = mapLibreAdapter.getHeight()
+        trace.putMetric("map_width_px", screenWidth.toLong())
+        trace.putMetric("map_height_px", screenHeight.toLong())
 
         Log.i(
             "AbstractEventMap",
@@ -428,6 +432,7 @@ abstract class AbstractEventMap<T>(
         )
 
         mapLibreAdapter.setStyle(stylePath) {
+            trace.putMetric("style_loaded", 1)
             // Set Attribution margins to 0
             mapLibreAdapter.setAttributionMargins(0, 0, 0, 0)
 
@@ -488,13 +493,17 @@ abstract class AbstractEventMap<T>(
                 when (mapConfig.initialCameraPosition) {
                     MapCameraPosition.DEFAULT_CENTER -> {
                         moveToCenter {
+                            trace.putMetric("camera_position", 1) // DEFAULT_CENTER
                             onMapLoaded()
+                            trace.stop()
                             cameraSetupComplete.complete(Unit)
                         }
                     }
                     MapCameraPosition.BOUNDS -> {
                         moveToMapBounds {
+                            trace.putMetric("camera_position", 2) // BOUNDS
                             onMapLoaded()
+                            trace.stop()
                             cameraSetupComplete.complete(Unit)
                         }
                     }
@@ -502,7 +511,9 @@ abstract class AbstractEventMap<T>(
                         // Mark that we should watch for dimension changes and recalculate
                         windowBoundsNeedRecalculation = true
                         moveToWindowBounds {
+                            trace.putMetric("camera_position", 3) // WINDOW
                             onMapLoaded()
+                            trace.stop()
                             cameraSetupComplete.complete(Unit)
                         }
                     }

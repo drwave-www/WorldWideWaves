@@ -83,6 +83,13 @@ class PositionManager(
      *
      * @param source The source of the position update
      * @param newPosition The new position (null to clear)
+     *
+     * Note: For production with log sampling (to avoid overwhelming logs), consider using:
+     * ```kotlin
+     * // Log only 1% of position updates (1 out of 100)
+     * Log.vSampled(TAG, "Position update from $source: $newPosition", sampleRate = 100)
+     * ```
+     * This is useful when ENABLE_POSITION_TRACKING_LOGGING is true in production.
      */
     fun updatePosition(
         source: PositionSource,
