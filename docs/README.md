@@ -10,6 +10,7 @@ Start here if you're new to the project:
 
 1. **[Environment Setup](environment-setup.md)**
    Development environment configuration for macOS, Linux, and Windows. Covers JDK, Android Studio, Xcode, Node.js installation, and first-run verification.
+   - **[Linux Setup Guide](setup/linux-setup.md)** - Comprehensive Linux-specific setup (Ubuntu, Fedora, Arch) with KVM acceleration
 
 2. **[Development Workflow](development.md)**
    Local dev loop, testing strategies, debugging techniques, and common troubleshooting. Essential for daily development.
