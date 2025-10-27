@@ -44,7 +44,7 @@ echo -e "${BLUE}  📱 ANDROID TESTS${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 
-if ./scripts/run_android_firebase_tests.sh; then
+if ./scripts/firebase/run_android_firebase_tests.sh; then
     ANDROID_SUCCESS=true
     echo -e "${GREEN}✅ Android tests completed${NC}"
 else
@@ -60,7 +60,7 @@ echo -e "${BLUE}  🍎 iOS TESTS${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 
-if ./scripts/run_ios_firebase_tests.sh; then
+if ./scripts/firebase/run_ios_firebase_tests.sh; then
     IOS_SUCCESS=true
     echo -e "${GREEN}✅ iOS tests completed${NC}"
 else
@@ -95,7 +95,7 @@ echo ""
 
 # Next steps
 echo -e "${YELLOW}📥 Download Screenshots:${NC}"
-echo "  ./scripts/collect_firebase_screenshots.sh"
+echo "  ./scripts/firebase/collect_firebase_screenshots.sh"
 echo ""
 echo -e "${YELLOW}📈 Generate Report:${NC}"
 echo "  python3 scripts/generate_test_report.py"

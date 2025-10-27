@@ -72,10 +72,10 @@ echo ""
 
 # 5. Check Firebase Test Lab scripts
 echo -e "${YELLOW}🔥 Checking Firebase Test Lab Scripts${NC}"
-check_item "run_android_firebase_tests.sh exists" "test -x scripts/run_android_firebase_tests.sh"
-check_item "run_ios_firebase_tests.sh exists" "test -x scripts/run_ios_firebase_tests.sh"
-check_item "run_all_firebase_tests.sh exists" "test -x scripts/run_all_firebase_tests.sh"
-check_item "collect_firebase_screenshots.sh exists" "test -x scripts/collect_firebase_screenshots.sh"
+check_item "run_android_firebase_tests.sh exists" "test -x scripts/firebase/run_android_firebase_tests.sh"
+check_item "run_ios_firebase_tests.sh exists" "test -x scripts/firebase/run_ios_firebase_tests.sh"
+check_item "run_all_firebase_tests.sh exists" "test -x scripts/firebase/run_all_firebase_tests.sh"
+check_item "collect_firebase_screenshots.sh exists" "test -x scripts/firebase/collect_firebase_screenshots.sh"
 check_item "generate_test_report.py exists" "test -x scripts/generate_test_report.py"
 echo ""
 
@@ -112,7 +112,7 @@ if $ALL_PASSED; then
     echo "  2. Run Android test locally:"
     echo "     ./gradlew :composeApp:connectedDebugAndroidTest"
     echo "  3. Or run on Firebase Test Lab:"
-    echo "     ./scripts/run_all_firebase_tests.sh"
+    echo "     ./scripts/firebase/run_all_firebase_tests.sh"
     exit 0
 else
     echo -e "${RED}❌ Some checks failed. Please review the issues above.${NC}"
