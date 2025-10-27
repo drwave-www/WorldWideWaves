@@ -132,6 +132,12 @@ kotlin {
 
             // Coroutines on Android
             implementation(libs.kotlinx.coroutines.android)
+
+            // Firebase for Crashlytics and Remote Config
+            // Note: Use specific versions, BOM doesn't work well in KMM shared modules
+            implementation("com.google.firebase:firebase-crashlytics-ktx:19.2.1")
+            implementation("com.google.firebase:firebase-perf-ktx:21.0.3")
+            implementation("com.google.firebase:firebase-config-ktx:22.0.1")
         }
 
         /*
@@ -304,7 +310,7 @@ tasks.register("detectTestAntipatterns") {
     doLast {
         project.providers.exec {
             workingDir(project.rootDir)
-            commandLine("bash", "scripts/detect-test-antipatterns.sh")
+            commandLine("bash", "scripts/dev/testing/detect-test-antipatterns.sh")
         }
     }
 }
