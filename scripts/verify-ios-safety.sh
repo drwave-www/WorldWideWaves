@@ -107,7 +107,14 @@ fi
 # ============================================================================
 echo "3️⃣  Checking for init{} blocks with DI access..."
 
-INIT_DI=$(rg -n -A 3 "init\s*\{" "$SHARED_MAIN" --type kotlin 2>/dev/null | rg "get\(\)|inject\(\)" | rg -v "// iOS FIX" || true)
+# Exclude documentation comments and example code
+# Filter out lines with KDoc markers (* at start) and documentation examples
+INIT_DI=$(rg -n -A 3 "^\s*init\s*\{" "$SHARED_MAIN" --type kotlin 2>/dev/null | \
+    rg "get\(\)|inject\(\)" | \
+    rg -v "// iOS FIX" | \
+    rg -v "^\s*\*" | \
+    rg -v "^\s*//" | \
+    rg -v "calling DI get\(\) in init" || true)
 
 if [ -n "$INIT_DI" ]; then
     echo "   ❌ FAIL: Found init{} with DI access"
