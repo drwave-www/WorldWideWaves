@@ -102,7 +102,15 @@ struct EventMapView: UIViewRepresentable {
     private func configureStyleURL(for mapView: MLNMapView) {
         let url: URL
         if styleURL.hasPrefix("http://") || styleURL.hasPrefix("https://") {
-            url = URL(string: styleURL)!
+            guard let remoteURL = URL(string: styleURL) else {
+                WWWLog.e(Self.tag, "❌ Invalid remote style URL: \(styleURL)")
+                // Fallback to local default style if remote URL is malformed
+                url = URL(fileURLWithPath: styleURL)
+                WWWLog.w(Self.tag, "Falling back to local style path")
+                mapView.styleURL = url
+                return
+            }
+            url = remoteURL
             WWWLog.d(Self.tag, "Using remote style URL: \(url)")
         } else {
             url = URL(fileURLWithPath: styleURL)
