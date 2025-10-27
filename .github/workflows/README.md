@@ -8,12 +8,50 @@ This directory contains the GitHub Actions workflows for the WorldWideWaves proj
 
 | Workflow | Purpose | Triggers | Duration |
 |----------|---------|----------|-----------|
-| **quality-gates.yml** | Code quality and fast tests | Push/PR | ~3-5 min |
-| **build-android.yml** | Android compilation | Push/PR | ~5-8 min |
-| **build-ios.yml** | iOS compilation | Push/PR | ~8-12 min |
-| **android-instrumented-tests.yml** | UI/Integration tests | Push/PR/Daily | ~25-45 min |
-| **integration.yml** | Security and compliance | Push/PR | ~10-15 min |
-| **status-check.yml** | Overall status aggregation | Push/PR | ~1-2 min |
+| **01-build-android.yml** | Android compilation | Push/PR | ~5-8 min |
+| **02-build-ios.yml** | iOS compilation | Push/PR | ~8-12 min |
+| **03-code-quality.yml** | Code quality and linting | Push/PR | ~3-5 min |
+| **04-ui-tests-android.yml** | UI/Integration tests | Push/PR/Daily | ~25-45 min |
+| **05-e2e-tests.yml** | End-to-end testing | Push/PR | ~15-25 min |
+| **06-performance-tests.yml** | Performance benchmarks | Push/PR | ~10-20 min |
+| **07-docs-check.yml** | Documentation link validation | PR (markdown changes) | ~2-5 min |
+| **99-pipeline-status.yml** | Overall status aggregation | Push/PR | ~1-2 min |
+
+## 📝 Documentation Link Check (07-docs-check.yml)
+
+Automated validation of documentation quality and link integrity:
+
+### Features
+- **Link Validation**: Checks all internal and external links in markdown files
+- **Markdown Linting**: Enforces consistent markdown formatting standards
+- **Smart Caching**: Caches link check results to speed up subsequent runs
+- **PR Comments**: Automatically comments on PRs with broken link details
+- **Selective Triggers**: Only runs when markdown files are modified
+
+### Link Check Capabilities
+- ✅ **Internal Links**: Validates relative paths to files and headings
+- ✅ **External URLs**: Verifies HTTP/HTTPS links are accessible
+- ✅ **Intelligent Exclusions**: Skips localhost, build directories, and known false positives
+- ✅ **Retry Logic**: Retries failed links up to 3 times to avoid transient failures
+- ✅ **Timeout Control**: 30-second timeout per link to prevent hanging
+
+### Markdown Linting
+- Consistent heading styles (ATX format)
+- Proper list formatting and indentation
+- Code block language specification
+- Trailing whitespace detection
+- File ending with newline
+
+### Configuration Files
+- `.lycheeignore`: Patterns for links/paths to exclude from checking
+- `.markdownlint-cli2.jsonc`: Markdown linting rules and preferences
+
+### Excluded Patterns
+- `node_modules`, `build`, `SourcePackages` directories
+- Firebase/Google service URLs (authentication required)
+- App Store/Play Store links (region-specific)
+- Example URLs (example.com, localhost)
+- Email addresses (via --exclude-mail flag)
 
 ## 📱 Android Instrumented Tests (NEW)
 
