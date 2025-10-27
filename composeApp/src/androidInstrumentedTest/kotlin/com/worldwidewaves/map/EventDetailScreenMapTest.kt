@@ -61,20 +61,18 @@ class EventDetailScreenMapTest : BaseMapIntegrationTest() {
     fun testEventDetail_initialCameraShowsEntireEventArea() =
         runBlocking {
             // Apply BOUNDS mode configuration
-            runOnUiThread {
-                adapter.setBoundsForCameraTarget(
-                    constraintBounds = eventBounds,
-                    applyZoomSafetyMargin = false,
-                    originalEventBounds = eventBounds,
-                )
-            }
+            adapter.setBoundsForCameraTarget(
+                constraintBounds = eventBounds,
+                applyZoomSafetyMargin = false,
+                originalEventBounds = eventBounds,
+            )
 
             // Move to bounds (simulates EventDetailScreen initial setup)
             animateCameraAndWait(eventBounds.center(), zoom = 13.0)
 
             // Assertions
-            val cameraPosition = runOnUiThread { adapter.getCameraPosition() }
-            val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
+            val cameraPosition = adapter.getCameraPosition()
+            val visibleRegion = adapter.getVisibleRegion()
 
             // Camera should be centered on event
             assertCameraAt(
@@ -104,7 +102,7 @@ class EventDetailScreenMapTest : BaseMapIntegrationTest() {
         runBlocking {
             // Set initial camera
             animateCameraAndWait(eventBounds.center(), zoom = 13.0)
-            val initialCamera = runOnUiThread { adapter.getCameraPosition() }
+            val initialCamera = adapter.getCameraPosition()
             val initialZoom = adapter.currentZoom.value
 
             // Simulate user position update (via PositionManager)
@@ -113,13 +111,13 @@ class EventDetailScreenMapTest : BaseMapIntegrationTest() {
                     eventBounds.northeast.latitude - 0.001,
                     eventBounds.northeast.longitude - 0.001,
                 )
-            setUserPosition(userPosition)
+            adapter.setUserPosition(userPosition)
 
             // Wait a bit to ensure no camera animation triggers
             Thread.sleep(1000)
 
             // Assertions - camera should NOT have moved
-            val finalCamera = runOnUiThread { adapter.getCameraPosition() }
+            val finalCamera = adapter.getCameraPosition()
             val finalZoom = adapter.currentZoom.value
 
             assertEquals(
@@ -172,7 +170,7 @@ class EventDetailScreenMapTest : BaseMapIntegrationTest() {
             testPositions.forEach { position ->
                 animateCameraAndWait(position, zoom = 13.0)
 
-                val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
+                val visibleRegion = adapter.getVisibleRegion()
 
                 // Entire event should always be visible
                 assertTrue(
@@ -194,7 +192,8 @@ class EventDetailScreenMapTest : BaseMapIntegrationTest() {
             // Calculate and apply min zoom for BOUNDS mode
             val minZoom = MapTestFixtures.calculateMinZoomToFit(eventBounds, MapTestFixtures.PORTRAIT_PHONE)
 
-            setZoomPreferences(minZoom = minZoom, maxZoom = 18.0)
+            adapter.setMinZoomPreference(minZoom)
+            adapter.setMaxZoomPreference(18.0)
 
             // Try to zoom out beyond min zoom
             animateCameraAndWait(eventBounds.center(), zoom = minZoom - 2.0)
@@ -220,10 +219,10 @@ class EventDetailScreenMapTest : BaseMapIntegrationTest() {
         runBlocking {
             // Set initial camera to show entire event
             val minZoom = MapTestFixtures.calculateMinZoomToFit(eventBounds, MapTestFixtures.PORTRAIT_PHONE)
-            setZoomPreferences(minZoom = minZoom)
+            adapter.setMinZoomPreference(minZoom)
             animateCameraAndWait(eventBounds.center(), zoom = minZoom)
 
-            val cameraBeforePolygons = runOnUiThread { adapter.getCameraPosition() }
+            val cameraBeforePolygons = adapter.getCameraPosition()
             val zoomBeforePolygons = adapter.currentZoom.value
 
             // Simulate wave progression - add multiple wave polygon circles
@@ -245,7 +244,7 @@ class EventDetailScreenMapTest : BaseMapIntegrationTest() {
             // Wait to ensure no camera animation triggers
             Thread.sleep(500)
 
-            val cameraAfterPolygons = runOnUiThread { adapter.getCameraPosition() }
+            val cameraAfterPolygons = adapter.getCameraPosition()
             val zoomAfterPolygons = adapter.currentZoom.value
 
             // Assertions - camera should NOT have moved
@@ -275,7 +274,7 @@ class EventDetailScreenMapTest : BaseMapIntegrationTest() {
             )
 
             // Visible region should still show entire event
-            val visibleRegionAfterPolygons = runOnUiThread { adapter.getVisibleRegion() }
+            val visibleRegionAfterPolygons = adapter.getVisibleRegion()
 
             assertTrue(
                 "Entire event should still be visible after adding wave polygons",
