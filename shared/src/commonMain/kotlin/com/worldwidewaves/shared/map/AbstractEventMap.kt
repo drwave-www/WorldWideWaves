@@ -273,7 +273,7 @@ abstract class AbstractEventMap<T>(
         if (userPosition == null || closestWaveLongitude == null) {
             Log.w(
                 "AbstractEventMap",
-                "⚠️ targetUserAndWave: missing data (userPos=$userPosition, waveLng=$closestWaveLongitude)",
+                "WARNING: targetUserAndWave: missing data (userPos=$userPosition, waveLng=$closestWaveLongitude)",
             )
             return
         }
@@ -424,7 +424,7 @@ abstract class AbstractEventMap<T>(
 
         Log.i(
             "AbstractEventMap",
-            "📐 Screen dimensions set on map init: ${screenWidth}x$screenHeight px (aspect: ${screenWidth / screenHeight})",
+            "DIMENSIONS: Screen dimensions set on map init: ${screenWidth}x$screenHeight px (aspect: ${screenWidth / screenHeight})",
         )
 
         mapLibreAdapter.setStyle(stylePath) {
@@ -464,8 +464,8 @@ abstract class AbstractEventMap<T>(
                     if (widthChange > DIMENSION_CHANGE_THRESHOLD || heightChange > DIMENSION_CHANGE_THRESHOLD) {
                         Log.i(
                             "AbstractEventMap",
-                            "📐 Dimensions changed significantly (${screenWidth}x$screenHeight → ${currentWidth}x$currentHeight), " +
-                                "recalculating WINDOW bounds",
+                            "DIMENSIONS: Dimensions changed significantly " +
+                                "(${screenWidth}x$screenHeight -> ${currentWidth}x$currentHeight), recalculating WINDOW bounds",
                         )
                         screenWidth = currentWidth
                         screenHeight = currentHeight

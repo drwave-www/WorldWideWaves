@@ -89,9 +89,7 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
             // Apply constraints
             setZoomPreferences(minZoom = minZoom)
             runOnUiThread {
-                runOnUiThread {
-                    adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
-                }
+                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
             }
 
             // Zoom to min zoom at event center
@@ -148,9 +146,7 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
             // Apply constraints
             setZoomPreferences(minZoom = minZoom)
             runOnUiThread {
-                runOnUiThread {
-                    adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
-                }
+                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
             }
 
             // Zoom to min zoom at event center
@@ -186,9 +182,7 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
 
             setZoomPreferences(minZoom = minZoom)
             runOnUiThread {
-                runOnUiThread {
-                    adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
-                }
+                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
             }
 
             // Test north edge
@@ -243,9 +237,7 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
 
             setZoomPreferences(minZoom = minZoom)
             runOnUiThread {
-                runOnUiThread {
-                    adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
-                }
+                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
             }
 
             // Test NW corner
@@ -300,9 +292,7 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
 
             setZoomPreferences(minZoom = minZoom)
             runOnUiThread {
-                runOnUiThread {
-                    adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
-                }
+                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
             }
 
             // Test various camera positions at min zoom
@@ -333,9 +323,7 @@ class FullMapScreenMapTest : BaseMapIntegrationTest() {
 
             setZoomPreferences(minZoom = minZoom)
             runOnUiThread {
-                runOnUiThread {
-                    adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
-                }
+                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
             }
 
             animateCameraAndWait(eventBounds.center(), minZoom)

@@ -173,7 +173,7 @@ class MapBoundsEnforcer(
 
             Log.i(
                 "MapBoundsEnforcer",
-                "✅ Applied constraints: minZoom=$minZoom, " +
+                "Applied constraints: minZoom=$minZoom, " +
                     "bounds=SW(${paddedBounds.sw.lat},${paddedBounds.sw.lng}) " +
                     "NE(${paddedBounds.ne.lat},${paddedBounds.ne.lng})",
             )

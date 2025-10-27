@@ -81,13 +81,11 @@ class CrossCuttingMapTest : BaseMapIntegrationTest() {
         runBlocking {
             // Simulate WaveScreen setup (BOUNDS mode) - wrap in UI thread
             runOnUiThread {
-                runOnUiThread {
-                    adapter.setBoundsForCameraTarget(
-                        constraintBounds = eventBounds,
-                        applyZoomSafetyMargin = false,
-                        originalEventBounds = eventBounds,
-                    )
-                }
+                adapter.setBoundsForCameraTarget(
+                    constraintBounds = eventBounds,
+                    applyZoomSafetyMargin = false,
+                    originalEventBounds = eventBounds,
+                )
             }
 
             // Move to bounds
