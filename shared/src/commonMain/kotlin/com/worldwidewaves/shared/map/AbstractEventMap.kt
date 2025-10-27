@@ -267,9 +267,8 @@ abstract class AbstractEventMap<T>(
             return
         }
 
-        // Get the area's bounding box (or constraint bounds if more restrictive)
+        // Get the area's bounding box
         val areaBbox = event.area.bbox()
-        val constraintBbox = constraintManager?.calculateConstraintBounds() ?: areaBbox
 
         // ============================================================
         // ADAPTIVE LOGIC: Calculate context-aware maximum span
