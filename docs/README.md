@@ -163,15 +163,6 @@ Found an issue or have a suggestion?
 - Submit a PR with documentation improvements
 - Discussion: [WorldWideWaves Discussions](https://github.com/mglcel/WorldWideWaves/discussions)
 
-## Historical Documentation
-
-Historical documentation (iOS map refactoring, test reports, setup guides) has been archived:
-
-**[Archive Directory](archive/README.md)**
-- iOS map refactor analysis (10 documents)
-- Testing reports (5 documents)
-- Setup guides (3 documents)
-- Complete archive index and retrieval instructions
 
 ## Version History
 

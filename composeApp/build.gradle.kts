@@ -268,6 +268,16 @@ dependencies {
     implementation(libs.firebase.perf)
 }
 
+// Force protobuf version resolution to fix instrumented test conflicts
+configurations.all {
+    resolutionStrategy {
+        // Force newer protobuf-javalite to prevent NoSuchMethodError in tests
+        force("com.google.protobuf:protobuf-javalite:3.25.5")
+        // Exclude old protobuf-lite to prevent conflicts
+        exclude(group = "com.google.protobuf", module = "protobuf-lite")
+    }
+}
+
 // Firebase Configuration Generation Task
 tasks.register("generateFirebaseConfig") {
     group = "firebase"

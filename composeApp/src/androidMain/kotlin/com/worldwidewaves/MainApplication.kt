@@ -45,7 +45,7 @@ import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 import kotlin.time.ExperimentalTime
 
-class MainApplication :
+open class MainApplication :
     Application(),
     Configuration.Provider {
     private val wwwShutdownHandler: WWWShutdownHandler by inject()
