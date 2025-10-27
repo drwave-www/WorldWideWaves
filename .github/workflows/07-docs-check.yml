@@ -1,0 +1,180 @@
+name: 07 • Documentation Link Check
+
+on:
+  pull_request:
+    paths:
+      - '**.md'
+      - 'docs/**'
+      - '.lycheeignore'
+      - '.github/workflows/07-docs-check.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - '**.md'
+      - 'docs/**'
+      - '.lycheeignore'
+
+  # Allow manual triggering
+  workflow_dispatch:
+
+concurrency:
+  group: docs-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  link-check:
+    name: Check Documentation Links
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Restore Link Check Cache
+        uses: actions/cache@v4
+        with:
+          path: .lycheecache
+          key: cache-lychee-${{ github.sha }}
+          restore-keys: cache-lychee-
+
+      - name: Check Links with Lychee
+        uses: lycheeverse/lychee-action@v1
+        with:
+          # Check all markdown files recursively
+          args: >-
+            --verbose
+            --no-progress
+            --exclude-mail
+            --exclude-link-local
+            --exclude-loopback
+            --exclude-private
+            --timeout 30
+            --max-retries 3
+            --cache
+            --max-cache-age 1d
+            '**/*.md'
+
+          # Don't fail on warnings, only errors
+          fail: true
+
+          # Output format
+          format: markdown
+
+          # Output file for results
+          output: ./lychee-results.md
+
+      - name: Generate Link Check Summary
+        if: always()
+        run: |
+          echo "## Documentation Link Check Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f lychee-results.md ]; then
+            cat lychee-results.md >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ All documentation links are valid!" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload Link Check Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: link-check-results
+          path: lychee-results.md
+          retention-days: 30
+
+      - name: Comment PR with Results
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let body = '## Documentation Link Check Failed\n\n';
+
+            if (fs.existsSync('lychee-results.md')) {
+              const results = fs.readFileSync('lychee-results.md', 'utf8');
+              body += results;
+              body += '\n\n---\n';
+            }
+
+            body += '**Action Required**: Please fix the broken links listed above before merging.\n\n';
+            body += '**Tips**:\n';
+            body += '- For internal links, ensure the target file exists and the path is correct\n';
+            body += '- For external links, verify the URL is accessible\n';
+            body += '- Use relative paths for internal documentation links\n';
+            body += '- Add problematic external links to `.lycheeignore` if they are known to be valid\n';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+  markdown-lint:
+    name: Markdown Lint Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Markdown Lint
+        uses: DavidAnson/markdownlint-cli2-action@v16
+        with:
+          globs: |
+            **/*.md
+            !node_modules/**
+            !build/**
+            !SourcePackages/**
+            !.gradle/**
+            !iosApp/build/**
+            !shared/build/**
+            !composeApp/build/**
+            !maps/**/node_modules/**
+
+      - name: Upload Markdown Lint Results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: markdown-lint-results
+          path: .markdownlint-cli2-results.json
+          retention-days: 30
+
+  docs-quality-summary:
+    name: Documentation Quality Summary
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [link-check, markdown-lint]
+    if: always()
+
+    steps:
+      - name: Evaluate Documentation Quality
+        run: |
+          link_check_result="${{ needs.link-check.result }}"
+          markdown_lint_result="${{ needs.markdown-lint.result }}"
+
+          echo "## Documentation Quality Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Link Check | $link_check_result |" >> $GITHUB_STEP_SUMMARY
+          echo "| Markdown Lint | $markdown_lint_result |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "$link_check_result" == "success" && "$markdown_lint_result" == "success" ]]; then
+            echo "✅ All documentation quality checks passed!" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          elif [[ "$link_check_result" == "failure" ]]; then
+            echo "❌ Documentation link check failed - broken links detected" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          elif [[ "$markdown_lint_result" == "failure" ]]; then
+            echo "⚠️ Markdown lint warnings detected (non-blocking)" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          else
+            echo "⚠️ Some checks were skipped or had issues" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi

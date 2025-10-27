@@ -79,7 +79,7 @@ data class MidiTrack(
  */
 object MidiParser {
     // Logging tag
-    private const val TAG = "MidiParser"
+    private const val TAG = "WWW.Sound.Midi"
 
     // Global MIDI file cache - keyed by resource path
     // This ensures MIDI files are loaded only once for the entire application lifecycle

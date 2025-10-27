@@ -59,35 +59,40 @@ class CrossCuttingMapTest : BaseMapIntegrationTest() {
             assertNotNull("MapLibreMap should be loaded", mapLibreMap)
             assertNotNull("Adapter should be initialized", adapter)
 
-            // Verify style loaded
-            val styleLoaded = mapLibreMap.style?.isFullyLoaded ?: false
+            // Verify style loaded (must access on UI thread)
+            val styleLoaded =
+                runOnUiThread {
+                    mapLibreMap.style?.isFullyLoaded ?: false
+                }
             assertTrue("Map style should be fully loaded for EventDetailScreen", styleLoaded)
 
             // Verify camera is functional
             animateCameraAndWait(eventBounds.center(), zoom = 13.0)
-            val cameraPosition = adapter.getCameraPosition()
+            val cameraPosition = runOnUiThread { adapter.getCameraPosition() }
             assertNotNull("Camera position should be available after animation", cameraPosition)
 
             // Verify visible region query works
-            val visibleRegion = adapter.getVisibleRegion()
+            val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
             assertValidVisibleRegion(message = "EventDetailScreen visible region should be valid after load")
         }
 
     @Test
     fun testMapLoadsSuccessfully_Wave() =
         runBlocking {
-            // Simulate WaveScreen setup (BOUNDS mode)
-            adapter.setBoundsForCameraTarget(
-                constraintBounds = eventBounds,
-                applyZoomSafetyMargin = false,
-                originalEventBounds = eventBounds,
-            )
+            // Simulate WaveScreen setup (BOUNDS mode) - wrap in UI thread
+            runOnUiThread {
+                adapter.setBoundsForCameraTarget(
+                    constraintBounds = eventBounds,
+                    applyZoomSafetyMargin = false,
+                    originalEventBounds = eventBounds,
+                )
+            }
 
             // Move to bounds
             animateCameraAndWait(eventBounds.center(), zoom = 13.0)
 
             // Verify map is functional
-            val visibleRegion = adapter.getVisibleRegion()
+            val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
             assertNotNull("Visible region should be available for WaveScreen", visibleRegion)
 
             assertValidVisibleRegion(message = "WaveScreen visible region should be valid")
@@ -105,15 +110,16 @@ class CrossCuttingMapTest : BaseMapIntegrationTest() {
             // Simulate FullMapScreen setup (WINDOW mode)
             val minZoom = MapTestFixtures.calculateMinZoomToFit(eventBounds, MapTestFixtures.PORTRAIT_PHONE)
 
-            adapter.setMinZoomPreference(minZoom)
-            adapter.setMaxZoomPreference(18.0)
-            adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            setZoomPreferences(minZoom = minZoom, maxZoom = 18.0)
+            runOnUiThread {
+                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            }
 
             // Move to event center
             animateCameraAndWait(eventBounds.center(), minZoom)
 
             // Verify map is functional
-            val visibleRegion = adapter.getVisibleRegion()
+            val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
             assertNotNull("Visible region should be available for FullMapScreen", visibleRegion)
 
             assertValidVisibleRegion(message = "FullMapScreen visible region should be valid")
@@ -140,13 +146,13 @@ class CrossCuttingMapTest : BaseMapIntegrationTest() {
                     eventBounds.center().latitude + 0.001,
                     eventBounds.center().longitude + 0.001,
                 )
-            adapter.setUserPosition(userPosition)
+            setUserPosition(userPosition)
 
             // Wait for position to be applied
             Thread.sleep(300)
 
             // Verify user position is within visible region
-            val visibleRegion = adapter.getVisibleRegion()
+            val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
             assertTrue(
                 "User position should be visible in EventDetailScreen\n" +
                     "  User position: (${userPosition.latitude}, ${userPosition.longitude})\n" +
@@ -162,7 +168,9 @@ class CrossCuttingMapTest : BaseMapIntegrationTest() {
     fun testUserPositionMarkerVisible_Wave() =
         runBlocking {
             // Set camera to show entire event (WaveScreen initial behavior)
-            adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            runOnUiThread {
+                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            }
             animateCameraAndWait(eventBounds.center(), zoom = 13.0)
 
             // Set user position within event area
@@ -171,12 +179,12 @@ class CrossCuttingMapTest : BaseMapIntegrationTest() {
                     eventBounds.northeast.latitude - 0.002,
                     eventBounds.northeast.longitude - 0.002,
                 )
-            adapter.setUserPosition(userPosition)
+            setUserPosition(userPosition)
 
             Thread.sleep(300)
 
             // Verify user position is visible
-            val visibleRegion = adapter.getVisibleRegion()
+            val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
             assertTrue(
                 "User position should be visible in WaveScreen\n" +
                     "  User position: (${userPosition.latitude}, ${userPosition.longitude})\n" +
@@ -190,8 +198,10 @@ class CrossCuttingMapTest : BaseMapIntegrationTest() {
         runBlocking {
             // Set camera to WINDOW mode (FullMapScreen behavior)
             val minZoom = MapTestFixtures.calculateMinZoomToFit(eventBounds, MapTestFixtures.PORTRAIT_PHONE)
-            adapter.setMinZoomPreference(minZoom)
-            adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            setZoomPreferences(minZoom = minZoom)
+            runOnUiThread {
+                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            }
 
             // Set user position
             val userPosition =
@@ -199,7 +209,7 @@ class CrossCuttingMapTest : BaseMapIntegrationTest() {
                     eventBounds.center().latitude - 0.001,
                     eventBounds.center().longitude - 0.001,
                 )
-            adapter.setUserPosition(userPosition)
+            setUserPosition(userPosition)
 
             // In FullMapScreen, camera auto-targets user on first GPS fix
             // Simulate this behavior
@@ -208,7 +218,7 @@ class CrossCuttingMapTest : BaseMapIntegrationTest() {
             Thread.sleep(300)
 
             // Verify user position is visible
-            val visibleRegion = adapter.getVisibleRegion()
+            val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
             assertTrue(
                 "User position should be visible in FullMapScreen\n" +
                     "  User position: (${userPosition.latitude}, ${userPosition.longitude})\n" +
@@ -233,10 +243,10 @@ class CrossCuttingMapTest : BaseMapIntegrationTest() {
         runBlocking {
             // Set camera to show entire event
             val minZoom = MapTestFixtures.calculateMinZoomToFit(eventBounds, MapTestFixtures.PORTRAIT_PHONE)
-            adapter.setMinZoomPreference(minZoom)
+            setZoomPreferences(minZoom = minZoom)
             animateCameraAndWait(eventBounds.center(), minZoom)
 
-            val visibleRegionBefore = adapter.getVisibleRegion()
+            val visibleRegionBefore = runOnUiThread { adapter.getVisibleRegion() }
 
             // Create wave polygons centered at event center
             val wavePolygons =
@@ -264,7 +274,7 @@ class CrossCuttingMapTest : BaseMapIntegrationTest() {
 
             // Verify camera didn't move when polygons added (EventDetailScreen has static camera)
             Thread.sleep(300)
-            val visibleRegionAfter = adapter.getVisibleRegion()
+            val visibleRegionAfter = runOnUiThread { adapter.getVisibleRegion() }
 
             val centerDiff =
                 kotlin.math.abs(visibleRegionAfter.center().latitude - visibleRegionBefore.center().latitude) +
@@ -281,10 +291,12 @@ class CrossCuttingMapTest : BaseMapIntegrationTest() {
     fun testWavePolygonsRender_Wave() =
         runBlocking {
             // Set camera to show entire event (WaveScreen initial state)
-            adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            runOnUiThread {
+                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            }
             animateCameraAndWait(eventBounds.center(), zoom = 13.0)
 
-            val visibleRegion = adapter.getVisibleRegion()
+            val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
 
             // Create wave polygons
             val wavePolygons =
@@ -318,12 +330,14 @@ class CrossCuttingMapTest : BaseMapIntegrationTest() {
         runBlocking {
             // Set camera to WINDOW mode
             val minZoom = MapTestFixtures.calculateMinZoomToFit(eventBounds, MapTestFixtures.PORTRAIT_PHONE)
-            adapter.setMinZoomPreference(minZoom)
-            adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            setZoomPreferences(minZoom = minZoom)
+            runOnUiThread {
+                adapter.setBoundsForCameraTarget(eventBounds, applyZoomSafetyMargin = false, originalEventBounds = eventBounds)
+            }
 
             animateCameraAndWait(eventBounds.center(), minZoom)
 
-            val visibleRegion = adapter.getVisibleRegion()
+            val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
 
             // Create wave polygons
             val wavePolygons =

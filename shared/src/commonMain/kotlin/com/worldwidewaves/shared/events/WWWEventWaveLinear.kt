@@ -206,15 +206,17 @@ data class WWWEventWaveLinear(
      * Returns cached hit datetime if the user hasn't moved significantly
      */
     private fun getCachedHitDateTimeIfValid(userPosition: Position): Instant? {
-        if (cachedHitPosition == null || cachedHitDateTime == null) {
+        val cached = cachedHitPosition
+        val hitTime = cachedHitDateTime
+        if (cached == null || hitTime == null) {
             return null
         }
 
         val isCloseEnough =
-            abs(cachedHitPosition!!.lat - userPosition.lat) < epsilonLatPosition &&
-                abs(cachedHitPosition!!.lng - userPosition.lng) < epsilonLngPosition
+            abs(cached.lat - userPosition.lat) < epsilonLatPosition &&
+                abs(cached.lng - userPosition.lng) < epsilonLngPosition
 
-        return if (isCloseEnough) cachedHitDateTime else null
+        return if (isCloseEnough) hitTime else null
     }
 
     override suspend fun closestWaveLongitude(latitude: Double): Double {

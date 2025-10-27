@@ -67,11 +67,7 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
 
         animateCameraAndWait(targetPosition, targetZoom)
 
-        // Query visible region
-        val visibleRegion = adapter.getVisibleRegion()
-        val cameraPosition = adapter.getCameraPosition()
-
-        // Assertions
+        // Assertions (UI thread wrappers are in assertion helpers)
         assertVisibleRegionCenterMatchesCamera(
             message = "Visible region center should match camera position after initial positioning",
         )
@@ -93,7 +89,7 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
     fun testVisibleRegionUpdatesAfterPan() {
         // Start at center
         animateCameraAndWait(eventBounds.center(), zoom = 15.0)
-        val initialRegion = adapter.getVisibleRegion()
+        val initialRegion = runOnUiThread { adapter.getVisibleRegion() }
 
         // Pan north (programmatically)
         val northPosition =
@@ -102,7 +98,7 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
                 eventBounds.center().longitude,
             )
         animateCameraAndWait(northPosition, zoom = 15.0)
-        val regionAfterPan = adapter.getVisibleRegion()
+        val regionAfterPan = runOnUiThread { adapter.getVisibleRegion() }
 
         // Assertions
         assertTrue(
@@ -125,7 +121,7 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
     fun testVisibleRegionUpdatesAfterPanEast() {
         // Start at center
         animateCameraAndWait(eventBounds.center(), zoom = 15.0)
-        val initialRegion = adapter.getVisibleRegion()
+        val initialRegion = runOnUiThread { adapter.getVisibleRegion() }
 
         // Pan east (programmatically)
         val eastPosition =
@@ -134,7 +130,7 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
                 eventBounds.center().longitude + 0.002,
             )
         animateCameraAndWait(eastPosition, zoom = 15.0)
-        val regionAfterPan = adapter.getVisibleRegion()
+        val regionAfterPan = runOnUiThread { adapter.getVisibleRegion() }
 
         // Assertions
         assertTrue(
@@ -160,7 +156,7 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
         val initialZoom = 13.0
         animateCameraAndWait(centerPosition, initialZoom)
 
-        val initialRegion = adapter.getVisibleRegion()
+        val initialRegion = runOnUiThread { adapter.getVisibleRegion() }
         val initialWidth = initialRegion.width
         val initialHeight = initialRegion.height
 
@@ -168,7 +164,7 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
         val zoomedInZoom = 15.0
         animateCameraAndWait(centerPosition, zoomedInZoom)
 
-        val regionAfterZoomIn = adapter.getVisibleRegion()
+        val regionAfterZoomIn = runOnUiThread { adapter.getVisibleRegion() }
         val zoomedInWidth = regionAfterZoomIn.width
         val zoomedInHeight = regionAfterZoomIn.height
 
@@ -193,7 +189,7 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
 
         // Zoom back out
         animateCameraAndWait(centerPosition, initialZoom)
-        val regionAfterZoomOut = adapter.getVisibleRegion()
+        val regionAfterZoomOut = runOnUiThread { adapter.getVisibleRegion() }
         val zoomedOutWidth = regionAfterZoomOut.width
         val zoomedOutHeight = regionAfterZoomOut.height
 
@@ -229,7 +225,7 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
 
         animateCameraAndWait(cameraPosition, zoom)
 
-        val actualRegion = adapter.getVisibleRegion()
+        val actualRegion = runOnUiThread { adapter.getVisibleRegion() }
         val actualCenter = actualRegion.center()
 
         // Calculate expected viewport dimensions
@@ -282,8 +278,10 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
 
         animateCameraAndWait(targetPosition, targetZoom)
 
-        val visibleRegion = adapter.getVisibleRegion()
-        val cameraPosition = adapter.getCameraPosition()
+        val (visibleRegion, cameraPosition) =
+            runOnUiThread {
+                adapter.getVisibleRegion() to adapter.getCameraPosition()
+            }
         val zoomLevel = runBlocking { adapter.currentZoom.value }
 
         assertVisibleRegionCenterMatchesCamera(
@@ -298,7 +296,7 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
         val higherZoom = targetZoom + 2.0
         animateCameraAndWait(targetPosition, higherZoom)
 
-        val smallerRegion = adapter.getVisibleRegion()
+        val smallerRegion = runOnUiThread { adapter.getVisibleRegion() }
         val smallerWidth = smallerRegion.width
         val smallerHeight = smallerRegion.height
 
@@ -403,7 +401,7 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
         positions.zip(zooms).forEach { (position, zoom) ->
             animateCameraAndWait(position, zoom)
 
-            val visibleRegion = adapter.getVisibleRegion()
+            val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
 
             // Validate no inverted bounds
             assertTrue(
@@ -447,7 +445,7 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
         val startTime = System.nanoTime()
 
         repeat(iterations) {
-            adapter.getVisibleRegion()
+            runOnUiThread { adapter.getVisibleRegion() }
         }
 
         val endTime = System.nanoTime()
@@ -483,7 +481,7 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
         // Set initial position
         animateCameraAndWait(startPosition, startZoom)
 
-        val initialRegion = adapter.getVisibleRegion()
+        val initialRegion = runOnUiThread { adapter.getVisibleRegion() }
 
         // Target position (pan to NE corner)
         val targetPosition =
@@ -493,8 +491,10 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
             )
         val targetZoom = 15.0
 
-        // Start animation (don't wait for completion)
-        adapter.animateCamera(targetPosition, targetZoom)
+        // Start animation (don't wait for completion) - must be on UI thread
+        runOnUiThread {
+            adapter.animateCamera(targetPosition, targetZoom)
+        }
 
         // Sample visible region during animation (multiple times)
         val sampledRegions = mutableListOf<com.worldwidewaves.shared.events.utils.BoundingBox>()
@@ -504,7 +504,7 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
 
         repeat(sampleCount) { i ->
             Thread.sleep(sampleIntervalMs)
-            val region = adapter.getVisibleRegion()
+            val region = runOnUiThread { adapter.getVisibleRegion() }
             sampledRegions.add(region)
 
             // Validate each sampled region
@@ -520,7 +520,7 @@ class MapLibreVisibleRegionTest : BaseMapIntegrationTest() {
         // Wait for animation to complete
         waitForIdle()
 
-        val finalRegion = adapter.getVisibleRegion()
+        val finalRegion = runOnUiThread { adapter.getVisibleRegion() }
 
         // Verify smooth progression
         // 1. Regions should progressively move toward target

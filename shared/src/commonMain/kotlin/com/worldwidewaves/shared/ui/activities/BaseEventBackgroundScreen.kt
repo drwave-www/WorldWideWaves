@@ -71,7 +71,12 @@ abstract class BaseEventBackgroundScreen(
      * Set to false for full-screen content like maps that shouldn't scroll.
      */
     protected open val isScrollable: Boolean = true
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
+    /**
+     * iOS SAFETY: Lazy initialization prevents Dispatchers.Main access during object construction.
+     * Must only be instantiated from main thread (Compose UI context).
+     */
+    private val scope by lazy { CoroutineScope(SupervisorJob() + Dispatchers.Main) }
     private var selectedEvent by mutableStateOf<IWWWEvent?>(null)
     private var onFinish by mutableStateOf<(() -> Unit)?>(null)
     private val waitingHandlers: MutableList<(IWWWEvent) -> Unit> = mutableListOf()

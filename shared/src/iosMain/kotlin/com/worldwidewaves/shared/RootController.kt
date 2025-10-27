@@ -99,7 +99,7 @@ import platform.UIKit.UIViewController
  * @see IosSafeDI for iOS-safe dependency injection patterns
  */
 
-private const val TAG = "RootController"
+private const val TAG = "WWW.UI.RootController"
 
 // ---------- Small helpers (DI + VC factory) ----------
 

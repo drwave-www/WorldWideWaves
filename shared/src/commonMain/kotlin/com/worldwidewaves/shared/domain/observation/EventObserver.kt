@@ -369,7 +369,9 @@ class EventObserver(
      */
     private suspend fun handleDirectPositionUpdate(onPositionUpdate: suspend () -> Unit) {
         try {
-            Log.v("EventObserver", "Direct position changed, updating area detection for event ${event.id}")
+            if (com.worldwidewaves.shared.WWWGlobals.LogConfig.ENABLE_POSITION_TRACKING_LOGGING) {
+                Log.v("WWW.Domain.Observer", "Direct position changed, updating area detection for event ${event.id}")
+            }
             onPositionUpdate()
         } catch (e: IllegalStateException) {
             Log.e("EventObserver", "State error in updateAreaDetection for event ${event.id}: $e")

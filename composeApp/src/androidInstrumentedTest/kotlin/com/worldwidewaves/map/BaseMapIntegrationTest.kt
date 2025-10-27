@@ -22,10 +22,9 @@
 package com.worldwidewaves.map
 
 import android.content.Context
-import android.view.View
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.MapTestFixtures
@@ -48,19 +47,28 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 /**
- * Base class for Android MapLibre integration tests using headless MapView.
+ * Base class for Android MapLibre integration tests using Activity-based MapView.
  *
  * This approach provides:
- * - Real MapLibre map instance (not mocked)
- * - Headless rendering (no UI, faster execution)
+ * - Real MapLibre map instance with OpenGL rendering context
+ * - Activity lifecycle management for MapView initialization
  * - Programmatic camera control (no gesture simulation)
  * - Direct API access for validation
+ *
+ * The MapView requires a real Activity with OpenGL context for getMapAsync
+ * callback to fire. Using ActivityScenarioRule with TestMapActivity solves
+ * the headless MapView callback issue.
  *
  * Usage example shows how to extend this base class for specific map tests.
  * Subclasses can use mapView and adapter properties directly after setup.
  */
 @RunWith(AndroidJUnit4::class)
 abstract class BaseMapIntegrationTest {
+    // ============================================================
+    // ACTIVITY SCENARIO
+    // ============================================================
+
+    protected lateinit var activityScenario: ActivityScenario<TestMapActivity>
     // ============================================================
     // PROTECTED PROPERTIES
     // ============================================================
@@ -74,8 +82,23 @@ abstract class BaseMapIntegrationTest {
     protected var screenWidth: Double = PORTRAIT_PHONE.width
     protected var screenHeight: Double = PORTRAIT_PHONE.height
 
-    // Style path for test maps (using local test tiles)
-    protected open val stylePath: String = "asset://test_map_style.json"
+    // Style JSON for test maps
+    // Use inline minimal style (no network or assets required)
+    protected open val styleJson: String =
+        """
+        {
+          "version": 8,
+          "name": "Test Style",
+          "sources": {},
+          "layers": [
+            {
+              "id": "background",
+              "type": "background",
+              "paint": {"background-color": "#f0f0f0"}
+            }
+          ]
+        }
+        """.trimIndent()
 
     // Test event ID
     protected open val testEventId: String = "test-event-001"
@@ -88,69 +111,129 @@ abstract class BaseMapIntegrationTest {
     open fun setUp() {
         context = ApplicationProvider.getApplicationContext()
 
-        // Create headless MapView (no activity needed)
-        mapView = createHeadlessMapView()
+        // Initialize MapLibre on main thread (MapLibre requires UI thread for getInstance)
+        // This must run before ActivityScenario.launch to avoid threading issues
+        androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().run {
+            runOnMainSync {
+                org.maplibre.android.MapLibre
+                    .getInstance(context)
+            }
+        }
 
-        // Initialize adapter (will set map reference later)
-        adapter = AndroidMapLibreAdapter()
-
-        // Load map asynchronously and wait
         val mapLoadedLatch = CountDownLatch(1)
+        var setupError: Throwable? = null
 
-        mapView.getMapAsync { map ->
-            mapLibreMap = map
-            adapter.setMap(map)
+        // Launch activity without LAUNCHER intent category
+        val intent =
+            android.content.Intent(context, TestMapActivity::class.java).apply {
+                // Clear default flags to avoid process mismatch
+                flags = 0
+            }
+        activityScenario = ActivityScenario.launch(intent)
 
-            // Load style and wait
-            adapter.setStyle(stylePath) {
+        // Get MapView from Activity
+        activityScenario.onActivity { activity ->
+            try {
+                System.out.println("BaseMapIntegrationTest: Getting MapView from TestMapActivity...")
+                mapView = activity.mapView
+
+                System.out.println("BaseMapIntegrationTest: Creating adapter...")
+                adapter = AndroidMapLibreAdapter()
+
+                System.out.println("BaseMapIntegrationTest: Calling getMapAsync...")
+                // Load map asynchronously and wait
+                mapView.getMapAsync { map ->
+                    try {
+                        System.out.println("BaseMapIntegrationTest: getMapAsync callback received!")
+                        mapLibreMap = map
+                        activity.mapLibreMap = map
+
+                        // Set map on UI thread (MapLibre requirement)
+                        androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                            adapter.setMap(map)
+                        }
+
+                        System.out.println("BaseMapIntegrationTest: Loading inline JSON style...")
+                        // Load style from inline JSON (no network/assets required) - already on UI thread
+                        mapLibreMap.setStyle(
+                            org.maplibre.android.maps.Style
+                                .Builder()
+                                .fromJson(styleJson),
+                        ) {
+                            System.out.println("BaseMapIntegrationTest: Style loaded successfully!")
+                            mapLoadedLatch.countDown()
+                        }
+                    } catch (e: Throwable) {
+                        System.err.println("BaseMapIntegrationTest: Error in getMapAsync callback: ${e.message}")
+                        e.printStackTrace()
+                        setupError = e
+                        mapLoadedLatch.countDown()
+                    }
+                }
+                System.out.println("BaseMapIntegrationTest: getMapAsync called, waiting for callback...")
+            } catch (e: Throwable) {
+                System.err.println("BaseMapIntegrationTest: Error in onActivity: ${e.message}")
+                e.printStackTrace()
+                setupError = e
                 mapLoadedLatch.countDown()
             }
         }
 
-        // Wait up to 10 seconds for map to load
-        val loaded = mapLoadedLatch.await(10, TimeUnit.SECONDS)
-        if (!loaded) {
-            fail("MapView failed to load within timeout")
-        }
+        try {
+            // Wait up to 15 seconds for map to load
+            val loaded = mapLoadedLatch.await(15, TimeUnit.SECONDS)
 
-        // Give map time to fully initialize
-        Thread.sleep(500)
+            // Check for errors during setup
+            setupError?.let { throw AssertionError("Map setup failed", it) }
+
+            if (!loaded) {
+                fail("MapView failed to load within timeout (inline JSON style)")
+            }
+
+            // Give map time to fully initialize
+            Thread.sleep(500)
+        } catch (e: Throwable) {
+            // Clean up activity on failure
+            if (::activityScenario.isInitialized) {
+                activityScenario.close()
+            }
+            throw e
+        }
     }
 
     @After
     open fun tearDown() {
-        // Clean up map resources
-        mapView.onDestroy()
-    }
-
-    // ============================================================
-    // HEADLESS MAP CREATION
-    // ============================================================
-
-    /**
-     * Creates a headless MapView without attaching to an activity.
-     * The view is measured and laid out to simulate real rendering dimensions.
-     */
-    private fun createHeadlessMapView(): MapView {
-        val view = MapView(context)
-
-        // Measure and layout the view to set dimensions
-        // This makes MapLibre think it's in a real layout
-        view.measure(
-            View.MeasureSpec.makeMeasureSpec(screenWidth.toInt(), View.MeasureSpec.EXACTLY),
-            View.MeasureSpec.makeMeasureSpec(screenHeight.toInt(), View.MeasureSpec.EXACTLY),
-        )
-        view.layout(0, 0, screenWidth.toInt(), screenHeight.toInt())
-
-        // Trigger onCreate lifecycle event (required for MapView initialization)
-        view.onCreate(null)
-
-        return view
+        // Close activity scenario to clean up resources
+        if (::activityScenario.isInitialized) {
+            activityScenario.close()
+            System.out.println("BaseMapIntegrationTest: tearDown - activity scenario closed")
+        }
     }
 
     // ============================================================
     // TEST HELPER METHODS
     // ============================================================
+
+    /**
+     * Run code on UI thread (required for MapLibre operations).
+     * Uses Instrumentation.runOnMainSync to ensure execution on main thread.
+     */
+    protected fun <T> runOnUiThread(block: () -> T): T {
+        var result: T? = null
+        var error: Throwable? = null
+
+        androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            try {
+                result = block()
+            } catch (e: Throwable) {
+                error = e
+            }
+        }
+
+        error?.let { throw it }
+        @Suppress("UNCHECKED_CAST")
+        return result as T
+    }
 
     /**
      * Wait for map camera to become idle.
@@ -159,8 +242,10 @@ abstract class BaseMapIntegrationTest {
     protected fun waitForIdle(timeoutMs: Long = 2000) {
         val idleLatch = CountDownLatch(1)
 
-        adapter.addOnCameraIdleListener {
-            idleLatch.countDown()
+        runOnUiThread {
+            adapter.addOnCameraIdleListener {
+                idleLatch.countDown()
+            }
         }
 
         val idle = idleLatch.await(timeoutMs, TimeUnit.MILLISECONDS)
@@ -180,25 +265,64 @@ abstract class BaseMapIntegrationTest {
         zoom: Double? = null,
         timeoutMs: Long = 2000,
     ) {
-        adapter.animateCamera(position, zoom)
+        runOnUiThread {
+            adapter.animateCamera(position, zoom)
+        }
         waitForIdle(timeoutMs)
     }
 
     /**
-     * Set camera constraints and verify they were applied
+     * Set camera constraints and verify they were applied (already wrapped in UI thread)
      */
     protected fun applyConstraintsAndVerify(
         constraintBounds: BoundingBox,
         isWindowMode: Boolean = false,
     ) {
-        adapter.setBoundsForCameraTarget(
-            constraintBounds = constraintBounds,
-            applyZoomSafetyMargin = isWindowMode,
-            originalEventBounds = eventBounds,
-        )
+        runOnUiThread {
+            adapter.setBoundsForCameraTarget(
+                constraintBounds = constraintBounds,
+                applyZoomSafetyMargin = isWindowMode,
+                originalEventBounds = eventBounds,
+            )
+        }
 
         // Give MapLibre time to apply constraints
         Thread.sleep(300)
+    }
+
+    /**
+     * Set min/max zoom preferences on UI thread
+     */
+    protected fun setZoomPreferences(
+        minZoom: Double? = null,
+        maxZoom: Double? = null,
+    ) {
+        runOnUiThread {
+            minZoom?.let { adapter.setMinZoomPreference(it) }
+            maxZoom?.let { adapter.setMaxZoomPreference(it) }
+        }
+    }
+
+    /**
+     * Set user position on UI thread
+     */
+    protected fun setUserPosition(position: Position) {
+        runOnUiThread {
+            adapter.setUserPosition(position)
+        }
+    }
+
+    /**
+     * Animate camera to bounds and wait for completion
+     */
+    protected fun animateCameraToBoundsAndWait(
+        bounds: BoundingBox,
+        timeoutMs: Long = 2000,
+    ) {
+        runOnUiThread {
+            adapter.animateCameraToBounds(bounds)
+        }
+        waitForIdle(timeoutMs)
     }
 
     // ============================================================
@@ -209,7 +333,7 @@ abstract class BaseMapIntegrationTest {
      * Assert that visible region is completely within event bounds
      */
     protected fun assertVisibleRegionWithinBounds(message: String = "Visible region should be completely within event bounds") {
-        val visibleRegion = adapter.getVisibleRegion()
+        val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
         assertNotNull("Visible region should not be null", visibleRegion)
 
         assertTrue(
@@ -230,7 +354,7 @@ abstract class BaseMapIntegrationTest {
         tolerance: Double = TOLERANCE_POSITION,
         message: String = "Camera should be at expected position",
     ) {
-        val actualPosition = adapter.getCameraPosition()
+        val actualPosition = runOnUiThread { adapter.getCameraPosition() }
         assertNotNull("Camera position should not be null", actualPosition)
 
         assertTrue(
@@ -249,8 +373,10 @@ abstract class BaseMapIntegrationTest {
         tolerance: Double = TOLERANCE_POSITION,
         message: String = "Visible region center should match camera position",
     ) {
-        val visibleRegion = adapter.getVisibleRegion()
-        val cameraPosition = adapter.getCameraPosition()
+        val (visibleRegion, cameraPosition) =
+            runOnUiThread {
+                adapter.getVisibleRegion() to adapter.getCameraPosition()
+            }
 
         assertNotNull("Visible region should not be null", visibleRegion)
         assertNotNull("Camera position should not be null", cameraPosition)
@@ -291,7 +417,7 @@ abstract class BaseMapIntegrationTest {
      * Assert that visible region has valid bounds (not inverted or invalid)
      */
     protected fun assertValidVisibleRegion(message: String = "Visible region should have valid bounds") {
-        val visibleRegion = adapter.getVisibleRegion()
+        val visibleRegion = runOnUiThread { adapter.getVisibleRegion() }
         assertNotNull("Visible region should not be null", visibleRegion)
 
         assertTrue(

@@ -176,6 +176,9 @@ object WWWGlobals {
         /** Threshold for significant padding/constraint changes (10%) */
         const val CHANGE_THRESHOLD = 0.1
 
+        /** Maximum shrinkage percentage for bounding box transformations (50%) */
+        const val MAX_SHRINKAGE_PERCENTAGE = 0.5
+
         /** Angle conversion constants */
         const val DEGREES_TO_RADIANS_FACTOR = 180.0
 

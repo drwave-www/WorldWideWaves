@@ -812,6 +812,104 @@ xcrun simctl spawn booted log stream \
   --predicate 'process == "worldwidewaves" && subsystem contains "AppDelegate"'
 ```
 
+### Issue 7: Map Gestures Not Working
+
+**Symptoms**: User cannot pan/zoom map, gestures appear disabled
+
+**Root Cause**: Using wrong MLNMapView property names that don't exist
+
+**Incorrect Names** (silently fail in Swift):
+- `allowsZooming` - doesn't exist
+- `allowsScrolling` - doesn't exist
+- `allowsRotating` - doesn't exist
+- `allowsTilting` - doesn't exist
+
+**Correct Names** (from MLNMapView.h):
+- `isZoomEnabled` - controls zoom gestures
+- `isScrollEnabled` - controls pan gestures
+- `isRotateEnabled` - controls rotation gestures
+- `isPitchEnabled` - controls tilt gestures
+
+**Solution**:
+```swift
+// ✅ CORRECT - these properties actually exist
+mapView.isZoomEnabled = true
+mapView.isScrollEnabled = true
+mapView.isRotateEnabled = false
+mapView.isPitchEnabled = false
+
+// ❌ WRONG - these silently fail
+mapView.allowsZooming = true  // Property doesn't exist!
+mapView.allowsScrolling = true  // Property doesn't exist!
+```
+
+**Verification**:
+Check `shouldChangeFrom` delegate is receiving gesture events:
+- `reason=4` - MLNCameraChangeReasonGesturePan (pan gestures)
+- `reason=8` - MLNCameraChangeReasonGesturePinch (zoom gestures)
+
+If you only see `reason=1` (programmatic), gestures are not enabled.
+
+**Files to Check**:
+- `EventMapView.swift:66-97` - Gesture configuration
+- `MapLibreViewWrapper.swift` - setGesturesEnabled callback
+
+### Issue 8: User Can Pan Outside Event Area
+
+**Symptoms**: Map allows panning beyond event boundaries
+
+**Cause**: Camera bounds validation not enforced or using wrong validation approach
+
+**Current Working Solution**:
+iOS uses camera center validation (not viewport bounds):
+```swift
+public func mapView(_ mapView: MLNMapView, shouldChangeFrom oldCamera: MLNMapCamera,
+                   to newCamera: MLNMapCamera, reason: MLNCameraChangeReason) -> Bool {
+    guard let bounds = currentConstraintBounds else { return true }
+
+    // Validate camera center is within constraint bounds
+    let center = newCamera.centerCoordinate
+    if center.latitude < bounds.sw.latitude || center.latitude > bounds.ne.latitude ||
+       center.longitude < bounds.sw.longitude || center.longitude > bounds.ne.longitude {
+        return false  // Reject gesture
+    }
+    return true
+}
+```
+
+**Why Camera Center (Not Viewport)**:
+- Replicates Android `setLatLngBoundsForCameraTarget()` behavior
+- MapLibre natively clamps viewport edges to tile boundaries
+- Simpler validation logic
+- Allows user to touch map edges without rejection
+
+**Files**:
+- `MapLibreViewWrapper.swift:1166-1287` - shouldChangeFrom delegate
+
+### Issue 9: Min Zoom Too Restrictive
+
+**Symptoms**: User cannot see full event height at minimum zoom
+
+**Cause**: Incorrect tile size in min zoom calculation
+
+**Current Implementation** (512px tiles):
+```swift
+// iOS MapLibre uses 512px tiles (not 256px)
+let zoomForHeight = log2((screenHeight * 360.0) / (boundsHeight * 512.0))
+let zoomForWidth = log2((screenWidth * 360.0 * cos(latRadians)) / (boundsWidth * 512.0))
+let minZoom = min(zoomForHeight, zoomForWidth)
+```
+
+**Result**:
+- Min zoom slightly higher than theoretical (uses 512px assumption)
+- User can see ~90-95% of event height at minZoom
+- Acceptable per user decision (prevents over-zooming out)
+
+**Trade-off**: Prioritizes preventing excessive zoom-out over perfect height visibility
+
+**Files**:
+- `MapLibreViewWrapper.swift:519-571` - setBoundsForCameraTarget
+
 ---
 
 ## Advanced Topics
@@ -1128,10 +1226,10 @@ PositionManager.positionFlow
 
 ### Essential Documentation
 - [CLAUDE.md](./CLAUDE.md) - Main development guide
-- [docs/iOS_VIOLATION_TRACKER.md](docs/iOS_VIOLATION_TRACKER.md) - Historical violations
-- [docs/iOS_SUCCESS_STATE.md](docs/iOS_SUCCESS_STATE.md) - Success criteria
-- [docs/iOS_DEBUGGING_GUIDE.md](docs/iOS_DEBUGGING_GUIDE.md) - Advanced debugging
-- [iOS_MAP_IMPLEMENTATION_STATUS.md](docs/ios/IOS_MAP_IMPLEMENTATION_STATUS.md) - Map status
+- [docs/ios/ios-violation-tracker.md](docs/ios/ios-violation-tracker.md) - Historical violations
+- [docs/ios/ios-success-state.md](docs/ios/ios-success-state.md) - Success criteria
+- [docs/ios/ios-debugging-guide.md](docs/ios/ios-debugging-guide.md) - Advanced debugging
+- [docs/ios/ios-map-implementation-status.md](docs/ios/ios-map-implementation-status.md) - Map status
 
 ### External Resources
 - [Kotlin Multiplatform Mobile](https://kotlinlang.org/docs/multiplatform-mobile-getting-started.html)

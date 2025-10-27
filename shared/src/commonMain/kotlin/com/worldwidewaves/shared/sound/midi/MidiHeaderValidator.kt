@@ -35,7 +35,7 @@ import com.worldwidewaves.shared.utils.Log
  * - Time division: Timing resolution (ticks per beat or SMPTE format)
  */
 internal object MidiHeaderValidator {
-    private const val TAG = "MidiHeaderValidator"
+    private const val TAG = "WWW.Sound.MidiHeader"
 
     // MIDI header constants
     private const val HEADER_CHUNK_ID = "MThd"

@@ -75,7 +75,7 @@ import kotlin.time.Instant
 @OptIn(ExperimentalTime::class)
 class AudioTestActivity : ComponentActivity() {
     companion object {
-        private const val TAG = "AudioTest"
+        private const val TAG = "WWW.Debug.Audio"
     }
 
     private lateinit var soundPlayer: AndroidSoundPlayer
