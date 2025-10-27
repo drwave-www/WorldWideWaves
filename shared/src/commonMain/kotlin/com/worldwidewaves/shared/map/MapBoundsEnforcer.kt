@@ -34,6 +34,27 @@ import kotlin.math.min
  * Platform-independent map bounds enforcement that handles the logic
  * for keeping the map view within bounds.
  *
+ * Responsibilities:
+ * - Calculate constraint bounds (event bounds shrunk by viewport padding)
+ * - Apply min zoom to prevent showing pixels outside event area
+ * - Monitor camera changes and recalculate constraints when viewport size changes
+ *
+ * Min Zoom Calculation:
+ * The minimum zoom level prevents users from zooming out beyond the event area.
+ * Platform-specific implementations:
+ *
+ * Android: Uses MapLibre's getCameraForLatLngBounds() for constraint-based calculation
+ * - Automatically calculates zoom to fit bounds within viewport
+ *
+ * iOS: Manual calculation using Web Mercator projection (512px tiles)
+ * - WINDOW mode: zoomForHeight = log2((screenHeight * 360) / (boundsHeight * 512))
+ *                zoomForWidth  = log2((screenWidth * 360 * cos(lat)) / (boundsWidth * 512))
+ *                Uses constraining dimension (min of both)
+ * - BOUNDS mode: Uses MapLibre's cameraThatFitsCoordinateBounds() for entire event visibility
+ *
+ * See: iosApp/worldwidewaves/MapLibre/MapLibreViewWrapper.swift lines 516-560 for iOS formula
+ * See: docs/ios/ios-map-implementation-status.md for platform comparison
+ *
  * @param mapBounds The event area bounding box to constrain the map to
  * @param mapLibreAdapter Platform-specific map adapter
  * @param isWindowMode True for WINDOW mode (full map with gestures), false for BOUNDS mode (event detail, no gestures)

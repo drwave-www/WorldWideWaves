@@ -62,7 +62,27 @@ enum class MapCameraPosition {
 // ----------------------------------------------------------------------------
 
 /**
- * Abstract base class for EventMap functionality that's shared across platforms
+ * Abstract base class for EventMap functionality that's shared across platforms.
+ *
+ * This class provides the core map interaction logic for event visualization, including:
+ * - Camera positioning and animation (bounds, center, user/wave targeting)
+ * - Constraint enforcement to keep map view within event area
+ * - Location tracking and position updates via PositionManager
+ * - Wave polygon rendering and progression tracking
+ * - Gesture control and user interaction handling
+ *
+ * Platform-specific subclasses provide:
+ * - MapLibreAdapter implementation for native map library
+ * - LocationProvider for platform-specific GPS/location services
+ *
+ * Architecture documentation:
+ * - See docs/architecture/map-architecture-analysis.md for detailed system design
+ * - See docs/ios/ios-map-implementation-status.md for iOS-specific implementation
+ *
+ * @param T The platform-specific map type (e.g., MapView on Android, MLNMapView on iOS)
+ * @param event The event to display on the map
+ * @param mapConfig Configuration for initial camera position and gesture control
+ * @param onLocationUpdate Callback invoked when user position changes
  */
 abstract class AbstractEventMap<T>(
     protected val event: IWWWEvent,
