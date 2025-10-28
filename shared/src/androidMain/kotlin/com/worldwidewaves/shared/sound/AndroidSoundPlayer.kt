@@ -30,6 +30,8 @@ import android.os.Build
 import com.worldwidewaves.shared.WWWGlobals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
@@ -115,6 +117,7 @@ class AndroidSoundPlayer(
     VolumeController {
     private val sampleRate = 44100 // Hz
     private val activeTracks = mutableListOf<AudioTrack>()
+    private val playbackMutex = Mutex()
 
     // Audio manager for volume control
     private val audioManager by lazy {
@@ -142,45 +145,49 @@ class AndroidSoundPlayer(
         amplitude: Double,
         duration: Duration,
         waveform: SoundPlayer.Waveform,
-    ) = withContext(Dispatchers.Main) {
-        // Save current volume (Main dispatcher needed for AudioManager access)
-        val originalVolume = getCurrentVolume()
+    ) {
+        playbackMutex.withLock {
+            withContext(Dispatchers.Main) {
+                // Save current volume (Main dispatcher needed for AudioManager access)
+                val originalVolume = getCurrentVolume()
 
-        try {
-            // Set to maximum volume
-            setVolume(1.0f)
+                try {
+                    // Set to maximum volume
+                    setVolume(1.0f)
 
-            // Wait a moment for volume change to take effect
-            delay(50.milliseconds)
+                    // Wait a moment for volume change to take effect
+                    delay(50.milliseconds)
 
-            // Generate waveform on Default dispatcher (CPU-bound mathematical operations)
-            withContext(Dispatchers.Default) {
-                // Generate and play
-                val samples =
-                    WaveformGenerator.generateWaveform(
-                        sampleRate = sampleRate,
-                        frequency = frequency,
-                        amplitude = amplitude,
-                        duration = duration,
-                        waveform = waveform,
-                    )
+                    // Generate waveform on Default dispatcher (CPU-bound mathematical operations)
+                    withContext(Dispatchers.Default) {
+                        // Generate and play
+                        val samples =
+                            WaveformGenerator.generateWaveform(
+                                sampleRate = sampleRate,
+                                frequency = frequency,
+                                amplitude = amplitude,
+                                duration = duration,
+                                waveform = waveform,
+                            )
 
-                val buffer =
-                    AudioBufferFactory.createFromSamples(
-                        samples = samples,
-                        sampleRate = sampleRate,
-                        bitsPerSample = WWWGlobals.Audio.DEFAULT_BITS_PER_SAMPLE,
-                        channels = WWWGlobals.Audio.DEFAULT_CHANNELS,
-                    )
+                        val buffer =
+                            AudioBufferFactory.createFromSamples(
+                                samples = samples,
+                                sampleRate = sampleRate,
+                                bitsPerSample = WWWGlobals.Audio.DEFAULT_BITS_PER_SAMPLE,
+                                channels = WWWGlobals.Audio.DEFAULT_CHANNELS,
+                            )
 
-                playBuffer(buffer, duration)
+                        playBuffer(buffer, duration)
+                    }
+
+                    // Wait for playback to complete
+                    delay(duration + 100.milliseconds)
+                } finally {
+                    // Always restore original volume
+                    setVolume(originalVolume)
+                }
             }
-
-            // Wait for playback to complete
-            delay(duration + 100.milliseconds)
-        } finally {
-            // Always restore original volume
-            setVolume(originalVolume)
         }
     }
 
