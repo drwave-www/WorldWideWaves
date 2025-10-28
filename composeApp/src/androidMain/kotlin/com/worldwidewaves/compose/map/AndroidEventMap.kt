@@ -169,7 +169,8 @@ class AndroidEventMap(
         val scope = rememberCoroutineScope()
         var isMapLoaded by remember { mutableStateOf(false) }
         var mapError by remember { mutableStateOf(false) }
-        var hasLocationPermission by remember { mutableStateOf(false) }
+        // Initialize with actual permission state instead of false
+        var hasLocationPermission by remember { mutableStateOf(isLocationPermissionGranted(context)) }
         var isMapAvailable by remember { mutableStateOf(false) }
         var isMapDownloading by remember { mutableStateOf(false) }
         // Guard to avoid auto-re-download after the user explicitly cancels
