@@ -166,8 +166,16 @@
   <string name="simulation_stop">Hentikan simulasi</string>
   <!-- src_hash: 6d4c61d15149531c4b9a28f9cfd02787bc274513 -->
   <string name="simulation_mode">Nonaktifkan mode simulasi</string>
-  <!-- src_hash: bfcafa1977a42ccadf9e8b0f973cdb4e3f9e4f19 -->
+  <!-- src_hash: 4a66b217223c21d295055c3e7ce6c3abb730b2b0 -->
   <string name="test_simulation">Aktifkan mode simulasi</string>
+  <!-- src_hash: 91658052e0f261ad9f41d80e9987f5f396998dc0 -->
+  <string name="simulation_error">Kesalahan simulasi</string>
+  <!-- src_hash: 389e3b61ef3cc49d6e7a288c0f1970858c6e9445 -->
+  <string name="simulation_stop_error">Kesalahan penghentian</string>
+  <!-- src_hash: efafdbd3cefc1e7cdfe6372408a1aac6dc91ebc1 -->
+  <string name="simulation_started">Simulasi dimulai</string>
+  <!-- src_hash: 26fe613840dcd6f5dc316457f12510de2cc2be7c -->
+  <string name="simulation_stopped">Simulasi berhenti</string>
   <!-- src_hash: 79be6f40b995cebcbcebdd8f169edbdcba9eece0 -->
   <string name="wave_be_ready">Bersiap!</string>
   <!-- src_hash: 148c3b7e1852740b1933733f38314874e6585a66 -->
