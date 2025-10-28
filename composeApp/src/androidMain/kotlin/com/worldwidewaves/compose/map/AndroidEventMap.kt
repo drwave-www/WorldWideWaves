@@ -589,17 +589,11 @@ class AndroidEventMap(
             val (stylePath, uri) =
                 withContext(Dispatchers.IO) {
                     // Get style URI (uses cached value on subsequent calls)
+                    // getStyleUri() already validates file existence, no need for redundant check
                     val path: String? = event.map.getStyleUri()
 
                     if (path == null) {
                         Log.e(TAG, "Failed to resolve style URI for event ${event.id}")
-                        return@withContext null to null
-                    }
-
-                    // Verify file exists on disk
-                    val fileExists = File(path).exists()
-                    if (!fileExists) {
-                        Log.e(TAG, "Style file doesn't exist at path: $path")
                         return@withContext null to null
                     }
 
@@ -622,12 +616,6 @@ class AndroidEventMap(
                         scope,
                         uri.toString(),
                         onMapLoaded = {
-                            // Initialize location component if permission granted and lifecycle is at least STARTED
-                            if (hasLocationPermission &&
-                                lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
-                            ) {
-                                setupMapLocationComponent(map, context)
-                            }
                             onMapLoaded()
                         },
                         onMapClick = { _, _ ->
@@ -638,6 +626,15 @@ class AndroidEventMap(
                             )
                         },
                     )
+
+                    // Initialize location component in parallel (optimization: doesn't block onMapLoaded)
+                    if (hasLocationPermission &&
+                        lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
+                    ) {
+                        scope.launch {
+                            setupMapLocationComponent(map, context)
+                        }
+                    }
                 }
             }
 

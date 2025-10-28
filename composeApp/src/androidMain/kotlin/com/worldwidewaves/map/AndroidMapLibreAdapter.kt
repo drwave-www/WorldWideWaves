@@ -22,6 +22,7 @@ package com.worldwidewaves.map
  */
 
 import android.graphics.Color
+import android.os.Looper
 import android.util.Log
 import androidx.core.graphics.toColorInt
 import com.worldwidewaves.shared.WWWGlobals
@@ -51,7 +52,6 @@ import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.Point
 import org.maplibre.geojson.Polygon
-import java.util.UUID
 
 /**
  * Android-specific implementation of the shared [MapLibreAdapter].
@@ -91,6 +91,16 @@ class AndroidMapLibreAdapter(
     // Only stores the most recent set since wave progression contains all previous circles
     private var pendingPolygons: List<Polygon>? = null
     private var styleLoaded = false
+
+    // Cache for camera bounds calculations to avoid expensive getCameraForLatLngBounds calls
+    private data class BoundsCacheKey(
+        val bounds: BoundingBox,
+        val mapWidth: Double,
+        val mapHeight: Double,
+        val isWindowMode: Boolean,
+    )
+
+    private val cameraBoundsCache = mutableMapOf<BoundsCacheKey, Double>()
 
     override fun getWidth(): Double {
         require(mapLibreMap != null)
@@ -145,14 +155,19 @@ class AndroidMapLibreAdapter(
             Log.i(TAG, "Style loaded successfully")
             styleLoaded = true
 
-            // Render pending polygons that arrived before style loaded
-            // Only the most recent set matters (wave progression contains all previous circles)
-            pendingPolygons?.let { polygons ->
-                addWavePolygons(polygons, clearExisting = true)
-                pendingPolygons = null
-            }
-
+            // Invoke callback first to proceed with map setup
             callback()
+
+            // Use IdleHandler to render wave polygons after the main thread completes current rendering tasks
+            // This adaptively waits for base tiles to render without a fixed delay
+            pendingPolygons?.let { polygons ->
+                Looper.myQueue().addIdleHandler {
+                    Log.i(TAG, "Rendering pending wave polygons after base tile render (adaptive timing)")
+                    addWavePolygons(polygons, clearExisting = true)
+                    pendingPolygons = null
+                    false // Remove handler after execution
+                }
+            }
         }
     }
 
@@ -385,38 +400,61 @@ class AndroidMapLibreAdapter(
                     return
                 }
 
-                // Determine which dimension is constraining
-                val eventAspect = eventWidth / eventHeight
-                val screenAspect = mapWidth / mapHeight
+                // Check cache first to avoid expensive calculation
+                val cacheKey = BoundsCacheKey(boundsForMinZoom, mapWidth, mapHeight, isWindowMode = true)
+                baseMinZoom = cameraBoundsCache[cacheKey] ?: run {
+                    // Cache miss - calculate zoom
+                    // Determine which dimension is constraining
+                    val eventAspect = eventWidth / eventHeight
+                    val screenAspect = mapWidth / mapHeight
 
-                // Calculate zoom for the constraining dimension
-                val constrainingBounds =
-                    if (eventAspect > screenAspect) {
-                        // Event wider than screen → constrained by HEIGHT
-                        val constrainedWidth = eventHeight * screenAspect
-                        val centerLng = (boundsForMinZoom.sw.lng + boundsForMinZoom.ne.lng) / 2.0
-                        BoundingBox.fromCorners(
-                            Position(boundsForMinZoom.sw.lat, centerLng - constrainedWidth / 2),
-                            Position(boundsForMinZoom.ne.lat, centerLng + constrainedWidth / 2),
-                        )
-                    } else {
-                        // Event taller than screen → constrained by WIDTH
-                        val constrainedHeight = eventWidth / screenAspect
-                        val centerLat = (boundsForMinZoom.sw.lat + boundsForMinZoom.ne.lat) / 2.0
-                        BoundingBox.fromCorners(
-                            Position(centerLat - constrainedHeight / 2, boundsForMinZoom.sw.lng),
-                            Position(centerLat + constrainedHeight / 2, boundsForMinZoom.ne.lng),
-                        )
-                    }
+                    // Calculate zoom for the constraining dimension
+                    val constrainingBounds =
+                        if (eventAspect > screenAspect) {
+                            // Event wider than screen → constrained by HEIGHT
+                            val constrainedWidth = eventHeight * screenAspect
+                            val centerLng = (boundsForMinZoom.sw.lng + boundsForMinZoom.ne.lng) / 2.0
+                            BoundingBox.fromCorners(
+                                Position(boundsForMinZoom.sw.lat, centerLng - constrainedWidth / 2),
+                                Position(boundsForMinZoom.ne.lat, centerLng + constrainedWidth / 2),
+                            )
+                        } else {
+                            // Event taller than screen → constrained by WIDTH
+                            val constrainedHeight = eventWidth / screenAspect
+                            val centerLat = (boundsForMinZoom.sw.lat + boundsForMinZoom.ne.lat) / 2.0
+                            BoundingBox.fromCorners(
+                                Position(centerLat - constrainedHeight / 2, boundsForMinZoom.sw.lng),
+                                Position(centerLat + constrainedHeight / 2, boundsForMinZoom.ne.lng),
+                            )
+                        }
 
-                val latLngBounds = constrainingBounds.toLatLngBounds()
-                val cameraPosition = mapLibreMap!!.getCameraForLatLngBounds(latLngBounds, intArrayOf(0, 0, 0, 0))
-                baseMinZoom = cameraPosition?.zoom ?: mapLibreMap!!.minZoomLevel
+                    val latLngBounds = constrainingBounds.toLatLngBounds()
+                    val cameraPosition = mapLibreMap!!.getCameraForLatLngBounds(latLngBounds, intArrayOf(0, 0, 0, 0))
+                    val calculatedZoom = cameraPosition?.zoom ?: mapLibreMap!!.minZoomLevel
+
+                    // Cache the result
+                    cameraBoundsCache[cacheKey] = calculatedZoom
+                    Log.i("Camera", "Cached min zoom calculation for window mode: $calculatedZoom")
+                    calculatedZoom
+                }
             } else {
                 // BOUNDS MODE: Use MapLibre's calculation (shows entire event)
-                val latLngBounds = boundsForMinZoom.toLatLngBounds()
-                val cameraPosition = mapLibreMap!!.getCameraForLatLngBounds(latLngBounds, intArrayOf(0, 0, 0, 0))
-                baseMinZoom = cameraPosition?.zoom ?: mapLibreMap!!.minZoomLevel
+                val mapWidth = getWidth()
+                val mapHeight = getHeight()
+
+                // Check cache first
+                val cacheKey = BoundsCacheKey(boundsForMinZoom, mapWidth, mapHeight, isWindowMode = false)
+                baseMinZoom = cameraBoundsCache[cacheKey] ?: run {
+                    // Cache miss - calculate zoom
+                    val latLngBounds = boundsForMinZoom.toLatLngBounds()
+                    val cameraPosition = mapLibreMap!!.getCameraForLatLngBounds(latLngBounds, intArrayOf(0, 0, 0, 0))
+                    val calculatedZoom = cameraPosition?.zoom ?: mapLibreMap!!.minZoomLevel
+
+                    // Cache the result
+                    cameraBoundsCache[cacheKey] = calculatedZoom
+                    Log.i("Camera", "Cached min zoom calculation for bounds mode: $calculatedZoom")
+                    calculatedZoom
+                }
             }
 
             // Base min zoom ensures event fits in viewport
@@ -580,51 +618,111 @@ class AndroidMapLibreAdapter(
             return
         }
 
-        // Style is loaded - render immediately
+        // Style is loaded - render with iOS-style layer reuse pattern
         map.getStyle { style ->
             try {
-                // -- Clear existing dynamic layers/sources when requested ----
-                if (clearExisting) {
-                    waveLayerIds.forEach { style.removeLayer(it) }
-                    waveSourceIds.forEach { style.removeSource(it) }
-                    waveLayerIds.clear()
-                    waveSourceIds.clear()
+                // Phase 1: Remove excess layers if polygon count decreased (iOS pattern)
+                if (wavePolygons.size < waveLayerIds.size) {
+                    for (index in wavePolygons.size until waveLayerIds.size) {
+                        style.removeLayer(waveLayerIds[index])
+                        style.removeSource(waveSourceIds[index])
+                    }
+                    // Shrink arrays to match current polygon count
+                    waveLayerIds.subList(wavePolygons.size, waveLayerIds.size).clear()
+                    waveSourceIds.subList(wavePolygons.size, waveSourceIds.size).clear()
                 }
 
-                // -- Add each polygon on its own layer -----------------------
+                // Phase 2: Update or create each polygon layer (iOS pattern)
                 wavePolygons.forEachIndexed { index, polygon ->
-                    // Add UUID to prevent ID conflicts during rapid updates (matches iOS pattern)
-                    val uuid = UUID.randomUUID().toString()
-                    val sourceId = "wave-polygons-source-$index-$uuid"
-                    val layerId = "wave-polygons-layer-$index-$uuid"
-
-                    // GeoJSON source with a single polygon
-                    val src =
-                        GeoJsonSource(sourceId).apply {
-                            setGeoJson(Feature.fromGeometry(polygon))
+                    // Use deterministic IDs (index-based, not UUID-based) for layer reuse
+                    val sourceId =
+                        if (index < waveSourceIds.size) {
+                            waveSourceIds[index] // Reuse existing ID
+                        } else {
+                            "wave-polygons-source-$index" // Deterministic, no UUID
                         }
-                    style.addSource(src)
+                    val layerId =
+                        if (index < waveLayerIds.size) {
+                            waveLayerIds[index] // Reuse existing ID
+                        } else {
+                            "wave-polygons-layer-$index" // Deterministic, no UUID
+                        }
 
-                    // Fill layer
-                    val layer =
-                        FillLayer(layerId, sourceId).withProperties(
-                            PropertyFactory.fillColor(Wave.BACKGROUND_COLOR.toColorInt()),
-                            PropertyFactory.fillOpacity(Wave.BACKGROUND_OPACITY),
-                        )
-                    style.addLayer(layer)
-
-                    // Track for next cleanup
-                    waveSourceIds.add(sourceId)
-                    waveLayerIds.add(layerId)
+                    if (index < waveSourceIds.size) {
+                        // Phase 3A: Update existing source (no flickering)
+                        updateExistingPolygon(style, sourceId, layerId, polygon)
+                    } else {
+                        // Phase 3B: Add new polygon (first time or expansion)
+                        addNewPolygon(style, sourceId, layerId, polygon)
+                    }
                 }
             } catch (ise: IllegalStateException) {
-                Log.e("MapUpdate", "Map style in invalid state for wave polygons", ise)
+                Log.e(TAG, "Map style in invalid state for wave polygons", ise)
             } catch (iae: IllegalArgumentException) {
-                Log.e("MapUpdate", "Invalid arguments for wave polygon styling", iae)
+                Log.e(TAG, "Invalid arguments for wave polygon styling", iae)
             } catch (uoe: UnsupportedOperationException) {
-                Log.e("MapUpdate", "Unsupported map operation", uoe)
+                Log.e(TAG, "Unsupported map operation", uoe)
             }
         }
+    }
+
+    /**
+     * Updates an existing polygon source with new geometry (iOS pattern).
+     * Prevents flickering by updating geometry in place rather than recreating layers.
+     */
+    private fun updateExistingPolygon(
+        style: Style,
+        sourceId: String,
+        layerId: String,
+        polygon: Polygon,
+    ) {
+        val source = style.getSource(sourceId) as? GeoJsonSource
+        if (source != null) {
+            // Update geometry only (prevents flickering) - iOS pattern
+            source.setGeoJson(Feature.fromGeometry(polygon))
+        } else {
+            // Fallback: recreate if source missing (shouldn't happen)
+            Log.w(TAG, "Source $sourceId missing, recreating layer")
+            val newSource =
+                GeoJsonSource(sourceId).apply {
+                    setGeoJson(Feature.fromGeometry(polygon))
+                }
+            style.addSource(newSource)
+
+            val layer =
+                FillLayer(layerId, sourceId).withProperties(
+                    PropertyFactory.fillColor(Wave.BACKGROUND_COLOR.toColorInt()),
+                    PropertyFactory.fillOpacity(Wave.BACKGROUND_OPACITY),
+                )
+            style.addLayer(layer)
+        }
+    }
+
+    /**
+     * Adds a new polygon layer and tracks its IDs for future reuse (iOS pattern).
+     */
+    private fun addNewPolygon(
+        style: Style,
+        sourceId: String,
+        layerId: String,
+        polygon: Polygon,
+    ) {
+        val source =
+            GeoJsonSource(sourceId).apply {
+                setGeoJson(Feature.fromGeometry(polygon))
+            }
+        style.addSource(source)
+
+        val layer =
+            FillLayer(layerId, sourceId).withProperties(
+                PropertyFactory.fillColor(Wave.BACKGROUND_COLOR.toColorInt()),
+                PropertyFactory.fillOpacity(Wave.BACKGROUND_OPACITY),
+            )
+        style.addLayer(layer)
+
+        // Track IDs for future reuse (iOS pattern)
+        waveSourceIds.add(sourceId)
+        waveLayerIds.add(layerId)
     }
 
     // --------------------------------

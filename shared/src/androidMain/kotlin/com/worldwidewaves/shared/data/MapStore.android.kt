@@ -47,6 +47,12 @@ private const val RETRY_DELAY_MS = 100L
 private const val FETCH_RETRY_DELAY_MS = 120L
 private const val MIN_ANDROID_VERSION_FOR_SPLIT_CONTEXT = 26 // Android 8.0 Oreo
 
+/**
+ * Cache for split contexts to avoid repeated createContextForSplit() and SplitCompat.install() calls.
+ * Key: eventId, Value: split context
+ */
+private val splitContextCache = mutableMapOf<String, Context>()
+
 private fun ctx(): Context = inject<Context>(Context::class.java).value
 
 actual suspend fun platformTryCopyInitialTagToCache(
@@ -96,8 +102,8 @@ private fun attemptFileCopy(
     destAbsolutePath: String,
 ): CopyResult =
     try {
+        // Use cached split context (SplitCompat.install already called in cache)
         val splitCtx = createSplitContext(baseContext, eventId)
-        SplitCompat.install(splitCtx)
 
         copyAssetToFile(splitCtx, assetName, destAbsolutePath)
 
@@ -112,14 +118,26 @@ private fun attemptFileCopy(
     }
 
 /**
- * Creates a split context for the given event ID (Android 8.0+).
+ * Creates or retrieves a cached split context for the given event ID (Android 8.0+).
+ * Caches the result to avoid repeated createContextForSplit() and SplitCompat.install() overhead.
  */
 private fun createSplitContext(
     baseContext: Context,
     eventId: String,
 ): Context =
     if (Build.VERSION.SDK_INT >= MIN_ANDROID_VERSION_FOR_SPLIT_CONTEXT) {
-        runCatching { baseContext.createContextForSplit(eventId) }.getOrElse { baseContext }
+        splitContextCache.getOrPut(eventId) {
+            runCatching {
+                val splitCtx = baseContext.createContextForSplit(eventId)
+                // Install split compatibility immediately when creating context
+                SplitCompat.install(splitCtx)
+                Log.d(TAG, "Created and cached split context for $eventId")
+                splitCtx
+            }.getOrElse {
+                Log.w(TAG, "Failed to create split context for $eventId, using base context")
+                baseContext
+            }
+        }
     } else {
         baseContext
     }

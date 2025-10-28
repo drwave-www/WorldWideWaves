@@ -29,6 +29,12 @@ import org.koin.java.KoinJavaComponent.inject
 import java.io.File
 
 /**
+ * Cache for app update time to avoid repeated PackageManager binder calls.
+ * Only needs to be fetched once per app session since it won't change until app restart.
+ */
+private var cachedAppUpdateTime: Long? = null
+
+/**
  * Checks if a cached file exists in the application's cache directory.
  *
  * This function determines whether a file with the specified name exists in the cache directory.
@@ -127,9 +133,12 @@ actual fun isCachedFileStale(fileName: String): Boolean {
             0L
         }
 
+    // Use cached app update time to avoid repeated PackageManager binder calls
     val appUpdateTime =
-        try {
-            context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
+        cachedAppUpdateTime ?: try {
+            val updateTime = context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
+            cachedAppUpdateTime = updateTime
+            updateTime
         } catch (_: Exception) {
             System.currentTimeMillis()
         }
