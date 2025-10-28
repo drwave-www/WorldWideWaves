@@ -1,11 +1,12 @@
-name: 99 • Pipeline Status [DISABLED]
+name: 99 • Pipeline Status [TESTING]
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  # Temporarily only workflow_dispatch for testing
   workflow_dispatch:
+  # push:
+  #   branches: [ main ]
+  # pull_request:
+  #   branches: [ main ]
 
 permissions:
   checks: read
@@ -20,7 +21,6 @@ jobs:
   wait-for-workflows:
     name: Wait for Core Workflows
     runs-on: ubuntu-latest
-    if: false  # DISABLED - Workflow temporarily deactivated to save costs
     steps:
       - name: Wait for workflows to complete
         run: |
@@ -31,7 +31,6 @@ jobs:
     name: Overall Status
     runs-on: ubuntu-latest
     needs: [wait-for-workflows]
-    if: false  # DISABLED - Workflow temporarily deactivated to save costs
 
     steps:
       - name: Checkout
