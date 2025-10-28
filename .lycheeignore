@@ -6,7 +6,7 @@
 #
 # Syntax:
 #   - One pattern per line
-#   - Use glob patterns for paths (*, **, etc.)
+#   - Use glob patterns for paths (*, .*, etc.)
 #   - Use regex for URLs when needed
 #   - Lines starting with # are comments
 # ============================================================
@@ -14,24 +14,24 @@
 # ============================================================
 # BUILD & DEPENDENCY DIRECTORIES
 # ============================================================
-# Exclude build artifacts and dependencies
-**/node_modules/**
-**/build/**
-**/.gradle/**
-**/SourcePackages/**
-**/DerivedData/**
-**/.build/**
-**/.kotlin/**
-**/xcuserdata/**
+# Exclude build artifacts and dependencies (regex patterns)
+.*/node_modules/.*
+.*/build/.*
+.*/.gradle/.*
+.*/SourcePackages/.*
+.*/DerivedData/.*
+.*/.build/.*
+.*/.kotlin/.*
+.*/xcuserdata/.*
 
 # ============================================================
 # IDE & SYSTEM FILES
 # ============================================================
-**/.idea/**
-**/.vscode/**
-**/.DS_Store
-**/*.iml
-**/.swiftpm/**
+.*/.idea/.*
+.*/.vscode/.*
+.*/.DS_Store
+.*\.iml
+.*/.swiftpm/.*
 
 # ============================================================
 # LOCALHOST & DEVELOPMENT URLS
@@ -46,48 +46,48 @@ http://127.0.0.1:*
 # FIREBASE & GOOGLE SERVICES
 # ============================================================
 # Firebase dynamic URLs that may not be publicly accessible
-https://firestore.googleapis.com/**
-https://firebase.google.com/docs/reference/**
-https://console.firebase.google.com/**
+https://firestore\.googleapis\.com/.*
+https://firebase\.google\.com/docs/reference/.*
+https://console\.firebase\.google\.com/.*
 
 # Firebase deep linking domains (app-specific)
-https://*.page.link/**
-https://*.firebaseapp.com/**
+https://[^/]+\.page\.link/.*
+https://[^/]+\.firebaseapp\.com/.*
 
 # ============================================================
 # MOBILE APP STORES
 # ============================================================
 # App Store links (may require authentication/region)
-https://apps.apple.com/**
-https://play.google.com/store/**
+https://apps\.apple\.com/.*
+https://play\.google\.com/store/.*
 
 # ============================================================
 # AUTHENTICATION-REQUIRED URLS
 # ============================================================
 # GitHub private repositories or draft PRs
-https://github.com/**/pull/*/files
-https://github.com/**/compare/**
+https://github\.com/.*/pull/.*/files
+https://github\.com/.*/compare/.*
 
 # Apple Developer documentation (may require login)
-https://developer.apple.com/library/archive/**
+https://developer\.apple\.com/library/archive/.*
 
 # ============================================================
 # KOTLIN & ANDROID DOCUMENTATION
 # ============================================================
 # Kotlin API docs with version-specific paths
-https://kotlinlang.org/api/latest/jvm/**
-https://developer.android.com/reference/kotlin/**
+https://kotlinlang.org/api/latest/jvm/.*
+https://developer.android.com/reference/kotlin/.*
 
 # ============================================================
 # EXTERNAL SERVICES (KNOWN TRANSIENT ISSUES)
 # ============================================================
 # MapLibre documentation (occasionally unavailable)
 # (Uncomment if needed)
-# https://maplibre.org/maplibre-gl-js-docs/**
+# https://maplibre.org/maplibre-gl-js-docs/.*
 
 # NPM registry (rate limiting)
 # (Uncomment if needed)
-# https://registry.npmjs.org/**
+# https://registry.npmjs.org/.*
 
 # ============================================================
 # EXAMPLE URLs & PLACEHOLDERS
@@ -99,14 +99,14 @@ http://example.com
 http://example.org
 
 # API endpoint examples
-https://api.example.com/**
-http://api.example.com/**
+https://api.example.com/.*
+http://api.example.com/.*
 
 # ============================================================
 # FILE PROTOCOL LINKS
 # ============================================================
 # Local file references
-file:///**
+file:///.*
 
 # ============================================================
 # MAIL LINKS
@@ -120,7 +120,7 @@ mailto:*
 # Add project-specific exclusions below:
 
 # GitHub Actions workflow URLs (may not exist yet)
-https://github.com/*/actions/workflows/**
+https://github.com/*/actions/workflows/.*
 
 # Temporary exclusions (document reason and removal date):
-# (Example) https://temporary-url.com/** - Waiting for service deployment (Remove after 2025-11-01)
+# (Example) https://temporary-url.com/.* - Waiting for service deployment (Remove after 2025-11-01)
