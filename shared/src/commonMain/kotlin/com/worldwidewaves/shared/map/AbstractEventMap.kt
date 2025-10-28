@@ -267,6 +267,7 @@ abstract class AbstractEventMap<T>(
      * - User-wave distance (expands if needed)
      * - Event edge proximity (ensures boundary visibility)
      */
+    @Suppress("ComplexCondition") // Necessary validation: null + NaN checks prevent IllegalArgumentException
     suspend fun targetUserAndWave() {
         val userPosition = positionManager.getCurrentPosition()
         val closestWaveLongitude = event.wave.userClosestWaveLongitude()

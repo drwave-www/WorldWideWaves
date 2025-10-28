@@ -146,6 +146,7 @@ class MapDownloadCoordinator(
         retryManager.resetRetryCount()
     }
 
+    @Suppress("UnusedParameter") // moduleIds kept for API compatibility and future use
     fun handleInstallComplete(moduleIds: List<String>) {
         // Don't clear cache immediately on installation - this causes a race condition
         // where MapLibre tries to load the mbtiles file while it's being deleted.
