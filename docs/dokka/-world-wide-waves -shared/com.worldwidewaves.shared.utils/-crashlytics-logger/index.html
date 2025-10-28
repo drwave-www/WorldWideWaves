@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>CrashlyticsLogger</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+                    <a class="library-name--link" href="../../../index.html">
+                            WorldWideWaves Shared
+                    </a>
+            </div>
+            <div class="library-version">
+            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":shared:dokkaHtml/androidMain">android</button>
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":shared:dokkaHtml/commonMain">common</button>
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":shared:dokkaHtml/iosMain">ios</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="WorldWideWaves Shared::com.worldwidewaves.shared.utils/CrashlyticsLogger///PointingToDeclaration//-1187756703">
+  <div class="breadcrumbs"><a href="../../../index.html">WorldWideWaves Shared</a><span class="delimiter">/</span><a href="../index.html">com.worldwidewaves.shared.utils</a><span class="delimiter">/</span><span class="current">CrashlyticsLogger</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Crashlytics</span><wbr></wbr><span><span>Logger</span></span></h1>
+    <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain" data-toggle=":shared:dokkaHtml/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">object </span><a href="index.html">CrashlyticsLogger</a></div><p class="paragraph">Android implementation of Crashlytics integration using Firebase Crashlytics SDK.</p><h2 class="">Implementation Details</h2><ul><li><p class="paragraph">Uses Firebase Crashlytics KTX extension for modern Kotlin API</p></li><li><p class="paragraph">Only reports in production (BuildKonfig.DEBUG = false)</p></li><li><p class="paragraph">Silent fallback prevents crashes if Crashlytics fails to initialize</p></li><li><p class="paragraph">Tag included in log breadcrumbs for better context</p></li></ul><h2 class="">Production Safety</h2><p class="paragraph">All methods wrapped in try-catch to prevent Crashlytics failures from affecting app functionality.</p></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">object </span><a href="index.html">CrashlyticsLogger</a><span class="clearfix"><span class="floating-right">(<a href="https://github.com/mglcel/WorldWideWaves/tree/main/shared/src/commonMain/kotlin/com/worldwidewaves/shared/utils/CrashlyticsLogger.kt#L47">source</a>)</span></span></div><p class="paragraph">Platform-specific Crashlytics integration for non-fatal error reporting.</p><p class="paragraph">This wrapper provides cross-platform access to Firebase Crashlytics for tracking non-fatal exceptions and errors in production. It integrates with the Log utility to automatically forward errors and warnings to Crashlytics for monitoring.</p><h2 class="">Behavior</h2><ul><li><p class="paragraph">Only sends data in production builds (when DEBUG = false)</p></li><li><p class="paragraph">Silently fails if Crashlytics is not available</p></li><li><p class="paragraph">Includes tag and message as breadcrumbs for crash context</p></li></ul><h2 class="">Usage</h2><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">CrashlyticsLogger.recordException(exception, &quot;MyTag&quot;, &quot;Operation failed&quot;)<br>CrashlyticsLogger.log(&quot;User navigated to screen X&quot;)<br>CrashlyticsLogger.setCustomKey(&quot;user_id&quot;, userId)</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Platform implementations:</p><ul><li><p class="paragraph">Android: Uses Firebase Crashlytics SDK</p></li><li><p class="paragraph">iOS: Uses Firebase Crashlytics via CocoaPods</p></li></ul></div><div class="content sourceset-dependent-content" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">object </span><a href="index.html">CrashlyticsLogger</a></div><p class="paragraph">iOS implementation of Crashlytics integration.</p><h2 class="">Implementation Details</h2><ul><li><p class="paragraph">iOS Crashlytics integration is handled natively in Swift (AppDelegate/SceneDelegate)</p></li><li><p class="paragraph">This implementation is a no-op stub since Firebase is initialized and managed in iOS app layer</p></li><li><p class="paragraph">Actual crash reporting happens automatically via Firebase iOS SDK</p></li><li><p class="paragraph">Non-fatal error reporting can be added via Swift bridge pattern if needed in future</p></li></ul><h2 class="">Why No-Op?</h2><p class="paragraph">Firebase Crashlytics on iOS works best when initialized in AppDelegate and used directly from Swift. The Kotlin/Native -> Swift bridging for error reporting introduces complexity without significant benefit since crashes are already captured automatically by Firebase SDK.</p><h2 class="">Future Enhancement</h2><p class="paragraph">To enable non-fatal error reporting from Kotlin code:</p><ol><li><p class="paragraph">Create Swift wrapper in iosApp/worldwidewaves/Utils/</p></li><li><p class="paragraph">Expose via KMM native interop (not external object)</p></li><li><p class="paragraph">Call from this implementation</p></li></ol><h2 class="">Threading Model</h2><p class="paragraph">No-op implementation is thread-safe (does nothing)</p><h2 class="">Production Safety</h2><p class="paragraph">Safe no-op - no crashes, no side effects</p></div>    </div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-283555222%2FFunctions%2F-1187756703" anchor-label="log" id="-283555222%2FFunctions%2F-1187756703" data-filterable-set=":shared:dokkaHtml/commonMain,:shared:dokkaHtml/androidMain,:shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain,:shared:dokkaHtml/androidMain,:shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/commonMain,:shared:dokkaHtml/androidMain,:shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="log.html"><span><span>log</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-283555222%2FFunctions%2F-1187756703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain" data-toggle=":shared:dokkaHtml/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="log.html"><span class="token function">log</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">message<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="log.html"><span class="token function">log</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">message<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Logs a breadcrumb for crash context. Breadcrumbs appear in crash reports to provide context about what happened before a crash.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="log.html"><span class="token function">log</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">message<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1945405591%2FFunctions%2F-1187756703" anchor-label="recordException" id="1945405591%2FFunctions%2F-1187756703" data-filterable-set=":shared:dokkaHtml/commonMain,:shared:dokkaHtml/androidMain,:shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain,:shared:dokkaHtml/androidMain,:shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/commonMain,:shared:dokkaHtml/androidMain,:shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="record-exception.html"><span>record</span><wbr></wbr><span><span>Exception</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1945405591%2FFunctions%2F-1187756703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain" data-toggle=":shared:dokkaHtml/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="record-exception.html"><span class="token function">recordException</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">throwable<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">, </span></span><span class="parameter ">tag<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">message<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="record-exception.html"><span class="token function">recordException</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">throwable<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">, </span></span><span class="parameter ">tag<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">message<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Records a non-fatal exception to Crashlytics. Only sends in production builds (when DEBUG = false).</p></div></div><div class="content sourceset-dependent-content" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="record-exception.html"><span class="token function">recordException</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">throwable<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">, </span></span><span class="parameter ">tag<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">message<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-929718951%2FFunctions%2F-1187756703" anchor-label="setCustomKey" id="-929718951%2FFunctions%2F-1187756703" data-filterable-set=":shared:dokkaHtml/commonMain,:shared:dokkaHtml/androidMain,:shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain,:shared:dokkaHtml/androidMain,:shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/commonMain,:shared:dokkaHtml/androidMain,:shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-custom-key.html"><span>set</span><wbr></wbr><span>Custom</span><wbr></wbr><span><span>Key</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-929718951%2FFunctions%2F-1187756703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain" data-toggle=":shared:dokkaHtml/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="set-custom-key.html"><span class="token function">setCustomKey</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="set-custom-key.html"><span class="token function">setCustomKey</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Sets a custom key for crash reporting context. Custom keys persist across app sessions and appear in all subsequent crash reports.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="set-custom-key.html"><span class="token function">setCustomKey</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

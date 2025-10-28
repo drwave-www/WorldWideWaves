@@ -332,7 +332,7 @@ tasks.register("testQuality") {
 
 // Dokka API Documentation Configuration
 tasks.named<org.jetbrains.dokka.gradle.DokkaTask>("dokkaHtml").configure {
-    outputDirectory.set(layout.buildDirectory.dir("dokka"))
+    outputDirectory.set(file("${project.rootDir}/docs/dokka"))
     moduleName.set("WorldWideWaves Shared")
 
     dokkaSourceSets {

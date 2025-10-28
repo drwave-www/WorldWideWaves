@@ -45,9 +45,25 @@ echo "📖 Generating API documentation with Dokka..."
 # Run Dokka for the shared module (where most KMM code lives)
 if ./gradlew :shared:dokkaHtml --quiet; then
     echo "✅ Dokka API documentation generated successfully"
-    dokka_output="shared/build/dokka"
+    dokka_output="docs/dokka"
     if [ -d "$dokka_output" ]; then
         echo "   Documentation available at: $dokka_output/index.html"
+
+        # Check if Dokka docs have changes and commit them
+        if ! git diff --quiet "$dokka_output"; then
+            echo "📝 Committing updated Dokka documentation..."
+            git add "$dokka_output"
+            git commit -m "docs: update API documentation (Dokka)
+
+Automated commit from pre-push hook.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+            echo "✅ Dokka documentation committed"
+        else
+            echo "   Documentation is up to date"
+        fi
     fi
 else
     echo "⚠️  Dokka generation failed. This may indicate KDoc issues."
