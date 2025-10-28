@@ -139,11 +139,11 @@ function handleAnchor() {
     }
 
     let findAnyTab = function (target) {
-   	let result = null
+    	let result = null
         document.querySelectorAll('div[tabs-section] > button[data-togglable]')
         .forEach(node => {
             if(node.getAttribute("data-togglable").split(",").includes(target)) {
-           	result = node
+            	result = node
             }
         })
         return result

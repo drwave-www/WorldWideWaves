@@ -337,7 +337,7 @@ Comprehensive documentation is available in the `docs/` directory.
 ### Getting Started
 - **[CLAUDE.md](CLAUDE.md)** - Complete project development guide (start here for development)
 - **[CLAUDE_iOS.md](CLAUDE_iOS.md)** - iOS-specific development rules and deadlock prevention
-- **[API Documentation](docs/dokka/index.html)** - Complete API reference (Dokka-generated, auto-updated)
+- **[API Documentation](https://mglcel.github.io/WorldWideWaves/dokka/)** - Complete API reference (Dokka-generated, auto-updated)
 - [Environment Setup](docs/environment-setup.md) - Development environment configuration (macOS, Linux, Windows)
 
 ### Development Guides
