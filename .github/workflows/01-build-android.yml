@@ -1,10 +1,12 @@
-name: 01 • Build Android [DISABLED]
+name: 01 • Build Android [TESTING]
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  # Temporarily only workflow_dispatch for testing
+  workflow_dispatch:
+  # push:
+  #   branches: [ main ]
+  # pull_request:
+  #   branches: [ main ]
 
 concurrency:
   group: build-android-${{ github.ref }}
@@ -16,7 +18,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: []  # Removed dependency to run in parallel with quality gates
-    if: false  # DISABLED - Workflow temporarily deactivated to save costs
 
     steps:
       - name: Checkout
