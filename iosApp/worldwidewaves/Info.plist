@@ -4,6 +4,8 @@
 <dict>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>WorldWideWaves needs your location to determine when you're within wave events and coordinate synchronized participation with others.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

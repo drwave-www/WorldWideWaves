@@ -158,15 +158,18 @@ class AndroidMapLibreAdapter(
             // Invoke callback first to proceed with map setup
             callback()
 
-            // Use IdleHandler to render wave polygons after the main thread completes current rendering tasks
-            // This adaptively waits for base tiles to render without a fixed delay
+            // Hybrid approach: minimum delay to let tiles start loading + IdleHandler for completion
+            // MapLibre's tile rendering happens on background threads, so IdleHandler alone fires too early
             pendingPolygons?.let { polygons ->
-                Looper.myQueue().addIdleHandler {
-                    Log.i(TAG, "Rendering pending wave polygons after base tile render (adaptive timing)")
-                    addWavePolygons(polygons, clearExisting = true)
-                    pendingPolygons = null
-                    false // Remove handler after execution
-                }
+                android.os.Handler(Looper.getMainLooper()).postDelayed({
+                    // After minimum delay, wait for main thread to be idle before rendering waves
+                    Looper.myQueue().addIdleHandler {
+                        Log.i(TAG, "Rendering pending wave polygons after tile render delay + idle check")
+                        addWavePolygons(polygons, clearExisting = true)
+                        pendingPolygons = null
+                        false // Remove handler after execution
+                    }
+                }, 150) // 150ms minimum delay (50% faster than original 300ms, but allows tile loading)
             }
         }
     }
