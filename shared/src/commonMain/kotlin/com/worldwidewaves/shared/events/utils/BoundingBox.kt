@@ -39,11 +39,6 @@ class BoundingBox private constructor(
             sw: Position,
             ne: Position,
         ): BoundingBox {
-            Log.d(
-                "BoundingBox",
-                "fromCorners(2pos): input SW(${sw.lat},${sw.lng}) NE(${ne.lat},${ne.lng})",
-            )
-
             val bbox =
                 if (sw.lat <= ne.lat && sw.lng <= ne.lng) {
                     // Already in correct order, no need to create new objects
@@ -54,11 +49,6 @@ class BoundingBox private constructor(
                         ne = Position(maxOf(sw.lat, ne.lat), maxOf(sw.lng, ne.lng)).init(),
                     )
                 }
-
-            Log.d(
-                "BoundingBox",
-                "fromCorners(2pos): output SW(${bbox.sw.lat},${bbox.sw.lng}) NE(${bbox.ne.lat},${bbox.ne.lng})",
-            )
 
             return bbox
         }
@@ -73,12 +63,6 @@ class BoundingBox private constructor(
             // Always use min/max - we don't support International Date Line wrapping
             // iOS MapLibre requires swLng < neLng (cannot handle antimeridian wrapping)
             val bbox = BoundingBox(minLat, minLng, maxLat, maxLng)
-
-            // Debug logging for iOS
-            Log.d(
-                "BoundingBox",
-                "fromCorners: ${positions.size} positions → SW($minLat,$minLng) NE($maxLat,$maxLng)",
-            )
 
             return bbox
         }
