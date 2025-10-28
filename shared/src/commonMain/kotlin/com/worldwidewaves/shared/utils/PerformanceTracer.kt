@@ -20,10 +20,11 @@
 package com.worldwidewaves.shared.utils
 
 /**
- * Platform-specific Firebase Performance Monitoring integration.
+ * Performance tracing abstraction (DISABLED in production).
  *
- * Provides performance tracing capabilities for critical code paths to monitor
- * app performance in production. Traces are automatically sent to Firebase Console.
+ * All traces are no-ops by default to avoid Firebase Performance costs.
+ * Local timing can be enabled via ENABLE_TRACING flag in platform implementations
+ * for debugging purposes only.
  *
  * Usage:
  * ```kotlin
@@ -35,6 +36,8 @@ package com.worldwidewaves.shared.utils
  *     trace.stop()
  * }
  * ```
+ *
+ * Note: Traces have zero overhead in production (no-op implementation).
  */
 expect object PerformanceTracer {
     /**

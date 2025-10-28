@@ -1,3 +1,5 @@
+@file:Suppress("MatchingDeclarationName") // expect/actual pattern requires .android.kt suffix
+
 package com.worldwidewaves.shared.utils
 
 /*
@@ -135,6 +137,7 @@ actual object RuntimeLogConfig {
     /**
      * Get minimum log level for a specific tag from remote config.
      */
+    @Suppress("ReturnCount") // Multiple returns for config priority levels - improves readability
     actual fun getMinLogLevel(tag: String): LogLevel {
         if (!initialized || remoteConfig == null) {
             // Fall back to build configuration

@@ -1,3 +1,8 @@
+@file:Suppress(
+    "MatchingDeclarationName", // expect/actual pattern requires .android.kt suffix
+    "SwallowedException", // Crashlytics errors must not crash app - defensive logging
+)
+
 package com.worldwidewaves.shared.utils
 
 /*

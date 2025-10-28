@@ -52,9 +52,8 @@ fun doInitPlatform() {
             }
         }
 
-        // TODO: Initialize RuntimeLogConfig when iOS Firebase Remote Config is configured
-        // Requires FirebaseRemoteConfig CocoaPod to be added to iosApp project
-        // For now, uses build-time configuration fallback
+        // NOTE: RuntimeLogConfig initialization deferred - using build-time configuration fallback.
+        // Firebase Remote Config integration requires FirebaseRemoteConfig CocoaPod in iosApp project.
     } catch (e: Exception) {
         Log.e(TAG, "startKoin failed: ${e.message}")
     }

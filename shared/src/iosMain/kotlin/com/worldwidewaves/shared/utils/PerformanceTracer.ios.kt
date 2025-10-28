@@ -1,3 +1,5 @@
+@file:Suppress("MatchingDeclarationName") // expect/actual pattern requires .ios.kt suffix
+
 package com.worldwidewaves.shared.utils
 
 /*
@@ -27,38 +29,38 @@ import platform.Foundation.timeIntervalSince1970
 /**
  * iOS implementation of PerformanceTracer.
  *
- * Uses local timing measurements. Firebase Performance Monitoring integration
- * requires Firebase/Performance CocoaPod configuration in the iOS project.
- *
- * To enable Firebase Performance on iOS:
- * 1. Add Firebase/Performance pod to iosApp/Podfile
- * 2. Run pod install
- * 3. Import cocoapods.FirebasePerformance
- * 4. Replace this stub with Firebase trace implementation
+ * DISABLED: Performance tracing is disabled in production to avoid costs.
+ * All traces are no-ops. Local timing can be enabled via ENABLE_TRACING flag.
  */
 actual object PerformanceTracer {
-    /**
-     * Start a performance trace (local timing for iOS).
-     */
-    actual fun startTrace(name: String): PerformanceTrace {
-        val startTime = (NSDate().timeIntervalSince1970() * 1000).toLong()
-        return LocalPerformanceTrace(name, startTime)
-    }
+    // Performance tracing disabled - all operations are no-ops
+    private const val ENABLE_TRACING = false // Set to true only for local debugging
 
     /**
-     * Record a custom metric (local logging only).
+     * Start a performance trace (no-op by default).
+     */
+    actual fun startTrace(name: String): PerformanceTrace =
+        if (ENABLE_TRACING) {
+            val startTime = (NSDate().timeIntervalSince1970() * 1000).toLong()
+            LocalPerformanceTrace(name, startTime)
+        } else {
+            NoOpPerformanceTrace()
+        }
+
+    /**
+     * Record a custom metric (no-op).
      */
     actual fun recordMetric(
         name: String,
         value: Long,
     ) {
-        Log.performance("WWW.Perf", "$name=$value")
+        // No-op - tracing disabled
     }
 }
 
 /**
- * Local performance trace implementation for iOS.
- * Logs timing information but doesn't send to Firebase (requires CocoaPod).
+ * Local performance trace for debugging (no Firebase, no cost).
+ * Logs timing information to console only.
  */
 private class LocalPerformanceTrace(
     private val name: String,
@@ -83,8 +85,30 @@ private class LocalPerformanceTrace(
 
     override fun stop() {
         val duration = (NSDate().timeIntervalSince1970() * 1000).toLong() - startTimeMs
-
         val metricsStr = metrics.entries.joinToString(", ") { "${it.key}=${it.value}" }
-        Log.performance("WWW.Perf", "trace=$name duration_ms=$duration metrics=[$metricsStr]")
+        Log.d("WWW.Perf", "trace=$name duration_ms=$duration metrics=[$metricsStr]")
+    }
+}
+
+/**
+ * No-op implementation for production (zero overhead, no costs).
+ */
+private class NoOpPerformanceTrace : PerformanceTrace {
+    override fun putMetric(
+        name: String,
+        value: Long,
+    ) {
+        // No-op - tracing disabled
+    }
+
+    override fun incrementMetric(
+        name: String,
+        by: Long,
+    ) {
+        // No-op - tracing disabled
+    }
+
+    override fun stop() {
+        // No-op - tracing disabled
     }
 }

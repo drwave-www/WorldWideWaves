@@ -188,6 +188,7 @@ fun BoxScope.SimulationButton(
  * Handles the simulation button click logic with proper error handling.
  * Returns functions that should be called within LaunchedEffect to manage coroutine lifecycle properly.
  */
+@Suppress("LongParameterList") // UI glue function passing through callbacks and resources - refactoring would complicate call site
 private fun handleSimulationClick(
     simulationButtonState: String,
     isMapAvailableForSimulation: Boolean,

@@ -1,4 +1,9 @@
-/* * Copyright 2025 DrWave
+@file:Suppress("MatchingDeclarationName") // expect/actual pattern requires .android.kt suffix
+
+package com.worldwidewaves.shared.utils
+
+/*
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries. The project aims to transcend physical and cultural
@@ -15,39 +20,25 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. */
-
-package com.worldwidewaves.shared.utils
-
-import com.google.firebase.perf.FirebasePerformance
-import com.google.firebase.perf.metrics.Trace
+ * limitations under the License.
+ */
 
 /**
  * Android implementation of Firebase Performance Monitoring.
  *
- * Uses Firebase Performance SDK to track custom traces and metrics.
+ * DISABLED: Firebase Performance tracing is disabled in production to avoid costs.
+ * All traces are no-ops. Local timing can be enabled via DEBUG flag.
  */
 actual object PerformanceTracer {
-    // Lazy initialization to avoid Firebase access during unit tests
-    private val firebasePerf: FirebasePerformance by lazy {
-        try {
-            FirebasePerformance.getInstance()
-        } catch (e: IllegalStateException) {
-            // Firebase not initialized (unit tests) - return a mock that logs warnings
-            Log.w("PerformanceTracer", "Firebase not initialized, performance tracing disabled")
-            throw e // Re-throw to prevent silent failures in production
-        }
-    }
+    // Performance tracing disabled - all operations are no-ops
+    private const val ENABLE_TRACING = false // Set to true only for local debugging
 
     actual fun startTrace(name: String): PerformanceTrace =
-        try {
-            val trace = firebasePerf.newTrace(name)
-            trace.start()
-            Log.v("PerformanceTracer", "Started trace: $name")
-            AndroidPerformanceTrace(trace)
-        } catch (e: IllegalStateException) {
-            // Firebase not initialized (unit tests)
-            Log.w("PerformanceTracer", "Cannot start trace '$name': Firebase not initialized")
+        if (ENABLE_TRACING) {
+            // Local timing only (no Firebase)
+            LocalPerformanceTrace(name, System.currentTimeMillis())
+        } else {
+            // No-op for production (zero overhead)
             NoOpPerformanceTrace()
         }
 
@@ -55,66 +46,61 @@ actual object PerformanceTracer {
         name: String,
         value: Long,
     ) {
-        try {
-            Log.v("PerformanceTracer", "Recorded metric: $name = $value")
-            // Firebase Performance doesn't have a direct "record metric" API
-            // We create a short-lived trace instead
-            val trace = firebasePerf.newTrace(name)
-            trace.start()
-            trace.putMetric("value", value)
-            trace.stop()
-        } catch (e: IllegalStateException) {
-            // Firebase not initialized (unit tests)
-            Log.w("PerformanceTracer", "Cannot record metric '$name': Firebase not initialized")
-        }
+        // No-op - Firebase Performance disabled
     }
 }
 
 /**
- * Android implementation of PerformanceTrace wrapping Firebase Trace.
+ * Local performance trace for debugging (no Firebase, no cost).
+ * Logs timing information to Logcat only.
  */
-private class AndroidPerformanceTrace(
-    private val trace: Trace,
+private class LocalPerformanceTrace(
+    private val name: String,
+    private val startTimeMs: Long,
 ) : PerformanceTrace {
+    private val metrics = mutableMapOf<String, Long>()
+
     override fun putMetric(
         name: String,
         value: Long,
     ) {
-        trace.putMetric(name, value)
+        metrics[name] = value
     }
 
     override fun incrementMetric(
         name: String,
         by: Long,
     ) {
-        trace.incrementMetric(name, by)
+        val current = metrics[name] ?: 0L
+        metrics[name] = current + by
     }
 
     override fun stop() {
-        trace.stop()
-        Log.v("PerformanceTracer", "Stopped trace: ${trace.name}")
+        val duration = System.currentTimeMillis() - startTimeMs
+        val metricsStr = metrics.entries.joinToString(", ") { "${it.key}=${it.value}" }
+        Log.d("WWW.Perf", "trace=$name duration_ms=$duration metrics=[$metricsStr]")
     }
 }
 
 /**
- * No-op implementation for unit tests when Firebase is not available.
+ * No-op implementation for production (zero overhead, no costs).
  */
 private class NoOpPerformanceTrace : PerformanceTrace {
     override fun putMetric(
         name: String,
         value: Long,
     ) {
-        // No-op for unit tests
+        // No-op - tracing disabled
     }
 
     override fun incrementMetric(
         name: String,
         by: Long,
     ) {
-        // No-op for unit tests
+        // No-op - tracing disabled
     }
 
     override fun stop() {
-        // No-op for unit tests
+        // No-op - tracing disabled
     }
 }

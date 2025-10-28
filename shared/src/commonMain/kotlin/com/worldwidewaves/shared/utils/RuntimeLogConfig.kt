@@ -185,6 +185,7 @@ enum class LogLevel(
          * @param value String value ("VERBOSE", "DEBUG", "INFO", "WARNING", "ERROR")
          * @return Corresponding LogLevel or null if invalid
          */
+        @Suppress("SwallowedException") // Returns null for invalid input - expected behavior
         fun fromString(value: String): LogLevel? =
             try {
                 valueOf(value.uppercase())

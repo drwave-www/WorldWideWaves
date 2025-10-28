@@ -88,6 +88,10 @@ import kotlin.random.Random
  * ```
  */
 object CorrelationContext {
+    // Correlation ID generation constants
+    private const val CID_MIN = 10000
+    private const val CID_MAX = 99999
+
     /**
      * Coroutine context element that holds the correlation ID.
      *
@@ -160,5 +164,5 @@ object CorrelationContext {
      *
      * @return Generated correlation ID (e.g., "CID-42815")
      */
-    private fun generateCorrelationId(): String = "CID-${Random.nextInt(10000, 99999)}"
+    private fun generateCorrelationId(): String = "CID-${Random.nextInt(CID_MIN, CID_MAX)}"
 }

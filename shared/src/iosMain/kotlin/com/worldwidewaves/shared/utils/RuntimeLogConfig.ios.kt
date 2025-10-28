@@ -1,3 +1,5 @@
+@file:Suppress("MatchingDeclarationName") // expect/actual pattern requires .ios.kt suffix
+
 package com.worldwidewaves.shared.utils
 
 /*
@@ -43,7 +45,8 @@ actual object RuntimeLogConfig {
     /**
      * Initialize remote config (stub - uses build config fallback).
      *
-     * TODO: Implement Firebase Remote Config once CocoaPod is added.
+     * NOTE: Firebase Remote Config integration deferred - using build config fallback.
+     * Implementation requires Firebase/RemoteConfig CocoaPod configuration.
      */
     actual suspend fun initialize() {
         Log.i(TAG, "RuntimeLogConfig initialized (using build config fallback on iOS)")

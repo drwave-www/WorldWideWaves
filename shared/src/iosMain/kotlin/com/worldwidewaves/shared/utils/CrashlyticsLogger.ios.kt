@@ -1,3 +1,5 @@
+@file:Suppress("MatchingDeclarationName") // expect/actual pattern requires .ios.kt suffix
+
 package com.worldwidewaves.shared.utils
 
 /*
