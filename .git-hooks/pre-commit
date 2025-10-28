@@ -7,6 +7,75 @@
 # Redirect output to stderr.
 exec 1>&2
 
+# ============================================================
+# SECURITY CHECKS - PREVENT SECRETS FROM BEING COMMITTED
+# ============================================================
+echo "🔒 Running security checks..."
+
+# Block Firebase configuration files (but allow deletions)
+staged_firebase_files=$(git diff --cached --name-only --diff-filter=AM | grep "google-services.json" || true)
+if [ -n "$staged_firebase_files" ]; then
+    # Allow template files
+    if echo "$staged_firebase_files" | grep -q "template"; then
+        echo "✅ Template file allowed: $staged_firebase_files"
+    else
+        echo "❌ ERROR: Attempting to commit google-services.json"
+        echo "   This file contains sensitive Firebase API keys."
+        echo "   Use google-services.json.template instead."
+        exit 1
+    fi
+fi
+
+# Allow deletion of Firebase files (removing from tracking)
+deleted_firebase_files=$(git diff --cached --name-only --diff-filter=D | grep "google-services.json" || true)
+if [ -n "$deleted_firebase_files" ]; then
+    echo "✅ Allowing removal of Firebase config from git tracking: $deleted_firebase_files"
+fi
+
+staged_ios_firebase=$(git diff --cached --name-only --diff-filter=AM | grep "GoogleService-Info.plist" || true)
+if [ -n "$staged_ios_firebase" ]; then
+    echo "❌ ERROR: Attempting to commit GoogleService-Info.plist"
+    echo "   This file contains sensitive Firebase API keys."
+    exit 1
+fi
+
+# Scan for Firebase API key patterns in staged content (exclude deletions and security tooling)
+staged_files_to_scan=$(git diff --cached --name-only --diff-filter=AM | grep -vE "(\.git-hooks/|\.github/workflows/|SECURITY_AUDIT_REPORT\.md)" || true)
+if [ -n "$staged_files_to_scan" ]; then
+    for file in $staged_files_to_scan; do
+        if git diff --cached "$file" | grep -qE "AIzaSy[A-Za-z0-9_-]{33}"; then
+            echo "❌ ERROR: Firebase API key pattern detected in: $file"
+            echo "   Remove sensitive data before committing."
+            exit 1
+        fi
+    done
+fi
+
+# Scan for common API key patterns (exclude deletions and security tooling)
+if [ -n "$staged_files_to_scan" ]; then
+    for file in $staged_files_to_scan; do
+        if git diff --cached "$file" | grep -qE "(sk-proj-[A-Za-z0-9_-]{48,}|ghp_[A-Za-z0-9]{36}|gho_[A-Za-z0-9]{36})"; then
+            echo "❌ ERROR: Potential API key pattern detected in: $file"
+            echo "   Patterns found: OpenAI, GitHub tokens, or similar"
+            echo "   Remove sensitive data before committing."
+            exit 1
+        fi
+    done
+fi
+
+# Run gitleaks on staged changes if available
+if command -v gitleaks >/dev/null 2>&1; then
+    echo "Running gitleaks security scan..."
+    if ! gitleaks protect --staged --verbose 2>&1 | grep -q "No leaks found"; then
+        echo "❌ ERROR: gitleaks detected potential secrets in staged changes"
+        echo "   Review the output above and remove any secrets before committing."
+        exit 1
+    fi
+    echo "✅ Gitleaks scan passed - no secrets detected"
+fi
+
+echo "✅ Security checks passed"
+
 # Check if there are any staged Kotlin files
 staged_kotlin_files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(kt|kts)$' || true)
 
