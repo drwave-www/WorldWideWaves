@@ -1,0 +1,49 @@
+# Gitleaks Configuration
+#
+# This file configures gitleaks secret scanning for the WorldWideWaves project.
+# Documentation: https://github.com/gitleaks/gitleaks
+
+[allowlist]
+  description = "Allowlist for known false positives"
+
+  # Path patterns to exclude from scanning
+  paths = [
+    # Generated Moko Resources metadata (translation keys, not secrets)
+    '''shared/build/generated/moko-resources/metadata/.*''',
+
+    # Build artifacts and generated files
+    '''.*/build/.*''',
+    '''.*/\.gradle/.*''',
+    '''.*/node_modules/.*''',
+
+    # Documentation with example API key patterns (not real secrets)
+    '''docs/.*\.md$''',
+    '''README\.md$''',
+    '''.*\.md$''',
+
+    # Git hooks with example patterns in comments
+    '''\.git-hooks/.*''',
+    '''\.github/workflows/.*''',
+
+    # Test files with mock data
+    '''.*Test\.kt$''',
+    '''.*TestData\.kt$''',
+
+    # Backup directories
+    '''\.git/hooks\.backup.*/.*''',
+  ]
+
+  # Specific commit SHAs to skip (if needed)
+  # commits = [
+  #   "sha256:...",
+  # ]
+
+  # Regular expressions to allowlist specific patterns
+  # regexes = [
+  #   '''219-09-9999''',  # Example SSN pattern
+  # ]
+
+  # Specific strings to allowlist (exact match)
+  # stopwords = [
+  #   '''example-api-key''',
+  # ]
