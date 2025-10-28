@@ -10,24 +10,29 @@ graph LR
     PR[Pull Request] --> QG[Quality Gates]
     PR --> BA[Build Android]
     PR --> BI[Build iOS]
+    PR --> SEC[Security Scan]
 
     QG --> |Pass| UT[UI Tests]
     BA --> |Pass| UT
     BI --> |Pass| UT
+    SEC --> |Pass| UT
 
     UT --> |Pass| E2E[E2E Tests]
 
     MAIN[Push to Main] --> QG
     MAIN --> BA
     MAIN --> BI
+    MAIN --> SEC
     MAIN --> E2E
     MAIN --> PERF[Performance Tests]
 
     E2E --> |Nightly| FTL[Firebase Test Lab]
+    SEC --> |Weekly| SCAN[Full History Scan]
 
     style QG fill:#4285f4,color:#fff
     style BA fill:#34a853,color:#fff
     style BI fill:#34a853,color:#fff
+    style SEC fill:#ea4335,color:#fff
     style UT fill:#fbbc04,color:#000
     style E2E fill:#ea4335,color:#fff
 ```
@@ -259,7 +264,97 @@ Send notifications on failure:
 - Slack webhook (if configured)
 - Create GitHub issue with failure details
 
-### 06 - Performance Tests
+### 06 - Security Scan
+
+**File:** `.github/workflows/security-scan.yml`
+
+**Purpose:** Continuous security monitoring to prevent secrets and sensitive data from being committed.
+
+**Trigger:**
+- Push to `main` or `develop`
+- Pull requests to `main` or `develop`
+- Weekly scheduled run (Sunday 00:00 UTC)
+- Manual dispatch
+
+**Jobs (4 parallel):**
+
+#### 1. Gitleaks Secret Scanning
+**Tool:** [Gitleaks](https://github.com/gitleaks/gitleaks)
+
+**Purpose:** Scan entire git history for exposed secrets and API keys.
+
+**Features:**
+- Full repository history scan
+- Pattern matching for 100+ secret types
+- Automatic detection of entropy-based secrets
+- Upload report artifacts on failure
+
+**Coverage:**
+- API keys (Firebase, AWS, OpenAI, GitHub, Slack, Stripe)
+- OAuth tokens
+- Private keys
+- Database connection strings
+- JWT secrets
+
+#### 2. Firebase Configuration Check
+**Purpose:** Ensure sensitive Firebase config files are not tracked in git.
+
+**Checks:**
+- Verifies `composeApp/google-services.json` is not tracked
+- Verifies `iosApp/**/GoogleService-Info.plist` is not tracked
+- Scans codebase for hardcoded Firebase API keys (excluding templates/docs)
+- Fails build if sensitive files found
+
+#### 3. API Key Pattern Scan
+**Purpose:** Detect common API key patterns in codebase.
+
+**Patterns Detected:**
+- OpenAI API keys (`sk-proj-...`)
+- GitHub Personal Access Tokens (`ghp_...`, `gho_...`, `ghs_...`)
+- Slack Bot Tokens (`xoxb-...`, `xoxp-...`)
+- Stripe Keys (`sk_live_...`, `pk_live_...`)
+- AWS Access Keys (`AKIA...`)
+
+**Exclusions:**
+- Documentation files (`*.md`)
+- Template files (`*.template`)
+- Security tooling files (`.git-hooks/`, `.github/workflows/`)
+
+#### 4. TruffleHog Secret Scanning
+**Tool:** [TruffleHog](https://github.com/trufflesecurity/trufflehog)
+
+**Purpose:** Entropy-based secret detection for custom or unknown secret types.
+
+**Features:**
+- High-entropy string detection
+- Regex pattern matching
+- Historical commit scanning
+- Informational (doesn't block builds, but flags potential issues)
+
+#### Security Summary
+Aggregates results from all security jobs and fails build if critical secrets detected.
+
+**Local Pre-commit Protection:**
+
+The repository includes pre-commit hooks that prevent accidental secret commits:
+
+```bash
+# Located in .git-hooks/pre-commit
+# Automatically blocks:
+# - Firebase config files (google-services.json, GoogleService-Info.plist)
+# - Firebase API key patterns (AIzaSy...)
+# - Common API keys (OpenAI, GitHub, Slack, Stripe, AWS)
+# - Runs gitleaks on staged changes if available
+```
+
+**Best Practices:**
+- Never commit `google-services.json` or `GoogleService-Info.plist`
+- Use `*.template` files with placeholders for config examples
+- Store secrets in `local.properties` (gitignored) or GitHub Secrets
+- Use environment variables for sensitive data
+- Run `gitleaks detect` locally before pushing
+
+### 07 - Performance Tests
 
 **File:** `.github/workflows/06-performance-tests.yml`
 
@@ -311,6 +406,7 @@ Send notifications on failure:
    - Quality Gates (03)
    - Build Android (01)
    - Build iOS (02)
+   - Security Scan (06)
    - E2E Tests (05)
 3. Generate summary in GitHub Actions UI
 4. Return overall success/failure
