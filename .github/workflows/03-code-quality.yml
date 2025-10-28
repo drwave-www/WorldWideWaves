@@ -1,10 +1,12 @@
-name: 03 • Quality & Security Gates [DISABLED]
+name: 03 • Quality & Security Gates [TESTING]
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  # Temporarily only workflow_dispatch for testing
+  workflow_dispatch:
+  # push:
+  #   branches: [ main ]
+  # pull_request:
+  #   branches: [ main ]
 
 concurrency:
   group: quality-security-${{ github.ref }}
@@ -15,7 +17,6 @@ jobs:
     name: Code Linting
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: false  # DISABLED - Workflow temporarily deactivated to save costs
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,7 +54,6 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: false  # DISABLED - Workflow temporarily deactivated to save costs
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -88,7 +88,6 @@ jobs:
     name: UI Test Compilation Check
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: false  # DISABLED - Workflow temporarily deactivated to save costs
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -131,7 +130,6 @@ jobs:
     name: Dependency Vulnerability Scan
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: false  # DISABLED - Workflow temporarily deactivated to save costs
 
     steps:
       - name: Checkout
@@ -160,7 +158,6 @@ jobs:
     name: License Compliance Check
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: false  # DISABLED - Workflow temporarily deactivated to save costs
 
     steps:
       - name: Checkout
@@ -189,7 +186,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [lint, test, ui-test-compilation, dependency-check, license-check]
-    if: false  # DISABLED - Workflow temporarily deactivated to save costs
     steps:
       - name: Evaluate Quality Gates
         run: |
