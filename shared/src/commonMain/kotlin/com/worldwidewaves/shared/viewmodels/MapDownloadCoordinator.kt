@@ -147,7 +147,9 @@ class MapDownloadCoordinator(
     }
 
     fun handleInstallComplete(moduleIds: List<String>) {
-        platformAdapter.clearCacheForInstalledMaps(moduleIds)
+        // Don't clear cache immediately on installation - this causes a race condition
+        // where MapLibre tries to load the mbtiles file while it's being deleted.
+        // The cache will be naturally cleaned up by stale file detection (isCachedFileStale).
         handleDownloadSuccess()
     }
 
