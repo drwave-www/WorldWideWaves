@@ -1,10 +1,11 @@
-name: 06 • Performance Tests [DISABLED]
+name: 06 • Performance Tests [TESTING]
 
 on:
-  schedule:
-    # Run nightly at 3 AM UTC for performance regression detection
-    - cron: '0 3 * * *'
+  # Temporarily only workflow_dispatch for testing
   workflow_dispatch:
+  # schedule:
+  #   # Run nightly at 3 AM UTC for performance regression detection
+  #   - cron: '0 3 * * *'
 
 env:
   JAVA_VERSION: '17'
@@ -20,7 +21,6 @@ jobs:
   performance-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    if: false  # DISABLED - Workflow temporarily deactivated to save costs
 
     strategy:
       matrix:
@@ -121,7 +121,7 @@ jobs:
   notify-results:
     runs-on: ubuntu-latest
     needs: [performance-tests]
-    if: false  # DISABLED - Workflow temporarily deactivated to save costs
+    if: always()
 
     steps:
     - name: Notify on Performance Regression
