@@ -616,6 +616,15 @@ class AndroidEventMap(
                         scope,
                         uri.toString(),
                         onMapLoaded = {
+                            // Initialize location component in parallel after style is loaded
+                            // Runs on main thread but doesn't block onMapLoaded completion
+                            if (hasLocationPermission &&
+                                lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
+                            ) {
+                                scope.launch(Dispatchers.Main) {
+                                    setupMapLocationComponent(map, context)
+                                }
+                            }
                             onMapLoaded()
                         },
                         onMapClick = { _, _ ->
@@ -626,15 +635,6 @@ class AndroidEventMap(
                             )
                         },
                     )
-
-                    // Initialize location component in parallel (optimization: doesn't block onMapLoaded)
-                    if (hasLocationPermission &&
-                        lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
-                    ) {
-                        scope.launch {
-                            setupMapLocationComponent(map, context)
-                        }
-                    }
                 }
             }
 

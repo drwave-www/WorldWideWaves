@@ -271,10 +271,16 @@ abstract class AbstractEventMap<T>(
         val userPosition = positionManager.getCurrentPosition()
         val closestWaveLongitude = event.wave.userClosestWaveLongitude()
 
-        if (userPosition == null || closestWaveLongitude == null) {
+        // Validate that we have valid data (not null and not NaN)
+        if (userPosition == null ||
+            closestWaveLongitude == null ||
+            closestWaveLongitude.isNaN() ||
+            userPosition.latitude.isNaN() ||
+            userPosition.longitude.isNaN()
+        ) {
             Log.w(
                 "AbstractEventMap",
-                "WARNING: targetUserAndWave: missing data (userPos=$userPosition, waveLng=$closestWaveLongitude)",
+                "WARNING: targetUserAndWave: missing or invalid data (userPos=$userPosition, waveLng=$closestWaveLongitude)",
             )
             return
         }
