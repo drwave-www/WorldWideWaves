@@ -618,12 +618,24 @@ class AndroidEventMap(
                         onMapLoaded = {
                             // Initialize location component in parallel after style is loaded
                             // Runs on main thread but doesn't block onMapLoaded completion
+                            Log.d(
+                                TAG,
+                                "onMapLoaded callback: hasLocationPermission=$hasLocationPermission, " +
+                                    "lifecycle=${lifecycle.currentState}",
+                            )
                             if (hasLocationPermission &&
                                 lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
                             ) {
                                 scope.launch(Dispatchers.Main) {
+                                    Log.d(TAG, "Calling setupMapLocationComponent")
                                     setupMapLocationComponent(map, context)
                                 }
+                            } else {
+                                Log.w(
+                                    TAG,
+                                    "Skipping location component setup: permission=$hasLocationPermission, " +
+                                        "lifecycle=${lifecycle.currentState}",
+                                )
                             }
                             onMapLoaded()
                         },
@@ -666,16 +678,21 @@ class AndroidEventMap(
         map: MapLibreMap,
         context: Context,
     ) {
+        Log.d(TAG, "setupMapLocationComponent called, style=${map.style != null}")
         map.style?.let { style ->
             try {
                 // Check if already activated to avoid double activation
                 if (!map.locationComponent.isLocationComponentActivated) {
+                    Log.d(TAG, "Activating location component")
                     map.locationComponent.activateLocationComponent(
                         buildLocationComponentActivationOptions(context, style),
                     )
+                } else {
+                    Log.d(TAG, "Location component already activated")
                 }
                 map.locationComponent.isLocationComponentEnabled = true
                 map.locationComponent.cameraMode = CameraMode.NONE
+                Log.i(TAG, "Location component setup complete and enabled")
             } catch (e: IllegalStateException) {
                 Log.e(TAG, "Failed to setup location component - invalid state", e)
             } catch (e: UnsupportedOperationException) {
