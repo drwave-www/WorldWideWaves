@@ -70,6 +70,7 @@ WorldWideWaves uses Kotlin Coroutines Flow as the foundation for reactive progra
 ### Decision Tree
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'background':'transparent'}}}%%
 graph TD
     A[Need reactive stream?] -->|Yes| B{Need current value?}
     A -->|No| Z[Use suspend fun]

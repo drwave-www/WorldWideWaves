@@ -5,6 +5,7 @@ WorldWideWaves implements Clean Architecture principles with Kotlin Multiplatfor
 ## System Context
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'background':'transparent'}}}%%
 graph TB
     User[User/Participant]
     Mobile[Mobile App<br/>Android/iOS]
@@ -27,6 +28,7 @@ graph TB
 ## High-Level Component Architecture
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'background':'transparent'}}}%%
 graph TB
     subgraph "Presentation Layer"
         UI[Compose UI<br/>Screens & Components]
@@ -135,6 +137,7 @@ Self-contained offline map modules for 42 cities implemented as Android Dynamic 
 ### Event Loading Flow
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'background':'transparent'}}}%%
 sequenceDiagram
     participant UI as EventsListScreen
     participant VM as EventsViewModel
@@ -155,6 +158,7 @@ sequenceDiagram
 ### Wave Participation Flow
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'background':'transparent'}}}%%
 sequenceDiagram
     participant UI as FullMapScreen
     participant VM as MapViewModel
@@ -183,6 +187,7 @@ sequenceDiagram
 The position system uses a unified architecture with source priority:
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'background':'transparent'}}}%%
 graph LR
     GPS[GPS Location<br/>High Priority]
     SIM[Simulation<br/>Higher Priority]

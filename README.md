@@ -27,6 +27,7 @@ WorldWideWaves enables participants to join synchronized wave events at specific
 ### Architecture Overview
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'background':'transparent'}}}%%
 graph TB
     subgraph "Mobile Apps - Kotlin Multiplatform"
         ANDROID[Android App<br/>Jetpack Compose]
@@ -299,29 +300,6 @@ test: add choreography integration tests
 
 See [docs/contributing.md](docs/contributing.md) for complete guidelines.
 
-## Documentation
-
-### For Developers
-
-- [Environment Setup](docs/environment-setup.md) - Development environment configuration (macOS, Linux, Windows)
-- [Architecture](docs/architecture.md) - System design, component responsibilities, data flows
-- [Development Workflow](docs/development.md) - Local dev loop, testing, debugging
-- [Contributing](docs/contributing.md) - Contribution guidelines, code standards, review process
-- [CI/CD Pipeline](docs/ci-cd.md) - Workflow details, quality gates, release process
-
-### For Operations
-
-- [Operations Guide](docs/operations.md) - Runtime config, monitoring, deployment, incident response
-
-### Specialized Topics
-
-- [Firebase Setup](docs/setup/firebase-setup.md) - Firebase project configuration and security
-- [Map Architecture](docs/architecture/map-architecture-analysis.md) - Shared vs platform-specific map system design
-- [iOS Development](CLAUDE_iOS.md) - Complete iOS development guide
-- [iOS Documentation](docs/ios/) - iOS-specific guides, debugging, and accessibility
-
-See [docs/README.md](docs/README.md) for complete documentation map.
-
 ## Testing
 
 ### Test Philosophy
@@ -354,27 +332,31 @@ See [docs/testing-strategy.md](docs/testing-strategy.md) for complete testing ap
 
 ## Documentation
 
-Comprehensive documentation is available in the `docs/` directory:
+Comprehensive documentation is available in the `docs/` directory.
 
-### Core Documentation
+### Getting Started
 - **[CLAUDE.md](CLAUDE.md)** - Complete project development guide (start here for development)
 - **[CLAUDE_iOS.md](CLAUDE_iOS.md)** - iOS-specific development rules and deadlock prevention
+- [Environment Setup](docs/environment-setup.md) - Development environment configuration (macOS, Linux, Windows)
 
-### Documentation Hub
-- **[docs/](docs/)** - Complete documentation index
-  - [Architecture](docs/architecture.md) - System design and patterns
-  - [iOS Development](docs/ios/) - iOS-specific guides and debugging
-  - [Android Development](docs/android/) - Android MapLibre implementation reference
-  - [Testing Strategy](docs/TESTING_STRATEGY.md) - Test architecture and approach
-  - [Accessibility Guide](docs/ACCESSIBILITY_GUIDE.md) - WCAG 2.1 Level AA compliance
-  - [CI/CD Pipeline](docs/ci-cd.md) - GitHub Actions workflows
-  - [Environment Setup](docs/environment-setup.md) - Complete development environment configuration
-  - [Contributing](docs/contributing.md) - Contribution guidelines
+### Development Guides
+- [Architecture](docs/architecture.md) - System design, component responsibilities, data flows
+- [Development Workflow](docs/development.md) - Local dev loop, testing, debugging
+- [Contributing](docs/contributing.md) - Contribution guidelines, code standards, review process
+- [CI/CD Pipeline](docs/ci-cd.md) - Workflow details, quality gates, release process
 
-### Quick Links
-- [Setup Firebase](docs/setup/) - Firebase configuration guides
-- [Development Workflows](docs/development.md) - Daily development tasks
-- [Map Architecture](docs/architecture/map-architecture-analysis.md) - MapLibre integration deep dive
+### Platform-Specific
+- [iOS Development](docs/ios/) - iOS-specific guides, debugging, and accessibility
+- [Android Development](docs/android/) - Android MapLibre implementation reference
+
+### Specialized Topics
+- [Testing Strategy](docs/TESTING_STRATEGY.md) - Test architecture and approach
+- [Accessibility Guide](docs/ACCESSIBILITY_GUIDE.md) - WCAG 2.1 Level AA compliance
+- [Firebase Setup](docs/setup/firebase-setup.md) - Firebase project configuration and security
+- [Map Architecture](docs/architecture/map-architecture-analysis.md) - Shared vs platform-specific map system design
+- [Operations Guide](docs/operations.md) - Runtime config, monitoring, deployment, incident response
+
+See [docs/README.md](docs/README.md) for complete documentation map.
 
 ---
 
