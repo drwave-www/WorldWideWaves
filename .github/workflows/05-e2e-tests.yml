@@ -1,12 +1,13 @@
-name: 05 • End-to-End Tests [DISABLED]
+name: 05 • End-to-End Tests [TESTING]
 
 on:
-  push:
-    branches: [ main ]
-  schedule:
-    # Run daily at 2 AM UTC to catch environmental issues
-    - cron: '0 2 * * *'
+  # Temporarily only workflow_dispatch for testing
   workflow_dispatch:
+  # push:
+  #   branches: [ main ]
+  # schedule:
+  #   # Run daily at 2 AM UTC to catch environmental issues
+  #   - cron: '0 2 * * *'
 
 env:
   JAVA_VERSION: '17'
@@ -22,7 +23,6 @@ jobs:
   real-integration-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 90  # Increased from 60 to 90 minutes for emulator boot + tests
-    if: false  # DISABLED - Workflow temporarily deactivated to save costs
 
     strategy:
       matrix:
@@ -164,7 +164,7 @@ jobs:
 
   firebase-test-lab:
     runs-on: ubuntu-latest
-    if: false  # DISABLED - Workflow temporarily deactivated to save costs
+    if: false  # Keep disabled - requires Firebase credentials
     needs: [real-integration-tests]
     # Note: Requires FIREBASE_SERVICE_ACCOUNT_KEY secret to be configured
 
@@ -209,8 +209,8 @@ jobs:
 
   notify-results:
     runs-on: ubuntu-latest
-    needs: [real-integration-tests, firebase-test-lab]
-    if: false  # DISABLED - Workflow temporarily deactivated to save costs
+    needs: [real-integration-tests]
+    if: always()
 
     steps:
     - name: Notify Slack on Success
