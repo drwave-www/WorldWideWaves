@@ -13,7 +13,7 @@ Currently supported versions for security updates:
 
 **Please do not report security vulnerabilities through public GitHub issues.**
 
-Instead, report them via email to: security@worldwidewaves.com
+Instead, report them via email to: security@worldwidewaves.net
 
 You should receive a response within 48 hours. If for some reason you do not, please follow up via email to ensure we received your original message.
 
@@ -127,4 +127,4 @@ We appreciate the security research community's efforts to responsibly disclose 
 ---
 
 **Last Updated**: October 27, 2025
-**Contact**: security@worldwidewaves.com
+**Contact**: security@worldwidewaves.net

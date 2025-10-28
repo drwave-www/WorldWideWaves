@@ -85,8 +85,8 @@ Manual configuration:
 ```kotlin
 // shared/src/commonMain/kotlin/com/worldwidewaves/shared/data/Config.kt
 object ApiConfig {
-    const val EVENT_API_BASE_URL = "https://api.worldwidewaves.com/v1"
-    const val MAP_TILES_BASE_URL = "https://tiles.worldwidewaves.com"
+    const val EVENT_API_BASE_URL = "https://api.worldwidewaves.net/v1"
+    const val MAP_TILES_BASE_URL = "https://tiles.worldwidewaves.net"
 }
 ```
 

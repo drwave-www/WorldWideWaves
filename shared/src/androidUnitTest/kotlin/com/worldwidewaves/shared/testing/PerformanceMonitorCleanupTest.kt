@@ -256,7 +256,7 @@ class PerformanceMonitorCleanupTest {
 
             // When - Record system metrics
             monitor.recordMemoryUsage(8000, 10000)
-            monitor.recordNetworkLatency("api.worldwidewaves.com", 100.milliseconds)
+            monitor.recordNetworkLatency("api.worldwidewaves.net", 100.milliseconds)
             monitor.recordLocationAccuracy(10.0f)
 
             // Then - Should have recorded metrics

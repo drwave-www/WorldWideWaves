@@ -60,7 +60,7 @@ representative at an online or offline event.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the community leaders responsible for enforcement at
-conduct@worldwidewaves.com.
+conduct@worldwidewaves.net.
 
 All complaints will be reviewed and investigated promptly and fairly.
 
@@ -182,4 +182,4 @@ For answers to common questions about this code of conduct, see the FAQ at
 ---
 
 **Last Updated**: October 27, 2025
-**Contact**: conduct@worldwidewaves.com
+**Contact**: conduct@worldwidewaves.net
