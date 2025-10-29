@@ -25,6 +25,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import platform.Foundation.NSBundleResourceRequest
 import platform.Foundation.NSOperationQueue
 
@@ -35,6 +37,7 @@ import platform.Foundation.NSOperationQueue
  */
 class IosMapAvailabilityChecker : MapAvailabilityChecker {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val mutex = Mutex() // Protect tracked set from concurrent downloads
     private val tracked = mutableSetOf<String>()
     private val _mapStates = MutableStateFlow<Map<String, Boolean>>(emptyMap())
     override val mapStates: StateFlow<Map<String, Boolean>> = _mapStates
@@ -64,25 +67,40 @@ class IosMapAvailabilityChecker : MapAvailabilityChecker {
 
     override fun trackMaps(mapIds: Collection<String>) {
         if (mapIds.isEmpty()) return
-        tracked += mapIds
 
-        val updated = _mapStates.value.toMutableMap()
-        for (id in mapIds) updated[id] = isMapDownloaded(id)
-        _mapStates.value = updated
+        // Ensure StateFlow mutations happen on Main thread (iOS requirement)
+        // and protect tracked set from concurrent access
+        scope.launch {
+            mutex.withLock {
+                tracked += mapIds
 
-        // Auto-mount ONLY initial tags, on main
-        val toAuto =
-            mapIds.filter { id ->
-                id in initialTags && !inPersistentCache(id) && !pinnedRequests.containsKey(id)
+                val updated = _mapStates.value.toMutableMap()
+                for (id in mapIds) updated[id] = isMapDownloaded(id)
+                _mapStates.value = updated
             }
-        toAuto.forEach { id -> onMain { requestMapDownload(id) } }
+
+            // Auto-mount ONLY initial tags, on main (outside lock to prevent deadlock)
+            val toAuto =
+                mapIds.filter { id ->
+                    id in initialTags && !inPersistentCache(id) && !pinnedRequests.containsKey(id)
+                }
+            toAuto.forEach { id -> onMain { requestMapDownload(id) } }
+        }
     }
 
     override fun refreshAvailability() {
-        if (tracked.isEmpty()) return
-        val updated = mutableMapOf<String, Boolean>()
-        for (id in tracked) updated[id] = isMapDownloaded(id) // non-downloading checks
-        _mapStates.value = updated
+        // Ensure StateFlow access happens on Main thread (iOS requirement)
+        scope.launch {
+            val trackedCopy = mutex.withLock { tracked.toSet() }
+            if (trackedCopy.isEmpty()) return@launch
+
+            val updated = mutableMapOf<String, Boolean>()
+            for (id in trackedCopy) updated[id] = isMapDownloaded(id) // non-downloading checks
+
+            mutex.withLock {
+                _mapStates.value = updated
+            }
+        }
     }
 
     override fun requestMapDownload(eventId: String) {

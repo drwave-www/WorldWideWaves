@@ -79,7 +79,11 @@ fun FullMapScreen(
             onTargetUser = {
                 scope.launch {
                     eventMap?.markUserInteracted()
-                    eventMap?.targetUser()
+                    // Only target user if within event area to prevent camera moving to positions without tiles
+                    val position = eventMap?.getCurrentPosition()
+                    if (position != null && event.area.isPositionWithin(position)) {
+                        eventMap.targetUser()
+                    }
                 }
             },
         )
