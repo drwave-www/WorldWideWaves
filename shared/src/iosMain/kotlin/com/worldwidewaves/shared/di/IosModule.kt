@@ -70,6 +70,7 @@ val IosModule =
         single(createdAtStart = true) { ChoreographySequenceBuilder<DrawableResource>() }
 
         // iOS Map Availability Checker (production-grade iOS implementation)
+        // Note: Must be registered before PlatformMapManager for state synchronization
         single<MapAvailabilityChecker> { IosMapAvailabilityChecker() }
 
         // Debug screen - iOS implementation
@@ -79,7 +80,12 @@ val IosModule =
         single<FavoriteEventsStore> { IosFavoriteEventsStore() }
 
         // Map services
-        single<PlatformMapManager> { IosPlatformMapManager() }
+        // PlatformMapManager with IosMapAvailabilityChecker for UI state synchronization
+        single<PlatformMapManager> {
+            IosPlatformMapManager(
+                mapAvailabilityChecker = get(),
+            )
+        }
         // Note: IosMapLibreAdapter is now created per-instance in IosEventMap with eventId
         // Removed singleton registration - each map creates its own adapter
         single { MapStateHolder(get()) }

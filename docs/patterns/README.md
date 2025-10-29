@@ -209,6 +209,7 @@ Comprehensive reference table for all patterns:
 | **Scope Decisions** | [di-patterns.md](./di-patterns.md) | Dependency Injection | Choosing single vs factory | ⚠️ Recommended |
 | **Platform-Specific DI** | [di-patterns.md](./di-patterns.md) | Dependency Injection | Platform implementations (GPS, haptics) | ⚠️ Recommended |
 | **StateFlow State Management** | [reactive-patterns.md](./reactive-patterns.md) | Reactive | ViewModel state with latest value | ⚠️ Recommended |
+| **Platform State Synchronization** | [state-management-patterns.md](./state-management-patterns.md#36-platform-state-synchronization-ios) | State Management | iOS map downloads, platform-specific operations affecting UI state | ⚠️ Recommended |
 | **Flow Operators** | [reactive-patterns.md](./reactive-patterns.md) | Reactive | Transforming data streams | ⚠️ Recommended |
 | **collectAsStateWithLifecycle** | [reactive-patterns.md](./reactive-patterns.md) | Reactive | Compose UI integration | ⚠️ Recommended |
 | **Backpressure Handling** | [reactive-patterns.md](./reactive-patterns.md) | Reactive | High-frequency data sources (GPS) | ⚠️ Recommended |

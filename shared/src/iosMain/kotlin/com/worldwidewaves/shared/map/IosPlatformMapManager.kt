@@ -8,6 +8,7 @@ package com.worldwidewaves.shared.map
  */
 
 import com.worldwidewaves.shared.data.isMapFileInCache
+import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CoroutineDispatcher
@@ -30,6 +31,12 @@ import platform.Foundation.NSBundleResourceRequest
  * - Check if a tagged resource is currently available in the bundle.
  * - Trigger an ODR request for a given tag (mapId) and emit progress to 100.
  * - Cancel an ODR request gracefully.
+ * - Synchronize UI state with IosMapAvailabilityChecker after download completion.
+ *
+ * State Synchronization:
+ * - When a map download completes successfully, this manager notifies the
+ *   IosMapAvailabilityChecker to refresh its state, ensuring the UI (EventsListScreen)
+ *   immediately reflects the downloaded status without requiring an app restart.
  *
  * Notes:
  * - We *simulate* progress ticks until the ODR completion arrives, then jump to 100.
@@ -41,6 +48,7 @@ class IosPlatformMapManager(
     private val scope: CoroutineScope =
         CoroutineScope(SupervisorJob() + Dispatchers.Default),
     private val callbackDispatcher: CoroutineDispatcher = Dispatchers.Default,
+    private val mapAvailabilityChecker: MapAvailabilityChecker? = null,
 ) : PlatformMapManager {
     private val requests = mutableMapOf<String, NSBundleResourceRequest>()
     private val progressJobs = mutableMapOf<String, Job>()
@@ -162,6 +170,11 @@ class IosPlatformMapManager(
                             com.worldwidewaves.shared.data.MapDownloadGate
                                 .allow(mapId)
                             Log.d(TAG, "MapDownloadGate.allow called for: $mapId")
+
+                            // Synchronize UI state with availability checker
+                            mapAvailabilityChecker?.refreshAvailability()
+                            Log.d(TAG, "IosMapAvailabilityChecker.refreshAvailability() called for: $mapId")
+
                             onSuccess()
                         }
                     } else {

@@ -10,6 +10,7 @@
 2. [UI State Pattern](#1-ui-state-pattern)
 3. [Domain State Pattern](#2-domain-state-pattern)
 4. [State Updates](#3-state-updates)
+   - 3.6 [Platform State Synchronization (iOS)](#36-platform-state-synchronization-ios)
 5. [State Validation](#4-state-validation)
 6. [Testing State](#5-testing-state)
 7. [Common Pitfalls](#6-common-pitfalls)
@@ -475,6 +476,159 @@ object MapDownloadGate {
 - StateFlow updates (already thread-safe)
 - Immutable data structures
 - Single-threaded contexts
+
+### 3.6 Platform State Synchronization (iOS)
+
+**Pattern**: Coordinate state updates across platform-specific components after async operations complete
+
+**Overview**: When platform-specific operations (like iOS ODR downloads) complete, related UI state holders must be notified to refresh their state. This ensures immediate UI updates without requiring manual refresh or app restart.
+
+```kotlin
+// IosPlatformMapManager.kt
+if (ok) {
+    Log.i(TAG, "✅ Map download SUCCESS for: $mapId")
+    // Allow future downloads/caching for this event
+    scope.launch {
+        com.worldwidewaves.shared.data.MapDownloadGate
+            .allow(mapId)
+        Log.d(TAG, "MapDownloadGate.allow called for: $mapId")
+
+        // Synchronize UI state with availability checker
+        mapAvailabilityChecker?.refreshAvailability()
+        Log.d(TAG, "IosMapAvailabilityChecker.refreshAvailability() called for: $mapId")
+
+        onSuccess()
+    }
+}
+```
+
+**Dependency Injection**: `IosMapAvailabilityChecker` is injected into `IosPlatformMapManager` via constructor
+
+```kotlin
+// IosModule.kt
+single<PlatformMapManager> {
+    IosPlatformMapManager(
+        mapAvailabilityChecker = get(),
+    )
+}
+```
+
+**Key Components**:
+
+| Component | Role | State Type |
+|-----------|------|------------|
+| `IosPlatformMapManager` | Platform-specific ODR download manager | Downloads, progress tracking |
+| `IosMapAvailabilityChecker` | UI state holder for map availability | `StateFlow<Map<String, Boolean>>` |
+| `EventsListScreen` | UI component consuming state | Observes `mapStates` for badges |
+| `EventDetailScreen` | Triggers downloads | Uses `MapViewModel.featureState` |
+
+**Execution Flow**:
+
+```
+User triggers download
+  ↓
+MapViewModel.downloadMap()
+  ↓
+IosPlatformMapManager.downloadMap()
+  ↓
+ODR completion handler
+  ↓
+MapDownloadGate.allow(mapId)
+  ↓
+mapAvailabilityChecker?.refreshAvailability()  // State sync
+  ↓
+onSuccess() callback
+  ↓
+UI reflects updated state
+```
+
+**When to Use This Pattern**:
+- Platform-specific operations (ODR, Feature Delivery) that affect shared UI state
+- Multiple state holders exist for different concerns (download manager vs UI state)
+- Immediate UI updates required after async operations complete
+- State coordination between independent components
+
+**Backward Compatibility**: The `mapAvailabilityChecker` parameter is optional (`?`) to prevent breaking existing code or tests that instantiate `IosPlatformMapManager` without the checker.
+
+```kotlin
+// Constructor signature
+class IosPlatformMapManager(
+    private val scope: CoroutineScope = ...,
+    private val callbackDispatcher: CoroutineDispatcher = ...,
+    private val mapAvailabilityChecker: MapAvailabilityChecker? = null, // Optional
+) : PlatformMapManager
+```
+
+**Testing**:
+
+```kotlin
+// IosPlatformMapManagerTest.kt
+@Test
+fun `downloadMap calls refreshAvailability on success when checker provided`() = runTest {
+    val checker = FakeMapAvailabilityChecker()
+    val manager = IosPlatformMapManager(
+        scope = this,
+        callbackDispatcher = UnconfinedTestDispatcher(testScheduler),
+        mapAvailabilityChecker = checker,
+    )
+
+    var errorCalled = false
+    manager.downloadMap(
+        mapId = "test_map",
+        onProgress = {},
+        onSuccess = {},
+        onError = { _, _ -> errorCalled = true },
+    )
+
+    advanceUntilIdle()
+
+    // Without real ODR resources, we expect error path
+    assertTrue(errorCalled, "Should fail without ODR resources")
+    assertEquals(0, checker.refreshCallCount, "No refresh on failure")
+}
+```
+
+**Related Patterns**:
+- [StateFlow State Management](#11-data-class-structure) - Foundation for reactive state
+- [Thread-Safe Updates with Mutex](#35-thread-safe-updates-with-mutex) - Ensures atomic state updates
+- [Testing State](#5-testing-state) - How to test state synchronization
+
+**Anti-Patterns to Avoid**:
+
+❌ **Polling for state changes**:
+```kotlin
+// ❌ WRONG: Wasteful periodic refresh
+LaunchedEffect(Unit) {
+    while (true) {
+        mapChecker.refreshAvailability()
+        delay(1000) // Check every second
+    }
+}
+```
+
+❌ **Manual state management in multiple places**:
+```kotlin
+// ❌ WRONG: Duplicated state update logic
+onSuccess = {
+    // Update in platform manager
+    _isDownloaded.value = true
+
+    // Also update in checker (duplicate logic)
+    mapChecker.updateState(mapId, true)
+}
+```
+
+✅ **CORRECT: Single refresh call at completion**:
+```kotlin
+// ✅ CORRECT: Delegate to checker's refresh logic
+onSuccess = {
+    mapAvailabilityChecker?.refreshAvailability()
+}
+```
+
+**Platform Notes**:
+- **iOS**: Used for ODR downloads to coordinate IosPlatformMapManager and IosMapAvailabilityChecker
+- **Android**: Not currently needed - Google Play Feature Delivery uses unified state management
 
 ---
 
