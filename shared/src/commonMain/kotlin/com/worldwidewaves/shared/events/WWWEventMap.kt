@@ -37,8 +37,10 @@ import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.core.component.KoinComponent
@@ -233,31 +235,35 @@ class WWWEventMap(
      * and returns the path to the cache directory.
      *
      * **Performance**: Uses parallel processing to cache multiple files concurrently.
+     * **Cancellation**: Runs in NonCancellable context to ensure caching completes even if
+     * the parent scope is cancelled (e.g., during composition disposal or navigation).
      */
     @OptIn(ExperimentalResourceApi::class)
     suspend fun cacheSpriteAndGlyphs(): String =
-        try {
-            val files =
-                Res
-                    .readBytes(FileSystem.STYLE_LISTING)
-                    .decodeToString()
-                    .lines()
-                    .filter { it.isNotBlank() }
+        withContext(NonCancellable) {
+            try {
+                val files =
+                    Res
+                        .readBytes(FileSystem.STYLE_LISTING)
+                        .decodeToString()
+                        .lines()
+                        .filter { it.isNotBlank() }
 
-            // Use parallel processing for file caching
-            coroutineScope {
-                files
-                    .map { file ->
-                        async(Dispatchers.Default) {
-                            cacheDeepFile("${FileSystem.STYLE_FOLDER}/$file")
-                        }
-                    }.forEach { it.await() }
+                // Use parallel processing for file caching
+                coroutineScope {
+                    files
+                        .map { file ->
+                            async(Dispatchers.Default) {
+                                cacheDeepFile("${FileSystem.STYLE_FOLDER}/$file")
+                            }
+                        }.forEach { it.await() }
+                }
+
+                getCacheDir()
+            } catch (e: Exception) {
+                Log.e(::cacheSpriteAndGlyphs.name, "Error caching sprite and glyphs", e)
+                throw e
             }
-
-            getCacheDir()
-        } catch (e: Exception) {
-            Log.e(::cacheSpriteAndGlyphs.name, "Error caching sprite and glyphs", e)
-            throw e
         }
 
     /**
