@@ -112,8 +112,8 @@ android {
             libs.versions.android.targetSdk
                 .get()
                 .toInt()
-        versionCode = 29
-        versionName = "v0.25"
+        versionCode = 30
+        versionName = "v0.26"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Logging configuration
