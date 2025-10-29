@@ -72,8 +72,11 @@ fun EventsScreen(
     var downloadedSelected by remember { mutableStateOf(false) }
     var filteredEvents by remember { mutableStateOf(events) }
 
-    // Filter logic - EXACT Android match
-    LaunchedEffect(starredSelected, downloadedSelected, events) {
+    // Refresh trigger - incremented when favorites change to force re-filtering
+    var refreshTrigger by remember { mutableStateOf(0) }
+
+    // Filter logic - EXACT Android match with refresh trigger
+    LaunchedEffect(starredSelected, downloadedSelected, events, refreshTrigger) {
         filteredEvents =
             when {
                 starredSelected -> events.filter { it.favorite }
@@ -82,8 +85,14 @@ fun EventsScreen(
             }
         Log.i(
             "SharedEventsListScreen",
-            "Filtered events: ${filteredEvents.size} (starred: $starredSelected, downloaded: $downloadedSelected)",
+            "Filtered events: ${filteredEvents.size} (starred: $starredSelected, downloaded: $downloadedSelected, refresh: $refreshTrigger)",
         )
+    }
+
+    // Create callback to refresh filter when favorites change
+    val onFavoriteChanged: () -> Unit = {
+        refreshTrigger++
+        Log.i("SharedEventsListScreen", "Favorite changed, refresh trigger: $refreshTrigger")
     }
 
     EventsList(
@@ -112,5 +121,6 @@ fun EventsScreen(
             ),
         onEventClick = onEventClick,
         setEventFavorite = setEventFavorite,
+        onFavoriteChanged = onFavoriteChanged,
     )
 }

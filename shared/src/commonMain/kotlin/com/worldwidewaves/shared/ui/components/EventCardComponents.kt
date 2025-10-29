@@ -140,6 +140,7 @@ fun EventOverlayFavorite(
     event: IWWWEvent,
     @Suppress("UNUSED_PARAMETER") starredSelected: Boolean,
     setEventFavorite: SetEventFavorite?,
+    onFavoriteChanged: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var isFavorite by remember { mutableStateOf(event.favorite) }
@@ -152,6 +153,7 @@ fun EventOverlayFavorite(
                 try {
                     isFavorite = !isFavorite
                     favoriteSetter.call(event, isFavorite)
+                    onFavoriteChanged()
                     Log.i("SharedEventsListScreen", "Favorite toggled for ${event.id}: $isFavorite")
                 } catch (e: Exception) {
                     // Revert on error

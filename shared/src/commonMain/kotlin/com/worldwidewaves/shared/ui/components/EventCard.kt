@@ -66,6 +66,7 @@ fun EventCard(
     starredSelected: Boolean,
     onEventClick: (String) -> Unit,
     setEventFavorite: SetEventFavorite?,
+    onFavoriteChanged: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val eventLocation = stringResource(event.getLocation())
@@ -82,7 +83,7 @@ fun EventCard(
                     contentDescription = accessibilityDescription
                 },
     ) {
-        EventOverlay(event, isMapInstalled, starredSelected, setEventFavorite)
+        EventOverlay(event, isMapInstalled, starredSelected, setEventFavorite, onFavoriteChanged)
         EventLocationAndDate(event)
     }
 }
@@ -96,6 +97,7 @@ private fun EventOverlay(
     isMapInstalled: Boolean,
     starredSelected: Boolean,
     setEventFavorite: SetEventFavorite?,
+    onFavoriteChanged: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val heightModifier = Modifier.height(EventsList.OVERLAY_HEIGHT.dp)
@@ -129,7 +131,7 @@ private fun EventOverlay(
         EventOverlaySoonOrRunning(eventStatus)
         EventOverlayDone(eventStatus)
         EventOverlayMapDownloaded(event.id, isMapInstalled)
-        EventOverlayFavorite(event, starredSelected, setEventFavorite)
+        EventOverlayFavorite(event, starredSelected, setEventFavorite, onFavoriteChanged)
     }
 }
 

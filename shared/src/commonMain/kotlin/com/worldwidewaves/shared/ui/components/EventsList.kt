@@ -58,6 +58,7 @@ fun EventsList(
     filterCallbacks: EventsFilterCallbacks,
     onEventClick: (String) -> Unit,
     setEventFavorite: SetEventFavorite?,
+    onFavoriteChanged: () -> Unit = {},
 ) {
     Column(
         modifier =
@@ -80,6 +81,7 @@ fun EventsList(
             downloadedSelected = filterState.downloadedSelected,
             onEventClick = onEventClick,
             setEventFavorite = setEventFavorite,
+            onFavoriteChanged = onFavoriteChanged,
             modifier = Modifier.weight(1f),
         )
     }
@@ -96,6 +98,7 @@ private fun Events(
     downloadedSelected: Boolean,
     onEventClick: (String) -> Unit,
     setEventFavorite: SetEventFavorite?,
+    onFavoriteChanged: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val state = rememberLazyListState()
@@ -107,7 +110,7 @@ private fun Events(
         if (events.isNotEmpty()) {
             items(events) { event ->
                 val isMapInstalled = mapStates[event.id] ?: false
-                EventCard(event, isMapInstalled, starredSelected, onEventClick, setEventFavorite)
+                EventCard(event, isMapInstalled, starredSelected, onEventClick, setEventFavorite, onFavoriteChanged)
             }
         } else {
             item {
