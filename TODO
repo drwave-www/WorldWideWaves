@@ -2,19 +2,11 @@
 TODAY :
 
 - Langue système pas prise en compte ? -> tester en rebootant le smartphone
-
 - RESILIER abonnements non necessaires : InDesign, Deepl, ...
 
 ---------------------------------------------
 
-- CEHCK INTENTs stacks, no need to stack all screens..
 - PDFs : polices
-
-prios: IOS:
-- Terminer vagues / MapLibre
-- check translations
-- fonts
-- pousser sur App Store
 
 ANDROID:
 - modifier l'image back windmill + islamic ? (invert)
@@ -25,13 +17,18 @@ ANDROID:
 ALL:
 - event does not disappear from the list when favorite is unchecked
 
-
 - Full human code review
 - Packaging :
     - configurer le "mandatory update" flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
 - Tour complet de tests (Faire un cahier)
 - faire une campagne de tests sur multiples devices et langues
+
+next
+- Videos
 - Static website to improve
+
+-- PRODUCTION :
+- deactivate logging verbose/debug in WWWGlobals
 
 ---------------------------------------------
 

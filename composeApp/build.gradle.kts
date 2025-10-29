@@ -112,8 +112,8 @@ android {
             libs.versions.android.targetSdk
                 .get()
                 .toInt()
-        versionCode = 26
-        versionName = "v0.22"
+        versionCode = 28
+        versionName = "v0.24"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Logging configuration
@@ -263,6 +263,8 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.feature.delivery.ktx)
     implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.common.ktx)
+    implementation(libs.firebase.crashlytics.ktx)
     implementation(libs.firebase.crashlytics.ndk)
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.perf)

@@ -32,6 +32,15 @@ final class IOSPlatformEnabler: PlatformEnabler {
     private let notificationFeedback = UINotificationFeedbackGenerator()
     private let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
 
+    /// Indicates whether this is a debug build (set at compile time via Swift's #if DEBUG)
+    var isDebugBuild: Bool {
+        #if DEBUG
+        return true
+        #else
+        return false
+        #endif
+    }
+
     init() {
         // Prepare haptic generators for low-latency responses
         notificationFeedback.prepare()

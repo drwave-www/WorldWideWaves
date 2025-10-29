@@ -2,6 +2,31 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Limit app to phones only (exclude tablets) -->
+    <supports-screens
+        android:smallScreens="true"
+        android:normalScreens="true"
+        android:largeScreens="false"
+        android:xlargeScreens="false"
+        android:requiresSmallestWidthDp="320" />
+
+    <!-- Exclude non-phone form factors -->
+    <!-- Require touchscreen (excludes TV) -->
+    <uses-feature android:name="android.hardware.touchscreen" android:required="true" />
+
+    <!-- Explicitly exclude Android TV -->
+    <uses-feature android:name="android.software.leanback" android:required="false" />
+    <uses-feature android:name="android.hardware.type.television" android:required="false" />
+
+    <!-- Explicitly exclude Wear OS -->
+    <uses-feature android:name="android.hardware.type.watch" android:required="false" />
+
+    <!-- Explicitly exclude Android Auto -->
+    <uses-feature android:name="android.hardware.type.automotive" android:required="false" />
+
+    <!-- Exclude Chromebooks (require telephony which most Chromebooks lack) -->
+    <uses-feature android:name="android.hardware.telephony" android:required="true" />
+
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 

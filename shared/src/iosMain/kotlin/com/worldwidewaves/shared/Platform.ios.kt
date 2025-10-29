@@ -40,11 +40,15 @@ fun doInitPlatform() {
                 logger(PrintLogger(if (BuildKonfig.DEBUG) Level.INFO else Level.ERROR))
                 modules(com.worldwidewaves.shared.di.sharedModule + com.worldwidewaves.shared.di.IosModule)
             }
-        if (BuildKonfig.DEBUG) {
+
+        // Use PlatformEnabler.isDebugBuild to determine if simulation should be enabled
+        // This ensures simulation is only active in debug builds (set by Swift's #if DEBUG)
+        val platformEnabler = KoinPlatform.getKoin().get<PlatformEnabler>()
+        if (platformEnabler.isDebugBuild) {
             try {
                 // Enable simulation mode (makes the red indicator visible)
                 val platform = KoinPlatform.getKoin().get<WWWPlatform>()
-                initializeSimulationMode(platform, BuildKonfig.DEBUG)
+                initializeSimulationMode(platform, true)
 
                 // Set up simulation data (time, position, etc.)
                 setupDebugSimulation()

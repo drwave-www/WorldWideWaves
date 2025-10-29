@@ -135,9 +135,10 @@ kotlin {
 
             // Firebase for Crashlytics and Remote Config
             // Note: Use specific versions, BOM doesn't work well in KMM shared modules
-            implementation("com.google.firebase:firebase-crashlytics-ktx:19.2.1")
-            implementation("com.google.firebase:firebase-perf-ktx:21.0.3")
-            implementation("com.google.firebase:firebase-config-ktx:22.0.1")
+            // Using api() instead of implementation() to expose Firebase types to consuming modules
+            api("com.google.firebase:firebase-crashlytics-ktx:19.2.1")
+            api("com.google.firebase:firebase-perf-ktx:21.0.3")
+            api("com.google.firebase:firebase-config-ktx:22.0.1")
         }
 
         /*

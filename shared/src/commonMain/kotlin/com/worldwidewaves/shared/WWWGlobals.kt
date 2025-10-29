@@ -36,10 +36,11 @@ import kotlin.time.Duration.Companion.seconds
 object WWWGlobals {
     /**
      * Logging configuration constants - driven by BuildKonfig
+     * Can be temporarily overridden for debugging purposes
      */
     object LogConfig {
-        val ENABLE_VERBOSE_LOGGING: Boolean = BuildKonfig.ENABLE_VERBOSE_LOGGING
-        val ENABLE_DEBUG_LOGGING: Boolean = BuildKonfig.ENABLE_DEBUG_LOGGING
+        val ENABLE_VERBOSE_LOGGING: Boolean = true // BuildKonfig.ENABLE_VERBOSE_LOGGING
+        val ENABLE_DEBUG_LOGGING: Boolean = true // BuildKonfig.ENABLE_DEBUG_LOGGING
         val ENABLE_PERFORMANCE_LOGGING: Boolean = BuildKonfig.ENABLE_PERFORMANCE_LOGGING
         val ENABLE_POSITION_TRACKING_LOGGING: Boolean = BuildKonfig.ENABLE_POSITION_TRACKING_LOGGING
     }

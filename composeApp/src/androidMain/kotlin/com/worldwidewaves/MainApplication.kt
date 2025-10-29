@@ -91,8 +91,11 @@ open class MainApplication :
 
         // -------------------------------------------------------------------- //
         //  Default simulation initialization (runs after Koin properties are ready)
+        //  Only run in debug builds to prevent simulation in production
         // -------------------------------------------------------------------- //
-        setupDebugSimulation()
+        if (BuildConfig.ENABLE_SIMULATION_MODE) {
+            setupDebugSimulation()
+        }
 
         // -------------------------------------------------------------------- //
         //  Initialize runtime log configuration (async, non-blocking)

@@ -93,7 +93,8 @@ open class MainScreen
 
         private val eventsListScreen: EventsListScreen by inject()
         private val aboutTabScreen: AboutTabScreen by inject()
-        private val debugTabScreen: DebugTabScreen? by inject()
+        // iOS FIX: debugTabScreen removed - will be retrieved directly in @Composable to avoid deadlock
+        // See: docs/patterns/ios-safety-patterns.md - Rule #2: Never use by inject() during Compose composition
 
         /** Flag updated when `events.loadEvents()` finishes. */
         private var isDataLoaded: Boolean = false
@@ -167,6 +168,9 @@ open class MainScreen
                                 .windowInsetsPadding(WindowInsets.safeDrawing),
                     ) {
                         var showDebugScreen by remember { mutableStateOf(false) }
+                        // iOS-safe DI: Get debugTabScreen directly in Composable, not via property injection
+                        // Using getKoin() to access Koin safely during composition
+                        val debugTabScreen = remember { getKoin().getOrNull<DebugTabScreen>() }
 
                         val ready by isSplashFinished.collectAsState()
                         if (ready) {

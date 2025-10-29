@@ -142,6 +142,16 @@ expect fun localizeString(resource: StringResource): String
 // ---------------------------
 
 interface PlatformEnabler {
+    /**
+     * Indicates whether this is a debug build.
+     * Determined at compile time by the platform-specific build configuration:
+     * - Android: BuildConfig.DEBUG
+     * - iOS: #if DEBUG compilation condition
+     *
+     * Used to control debug-only features like simulation mode.
+     */
+    val isDebugBuild: Boolean
+
     // Open an event activity / screen
     fun openEventActivity(eventId: String)
 

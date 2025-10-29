@@ -28,6 +28,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.activities.event.EventActivity
 import com.worldwidewaves.activities.event.EventFullMapActivity
 import com.worldwidewaves.activities.event.WaveActivity
@@ -38,6 +39,12 @@ import org.koin.mp.KoinPlatform
 class AndroidPlatformEnabler(
     val context: Context? = null,
 ) : PlatformEnabler {
+    /**
+     * Indicates whether this is a debug build (set at compile time via BuildConfig.DEBUG).
+     * Controls debug-only features like simulation mode.
+     */
+    override val isDebugBuild: Boolean = BuildConfig.DEBUG
+
     override fun openEventActivity(eventId: String) {
         val context: Context = context ?: KoinPlatform.getKoin().get()
         context.startActivity(
