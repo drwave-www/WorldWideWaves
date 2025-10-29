@@ -646,7 +646,8 @@ object MapWrapperRegistry {
         }
 
         Log.v(TAG, "Invoking ${listeners.size} camera idle callback(s) for event: $eventId")
-        listeners.forEach { callback ->
+        // Create a copy to avoid ConcurrentModificationException if callbacks add more listeners
+        listeners.toList().forEach { callback ->
             try {
                 callback.invoke()
             } catch (e: Exception) {
@@ -1038,7 +1039,8 @@ object MapWrapperRegistry {
         }
 
         Log.i(TAG, "Invoking ${callbacks.size} map ready callback(s) for event: $eventId")
-        callbacks.forEach { callback ->
+        // Create a copy to avoid ConcurrentModificationException if callbacks add more callbacks
+        callbacks.toList().forEach { callback ->
             try {
                 callback.invoke()
             } catch (e: Exception) {

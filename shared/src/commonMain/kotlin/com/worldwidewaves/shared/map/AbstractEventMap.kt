@@ -181,7 +181,8 @@ abstract class AbstractEventMap<T>(
      *
      * WINDOW mode (full map with gestures):
      * - Constraints are applied to prevent viewport from exceeding event boundaries
-     * - No initial camera animation - view controlled by autoTargetUserOnFirstLocation or user gestures
+     * - Camera initializes to event bounds to ensure tiles are visible
+     * - Then autoTargetUserOnFirstLocation can move to user position (if configured)
      * - Min zoom calculated to prevent zooming out beyond event area
      */
     suspend fun moveToWindowBounds(onComplete: () -> Unit = {}) {
@@ -195,10 +196,29 @@ abstract class AbstractEventMap<T>(
         // This ensures min zoom is set IMMEDIATELY (preventive enforcement)
         constraintManager?.applyConstraints()
 
-        // WINDOW mode: Don't animate camera - let autoTargetUserOnFirstLocation or manual gestures control initial view
-        // Constraints are still applied to enforce boundaries
-        mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
-        onComplete()
+        // WINDOW mode: Initialize camera to event bounds first to ensure tiles are visible
+        // This prevents gray screen when user is outside tile coverage area
+        // After this, autoTargetUserOnFirstLocation can move camera to user position
+        runCameraAnimation { cb ->
+            mapLibreAdapter.animateCameraToBounds(
+                eventBbox,
+                padding = 0,
+                callback =
+                    object : MapCameraCallback {
+                        override fun onFinish() {
+                            mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
+                            cb.onFinish()
+                            onComplete()
+                        }
+
+                        override fun onCancel() {
+                            mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
+                            cb.onCancel()
+                            onComplete()
+                        }
+                    },
+            )
+        }
     }
 
     /**
