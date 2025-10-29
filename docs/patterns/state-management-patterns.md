@@ -494,8 +494,10 @@ if (ok) {
         Log.d(TAG, "MapDownloadGate.allow called for: $mapId")
 
         // Synchronize UI state with availability checker
+        // First ensure the map is tracked, then refresh all tracked maps
+        mapAvailabilityChecker?.trackMaps(listOf(mapId))
         mapAvailabilityChecker?.refreshAvailability()
-        Log.d(TAG, "IosMapAvailabilityChecker.refreshAvailability() called for: $mapId")
+        Log.d(TAG, "IosMapAvailabilityChecker state synced for: $mapId")
 
         onSuccess()
     }

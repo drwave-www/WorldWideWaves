@@ -73,8 +73,8 @@ val IosModule =
         // Note: Must be registered before PlatformMapManager for state synchronization
         single<MapAvailabilityChecker> { IosMapAvailabilityChecker() }
 
-        // Debug screen - iOS implementation
-        single<DebugTabScreen?> { DebugTabScreen() }
+        // Debug screen - iOS implementation (always available on iOS)
+        single { DebugTabScreen() }
 
         // Data persistence
         single<FavoriteEventsStore> { IosFavoriteEventsStore() }

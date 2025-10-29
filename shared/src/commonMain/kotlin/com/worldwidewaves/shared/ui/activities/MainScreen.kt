@@ -170,7 +170,8 @@ open class MainScreen
                         var showDebugScreen by remember { mutableStateOf(false) }
                         // iOS-safe DI: Get debugTabScreen directly in Composable, not via property injection
                         // Using getKoin() to access Koin safely during composition
-                        val debugTabScreen = remember { getKoin().getOrNull<DebugTabScreen>() }
+                        // Note: Module registers as nullable type, so we use runCatching to safely retrieve it
+                        val debugTabScreen = remember { runCatching { getKoin().get<DebugTabScreen>() }.getOrNull() }
 
                         val ready by isSplashFinished.collectAsState()
                         if (ready) {

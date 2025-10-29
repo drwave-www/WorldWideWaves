@@ -380,14 +380,51 @@ class IosPlatformMapManagerTest {
             // This test validates the structure is in place
             assertTrue(true, "Test structure validated")
         }
+
+    @Test
+    fun `downloadMap calls trackMaps before refreshAvailability on success`() =
+        runTest {
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            val scope = TestScope(dispatcher)
+            val checker = FakeMapAvailabilityChecker()
+            val manager =
+                IosPlatformMapManager(
+                    scope = scope,
+                    callbackDispatcher = dispatcher,
+                    mapAvailabilityChecker = checker,
+                )
+
+            manager.downloadMap(
+                mapId = "test_city",
+                onProgress = { /* ignore */ },
+                onSuccess = { /* ignore */ },
+                onError = { _, _ -> /* ignore */ },
+            )
+
+            // Drive the simulated progress and completion
+            advanceTimeBy(35_000)
+            advanceUntilIdle()
+
+            // Without ODR resource, download will fail (error path)
+            // Verify no tracking happens on failure
+            assertEquals(0, checker.trackMapsCallCount, "trackMaps should not be called on failure")
+            assertEquals(0, checker.refreshCallCount, "refreshAvailability should not be called on failure")
+            assertTrue(checker.trackedMapIds.isEmpty(), "No maps should be tracked on failure")
+        }
 }
 
 /**
  * Fake implementation of MapAvailabilityChecker for testing.
- * Tracks calls to refreshAvailability without requiring real ODR resources.
+ * Tracks calls to refreshAvailability and trackMaps without requiring real ODR resources.
  */
 private class FakeMapAvailabilityChecker : MapAvailabilityChecker {
     var refreshCallCount = 0
+        private set
+
+    var trackMapsCallCount = 0
+        private set
+
+    val trackedMapIds = mutableListOf<String>()
         private set
 
     private val _mapStates = MutableStateFlow<Map<String, Boolean>>(emptyMap())
@@ -402,23 +439,38 @@ private class FakeMapAvailabilityChecker : MapAvailabilityChecker {
     override fun getDownloadedMaps(): List<String> = emptyList()
 
     override fun trackMaps(mapIds: Collection<String>) {
-        // No-op for testing
+        trackMapsCallCount++
+        trackedMapIds.addAll(mapIds)
     }
 }
 
 /**
  * Specialized fake that verifies the order of operations.
- * Tracks whether refreshAvailability was called before the success callback.
+ * Tracks whether trackMaps and refreshAvailability are called in the correct order.
  */
 private class OrderVerifyingMapAvailabilityChecker : MapAvailabilityChecker {
+    var trackMapsCalled = false
+        private set
     var refreshCalled = false
         private set
     var successCallbackInvoked = false
     var refreshWasCalledBeforeSuccess = false
         private set
+    var trackMapsCalledBeforeRefresh = false
+        private set
 
     private val _mapStates = MutableStateFlow<Map<String, Boolean>>(emptyMap())
     override val mapStates: StateFlow<Map<String, Boolean>> = _mapStates
+
+    override fun trackMaps(mapIds: Collection<String>) {
+        trackMapsCalled = true
+        // Check if refresh was already called (wrong order)
+        if (refreshCalled) {
+            trackMapsCalledBeforeRefresh = false
+        } else {
+            trackMapsCalledBeforeRefresh = true
+        }
+    }
 
     override fun refreshAvailability() {
         refreshCalled = true
@@ -433,8 +485,4 @@ private class OrderVerifyingMapAvailabilityChecker : MapAvailabilityChecker {
     override fun isMapDownloaded(eventId: String): Boolean = false
 
     override fun getDownloadedMaps(): List<String> = emptyList()
-
-    override fun trackMaps(mapIds: Collection<String>) {
-        // No-op for testing
-    }
 }

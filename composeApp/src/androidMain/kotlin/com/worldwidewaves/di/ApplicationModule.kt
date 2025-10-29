@@ -69,14 +69,9 @@ val applicationModule =
         single { SimulationLocationEngine(get()) }
         factory { AndroidLocationProvider() }
 
-        // Debug screen - only in debug builds
-        single<DebugTabScreen?> {
-            val isDebug = BuildConfig.DEBUG
-            Log.d("ApplicationModule", "Debug screen injection: BuildConfig.DEBUG=$isDebug")
-            if (isDebug) {
-                DebugTabScreen()
-            } else {
-                null
-            }
+        // Debug screen - only register in debug builds (not as nullable type)
+        if (BuildConfig.DEBUG) {
+            Log.d("ApplicationModule", "Registering debug screen (BuildConfig.DEBUG=true)")
+            single { DebugTabScreen() }
         }
     }
