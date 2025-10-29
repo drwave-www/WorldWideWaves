@@ -455,6 +455,10 @@ xcrun simctl location "iPhone 15" set 37.7749,-122.4194
 
 **GPS mode**: Uses real device GPS (FusedLocationProvider on Android, CoreLocation on iOS). **Simulation mode**: Uses programmatically set positions for testing wave choreography. PositionManager prioritizes simulation when active (for testing), otherwise uses GPS.
 
+### How do I test event participation without waiting for a real event?
+
+Use **simulation mode** for testing wave choreography and event participation. Simulation mode provides time acceleration (speed up event progression), position simulation (simulate movement during waves), and predictable test conditions. This enables testing complete wave lifecycles in seconds rather than hours. See [Simulation Mode Guide](features/simulation-mode.md) for complete documentation on time multipliers, position control, and integration with tests.
+
 ### How accurate is position tracking?
 
 Uses high-accuracy location providers (~5-10m accuracy outdoors). Position updates are debounced (500ms) and deduplicated to optimize battery and reduce state emissions.

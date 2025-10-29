@@ -293,6 +293,7 @@ object SharedState {
 - ❌ Components **never set** position directly
 - **Priority**: SIMULATION > GPS (testing > real device)
 - **Pattern**: Reactive updates via StateFlow
+- **Testing**: Use simulation mode for time acceleration and position control
 
 ```kotlin
 // ✅ CORRECT
@@ -303,6 +304,8 @@ positionManager.positionFlow.collect { position ->
 // ❌ WRONG
 val gpsProvider = GPSProvider()  // Don't create separate sources!
 ```
+
+**Simulation Mode**: For testing event participation without waiting for real events, use simulation mode with time acceleration and position control. See [Simulation Mode Guide](docs/features/simulation-mode.md) for complete documentation.
 
 ### Error Handling
 

@@ -48,6 +48,9 @@ For deployment and production:
 9. **[Map Architecture Analysis](architecture/map-architecture-analysis.md)**
    Detailed analysis of shared vs platform-specific map system design.
 
+10. **[Simulation Mode](features/simulation-mode.md)**
+    Time acceleration and position simulation for testing event participation without waiting for real events.
+
 ## Quick Links
 
 ### Common Tasks

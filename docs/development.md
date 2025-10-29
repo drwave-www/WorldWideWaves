@@ -383,6 +383,28 @@ buildConfigField("boolean", "ENABLE_VERBOSE_LOGGING", "true")
 open -a Instruments
 ```
 
+### Simulation Mode for Testing
+
+For testing event participation without waiting for real events, use **simulation mode**:
+
+**Benefits**:
+- **Time acceleration**: Speed up event progression with time multipliers
+- **Position simulation**: Simulate user movement during wave events
+- **Predictable conditions**: Consistent test results across runs
+- **Fast iteration**: Test complete wave lifecycles in seconds
+
+**Quick Start**:
+```kotlin
+// Enable simulation in tests
+simulationController.enableSimulation(timeMultiplier = 10.0)
+simulationController.setSimulatedPosition(latitude, longitude)
+
+// Test wave progression
+advanceTimeBy(30.seconds) // Simulates 5 minutes with 10x multiplier
+```
+
+**Documentation**: See [Simulation Mode Guide](features/simulation-mode.md) for complete API reference, usage patterns, and integration examples.
+
 ### Common Issues
 
 **Issue: Gradle build fails with "Out of Memory"**

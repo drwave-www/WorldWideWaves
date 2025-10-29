@@ -143,6 +143,12 @@
 
 ### 5. Features & Implementation
 
+#### Core Features
+| Document | Description | Size |
+|----------|-------------|------|
+| [Simulation Mode](features/simulation-mode.md) | Time acceleration and position simulation for testing | 730 lines |
+| [Choreography System](features/choreography-system.md) | Wave choreography and timing system | 1,020 lines |
+
 #### Accessibility
 | Document | Description | Size |
 |----------|-------------|------|
