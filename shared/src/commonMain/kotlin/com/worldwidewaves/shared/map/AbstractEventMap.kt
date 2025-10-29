@@ -580,17 +580,25 @@ abstract class AbstractEventMap<T>(
         }
 
         // Auto-target the user the first time (optional) if no interaction yet
-        val shouldAutoTarget =
-            mapConfig.autoTargetUserOnFirstLocation &&
-                !userHasBeenLocated &&
-                !userInteracted &&
-                mapConfig.initialCameraPosition == MapCameraPosition.WINDOW
-
-        if (shouldAutoTarget) {
+        // BUT ONLY if user is within the event area - don't move camera to positions outside tile coverage
+        if (mapConfig.autoTargetUserOnFirstLocation &&
+            !userHasBeenLocated &&
+            !userInteracted &&
+            mapConfig.initialCameraPosition == MapCameraPosition.WINDOW
+        ) {
             scope.launch {
-                targetUser()
+                val isUserInEventArea = event.area.isPositionWithin(position)
+                if (isUserInEventArea) {
+                    targetUser()
+                    Log.i("AbstractEventMap", "User in event area, auto-targeting user position")
+                } else {
+                    Log.i(
+                        "AbstractEventMap",
+                        "User outside event area (${position.latitude}, ${position.longitude}), keeping camera on event bounds",
+                    )
+                }
+                userHasBeenLocated = true
             }
-            userHasBeenLocated = true
         }
 
         if (lastKnownPosition == null || lastKnownPosition != position) {
