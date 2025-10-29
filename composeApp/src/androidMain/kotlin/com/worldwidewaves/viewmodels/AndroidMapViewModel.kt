@@ -75,7 +75,32 @@ class AndroidMapViewModel(
     // Platform adapter for business logic
     private val platformAdapter =
         object : PlatformMapDownloadAdapter {
-            override suspend fun isMapInstalled(mapId: String): Boolean = splitInstallManager.installedModules.contains(mapId)
+            override suspend fun isMapInstalled(mapId: String): Boolean {
+                val moduleInstalled = splitInstallManager.installedModules.contains(mapId)
+                if (!moduleInstalled) {
+                    return false
+                }
+
+                // Verify that actual map files exist and are accessible
+                val cacheDir = application.cacheDir
+                val mbtilesFile = java.io.File(cacheDir, "$mapId.mbtiles")
+                val geojsonFile = java.io.File(cacheDir, "$mapId.geojson")
+
+                val mbtilesExists = mbtilesFile.exists() && mbtilesFile.canRead() && mbtilesFile.length() > 0
+                val geojsonExists = geojsonFile.exists() && geojsonFile.canRead() && geojsonFile.length() > 0
+
+                val filesAccessible = mbtilesExists && geojsonExists
+
+                if (!filesAccessible) {
+                    Log.w(
+                        TAG,
+                        "isMapInstalled: module=$moduleInstalled but files not accessible for $mapId " +
+                            "(mbtiles=$mbtilesExists, geojson=$geojsonExists)",
+                    )
+                }
+
+                return filesAccessible
+            }
 
             override suspend fun startPlatformDownload(
                 mapId: String,

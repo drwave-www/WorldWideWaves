@@ -110,6 +110,82 @@ class MapDownloadCoordinatorTest {
             assertEquals(MapFeatureState.Unknown, manager.featureState.first())
         }
 
+    @Test
+    fun `downloadMap skips download when map already installed`() =
+        runTest {
+            mockAdapter.setMapInstalled("sydney_australia", true)
+
+            manager.downloadMap("sydney_australia")
+
+            assertEquals(MapFeatureState.Installed, manager.featureState.first())
+            assertTrue(mockAdapter.isMapInstalledCalled)
+            assertFalse(mockAdapter.startPlatformDownloadCalled)
+        }
+
+    @Test
+    fun `downloadMap proceeds when map not installed`() =
+        runTest {
+            mockAdapter.setMapInstalled("cairo_egypt", false)
+
+            manager.downloadMap("cairo_egypt")
+
+            assertEquals(MapFeatureState.Pending, manager.featureState.first())
+            assertTrue(mockAdapter.isMapInstalledCalled)
+            assertTrue(mockAdapter.startPlatformDownloadCalled)
+        }
+
+    @Test
+    fun `downloadMap skips download for session zero (already installed module)`() =
+        runTest {
+            // Simulate PlayCore reporting module as already installed (session=0 case)
+            mockAdapter.setMapInstalled("london_england", true)
+
+            manager.downloadMap("london_england")
+
+            // Should skip download and mark as installed
+            assertEquals(MapFeatureState.Installed, manager.featureState.first())
+            assertFalse(mockAdapter.startPlatformDownloadCalled)
+        }
+
+    @Test
+    fun `checkIfMapIsAvailable with valid files sets Available state`() =
+        runTest {
+            mockAdapter.setMapInstalled("paris_france", true)
+
+            manager.checkIfMapIsAvailable("paris_france", autoDownload = false)
+
+            assertEquals(MapFeatureState.Available, manager.featureState.first())
+            assertTrue(mockAdapter.isMapInstalledCalled)
+        }
+
+    @Test
+    fun `checkIfMapIsAvailable with missing files sets NotAvailable state`() =
+        runTest {
+            mockAdapter.setMapInstalled("tokyo_japan", false)
+
+            manager.checkIfMapIsAvailable("tokyo_japan", autoDownload = false)
+
+            assertEquals(MapFeatureState.NotAvailable, manager.featureState.first())
+            assertTrue(mockAdapter.isMapInstalledCalled)
+        }
+
+    @Test
+    fun `concurrent download attempts are prevented`() =
+        runTest {
+            mockAdapter.setMapInstalled("berlin_germany", false)
+
+            // First download
+            manager.downloadMap("berlin_germany")
+            assertEquals(MapFeatureState.Pending, manager.featureState.first())
+
+            // Reset mock
+            mockAdapter.startPlatformDownloadCalled = false
+
+            // Second download attempt should be ignored
+            manager.downloadMap("berlin_germany")
+            assertFalse(mockAdapter.startPlatformDownloadCalled)
+        }
+
     // Test helper class
     private class TestPlatformMapDownloadAdapter : PlatformMapDownloadAdapter {
         var isMapInstalledCalled = false

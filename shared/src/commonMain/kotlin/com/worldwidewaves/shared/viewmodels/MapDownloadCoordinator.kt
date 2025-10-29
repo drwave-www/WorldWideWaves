@@ -92,6 +92,14 @@ class MapDownloadCoordinator(
             return
         }
 
+        // Early-exit if map is already fully installed with valid files
+        if (platformAdapter.isMapInstalled(mapId)) {
+            Log.i(TAG, "downloadMap skipped – map already installed: $mapId")
+            _featureState.value = MapFeatureState.Installed
+            onMapDownloaded?.invoke()
+            return
+        }
+
         _featureState.value = MapFeatureState.Pending
         retryManager.resetRetryCount()
         currentMapId = mapId

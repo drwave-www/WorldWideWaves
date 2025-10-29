@@ -141,9 +141,25 @@ class AndroidMapAvailabilityChecker(
 
         // First add all queried maps – honour any forced-uninstall overrides
         for (mapId in queriedMaps) {
-            val installed = installedModules.contains(mapId)
-            updatedStates[mapId] =
-                if (forcedUnavailable.contains(mapId)) false else installed
+            val moduleInstalled = installedModules.contains(mapId)
+            val forcedUnavail = forcedUnavailable.contains(mapId)
+
+            // Module must be installed by PlayCore AND have valid map files
+            val isAvailable =
+                if (forcedUnavail) {
+                    false
+                } else if (moduleInstalled) {
+                    // Verify that actual map files exist and are accessible
+                    areMapFilesAccessible(mapId)
+                } else {
+                    false
+                }
+
+            updatedStates[mapId] = isAvailable
+
+            if (moduleInstalled && !isAvailable && !forcedUnavail) {
+                Log.w(TAG, "Module $mapId installed but files not accessible")
+            }
         }
 
         // Update the state flow with the new map
@@ -164,6 +180,32 @@ class AndroidMapAvailabilityChecker(
         val downloaded = mapStates.value[eventId] == true
         Log.d(TAG, "isMapDownloaded id=$eventId -> $downloaded")
         return downloaded
+    }
+
+    /**
+     * Checks if the map files (.mbtiles and .geojson) are actually accessible in the cache.
+     * PlayCore may report a module as INSTALLED before files are fully extracted,
+     * or files may be missing/corrupted.
+     *
+     * @param eventId The event/map ID to check
+     * @return true if both .mbtiles and .geojson files exist in cache, false otherwise
+     */
+    private fun areMapFilesAccessible(eventId: String): Boolean {
+        val cacheDir = context.cacheDir
+        val mbtilesFile = java.io.File(cacheDir, "$eventId.mbtiles")
+        val geojsonFile = java.io.File(cacheDir, "$eventId.geojson")
+
+        val mbtilesExists = mbtilesFile.exists() && mbtilesFile.canRead() && mbtilesFile.length() > 0
+        val geojsonExists = geojsonFile.exists() && geojsonFile.canRead() && geojsonFile.length() > 0
+
+        if (!mbtilesExists || !geojsonExists) {
+            Log.d(
+                TAG,
+                "areMapFilesAccessible id=$eventId mbtiles=$mbtilesExists geojson=$geojsonExists",
+            )
+        }
+
+        return mbtilesExists && geojsonExists
     }
 
     override fun getDownloadedMaps(): List<String> {
