@@ -51,6 +51,8 @@ import com.worldwidewaves.shared.ui.utils.focusIndicator
 import com.worldwidewaves.shared.ui.utils.getIosSafePlatform
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 
@@ -171,8 +173,15 @@ fun BoxScope.SimulationButton(
     // Execute pending actions - add event.id key to prevent conflicts across recomposition
     LaunchedEffect(event.id, pendingAction) {
         pendingAction?.let { action ->
-            action()
-            pendingAction = null
+            try {
+                action()
+            } catch (e: Exception) {
+                Log.e("SimulationButton", "Action failed for event ${event.id}", e)
+                simulationButtonState = "idle"
+                onError(simulationErrorText, e.message ?: "Unknown error")
+            } finally {
+                pendingAction = null
+            }
         }
     }
 
@@ -288,7 +297,9 @@ private suspend fun startSimulation(
         platform.setSimulation(simulation)
 
         // Restart event observation to apply simulation
+        // Note: stopObservation() is async, so we add a delay to ensure proper cleanup
         event.observer.stopObservation()
+        delay(150.milliseconds) // Allow time for async cancellation to complete
         event.observer.startObservation()
 
         onSimulationStarted(simulationStartedText)
@@ -318,7 +329,10 @@ private suspend fun stopSimulation(
     simulationStoppedText: String,
 ) {
     platform.disableSimulation()
+    // Restart event observation to return to real GPS/time
+    // Note: stopObservation() is async, so we add a delay to ensure proper cleanup
     event.observer.stopObservation()
+    delay(150.milliseconds) // Allow time for async cancellation to complete
     event.observer.startObservation()
     onSimulationStopped(simulationStoppedText)
 }
