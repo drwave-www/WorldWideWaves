@@ -279,4 +279,191 @@ class SimulationModeTest {
             val changedValue2 = platform.simulationChanged.first()
             assertEquals(changedValue1 + 1, changedValue2, "simulationChanged should increment")
         }
+
+    // ============================================================
+    // SIMULATION SWITCHING TESTS (iOS Map Fix #2)
+    // ============================================================
+
+    @Test
+    fun simulation_switchBetweenEvents_disablesPreviousSimulation() =
+        runTest {
+            val coroutineScopeProvider = TestCoroutineScopeProvider(this)
+            val positionManager = PositionManager(coroutineScopeProvider)
+            val platform = WWWPlatform("Test", positionManager)
+
+            // GIVEN simulation running for Event A
+            val positionA = Position(lat = 48.8566, lng = 2.3522) // Paris
+            val timeZone = TimeZone.of("Europe/Paris")
+            val startTimeA = LocalDateTime(2026, 7, 14, 18, 0).toInstant(timeZone)
+            val simulationA =
+                WWWSimulation(
+                    startDateTime = startTimeA,
+                    userPosition = positionA,
+                    initialSpeed = WWWGlobals.Wave.DEFAULT_SPEED_SIMULATION,
+                )
+            platform.setSimulation(simulationA)
+            assertTrue(platform.isOnSimulation(), "Simulation A should be active")
+
+            // WHEN switching to Event B simulation (as SimulationButton does)
+            platform.disableSimulation() // SimulationButton calls this before setSimulation
+
+            // THEN previous simulation should be cleared
+            assertFalse(platform.isOnSimulation(), "Simulation should be disabled after switch")
+            assertNull(platform.getSimulation(), "Previous simulation should be null")
+        }
+
+    @Test
+    fun simulation_switchBetweenEvents_newSimulationReplacesOld() =
+        runTest {
+            val coroutineScopeProvider = TestCoroutineScopeProvider(this)
+            val positionManager = PositionManager(coroutineScopeProvider)
+            val platform = WWWPlatform("Test", positionManager)
+
+            // GIVEN simulation running for Event A
+            val positionA = Position(lat = 48.8566, lng = 2.3522) // Paris
+            val timeZone = TimeZone.of("Europe/Paris")
+            val startTimeA = LocalDateTime(2026, 7, 14, 18, 0).toInstant(timeZone)
+            val simulationA =
+                WWWSimulation(
+                    startDateTime = startTimeA,
+                    userPosition = positionA,
+                    initialSpeed = WWWGlobals.Wave.DEFAULT_SPEED_SIMULATION,
+                )
+            platform.setSimulation(simulationA)
+            assertEquals(positionA, platform.getSimulation()?.getUserPosition())
+
+            // WHEN starting Event B simulation (full switch flow)
+            platform.disableSimulation()
+            val positionB = Position(lat = 40.7128, lng = -74.0060) // New York
+            val startTimeB = LocalDateTime(2026, 7, 14, 20, 0).toInstant(timeZone)
+            val simulationB =
+                WWWSimulation(
+                    startDateTime = startTimeB,
+                    userPosition = positionB,
+                    initialSpeed = WWWGlobals.Wave.DEFAULT_SPEED_SIMULATION,
+                )
+            platform.setSimulation(simulationB)
+
+            // THEN new simulation should be active
+            assertTrue(platform.isOnSimulation(), "Simulation B should be active")
+            assertEquals(positionB, platform.getSimulation()?.getUserPosition(), "Should have Event B position")
+        }
+
+    @Test
+    fun simulation_switchBetweenEvents_incrementsChangedCounterTwice() =
+        runTest {
+            val coroutineScopeProvider = TestCoroutineScopeProvider(this)
+            val positionManager = PositionManager(coroutineScopeProvider)
+            val platform = WWWPlatform("Test", positionManager)
+
+            val initialCount = platform.simulationChanged.first()
+
+            // GIVEN simulation for Event A
+            val positionA = Position(lat = 48.8566, lng = 2.3522)
+            val timeZone = TimeZone.of("Europe/Paris")
+            val startTimeA = LocalDateTime(2026, 7, 14, 18, 0).toInstant(timeZone)
+            val simulationA =
+                WWWSimulation(
+                    startDateTime = startTimeA,
+                    userPosition = positionA,
+                    initialSpeed = WWWGlobals.Wave.DEFAULT_SPEED_SIMULATION,
+                )
+            platform.setSimulation(simulationA)
+            val countAfterA = platform.simulationChanged.first()
+
+            // WHEN switching to Event B (disable + setSimulation)
+            platform.disableSimulation()
+            val countAfterDisable = platform.simulationChanged.first()
+
+            val positionB = Position(lat = 40.7128, lng = -74.0060)
+            val startTimeB = LocalDateTime(2026, 7, 14, 20, 0).toInstant(timeZone)
+            val simulationB =
+                WWWSimulation(
+                    startDateTime = startTimeB,
+                    userPosition = positionB,
+                    initialSpeed = WWWGlobals.Wave.DEFAULT_SPEED_SIMULATION,
+                )
+            platform.setSimulation(simulationB)
+            val countAfterB = platform.simulationChanged.first()
+
+            // THEN counter should increment twice (once for disable, once for new simulation)
+            assertEquals(initialCount + 1, countAfterA, "Should increment after Event A")
+            assertEquals(countAfterA + 1, countAfterDisable, "Should increment after disable")
+            assertEquals(countAfterDisable + 1, countAfterB, "Should increment after Event B")
+        }
+
+    @Test
+    fun simulation_switchWhileActive_doesNotLeaveStaleState() =
+        runTest {
+            val coroutineScopeProvider = TestCoroutineScopeProvider(this)
+            val positionManager = PositionManager(coroutineScopeProvider)
+            val platform = WWWPlatform("Test", positionManager)
+
+            // GIVEN active simulation
+            val position1 = Position(lat = 48.8566, lng = 2.3522)
+            val timeZone = TimeZone.of("Europe/Paris")
+            val startTime1 = LocalDateTime(2026, 7, 14, 18, 0).toInstant(timeZone)
+            val simulation1 =
+                WWWSimulation(
+                    startDateTime = startTime1,
+                    userPosition = position1,
+                    initialSpeed = 10,
+                )
+            platform.setSimulation(simulation1)
+
+            // WHEN rapidly switching (simulates quick button presses)
+            platform.disableSimulation()
+            val position2 = Position(lat = 40.7128, lng = -74.0060)
+            val startTime2 = LocalDateTime(2026, 7, 14, 20, 0).toInstant(timeZone)
+            val simulation2 =
+                WWWSimulation(
+                    startDateTime = startTime2,
+                    userPosition = position2,
+                    initialSpeed = 20,
+                )
+            platform.setSimulation(simulation2)
+
+            platform.disableSimulation()
+            val position3 = Position(lat = 51.5074, lng = -0.1278) // London
+            val startTime3 = LocalDateTime(2026, 7, 14, 22, 0).toInstant(timeZone)
+            val simulation3 =
+                WWWSimulation(
+                    startDateTime = startTime3,
+                    userPosition = position3,
+                    initialSpeed = 30,
+                )
+            platform.setSimulation(simulation3)
+
+            // THEN final state should be clean (only last simulation active)
+            assertTrue(platform.isOnSimulation(), "Final simulation should be active")
+            assertEquals(position3, platform.getSimulation()?.getUserPosition(), "Should have final position")
+        }
+
+    @Test
+    fun simulation_disableDuringSwitch_clearsPositionCorrectly() =
+        runTest {
+            val coroutineScopeProvider = TestCoroutineScopeProvider(this)
+            val positionManager = PositionManager(coroutineScopeProvider)
+            val platform = WWWPlatform("Test", positionManager)
+
+            // GIVEN simulation with position
+            val position1 = Position(lat = 48.8566, lng = 2.3522)
+            val timeZone = TimeZone.of("Europe/Paris")
+            val startTime1 = LocalDateTime(2026, 7, 14, 18, 0).toInstant(timeZone)
+            val simulation1 =
+                WWWSimulation(
+                    startDateTime = startTime1,
+                    userPosition = position1,
+                    initialSpeed = WWWGlobals.Wave.DEFAULT_SPEED_SIMULATION,
+                )
+            platform.setSimulation(simulation1)
+            assertNotNull(platform.getSimulation()?.getUserPosition())
+
+            // WHEN disabling simulation
+            platform.disableSimulation()
+
+            // THEN simulation and position should be cleared
+            assertNull(platform.getSimulation(), "Simulation should be null after disable")
+            assertFalse(platform.isOnSimulation(), "isOnSimulation should be false")
+        }
 }

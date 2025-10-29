@@ -267,10 +267,10 @@ private suspend fun startSimulation(
     simulationStartedText: String,
 ) {
     try {
-        // Prevent concurrent simulation operations for the same event
+        // If simulation is already running on another event, stop it first
+        // This allows switching simulations between events as designed
         if (platform.isOnSimulation()) {
-            Log.w("SimulationButton", "Simulation already running, ignoring duplicate start request for ${event.id}")
-            return
+            Log.i("SimulationButton", "Stopping existing simulation to start new one for ${event.id}")
         }
 
         // Generate random position within event area
@@ -280,7 +280,7 @@ private suspend fun startSimulation(
         val simulationDelay = 0.minutes
         val simulationTime = event.getStartDateTime() + simulationDelay
 
-        // Reset any existing simulation (only if not already disabled)
+        // Reset any existing simulation before starting new one
         platform.disableSimulation()
 
         // Create new simulation with unique identifier

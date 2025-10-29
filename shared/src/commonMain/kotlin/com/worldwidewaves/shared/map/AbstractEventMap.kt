@@ -590,13 +590,16 @@ abstract class AbstractEventMap<T>(
                 val isUserInEventArea = event.area.isPositionWithin(position)
                 if (isUserInEventArea) {
                     targetUser()
-                    Log.i("AbstractEventMap", "User in event area, auto-targeting user position")
+                    Log.i("AbstractEventMap", "User in event area, auto-targeted user position")
                 } else {
+                    // User outside event area - don't target to prevent showing position without tiles
                     Log.i(
                         "AbstractEventMap",
                         "User outside event area (${position.latitude}, ${position.longitude}), keeping camera on event bounds",
                     )
                 }
+                // Always mark as located to prevent retrying on every position update
+                // This preserves "first location" semantics even when user is outside area
                 userHasBeenLocated = true
             }
         }

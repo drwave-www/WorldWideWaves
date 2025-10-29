@@ -76,7 +76,8 @@ fun EventsScreen(
     var refreshTrigger by remember { mutableStateOf(0) }
 
     // Filter logic - EXACT Android match with refresh trigger
-    LaunchedEffect(starredSelected, downloadedSelected, events, refreshTrigger) {
+    // Note: mapStates dependency ensures filter updates when maps are downloaded
+    LaunchedEffect(starredSelected, downloadedSelected, events, mapStates, refreshTrigger) {
         filteredEvents =
             when {
                 starredSelected -> events.filter { it.favorite }

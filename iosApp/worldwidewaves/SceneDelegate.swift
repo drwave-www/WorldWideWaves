@@ -229,6 +229,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 provider: SwiftNativeMapViewProvider()
             )
             WWWLog.i(tag, "NativeMapViewProvider (Swift) registered into Koin")
+
+            // Initialize debug simulation AFTER PlatformEnabler is registered
+            try Platform_iosKt.initializeDebugSimulation()
+            WWWLog.i(tag, "Debug simulation initialized")
         } catch {
             WWWLog.e(tag, "Error during registration", error: error)
             fatalError("Cannot proceed without registration: \(error)")

@@ -41,20 +41,8 @@ fun doInitPlatform() {
                 modules(com.worldwidewaves.shared.di.sharedModule + com.worldwidewaves.shared.di.IosModule)
             }
 
-        // Use PlatformEnabler.isDebugBuild to determine if simulation should be enabled
-        // This ensures simulation is only active in debug builds (set by Swift's #if DEBUG)
-        val platformEnabler = KoinPlatform.getKoin().get<PlatformEnabler>()
-        if (platformEnabler.isDebugBuild) {
-            try {
-                // Enable simulation mode (makes the red indicator visible)
-                val platform = KoinPlatform.getKoin().get<WWWPlatform>()
-                initializeSimulationMode(platform, true)
-
-                // Set up simulation data (time, position, etc.)
-                setupDebugSimulation()
-            } catch (_: Throwable) {
-            }
-        }
+        // NOTE: Simulation initialization moved to initializeDebugSimulation()
+        // Must be called AFTER PlatformEnabler registration (see SceneDelegate.swift)
 
         // NOTE: RuntimeLogConfig initialization deferred - using build-time configuration fallback.
         // Firebase Remote Config integration requires FirebaseRemoteConfig CocoaPod in iosApp project.
@@ -64,5 +52,37 @@ fun doInitPlatform() {
 }
 
 private var koinApp: KoinApplication? = null
+
+/**
+ * Initialize debug simulation for iOS.
+ * Must be called AFTER PlatformEnabler is registered into Koin.
+ * This is separate from doInitPlatform() because PlatformEnabler registration
+ * happens after Koin initialization in SceneDelegate.
+ */
+@Throws(Throwable::class)
+fun initializeDebugSimulation() {
+    try {
+        // Use PlatformEnabler.isDebugBuild to determine if simulation should be enabled
+        // This ensures simulation is only active in debug builds (set by Swift's #if DEBUG)
+        val platformEnabler = KoinPlatform.getKoin().get<PlatformEnabler>()
+        if (platformEnabler.isDebugBuild) {
+            Log.d(TAG, "Debug build detected, enabling simulation mode")
+
+            // Enable simulation mode (makes the red indicator visible)
+            val platform = KoinPlatform.getKoin().get<WWWPlatform>()
+            initializeSimulationMode(platform, true)
+
+            // Set up simulation data (time, position, etc.)
+            setupDebugSimulation()
+
+            Log.i(TAG, "Debug simulation initialized successfully")
+        } else {
+            Log.d(TAG, "Release build, simulation mode not enabled")
+        }
+    } catch (e: Exception) {
+        Log.e(TAG, "Failed to initialize debug simulation: ${e.message}", e)
+        throw e
+    }
+}
 
 actual fun localizeString(resource: StringResource): String = resource.desc().localized()

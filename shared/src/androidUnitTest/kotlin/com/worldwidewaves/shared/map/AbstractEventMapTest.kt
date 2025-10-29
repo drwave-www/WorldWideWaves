@@ -22,6 +22,7 @@ import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.position.PositionManager
 import io.mockk.Runs
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -678,6 +679,246 @@ class AbstractEventMapTest : KoinTest {
         }
 
     // ============================================================
+    // AUTO-TARGET AREA CHECK TESTS (iOS Map Fix #1)
+    // ============================================================
+
+    @Test
+    fun autoTargetOnFirstLocation_triggersWhenUserInsideEventArea() =
+        runTest {
+            // Given: User position inside event area
+            val insidePosition = Position(48.86, 2.35) // Inside test bounds
+            val mockArea = mockk<WWWEventArea>()
+            coEvery { mockArea.bbox() } returns testBounds
+            coEvery { mockArea.getCenter() } returns testCenter
+            coEvery { mockArea.isPositionWithin(insidePosition) } returns true
+            every { mockArea.bboxIsOverride } returns false
+            every { mockEvent.area } returns mockArea
+
+            val configWithAutoTarget =
+                EventMapConfig(
+                    initialCameraPosition = MapCameraPosition.WINDOW,
+                    autoTargetUserOnFirstLocation = true,
+                )
+            eventMap =
+                TestEventMap(
+                    event = mockEvent,
+                    mapConfig = configWithAutoTarget,
+                    onLocationUpdate = { },
+                    mockMapLibreAdapter = mockMapLibreAdapter,
+                    mockLocationProvider = mockLocationProvider,
+                )
+
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+
+            // When: User position updated (inside area)
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, insidePosition)
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then: Should auto-target user
+            coVerify {
+                mockMapLibreAdapter.animateCamera(
+                    insidePosition,
+                    WWWGlobals.MapDisplay.TARGET_USER_ZOOM,
+                    any(),
+                )
+            }
+        }
+
+    @Test
+    fun autoTargetOnFirstLocation_doesNotTriggerWhenUserOutsideEventArea() =
+        runTest {
+            // Given: User position outside event area
+            val outsidePosition = Position(40.7128, -74.0060) // NYC - outside Paris bounds
+            val mockArea = mockk<WWWEventArea>()
+            coEvery { mockArea.bbox() } returns testBounds
+            coEvery { mockArea.getCenter() } returns testCenter
+            coEvery { mockArea.isPositionWithin(outsidePosition) } returns false
+            every { mockArea.bboxIsOverride } returns false
+            every { mockEvent.area } returns mockArea
+
+            val configWithAutoTarget =
+                EventMapConfig(
+                    initialCameraPosition = MapCameraPosition.WINDOW,
+                    autoTargetUserOnFirstLocation = true,
+                )
+            eventMap =
+                TestEventMap(
+                    event = mockEvent,
+                    mapConfig = configWithAutoTarget,
+                    onLocationUpdate = { },
+                    mockMapLibreAdapter = mockMapLibreAdapter,
+                    mockLocationProvider = mockLocationProvider,
+                )
+
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+
+            // When: User position updated (outside area)
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, outsidePosition)
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then: Should NOT auto-target user (stays on event bounds from WINDOW initialization)
+            coVerify(exactly = 0) {
+                mockMapLibreAdapter.animateCamera(
+                    outsidePosition,
+                    WWWGlobals.MapDisplay.TARGET_USER_ZOOM,
+                    any(),
+                )
+            }
+        }
+
+    @Test
+    fun autoTargetOnFirstLocation_doesNotRetargetWhenUserMovesInsideAfterBeingLocated() =
+        runTest {
+            // Given: User first located outside, then moves inside
+            val outsidePosition = Position(40.7128, -74.0060)
+            val insidePosition = Position(48.86, 2.35)
+            val mockArea = mockk<WWWEventArea>()
+            coEvery { mockArea.bbox() } returns testBounds
+            coEvery { mockArea.getCenter() } returns testCenter
+            coEvery { mockArea.isPositionWithin(outsidePosition) } returns false
+            coEvery { mockArea.isPositionWithin(insidePosition) } returns true
+            every { mockArea.bboxIsOverride } returns false
+            every { mockEvent.area } returns mockArea
+
+            val configWithAutoTarget =
+                EventMapConfig(
+                    initialCameraPosition = MapCameraPosition.WINDOW,
+                    autoTargetUserOnFirstLocation = true,
+                )
+            eventMap =
+                TestEventMap(
+                    event = mockEvent,
+                    mapConfig = configWithAutoTarget,
+                    onLocationUpdate = { },
+                    mockMapLibreAdapter = mockMapLibreAdapter,
+                    mockLocationProvider = mockLocationProvider,
+                )
+
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+
+            // When: First location (outside)
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, outsidePosition)
+            testScope.testScheduler.advanceUntilIdle()
+
+            // When: User moves inside
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, insidePosition)
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then: Should NOT auto-target (userHasBeenLocated already true)
+            coVerify(exactly = 0) {
+                mockMapLibreAdapter.animateCamera(
+                    insidePosition,
+                    WWWGlobals.MapDisplay.TARGET_USER_ZOOM,
+                    any(),
+                )
+            }
+        }
+
+    @Test
+    fun autoTargetOnFirstLocation_doesNotTriggerInWINDOWModeWhenDisabled() =
+        runTest {
+            // Given: WINDOW mode with autoTargetUserOnFirstLocation=false
+            val insidePosition = Position(48.86, 2.35)
+            val mockArea = mockk<WWWEventArea>()
+            coEvery { mockArea.bbox() } returns testBounds
+            coEvery { mockArea.getCenter() } returns testCenter
+            coEvery { mockArea.isPositionWithin(insidePosition) } returns true
+            every { mockArea.bboxIsOverride } returns false
+            every { mockEvent.area } returns mockArea
+
+            val configWithoutAutoTarget =
+                EventMapConfig(
+                    initialCameraPosition = MapCameraPosition.WINDOW,
+                    autoTargetUserOnFirstLocation = false,
+                )
+            eventMap =
+                TestEventMap(
+                    event = mockEvent,
+                    mapConfig = configWithoutAutoTarget,
+                    onLocationUpdate = { },
+                    mockMapLibreAdapter = mockMapLibreAdapter,
+                    mockLocationProvider = mockLocationProvider,
+                )
+
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+
+            // When: User position updated
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, insidePosition)
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then: Should NOT auto-target
+            coVerify(exactly = 0) {
+                mockMapLibreAdapter.animateCamera(
+                    insidePosition,
+                    WWWGlobals.MapDisplay.TARGET_USER_ZOOM,
+                    any(),
+                )
+            }
+        }
+
+    @Test
+    fun autoTargetOnFirstLocation_doesNotTriggerInBOUNDSMode() =
+        runTest {
+            // Given: BOUNDS mode (event details)
+            val insidePosition = Position(48.86, 2.35)
+            val mockArea = mockk<WWWEventArea>()
+            coEvery { mockArea.bbox() } returns testBounds
+            coEvery { mockArea.getCenter() } returns testCenter
+            coEvery { mockArea.isPositionWithin(insidePosition) } returns true
+            every { mockArea.bboxIsOverride } returns false
+            every { mockEvent.area } returns mockArea
+
+            val boundsConfig =
+                EventMapConfig(
+                    initialCameraPosition = MapCameraPosition.BOUNDS,
+                    autoTargetUserOnFirstLocation = true, // Enabled but BOUNDS mode overrides
+                )
+            eventMap =
+                TestEventMap(
+                    event = mockEvent,
+                    mapConfig = boundsConfig,
+                    onLocationUpdate = { },
+                    mockMapLibreAdapter = mockMapLibreAdapter,
+                    mockLocationProvider = mockLocationProvider,
+                )
+
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+
+            // When: User position updated
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, insidePosition)
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then: Should NOT auto-target (BOUNDS mode shows full event)
+            coVerify(exactly = 0) {
+                mockMapLibreAdapter.animateCamera(
+                    insidePosition,
+                    WWWGlobals.MapDisplay.TARGET_USER_ZOOM,
+                    any(),
+                )
+            }
+        }
+
+    // ============================================================
     // USER INTERACTION TESTS
     // ============================================================
 
@@ -760,6 +1001,140 @@ class AbstractEventMapTest : KoinTest {
 
             // Then - should call animateCameraToBounds with calculated window bounds
             coEvery { mockMapLibreAdapter.animateCameraToBounds(any(), 0, any()) }
+        }
+
+    // ============================================================
+    // WINDOW MODE CAMERA INITIALIZATION TESTS (iOS Map Fix #3)
+    // ============================================================
+
+    @Test
+    fun setupMap_windowMode_animatesToBoundsFirst() =
+        runTest {
+            // Given: WINDOW mode configuration
+            val config = EventMapConfig(initialCameraPosition = MapCameraPosition.WINDOW)
+            eventMap =
+                TestEventMap(
+                    event = mockEvent,
+                    mapConfig = config,
+                    onLocationUpdate = { },
+                    mockMapLibreAdapter = mockMapLibreAdapter,
+                    mockLocationProvider = mockLocationProvider,
+                )
+
+            // When: Setup map
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then: Should animate to event bounds (ensures tiles are loaded)
+            coVerify {
+                mockMapLibreAdapter.animateCameraToBounds(
+                    testBounds,
+                    0,
+                    any(),
+                )
+            }
+        }
+
+    @Test
+    fun setupMap_windowMode_appliesConstraintsBeforeCameraAnimation() =
+        runTest {
+            // Given: WINDOW mode configuration
+            var constraintsCalled = false
+            var animationCalled = false
+            val orderTracking = mutableListOf<String>()
+
+            every { mockMapLibreAdapter.setBoundsForCameraTarget(any(), any(), any()) } answers {
+                constraintsCalled = true
+                orderTracking.add("constraints")
+            }
+
+            coEvery { mockMapLibreAdapter.animateCameraToBounds(any(), any(), any()) } answers {
+                animationCalled = true
+                orderTracking.add("animation")
+                thirdArg<MapCameraCallback?>()?.onFinish()
+            }
+
+            val config = EventMapConfig(initialCameraPosition = MapCameraPosition.WINDOW)
+            eventMap =
+                TestEventMap(
+                    event = mockEvent,
+                    mapConfig = config,
+                    onLocationUpdate = { },
+                    mockMapLibreAdapter = mockMapLibreAdapter,
+                    mockLocationProvider = mockLocationProvider,
+                )
+
+            // When: Setup map
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then: Constraints should be applied before animation
+            assertTrue(constraintsCalled, "Constraints should be applied")
+            assertTrue(animationCalled, "Animation should be called")
+            assertEquals(
+                listOf("constraints", "animation"),
+                orderTracking,
+                "Constraints must be applied before camera animation",
+            )
+        }
+
+    @Test
+    fun setupMap_windowMode_allowsAutoTargetAfterBoundsAnimation() =
+        runTest {
+            // Given: WINDOW mode with autoTargetUserOnFirstLocation enabled
+            val insidePosition = Position(48.86, 2.35)
+            val mockArea = mockk<WWWEventArea>()
+            coEvery { mockArea.bbox() } returns testBounds
+            coEvery { mockArea.getCenter() } returns testCenter
+            coEvery { mockArea.isPositionWithin(insidePosition) } returns true
+            every { mockArea.bboxIsOverride } returns false
+            every { mockEvent.area } returns mockArea
+
+            val config =
+                EventMapConfig(
+                    initialCameraPosition = MapCameraPosition.WINDOW,
+                    autoTargetUserOnFirstLocation = true,
+                )
+            eventMap =
+                TestEventMap(
+                    event = mockEvent,
+                    mapConfig = config,
+                    onLocationUpdate = { },
+                    mockMapLibreAdapter = mockMapLibreAdapter,
+                    mockLocationProvider = mockLocationProvider,
+                )
+
+            // When: Setup map and then provide user position
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+            testScope.testScheduler.advanceUntilIdle()
+
+            // When: User position arrives
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, insidePosition)
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then: Should first animate to bounds, then auto-target user
+            coVerify {
+                // First: Bounds animation
+                mockMapLibreAdapter.animateCameraToBounds(testBounds, 0, any())
+                // Then: Auto-target user
+                mockMapLibreAdapter.animateCamera(
+                    insidePosition,
+                    WWWGlobals.MapDisplay.TARGET_USER_ZOOM,
+                    any(),
+                )
+            }
         }
 
     @Test
