@@ -565,7 +565,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
 				"EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE[sdk=iphoneos*]" = NO;
 				"EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE[sdk=iphonesimulator*]" = NO;
@@ -578,10 +578,10 @@
 				INFOPLIST_KEY_CADisableMinimumFrameDurationOnPhone = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = WorldWideWaves;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "WorldWideWaves needs your location to determine when you're within wave events and coordinate synchronized participation with others.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "WorldWideWaves needs your location to determine when you're within wave events and coordinate synchronized participation with others.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -609,7 +609,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = NO;
 				"EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE[sdk=iphoneos*]" = NO;
 				"EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE[sdk=iphonesimulator*]" = NO;
@@ -622,10 +622,10 @@
 				INFOPLIST_KEY_CADisableMinimumFrameDurationOnPhone = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = WorldWideWaves;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "WorldWideWaves needs your location to determine when you're within wave events and coordinate synchronized participation with others.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "WorldWideWaves needs your location to determine when you're within wave events and coordinate synchronized participation with others.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

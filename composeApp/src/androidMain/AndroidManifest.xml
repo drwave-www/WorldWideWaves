@@ -18,9 +18,6 @@
     <uses-feature android:name="android.software.leanback" android:required="false" />
     <uses-feature android:name="android.hardware.type.television" android:required="false" />
 
-    <!-- Explicitly exclude Wear OS -->
-    <uses-feature android:name="android.hardware.type.watch" android:required="false" />
-
     <!-- Explicitly exclude Android Auto -->
     <uses-feature android:name="android.hardware.type.automotive" android:required="false" />
 
