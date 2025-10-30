@@ -50,7 +50,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -76,6 +79,7 @@ import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedExtraPrimaryColoredBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
+import com.worldwidewaves.shared.ui.utils.findClickableLinks
 import com.worldwidewaves.shared.ui.utils.focusIndicator
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.StringResource
@@ -249,35 +253,18 @@ private fun createClickableText(
     val linkColor = sharedQuinaryColoredBoldTextStyle(FAQ.RULE_ANSWER_FONTSIZE).color
 
     return buildAnnotatedString {
-        // Pattern to match URLs (http/https) and email addresses
-        val urlPattern = Regex("(https?://[^\\s]+)")
-        val emailPattern = Regex("([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})")
-
+        val links = findClickableLinks(text)
         var currentIndex = 0
-        val matches = mutableListOf<Pair<IntRange, String>>()
-
-        // Find all URL matches
-        urlPattern.findAll(text).forEach { matchResult ->
-            matches.add(matchResult.range to matchResult.value)
-        }
-
-        // Find all email matches
-        emailPattern.findAll(text).forEach { matchResult ->
-            matches.add(matchResult.range to "mailto:${matchResult.value}")
-        }
-
-        // Sort matches by start position
-        matches.sortBy { it.first.first }
 
         // Build annotated string
-        matches.forEach { (range, url) ->
+        links.forEach { link ->
             // Add text before the link
-            if (currentIndex < range.first) {
-                append(text.substring(currentIndex, range.first))
+            if (currentIndex < link.range.first) {
+                append(text.substring(currentIndex, link.range.first))
             }
 
             // Add the clickable link
-            pushStringAnnotation(tag = "URL", annotation = url)
+            pushStringAnnotation(tag = "URL", annotation = link.url)
             withStyle(
                 style =
                     SpanStyle(
@@ -285,11 +272,11 @@ private fun createClickableText(
                         textDecoration = TextDecoration.Underline,
                     ),
             ) {
-                append(text.substring(range))
+                append(text.substring(link.range))
             }
             pop()
 
-            currentIndex = range.last + 1
+            currentIndex = link.range.last + 1
         }
 
         // Add remaining text
@@ -351,6 +338,11 @@ private fun FAQItem(
                             onUrlOpen(annotation.item)
                         }
                 },
+                modifier =
+                    Modifier.semantics {
+                        role = Role.Button
+                        contentDescription = "FAQ answer with clickable links"
+                    },
             )
             if (showSimulateButton) {
                 Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
