@@ -164,15 +164,35 @@ suspend fun getMapFileAbsolutePath(
 
         Log.d("MapStore", "getMapFileAbsolutePath: Checking cache at $dataPath")
 
-        // cache hit
-        if (platformFileExists(dataPath) &&
-            platformFileExists(meta) &&
-            runCatching { platformReadText(meta) }.getOrNull() == stamp
-        ) {
-            Log.i("MapStore", "getMapFileAbsolutePath: Cache HIT for $eventId.$extension -> $dataPath")
-            return dataPath
+        // Check if data file exists first
+        val dataFileExists = platformFileExists(dataPath)
+
+        if (dataFileExists) {
+            // Data file exists - check metadata
+            val metaExists = platformFileExists(meta)
+            val storedStamp = if (metaExists) runCatching { platformReadText(meta) }.getOrNull() else null
+
+            if (storedStamp == stamp) {
+                // Perfect cache hit - version matches
+                Log.i("MapStore", "getMapFileAbsolutePath: Cache HIT for $eventId.$extension -> $dataPath")
+                return dataPath
+            } else if (storedStamp != null && storedStamp.isNotEmpty()) {
+                // Cache exists with old version stamp - migrate to current version
+                Log.i("MapStore", "getMapFileAbsolutePath: Migrating cache from version $storedStamp to $stamp for $eventId.$extension")
+                platformWriteText(meta, stamp)
+                if (extension == MapFileExtension.GEOJSON) platformInvalidateGeoJson(eventId)
+                Log.i("MapStore", "getMapFileAbsolutePath: Cache migrated successfully -> $dataPath")
+                return dataPath
+            } else if (!metaExists) {
+                // Data file exists but no metadata - create metadata
+                Log.i("MapStore", "getMapFileAbsolutePath: Creating missing metadata for existing cache $eventId.$extension")
+                platformWriteText(meta, stamp)
+                if (extension == MapFileExtension.GEOJSON) platformInvalidateGeoJson(eventId)
+                Log.i("MapStore", "getMapFileAbsolutePath: Metadata created -> $dataPath")
+                return dataPath
+            }
         }
-        Log.d("MapStore", "getMapFileAbsolutePath: Cache MISS for $eventId.$extension (exists=${platformFileExists(dataPath)})")
+        Log.d("MapStore", "getMapFileAbsolutePath: Cache MISS for $eventId.$extension (exists=$dataFileExists)")
 
         // downloads disallowed → try copying from currently-visible bundle/split (no mount)
         if (!MapDownloadGate.isAllowed(eventId)) {

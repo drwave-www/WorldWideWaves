@@ -170,14 +170,30 @@ class IosEventMap(
                 }
 
             var styleURL by remember { mutableStateOf<String?>(null) }
+            var styleLoadError by remember { mutableStateOf<String?>(null) }
+            val maxRetries = 3
 
             LaunchedEffect(event.id, downloadState.isAvailable) {
-                styleURL = event.map.getStyleUri()
+                // Reset error state on new attempt
+                styleLoadError = null
+                styleURL = null
 
-                // Retry once if null (matches Android pattern)
-                if (styleURL == null) {
-                    delay(100)
+                // Try to load style with retries
+                var retryCount = 0
+                while (retryCount < maxRetries && styleURL == null && downloadState.isAvailable) {
                     styleURL = event.map.getStyleUri()
+
+                    if (styleURL == null) {
+                        retryCount++
+                        if (retryCount < maxRetries) {
+                            delay((100 * retryCount).toLong()) // Progressive backoff
+                        }
+                    }
+                }
+
+                // If still null after retries, set error state
+                if (styleURL == null && downloadState.isAvailable) {
+                    styleLoadError = "Failed to load map style after $maxRetries attempts. Map files may be corrupted."
                 }
 
                 // Register setupMap() to be called after style loads
@@ -216,6 +232,22 @@ class IosEventMap(
                             modifier = Modifier.fillMaxSize(),
                         )
                     }
+                }
+
+                styleLoadError != null -> {
+                    // Style loading failed after retries
+                    MapErrorOverlay(
+                        errorMessage = styleLoadError!!,
+                        onRetry = {
+                            // Reset error and retry
+                            MainScope().launch {
+                                styleLoadError = null
+                                setupMapCalled = false
+                                event.map.clearStyleUriCache()
+                                downloadCoordinator.autoDownloadIfNeeded(event.id, autoDownload = true)
+                            }
+                        },
+                    )
                 }
 
                 downloadState.isDownloading && downloadState.error == null -> {

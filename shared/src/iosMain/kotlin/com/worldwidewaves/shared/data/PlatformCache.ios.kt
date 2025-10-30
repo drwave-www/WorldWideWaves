@@ -28,12 +28,9 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import platform.Foundation.NSBundle
 import platform.Foundation.NSCachesDirectory
 import platform.Foundation.NSData
-import platform.Foundation.NSDate
 import platform.Foundation.NSFileManager
-import platform.Foundation.NSFileModificationDate
 import platform.Foundation.NSString
 import platform.Foundation.NSTemporaryDirectory
 import platform.Foundation.NSURL
@@ -43,7 +40,6 @@ import platform.Foundation.create
 import platform.Foundation.stringByAppendingPathComponent
 import platform.Foundation.stringByDeletingLastPathComponent
 import platform.Foundation.stringWithContentsOfFile
-import platform.Foundation.timeIntervalSince1970
 import platform.Foundation.writeToFile
 
 private fun cacheRoot(): String {
@@ -105,8 +101,11 @@ actual suspend fun cacheDeepFile(fileName: String) {
 }
 
 /**
- * iOS "staleness": compare our metadata timestamp to the bundle's modification time.
+ * iOS "staleness": compare our metadata version stamp to the current app version.
  * If no data file or metadata exists, it's stale.
+ *
+ * This uses version stamps (e.g., "1.0+7") instead of bundle modification time
+ * to prevent cached maps from being invalidated on every app update.
  */
 actual fun isCachedFileStale(fileName: String): Boolean {
     val root = cacheRoot()
@@ -115,15 +114,17 @@ actual fun isCachedFileStale(fileName: String): Boolean {
 
     val metaPath = joinPath(root, "$fileName.metadata")
     val metaText = NSString.stringWithContentsOfFile(metaPath, NSUTF8StringEncoding, null)
-    val cachedTime = metaText?.toLongOrNull() ?: 0L
 
-    // Use bundle path modification time as a proxy for "app updated"
-    val bundlePath = NSBundle.mainBundle.bundlePath
-    val attrs = NSFileManager.defaultManager.attributesOfItemAtPath(bundlePath, null)
-    val modDate = attrs?.get(NSFileModificationDate) as? NSDate
-    val appUpdateMs = ((modDate?.timeIntervalSince1970 ?: 0.0) * 1000.0).toLong()
+    // If no metadata exists, cache is stale
+    if (metaText == null || metaText.isEmpty()) return true
 
-    return appUpdateMs > cachedTime
+    // Get current app version stamp (from MapStore.ios.kt)
+    val currentStamp =
+        com.worldwidewaves.shared.data
+            .platformAppVersionStamp()
+
+    // Compare version stamps - cache is stale if they don't match
+    return metaText != currentStamp
 }
 
 actual fun updateCacheMetadata(fileName: String) {
@@ -135,7 +136,11 @@ actual fun updateCacheMetadata(fileName: String) {
         attributes = null,
         error = null,
     )
+    // Write version stamp instead of timestamp for consistency with MapStore
+    val versionStamp =
+        com.worldwidewaves.shared.data
+            .platformAppVersionStamp()
     NSString
-        .create(string = "${NSDate().timeIntervalSince1970.toLong() * 1000}")
+        .create(string = versionStamp)
         .writeToFile(metaPath, true, NSUTF8StringEncoding, null)
 }

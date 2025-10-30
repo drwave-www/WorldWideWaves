@@ -163,13 +163,18 @@ class WWWEventMap(
         val spriteAndGlyphsPath = result.third
 
         if (mbtilesFilePath == null) {
-            Log.w("WWWEventMap", "getStyleUri: MBTiles file path is null for event ${event.id}")
+            Log.e(
+                "WWWEventMap",
+                "getStyleUri: MBTiles file path is null for event ${event.id} - map files may not be downloaded or cache may be corrupted",
+            )
+            Log.e("WWWEventMap", "getStyleUri: Failed to generate style URI - returning null")
             return null
         }
         Log.i("WWWEventMap", "getStyleUri: MBTiles path = $mbtilesFilePath")
 
         if (geojsonFilePath == null) {
-            Log.w("WWWEventMap", "getStyleUri: GeoJSON file path is null for event ${event.id}")
+            Log.e("WWWEventMap", "getStyleUri: GeoJSON file path is null for event ${event.id} - map data may not be available")
+            Log.e("WWWEventMap", "getStyleUri: Failed to generate style URI - returning null")
             return null
         }
         Log.i("WWWEventMap", "getStyleUri: GeoJSON path = $geojsonFilePath")
