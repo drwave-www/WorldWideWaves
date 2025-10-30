@@ -30,6 +30,7 @@ import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.runBlocking
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -83,7 +84,8 @@ class WWWPlatform(
     }
 
     fun setSimulation(simulation: WWWSimulation) {
-        Log.i(::setSimulation.name, "Set simulation to ${simulation.now()} and ${simulation.getUserPosition()}")
+        val simulationTime = runBlocking { simulation.now() }
+        Log.i(::setSimulation.name, "Set simulation to $simulationTime and ${simulation.getUserPosition()}")
         _simulation = simulation
         // Update PositionManager with simulation position
         positionManager?.updatePosition(PositionManager.PositionSource.SIMULATION, simulation.getUserPosition())

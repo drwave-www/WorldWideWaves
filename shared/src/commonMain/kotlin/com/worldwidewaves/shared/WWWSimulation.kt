@@ -91,9 +91,10 @@ class WWWSimulation(
 
     /**
      * Get the current simulated time.
+     * Thread-safe: Uses mutex to ensure consistent reads of speed and checkpoint.
      * @return The current instant in the simulation timeline
      */
-    fun now(): Instant = calculateCurrentTime()
+    suspend fun now(): Instant = speedMutex.withLock { calculateCurrentTime() }
 
     /**
      * Get the user's position.
