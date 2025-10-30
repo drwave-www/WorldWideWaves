@@ -32,7 +32,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedButton
@@ -56,11 +56,12 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.worldwidewaves.shared.MokoRes
@@ -242,43 +243,40 @@ private fun ShowRulesHierarchy() {
 }
 
 /**
- * Creates an AnnotatedString with clickable URLs and email addresses.
+ * Creates an AnnotatedString with clickable URLs and email addresses using LinkAnnotation.
  * URLs and emails are styled with underline and made clickable.
+ * Uses modern LinkAnnotation API for better accessibility support.
  */
 @Composable
-private fun createClickableText(text: String): AnnotatedString {
+private fun createClickableText(
+    text: String,
+    onUrlOpen: (String) -> Unit,
+): AnnotatedString {
     val linkColor = sharedQuinaryColoredBoldTextStyle(FAQ.RULE_ANSWER_FONTSIZE).color
+    val links = findClickableLinks(text)
 
     return buildAnnotatedString {
-        val links = findClickableLinks(text)
-        var currentIndex = 0
+        // First append all the text
+        append(text)
 
-        // Build annotated string
+        // Then add link annotations at the correct positions
         links.forEach { link ->
-            // Add text before the link
-            if (currentIndex < link.range.first) {
-                append(text.substring(currentIndex, link.range.first))
-            }
-
-            // Add the clickable link
-            pushStringAnnotation(tag = "URL", annotation = link.url)
-            withStyle(
-                style =
-                    SpanStyle(
-                        color = linkColor,
-                        textDecoration = TextDecoration.Underline,
-                    ),
-            ) {
-                append(text.substring(link.range))
-            }
-            pop()
-
-            currentIndex = link.range.last + 1
-        }
-
-        // Add remaining text
-        if (currentIndex < text.length) {
-            append(text.substring(currentIndex))
+            val linkAnnotation =
+                LinkAnnotation.Clickable(
+                    tag = "URL",
+                    styles =
+                        TextLinkStyles(
+                            style =
+                                SpanStyle(
+                                    color = linkColor,
+                                    textDecoration = TextDecoration.Underline,
+                                ),
+                        ),
+                    linkInteractionListener = {
+                        onUrlOpen(link.url)
+                    },
+                )
+            addLink(linkAnnotation, link.range.first, link.range.last + 1)
         }
     }
 }
@@ -318,19 +316,11 @@ private fun FAQItem(
         if (expandedFaqItem == itemIndex) {
             Spacer(modifier = Modifier.size(SPACER_SMALL_SIZE.dp))
             val answerText = stringResource(answerResource)
-            val annotatedString = createClickableText(text = answerText)
+            val annotatedString = createClickableText(text = answerText, onUrlOpen = onUrlOpen)
 
-            ClickableText(
+            BasicText(
                 text = annotatedString,
                 style = sharedCommonJustifiedTextStyle(FAQ.RULE_ANSWER_FONTSIZE),
-                onClick = { offset ->
-                    annotatedString
-                        .getStringAnnotations(tag = "URL", start = offset, end = offset)
-                        .firstOrNull()
-                        ?.let { annotation ->
-                            onUrlOpen(annotation.item)
-                        }
-                },
                 modifier =
                     Modifier.semantics {
                         role = Role.Button

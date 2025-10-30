@@ -414,7 +414,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         #endif
 
         do {
-            try LocalizationBridgeKt.notifyLocaleChanged()
+            try LocalizationBridge_iosKt.notifyLocaleChanged()
             WWWLog.i(tag, "Locale change notified to Kotlin layer")
         } catch {
             WWWLog.e(tag, "Failed to notify locale change", error: error)
