@@ -1427,6 +1427,56 @@ class AbstractEventMapTest : KoinTest {
         }
 
     // ============================================================
+    // BOUNDS PRELOADING TESTS
+    // ============================================================
+
+    @Test
+    fun setupMap_initializesWithoutCrashingWhenBoundsPreloaded() =
+        runTest {
+            // Given - Event area bbox should be preloaded during setupMap
+            // This test verifies the fix for issue where world bounds (-90,-180 to 90,180)
+            // were used as fallback when GeoJSON hadn't loaded yet
+
+            // When
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then - Should complete without exceptions
+            // The bounds preloading happens asynchronously, so we verify setup completes
+            verify { mockLocationProvider.startLocationUpdates(any()) }
+        }
+
+    @Test
+    fun setupMap_windowMode_initializesCorrectlyWithBoundsPreloading() =
+        runTest {
+            // Given - WINDOW mode requires valid bounds for area checks
+            // This test ensures bounds are available before position updates start
+            val windowModeMap =
+                TestEventMap(
+                    event = mockEvent,
+                    mapConfig = EventMapConfig(initialCameraPosition = MapCameraPosition.WINDOW),
+                    onLocationUpdate = { },
+                    mockMapLibreAdapter = mockMapLibreAdapter,
+                    mockLocationProvider = mockLocationProvider,
+                )
+
+            // When
+            windowModeMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then - Should complete setup without using fallback world bounds
+            coVerify { mockMapLibreAdapter.animateCameraToBounds(testBounds, any(), any()) }
+        }
+
+    // ============================================================
     // TEST IMPLEMENTATION
     // ============================================================
 

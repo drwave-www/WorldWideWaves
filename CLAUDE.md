@@ -397,6 +397,7 @@ A file/module is production-ready when:
 
 ### Critical Rules
 
+- **Commit** your work, always
 - **Use agents** for complex multi-step tasks
 - **Check all implications** when changing code (callers, documentation, signatures)
 - **Clean temporary files** after development
