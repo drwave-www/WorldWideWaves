@@ -519,12 +519,21 @@ class AndroidEventMap(
                         mapState.setMapError(false)
                     }
 
-                    // Read isMapAvailable to create dependency (update block re-runs when it changes)
-                    // but don't require it to be true - map can load from cache
-                    @Suppress("UNUSED_VARIABLE")
-                    val mapAvailabilityTrigger = mapState.isMapAvailable
+                    // Check mapFeatureState directly to determine if map files are ready
+                    // This eliminates race condition with async isMapAvailable state updates
+                    // Reading mapFeatureState creates Compose dependency for recomposition
+                    val mapFilesReady =
+                        when (mapState.mapFeatureState) {
+                            is MapFeatureState.Installed, // Just completed download
+                            is MapFeatureState.Available, // Already cached from previous session
+                            -> true
+                            else -> false // Downloading, NotAvailable, Failed, etc.
+                        }
 
-                    if (!mapState.isMapLoaded && !mapState.initStarted) {
+                    // Only attempt to initialize map when tiles are actually available (downloaded)
+                    // Attempting to load before download completes causes gray screen (no tiles)
+                    // and wrong camera position (moves to bounds before tiles exist)
+                    if (!mapState.isMapLoaded && !mapState.initStarted && mapFilesReady) {
                         mapState.setInitStarted(true)
                         loadMap(
                             context = context,
