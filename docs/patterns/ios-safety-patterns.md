@@ -146,6 +146,80 @@ object MapDownloadGate {
 }
 ```
 
+## Cinterop Memory Safety Patterns
+
+> **Priority**: CRITICAL | **Applies to**: iOS platform code using Foundation/CoreLocation/POSIX APIs
+
+### Pattern: Memory Pinning for C Interop
+
+**Problem**: Kotlin GC can move objects; C expects stable memory addresses.
+
+**Solution**: Use `usePinned { }` to pin ByteArray before passing to C APIs.
+
+```kotlin
+// ✅ CORRECT
+bytes.usePinned { pinned ->
+    NSData.create(bytes = pinned.addressOf(0), length = bytes.size.toULong())
+        .writeToFile(fullPath, atomically = true)
+}
+
+// ❌ WRONG: No pinning
+val nsData = NSData.create(bytes = bytes[0], length = bytes.size.toULong())  // CRASH!
+```
+
+**Used in**: `PlatformCache.ios.kt`, `Typography.ios.kt`
+
+### Pattern: useContents for Struct Access
+
+**Problem**: iOS structs (CLLocationCoordinate2D, CGRect) are value types in managed memory.
+
+**Solution**: Use `useContents { }` to safely access struct fields.
+
+```kotlin
+// ✅ CORRECT
+location.coordinate.useContents {
+    val position = Position(
+        lat = latitude,
+        lng = longitude
+    )
+}
+
+// ❌ WRONG: Direct access
+val lat = location.coordinate.latitude  // UNDEFINED BEHAVIOR!
+```
+
+**Used in**: `IosLocationProvider.kt`
+
+### Pattern: addressOf Pointer Safety
+
+**Problem**: Pointers are only valid within pinned scope.
+
+**Solution**: Complete all C operations inside `usePinned { }` block.
+
+```kotlin
+// ✅ CORRECT: Pointer used within scope
+bytes.usePinned { pinned ->
+    val pointer = pinned.addressOf(0)
+    fread(pointer, 1u, size.toULong(), file)  // Safe
+}
+
+// ❌ WRONG: Escaping pointer
+val unsafePointer = bytes.usePinned { it.addressOf(0) }
+// Pointer is now INVALID!
+```
+
+**Used in**: `Typography.ios.kt` (font loading)
+
+### Verification
+
+```bash
+./scripts/dev/verification/verify-ios-safety.sh  # Checks 8-11 validate cinterop
+```
+
+**Related Documentation**:
+- [Cinterop Memory Safety Patterns](../ios/cinterop-memory-safety-patterns.md) - Complete guide
+- [Platform API Usage Guide](../ios/platform-api-usage-guide.md) - Threading requirements
+
 ## Kotlin-Swift Exception Handling
 
 ```kotlin
@@ -192,9 +266,14 @@ rg -n -A 3 "init\s*\{" shared/src/commonMain --type kotlin \
 | Init DI access | `init { get<T>() }` | Constructor injection |
 | Init coroutine | `init { scope.launch }` | Suspend initialize() |
 | Property dispatcher | `val scope = CoroutineScope(Main)` | Lazy initialization |
+| Unpinned ByteArray | `NSData.create(bytes = bytes[0], ...)` | Use `bytes.usePinned { }` |
+| Direct struct access | `location.coordinate.latitude` | Use `coordinate.useContents { }` |
+| Escaping pointer | `val ptr = usePinned { addressOf(0) }` | Keep all C ops inside pinned block |
 
 ## Reference
 
 - **Tracking**: docs/ios/ios-violation-tracker.md (historical violations)
-- **Verification**: ./scripts/verify-ios-safety.sh
+- **Verification**: ./scripts/dev/verification/verify-ios-safety.sh
+- **Cinterop Patterns**: docs/ios/cinterop-memory-safety-patterns.md (complete guide)
+- **Platform APIs**: docs/ios/platform-api-usage-guide.md (threading requirements)
 - **Status**: All 11 critical violations fixed (October 2025)
