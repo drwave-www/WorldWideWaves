@@ -25,7 +25,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import platform.Foundation.NSBundleResourceRequest
 import platform.Foundation.NSOperationQueue
 
@@ -67,13 +69,15 @@ class IosMapAvailabilityChecker : MapAvailabilityChecker {
     override fun trackMaps(mapIds: Collection<String>) {
         if (mapIds.isEmpty()) return
 
-        // Thread-safe synchronous update
-        // StateFlow updates are thread-safe on Kotlin/Native, no need for Main thread dispatch
+        // Thread-safe synchronous update using runBlocking + mutex
+        // StateFlow updates are thread-safe on Kotlin/Native
         val updated = _mapStates.value.toMutableMap()
 
-        synchronized(mutex) {
-            tracked += mapIds
-            for (id in mapIds) updated[id] = isMapDownloaded(id)
+        runBlocking {
+            mutex.withLock {
+                tracked += mapIds
+                for (id in mapIds) updated[id] = isMapDownloaded(id)
+            }
         }
 
         _mapStates.value = updated
@@ -87,7 +91,10 @@ class IosMapAvailabilityChecker : MapAvailabilityChecker {
     }
 
     override fun refreshAvailability() {
-        val trackedCopy = synchronized(mutex) { tracked.toSet() }
+        val trackedCopy =
+            runBlocking {
+                mutex.withLock { tracked.toSet() }
+            }
         if (trackedCopy.isEmpty()) return
 
         val updated = mutableMapOf<String, Boolean>()

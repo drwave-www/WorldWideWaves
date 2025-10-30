@@ -1156,8 +1156,9 @@ extension MapLibreViewWrapper: MLNMapViewDelegate {
             return true
         }
 
-        // Tolerance for floating-point precision (~1 meter)
-        let epsilon = 0.00001
+        // Tolerance for smooth gesture handling at boundaries (~55 meters)
+        // Increased from 0.00001 to prevent sticky/blocking behavior when panning at edges
+        let epsilon = 0.0005
 
         // Check if camera center exceeds constraint bounds
         let cameraPosition = newCamera.centerCoordinate
