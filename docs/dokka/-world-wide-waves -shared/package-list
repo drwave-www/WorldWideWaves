@@ -908,6 +908,13 @@ $dokka.location:com.worldwidewaves.shared.format/DateTimeFormats/timeShort/#kotl
 $dokka.location:com.worldwidewaves.shared.lifecycle////PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.lifecycle/index.html
 $dokka.location:com.worldwidewaves.shared.lifecycle//collectAsStateSafe/kotlinx.coroutines.flow.Flow[TypeParam(bounds=[kotlin.Any?])]#TypeParam(bounds=[kotlin.Any?])/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.lifecycle/collect-as-state-safe.html
 $dokka.location:com.worldwidewaves.shared.lifecycle//isStarted/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.lifecycle/is-started.html
+$dokka.location:com.worldwidewaves.shared.localization////PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.localization/index.html
+$dokka.location:com.worldwidewaves.shared.localization//getPlatformLocaleKey/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.localization/get-platform-locale-key.html
+$dokka.location:com.worldwidewaves.shared.localization//notifyLocaleChanged/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.localization/notify-locale-changed.html
+$dokka.location:com.worldwidewaves.shared.localization/LocalizationManager///PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.localization/-localization-manager/index.html
+$dokka.location:com.worldwidewaves.shared.localization/LocalizationManager/LocalizationManager/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.localization/-localization-manager/-localization-manager.html
+$dokka.location:com.worldwidewaves.shared.localization/LocalizationManager/localeChanges/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.localization/-localization-manager/locale-changes.html
+$dokka.location:com.worldwidewaves.shared.localization/LocalizationManager/notifyLocaleChanged/#kotlin.String/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.localization/-localization-manager/notify-locale-changed.html
 $dokka.location:com.worldwidewaves.shared.map////PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.map/index.html
 $dokka.location:com.worldwidewaves.shared.map//createNativeMapViewController/#com.worldwidewaves.shared.events.IWWWEvent#kotlin.String#kotlin.Boolean#kotlin.String?/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.map/create-native-map-view-controller.html
 $dokka.location:com.worldwidewaves.shared.map//registerNativeMapViewProvider/#com.worldwidewaves.shared.map.NativeMapViewProvider/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.map/register-native-map-view-provider.html
@@ -1653,13 +1660,20 @@ $dokka.location:com.worldwidewaves.shared.ui.theme/ExtendedColorScheme/quaternar
 $dokka.location:com.worldwidewaves.shared.ui.theme/ExtendedColorScheme/quinary/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui.theme/-extended-color-scheme/quinary.html
 $dokka.location:com.worldwidewaves.shared.ui.utils////PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui.utils/index.html
 $dokka.location:com.worldwidewaves.shared.ui.utils//AutoResizeSingleLineText/#kotlin.String#androidx.compose.ui.text.TextStyle#androidx.compose.ui.graphics.Color#androidx.compose.ui.text.style.TextAlign#kotlin.Float#kotlin.Float#androidx.compose.ui.Modifier/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui.utils/-auto-resize-single-line-text.html
+$dokka.location:com.worldwidewaves.shared.ui.utils//findClickableLinks/#kotlin.String/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui.utils/find-clickable-links.html
 $dokka.location:com.worldwidewaves.shared.ui.utils//focusIndicator/androidx.compose.ui.Modifier#androidx.compose.foundation.interaction.MutableInteractionSource#androidx.compose.ui.graphics.Color#androidx.compose.ui.unit.Dp/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui.utils/focus-indicator.html
 $dokka.location:com.worldwidewaves.shared.ui.utils//formatDuration/#kotlin.time.Duration/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui.utils/format-duration.html
 $dokka.location:com.worldwidewaves.shared.ui.utils//formatDurationMinutes/#kotlin.Long?#kotlin.String/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui.utils/format-duration-minutes.html
 $dokka.location:com.worldwidewaves.shared.ui.utils//getIosSafeClock/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui.utils/get-ios-safe-clock.html
+$dokka.location:com.worldwidewaves.shared.ui.utils//getIosSafeLocalizationManager/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui.utils/get-ios-safe-localization-manager.html
 $dokka.location:com.worldwidewaves.shared.ui.utils//getIosSafePlatform/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui.utils/get-ios-safe-platform.html
+$dokka.location:com.worldwidewaves.shared.ui.utils/ClickableLink///PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui.utils/-clickable-link/index.html
+$dokka.location:com.worldwidewaves.shared.ui.utils/ClickableLink/ClickableLink/#kotlin.ranges.IntRange#kotlin.String/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui.utils/-clickable-link/-clickable-link.html
+$dokka.location:com.worldwidewaves.shared.ui.utils/ClickableLink/range/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui.utils/-clickable-link/range.html
+$dokka.location:com.worldwidewaves.shared.ui.utils/ClickableLink/url/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui.utils/-clickable-link/url.html
 $dokka.location:com.worldwidewaves.shared.ui.utils/IosSafeDI///PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui.utils/-ios-safe-d-i/index.html
 $dokka.location:com.worldwidewaves.shared.ui.utils/IosSafeDI/clock/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui.utils/-ios-safe-d-i/clock.html
+$dokka.location:com.worldwidewaves.shared.ui.utils/IosSafeDI/localizationManager/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui.utils/-ios-safe-d-i/localization-manager.html
 $dokka.location:com.worldwidewaves.shared.ui.utils/IosSafeDI/platform/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui.utils/-ios-safe-d-i/platform.html
 $dokka.location:com.worldwidewaves.shared.ui////PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui/index.html
 $dokka.location:com.worldwidewaves.shared.ui//toIosObservable/kotlinx.coroutines.flow.StateFlow[TypeParam(bounds=[kotlin.Any?])]#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui/to-ios-observable.html
@@ -1668,6 +1682,10 @@ $dokka.location:com.worldwidewaves.shared.ui/AboutTabScreen///PointingToDeclarat
 $dokka.location:com.worldwidewaves.shared.ui/AboutTabScreen/AboutTabScreen/#com.worldwidewaves.shared.WWWPlatform/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui/-about-tab-screen/-about-tab-screen.html
 $dokka.location:com.worldwidewaves.shared.ui/AboutTabScreen/Screen/#com.worldwidewaves.shared.PlatformEnabler#androidx.compose.ui.Modifier/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui/-about-tab-screen/-screen.html
 $dokka.location:com.worldwidewaves.shared.ui/AboutTabScreen/name/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui/-about-tab-screen/name.html
+$dokka.location:com.worldwidewaves.shared.ui/ActionMessageScreen///PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui/-action-message-screen/index.html
+$dokka.location:com.worldwidewaves.shared.ui/ActionMessageScreen/ActionMessageScreen/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui/-action-message-screen/-action-message-screen.html
+$dokka.location:com.worldwidewaves.shared.ui/ActionMessageScreen/Screen/#com.worldwidewaves.shared.PlatformEnabler#androidx.compose.ui.Modifier/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui/-action-message-screen/-screen.html
+$dokka.location:com.worldwidewaves.shared.ui/ActionMessageScreen/name/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui/-action-message-screen/name.html
 $dokka.location:com.worldwidewaves.shared.ui/BaseViewModel///PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui/-base-view-model/index.html
 $dokka.location:com.worldwidewaves.shared.ui/BaseViewModel/BaseViewModel/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui/-base-view-model/-base-view-model.html
 $dokka.location:com.worldwidewaves.shared.ui/BaseViewModel/clear/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.ui/-base-view-model/clear.html
@@ -1855,7 +1873,7 @@ $dokka.location:com.worldwidewaves.shared.viewmodels/IosMapViewModel/downloadMap
 $dokka.location:com.worldwidewaves.shared.viewmodels/IosMapViewModel/featureState/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.viewmodels/-ios-map-view-model/feature-state.html
 $dokka.location:com.worldwidewaves.shared.viewmodels/MapDownloadCoordinator.Companion///PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.viewmodels/-map-download-coordinator/-companion/index.html
 $dokka.location:com.worldwidewaves.shared.viewmodels/MapDownloadCoordinator///PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.viewmodels/-map-download-coordinator/index.html
-$dokka.location:com.worldwidewaves.shared.viewmodels/MapDownloadCoordinator/MapDownloadCoordinator/#com.worldwidewaves.shared.viewmodels.PlatformMapDownloadAdapter/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.viewmodels/-map-download-coordinator/-map-download-coordinator.html
+$dokka.location:com.worldwidewaves.shared.viewmodels/MapDownloadCoordinator/MapDownloadCoordinator/#com.worldwidewaves.shared.viewmodels.PlatformMapDownloadAdapter#com.worldwidewaves.shared.events.data.GeoJsonDataProvider?/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.viewmodels/-map-download-coordinator/-map-download-coordinator.html
 $dokka.location:com.worldwidewaves.shared.viewmodels/MapDownloadCoordinator/cancelDownload/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.viewmodels/-map-download-coordinator/cancel-download.html
 $dokka.location:com.worldwidewaves.shared.viewmodels/MapDownloadCoordinator/checkIfMapIsAvailable/#kotlin.String#kotlin.Boolean/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.viewmodels/-map-download-coordinator/check-if-map-is-available.html
 $dokka.location:com.worldwidewaves.shared.viewmodels/MapDownloadCoordinator/currentMapId/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared.viewmodels/-map-download-coordinator/current-map-id.html
@@ -2151,6 +2169,7 @@ com.worldwidewaves.shared.events.resources
 com.worldwidewaves.shared.events.utils
 com.worldwidewaves.shared.format
 com.worldwidewaves.shared.lifecycle
+com.worldwidewaves.shared.localization
 com.worldwidewaves.shared.map
 com.worldwidewaves.shared.position
 com.worldwidewaves.shared.resources
