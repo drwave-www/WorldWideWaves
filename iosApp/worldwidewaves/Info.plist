@@ -17,6 +17,10 @@
 			</array>
 		</dict>
 	</array>
+	<key>NSOnDemandResourcesInitialInstallTags</key>
+	<array>
+		<string>$(WWW_INITIAL_ODR_TAG_1)</string>
+	</array>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Montserrat-VF.ttf</string>
