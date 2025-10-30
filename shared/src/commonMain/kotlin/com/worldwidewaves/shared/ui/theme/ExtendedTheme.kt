@@ -64,7 +64,10 @@ fun sharedDefaultTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextSty
 
 @Composable
 fun sharedCommonTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
-    sharedDefaultTextStyle(fontSize).copy(fontFamily = AppBodyFontFamily())
+    sharedDefaultTextStyle(fontSize).copy(
+        fontFamily = AppBodyFontFamily(),
+        color = Color.White,
+    )
 
 @Composable
 fun sharedCommonJustifiedTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
