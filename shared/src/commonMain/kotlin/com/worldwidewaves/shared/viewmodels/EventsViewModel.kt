@@ -137,28 +137,31 @@ class EventsViewModel(
         sortedEvents.forEach { event ->
             Log.d("EventsViewModel", "Starting observation for event ${event.id}")
 
+            // Setup simulation speed listeners BEFORE starting observation
+            // This ensures we capture the backup speed before warming begins
+            monitorSimulatedSpeed(event)
+
             // Start event observation for all events
             event.observer.startObservation()
-
-            // Setup simulation speed listeners on DEBUG mode
-            monitorSimulatedSpeed(event)
         }
     }
 
     /**
      * Monitor simulation speed during event phases (DEBUG mode only).
      * Uses viewModelScope for automatic lifecycle management and memory leak prevention.
+     *
+     * IMPORTANT: Must be called BEFORE startObservation() to capture the correct backup speed.
      */
     private fun monitorSimulatedSpeed(event: IWWWEvent) {
-        // Capture the current simulation speed immediately (before warming or hit)
-        var backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
+        // Capture the current simulation speed once at initialization
+        // This must happen before warming starts to get the correct high-speed value
+        val backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
 
         // Handle warming started - using viewModelScope for automatic cleanup
         scope.launch {
             event.observer.isUserWarmingInProgress.collect { isWarmingStarted ->
                 if (isWarmingStarted) {
-                    // Update backup speed when warming starts (in case it changed)
-                    backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
+                    // Set speed to 1 during warming (backup already captured at line 154)
                     platform.getSimulation()?.setSpeed(1)
                 }
             }
