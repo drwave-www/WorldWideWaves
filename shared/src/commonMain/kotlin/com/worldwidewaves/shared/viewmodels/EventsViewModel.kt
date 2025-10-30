@@ -151,6 +151,10 @@ class EventsViewModel(
      * Uses viewModelScope for automatic lifecycle management and memory leak prevention.
      *
      * IMPORTANT: Must be called BEFORE startObservation() to capture the correct backup speed.
+     *
+     * **Fix for multi-event race condition**: When multiple events are active, each event's
+     * warming/hit collectors could interfere with each other. This implementation cancels the
+     * warming collector after hit restoration to prevent speed being reset back to 1.
      */
     private fun monitorSimulatedSpeed(event: IWWWEvent) {
         // Capture the current simulation speed once at initialization
@@ -158,14 +162,16 @@ class EventsViewModel(
         val backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
 
         // Handle warming started - using viewModelScope for automatic cleanup
-        scope.launch {
-            event.observer.isUserWarmingInProgress.collect { isWarmingStarted ->
-                if (isWarmingStarted) {
-                    // Set speed to 1 during warming (backup already captured at line 154)
-                    platform.getSimulation()?.setSpeed(1)
+        // Store the Job so we can cancel it after hit restoration
+        val warmingJob =
+            scope.launch {
+                event.observer.isUserWarmingInProgress.collect { isWarmingStarted ->
+                    if (isWarmingStarted) {
+                        // Set speed to 1 during warming (backup already captured at line 154)
+                        platform.getSimulation()?.setSpeed(1)
+                    }
                 }
             }
-        }
 
         // Handle user has been hit - using viewModelScope for automatic cleanup
         scope.launch {
@@ -175,6 +181,10 @@ class EventsViewModel(
                     launch {
                         delay(WaveTiming.SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * MILLIS_PER_SECOND)
                         platform.getSimulation()?.setSpeed(backupSimulationSpeed)
+
+                        // Cancel warming collector to prevent it from interfering with speed restoration
+                        // This prevents race conditions when multiple events are active
+                        warmingJob.cancel()
                     }
                 }
             }
