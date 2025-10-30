@@ -3,11 +3,11 @@
 
     <!--
         Test manifest for androidInstrumentedTest.
-        Uses the production MainApplication (no android:name means it uses the main app's Application).
-        Registers test-only activities.
+        Registers test-only activities and custom Application for proper MapLibre initialization.
     -->
 
-    <application>
+    <application
+        android:name="com.worldwidewaves.TestApplication">
         <!--
             TestMapActivity: Minimal activity for MapView integration tests.
             Note: Do not specify android:exported="false" or intent-filters here.
