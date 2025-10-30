@@ -23,8 +23,11 @@
 
 package com.worldwidewaves.shared.localization
 
+import com.worldwidewaves.shared.utils.Log
 import platform.Foundation.NSLocale
 import platform.Foundation.preferredLanguages
+
+private const val TAG = "LocalizationManager.ios"
 
 /**
  * iOS implementation of platform locale detection.
@@ -47,16 +50,25 @@ actual fun getPlatformLocaleKey(): String {
     // Get the user's preferred languages (ordered by preference)
     val preferredLanguages = NSLocale.preferredLanguages
 
+    // Debug logging
+    Log.d(TAG, "preferredLanguages = $preferredLanguages")
+    Log.d(TAG, "preferredLanguages.size = ${preferredLanguages.size}")
+
     if (preferredLanguages.isEmpty()) {
+        Log.w(TAG, "No preferred languages found, returning 'en'")
         return "en" // Fallback to English if no preferences available
     }
 
     // First element is the primary language preference (e.g., "fr-FR", "en-US", "ja-JP")
     val primaryLanguage = preferredLanguages.first() as String
+    Log.d(TAG, "primaryLanguage = '$primaryLanguage'")
 
     // Extract language code from locale string (e.g., "fr-FR" -> "fr", "en-US" -> "en")
     // Split on hyphen and take first part
     val languageCode = primaryLanguage.split("-", "_").firstOrNull() ?: "en"
+    Log.d(TAG, "extracted languageCode = '$languageCode'")
 
-    return languageCode.lowercase()
+    val result = languageCode.lowercase()
+    Log.i(TAG, "getPlatformLocaleKey() returning: '$result'")
+    return result
 }
