@@ -74,6 +74,10 @@ class EventsViewModel(
 
     // Exception handler removed - unused in the codebase
 
+    // Simulation speed management for multi-event coordination
+    private var globalBackupSpeed: Int? = null
+    private val warmingEventsCount = MutableStateFlow(0)
+
     // ---------------------------
 
     // ---------------------------
@@ -132,13 +136,22 @@ class EventsViewModel(
         // Check for favorites using use case
         _hasFavorites.value = checkEventFavoritesUseCase.hasFavoriteEvents(sortedEvents)
 
+        // Capture global backup speed ONCE before any event starts observation
+        // This ensures we always restore to the original high speed, not the slowed-down speed
+        if (globalBackupSpeed == null) {
+            globalBackupSpeed = platform.getSimulation()?.speed ?: 1
+            Log.d(
+                "EventsViewModel",
+                "Captured global backup simulation speed: $globalBackupSpeed",
+            )
+        }
+
         // Start observing all events - multiple events can be active simultaneously
         // The user has a single position that needs to be checked against all event areas
         sortedEvents.forEach { event ->
             Log.d("EventsViewModel", "Starting observation for event ${event.id}")
 
             // Setup simulation speed listeners BEFORE starting observation
-            // This ensures we capture the backup speed before warming begins
             monitorSimulatedSpeed(event)
 
             // Start event observation for all events
@@ -150,41 +163,80 @@ class EventsViewModel(
      * Monitor simulation speed during event phases (DEBUG mode only).
      * Uses viewModelScope for automatic lifecycle management and memory leak prevention.
      *
-     * IMPORTANT: Must be called BEFORE startObservation() to capture the correct backup speed.
+     * **Multi-event coordination strategy**:
+     * - Track the number of events currently in warming phase
+     * - Only slow down (speed = 1) when the FIRST event enters warming
+     * - Only restore speed when ALL events exit warming OR when a user is hit
+     * - Use globally captured backup speed to prevent restoring to already-slowed speed
      *
-     * **Fix for multi-event race condition**: When multiple events are active, each event's
-     * warming/hit collectors could interfere with each other. This implementation cancels the
-     * warming collector after hit restoration to prevent speed being reset back to 1.
+     * This prevents race conditions where:
+     * - Event A hits user and restores speed, but Event B is still warming and immediately
+     *   slows it down again
+     * - Event B captures backup speed after Event A has already slowed down, so it restores
+     *   to speed=1 instead of the original high speed
      */
     private fun monitorSimulatedSpeed(event: IWWWEvent) {
-        // Capture the current simulation speed once at initialization
-        // This must happen before warming starts to get the correct high-speed value
-        val backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
+        // Track when this event enters/exits warming phase
+        scope.launch {
+            var wasWarming = false
+            event.observer.isUserWarmingInProgress.collect { isWarming ->
+                if (isWarming && !wasWarming) {
+                    // Event entered warming - increment counter
+                    val count = warmingEventsCount.value + 1
+                    warmingEventsCount.value = count
+                    Log.d(
+                        "EventsViewModel",
+                        "Event ${event.id} entered warming. Total warming events: $count",
+                    )
 
-        // Handle warming started - using viewModelScope for automatic cleanup
-        // Store the Job so we can cancel it after hit restoration
-        val warmingJob =
-            scope.launch {
-                event.observer.isUserWarmingInProgress.collect { isWarmingStarted ->
-                    if (isWarmingStarted) {
-                        // Set speed to 1 during warming (backup already captured at line 154)
+                    // Only set speed to 1 when FIRST event enters warming
+                    if (count == 1) {
                         platform.getSimulation()?.setSpeed(1)
+                        Log.d("EventsViewModel", "Simulation speed set to 1 (warming started)")
                     }
+                    wasWarming = true
+                } else if (!isWarming && wasWarming) {
+                    // Event exited warming - decrement counter
+                    val count = maxOf(0, warmingEventsCount.value - 1)
+                    warmingEventsCount.value = count
+                    Log.d(
+                        "EventsViewModel",
+                        "Event ${event.id} exited warming. Total warming events: $count",
+                    )
+
+                    // Only restore speed when ALL events exit warming
+                    if (count == 0) {
+                        val speedToRestore = globalBackupSpeed ?: 1
+                        platform.getSimulation()?.setSpeed(speedToRestore)
+                        Log.d(
+                            "EventsViewModel",
+                            "All events exited warming. Speed restored to $speedToRestore",
+                        )
+                    }
+                    wasWarming = false
                 }
             }
+        }
 
-        // Handle user has been hit - using viewModelScope for automatic cleanup
+        // Handle user has been hit - restore speed after hit sequence
         scope.launch {
+            var alreadyHit = false
             event.observer.userHasBeenHit.collect { hasBeenHit ->
-                if (hasBeenHit) {
-                    // Restore simulation speed after a delay
+                if (hasBeenHit && !alreadyHit) {
+                    alreadyHit = true
+                    Log.d("EventsViewModel", "Event ${event.id}: user has been hit")
+
+                    // Restore simulation speed after showing the hit sequence
                     launch {
                         delay(WaveTiming.SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * MILLIS_PER_SECOND)
-                        platform.getSimulation()?.setSpeed(backupSimulationSpeed)
 
-                        // Cancel warming collector to prevent it from interfering with speed restoration
-                        // This prevents race conditions when multiple events are active
-                        warmingJob.cancel()
+                        // Restore to global backup speed (not per-event backup)
+                        val speedToRestore = globalBackupSpeed ?: 1
+                        platform.getSimulation()?.setSpeed(speedToRestore)
+                        Log.d(
+                            "EventsViewModel",
+                            "Event ${event.id}: hit sequence complete. Speed restored to $speedToRestore",
+                        )
                     }
                 }
             }
