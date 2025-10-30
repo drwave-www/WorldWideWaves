@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -62,6 +63,7 @@ import com.worldwidewaves.shared.ui.components.global.SplashScreen
 import com.worldwidewaves.shared.ui.components.navigation.ConfigurableTabBarItem
 import com.worldwidewaves.shared.ui.screens.DebugScreen
 import com.worldwidewaves.shared.ui.theme.WorldWideWavesTheme
+import com.worldwidewaves.shared.ui.utils.getIosSafeLocalizationManager
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.delay
@@ -148,6 +150,11 @@ open class MainScreen
         @Composable
         @Throws(Throwable::class)
         open fun Draw() {
+            // Observe locale changes for runtime language switching
+            // When device language changes, UI will recompose with new localized strings
+            val localizationManager = getIosSafeLocalizationManager()
+            val currentLocale by localizationManager.localeChanges.collectAsState()
+
             // Enforce minimum duration for programmatic splash
             LaunchedEffect(Unit) {
                 delay(WWWGlobals.Timing.SPLASH_MIN_DURATION)
@@ -155,76 +162,80 @@ open class MainScreen
                 initialize()
             }
 
-            WorldWideWavesTheme {
-                Surface(
-                    modifier = Modifier.background(MaterialTheme.colorScheme.background).fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background,
-                ) {
-                    // Box to stack main content and simulation-mode overlay
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .windowInsetsPadding(WindowInsets.safeDrawing),
+            // Trigger full recomposition when locale changes
+            // This ensures all stringResource() calls fetch strings in the new language
+            key(currentLocale) {
+                WorldWideWavesTheme {
+                    Surface(
+                        modifier = Modifier.background(MaterialTheme.colorScheme.background).fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background,
                     ) {
-                        var showDebugScreen by remember { mutableStateOf(false) }
-                        // iOS-safe DI: Get debugTabScreen directly in Composable, not via property injection
-                        // Using getKoin() to access Koin safely during composition
-                        // Note: Module registers as nullable type, so we use runCatching to safely retrieve it
-                        val debugTabScreen = remember { runCatching { getKoin().get<DebugTabScreen>() }.getOrNull() }
+                        // Box to stack main content and simulation-mode overlay
+                        Box(
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .windowInsetsPadding(WindowInsets.safeDrawing),
+                        ) {
+                            var showDebugScreen by remember { mutableStateOf(false) }
+                            // iOS-safe DI: Get debugTabScreen directly in Composable, not via property injection
+                            // Using getKoin() to access Koin safely during composition
+                            // Note: Module registers as nullable type, so we use runCatching to safely retrieve it
+                            val debugTabScreen = remember { runCatching { getKoin().get<DebugTabScreen>() }.getOrNull() }
 
-                        val ready by isSplashFinished.collectAsState()
-                        if (ready) {
-                            if (showDebugScreen) {
-                                debugTabScreen?.Screen(platformEnabler, Modifier.fillMaxSize()) ?: run {
-                                    // Fallback debug screen if injection failed
-                                    DebugScreen(
-                                        modifier = Modifier.fillMaxSize(),
-                                    )
+                            val ready by isSplashFinished.collectAsState()
+                            if (ready) {
+                                if (showDebugScreen) {
+                                    debugTabScreen?.Screen(platformEnabler, Modifier.fillMaxSize()) ?: run {
+                                        // Fallback debug screen if injection failed
+                                        DebugScreen(
+                                            modifier = Modifier.fillMaxSize(),
+                                        )
+                                    }
+                                } else {
+                                    Screen()
                                 }
                             } else {
-                                Screen()
+                                SplashScreen()
                             }
-                        } else {
-                            SplashScreen()
-                        }
 
-                        // -----------------------------------------------------------------
-                        //  Global Simulation-Mode chip shown whenever the mode is enabled
-                        // -----------------------------------------------------------------
-                        SimulationModeChip(platform)
+                            // -----------------------------------------------------------------
+                            //  Global Simulation-Mode chip shown whenever the mode is enabled
+                            // -----------------------------------------------------------------
+                            SimulationModeChip(platform)
 
-                        // -----------------------------------------------------------------
-                        //  Floating Debug Icon (green) - bottom right corner
-                        //  Only visible in debug builds
-                        // -----------------------------------------------------------------
-                        if (ready && debugTabScreen != null && platformEnabler.isDebugBuild) {
-                            val windowInfo = LocalWindowInfo.current
-                            val density = LocalDensity.current
-                            val densityScale = density.density
-                            val containerHeightPx = windowInfo.containerSize.height
-                            val screenHeightDp = (containerHeightPx / densityScale).dp
-                            val bottomOffset = screenHeightDp * 0.15f
+                            // -----------------------------------------------------------------
+                            //  Floating Debug Icon (green) - bottom right corner
+                            //  Only visible in debug builds
+                            // -----------------------------------------------------------------
+                            if (ready && debugTabScreen != null && platformEnabler.isDebugBuild) {
+                                val windowInfo = LocalWindowInfo.current
+                                val density = LocalDensity.current
+                                val densityScale = density.density
+                                val containerHeightPx = windowInfo.containerSize.height
+                                val screenHeightDp = (containerHeightPx / densityScale).dp
+                                val bottomOffset = screenHeightDp * 0.15f
 
-                            FloatingActionButton(
-                                onClick = { showDebugScreen = !showDebugScreen },
-                                modifier =
-                                    Modifier
-                                        .align(Alignment.BottomEnd)
-                                        .padding(end = 16.dp, bottom = bottomOffset),
-                                containerColor = UIConstants.DEBUG_BUTTON_COLOR,
-                                shape = CircleShape,
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.BugReport,
-                                    contentDescription = stringResource(MokoRes.strings.accessibility_debug_screen),
-                                    tint = Color.White,
-                                )
+                                FloatingActionButton(
+                                    onClick = { showDebugScreen = !showDebugScreen },
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.BottomEnd)
+                                            .padding(end = 16.dp, bottom = bottomOffset),
+                                    containerColor = UIConstants.DEBUG_BUTTON_COLOR,
+                                    shape = CircleShape,
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.BugReport,
+                                        contentDescription = stringResource(MokoRes.strings.accessibility_debug_screen),
+                                        tint = Color.White,
+                                    )
+                                }
                             }
                         }
                     }
                 }
-            }
+            } // Close key(currentLocale) block
         }
 
         @Composable
