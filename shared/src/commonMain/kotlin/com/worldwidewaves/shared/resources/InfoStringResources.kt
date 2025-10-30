@@ -63,6 +63,7 @@ val faq_contents =
         Pair(MokoRes.strings.faq_question_4, MokoRes.strings.faq_answer_4),
         Pair(MokoRes.strings.faq_question_5, MokoRes.strings.faq_answer_5),
         Pair(MokoRes.strings.faq_question_6, MokoRes.strings.faq_answer_6),
+        Pair(MokoRes.strings.faq_question_7, MokoRes.strings.faq_answer_7),
     )
 
 val infos_core =

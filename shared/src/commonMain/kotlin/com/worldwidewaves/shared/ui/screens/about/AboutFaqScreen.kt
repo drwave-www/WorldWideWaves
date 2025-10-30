@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedButton
@@ -51,8 +52,12 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.worldwidewaves.shared.MokoRes
@@ -149,8 +154,9 @@ fun AboutFaqScreen(
                     answer,
                     expandedFaqItem,
                     onExpand = { expandedFaqItem = it },
-                    showSimulateButton = (question == MokoRes.strings.faq_question_6),
+                    showSimulateButton = (question == MokoRes.strings.faq_question_7),
                     onSimulateClick = onSimulateClick,
+                    onUrlOpen = onUrlOpen,
                 )
                 FAQDividerLine()
             }
@@ -231,6 +237,68 @@ private fun ShowRulesHierarchy() {
     }
 }
 
+/**
+ * Creates an AnnotatedString with clickable URLs and email addresses.
+ * URLs and emails are styled with underline and made clickable.
+ */
+@Composable
+private fun createClickableText(
+    text: String,
+    baseStyle: androidx.compose.ui.text.TextStyle,
+): AnnotatedString {
+    val linkColor = sharedQuinaryColoredBoldTextStyle(FAQ.RULE_ANSWER_FONTSIZE).color
+
+    return buildAnnotatedString {
+        // Pattern to match URLs (http/https) and email addresses
+        val urlPattern = Regex("(https?://[^\\s]+)")
+        val emailPattern = Regex("([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})")
+
+        var currentIndex = 0
+        val matches = mutableListOf<Pair<IntRange, String>>()
+
+        // Find all URL matches
+        urlPattern.findAll(text).forEach { matchResult ->
+            matches.add(matchResult.range to matchResult.value)
+        }
+
+        // Find all email matches
+        emailPattern.findAll(text).forEach { matchResult ->
+            matches.add(matchResult.range to "mailto:${matchResult.value}")
+        }
+
+        // Sort matches by start position
+        matches.sortBy { it.first.first }
+
+        // Build annotated string
+        matches.forEach { (range, url) ->
+            // Add text before the link
+            if (currentIndex < range.first) {
+                append(text.substring(currentIndex, range.first))
+            }
+
+            // Add the clickable link
+            pushStringAnnotation(tag = "URL", annotation = url)
+            withStyle(
+                style =
+                    SpanStyle(
+                        color = linkColor,
+                        textDecoration = TextDecoration.Underline,
+                    ),
+            ) {
+                append(text.substring(range))
+            }
+            pop()
+
+            currentIndex = range.last + 1
+        }
+
+        // Add remaining text
+        if (currentIndex < text.length) {
+            append(text.substring(currentIndex))
+        }
+    }
+}
+
 @Composable
 private fun FAQItem(
     itemIndex: Int,
@@ -240,6 +308,7 @@ private fun FAQItem(
     onExpand: (Int) -> Unit,
     showSimulateButton: Boolean = false,
     onSimulateClick: () -> Unit,
+    onUrlOpen: (String) -> Unit,
 ) {
     Column(
         modifier =
@@ -264,9 +333,24 @@ private fun FAQItem(
 
         if (expandedFaqItem == itemIndex) {
             Spacer(modifier = Modifier.size(SPACER_SMALL_SIZE.dp))
-            Text(
-                text = stringResource(answerResource),
+            val answerText = stringResource(answerResource)
+            val annotatedString =
+                createClickableText(
+                    text = answerText,
+                    baseStyle = sharedCommonJustifiedTextStyle(FAQ.RULE_ANSWER_FONTSIZE),
+                )
+
+            ClickableText(
+                text = annotatedString,
                 style = sharedCommonJustifiedTextStyle(FAQ.RULE_ANSWER_FONTSIZE),
+                onClick = { offset ->
+                    annotatedString
+                        .getStringAnnotations(tag = "URL", start = offset, end = offset)
+                        .firstOrNull()
+                        ?.let { annotation ->
+                            onUrlOpen(annotation.item)
+                        }
+                },
             )
             if (showSimulateButton) {
                 Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))

@@ -277,7 +277,7 @@
   <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
   <string name="faq_question_5">기여할 수 있나요?</string>
   <!-- src_hash: d56087c228256042d65da9946639185896f429c7 -->
-  <string name="faq_answer_5">네, 언제나 자원봉사자를 환영합니다. 앱 코드는 GitHub에 오픈 소스로 공개되어 있으며, worldwidewaves@proton.me로 제작진에게 연락할 수 있습니다(회신을 보장하지 않습니다). 가장 좋은 도움은 널리 알리는 것입니다: 제안된 해시태그로 이벤트 사진과 영상을 공유하고, 지역 인플루언서에게 연락해 메시지를 확산시키고, 커뮤니티에서 이를 이야기하고, 그리고 무엇보다 파도에 참여하세요!</string>
+  <string name="faq_answer_5">네, 언제나 자원봉사자를 환영합니다. 앱 코드는 GitHub에 오픈 소스로 공개되어 있으며, contact@worldwidewaves.net로 제작진에게 연락할 수 있습니다(회신을 보장하지 않습니다). 가장 좋은 도움은 널리 알리는 것입니다: 제안된 해시태그로 이벤트 사진과 영상을 공유하고, 지역 인플루언서에게 연락해 메시지를 확산시키고, 커뮤니티에서 이를 이야기하고, 그리고 무엇보다 파도에 참여하세요!</string>
   <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
   <string name="faq_question_6">파도를 어떻게 시뮬레이션할 수 있나요?</string>
   <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
