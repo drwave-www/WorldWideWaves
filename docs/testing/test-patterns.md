@@ -321,3 +321,4 @@ fun testBoundsValidation() {
 - **Test Organization**: shared/src/{commonTest,androidUnitTest,iosTest}
 - **Coverage Report**: `./gradlew :shared:testDebugUnitTest` generates HTML report
 - **CI Pipeline**: .github/workflows/03-quality-security-gates.yml
+- **iOS Cinterop Testing**: [Cinterop Testing Patterns](./cinterop-testing-patterns.md) - Memory safety, protocols, threading
