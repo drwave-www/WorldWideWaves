@@ -67,11 +67,11 @@ fun MapActions(
     modifier: Modifier = Modifier,
     onTargetWave: () -> Unit = {},
     onTargetUser: () -> Unit = {},
+    hasPosition: Boolean = false,
     // iOS FIX: Clock dependency passed as parameter to prevent deadlock
     clock: IClock = getIosSafeClock(),
 ) {
     val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
-    val isInArea by event.observer.userIsInArea.collectAsState()
 
     // iOS FIX: Removed dangerous object : KoinComponent pattern
 
@@ -111,17 +111,17 @@ fun MapActions(
                     Modifier
                         .size(Event.TARGET_ME_IMAGE_SIZE.dp)
                         .clickable {
-                            if (isInArea) {
+                            if (hasPosition) {
                                 onTargetUser()
                             }
                         }.semantics {
                             role = Role.Button
-                            stateDescription = if (isInArea) "Active" else "Inactive"
+                            stateDescription = if (hasPosition) "Active" else "Inactive"
                         },
-                painter = painterResource(if (isInArea) Res.drawable.target_me_active else Res.drawable.target_me_inactive),
+                painter = painterResource(if (hasPosition) Res.drawable.target_me_active else Res.drawable.target_me_inactive),
                 contentDescription =
                     stringResource(
-                        if (isInArea) MokoRes.strings.event_target_me_on else MokoRes.strings.event_target_me_off,
+                        if (hasPosition) MokoRes.strings.event_target_me_on else MokoRes.strings.event_target_me_off,
                     ),
             )
         }

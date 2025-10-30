@@ -25,6 +25,7 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.ui.components.shared.ButtonWave
 import com.worldwidewaves.shared.ui.components.shared.MapActions
+import com.worldwidewaves.shared.ui.utils.getIosSafePositionManager
 import kotlinx.coroutines.launch
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -51,6 +52,11 @@ fun FullMapScreen(
     }
     val isInArea by event.observer.userIsInArea.collectAsState()
 
+    // Track position availability for targetUser button state
+    val positionManager = getIosSafePositionManager()
+    val position by positionManager.position.collectAsState()
+    val hasPosition = position != null
+
     // Screen composition
     Box(modifier = modifier.fillMaxSize()) {
         eventMap?.Draw(
@@ -69,6 +75,7 @@ fun FullMapScreen(
 
         MapActions(
             event = event,
+            hasPosition = hasPosition,
             modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
             onTargetWave = {
                 scope.launch {

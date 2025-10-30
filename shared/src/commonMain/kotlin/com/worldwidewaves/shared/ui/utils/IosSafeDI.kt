@@ -13,6 +13,7 @@ package com.worldwidewaves.shared.ui.utils
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.localization.LocalizationManager
+import com.worldwidewaves.shared.position.PositionManager
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -140,6 +141,23 @@ object IosSafeDI : KoinComponent {
      * ```
      */
     val localizationManager: LocalizationManager by inject()
+
+    /**
+     * Pre-resolved PositionManager instance.
+     *
+     * Resolved once when IosSafeDI is first accessed, then cached.
+     * Safe to access from @Composable functions via [getIosSafePositionManager].
+     *
+     * Use this to observe position changes and availability:
+     * ```kotlin
+     * @Composable
+     * fun MyScreen() {
+     *     val positionManager = getIosSafePositionManager()
+     *     val position by positionManager.position.collectAsState()
+     * }
+     * ```
+     */
+    val positionManager: PositionManager by inject()
 }
 
 /**
@@ -187,3 +205,24 @@ fun getIosSafeClock(): IClock = IosSafeDI.clock
  * @throws UninitializedPropertyAccessException if Koin not initialized before IosSafeDI access
  */
 fun getIosSafeLocalizationManager(): LocalizationManager = IosSafeDI.localizationManager
+
+/**
+ * Returns the iOS-safe PositionManager instance.
+ *
+ * Safe to call from @Composable functions as it accesses pre-resolved
+ * dependency from [IosSafeDI] singleton.
+ *
+ * Use this to observe position changes and availability:
+ * ```kotlin
+ * @Composable
+ * fun MyScreen() {
+ *     val positionManager = getIosSafePositionManager()
+ *     val position by positionManager.position.collectAsState()
+ *     val hasPosition = position != null
+ * }
+ * ```
+ *
+ * @return Cached PositionManager instance
+ * @throws UninitializedPropertyAccessException if Koin not initialized before IosSafeDI access
+ */
+fun getIosSafePositionManager(): PositionManager = IosSafeDI.positionManager
