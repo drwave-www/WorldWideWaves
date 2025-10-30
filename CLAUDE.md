@@ -1,6 +1,6 @@
 # WorldWideWaves - Claude Code Instructions
 
-> **Quick Links**: [iOS Safety](#ios-requirements-critical) | [Testing](#testing-requirements) | [Build Commands](#build-commands) | [Code Quality](#code-quality-standards)
+> **Quick Links**: [🚨 Commit Policy](#-commit-policy-critical) | [iOS Safety](#ios-requirements-critical) | [Testing](#testing-requirements) | [Build Commands](#build-commands) | [Code Quality](#code-quality-standards)
 
 ---
 
@@ -202,6 +202,16 @@ Users can change language **without app restart**:
 
 ## Mandatory Development Requirements
 
+### 🚨 Commit Policy [CRITICAL]
+
+**ALWAYS commit immediately after completing and testing each feature/fix.**
+
+- ✅ **Commit automatically** after tests pass - don't wait to be asked
+- ✅ **Commit after each logical unit of work** (feature, fix, refactor)
+- ✅ **Run all tests before committing** - ensure nothing is broken
+- ❌ **NEVER leave uncommitted work** - commit frequently
+- ❌ **DO NOT push to origin** unless explicitly requested (GitHub Actions costs)
+
 ### Platform Compatibility
 
 - **Cross-platform**: macOS + Linux required
@@ -256,6 +266,7 @@ shared/src/
 - **Run ALL tests**, not just relevant ones
 - **Performance**: Monitor test execution time
 - **iOS safety**: `./scripts/dev/verification/verify-ios-safety.sh` for shared code changes
+- ✅ **COMMIT IMMEDIATELY after tests pass** - don't wait to be asked
 
 ### Key Test Patterns
 
@@ -475,11 +486,11 @@ A file/module is production-ready when:
 
 ### Critical Rules
 
-- **Commit** your work, always
+- ✅ **COMMIT IMMEDIATELY** after completing and testing each feature/fix - always, automatically
 - **Use agents** for complex multi-step tasks
 - **Check all implications** when changing code (callers, documentation, signatures)
 - **Clean temporary files** after development
-- **Git push has costs** - GitHub Actions not free, only push when asked/required
+- ❌ **Git push has costs** - GitHub Actions not free, only push when explicitly requested
 - **Search for similar patterns** when fixing bugs (find other instances)
 - **Never bypass git hooks** (pre-commit, pre-push)
 - **Use short names** in code (imports for readability, not long qualified names)
@@ -504,7 +515,13 @@ When adding function calls/classes:
 
 #### Committing Changes
 
-**ONLY commit when user explicitly requests it.**
+**COMMIT AUTOMATICALLY after completing and testing each feature/fix.**
+
+Workflow:
+1. Complete the feature/fix
+2. Run all tests and ensure they pass
+3. Stage and commit the changes
+4. Continue with next task
 
 ```bash
 # 1. Check status and changes
@@ -534,7 +551,7 @@ EOF
 ./gradlew :shared:testDebugUnitTest
 ```
 
-**DO NOT push to origin** unless user explicitly requests it.
+**DO NOT push to origin** unless explicitly requested (GitHub Actions costs).
 
 #### Creating Pull Requests
 
