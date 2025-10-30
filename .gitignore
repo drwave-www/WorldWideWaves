@@ -49,4 +49,8 @@ iosApp/**/GoogleService-Info.plist
 
 # iOS ODR Resources (should only exist locally for testing)
 iosApp/worldwidewaves/Resources/Maps/
+
+# iOS Maps (use Android map modules only - avoid duplication)
+iosApp/worldwidewaves/Maps/
+
 test_results/
