@@ -50,7 +50,12 @@ class IosMapAvailabilityChecker : MapAvailabilityChecker {
         val obj =
             platform.Foundation.NSBundle.mainBundle
                 .objectForInfoDictionaryKey("NSOnDemandResourcesInitialInstallTags")
-        (obj as? List<*>)?.mapNotNull { it as? String }?.toSet() ?: emptySet()
+        val tags = (obj as? List<*>)?.mapNotNull { it as? String }?.toSet() ?: emptySet()
+        com.worldwidewaves.shared.utils.Log.d(
+            "IosMapAvailabilityChecker",
+            "Initial ODR tags from Info.plist: ${tags.joinToString(", ")}",
+        )
+        tags
     }
 
     private fun inPersistentCache(eventId: String): Boolean {
@@ -91,6 +96,12 @@ class IosMapAvailabilityChecker : MapAvailabilityChecker {
             mapIds.filter { id ->
                 id in initialTags && !inPersistentCache(id) && !pinnedRequests.containsKey(id)
             }
+        if (toAuto.isNotEmpty()) {
+            com.worldwidewaves.shared.utils.Log.d(
+                "IosMapAvailabilityChecker",
+                "Auto-mounting ${toAuto.size} map(s) from initial tags: ${toAuto.joinToString(", ")}",
+            )
+        }
         toAuto.forEach { id -> onMain { requestMapDownload(id) } }
     }
 
