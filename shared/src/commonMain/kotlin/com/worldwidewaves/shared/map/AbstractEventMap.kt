@@ -145,10 +145,31 @@ abstract class AbstractEventMap<T>(
      * Moves the camera to view the event bounds
      */
     suspend fun moveToMapBounds(onComplete: () -> Unit = {}) {
-        // Initialize constraint manager with BOUNDS mode (zero padding for tight fit)
-        constraintManager = MapBoundsEnforcer(event.area.bbox(), mapLibreAdapter, isWindowMode = false) { suppressCorrections }
-
         val bounds = event.area.bbox()
+
+        // Defensive logging: Detect invalid bbox that would cause world view
+        val isInvalidBbox =
+            bounds.sw.lat == 0.0 &&
+                bounds.sw.lng == 0.0 &&
+                bounds.ne.lat == 0.0 &&
+                bounds.ne.lng == 0.0
+        if (isInvalidBbox) {
+            Log.w(
+                "AbstractEventMap",
+                "moveToMapBounds: Invalid bbox (0,0,0,0) detected for event ${event.id}. " +
+                    "Camera will show entire world. GeoJSON may not be loaded yet.",
+            )
+        } else {
+            Log.d(
+                "AbstractEventMap",
+                "moveToMapBounds: Using bbox SW(${bounds.sw.lat},${bounds.sw.lng}) " +
+                    "NE(${bounds.ne.lat},${bounds.ne.lng}) for event ${event.id}",
+            )
+        }
+
+        // Initialize constraint manager with BOUNDS mode (zero padding for tight fit)
+        constraintManager = MapBoundsEnforcer(bounds, mapLibreAdapter, isWindowMode = false) { suppressCorrections }
+
         runCameraAnimation { cb ->
             mapLibreAdapter.animateCameraToBounds(
                 bounds,
@@ -189,6 +210,26 @@ abstract class AbstractEventMap<T>(
     suspend fun moveToWindowBounds(onComplete: () -> Unit = {}) {
         // Capture event bbox before animation (needed for callback which is not suspend)
         val eventBbox = event.area.bbox()
+
+        // Defensive logging: Detect invalid bbox that would cause world view
+        val isInvalidBbox =
+            eventBbox.sw.lat == 0.0 &&
+                eventBbox.sw.lng == 0.0 &&
+                eventBbox.ne.lat == 0.0 &&
+                eventBbox.ne.lng == 0.0
+        if (isInvalidBbox) {
+            Log.w(
+                "AbstractEventMap",
+                "moveToWindowBounds: Invalid bbox (0,0,0,0) detected for event ${event.id}. " +
+                    "Camera will show entire world. GeoJSON may not be loaded yet.",
+            )
+        } else {
+            Log.d(
+                "AbstractEventMap",
+                "moveToWindowBounds: Using bbox SW(${eventBbox.sw.lat},${eventBbox.sw.lng}) " +
+                    "NE(${eventBbox.ne.lat},${eventBbox.ne.lng}) for event ${event.id}",
+            )
+        }
 
         // Prepare bounds enforcer with WINDOW mode (strict viewport enforcement)
         constraintManager = MapBoundsEnforcer(eventBbox, mapLibreAdapter, isWindowMode = true) { suppressCorrections }

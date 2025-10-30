@@ -208,6 +208,9 @@ data class WWWEventArea(
     /**
      * Computes the bounding box for the event area.
      * Delegates to [EventAreaGeometry] for bounding box calculation.
+     *
+     * Note: Invalid bboxes (0,0,0,0) are not cached to prevent cache poisoning
+     * when GeoJSON files are not yet available during initial map setup.
      */
     suspend fun bbox(): BoundingBox {
         // Return cached bounding box if available
@@ -221,7 +224,23 @@ data class WWWEventArea(
                 cachedAreaPolygons,
             )
 
-        cachedBoundingBox = bbox
+        // Only cache valid bboxes to prevent cache poisoning
+        // Invalid bbox (0,0,0,0) indicates GeoJSON data not yet available
+        val isValidBbox =
+            bbox.sw.lat != 0.0 ||
+                bbox.sw.lng != 0.0 ||
+                bbox.ne.lat != 0.0 ||
+                bbox.ne.lng != 0.0
+
+        if (isValidBbox) {
+            cachedBoundingBox = bbox
+        } else {
+            Log.w(
+                "WWWEventArea",
+                "bbox: ${event.id} - Invalid bbox (0,0,0,0) not cached. GeoJSON may not be loaded yet.",
+            )
+        }
+
         return bbox
     }
 
