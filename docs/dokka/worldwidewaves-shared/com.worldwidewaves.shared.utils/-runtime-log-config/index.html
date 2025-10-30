@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>RuntimeLogConfig</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+                    <a class="library-name--link" href="../../../index.html">
+                            worldwidewaves-shared
+                    </a>
+            </div>
+            <div class="library-version">
+            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":shared:dokkaHtml/androidMain">android</button>
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":shared:dokkaHtml/commonMain">common</button>
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":shared:dokkaHtml/iosMain">ios</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="worldwidewaves-shared::com.worldwidewaves.shared.utils/RuntimeLogConfig///PointingToDeclaration//-1187756703">
+  <div class="breadcrumbs"><a href="../../../index.html">worldwidewaves-shared</a><span class="delimiter">/</span><a href="../index.html">com.worldwidewaves.shared.utils</a><span class="delimiter">/</span><span class="current">RuntimeLogConfig</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Runtime</span><wbr></wbr><span>Log</span><wbr></wbr><span><span>Config</span></span></h1>
+    <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain" data-toggle=":shared:dokkaHtml/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">object </span><a href="index.html">RuntimeLogConfig</a></div><p class="paragraph">Android implementation of RuntimeLogConfig using Firebase Remote Config.</p></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">object </span><a href="index.html">RuntimeLogConfig</a><span class="clearfix"><span class="floating-right">(<a href="https://github.com/mglcel/WorldWideWaves/tree/main/shared/src/commonMain/kotlin/com/worldwidewaves/shared/utils/RuntimeLogConfig.kt#L84">source</a>)</span></span></div><p class="paragraph">Runtime log configuration manager using Firebase Remote Config.</p><p class="paragraph">This enables dynamic log level control without app updates:</p><ul><li><p class="paragraph">Enable verbose logging for specific tags in production</p></li><li><p class="paragraph">Disable noisy logs without redeploying</p></li><li><p class="paragraph">Debug production issues remotely</p></li></ul><h2 class="">Remote Config Keys</h2><p class="paragraph">The following keys are supported in Firebase Remote Config:</p><p class="paragraph"><strong>Global Log Level Control</strong>:</p><ul><li><p class="paragraph"><code class="lang-kotlin">log_level_global</code>: Minimum log level for all tags (default: &quot;INFO&quot;)</p></li><li><p class="paragraph">Values: &quot;VERBOSE&quot;, &quot;DEBUG&quot;, &quot;INFO&quot;, &quot;WARNING&quot;, &quot;ERROR&quot;</p></li><li><p class="paragraph">Affects all logs unless overridden by tag-specific config</p></li></ul><p class="paragraph"><strong>Tag-Specific Log Level Control</strong>:</p><ul><li><p class="paragraph"><code class="lang-kotlin">log_level_&lt;tag&gt;</code>: Minimum log level for specific tag</p></li><li><p class="paragraph">Example: <code class="lang-kotlin">log_level_PositionManager</code> = &quot;VERBOSE&quot;</p></li><li><p class="paragraph">Example: <code class="lang-kotlin">log_level_WWW.Position.Manager</code> = &quot;DEBUG&quot;</p></li><li><p class="paragraph">Overrides global log level for that tag</p></li></ul><p class="paragraph"><strong>Feature-Specific Control</strong> (overrides build config):</p><ul><li><p class="paragraph"><code class="lang-kotlin">enable_verbose_logging</code>: Enable verbose logs (default: BuildKonfig.ENABLE_VERBOSE_LOGGING)</p></li><li><p class="paragraph"><code class="lang-kotlin">enable_debug_logging</code>: Enable debug logs (default: BuildKonfig.ENABLE_DEBUG_LOGGING)</p></li><li><p class="paragraph"><code class="lang-kotlin">enable_performance_logging</code>: Enable performance logs (default: BuildKonfig.ENABLE_PERFORMANCE_LOGGING)</p></li><li><p class="paragraph"><code class="lang-kotlin">enable_position_tracking_logging</code>: Enable position tracking logs (default: false)</p></li></ul><h2 class="">Usage</h2><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">// Initialize during app startup<br>suspend fun initializeApp() {<br>    RuntimeLogConfig.initialize()<br>}<br><br>// Check before logging (automatic in Log wrapper)<br>if (RuntimeLogConfig.shouldLog(&quot;PositionManager&quot;, LogLevel.VERBOSE)) {<br>    Log.v(&quot;PositionManager&quot;, &quot;Position update: $position&quot;)<br>}<br><br>// Get minimum log level for a tag<br>val minLevel = RuntimeLogConfig.getMinLogLevel(&quot;EventObserver&quot;)</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><h2 class="">Fallback Behavior</h2><p class="paragraph">If Firebase Remote Config is unavailable or initialization fails:</p><ul><li><p class="paragraph">Falls back to build configuration (BuildKonfig flags)</p></li><li><p class="paragraph">Logs continue to work normally</p></li><li><p class="paragraph">No app crashes due to config unavailability</p></li></ul><h2 class="">Performance</h2><ul><li><p class="paragraph">Remote Config is cached locally after first fetch</p></li><li><p class="paragraph">Log level checks are fast (in-memory lookups)</p></li><li><p class="paragraph">No network calls during normal logging operations</p></li><li><p class="paragraph">Fetch interval: 12 hours (configurable)</p></li></ul></div><div class="content sourceset-dependent-content" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">object </span><a href="index.html">RuntimeLogConfig</a></div><p class="paragraph">iOS implementation of RuntimeLogConfig.</p><p class="paragraph">Currently uses build-time configuration only (fallback mode). Firebase Remote Config integration requires FirebaseRemoteConfig CocoaPod to be added to the iOS project first.</p><p class="paragraph">To enable Firebase Remote Config on iOS:</p><ol><li><p class="paragraph">Add FirebaseRemoteConfig pod to iosApp/Podfile</p></li><li><p class="paragraph">Run pod install</p></li><li><p class="paragraph">Replace this stub with Firebase implementation</p></li></ol><p class="paragraph">See: docs/setup/firebase-ios-setup.md for configuration instructions</p></div>    </div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-447054327%2FFunctions%2F-1187756703" anchor-label="getMinLogLevel" id="-447054327%2FFunctions%2F-1187756703" data-filterable-set=":shared:dokkaHtml/commonMain,:shared:dokkaHtml/androidMain,:shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain,:shared:dokkaHtml/androidMain,:shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/commonMain,:shared:dokkaHtml/androidMain,:shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-min-log-level.html"><span>get</span><wbr></wbr><span>Min</span><wbr></wbr><span>Log</span><wbr></wbr><span><span>Level</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-447054327%2FFunctions%2F-1187756703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain" data-toggle=":shared:dokkaHtml/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="get-min-log-level.html"><span class="token function">getMinLogLevel</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">tag<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-log-level/index.html">LogLevel</a></div><div class="brief "><p class="paragraph">Get minimum log level for a specific tag from remote config.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="get-min-log-level.html"><span class="token function">getMinLogLevel</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">tag<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-log-level/index.html">LogLevel</a></div><div class="brief "><p class="paragraph">Get minimum log level for a specific tag from remote config.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="get-min-log-level.html"><span class="token function">getMinLogLevel</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">tag<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.worldwidewaves.shared.utils/LogLevel///PointingToDeclaration/">LogLevel</span></div><div class="brief "><p class="paragraph">Get minimum log level for a tag (stub - returns build config minimum).</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1089123495%2FFunctions%2F-1187756703" anchor-label="initialize" id="1089123495%2FFunctions%2F-1187756703" data-filterable-set=":shared:dokkaHtml/commonMain,:shared:dokkaHtml/androidMain,:shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain,:shared:dokkaHtml/androidMain,:shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/commonMain,:shared:dokkaHtml/androidMain,:shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="initialize.html"><span><span>initialize</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1089123495%2FFunctions%2F-1187756703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain" data-toggle=":shared:dokkaHtml/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="initialize.html"><span class="token function">initialize</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Initialize Firebase Remote Config and fetch latest values.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="initialize.html"><span class="token function">initialize</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Initialize Firebase Remote Config and fetch latest values.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="initialize.html"><span class="token function">initialize</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Initialize remote config (stub - uses build config fallback).</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-292368813%2FFunctions%2F-1187756703" anchor-label="shouldLog" id="-292368813%2FFunctions%2F-1187756703" data-filterable-set=":shared:dokkaHtml/commonMain,:shared:dokkaHtml/androidMain,:shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain,:shared:dokkaHtml/androidMain,:shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/commonMain,:shared:dokkaHtml/androidMain,:shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="should-log.html"><span>should</span><wbr></wbr><span><span>Log</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-292368813%2FFunctions%2F-1187756703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain" data-toggle=":shared:dokkaHtml/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="should-log.html"><span class="token function">shouldLog</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">tag<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">level<span class="token operator">: </span><a href="../-log-level/index.html">LogLevel</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Check if a specific log level should be enabled for a tag.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="should-log.html"><span class="token function">shouldLog</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">tag<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">level<span class="token operator">: </span><a href="../-log-level/index.html">LogLevel</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Check if a specific log level should be enabled for a tag.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="should-log.html"><span class="token function">shouldLog</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">tag<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">level<span class="token operator">: </span><span data-unresolved-link="com.worldwidewaves.shared.utils/LogLevel///PointingToDeclaration/">LogLevel</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Check if logging should be enabled for a given tag and level. Falls back to build configuration (BuildKonfig flags).</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>MapTestFixtures</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+                    <a class="library-name--link" href="../../../index.html">
+                            worldwidewaves-shared
+                    </a>
+            </div>
+            <div class="library-version">
+            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":shared:dokkaHtml/commonMain">common</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="worldwidewaves-shared::com.worldwidewaves.shared.map/MapTestFixtures///PointingToDeclaration//-1127283753">
+  <div class="breadcrumbs"><a href="../../../index.html">worldwidewaves-shared</a><span class="delimiter">/</span><a href="../index.html">com.worldwidewaves.shared.map</a><span class="delimiter">/</span><span class="current">MapTestFixtures</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Map</span><wbr></wbr><span>Test</span><wbr></wbr><span><span>Fixtures</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">MapTestFixtures</a><span class="clearfix"><span class="floating-right">(<a href="https://github.com/mglcel/WorldWideWaves/tree/main/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapTestFixtures.kt#L30">source</a>)</span></span></div><p class="paragraph">Test fixtures and utilities for map testing across all platforms. These fixtures provide standardized test data for unit tests, integration tests, and E2E tests.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="">Types</h2>
+        <div class="table"><a data-name="1360214866%2FClasslikes%2F-1127283753" anchor-label="ScreenDimensions" id="1360214866%2FClasslikes%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-screen-dimensions/index.html"><span>Screen</span><wbr></wbr><span><span>Dimensions</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1360214866%2FClasslikes%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-screen-dimensions/index.html">ScreenDimensions</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>width<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>height<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Portrait phone screen (9:16 aspect ratio)</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="-42384765%2FProperties%2F-1127283753" anchor-label="aspectRatio" id="-42384765%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="aspect-ratio.html"><span>aspect</span><wbr></wbr><span><span>Ratio</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-42384765%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../../com.worldwidewaves.shared.events.utils/-bounding-box/index.html">BoundingBox</a><span class="token punctuation">.</span><a href="aspect-ratio.html">aspectRatio</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Calculate the aspect ratio of a bounding box (width / height) Note: BoundingBox already has width and height properties</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-274023526%2FProperties%2F-1127283753" anchor-label="LANDSCAPE_PHONE" id="-274023526%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-l-a-n-d-s-c-a-p-e_-p-h-o-n-e.html"><span><span>LANDSCAPE_PHONE</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-274023526%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-l-a-n-d-s-c-a-p-e_-p-h-o-n-e.html">LANDSCAPE_PHONE</a><span class="token operator">: </span><a href="-screen-dimensions/index.html">MapTestFixtures.ScreenDimensions</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2112918540%2FProperties%2F-1127283753" anchor-label="LANDSCAPE_TABLET" id="2112918540%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-l-a-n-d-s-c-a-p-e_-t-a-b-l-e-t.html"><span><span>LANDSCAPE_TABLET</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2112918540%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-l-a-n-d-s-c-a-p-e_-t-a-b-l-e-t.html">LANDSCAPE_TABLET</a><span class="token operator">: </span><a href="-screen-dimensions/index.html">MapTestFixtures.ScreenDimensions</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1846440472%2FProperties%2F-1127283753" anchor-label="LARGE_EVENT_BOUNDS" id="1846440472%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-l-a-r-g-e_-e-v-e-n-t_-b-o-u-n-d-s.html"><span><span>LARGE_EVENT_BOUNDS</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1846440472%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-l-a-r-g-e_-e-v-e-n-t_-b-o-u-n-d-s.html">LARGE_EVENT_BOUNDS</a><span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-bounding-box/index.html">BoundingBox</a></div><div class="brief "><p class="paragraph">Large event for testing performance</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1992953644%2FProperties%2F-1127283753" anchor-label="PORTRAIT_PHONE" id="1992953644%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-p-o-r-t-r-a-i-t_-p-h-o-n-e.html"><span><span>PORTRAIT_PHONE</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1992953644%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-p-o-r-t-r-a-i-t_-p-h-o-n-e.html">PORTRAIT_PHONE</a><span class="token operator">: </span><a href="-screen-dimensions/index.html">MapTestFixtures.ScreenDimensions</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-625233222%2FProperties%2F-1127283753" anchor-label="PORTRAIT_TABLET" id="-625233222%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-p-o-r-t-r-a-i-t_-t-a-b-l-e-t.html"><span><span>PORTRAIT_TABLET</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-625233222%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-p-o-r-t-r-a-i-t_-t-a-b-l-e-t.html">PORTRAIT_TABLET</a><span class="token operator">: </span><a href="-screen-dimensions/index.html">MapTestFixtures.ScreenDimensions</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-409955612%2FProperties%2F-1127283753" anchor-label="SMALL_EVENT_BOUNDS" id="-409955612%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-s-m-a-l-l_-e-v-e-n-t_-b-o-u-n-d-s.html"><span><span>SMALL_EVENT_BOUNDS</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-409955612%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-s-m-a-l-l_-e-v-e-n-t_-b-o-u-n-d-s.html">SMALL_EVENT_BOUNDS</a><span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-bounding-box/index.html">BoundingBox</a></div><div class="brief "><p class="paragraph">Small event for testing zoom constraints</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2048417098%2FProperties%2F-1127283753" anchor-label="SQUARE_SCREEN" id="-2048417098%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-s-q-u-a-r-e_-s-c-r-e-e-n.html"><span><span>SQUARE_SCREEN</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2048417098%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-s-q-u-a-r-e_-s-c-r-e-e-n.html">SQUARE_SCREEN</a><span class="token operator">: </span><a href="-screen-dimensions/index.html">MapTestFixtures.ScreenDimensions</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1168284392%2FProperties%2F-1127283753" anchor-label="STANDARD_EVENT_BOUNDS" id="1168284392%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-s-t-a-n-d-a-r-d_-e-v-e-n-t_-b-o-u-n-d-s.html"><span><span>STANDARD_EVENT_BOUNDS</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1168284392%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-s-t-a-n-d-a-r-d_-e-v-e-n-t_-b-o-u-n-d-s.html">STANDARD_EVENT_BOUNDS</a><span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-bounding-box/index.html">BoundingBox</a></div><div class="brief "><p class="paragraph">Standard square event centered on Paris (approximately 1km x 1km)</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="403103832%2FProperties%2F-1127283753" anchor-label="TALL_EVENT_BOUNDS" id="403103832%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-a-l-l_-e-v-e-n-t_-b-o-u-n-d-s.html"><span><span>TALL_EVENT_BOUNDS</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="403103832%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-t-a-l-l_-e-v-e-n-t_-b-o-u-n-d-s.html">TALL_EVENT_BOUNDS</a><span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-bounding-box/index.html">BoundingBox</a></div><div class="brief "><p class="paragraph">Tall event with 1:2 aspect ratio (portrait orientation) Useful for testing WINDOW mode aspect ratio fitting</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1885712016%2FProperties%2F-1127283753" anchor-label="TOLERANCE_DIMENSION" id="1885712016%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-o-l-e-r-a-n-c-e_-d-i-m-e-n-s-i-o-n.html"><span><span>TOLERANCE_DIMENSION</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1885712016%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-o-l-e-r-a-n-c-e_-d-i-m-e-n-s-i-o-n.html">TOLERANCE_DIMENSION</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">0.05</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1132747687%2FProperties%2F-1127283753" anchor-label="TOLERANCE_EDGE" id="1132747687%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-o-l-e-r-a-n-c-e_-e-d-g-e.html"><span><span>TOLERANCE_EDGE</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1132747687%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-o-l-e-r-a-n-c-e_-e-d-g-e.html">TOLERANCE_EDGE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">1.0E-4</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1731448379%2FProperties%2F-1127283753" anchor-label="TOLERANCE_POSITION" id="1731448379%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-o-l-e-r-a-n-c-e_-p-o-s-i-t-i-o-n.html"><span><span>TOLERANCE_POSITION</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1731448379%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-o-l-e-r-a-n-c-e_-p-o-s-i-t-i-o-n.html">TOLERANCE_POSITION</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">1.0E-4</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-647984559%2FProperties%2F-1127283753" anchor-label="TOLERANCE_ZOOM" id="-647984559%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-o-l-e-r-a-n-c-e_-z-o-o-m.html"><span><span>TOLERANCE_ZOOM</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-647984559%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-o-l-e-r-a-n-c-e_-z-o-o-m.html">TOLERANCE_ZOOM</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">0.1</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-898230403%2FProperties%2F-1127283753" anchor-label="USER_AT_EAST_EDGE" id="-898230403%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-s-e-r_-a-t_-e-a-s-t_-e-d-g-e.html"><span><span>USER_AT_EAST_EDGE</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-898230403%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-u-s-e-r_-a-t_-e-a-s-t_-e-d-g-e.html">USER_AT_EAST_EDGE</a><span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-position/index.html">Position</a></div><div class="brief "><p class="paragraph">Position at the east edge of STANDARD_EVENT_BOUNDS</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="43376671%2FProperties%2F-1127283753" anchor-label="USER_AT_NE_CORNER" id="43376671%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-s-e-r_-a-t_-n-e_-c-o-r-n-e-r.html"><span><span>USER_AT_NE_CORNER</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="43376671%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-u-s-e-r_-a-t_-n-e_-c-o-r-n-e-r.html">USER_AT_NE_CORNER</a><span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-position/index.html">Position</a></div><div class="brief "><p class="paragraph">Position at the north-east corner of STANDARD_EVENT_BOUNDS</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-29545721%2FProperties%2F-1127283753" anchor-label="USER_AT_NORTH_EDGE" id="-29545721%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-s-e-r_-a-t_-n-o-r-t-h_-e-d-g-e.html"><span><span>USER_AT_NORTH_EDGE</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-29545721%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-u-s-e-r_-a-t_-n-o-r-t-h_-e-d-g-e.html">USER_AT_NORTH_EDGE</a><span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-position/index.html">Position</a></div><div class="brief "><p class="paragraph">Position at the north edge of STANDARD_EVENT_BOUNDS</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-608102351%2FProperties%2F-1127283753" anchor-label="USER_AT_NW_CORNER" id="-608102351%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-s-e-r_-a-t_-n-w_-c-o-r-n-e-r.html"><span><span>USER_AT_NW_CORNER</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-608102351%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-u-s-e-r_-a-t_-n-w_-c-o-r-n-e-r.html">USER_AT_NW_CORNER</a><span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-position/index.html">Position</a></div><div class="brief "><p class="paragraph">Position at the north-west corner of STANDARD_EVENT_BOUNDS</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="875869370%2FProperties%2F-1127283753" anchor-label="USER_AT_SE_CORNER" id="875869370%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-s-e-r_-a-t_-s-e_-c-o-r-n-e-r.html"><span><span>USER_AT_SE_CORNER</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="875869370%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-u-s-e-r_-a-t_-s-e_-c-o-r-n-e-r.html">USER_AT_SE_CORNER</a><span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-position/index.html">Position</a></div><div class="brief "><p class="paragraph">Position at the south-east corner of STANDARD_EVENT_BOUNDS</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2046827983%2FProperties%2F-1127283753" anchor-label="USER_AT_SOUTH_EDGE" id="2046827983%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-s-e-r_-a-t_-s-o-u-t-h_-e-d-g-e.html"><span><span>USER_AT_SOUTH_EDGE</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2046827983%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-u-s-e-r_-a-t_-s-o-u-t-h_-e-d-g-e.html">USER_AT_SOUTH_EDGE</a><span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-position/index.html">Position</a></div><div class="brief "><p class="paragraph">Position at the south edge of STANDARD_EVENT_BOUNDS</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="224390348%2FProperties%2F-1127283753" anchor-label="USER_AT_SW_CORNER" id="224390348%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-s-e-r_-a-t_-s-w_-c-o-r-n-e-r.html"><span><span>USER_AT_SW_CORNER</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="224390348%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-u-s-e-r_-a-t_-s-w_-c-o-r-n-e-r.html">USER_AT_SW_CORNER</a><span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-position/index.html">Position</a></div><div class="brief "><p class="paragraph">Position at the south-west corner of STANDARD_EVENT_BOUNDS</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="235983279%2FProperties%2F-1127283753" anchor-label="USER_AT_WEST_EDGE" id="235983279%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-s-e-r_-a-t_-w-e-s-t_-e-d-g-e.html"><span><span>USER_AT_WEST_EDGE</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="235983279%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-u-s-e-r_-a-t_-w-e-s-t_-e-d-g-e.html">USER_AT_WEST_EDGE</a><span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-position/index.html">Position</a></div><div class="brief "><p class="paragraph">Position at the west edge of STANDARD_EVENT_BOUNDS</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1732327790%2FProperties%2F-1127283753" anchor-label="USER_FAR_OUTSIDE_EVENT" id="-1732327790%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-s-e-r_-f-a-r_-o-u-t-s-i-d-e_-e-v-e-n-t.html"><span><span>USER_FAR_OUTSIDE_EVENT</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1732327790%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-u-s-e-r_-f-a-r_-o-u-t-s-i-d-e_-e-v-e-n-t.html">USER_FAR_OUTSIDE_EVENT</a><span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-position/index.html">Position</a></div><div class="brief "><p class="paragraph">Position far outside STANDARD_EVENT_BOUNDS</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="134012729%2FProperties%2F-1127283753" anchor-label="USER_INSIDE_EVENT" id="134012729%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-s-e-r_-i-n-s-i-d-e_-e-v-e-n-t.html"><span><span>USER_INSIDE_EVENT</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="134012729%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-u-s-e-r_-i-n-s-i-d-e_-e-v-e-n-t.html">USER_INSIDE_EVENT</a><span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-position/index.html">Position</a></div><div class="brief "><p class="paragraph">Position at the center of STANDARD_EVENT_BOUNDS</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1208113866%2FProperties%2F-1127283753" anchor-label="USER_OUTSIDE_EVENT" id="1208113866%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-s-e-r_-o-u-t-s-i-d-e_-e-v-e-n-t.html"><span><span>USER_OUTSIDE_EVENT</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1208113866%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-u-s-e-r_-o-u-t-s-i-d-e_-e-v-e-n-t.html">USER_OUTSIDE_EVENT</a><span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-position/index.html">Position</a></div><div class="brief "><p class="paragraph">Position outside STANDARD_EVENT_BOUNDS (north of event)</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1531022846%2FProperties%2F-1127283753" anchor-label="WIDE_EVENT_BOUNDS" id="1531022846%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-w-i-d-e_-e-v-e-n-t_-b-o-u-n-d-s.html"><span><span>WIDE_EVENT_BOUNDS</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1531022846%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-w-i-d-e_-e-v-e-n-t_-b-o-u-n-d-s.html">WIDE_EVENT_BOUNDS</a><span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-bounding-box/index.html">BoundingBox</a></div><div class="brief "><p class="paragraph">Wide event with 2:1 aspect ratio (landscape orientation) Useful for testing WINDOW mode aspect ratio fitting</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="478369572%2FProperties%2F-1127283753" anchor-label="ZOOM_BUILDING" id="478369572%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-z-o-o-m_-b-u-i-l-d-i-n-g.html"><span><span>ZOOM_BUILDING</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="478369572%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-z-o-o-m_-b-u-i-l-d-i-n-g.html">ZOOM_BUILDING</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">18.0</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1414134221%2FProperties%2F-1127283753" anchor-label="ZOOM_CITY" id="1414134221%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-z-o-o-m_-c-i-t-y.html"><span><span>ZOOM_CITY</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1414134221%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-z-o-o-m_-c-i-t-y.html">ZOOM_CITY</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">10.0</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-434958836%2FProperties%2F-1127283753" anchor-label="ZOOM_COUNTRY" id="-434958836%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-z-o-o-m_-c-o-u-n-t-r-y.html"><span><span>ZOOM_COUNTRY</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-434958836%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-z-o-o-m_-c-o-u-n-t-r-y.html">ZOOM_COUNTRY</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">5.0</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1542887038%2FProperties%2F-1127283753" anchor-label="ZOOM_MAX" id="1542887038%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-z-o-o-m_-m-a-x.html"><span><span>ZOOM_MAX</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1542887038%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-z-o-o-m_-m-a-x.html">ZOOM_MAX</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">22.0</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1669202294%2FProperties%2F-1127283753" anchor-label="ZOOM_NEIGHBORHOOD" id="-1669202294%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-z-o-o-m_-n-e-i-g-h-b-o-r-h-o-o-d.html"><span><span>ZOOM_NEIGHBORHOOD</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1669202294%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-z-o-o-m_-n-e-i-g-h-b-o-r-h-o-o-d.html">ZOOM_NEIGHBORHOOD</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">13.0</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1036449931%2FProperties%2F-1127283753" anchor-label="ZOOM_STREET" id="-1036449931%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-z-o-o-m_-s-t-r-e-e-t.html"><span><span>ZOOM_STREET</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1036449931%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-z-o-o-m_-s-t-r-e-e-t.html">ZOOM_STREET</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">15.0</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1980169936%2FProperties%2F-1127283753" anchor-label="ZOOM_WORLD" id="1980169936%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-z-o-o-m_-w-o-r-l-d.html"><span><span>ZOOM_WORLD</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1980169936%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-z-o-o-m_-w-o-r-l-d.html">ZOOM_WORLD</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">0.0</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-1238220154%2FFunctions%2F-1127283753" anchor-label="calculateMinZoomToFit" id="-1238220154%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="calculate-min-zoom-to-fit.html"><span>calculate</span><wbr></wbr><span>Min</span><wbr></wbr><span>Zoom</span><wbr></wbr><span>To</span><wbr></wbr><span><span>Fit</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1238220154%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="calculate-min-zoom-to-fit.html"><span class="token function">calculateMinZoomToFit</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bounds<span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-bounding-box/index.html">BoundingBox</a><span class="token punctuation">, </span></span><span class="parameter ">screenDimensions<span class="token operator">: </span><a href="-screen-dimensions/index.html">MapTestFixtures.ScreenDimensions</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Calculate minimum zoom level needed to fit a bounding box on screen</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="253514691%2FFunctions%2F-1127283753" anchor-label="calculateViewportDimensions" id="253514691%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="calculate-viewport-dimensions.html"><span>calculate</span><wbr></wbr><span>Viewport</span><wbr></wbr><span><span>Dimensions</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="253514691%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="calculate-viewport-dimensions.html"><span class="token function">calculateViewportDimensions</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">cameraLat<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">zoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">screenDimensions<span class="token operator">: </span><a href="-screen-dimensions/index.html">MapTestFixtures.ScreenDimensions</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-pair/index.html">Pair</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Calculate expected viewport dimensions for a given zoom level and screen dimensions Based on Web Mercator projection formulas</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-118530797%2FFunctions%2F-1127283753" anchor-label="center" id="-118530797%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="center.html"><span><span>center</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-118530797%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../../com.worldwidewaves.shared.events.utils/-bounding-box/index.html">BoundingBox</a><span class="token punctuation">.</span><a href="center.html"><span class="token function">center</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-position/index.html">Position</a></div><div class="brief "><p class="paragraph">Calculate the center position of a bounding box</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-814627150%2FFunctions%2F-1127283753" anchor-label="createVisibleRegion" id="-814627150%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-visible-region.html"><span>create</span><wbr></wbr><span>Visible</span><wbr></wbr><span><span>Region</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-814627150%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="create-visible-region.html"><span class="token function">createVisibleRegion</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">cameraPosition<span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-position/index.html">Position</a><span class="token punctuation">, </span></span><span class="parameter ">zoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">screenDimensions<span class="token operator">: </span><a href="-screen-dimensions/index.html">MapTestFixtures.ScreenDimensions</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-bounding-box/index.html">BoundingBox</a></div><div class="brief "><p class="paragraph">Create a BoundingBox representing the visible region at a given camera position and zoom</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-595287466%2FFunctions%2F-1127283753" anchor-label="expand" id="-595287466%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="expand.html"><span><span>expand</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-595287466%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../../com.worldwidewaves.shared.events.utils/-bounding-box/index.html">BoundingBox</a><span class="token punctuation">.</span><a href="expand.html"><span class="token function">expand</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">percentage<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-bounding-box/index.html">BoundingBox</a></div><div class="brief "><p class="paragraph">Expand a bounding box by a percentage</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1064422334%2FFunctions%2F-1127283753" anchor-label="isApproximately" id="-1064422334%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-approximately.html"><span>is</span><wbr></wbr><span><span>Approximately</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1064422334%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../../com.worldwidewaves.shared.events.utils/-bounding-box/index.html">BoundingBox</a><span class="token punctuation">.</span><a href="is-approximately.html"><span class="token function">isApproximately</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">other<span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-bounding-box/index.html">BoundingBox</a><span class="token punctuation">, </span></span><span class="parameter ">tolerance<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span>TOLERANCE_POSITION</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Check if two bounding boxes are approximately equal within tolerance</p></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="../../com.worldwidewaves.shared.events.utils/-position/index.html">Position</a><span class="token punctuation">.</span><a href="is-approximately.html"><span class="token function">isApproximately</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">other<span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-position/index.html">Position</a><span class="token punctuation">, </span></span><span class="parameter ">tolerance<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span>TOLERANCE_POSITION</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Check if two positions are approximately equal within tolerance</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="205858587%2FFunctions%2F-1127283753" anchor-label="isCompletelyWithin" id="205858587%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-completely-within.html"><span>is</span><wbr></wbr><span>Completely</span><wbr></wbr><span><span>Within</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="205858587%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../../com.worldwidewaves.shared.events.utils/-bounding-box/index.html">BoundingBox</a><span class="token punctuation">.</span><a href="is-completely-within.html"><span class="token function">isCompletelyWithin</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bounds<span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-bounding-box/index.html">BoundingBox</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Check if a bounding box is completely within another bounding box</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="349928004%2FFunctions%2F-1127283753" anchor-label="isValid" id="349928004%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-valid.html"><span>is</span><wbr></wbr><span><span>Valid</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="349928004%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../../com.worldwidewaves.shared.events.utils/-bounding-box/index.html">BoundingBox</a><span class="token punctuation">.</span><a href="is-valid.html"><span class="token function">isValid</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Check if a bounding box is valid (not inverted or zero-sized)</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1831433413%2FFunctions%2F-1127283753" anchor-label="shrink" id="1831433413%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="shrink.html"><span><span>shrink</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1831433413%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../../com.worldwidewaves.shared.events.utils/-bounding-box/index.html">BoundingBox</a><span class="token punctuation">.</span><a href="shrink.html"><span class="token function">shrink</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">percentage<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.utils/-bounding-box/index.html">BoundingBox</a></div><div class="brief "><p class="paragraph">Shrink a bounding box by a percentage</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

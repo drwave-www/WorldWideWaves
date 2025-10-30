@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>MapDownloadCoordinator</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+                    <a class="library-name--link" href="../../../index.html">
+                            worldwidewaves-shared
+                    </a>
+            </div>
+            <div class="library-version">
+            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":shared:dokkaHtml/commonMain">common</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="worldwidewaves-shared::com.worldwidewaves.shared.viewmodels/MapDownloadCoordinator///PointingToDeclaration//-1127283753">
+  <div class="breadcrumbs"><a href="../../../index.html">worldwidewaves-shared</a><span class="delimiter">/</span><a href="../index.html">com.worldwidewaves.shared.viewmodels</a><span class="delimiter">/</span><span class="current">MapDownloadCoordinator</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Map</span><wbr></wbr><span>Download</span><wbr></wbr><span><span>Coordinator</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">MapDownloadCoordinator</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">platformAdapter<span class="token operator">: </span><a href="../-platform-map-download-adapter/index.html">PlatformMapDownloadAdapter</a><span class="token punctuation">, </span></span><span class="parameter ">geoJsonDataProvider<span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.data/-geo-json-data-provider/index.html">GeoJsonDataProvider</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span> : <a href="../-i-map-download-manager/index.html">IMapDownloadManager</a><span class="clearfix"><span class="floating-right">(<a href="https://github.com/mglcel/WorldWideWaves/tree/main/shared/src/commonMain/kotlin/com/worldwidewaves/shared/viewmodels/MapDownloadCoordinator.kt#L52">source</a>)</span></span></div><p class="paragraph">Coordinates map download operations across platforms.</p><p class="paragraph">Contains all platform-agnostic download workflow logic without UI lifecycle concerns. Used by composition in platform-specific ViewModels (AndroidMapViewModel, IosMapViewModel).</p><p class="paragraph">RESPONSIBILITIES: • Download state management • Retry logic with exponential backoff • Progress tracking • Error handling and recovery • Platform-agnostic download workflow • GeoJSON cache invalidation after download</p><p class="paragraph">DEPENDENCIES: • PlatformMapDownloadAdapter (for platform-specific operations) • GeoJsonDataProvider (optional, for cache invalidation)</p><p class="paragraph">USED BY: • AndroidMapViewModel (composition) • IosMapViewModel (composition)</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="1421869623%2FConstructors%2F-1127283753" anchor-label="MapDownloadCoordinator" id="1421869623%2FConstructors%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-map-download-coordinator.html"><span>Map</span><wbr></wbr><span>Download</span><wbr></wbr><span><span>Coordinator</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1421869623%2FConstructors%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">platformAdapter<span class="token operator">: </span><a href="../-platform-map-download-adapter/index.html">PlatformMapDownloadAdapter</a><span class="token punctuation">, </span></span><span class="parameter ">geoJsonDataProvider<span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events.data/-geo-json-data-provider/index.html">GeoJsonDataProvider</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="">Types</h2>
+        <div class="table"><a data-name="-1419156252%2FClasslikes%2F-1127283753" anchor-label="Companion" id="-1419156252%2FClasslikes%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1419156252%2FClasslikes%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="818051071%2FProperties%2F-1127283753" anchor-label="currentMapId" id="818051071%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="current-map-id.html"><span>current</span><wbr></wbr><span>Map</span><wbr></wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="818051071%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="current-map-id.html">currentMapId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="762047746%2FProperties%2F-1127283753" anchor-label="featureState" id="762047746%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="feature-state.html"><span>feature</span><wbr></wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="762047746%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="feature-state.html">featureState</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../../com.worldwidewaves.shared.map/-map-feature-state/index.html">MapFeatureState</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1738888296%2FProperties%2F-1127283753" anchor-label="retryManager" id="-1738888296%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="retry-manager.html"><span>retry</span><wbr></wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1738888296%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="retry-manager.html">retryManager</a><span class="token operator">: </span><a href="../-map-download-utils/-retry-manager/index.html">MapDownloadUtils.RetryManager</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-1502115589%2FFunctions%2F-1127283753" anchor-label="cancelDownload" id="-1502115589%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="cancel-download.html"><span>cancel</span><wbr></wbr><span><span>Download</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1502115589%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="cancel-download.html"><span class="token function">cancelDownload</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Cancel any ongoing download.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1748760501%2FFunctions%2F-1127283753" anchor-label="checkIfMapIsAvailable" id="1748760501%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="check-if-map-is-available.html"><span>check</span><wbr></wbr><span>If</span><wbr></wbr><span>Map</span><wbr></wbr><span>Is</span><wbr></wbr><span><span>Available</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1748760501%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="check-if-map-is-available.html"><span class="token function">checkIfMapIsAvailable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mapId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">autoDownload<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Check if a map is available for the given event ID.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="164064641%2FFunctions%2F-1127283753" anchor-label="downloadMap" id="164064641%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="download-map.html"><span>download</span><wbr></wbr><span><span>Map</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="164064641%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="download-map.html"><span class="token function">downloadMap</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mapId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">onMapDownloaded<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Start downloading a map for the given event ID.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1947607674%2FFunctions%2F-1127283753" anchor-label="getErrorMessage" id="-1947607674%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-error-message.html"><span>get</span><wbr></wbr><span>Error</span><wbr></wbr><span><span>Message</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1947607674%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-error-message.html"><span class="token function">getErrorMessage</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">errorCode<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Get human-readable error message for error code.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1359667382%2FFunctions%2F-1127283753" anchor-label="handleDownloadCancellation" id="-1359667382%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="handle-download-cancellation.html"><span>handle</span><wbr></wbr><span>Download</span><wbr></wbr><span><span>Cancellation</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1359667382%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="handle-download-cancellation.html"><span class="token function">handleDownloadCancellation</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1399786685%2FFunctions%2F-1127283753" anchor-label="handleDownloadFailure" id="-1399786685%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="handle-download-failure.html"><span>handle</span><wbr></wbr><span>Download</span><wbr></wbr><span><span>Failure</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1399786685%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="handle-download-failure.html"><span class="token function">handleDownloadFailure</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">errorCode<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">shouldRetry<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1246572467%2FFunctions%2F-1127283753" anchor-label="handleDownloadProgress" id="1246572467%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="handle-download-progress.html"><span>handle</span><wbr></wbr><span>Download</span><wbr></wbr><span><span>Progress</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1246572467%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="handle-download-progress.html"><span class="token function">handleDownloadProgress</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">totalBytes<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">downloadedBytes<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2067149802%2FFunctions%2F-1127283753" anchor-label="handleDownloadSuccess" id="2067149802%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="handle-download-success.html"><span>handle</span><wbr></wbr><span>Download</span><wbr></wbr><span><span>Success</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2067149802%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="handle-download-success.html"><span class="token function">handleDownloadSuccess</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-205891717%2FFunctions%2F-1127283753" anchor-label="handleInstallComplete" id="-205891717%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="handle-install-complete.html"><span>handle</span><wbr></wbr><span>Install</span><wbr></wbr><span><span>Complete</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-205891717%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="handle-install-complete.html"><span class="token function">handleInstallComplete</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">moduleIds<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-859021532%2FFunctions%2F-1127283753" anchor-label="setStateCanceling" id="-859021532%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-state-canceling.html"><span>set</span><wbr></wbr><span>State</span><wbr></wbr><span><span>Canceling</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-859021532%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-state-canceling.html"><span class="token function">setStateCanceling</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="494272903%2FFunctions%2F-1127283753" anchor-label="setStateInstalling" id="494272903%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-state-installing.html"><span>set</span><wbr></wbr><span>State</span><wbr></wbr><span><span>Installing</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="494272903%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-state-installing.html"><span class="token function">setStateInstalling</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2047191211%2FFunctions%2F-1127283753" anchor-label="setStatePending" id="-2047191211%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-state-pending.html"><span>set</span><wbr></wbr><span>State</span><wbr></wbr><span><span>Pending</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2047191211%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-state-pending.html"><span class="token function">setStatePending</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1328150571%2FFunctions%2F-1127283753" anchor-label="setStateRetrying" id="1328150571%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-state-retrying.html"><span>set</span><wbr></wbr><span>State</span><wbr></wbr><span><span>Retrying</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1328150571%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-state-retrying.html"><span class="token function">setStateRetrying</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">retryCount<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">maxRetries<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1004835842%2FFunctions%2F-1127283753" anchor-label="setStateUnknown" id="1004835842%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-state-unknown.html"><span>set</span><wbr></wbr><span>State</span><wbr></wbr><span><span>Unknown</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1004835842%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-state-unknown.html"><span class="token function">setStateUnknown</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

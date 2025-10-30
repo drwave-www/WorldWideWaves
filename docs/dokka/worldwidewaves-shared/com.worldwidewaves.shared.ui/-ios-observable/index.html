@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>IosObservable</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+                    <a class="library-name--link" href="../../../index.html">
+                            worldwidewaves-shared
+                    </a>
+            </div>
+            <div class="library-version">
+            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":shared:dokkaHtml/commonMain">common</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="worldwidewaves-shared::com.worldwidewaves.shared.ui/IosObservable///PointingToDeclaration//-1127283753">
+  <div class="breadcrumbs"><a href="../../../index.html">worldwidewaves-shared</a><span class="delimiter">/</span><a href="../index.html">com.worldwidewaves.shared.ui</a><span class="delimiter">/</span><span class="current">IosObservable</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Ios</span><wbr></wbr><span><span>Observable</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">IosObservable</a><span class="token operator">&lt;</span><a href="index.html">T</a><span class="token operator">&gt;</span><span class="clearfix"><span class="floating-right">(<a href="https://github.com/mglcel/WorldWideWaves/tree/main/shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/IosReactivePattern.kt#L50">source</a>)</span></span></div><p class="paragraph">Cross-platform reactive pattern bridge for iOS UI frameworks.</p><p class="paragraph">This interface provides a bridge between Kotlin's StateFlow/Flow reactive patterns and iOS UI frameworks like SwiftUI (with @Observable) and UIKit (with Combine).</p><p class="paragraph">Architecture Impact:</p><ul><li><p class="paragraph">Enables seamless integration of Kotlin reactive state with iOS UI</p></li><li><p class="paragraph">Provides iOS-compatible observation patterns for SharedViewModel state</p></li><li><p class="paragraph">Supports iOS memory management patterns for reactive subscriptions</p></li><li><p class="paragraph">Bridges Kotlin Coroutines with iOS Combine/AsyncSequence patterns</p></li></ul><p class="paragraph">Usage Pattern for iOS:</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">// In shared code<br>val stateFlowWrapper = eventsViewModel.events.toIosObservable()<br><br>// Consumed in iOS Swift code via bridging<br>stateFlowWrapper.observe { events in<br>    // Update iOS UI<br>}</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="-1371780498%2FProperties%2F-1127283753" anchor-label="activeSubscriptionCount" id="-1371780498%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="active-subscription-count.html"><span>active</span><wbr></wbr><span>Subscription</span><wbr></wbr><span><span>Count</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1371780498%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">val </span><a href="active-subscription-count.html">activeSubscriptionCount</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div><div class="brief "><p class="paragraph">Count of currently active subscriptions Used for testing and debugging</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1431766679%2FProperties%2F-1127283753" anchor-label="value" id="-1431766679%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="value.html"><span><span>value</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1431766679%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">val </span><a href="value.html">value</a><span class="token operator">: </span><a href="index.html">T</a></div><div class="brief "><p class="paragraph">Current value of the observable state Compatible with iOS @State/@Published patterns</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-1080436650%2FFunctions%2F-1127283753" anchor-label="cleanup" id="-1080436650%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="cleanup.html"><span><span>cleanup</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1080436650%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="cleanup.html"><span class="token function">cleanup</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Cleanup all active subscriptions Should be called when the observable is no longer needed</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1178891585%2FFunctions%2F-1127283753" anchor-label="observe" id="1178891585%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="observe.html"><span><span>observe</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1178891585%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="observe.html"><span class="token function">observe</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">callback<span class="token operator">: </span><span class="token punctuation">(</span><a href="index.html">T</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-ios-observable-subscription/index.html">IosObservableSubscription</a></div><div class="brief "><p class="paragraph">Subscribe to state changes with iOS-compatible callback Returns a subscription handle for cleanup</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1571996458%2FFunctions%2F-1127283753" anchor-label="observeAsync" id="-1571996458%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="observe-async.html"><span>observe</span><wbr></wbr><span><span>Async</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1571996458%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="observe-async.html"><span class="token function">observeAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">callback<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><a href="index.html">T</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">iOS-specific async observation Compatible with Swift AsyncSequence/AsyncStream</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

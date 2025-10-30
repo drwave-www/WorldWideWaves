@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>MapWrapperRegistry</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+                    <a class="library-name--link" href="../../../index.html">
+                            worldwidewaves-shared
+                    </a>
+            </div>
+            <div class="library-version">
+            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":shared:dokkaHtml/iosMain">ios</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="worldwidewaves-shared::com.worldwidewaves.shared.map/MapWrapperRegistry///PointingToDeclaration//59985791">
+  <div class="breadcrumbs"><a href="../../../index.html">worldwidewaves-shared</a><span class="delimiter">/</span><a href="../index.html">com.worldwidewaves.shared.map</a><span class="delimiter">/</span><span class="current">MapWrapperRegistry</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Map</span><wbr></wbr><span>Wrapper</span><wbr></wbr><span><span>Registry</span></span></h1>
+    <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">MapWrapperRegistry</a></div><p class="paragraph">Registry to store MapLibreViewWrapper instances, polygon data, and camera commands. This allows coordination between Kotlin (IosEventMap) and Swift (MapLibreViewWrapper).</p><p class="paragraph">Architecture:</p><ol><li><p class="paragraph">Swift creates MapLibreViewWrapper in EventMapView</p></li><li><p class="paragraph">Swift registers it here via registerWrapper(eventId, wrapper)</p></li><li><p class="paragraph">Kotlin triggers immediate updates via callback system (direct dispatch)</p></li><li><p class="paragraph">Swift receives callbacks and executes immediately on main thread</p></li></ol><p class="paragraph">Memory Management (STRONG REFERENCES):</p><ul><li><p class="paragraph">Uses STRONG references (not WeakReference) to prevent premature GC</p></li><li><p class="paragraph">Wrappers survive entire screen session for dynamic updates</p></li><li><p class="paragraph">CRITICAL: Must call unregisterWrapper() on screen exit to prevent leaks</p></li><li><p class="paragraph">DisposableEffect in IosEventMap handles cleanup automatically</p></li><li><p class="paragraph">No LRU eviction - explicit lifecycle management only</p></li></ul></div>    </div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="">Types</h2>
+        <div class="table"><a data-name="-1781137510%2FClasslikes%2F59985791" anchor-label="PendingPolygonData" id="-1781137510%2FClasslikes%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-pending-polygon-data/index.html"><span>Pending</span><wbr></wbr><span>Polygon</span><wbr></wbr><span><span>Data</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1781137510%2FClasslikes%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-pending-polygon-data/index.html">PendingPolygonData</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>coordinates<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-pair/index.html">Pair</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>clearExisting<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="1528939215%2FFunctions%2F59985791" anchor-label="addOnMapReadyCallback" id="1528939215%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="add-on-map-ready-callback.html"><span>add</span><wbr></wbr><span>On</span><wbr></wbr><span>Map</span><wbr></wbr><span>Ready</span><wbr></wbr><span><span>Callback</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1528939215%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="add-on-map-ready-callback.html"><span class="token function">addOnMapReadyCallback</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">callback<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Add a callback to be invoked when map style is loaded and ready. If style is already loaded, callback is invoked immediately.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1511133115%2FFunctions%2F59985791" anchor-label="clear" id="1511133115%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear.html"><span><span>clear</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1511133115%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="clear.html"><span class="token function">clear</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Clear all registered wrappers and pending data. Useful for cleanup during app termination or testing.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="434599546%2FFunctions%2F59985791" anchor-label="clearMapClickCallback" id="434599546%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-map-click-callback.html"><span>clear</span><wbr></wbr><span>Map</span><wbr></wbr><span>Click</span><wbr></wbr><span><span>Callback</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="434599546%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="clear-map-click-callback.html"><span class="token function">clearMapClickCallback</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Clear map click callback for an event.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1495063103%2FFunctions%2F59985791" anchor-label="clearMapClickCoordinateListener" id="-1495063103%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-map-click-coordinate-listener.html"><span>clear</span><wbr></wbr><span>Map</span><wbr></wbr><span>Click</span><wbr></wbr><span>Coordinate</span><wbr></wbr><span><span>Listener</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1495063103%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="clear-map-click-coordinate-listener.html"><span class="token function">clearMapClickCoordinateListener</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Clear map click coordinate listener.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1343574296%2FFunctions%2F59985791" anchor-label="clearPendingCameraCommand" id="1343574296%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-pending-camera-command.html"><span>clear</span><wbr></wbr><span>Pending</span><wbr></wbr><span>Camera</span><wbr></wbr><span><span>Command</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1343574296%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="clear-pending-camera-command.html"><span class="token function">clearPendingCameraCommand</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Clear pending camera command after it's been executed. Swift calls this after successfully executing the command.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="359985269%2FFunctions%2F59985791" anchor-label="clearPendingPolygons" id="359985269%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-pending-polygons.html"><span>clear</span><wbr></wbr><span>Pending</span><wbr></wbr><span><span>Polygons</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="359985269%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="clear-pending-polygons.html"><span class="token function">clearPendingPolygons</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Clear pending polygons after they've been rendered. Swift calls this after successfully rendering polygons.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1725897095%2FFunctions%2F59985791" anchor-label="drawDebugBbox" id="-1725897095%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="draw-debug-bbox.html"><span>draw</span><wbr></wbr><span>Debug</span><wbr></wbr><span><span>Bbox</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1725897095%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="draw-debug-bbox.html"><span class="token function">drawDebugBbox</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">bbox<span class="token operator">: </span><span data-unresolved-link="com.worldwidewaves.shared.events.utils/BoundingBox///PointingToDeclaration/">BoundingBox</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Draw debug bounding box overlay (for testing constraint bounds).</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1218439197%2FFunctions%2F59985791" anchor-label="enableLocationComponentOnWrapper" id="-1218439197%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="enable-location-component-on-wrapper.html"><span>enable</span><wbr></wbr><span>Location</span><wbr></wbr><span>Component</span><wbr></wbr><span>On</span><wbr></wbr><span><span>Wrapper</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1218439197%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="enable-location-component-on-wrapper.html"><span class="token function">enableLocationComponentOnWrapper</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Enable or disable location component on the map wrapper.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1641155699%2FFunctions%2F59985791" anchor-label="getActualMinZoom" id="1641155699%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-actual-min-zoom.html"><span>get</span><wbr></wbr><span>Actual</span><wbr></wbr><span>Min</span><wbr></wbr><span><span>Zoom</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1641155699%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="get-actual-min-zoom.html"><span class="token function">getActualMinZoom</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1079928192%2FFunctions%2F59985791" anchor-label="getCameraPosition" id="-1079928192%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-camera-position.html"><span>get</span><wbr></wbr><span>Camera</span><wbr></wbr><span><span>Position</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1079928192%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="get-camera-position.html"><span class="token function">getCameraPosition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-pair/index.html">Pair</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator">&gt;</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Get camera position for event.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1007168938%2FFunctions%2F59985791" anchor-label="getCameraZoom" id="1007168938%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-camera-zoom.html"><span>get</span><wbr></wbr><span>Camera</span><wbr></wbr><span><span>Zoom</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1007168938%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="get-camera-zoom.html"><span class="token function">getCameraZoom</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Get camera zoom for event.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-673805377%2FFunctions%2F59985791" anchor-label="getMapHeight" id="-673805377%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-map-height.html"><span>get</span><wbr></wbr><span>Map</span><wbr></wbr><span><span>Height</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-673805377%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="get-map-height.html"><span class="token function">getMapHeight</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Get map height for event. Returns actual map view height from Swift wrapper.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="115980316%2FFunctions%2F59985791" anchor-label="getMapWidth" id="115980316%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-map-width.html"><span>get</span><wbr></wbr><span>Map</span><wbr></wbr><span><span>Width</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="115980316%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="get-map-width.html"><span class="token function">getMapWidth</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Get map width for event. Returns actual map view width from Swift wrapper.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1763355871%2FFunctions%2F59985791" anchor-label="getMinZoom" id="-1763355871%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-min-zoom.html"><span>get</span><wbr></wbr><span>Min</span><wbr></wbr><span><span>Zoom</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1763355871%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="get-min-zoom.html"><span class="token function">getMinZoom</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Get min zoom level for event (cached from Swift).</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1347061281%2FFunctions%2F59985791" anchor-label="getPendingCameraCommand" id="1347061281%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-pending-camera-command.html"><span>get</span><wbr></wbr><span>Pending</span><wbr></wbr><span>Camera</span><wbr></wbr><span><span>Command</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1347061281%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="get-pending-camera-command.html"><span class="token function">getPendingCameraCommand</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-camera-command/index.html">CameraCommand</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Get next pending camera command for an event. Swift calls this to retrieve camera commands that need to be executed. Returns null if no pending commands.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-132974132%2FFunctions%2F59985791" anchor-label="getPendingPolygons" id="-132974132%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-pending-polygons.html"><span>get</span><wbr></wbr><span>Pending</span><wbr></wbr><span><span>Polygons</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-132974132%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="get-pending-polygons.html"><span class="token function">getPendingPolygons</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-pending-polygon-data/index.html">MapWrapperRegistry.PendingPolygonData</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Get pending polygon data for an event. Swift calls this to retrieve polygons that need to be rendered. Returns null if no pending polygons.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1851313485%2FFunctions%2F59985791" anchor-label="getRenderCallback" id="1851313485%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-render-callback.html"><span>get</span><wbr></wbr><span>Render</span><wbr></wbr><span><span>Callback</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1851313485%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="get-render-callback.html"><span class="token function">getRenderCallback</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Get the registered render callback for an event. Used for synchronous polygon rendering.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="546430818%2FFunctions%2F59985791" anchor-label="getVisibleRegion" id="546430818%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-visible-region.html"><span>get</span><wbr></wbr><span>Visible</span><wbr></wbr><span><span>Region</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="546430818%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="get-visible-region.html"><span class="token function">getVisibleRegion</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.worldwidewaves.shared.events.utils/BoundingBox///PointingToDeclaration/">BoundingBox</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Get visible region from wrapper. Returns the current visible bounds of the map.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1940510737%2FFunctions%2F59985791" anchor-label="getWrapper" id="-1940510737%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-wrapper.html"><span>get</span><wbr></wbr><span><span>Wrapper</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1940510737%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="get-wrapper.html"><span class="token function">getWrapper</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Get the registered wrapper for an event. Returns null if not yet registered. With strong references, wrapper is guaranteed to exist until unregisterWrapper() is called.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-503632795%2FFunctions%2F59985791" anchor-label="hasPendingCameraCommand" id="-503632795%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="has-pending-camera-command.html"><span>has</span><wbr></wbr><span>Pending</span><wbr></wbr><span>Camera</span><wbr></wbr><span><span>Command</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-503632795%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="has-pending-camera-command.html"><span class="token function">hasPendingCameraCommand</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Check if there is a pending camera command for an event.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="970750216%2FFunctions%2F59985791" anchor-label="hasPendingPolygons" id="970750216%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="has-pending-polygons.html"><span>has</span><wbr></wbr><span>Pending</span><wbr></wbr><span><span>Polygons</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="970750216%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="has-pending-polygons.html"><span class="token function">hasPendingPolygons</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Check if there are pending polygons for an event.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="392570703%2FFunctions%2F59985791" anchor-label="hasUserPositionCallback" id="392570703%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="has-user-position-callback.html"><span>has</span><wbr></wbr><span>User</span><wbr></wbr><span>Position</span><wbr></wbr><span><span>Callback</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="392570703%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="has-user-position-callback.html"><span class="token function">hasUserPositionCallback</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Check if user position callback is registered for an event.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="239575612%2FFunctions%2F59985791" anchor-label="invokeCameraAnimationCallback" id="239575612%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="invoke-camera-animation-callback.html"><span>invoke</span><wbr></wbr><span>Camera</span><wbr></wbr><span>Animation</span><wbr></wbr><span><span>Callback</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="239575612%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="invoke-camera-animation-callback.html"><span class="token function">invokeCameraAnimationCallback</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">callbackId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">success<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Invoke camera animation callback (called from Swift when animation completes).</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1617256791%2FFunctions%2F59985791" anchor-label="invokeCameraIdleListener" id="1617256791%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="invoke-camera-idle-listener.html"><span>invoke</span><wbr></wbr><span>Camera</span><wbr></wbr><span>Idle</span><wbr></wbr><span><span>Listener</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1617256791%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="invoke-camera-idle-listener.html"><span class="token function">invokeCameraIdleListener</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Invoke all camera idle listeners (called from Swift). Executes all registered callbacks in order.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1353033573%2FFunctions%2F59985791" anchor-label="invokeMapClickCallback" id="-1353033573%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="invoke-map-click-callback.html"><span>invoke</span><wbr></wbr><span>Map</span><wbr></wbr><span>Click</span><wbr></wbr><span><span>Callback</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1353033573%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="invoke-map-click-callback.html"><span class="token function">invokeMapClickCallback</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Get and invoke map click callback for an event. Swift calls this when map is tapped. Returns true if callback was found and invoked.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1250303700%2FFunctions%2F59985791" anchor-label="invokeMapClickCoordinateListener" id="-1250303700%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="invoke-map-click-coordinate-listener.html"><span>invoke</span><wbr></wbr><span>Map</span><wbr></wbr><span>Click</span><wbr></wbr><span>Coordinate</span><wbr></wbr><span><span>Listener</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1250303700%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="invoke-map-click-coordinate-listener.html"><span class="token function">invokeMapClickCoordinateListener</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">latitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">longitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Invoke map click coordinate listener (called from Swift with tap coordinates).</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-424308885%2FFunctions%2F59985791" anchor-label="invokeMapReadyCallbacks" id="-424308885%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="invoke-map-ready-callbacks.html"><span>invoke</span><wbr></wbr><span>Map</span><wbr></wbr><span>Ready</span><wbr></wbr><span><span>Callbacks</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-424308885%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="invoke-map-ready-callbacks.html"><span class="token function">invokeMapReadyCallbacks</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Invoke all registered map ready callbacks for an event. Called from Swift after style loads.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1365732312%2FFunctions%2F59985791" anchor-label="isStyleLoaded" id="-1365732312%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-style-loaded.html"><span>is</span><wbr></wbr><span>Style</span><wbr></wbr><span><span>Loaded</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1365732312%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="is-style-loaded.html"><span class="token function">isStyleLoaded</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Check if style is loaded for an event.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="940266612%2FFunctions%2F59985791" anchor-label="registerWrapper" id="940266612%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="register-wrapper.html"><span>register</span><wbr></wbr><span><span>Wrapper</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="940266612%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="register-wrapper.html"><span class="token function">registerWrapper</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">wrapper<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-any/index.html">Any</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Register a MapLibreViewWrapper for an event. Called from Swift after wrapper creation. Uses STRONG reference - wrapper survives entire screen session. MUST call unregisterWrapper() on screen exit to prevent memory leaks.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="715350733%2FFunctions%2F59985791" anchor-label="requestImmediateCameraExecution" id="715350733%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="request-immediate-camera-execution.html"><span>request</span><wbr></wbr><span>Immediate</span><wbr></wbr><span>Camera</span><wbr></wbr><span><span>Execution</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="715350733%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="request-immediate-camera-execution.html"><span class="token function">requestImmediateCameraExecution</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Request immediate execution of pending camera command. Invokes the registered camera callback if available.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="593448170%2FFunctions%2F59985791" anchor-label="requestImmediateRender" id="593448170%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="request-immediate-render.html"><span>request</span><wbr></wbr><span>Immediate</span><wbr></wbr><span><span>Render</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="593448170%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="request-immediate-render.html"><span class="token function">requestImmediateRender</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Request immediate render of pending polygons. Invokes the registered render callback if available. Called from Kotlin when polygons are updated.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="147047804%2FFunctions%2F59985791" anchor-label="requestMapClickCallbackRegistration" id="147047804%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="request-map-click-callback-registration.html"><span>request</span><wbr></wbr><span>Map</span><wbr></wbr><span>Click</span><wbr></wbr><span>Callback</span><wbr></wbr><span><span>Registration</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="147047804%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="request-map-click-callback-registration.html"><span class="token function">requestMapClickCallbackRegistration</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">clickCallback<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Request map click callback registration on wrapper. Invokes the registered callback to set the click listener directly on the wrapper.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="359965109%2FFunctions%2F59985791" anchor-label="setAttributionMarginsCommand" id="359965109%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-attribution-margins-command.html"><span>set</span><wbr></wbr><span>Attribution</span><wbr></wbr><span>Margins</span><wbr></wbr><span><span>Command</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="359965109%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-attribution-margins-command.html"><span class="token function">setAttributionMarginsCommand</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">left<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">top<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">right<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">bottom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Set attribution margins command (Swift will execute).</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-490359232%2FFunctions%2F59985791" anchor-label="setCameraAnimationCallback" id="-490359232%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-camera-animation-callback.html"><span>set</span><wbr></wbr><span>Camera</span><wbr></wbr><span>Animation</span><wbr></wbr><span><span>Callback</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-490359232%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-camera-animation-callback.html"><span class="token function">setCameraAnimationCallback</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">callbackId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">callback<span class="token operator">: </span><span data-unresolved-link="com.worldwidewaves.shared.map/MapCameraCallback///PointingToDeclaration/">MapCameraCallback</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Store camera animation callback for async completion.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1548664655%2FFunctions%2F59985791" anchor-label="setCameraCallback" id="1548664655%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-camera-callback.html"><span>set</span><wbr></wbr><span>Camera</span><wbr></wbr><span><span>Callback</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1548664655%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-camera-callback.html"><span class="token function">setCameraCallback</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">callback<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Register a callback that Swift wrapper will invoke when camera command needs execution. This enables direct dispatch pattern (no polling).</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="332608562%2FFunctions%2F59985791" anchor-label="setCameraIdleListener" id="332608562%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-camera-idle-listener.html"><span>set</span><wbr></wbr><span>Camera</span><wbr></wbr><span>Idle</span><wbr></wbr><span><span>Listener</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="332608562%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-camera-idle-listener.html"><span class="token function">setCameraIdleListener</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">callback<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Set camera idle listener for event. Supports multiple listeners like Android MapLibre API.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="342855141%2FFunctions%2F59985791" anchor-label="setGesturesEnabledCallback" id="342855141%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-gestures-enabled-callback.html"><span>set</span><wbr></wbr><span>Gestures</span><wbr></wbr><span>Enabled</span><wbr></wbr><span><span>Callback</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="342855141%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-gestures-enabled-callback.html"><span class="token function">setGesturesEnabledCallback</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">callback<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Register callback for enabling/disabling gestures. Swift wrapper registers this to receive gesture enable/disable commands.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1647991767%2FFunctions%2F59985791" anchor-label="setGesturesEnabledOnWrapper" id="-1647991767%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-gestures-enabled-on-wrapper.html"><span>set</span><wbr></wbr><span>Gestures</span><wbr></wbr><span>Enabled</span><wbr></wbr><span>On</span><wbr></wbr><span><span>Wrapper</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1647991767%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-gestures-enabled-on-wrapper.html"><span class="token function">setGesturesEnabledOnWrapper</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Enable or disable gestures on the map wrapper.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="639757707%2FFunctions%2F59985791" anchor-label="setGetActualMinZoomCallback" id="639757707%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-get-actual-min-zoom-callback.html"><span>set</span><wbr></wbr><span>Get</span><wbr></wbr><span>Actual</span><wbr></wbr><span>Min</span><wbr></wbr><span>Zoom</span><wbr></wbr><span><span>Callback</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="639757707%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-get-actual-min-zoom-callback.html"><span class="token function">setGetActualMinZoomCallback</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">callback<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Register callback for getActualMinZoom requests. Swift wrapper registers this to provide real-time min zoom values.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1269312428%2FFunctions%2F59985791" anchor-label="setLocationComponentCallback" id="-1269312428%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-location-component-callback.html"><span>set</span><wbr></wbr><span>Location</span><wbr></wbr><span>Component</span><wbr></wbr><span><span>Callback</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1269312428%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-location-component-callback.html"><span class="token function">setLocationComponentCallback</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">callback<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Register callback for enabling/disabling location component. Swift wrapper registers this to receive location component enable/disable commands.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-440702602%2FFunctions%2F59985791" anchor-label="setMapClickCallback" id="-440702602%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-map-click-callback.html"><span>set</span><wbr></wbr><span>Map</span><wbr></wbr><span>Click</span><wbr></wbr><span><span>Callback</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-440702602%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-map-click-callback.html"><span class="token function">setMapClickCallback</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">callback<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Set map click callback for an event. Swift will invoke this when the map is tapped.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="488277603%2FFunctions%2F59985791" anchor-label="setMapClickCoordinateListener" id="488277603%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-map-click-coordinate-listener.html"><span>set</span><wbr></wbr><span>Map</span><wbr></wbr><span>Click</span><wbr></wbr><span>Coordinate</span><wbr></wbr><span><span>Listener</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="488277603%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-map-click-coordinate-listener.html"><span class="token function">setMapClickCoordinateListener</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">listener<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Set map click coordinate listener (invoked with tap coordinates).</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="955072544%2FFunctions%2F59985791" anchor-label="setMapClickRegistrationCallback" id="955072544%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-map-click-registration-callback.html"><span>set</span><wbr></wbr><span>Map</span><wbr></wbr><span>Click</span><wbr></wbr><span>Registration</span><wbr></wbr><span><span>Callback</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="955072544%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-map-click-registration-callback.html"><span class="token function">setMapClickRegistrationCallback</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">callback<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Register a callback that Swift wrapper will invoke to register map click callbacks. This enables direct callback storage in wrapper (no registry lookup).</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1876462391%2FFunctions%2F59985791" anchor-label="setMaxZoomCommand" id="1876462391%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-max-zoom-command.html"><span>set</span><wbr></wbr><span>Max</span><wbr></wbr><span>Zoom</span><wbr></wbr><span><span>Command</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1876462391%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-max-zoom-command.html"><span class="token function">setMaxZoomCommand</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">maxZoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Set max zoom command (Swift will execute).</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-301325175%2FFunctions%2F59985791" anchor-label="setMinZoomCommand" id="-301325175%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-min-zoom-command.html"><span>set</span><wbr></wbr><span>Min</span><wbr></wbr><span>Zoom</span><wbr></wbr><span><span>Command</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-301325175%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-min-zoom-command.html"><span class="token function">setMinZoomCommand</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">minZoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Set min zoom command (Swift will execute).</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2077169593%2FFunctions%2F59985791" anchor-label="setPendingCameraCommand" id="2077169593%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-pending-camera-command.html"><span>set</span><wbr></wbr><span>Pending</span><wbr></wbr><span>Camera</span><wbr></wbr><span><span>Command</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2077169593%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-pending-camera-command.html"><span class="token function">setPendingCameraCommand</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">command<span class="token operator">: </span><a href="../-camera-command/index.html">CameraCommand</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Store a camera command to be executed. Called from Kotlin when camera needs to be controlled.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-391800140%2FFunctions%2F59985791" anchor-label="setPendingPolygons" id="-391800140%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-pending-polygons.html"><span>set</span><wbr></wbr><span>Pending</span><wbr></wbr><span><span>Polygons</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-391800140%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-pending-polygons.html"><span class="token function">setPendingPolygons</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">coordinates<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-pair/index.html">Pair</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">clearExisting<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Store polygon data to be rendered. Called from Kotlin when polygons need to be displayed.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="973673536%2FFunctions%2F59985791" anchor-label="setRenderCallback" id="973673536%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-render-callback.html"><span>set</span><wbr></wbr><span>Render</span><wbr></wbr><span><span>Callback</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="973673536%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-render-callback.html"><span class="token function">setRenderCallback</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">callback<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Register a callback that Swift wrapper will invoke when immediate render is requested. This enables direct dispatch pattern (no polling).</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1805045406%2FFunctions%2F59985791" anchor-label="setStyleLoaded" id="1805045406%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-style-loaded.html"><span>set</span><wbr></wbr><span>Style</span><wbr></wbr><span><span>Loaded</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1805045406%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-style-loaded.html"><span class="token function">setStyleLoaded</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">loaded<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Mark style as loaded for an event. Called from Swift after didFinishLoading style.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-534618844%2FFunctions%2F59985791" anchor-label="setUserPositionCallback" id="-534618844%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-user-position-callback.html"><span>set</span><wbr></wbr><span>User</span><wbr></wbr><span>Position</span><wbr></wbr><span><span>Callback</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-534618844%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-user-position-callback.html"><span class="token function">setUserPositionCallback</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">callback<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Register callback for setting user position. Swift wrapper registers this to receive user position updates.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1026363354%2FFunctions%2F59985791" anchor-label="setUserPositionOnWrapper" id="1026363354%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-user-position-on-wrapper.html"><span>set</span><wbr></wbr><span>User</span><wbr></wbr><span>Position</span><wbr></wbr><span>On</span><wbr></wbr><span><span>Wrapper</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1026363354%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-user-position-on-wrapper.html"><span class="token function">setUserPositionOnWrapper</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">latitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">longitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Update user position on the map wrapper.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1868351041%2FFunctions%2F59985791" anchor-label="syncActualMinZoomFromWrapper" id="-1868351041%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="sync-actual-min-zoom-from-wrapper.html"><span>sync</span><wbr></wbr><span>Actual</span><wbr></wbr><span>Min</span><wbr></wbr><span>Zoom</span><wbr></wbr><span>From</span><wbr></wbr><span><span>Wrapper</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1868351041%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="sync-actual-min-zoom-from-wrapper.html"><span class="token function">syncActualMinZoomFromWrapper</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Synchronously fetch actualMinZoom from wrapper and update cache. This is called before getActualMinZoom() to ensure fresh value.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1465861997%2FFunctions%2F59985791" anchor-label="unregisterWrapper" id="-1465861997%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="unregister-wrapper.html"><span>unregister</span><wbr></wbr><span><span>Wrapper</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1465861997%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="unregister-wrapper.html"><span class="token function">unregisterWrapper</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Unregister a wrapper when the map screen is exited. CRITICAL: Must be called to release strong reference and prevent memory leaks. Clears wrapper, pending data, and all callbacks for the event.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-29695345%2FFunctions%2F59985791" anchor-label="updateActualMinZoom" id="-29695345%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-actual-min-zoom.html"><span>update</span><wbr></wbr><span>Actual</span><wbr></wbr><span>Min</span><wbr></wbr><span><span>Zoom</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-29695345%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="update-actual-min-zoom.html"><span class="token function">updateActualMinZoom</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">actualMinZoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Update actual min zoom from Swift (called synchronously before getActualMinZoom).</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-80712461%2FFunctions%2F59985791" anchor-label="updateCameraPosition" id="-80712461%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-camera-position.html"><span>update</span><wbr></wbr><span>Camera</span><wbr></wbr><span><span>Position</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-80712461%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="update-camera-position.html"><span class="token function">updateCameraPosition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">latitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">longitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Update camera position from Swift (for StateFlow reactive updates). Called when map camera moves.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1653571192%2FFunctions%2F59985791" anchor-label="updateCameraZoom" id="1653571192%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-camera-zoom.html"><span>update</span><wbr></wbr><span>Camera</span><wbr></wbr><span><span>Zoom</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1653571192%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="update-camera-zoom.html"><span class="token function">updateCameraZoom</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">zoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Update camera zoom from Swift (for StateFlow reactive updates). Called when map zoom changes.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1152491429%2FFunctions%2F59985791" anchor-label="updateMapHeight" id="-1152491429%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-map-height.html"><span>update</span><wbr></wbr><span>Map</span><wbr></wbr><span><span>Height</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1152491429%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="update-map-height.html"><span class="token function">updateMapHeight</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">height<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Update map height from Swift. Called by Swift when map view bounds change.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-324399190%2FFunctions%2F59985791" anchor-label="updateMapWidth" id="-324399190%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-map-width.html"><span>update</span><wbr></wbr><span>Map</span><wbr></wbr><span><span>Width</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-324399190%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="update-map-width.html"><span class="token function">updateMapWidth</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">width<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Update map width from Swift. Called by Swift when map view bounds change.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1177119235%2FFunctions%2F59985791" anchor-label="updateMinZoom" id="-1177119235%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-min-zoom.html"><span>update</span><wbr></wbr><span>Min</span><wbr></wbr><span><span>Zoom</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1177119235%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="update-min-zoom.html"><span class="token function">updateMinZoom</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">minZoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Update min zoom level from Swift.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="641701972%2FFunctions%2F59985791" anchor-label="updateVisibleRegion" id="641701972%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-visible-region.html"><span>update</span><wbr></wbr><span>Visible</span><wbr></wbr><span><span>Region</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="641701972%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="update-visible-region.html"><span class="token function">updateVisibleRegion</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">bbox<span class="token operator">: </span><span data-unresolved-link="com.worldwidewaves.shared.events.utils/BoundingBox///PointingToDeclaration/">BoundingBox</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Update visible region from Swift. Called by Swift when map region changes.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

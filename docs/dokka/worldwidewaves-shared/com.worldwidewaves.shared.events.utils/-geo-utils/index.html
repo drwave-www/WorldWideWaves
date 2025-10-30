@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>GeoUtils</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+                    <a class="library-name--link" href="../../../index.html">
+                            worldwidewaves-shared
+                    </a>
+            </div>
+            <div class="library-version">
+            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":shared:dokkaHtml/commonMain">common</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="worldwidewaves-shared::com.worldwidewaves.shared.events.utils/GeoUtils///PointingToDeclaration//-1127283753">
+  <div class="breadcrumbs"><a href="../../../index.html">worldwidewaves-shared</a><span class="delimiter">/</span><a href="../index.html">com.worldwidewaves.shared.events.utils</a><span class="delimiter">/</span><span class="current">GeoUtils</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Geo</span><wbr></wbr><span><span>Utils</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">GeoUtils</a><span class="clearfix"><span class="floating-right">(<a href="https://github.com/mglcel/WorldWideWaves/tree/main/shared/src/commonMain/kotlin/com/worldwidewaves/shared/events/utils/GeoUtils.kt#L35">source</a>)</span></span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="">Types</h2>
+        <div class="table"><a data-name="-1261296316%2FClasslikes%2F-1127283753" anchor-label="Vector2D" id="-1261296316%2FClasslikes%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-vector2-d/index.html"><span><span>Vector2D</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1261296316%2FClasslikes%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-vector2-d/index.html">Vector2D</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>x<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>y<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="1527580765%2FProperties%2F-1127283753" anchor-label="EARTH_RADIUS" id="1527580765%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-e-a-r-t-h_-r-a-d-i-u-s.html"><span><span>EARTH_RADIUS</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1527580765%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-e-a-r-t-h_-r-a-d-i-u-s.html">EARTH_RADIUS</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="949776972%2FProperties%2F-1127283753" anchor-label="EPSILON" id="949776972%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-e-p-s-i-l-o-n.html"><span><span>EPSILON</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="949776972%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-e-p-s-i-l-o-n.html">EPSILON</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Collection of lightweight geodesic helpers reused across the shared module.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1612550728%2FProperties%2F-1127283753" anchor-label="MIN_PERCEPTIBLE_SPEED_DIFFERENCE" id="-1612550728%2FProperties%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-i-n_-p-e-r-c-e-p-t-i-b-l-e_-s-p-e-e-d_-d-i-f-f-e-r-e-n-c-e.html"><span><span>MIN_PERCEPTIBLE_SPEED_DIFFERENCE</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1612550728%2FProperties%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-m-i-n_-p-e-r-c-e-p-t-i-b-l-e_-s-p-e-e-d_-d-i-f-f-e-r-e-n-c-e.html">MIN_PERCEPTIBLE_SPEED_DIFFERENCE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-270493433%2FFunctions%2F-1127283753" anchor-label="calculateDistance" id="-270493433%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="calculate-distance.html"><span>calculate</span><wbr></wbr><span><span>Distance</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-270493433%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="calculate-distance.html"><span class="token function">calculateDistance</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">lonWidth<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">lat<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Calculates the distance for a longitude width at a given latitude. Uses fast approximation for backward compatibility.</p></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="calculate-distance.html"><span class="token function">calculateDistance</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">lon1<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">lon2<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">lat<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Calculates distance between two longitudes at a given latitude. Uses fast approximation for backward compatibility with existing code.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="88367431%2FFunctions%2F-1127283753" anchor-label="calculateDistanceAccurate" id="88367431%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="calculate-distance-accurate.html"><span>calculate</span><wbr></wbr><span>Distance</span><wbr></wbr><span><span>Accurate</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="88367431%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="calculate-distance-accurate.html"><span class="token function">calculateDistanceAccurate</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">lon1<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">lon2<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">lat<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Calculates the great circle distance between two longitude points at a given latitude. Uses the Haversine formula for accurate geodesic calculations.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="744793519%2FFunctions%2F-1127283753" anchor-label="calculateDistanceFast" id="744793519%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="calculate-distance-fast.html"><span>calculate</span><wbr></wbr><span>Distance</span><wbr></wbr><span><span>Fast</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="744793519%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="calculate-distance-fast.html"><span class="token function">calculateDistanceFast</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">lon1<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">lon2<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">lat<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Calculates the approximate distance between two longitudes at a given latitude. Uses a planar approximation that is fast but becomes inaccurate for long distances.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="687463211%2FFunctions%2F-1127283753" anchor-label="clearTrignometricCaches" id="687463211%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-trignometric-caches.html"><span>clear</span><wbr></wbr><span>Trignometric</span><wbr></wbr><span><span>Caches</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="687463211%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="clear-trignometric-caches.html"><span class="token function">clearTrignometricCaches</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Clears all trigonometric caches to free memory. Useful for memory-constrained scenarios or testing.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1986763654%2FFunctions%2F-1127283753" anchor-label="isLatitudeInRange" id="-1986763654%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-latitude-in-range.html"><span>is</span><wbr></wbr><span>Latitude</span><wbr></wbr><span>In</span><wbr></wbr><span><span>Range</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1986763654%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="is-latitude-in-range.html"><span class="token function">isLatitudeInRange</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">lat<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">start<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">end<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1953894220%2FFunctions%2F-1127283753" anchor-label="isLongitudeEqual" id="-1953894220%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-longitude-equal.html"><span>is</span><wbr></wbr><span>Longitude</span><wbr></wbr><span><span>Equal</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1953894220%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="is-longitude-equal.html"><span class="token function">isLongitudeEqual</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">lng1<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">lng2<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1215659843%2FFunctions%2F-1127283753" anchor-label="isLongitudeInRange" id="-1215659843%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-longitude-in-range.html"><span>is</span><wbr></wbr><span>Longitude</span><wbr></wbr><span>In</span><wbr></wbr><span><span>Range</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1215659843%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="is-longitude-in-range.html"><span class="token function">isLongitudeInRange</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">lng<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">start<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">end<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-718275885%2FFunctions%2F-1127283753" anchor-label="isPointOnSegment" id="-718275885%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-point-on-segment.html"><span>is</span><wbr></wbr><span>Point</span><wbr></wbr><span>On</span><wbr></wbr><span><span>Segment</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-718275885%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="is-point-on-segment.html"><span class="token function">isPointOnSegment</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">point<span class="token operator">: </span><a href="../-position/index.html">Position</a><span class="token punctuation">, </span></span><span class="parameter ">segment<span class="token operator">: </span><a href="../-segment/index.html">Segment</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Checks if a given point lies on a line segment.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1487126704%2FFunctions%2F-1127283753" anchor-label="toDegrees" id="1487126704%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="to-degrees.html"><span>to</span><wbr></wbr><span><span>Degrees</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1487126704%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">.</span><a href="to-degrees.html"><span class="token function">toDegrees</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1393139781%2FFunctions%2F-1127283753" anchor-label="toRadians" id="-1393139781%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="to-radians.html"><span>to</span><wbr></wbr><span><span>Radians</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1393139781%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">.</span><a href="to-radians.html"><span class="token function">toRadians</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
