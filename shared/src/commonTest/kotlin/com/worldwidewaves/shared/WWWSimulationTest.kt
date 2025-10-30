@@ -20,6 +20,8 @@ package com.worldwidewaves.shared
  * limitations under the License. */
 
 import com.worldwidewaves.shared.events.utils.Position
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
@@ -70,25 +72,29 @@ class WWWSimulationTest {
 
     @Test
     fun `test setSpeed updates speed correctly`() {
-        val simulation = WWWSimulation(startDateTime, userPosition)
+        runBlocking {
+            val simulation = WWWSimulation(startDateTime, userPosition)
 
-        val newSpeed = simulation.setSpeed(5)
-        assertEquals(5, newSpeed, "setSpeed should return the new speed")
-        assertEquals(5, simulation.speed, "Speed property should be updated")
+            val newSpeed = simulation.setSpeed(5)
+            assertEquals(5, newSpeed, "setSpeed should return the new speed")
+            assertEquals(5, simulation.speed, "Speed property should be updated")
+        }
     }
 
     @Test
     fun `test setSpeed with invalid values throws exception`() {
-        val simulation = WWWSimulation(startDateTime, userPosition)
+        runBlocking {
+            val simulation = WWWSimulation(startDateTime, userPosition)
 
-        // Test with speed below minimum
-        assertFailsWith<IllegalArgumentException> {
-            simulation.setSpeed(0)
-        }
+            // Test with speed below minimum
+            assertFailsWith<IllegalArgumentException> {
+                simulation.setSpeed(0)
+            }
 
-        // Test with speed above maximum
-        assertFailsWith<IllegalArgumentException> {
-            simulation.setSpeed(601)
+            // Test with speed above maximum
+            assertFailsWith<IllegalArgumentException> {
+                simulation.setSpeed(601)
+            }
         }
     }
 
@@ -144,152 +150,158 @@ class WWWSimulationTest {
 
     @Test
     fun `should handle speed changes correctly`() {
-        // GIVEN: Simulation with initial speed 1
-        val simulation = WWWSimulation(startDateTime, userPosition)
+        runBlocking {
+            // GIVEN: Simulation with initial speed 1
+            val simulation = WWWSimulation(startDateTime, userPosition)
 
-        // WHEN: Getting initial state
-        val initialSpeed = simulation.speed
-        val initialTime = simulation.now()
+            // WHEN: Getting initial state
+            val initialSpeed = simulation.speed
+            val initialTime = simulation.now()
 
-        // THEN: Initial speed should be 1
-        assertEquals(1, initialSpeed, "Initial speed should be 1")
+            // THEN: Initial speed should be 1
+            assertEquals(1, initialSpeed, "Initial speed should be 1")
 
-        // WHEN: Changing speed to 5
-        simulation.setSpeed(5)
+            // WHEN: Changing speed to 5
+            simulation.setSpeed(5)
 
-        // THEN: Speed should be updated
-        assertEquals(5, simulation.speed, "Speed should be updated to 5")
+            // THEN: Speed should be updated
+            assertEquals(5, simulation.speed, "Speed should be updated to 5")
 
-        // AND: Time should still advance
-        val timeAfterSpeedChange = simulation.now()
-        assertTrue(
-            timeAfterSpeedChange >= initialTime,
-            "Time should continue advancing after speed change",
-        )
-    }
-
-    @Test
-    fun `should handle multiple speed changes in sequence`() {
-        // GIVEN: Simulation with initial speed 2
-        val simulation = WWWSimulation(startDateTime, userPosition, 2)
-
-        // WHEN: Testing sequence of speed changes
-        val speeds = listOf(2, 5, 10, 1, 50)
-        var previousTime = simulation.now()
-
-        for (speed in speeds) {
-            // WHEN: Changing to new speed
-            simulation.setSpeed(speed)
-
-            // THEN: Speed should be updated correctly
-            assertEquals(speed, simulation.speed, "Speed should be updated to $speed")
-
-            // AND: Time should advance consistently
-            val currentTime = simulation.now()
+            // AND: Time should still advance
+            val timeAfterSpeedChange = simulation.now()
             assertTrue(
-                currentTime >= previousTime,
-                "Time should always advance forward with speed $speed",
+                timeAfterSpeedChange >= initialTime,
+                "Time should continue advancing after speed change",
             )
-            previousTime = currentTime
         }
     }
 
     @Test
-    fun `should handle pause and resume functionality`() {
-        // GIVEN: Simulation with speed 10
-        val simulation = WWWSimulation(startDateTime, userPosition, 10)
-        val initialTime = simulation.now()
+    fun `should handle multiple speed changes in sequence`() =
+        runBlocking {
+            // GIVEN: Simulation with initial speed 2
+            val simulation = WWWSimulation(startDateTime, userPosition, 2)
 
-        // WHEN: Pausing the simulation
-        simulation.pause()
+            // WHEN: Testing sequence of speed changes
+            val speeds = listOf(2, 5, 10, 1, 50)
+            var previousTime = simulation.now()
 
-        // THEN: Speed should be 0 when paused
-        assertEquals(0, simulation.speed, "Speed should be 0 when paused")
+            for (speed in speeds) {
+                // WHEN: Changing to new speed
+                simulation.setSpeed(speed)
 
-        // AND: Time should not advance significantly while paused
-        val pausedTime = simulation.now()
-        assertTrue(
-            (pausedTime - initialTime).inWholeMilliseconds < 50,
-            "Time should not advance significantly while paused",
-        )
+                // THEN: Speed should be updated correctly
+                assertEquals(speed, simulation.speed, "Speed should be updated to $speed")
 
-        // WHEN: Resuming with speed 5
-        simulation.resume(5)
-
-        // THEN: Speed should be updated when resumed
-        assertEquals(5, simulation.speed, "Speed should be updated when resumed")
-
-        // AND: Time should advance after resume
-        val resumedTime = simulation.now()
-        assertTrue(
-            resumedTime >= pausedTime,
-            "Time should advance after resume",
-        )
-
-        // WHEN: Testing resume without specifying speed (should use last active speed)
-        simulation.pause()
-        simulation.resume()
-
-        // THEN: Should use last active speed
-        assertEquals(5, simulation.speed, "Resume without speed parameter should use last active speed")
-    }
+                // AND: Time should advance consistently
+                val currentTime = simulation.now()
+                assertTrue(
+                    currentTime >= previousTime,
+                    "Time should always advance forward with speed $speed",
+                )
+                previousTime = currentTime
+            }
+        }
 
     @Test
-    fun `should handle reset functionality`() {
-        // GIVEN: Simulation with speed 5
-        val simulation = WWWSimulation(startDateTime, userPosition, 5)
+    fun `should handle pause and resume functionality`() =
+        runBlocking {
+            // GIVEN: Simulation with speed 10
+            val simulation = WWWSimulation(startDateTime, userPosition, 10)
+            val initialTime = simulation.now()
 
-        // WHEN: Getting time after creation
-        val initialTime = simulation.now()
+            // WHEN: Pausing the simulation
+            simulation.pause()
 
-        // THEN: Time should be close to start time initially (allowing for microsecond differences)
-        val initialTimeDifference = (initialTime - startDateTime).inWholeMilliseconds
-        assertTrue(
-            initialTimeDifference < 100,
-            "Initial time should be close to start time, got ${initialTimeDifference}ms difference",
-        )
+            // THEN: Speed should be 0 when paused
+            assertEquals(0, simulation.speed, "Speed should be 0 when paused")
 
-        // WHEN: Resetting the simulation
-        simulation.reset()
+            // AND: Time should not advance significantly while paused
+            val pausedTime = simulation.now()
+            assertTrue(
+                (pausedTime - initialTime).inWholeMilliseconds < 50,
+                "Time should not advance significantly while paused",
+            )
 
-        // THEN: Time should be close to start time after reset
-        val afterResetTime = simulation.now()
-        val resetTimeDifference = (afterResetTime - startDateTime).inWholeMilliseconds
-        assertTrue(
-            resetTimeDifference < 100,
-            "Time should be close to start time after reset, got ${resetTimeDifference}ms difference",
-        )
+            // WHEN: Resuming with speed 5
+            simulation.resume(5)
 
-        // AND: Speed should remain unchanged
-        assertEquals(5, simulation.speed, "Speed should remain unchanged after reset")
+            // THEN: Speed should be updated when resumed
+            assertEquals(5, simulation.speed, "Speed should be updated when resumed")
 
-        // AND: Time should continue to advance after reset
-        val laterTime = simulation.now()
-        assertTrue(
-            laterTime >= afterResetTime,
-            "Time should continue advancing after reset",
-        )
-    }
+            // AND: Time should advance after resume
+            val resumedTime = simulation.now()
+            assertTrue(
+                resumedTime >= pausedTime,
+                "Time should advance after resume",
+            )
+
+            // WHEN: Testing resume without specifying speed (should use last active speed)
+            simulation.pause()
+            simulation.resume()
+
+            // THEN: Should use last active speed
+            assertEquals(5, simulation.speed, "Resume without speed parameter should use last active speed")
+        }
 
     @Test
-    fun `test boundary speeds`() {
-        // Test with minimum speed
-        val minSpeedSimulation = WWWSimulation(startDateTime, userPosition, WWWSimulation.MIN_SPEED)
-        assertEquals(WWWSimulation.MIN_SPEED, minSpeedSimulation.speed)
+    fun `should handle reset functionality`() =
+        runBlocking {
+            // GIVEN: Simulation with speed 5
+            val simulation = WWWSimulation(startDateTime, userPosition, 5)
 
-        // Test with maximum speed
-        val maxSpeedSimulation = WWWSimulation(startDateTime, userPosition, WWWSimulation.MAX_SPEED)
-        assertEquals(WWWSimulation.MAX_SPEED, maxSpeedSimulation.speed)
+            // WHEN: Getting time after creation
+            val initialTime = simulation.now()
 
-        // Test changing to boundary speeds
-        val simulation = WWWSimulation(startDateTime, userPosition, 50)
+            // THEN: Time should be close to start time initially (allowing for microsecond differences)
+            val initialTimeDifference = (initialTime - startDateTime).inWholeMilliseconds
+            assertTrue(
+                initialTimeDifference < 100,
+                "Initial time should be close to start time, got ${initialTimeDifference}ms difference",
+            )
 
-        simulation.setSpeed(WWWSimulation.MIN_SPEED)
-        assertEquals(WWWSimulation.MIN_SPEED, simulation.speed)
+            // WHEN: Resetting the simulation
+            simulation.reset()
 
-        simulation.setSpeed(WWWSimulation.MAX_SPEED)
-        assertEquals(WWWSimulation.MAX_SPEED, simulation.speed)
-    }
+            // THEN: Time should be close to start time after reset
+            val afterResetTime = simulation.now()
+            val resetTimeDifference = (afterResetTime - startDateTime).inWholeMilliseconds
+            assertTrue(
+                resetTimeDifference < 100,
+                "Time should be close to start time after reset, got ${resetTimeDifference}ms difference",
+            )
+
+            // AND: Speed should remain unchanged
+            assertEquals(5, simulation.speed, "Speed should remain unchanged after reset")
+
+            // AND: Time should continue to advance after reset
+            val laterTime = simulation.now()
+            assertTrue(
+                laterTime >= afterResetTime,
+                "Time should continue advancing after reset",
+            )
+        }
+
+    @Test
+    fun `test boundary speeds`() =
+        runBlocking {
+            // Test with minimum speed
+            val minSpeedSimulation = WWWSimulation(startDateTime, userPosition, WWWSimulation.MIN_SPEED)
+            assertEquals(WWWSimulation.MIN_SPEED, minSpeedSimulation.speed)
+
+            // Test with maximum speed
+            val maxSpeedSimulation = WWWSimulation(startDateTime, userPosition, WWWSimulation.MAX_SPEED)
+            assertEquals(WWWSimulation.MAX_SPEED, maxSpeedSimulation.speed)
+
+            // Test changing to boundary speeds
+            val simulation = WWWSimulation(startDateTime, userPosition, 50)
+
+            simulation.setSpeed(WWWSimulation.MIN_SPEED)
+            assertEquals(WWWSimulation.MIN_SPEED, simulation.speed)
+
+            simulation.setSpeed(WWWSimulation.MAX_SPEED)
+            assertEquals(WWWSimulation.MAX_SPEED, simulation.speed)
+        }
 
     @Test
     fun `test time calculation accuracy`() =
@@ -357,4 +369,106 @@ class WWWSimulationTest {
         assertEquals(45.0, retrievedPosition.latitude)
         assertEquals(45.0, retrievedPosition.longitude)
     }
+
+    @Test
+    fun `test concurrent setSpeed calls are thread-safe`() =
+        runBlocking {
+            // GIVEN: Simulation with initial speed 1
+            val simulation = WWWSimulation(startDateTime, userPosition)
+
+            // WHEN: Multiple coroutines concurrently change speed
+            val speeds = listOf(10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
+            val jobs =
+                speeds.map { speed ->
+                    async {
+                        simulation.setSpeed(speed)
+                        // Small delay to increase chance of interleaving
+                        delay(1)
+                        simulation.now() // Read current time to verify consistency
+                    }
+                }
+
+            // THEN: All operations should complete without corruption
+            val results = jobs.awaitAll()
+
+            // AND: Final speed should be one of the values set (not corrupted)
+            assertTrue(
+                speeds.contains(simulation.speed),
+                "Final speed ${simulation.speed} should be one of the set values",
+            )
+
+            // AND: Time calculation should not crash or produce invalid results
+            results.forEach { time ->
+                assertTrue(
+                    time >= startDateTime,
+                    "Simulated time should never go backwards: $time vs $startDateTime",
+                )
+            }
+        }
+
+    @Test
+    fun `test concurrent pause and resume are thread-safe`() =
+        runBlocking {
+            // GIVEN: Simulation with speed 10
+            val simulation = WWWSimulation(startDateTime, userPosition, 10)
+
+            // WHEN: Multiple coroutines concurrently pause and resume
+            val operations =
+                List(10) { index ->
+                    async {
+                        if (index % 2 == 0) {
+                            simulation.pause()
+                        } else {
+                            simulation.resume(index + 1)
+                        }
+                        delay(1)
+                        simulation.speed // Read speed to verify consistency
+                    }
+                }
+
+            // THEN: All operations should complete without crashes
+            val results = operations.awaitAll()
+
+            // AND: Speed should be valid (0 for paused, or > 0 for resumed)
+            assertTrue(
+                simulation.speed >= 0 && simulation.speed <= WWWSimulation.MAX_SPEED,
+                "Speed should be valid: ${simulation.speed}",
+            )
+        }
+
+    @Test
+    fun `test concurrent reset calls are thread-safe`() =
+        runBlocking {
+            // GIVEN: Simulation with speed 50
+            val simulation = WWWSimulation(startDateTime, userPosition, 50)
+
+            // WHEN: Multiple coroutines concurrently reset
+            val jobs =
+                List(20) {
+                    async {
+                        simulation.reset()
+                        delay(1)
+                        simulation.now()
+                    }
+                }
+
+            // THEN: All operations should complete without corruption
+            val results = jobs.awaitAll()
+
+            // AND: Time should be close to start time after all resets
+            val currentTime = simulation.now()
+            val timeDiff = (currentTime - startDateTime).inWholeMilliseconds
+            assertTrue(
+                timeDiff < 200,
+                "Time should be close to start time after resets: ${timeDiff}ms",
+            )
+
+            // AND: All intermediate time reads should be >= startDateTime
+            results.forEach { time ->
+                assertTrue(
+                    time >= startDateTime,
+                    "Time should never be before start time: $time",
+                )
+            }
+        }
 }

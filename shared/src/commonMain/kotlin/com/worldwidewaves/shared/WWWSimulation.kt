@@ -23,6 +23,8 @@ package com.worldwidewaves.shared
 
 import com.worldwidewaves.shared.WWWGlobals.Wave
 import com.worldwidewaves.shared.events.utils.Position
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -40,6 +42,9 @@ class WWWSimulation(
 
     private var _speed: Int = validateSpeed(initialSpeed)
     val speed: Int get() = _speed
+
+    // Mutex for thread-safe speed changes and time checkpoint updates
+    private val speedMutex = Mutex()
 
     // Track time checkpoints for accurate time calculation
     private data class TimeCheckpoint(
@@ -61,26 +66,28 @@ class WWWSimulation(
     /**
      * Change the simulation speed.
      * This creates a new time checkpoint to ensure accurate time calculations.
+     * Thread-safe: Uses mutex to prevent race conditions during concurrent speed changes.
      * @param newSpeed The new simulation speed (1-500)
      * @return The updated speed value
      */
-    fun setSpeed(newSpeed: Int): Int {
-        // Calculate simulated time at this moment before changing speed
-        val currentSimulatedTime = calculateCurrentTime()
+    suspend fun setSpeed(newSpeed: Int): Int =
+        speedMutex.withLock {
+            // Calculate simulated time at this moment before changing speed
+            val currentSimulatedTime = calculateCurrentTime()
 
-        // Update speed
-        _speed = validateSpeed(newSpeed)
+            // Update speed
+            _speed = validateSpeed(newSpeed)
 
-        // Create a new checkpoint with current values
-        lastCheckpoint =
-            TimeCheckpoint(
-                realTime = Clock.System.now(),
-                simulatedTime = currentSimulatedTime,
-            )
+            // Create a new checkpoint with current values
+            lastCheckpoint =
+                TimeCheckpoint(
+                    realTime = Clock.System.now(),
+                    simulatedTime = currentSimulatedTime,
+                )
 
-        initialSpeed = _speed
-        return _speed
-    }
+            initialSpeed = _speed
+            return _speed
+        }
 
     /**
      * Get the current simulated time.
@@ -125,40 +132,46 @@ class WWWSimulation(
     /**
      * Reset the simulation to start from the current moment.
      * Useful if you want to "pause" the simulation and restart it.
+     * Thread-safe: Uses mutex to prevent race conditions.
      */
-    fun reset() {
-        lastCheckpoint =
-            TimeCheckpoint(
-                realTime = Clock.System.now(),
-                simulatedTime = startDateTime,
-            )
-    }
+    suspend fun reset() =
+        speedMutex.withLock {
+            lastCheckpoint =
+                TimeCheckpoint(
+                    realTime = Clock.System.now(),
+                    simulatedTime = startDateTime,
+                )
+        }
 
     /**
      * Pause the simulation by creating a checkpoint at the current time.
      * To resume, call resume().
+     * Thread-safe: Uses mutex to prevent race conditions.
      */
-    fun pause() {
-        lastCheckpoint =
-            TimeCheckpoint(
-                realTime = Clock.System.now(),
-                simulatedTime = calculateCurrentTime(),
-            )
-        _speed = 0 // Set speed to 0 to effectively pause
-    }
+    suspend fun pause() =
+        speedMutex.withLock {
+            lastCheckpoint =
+                TimeCheckpoint(
+                    realTime = Clock.System.now(),
+                    simulatedTime = calculateCurrentTime(),
+                )
+            _speed = 0 // Set speed to 0 to effectively pause
+        }
 
     /**
      * Resume the simulation with the specified speed.
      * @param resumeSpeed The speed to resume at (defaults to last active speed)
+     * Thread-safe: Uses mutex to prevent race conditions.
      */
-    fun resume(resumeSpeed: Int = initialSpeed.takeIf { it > 0 } ?: 1) {
-        // Only update the real time in the checkpoint, keep simulated time as is
-        lastCheckpoint =
-            TimeCheckpoint(
-                realTime = Clock.System.now(),
-                simulatedTime = lastCheckpoint.simulatedTime,
-            )
-        _speed = validateSpeed(resumeSpeed)
-        initialSpeed = _speed
-    }
+    suspend fun resume(resumeSpeed: Int = initialSpeed.takeIf { it > 0 } ?: 1) =
+        speedMutex.withLock {
+            // Only update the real time in the checkpoint, keep simulated time as is
+            lastCheckpoint =
+                TimeCheckpoint(
+                    realTime = Clock.System.now(),
+                    simulatedTime = lastCheckpoint.simulatedTime,
+                )
+            _speed = validateSpeed(resumeSpeed)
+            initialSpeed = _speed
+        }
 }

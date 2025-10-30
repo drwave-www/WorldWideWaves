@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.ExperimentalTime
 
@@ -182,9 +183,9 @@ class EventsViewModel(
             var wasWarming = false
             event.observer.isUserWarmingInProgress.collect { isWarming ->
                 if (isWarming && !wasWarming) {
-                    // Event entered warming - increment counter
-                    val count = warmingEventsCount.value + 1
-                    warmingEventsCount.value = count
+                    // Event entered warming - increment counter atomically
+                    warmingEventsCount.update { it + 1 }
+                    val count = warmingEventsCount.value
                     Log.d(
                         "EventsViewModel",
                         "Event ${event.id} entered warming. Total warming events: $count",
@@ -197,9 +198,9 @@ class EventsViewModel(
                     }
                     wasWarming = true
                 } else if (!isWarming && wasWarming) {
-                    // Event exited warming - decrement counter
-                    val count = maxOf(0, warmingEventsCount.value - 1)
-                    warmingEventsCount.value = count
+                    // Event exited warming - decrement counter atomically
+                    warmingEventsCount.update { maxOf(0, it - 1) }
+                    val count = warmingEventsCount.value
                     Log.d(
                         "EventsViewModel",
                         "Event ${event.id} exited warming. Total warming events: $count",
@@ -228,7 +229,8 @@ class EventsViewModel(
                     Log.d("EventsViewModel", "Event ${event.id}: user has been hit")
 
                     // Restore simulation speed after showing the hit sequence
-                    launch {
+                    // Use scope.launch to ensure coroutine is cancelled when ViewModel is cleared
+                    scope.launch {
                         delay(WaveTiming.SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * MILLIS_PER_SECOND)
 
                         // Restore to MAX speed ONLY when simulation is active
