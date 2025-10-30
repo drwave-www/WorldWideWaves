@@ -260,11 +260,31 @@ object GeoJsonAreaParser {
                 return
             }
 
-            val polygon = createPolygonFromPositions(positions) ?: return
+            // Deduplicate positions after clamping to prevent degenerate polygons
+            // When bbox clamping is extensive, many coordinates may collapse to same values
+            val uniquePositions = positions.distinct()
 
-            val isValidPolygon = polygon.size > 1
+            // Check if we have enough unique positions to form a valid polygon (minimum 3)
+            if (uniquePositions.size < 3) {
+                Log.v(
+                    "GeoJsonAreaParser",
+                    "Rejecting polygon for event $eventId: only ${uniquePositions.size} unique " +
+                        "position(s) after clamping (${positions.size} original, minimum 3 required)",
+                )
+                return
+            }
+
+            val polygon = createPolygonFromPositions(uniquePositions) ?: return
+
+            val isValidPolygon = polygon.size >= 3
             if (isValidPolygon) {
                 polygons.add(polygon)
+            } else {
+                Log.v(
+                    "GeoJsonAreaParser",
+                    "Rejecting polygon for event $eventId: polygon has ${polygon.size} points " +
+                        "after construction (minimum 3 required)",
+                )
             }
         } catch (e: NumberFormatException) {
             Log.v("GeoJsonAreaParser", "Invalid numeric data in ring processing: ${e.message}")
