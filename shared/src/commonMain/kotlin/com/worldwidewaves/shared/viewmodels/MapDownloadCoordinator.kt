@@ -100,8 +100,13 @@ class MapDownloadCoordinator(
             return
         }
 
+        // Only reset retry count if this is a new download (not a retry)
+        // If we're coming from a Retrying state, preserve the counter
+        val isRetrying = _featureState.value is MapFeatureState.Retrying
         _featureState.value = MapFeatureState.Pending
-        retryManager.resetRetryCount()
+        if (!isRetrying) {
+            retryManager.resetRetryCount()
+        }
         currentMapId = mapId
 
         platformAdapter.startPlatformDownload(mapId, onMapDownloaded)

@@ -112,8 +112,13 @@ abstract class BaseMapDownloadViewModel :
             return
         }
 
+        // Only reset retry count if this is a new download (not a retry)
+        // If we're coming from a Retrying state, preserve the counter
+        val isRetrying = featureStateMutable.value is MapFeatureState.Retrying
         featureStateMutable.value = MapFeatureState.Pending
-        retryManager.resetRetryCount()
+        if (!isRetrying) {
+            retryManager.resetRetryCount()
+        }
         currentMapId = mapId
 
         startPlatformDownload(mapId, onMapDownloaded)
