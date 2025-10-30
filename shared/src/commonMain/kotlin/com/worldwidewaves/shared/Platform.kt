@@ -30,6 +30,8 @@ import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -48,9 +50,32 @@ class WWWPlatform(
      * (created, reset, or disabled).  UI or ViewModel layers can observe
      * [simulationChanged] to react and restart any time-sensitive observation
      * flows that depend on the current simulation context.
+     *
+     * Thread-safe: Protected by [simulationMutex] to prevent race conditions
+     * during concurrent simulation changes.
      */
     private val _simulationChanged = MutableStateFlow(0)
     val simulationChanged: StateFlow<Int> = _simulationChanged.asStateFlow()
+
+    /**
+     * Mutex to protect simulation state changes and counter increments.
+     * Ensures thread-safe updates when multiple coroutines attempt to
+     * modify simulation state concurrently.
+     */
+    private val simulationMutex = Mutex()
+
+    /**
+     * Thread-safe increment of the simulation changed counter.
+     * Uses mutex to prevent race conditions when multiple threads
+     * attempt to increment concurrently.
+     */
+    private fun incrementSimulationChanged() {
+        kotlinx.coroutines.runBlocking {
+            simulationMutex.withLock {
+                _simulationChanged.value = _simulationChanged.value + 1
+            }
+        }
+    }
 
     // -------------------------------------------------------------------- //
     //  Simulation *mode* flag (enables in-app testing UI)
@@ -78,17 +103,29 @@ class WWWPlatform(
         _simulation = null
         // Clear simulation position from PositionManager
         positionManager?.clearPosition(PositionManager.PositionSource.SIMULATION)
-        // Notify observers that the simulation context has changed
-        _simulationChanged.value = _simulationChanged.value + 1
+        // Notify observers that the simulation context has changed (thread-safe)
+        incrementSimulationChanged()
     }
 
     fun setSimulation(simulation: WWWSimulation) {
-        Log.i(::setSimulation.name, "Set simulation to ${simulation.now()} and ${simulation.getUserPosition()}")
+        val position = simulation.getUserPosition()
+        val positionInfo =
+            if (position == WWWSimulation.GPS_MARKER) {
+                "GPS marker (using device position)"
+            } else {
+                position.toString()
+            }
+        Log.i(::setSimulation.name, "Set simulation to ${simulation.now()} with position: $positionInfo")
+
         _simulation = simulation
-        // Update PositionManager with simulation position
-        positionManager?.updatePosition(PositionManager.PositionSource.SIMULATION, simulation.getUserPosition())
-        // Notify observers that the simulation context has changed
-        _simulationChanged.value = _simulationChanged.value + 1
+
+        // Update PositionManager with simulation position only if not GPS marker
+        if (position != WWWSimulation.GPS_MARKER) {
+            positionManager?.updatePosition(PositionManager.PositionSource.SIMULATION, position)
+        }
+
+        // Notify observers that the simulation context has changed (thread-safe)
+        incrementSimulationChanged()
     }
 
     fun getSimulation(): WWWSimulation? = _simulation

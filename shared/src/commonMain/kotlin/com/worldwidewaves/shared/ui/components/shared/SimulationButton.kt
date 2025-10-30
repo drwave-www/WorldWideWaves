@@ -49,6 +49,7 @@ import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.ui.theme.onPrimaryLight
 import com.worldwidewaves.shared.ui.utils.focusIndicator
 import com.worldwidewaves.shared.ui.utils.getIosSafePlatform
+import com.worldwidewaves.shared.ui.utils.getIosSafePositionManager
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.delay
@@ -273,8 +274,31 @@ private suspend fun startSimulation(
             Log.i("SimulationButton", "Stopping existing simulation to start new one for ${event.id}")
         }
 
-        // Generate random position within event area
-        val position = event.area.generateRandomPositionInArea()
+        // Determine position for simulation: use GPS if user is already in area, otherwise random
+        val positionManager = getIosSafePositionManager()
+        val currentPosition = positionManager.getCurrentPosition()
+        val polygonsLoaded = event.area.polygonsLoaded.value
+        val polygons = if (polygonsLoaded) event.area.getPolygons() else null
+
+        val isInArea =
+            try {
+                currentPosition != null &&
+                    polygons != null &&
+                    polygons.isNotEmpty() &&
+                    event.area.isPositionWithin(currentPosition, polygons)
+            } catch (e: Exception) {
+                Log.e("SimulationButton", "Error checking if user is in area", throwable = e)
+                false // Fallback to random position on error
+            }
+
+        val position =
+            if (isInArea) {
+                Log.i("SimulationButton", "User is in event area, using GPS position for simulation")
+                WWWSimulation.GPS_MARKER
+            } else {
+                Log.i("SimulationButton", "User is outside event area or position unavailable, using random position")
+                event.area.generateRandomPositionInArea()
+            }
 
         // Calculate time - start now
         val simulationDelay = 0.minutes
@@ -293,7 +317,11 @@ private suspend fun startSimulation(
 
         // Set the simulation with protection against concurrent access
         Log.i("SimulationButton", "Setting simulation starting time to $simulationTime from event ${event.id}")
-        Log.i("SimulationButton", "Setting simulation user position to $position from event ${event.id}")
+        if (position == WWWSimulation.GPS_MARKER) {
+            Log.i("SimulationButton", "Simulation using GPS position (user in area) for event ${event.id}")
+        } else {
+            Log.i("SimulationButton", "Simulation using random position $position for event ${event.id}")
+        }
         platform.setSimulation(simulation)
 
         // Restart event observation to apply simulation

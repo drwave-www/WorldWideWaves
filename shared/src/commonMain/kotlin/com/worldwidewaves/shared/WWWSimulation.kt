@@ -38,6 +38,14 @@ class WWWSimulation(
     companion object {
         val MIN_SPEED = Wave.MIN_SIMULATION_SPEED
         val MAX_SPEED = Wave.MAX_SIMULATION_SPEED
+
+        /**
+         * Special marker position that indicates the simulation should use the device's
+         * actual GPS position instead of a simulated position. This is used when the user
+         * is already physically present in the event area and wants to use simulation mode
+         * for time acceleration only, without position override.
+         */
+        val GPS_MARKER = Position(Double.NaN, Double.NaN)
     }
 
     private var _speed: Int = validateSpeed(initialSpeed)
@@ -97,9 +105,15 @@ class WWWSimulation(
 
     /**
      * Get the user's position.
-     * @return The user's position
+     * @return The user's position, or GPS_MARKER if GPS should be used
      */
     fun getUserPosition() = userPosition
+
+    /**
+     * Check if this simulation is using GPS position (rather than a simulated position).
+     * @return true if the simulation should use GPS, false if using a specific position
+     */
+    fun isUsingGPS() = userPosition == GPS_MARKER
 
     /**
      * Calculate the current simulated time based on elapsed real time
