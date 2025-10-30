@@ -37,7 +37,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -582,6 +581,7 @@ abstract class AbstractEventMap<T>(
 
         // Auto-target the user the first time (optional) if no interaction yet
         // BUT ONLY if user is within the event area - don't move camera to positions outside tile coverage
+        // Also handle marker updates to prevent camera interference on iOS
         if (mapConfig.autoTargetUserOnFirstLocation &&
             !userHasBeenLocated &&
             !userInteracted &&
@@ -592,44 +592,33 @@ abstract class AbstractEventMap<T>(
                 if (isUserInEventArea) {
                     targetUser()
                     Log.i("AbstractEventMap", "User in event area, auto-targeted user position")
+                    // Also update marker when user is inside area
+                    if (lastKnownPosition == null || lastKnownPosition != position) {
+                        mapLibreAdapter.setUserPosition(position)
+                    }
                 } else {
                     // User outside event area - don't target to prevent showing position without tiles
+                    // Also skip marker update to prevent camera interference on iOS
                     Log.i(
                         "AbstractEventMap",
-                        "User outside event area (${position.latitude}, ${position.longitude}), keeping camera on event bounds",
+                        "User outside event area (${position.latitude}, ${position.longitude}), keeping camera on event bounds, skipping marker",
                     )
                 }
                 // Always mark as located to prevent retrying on every position update
                 // This preserves "first location" semantics even when user is outside area
                 userHasBeenLocated = true
+
+                // Update tracking state
+                if (lastKnownPosition == null || lastKnownPosition != position) {
+                    onLocationUpdate(position)
+                    lastKnownPosition = position
+                }
             }
-        }
-
-        if (lastKnownPosition == null || lastKnownPosition != position) {
-            // Position is now managed by PositionManager through unified system
-
-            // In WINDOW mode with auto-target, skip marker update when user outside event area
-            // Production logs show setUserPosition() can trigger camera movement on iOS during initialization
-            // For other modes (BOUNDS, DEFAULT_CENTER), always update marker (camera won't move)
-            val shouldSkipMarker =
-                mapConfig.initialCameraPosition == MapCameraPosition.WINDOW &&
-                    mapConfig.autoTargetUserOnFirstLocation &&
-                    !userHasBeenLocated &&
-                    runBlocking { !event.area.isPositionWithin(position) }
-
-            if (!shouldSkipMarker) {
-                mapLibreAdapter.setUserPosition(position)
-            } else {
-                Log.d(
-                    "AbstractEventMap",
-                    "Skipping marker update during WINDOW init: user outside event area (${position.latitude}, ${position.longitude})",
-                )
-            }
-
-            // Notify caller (always notify, even when outside area)
+        } else if (lastKnownPosition == null || lastKnownPosition != position) {
+            // Regular position updates (not first location in WINDOW mode)
+            // Always update marker and notify
+            mapLibreAdapter.setUserPosition(position)
             onLocationUpdate(position)
-
-            // Save current known position on map
             lastKnownPosition = position
         }
     }
