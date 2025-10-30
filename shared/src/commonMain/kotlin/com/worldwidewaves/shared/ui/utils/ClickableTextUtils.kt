@@ -1,3 +1,5 @@
+@file:Suppress("MatchingDeclarationName") // File contains both data class and utility function
+
 package com.worldwidewaves.shared.ui.utils
 
 /*

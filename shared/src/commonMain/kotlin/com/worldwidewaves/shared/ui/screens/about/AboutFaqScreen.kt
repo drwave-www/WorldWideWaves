@@ -246,10 +246,7 @@ private fun ShowRulesHierarchy() {
  * URLs and emails are styled with underline and made clickable.
  */
 @Composable
-private fun createClickableText(
-    text: String,
-    baseStyle: androidx.compose.ui.text.TextStyle,
-): AnnotatedString {
+private fun createClickableText(text: String): AnnotatedString {
     val linkColor = sharedQuinaryColoredBoldTextStyle(FAQ.RULE_ANSWER_FONTSIZE).color
 
     return buildAnnotatedString {
@@ -321,11 +318,7 @@ private fun FAQItem(
         if (expandedFaqItem == itemIndex) {
             Spacer(modifier = Modifier.size(SPACER_SMALL_SIZE.dp))
             val answerText = stringResource(answerResource)
-            val annotatedString =
-                createClickableText(
-                    text = answerText,
-                    baseStyle = sharedCommonJustifiedTextStyle(FAQ.RULE_ANSWER_FONTSIZE),
-                )
+            val annotatedString = createClickableText(text = answerText)
 
             ClickableText(
                 text = annotatedString,
