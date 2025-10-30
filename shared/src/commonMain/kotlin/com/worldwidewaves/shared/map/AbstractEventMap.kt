@@ -607,10 +607,18 @@ abstract class AbstractEventMap<T>(
         if (lastKnownPosition == null || lastKnownPosition != position) {
             // Position is now managed by PositionManager through unified system
 
-            // Update visual location marker on map (important for iOS simulation)
-            mapLibreAdapter.setUserPosition(position)
+            // Update visual location marker on map ONLY if user is within event area
+            // This prevents marker (and potential camera movement) outside tile coverage
+            scope.launch {
+                if (event.area.isPositionWithin(position)) {
+                    mapLibreAdapter.setUserPosition(position)
+                } else {
+                    // Don't show marker outside event area to prevent camera interference
+                    Log.v("AbstractEventMap", "Skipping marker update: user outside event area")
+                }
+            }
 
-            // Notify caller
+            // Notify caller (always notify, even when outside area)
             onLocationUpdate(position)
 
             // Save current known position on map
