@@ -59,10 +59,14 @@ actual fun getPlatformLocaleKey(): String {
     }
 
     val firstLang = preferredLanguages.first()
-    Log.i(TAG, "First element type: ${firstLang::class.simpleName}")
+    Log.i(TAG, "First element type: ${firstLang?.let { it::class.simpleName } ?: "null"}")
     Log.i(TAG, "First element toString: $firstLang")
 
-    val primaryLanguage = firstLang as String
+    val primaryLanguage =
+        firstLang as? String ?: run {
+            Log.w(TAG, "Could not cast first language to String, returning 'en'")
+            return "en"
+        }
     Log.i(TAG, "primaryLanguage cast to String: '$primaryLanguage'")
 
     val languageCode = primaryLanguage.split("-", "_").firstOrNull() ?: "en"

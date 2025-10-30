@@ -276,12 +276,16 @@
   <string name="faq_answer_4">Non. L’app est entièrement gratuite. Sa conception et son développement ont demandé du temps et de l’argent aux créateurs, qui n’en tirent aucun bénéfice financier personnel direct.</string>
   <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
   <string name="faq_question_5">Puis-je contribuer ?</string>
-  <!-- src_hash: d56087c228256042d65da9946639185896f429c7 -->
-  <string name="faq_answer_5">Oui, les bénévoles sont toujours les bienvenus. Le code de l’application est open source sur GitHub, et vous pouvez contacter les créateurs à contact@worldwidewaves.net (réponses non garanties). Le meilleur moyen d’aider est de faire passer le mot : partagez des photos et des vidéos des événements avec les hashtags suggérés, contactez des influenceurs locaux pour amplifier le message, parlez-en avec votre communauté et, surtout, rejoignez la vague !</string>
-  <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
-  <string name="faq_question_6">Comment simuler une vague ?</string>
-  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
-  <string name="faq_answer_6">Appuyez sur le bouton ci-dessous pour activer le mode simulation. Sur les écrans de l’événement, utilisez le bouton chronomètre, près du bouton "Rejoindre la vague", pour lancer la simulation avec les paramètres de cet événement (date, heure, lieu). Pour arrêter la simulation, utilisez le même bouton. Enfin, quittez le mode simulation via l’icône d’arrêt sur le bandeau persistant quand vous avez terminé.</string>
+  <!-- src_hash: 7beca4eb43ee70e8557e56ee3958a6bb50df9ee4 -->
+  <string name="faq_answer_5">Oui, les bénévoles sont toujours les bienvenus. Le code de l’app est open source sur GitHub, et vous pouvez joindre les créateurs à contact@worldwidewaves.net (réponse non garantie). La meilleure façon d’aider est de faire passer le mot : partagez des photos et des vidéos des événements avec les hashtags suggérés, contactez des influenceurs locaux pour amplifier le message, parlez-en autour de vous et, surtout, rejoignez la vague !</string>
+  <!-- src_hash: 69965154ce3f4c1e3fba2a6f8aa27d9ad779a228 -->
+  <string name="faq_question_6">Où trouver des lieux où aller pendant les événements ?</string>
+  <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
+  <string name="faq_answer_6">Vous trouverez une liste d’actions, d’activités et de lieux proposés sur https://luma.com/worldwidewaves.</string>
+  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
+  <string name="faq_question_7">Comment simuler une vague ?</string>
+  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
+  <string name="faq_answer_7">Appuyez sur le bouton ci-dessous pour activer le mode simulation. Sur les écrans d’événement, utilisez le bouton minuteur près du bouton « Rejoindre la vague » pour lancer la simulation avec les propriétés de cet événement (date, heure, lieu). Pour arrêter la simulation, utilisez le même bouton. Enfin, quittez le mode simulation en appuyant sur l’icône d’arrêt sur le bandeau persistant quand vous avez terminé.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">États-Unis</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -606,6 +610,36 @@
   <string name="debug_storage_available_value">Disponible</string>
   <!-- src_hash: 5bb65df8e40b98916bd9a110898c9e7f7ff60c72 -->
   <string name="debug_device_orientation">Orientation de l’appareil</string>
-  <!-- src_hash: a8319bed2e56d59cfebb5b8d7abc61f9eeb725cc -->
+  <!-- src_hash: 8c0d4a7a62b814c539e62869793606fb7dcac4eb -->
   <string name="debug_device_orientation_portrait">Portrait</string>
+  <!-- src_hash: 4e44463f00e432d03f9f1c96d99f543d7322b251 -->
+  <string name="action_message_tab">Action</string>
+  <!-- src_hash: d6fe8f76f6c4764a0df743d474afb576b6bc2370 -->
+  <string name="action_message_title">Une vague, un message</string>
+  <!-- src_hash: d0e48e832d1fdd60e7cc6d6734d1a8ff24c413c7 -->
+  <string name="action_message_phrase_1">Prêts maintenant, pas plus tard.</string>
+  <!-- src_hash: fcfa6009fb2ef56aa65c4eb3fd72210022a017c4 -->
+  <string name="action_message_phrase_2">Nommer la réalité, ensemble.</string>
+  <!-- src_hash: 19deea7d2ba404acaa4e8b1ab9d829a73d7e1488 -->
+  <string name="action_message_phrase_3">Désescalader pour protéger la vie.</string>
+  <!-- src_hash: 37d357e06640e266681c8dcd2e8a88036ab09591 -->
+  <string name="action_message_phrase_4">Se réunir maintenant, décider vite.</string>
+  <!-- src_hash: 4f54399abbf1f266555a7245af955a2d1bb6896d -->
+  <string name="action_message_phrase_5">Lever les freins au changement.</string>
+  <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
+  <string name="action_message_phrase_6">Écouter le terrain, préparer ensemble.</string>
+  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
+  <string name="action_message_section_1">Nous devons passer de la limitation des dégâts à la préparation. Les températures dépasseront les objectifs ; les communautés ont donc besoin dès maintenant de consignes claires, d’exercices et d’outils simples.</string>
+  <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
+  <string name="action_message_section_2">Cela commence par une réalité partagée. Les gouvernements, les entreprises et les leaders civiques doivent énoncer les faits ensemble, ouvrir les données et aligner les calendriers pour que l’action soit coordonnée, pas fragmentée.
+
+Pour protéger la vie, engager une désescalade pacifique des tensions géopolitiques et réorienter les ressources vers la survie et la stabilité humaines.
+
+Se réunir au plus haut niveau avec les États, les entreprises et les représentants du public pour mettre des propositions sur la table, désigner des responsables et rendre compte des progrès.
+
+Lever les freins en donnant le feu vert à des projets pilotes, en harmonisant les normes et en finançant en priorité la résilience et l’accessibilité.</string>
+  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
+  <string name="action_message_section_3">Écouter les acteurs locaux confrontés aux impacts, hiérarchiser les menaces avec eux et publier des plans en langage clair pour informer le public et l’inviter à participer. La non‑violence, l’inclusion, la transparence et la science guident cet effort.
+
+Préparer aussi l’avenir : enseigner des compétences pratiques, investir dans des systèmes d’alerte précoce, des infrastructures résilientes et des solutions fondées sur la nature, et créer des outils et des données ouverts pour la planification communautaire.</string>
 </resources>

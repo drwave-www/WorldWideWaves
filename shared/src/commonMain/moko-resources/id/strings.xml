@@ -276,12 +276,16 @@
   <string name="faq_answer_4">Tidak. Aplikasi ini sepenuhnya gratis. Meski perancangan dan pengembangannya memerlukan waktu dan biaya dari para pembuat, mereka tidak menerima keuntungan finansial pribadi langsung darinya.</string>
   <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
   <string name="faq_question_5">Bisakah saya berkontribusi?</string>
-  <!-- src_hash: d56087c228256042d65da9946639185896f429c7 -->
-  <string name="faq_answer_5">Ya, relawan selalu disambut. Kode aplikasi ini bersifat sumber terbuka di GitHub, dan Anda dapat menghubungi para pembuatnya di contact@worldwidewaves.net (balasan tidak dijamin). Cara terbaik membantu adalah menyebarkan kabar: bagikan foto dan video dari acara menggunakan tagar yang disarankan, hubungi influencer lokal untuk memperkuat pesan, bicarakan dengan komunitas Anda, dan yang terpenting, bergabunglah dalam gelombang!</string>
-  <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
-  <string name="faq_question_6">Bagaimana cara melakukan simulasi gelombang?</string>
-  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
-  <string name="faq_answer_6">Ketuk tombol di bawah untuk mengaktifkan mode simulasi. Di layar acara, gunakan tombol timer di dekat tombol "Ikut gelombang" untuk memulai simulasi menggunakan detail acara ini (tanggal, waktu, lokasi). Untuk menghentikan simulasi, gunakan tombol yang sama. Terakhir, hentikan mode simulasi dengan ikon berhenti pada lapisan yang tetap muncul saat Anda selesai.</string>
+  <!-- src_hash: 7beca4eb43ee70e8557e56ee3958a6bb50df9ee4 -->
+  <string name="faq_answer_5">Ya, relawan selalu disambut. Kode aplikasi ini bersifat sumber terbuka di GitHub, dan Anda dapat menghubungi para pembuatnya di contact@worldwidewaves.net (balasan tidak dijamin). Cara terbaik untuk membantu adalah menyebarkan informasi: bagikan foto dan video dari acara dengan tagar yang disarankan, hubungi influencer lokal untuk memperkuat pesan, bicarakan dengan komunitas Anda, dan yang paling penting, bergabung dalam gelombang!</string>
+  <!-- src_hash: 69965154ce3f4c1e3fba2a6f8aa27d9ad779a228 -->
+  <string name="faq_question_6">Di mana saya bisa menemukan tempat untuk dikunjungi selama acara?</string>
+  <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
+  <string name="faq_answer_6">Anda dapat menemukan daftar aksi, aktivitas, dan tempat yang disarankan di https://luma.com/worldwidewaves.</string>
+  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
+  <string name="faq_question_7">Bagaimana cara mensimulasikan gelombang?</string>
+  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
+  <string name="faq_answer_7">Ketuk tombol di bawah untuk mengaktifkan mode simulasi. Di layar acara, gunakan tombol timer di dekat tombol "Gabung Gelombang" untuk memulai simulasi dengan properti acara ini (tanggal, waktu, lokasi). Untuk menghentikan simulasi, gunakan tombol yang sama. Dan terakhir, hentikan mode simulasi menggunakan ikon berhenti pada panel yang tetap muncul ketika Anda selesai.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">Amerika Serikat</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -606,6 +610,28 @@
   <string name="debug_storage_available_value">Tersedia</string>
   <!-- src_hash: 5bb65df8e40b98916bd9a110898c9e7f7ff60c72 -->
   <string name="debug_device_orientation">Orientasi Perangkat</string>
-  <!-- src_hash: a8319bed2e56d59cfebb5b8d7abc61f9eeb725cc -->
+  <!-- src_hash: 8c0d4a7a62b814c539e62869793606fb7dcac4eb -->
   <string name="debug_device_orientation_portrait">Potret</string>
+  <!-- src_hash: 4e44463f00e432d03f9f1c96d99f543d7322b251 -->
+  <string name="action_message_tab">Aksi</string>
+  <!-- src_hash: d6fe8f76f6c4764a0df743d474afb576b6bc2370 -->
+  <string name="action_message_title">Satu gelombang, satu pesan</string>
+  <!-- src_hash: d0e48e832d1fdd60e7cc6d6734d1a8ff24c413c7 -->
+  <string name="action_message_phrase_1">Siap sekarang, bukan nanti.</string>
+  <!-- src_hash: fcfa6009fb2ef56aa65c4eb3fd72210022a017c4 -->
+  <string name="action_message_phrase_2">Akui kenyataan bersama.</string>
+  <!-- src_hash: 19deea7d2ba404acaa4e8b1ab9d829a73d7e1488 -->
+  <string name="action_message_phrase_3">Redakan ketegangan untuk melindungi kehidupan.</string>
+  <!-- src_hash: 37d357e06640e266681c8dcd2e8a88036ab09591 -->
+  <string name="action_message_phrase_4">Bertemu sekarang, putuskan cepat.</string>
+  <!-- src_hash: 4f54399abbf1f266555a7245af955a2d1bb6896d -->
+  <string name="action_message_phrase_5">Singkirkan penghalang perubahan.</string>
+  <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
+  <string name="action_message_phrase_6">Dengarkan suara lokal, bersiap bersama.</string>
+  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
+  <string name="action_message_section_1">Kita harus beralih dari penanggulangan dampak ke kesiapsiagaan. Suhu akan melampaui target, jadi komunitas memerlukan panduan yang jelas, latihan, dan alat sederhana mulai sekarang.</string>
+  <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
+  <string name="action_message_section_2">Ini dimulai dengan realitas bersama. Pemerintah, perusahaan, dan pemimpin sipil harus menyatakan fakta bersama, membuka data, dan menyelaraskan jadwal agar tindakan terkoordinasi, bukan terpecah-pecah.\n\nUntuk melindungi kehidupan, tempuh deeskalasi damai atas ketegangan geopolitik dan fokuskan kembali sumber daya pada kelangsungan hidup manusia dan stabilitas.\n\nSelenggarakan pertemuan di tingkat tertinggi dengan negara, pelaku usaha, dan perwakilan publik untuk mengajukan proposal, menetapkan penanggung jawab, dan melaporkan kemajuan.\n\nSingkirkan penghalang dengan mengizinkan uji coba (pilot), menyelaraskan standar, serta mendanai ketangguhan dan aksesibilitas terlebih dahulu.</string>
+  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
+  <string name="action_message_section_3">Dengarkan para pelaku lokal yang menghadapi dampak, urutkan ancaman bersama mereka, dan publikasikan rencana dengan bahasa yang sederhana agar publik mendapat informasi dan diundang untuk berpartisipasi. Tanpa kekerasan, inklusi, transparansi, dan ilmu pengetahuan menjadi panduan upaya ini.\n\nSiapkan juga masa depan: ajarkan keterampilan praktis, investasikan pada sistem peringatan dini, infrastruktur yang tangguh, dan solusi berbasis alam, serta bangun alat dan data terbuka untuk perencanaan komunitas.</string>
 </resources>

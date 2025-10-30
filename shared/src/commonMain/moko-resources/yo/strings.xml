@@ -276,12 +276,16 @@
   <string name="faq_answer_4">Rárá. App náà jẹ́ ọ̀fẹ́ patapata. Bí ó tilẹ̀ jẹ́ pé àpẹrẹ àti ìdàgbàsókè rẹ̀ gba àkókò àti owó lọ́wọ́ àwọn aṣèdá, wọn kò ní anfàní owó taara kankan lọ́wọ́ rẹ̀.</string>
   <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
   <string name="faq_question_5">Ṣé mo lè kópa sí ìsapá yìí?</string>
-  <!-- src_hash: d56087c228256042d65da9946639185896f429c7 -->
-  <string name="faq_answer_5">Bẹ́ẹ̀ni, a ń gba olùfẹ́sẹ̀rùn ní gbogbo ìgbà. Kóòdù app náà jẹ́ orísun-ṣíṣi lórí GitHub, o sì lè kan àwọn aṣèdá sí contact@worldwidewaves.net (ìdáhùn kì í ṣe dídánilójú). Ọ̀nà tó dára jù lọ láti ràn lọ́wọ́ ni kí o tan ìròyìn ka: pín fọto àti fídíò láti àwọn ìṣẹ̀lẹ̀ pẹ̀lú àwọn hashtags tí a daba, kan sí àwọn olùnípa agbègbè láti gbé ìránṣẹ́ náà ga, sọ̀rọ̀ nípa rẹ̀ pẹ̀lú àwùjọ rẹ, tí ó sì ṣe pàtàkì jù lọ, darapọ̀ mọ́ ìgbì náà!</string>
-  <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
-  <string name="faq_question_6">Báwo ni mo ṣe lè ṣe ìdánwò ìgbì?</string>
-  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
-  <string name="faq_answer_6">Tẹ bọtìnì tó wà ní isalẹ lati mu ipo àfọwọ́ṣe ṣiṣẹ. Lórí iboju ìṣẹ̀lẹ̀, lo bọtìnì aago tó wà lẹ́gbẹ̀ẹ́ bọtìnì "Join the wave" láti bẹ̀rẹ̀ àfọwọ́ṣe pẹ̀lú àwọn àbùdá ìṣẹ̀lẹ̀ yìí (ọjọ́, àkókò, ibí). Láti dá àfọwọ́ṣe dúró, lo bọtìnì kan naa. Nígbà tó bá parí, dá ipo àfọwọ́ṣe dúró pẹ̀lú àmì ìdádúró lórí ìpele tó ń dúró lórí iboju.</string>
+  <!-- src_hash: 7beca4eb43ee70e8557e56ee3958a6bb50df9ee4 -->
+  <string name="faq_answer_5">Bẹ́ẹ̀ni, a máa ń kí àwọn olùfẹ́sẹ̀bọ̀ káàbọ̀ nígbà gbogbo. Kóòdù app náà jẹ́ orísun-ìmọ̀ ṣíṣi lórí GitHub, o sì lè kan sí àwọn olùdásílẹ̀ ní contact@worldwidewaves.net (ìdáhùn kì í ṣe dandan). Ọ̀nà tó dára jù lọ láti ràn lọ́wọ́ ni kí o tan ìròyìn kálẹ̀: pín fọ́tò àti fídíò láti àwọn ìṣẹ̀lẹ̀ nípasẹ̀ lílo àwọn hashtag tí a daba, kan sí àwọn olùnípa agbègbè kí wọ́n lè gbé ìfiranṣẹ́ náà ga sí i, bá àwùjọ rẹ sọ̀rọ̀ nípa rẹ̀, ó sì ṣe pàtàkì jù lọ, darapọ̀ mọ́ ìgbì náà!</string>
+  <!-- src_hash: 69965154ce3f4c1e3fba2a6f8aa27d9ad779a228 -->
+  <string name="faq_question_6">Níbo ni mo ti lè rí àwọn ibi láti lọ nígbà àwọn ìṣẹ̀lẹ̀?</string>
+  <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
+  <string name="faq_answer_6">O lè rí àkójọ àwọn ìgbésẹ̀, àwọn iṣẹ́-ṣe, àti àwọn ibi tí a daba ní https://luma.com/worldwidewaves.</string>
+  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
+  <string name="faq_question_7">Báwo ni mo ṣe lè ṣe àfọwọ́kọ ìgbì?</string>
+  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
+  <string name="faq_answer_7">Tẹ bọ́tìnì tó wà ní isalẹ láti mu ìpo àfọwọ́kọ ṣiṣẹ́. Lórí iboju ìṣẹ̀lẹ̀, lo bọ́tìnì aago tó sún mọ́ bọ́tìnì "Join the wave" láti bẹ̀rẹ̀ àfọwọ́kọ pẹ̀lú àwọn àtọka ìṣẹ̀lẹ̀ yìí (ọjọ́, àkókò, ibi). Láti dá àfọwọ́kọ dúró, lo bọ́tìnì kan náà. Ní ìkẹyìn, dá ìpo àfọwọ́kọ dúró pẹ̀lú àmì idádúró lórí fẹ́lẹ̀fẹ́lẹ̀ tó ń wà níbẹ̀ nígbà gbogbo nígbà tí o bá parí.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -606,6 +610,36 @@
   <string name="debug_storage_available_value">Tó wà</string>
   <!-- src_hash: 5bb65df8e40b98916bd9a110898c9e7f7ff60c72 -->
   <string name="debug_device_orientation">Ìtọ́sọ́nà Ẹrọ</string>
-  <!-- src_hash: a8319bed2e56d59cfebb5b8d7abc61f9eeb725cc -->
-  <string name="debug_device_orientation_portrait">Ináró</string>
+  <!-- src_hash: 8c0d4a7a62b814c539e62869793606fb7dcac4eb -->
+  <string name="debug_device_orientation_portrait">Portrait</string>
+  <!-- src_hash: 4e44463f00e432d03f9f1c96d99f543d7322b251 -->
+  <string name="action_message_tab">Ìṣe</string>
+  <!-- src_hash: d6fe8f76f6c4764a0df743d474afb576b6bc2370 -->
+  <string name="action_message_title">Ìgbì kan, ìfiranṣẹ́ kan</string>
+  <!-- src_hash: d0e48e832d1fdd60e7cc6d6734d1a8ff24c413c7 -->
+  <string name="action_message_phrase_1">Ìmúríyà báyìí, kì í ṣe lẹ́yìn.</string>
+  <!-- src_hash: fcfa6009fb2ef56aa65c4eb3fd72210022a017c4 -->
+  <string name="action_message_phrase_2">Jọ sọ òtítọ́ náà kedere.</string>
+  <!-- src_hash: 19deea7d2ba404acaa4e8b1ab9d829a73d7e1488 -->
+  <string name="action_message_phrase_3">Dín ìjà kù láti bó ìyè.</string>
+  <!-- src_hash: 37d357e06640e266681c8dcd2e8a88036ab09591 -->
+  <string name="action_message_phrase_4">Pàdé ní báyìí, ṣe ìpinnu kíákíá.</string>
+  <!-- src_hash: 4f54399abbf1f266555a7245af955a2d1bb6896d -->
+  <string name="action_message_phrase_5">Yọ ìdènà kúrò kí ìyípadà lè ṣẹlẹ̀.</string>
+  <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
+  <string name="action_message_phrase_6">Feti sí ti agbègbè, mura pọ̀.</string>
+  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
+  <string name="action_message_section_1">Gbọ́dọ̀ yí padà kúrò ní ìṣàkóso ìpalára sí ìmúríyà. Ìgbóná yóò kọjá ibi-afẹ̀, nítorí náà, àwọn àwùjọ nílò ìtọ́sọ́nà kedere, ìdárayá ìmúríyà, àti irinṣẹ́ rọrùn ní báyìí.</string>
+  <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
+  <string name="action_message_section_2">Èyí bẹ̀rẹ̀ pẹ̀lú òtítọ́ tí a pín pọ̀. Ìjọba, ilé-iṣẹ́, àti àwọn olórí àwùjọ yẹ kí wọ́n jọ sọ òtítọ́, ṣí data sílẹ̀, kí wọ́n sì ṣọ̀kan àsìkò kí ìṣe lè rọ̀pọ̀, kì í ṣe kí ó ya sílẹ̀.
+
+Láti bó ìyè, jẹ́ kí a dín ìfarapa ìṣèlú-àyíká àgbáyé kù ní aláfọ̀ọ́kanbalẹ̀, kí a sì tún dojúkọ ohun-ìní sí ìyè ènìyàn àti ìdúróṣinṣin.
+
+Pe ipàdé ní ipele gíga jù lọ pẹ̀lú àwọn ìpínlẹ̀, ilé-iṣẹ́, àti aṣojú aráàlú láti gbé àbá kalẹ̀, yàn ẹni tó ní ojúṣe, kí wọ́n sì máa jẹ́rìí ìlọsíwájú.
+
+Yọ ìdènà kúrò nípa fí ọwọ́ sílẹ̀ fún àwọn ìdánwò kékeré, dọ̀gba àwọn ìlànà, àti kíkọ ináwó sí ìfaradà àti ìraye-sí kọ́kọ́.</string>
+  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
+  <string name="action_message_section_3">Gbọ́ ti àwọn olùṣe agbègbè tí ń koju ipa, ṣe ìtọ́ka ewu pẹ̀lú wọn, kí ẹ sì tẹ̀jáde ètò ní èdè kedere kí gbogbo ará mọ̀, kí a sì pe wọn sí ìkópa. Aìlìwa-ipa, ìfikún-gbogbo ènìyàn, ìmọ̀làíláìpamọ́, àti sáyẹ́ǹsì ni yóò darí ìsapá yìí.
+
+Tún mura ọ̀la: kọ́ ọ̀nà ìṣe amúlò, fi owó sí àwọn eto ìkìlọ̀ tete, àmàyédẹrùn aláfaradà, àti ìmúlò tó da lórí isedá, kí ẹ sì kọ irinṣẹ́ ṣíṣi àti data fún ìlànà àwùjọ.</string>
 </resources>

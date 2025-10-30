@@ -276,12 +276,16 @@
   <string name="faq_answer_4">Mba. Ngwa ahụ bụ n’efu kpamkpam. N’agbanyeghị na imewe na mmepe ya were oge na ego nke ndị kere ya, ha enwetaghị uru ego onwe ha site na ya.</string>
   <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
   <string name="faq_question_5">Enwere m ike iso nyere aka?</string>
-  <!-- src_hash: d56087c228256042d65da9946639185896f429c7 -->
-  <string name="faq_answer_5">Ee, a na-anabata ndị na-enyere aka n'efu mgbe niile. Koodu ngwa a bụ isi mmalite mepere emepe na GitHub, ma ị nwere ike ịkpọtụrụ ndị okike na contact@worldwidewaves.net (azịza a gaghị ekwe nkwa). Ụzọ kacha mma isi nyere aka bụ ịgbasa ozi: kesaa foto na vidio sitere n'omume site n'iji hashtags e tụrụ aro, kpọtụrụ ndị nwere mmetụta n'ịntanetị n'obodo gị ka ha gbasaa ozi, kparịta ya n'obodo gị, ma karịa ihe niile, sonyere ebili mmadụ!</string>
-  <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
-  <string name="faq_question_6">Kedu ka m ga-esi mee nnwale ebili?</string>
-  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
-  <string name="faq_answer_6">Pịa bọtịnụ dị n’okpuru ka ị kpalite ọnọdụ simulashọn. Na ihuenyo omume, jiri bọtịnụ taịma nke dị nso na bọtịnụ "Join the wave" ka ịmalite simulashọn site n’iji njirimara nke omume a (ụbọchị, oge, ebe). Iji kwụsị simulashọn, jiri bọtịnụ ahụkwa. N’ikpeazụ, kwụsị ọnọdụ simulashọn site n’iji akara "stop" dị na oyi akwa na-anọgide n’elu ihuenyo mgbe ị mechara.</string>
+  <!-- src_hash: 7beca4eb43ee70e8557e56ee3958a6bb50df9ee4 -->
+  <string name="faq_answer_5">Ee, a na-anabata ndị ọrụ afọ ofufo mgbe niile. Koodu ngwa a bụ isi mmalite mepere emepe na GitHub, ị nwekwara ike ịkpọtụrụ ndị mepụtara ya na contact@worldwidewaves.net (azaghachi agaghị ekwe nkwa). Ụzọ kacha mma isi nyere aka bụ ịgbasa okwu: kekekọrịta foto na vidio sitere n’ime mmemme site n’iji hashtags a tụrụ aro, kpọtụrụ ndị na-emetụta n’obodo ka ha gbasaa ozi ahụ, kparịta ya na obodo gị, ma karịa ihe niile, sonyere ebili ahụ!</string>
+  <!-- src_hash: 69965154ce3f4c1e3fba2a6f8aa27d9ad779a228 -->
+  <string name="faq_question_6">Ebee ka m nwere ike ịhụ ebe ịga n'oge mmemme?</string>
+  <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
+  <string name="faq_answer_6">Ị nwere ike ịhụ ndepụta ihe a tụrụ aro—omume, ọrụ, na ebe—na https://luma.com/worldwidewaves.</string>
+  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
+  <string name="faq_question_7">Olee otú m ga-esi nwalee ebili?</string>
+  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
+  <string name="faq_answer_7">Pịa bọtịnụ dị n’okpuru iji kpalite ọnọdụ nnwale. Na ihuenyo mmemme, jiri bọtịnụ taịma dị nso na bọtịnụ "Join the wave" iji bido nnwale site n’iji njirimara mmemme a (ụbọchị, oge, ebe). Iji kwụsị nnwale, jiri bọtịnụ ahụ. N’ikpeazụ, kwụsị ọnọdụ nnwale site n’iji ikọn nkwụsị dị na ogwe na-anọgide n’elu ihuenyo mgbe ị gụchara.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -606,6 +610,36 @@
   <string name="debug_storage_available_value">Dị</string>
   <!-- src_hash: 5bb65df8e40b98916bd9a110898c9e7f7ff60c72 -->
   <string name="debug_device_orientation">Ụdị ntụgharị ngwaọrụ</string>
-  <!-- src_hash: a8319bed2e56d59cfebb5b8d7abc61f9eeb725cc -->
+  <!-- src_hash: 8c0d4a7a62b814c539e62869793606fb7dcac4eb -->
   <string name="debug_device_orientation_portrait">Kwụ ọtọ</string>
+  <!-- src_hash: 4e44463f00e432d03f9f1c96d99f543d7322b251 -->
+  <string name="action_message_tab">Omume</string>
+  <!-- src_hash: d6fe8f76f6c4764a0df743d474afb576b6bc2370 -->
+  <string name="action_message_title">Otu ebili, otu ozi</string>
+  <!-- src_hash: d0e48e832d1fdd60e7cc6d6734d1a8ff24c413c7 -->
+  <string name="action_message_phrase_1">Nkwadebe ugbu a, ọ bụghị mgbe e mesịrị.</string>
+  <!-- src_hash: fcfa6009fb2ef56aa65c4eb3fd72210022a017c4 -->
+  <string name="action_message_phrase_2">Kwuo eziokwu ahụ ọnụ.</string>
+  <!-- src_hash: 19deea7d2ba404acaa4e8b1ab9d829a73d7e1488 -->
+  <string name="action_message_phrase_3">Belata esemokwu iji chebe ndụ.</string>
+  <!-- src_hash: 37d357e06640e266681c8dcd2e8a88036ab09591 -->
+  <string name="action_message_phrase_4">Zute ugbu a, kpebie ngwa ngwa.</string>
+  <!-- src_hash: 4f54399abbf1f266555a7245af955a2d1bb6896d -->
+  <string name="action_message_phrase_5">Wepụ ihe na-egbochi mgbanwe.</string>
+  <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
+  <string name="action_message_phrase_6">Gee ndị obodo ntị, kwadebe ọnụ.</string>
+  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
+  <string name="action_message_section_1">Anyị kwesịrị ịgbanwe site n’ịchịkwa mmebi gaa na nkwadebe. Okpomọkụ ga-agafe ebumnuche a tụrụ, ya mere obodo chọrọ nduzi doro anya, mmega mberede, na ngwá ọrụ dị mfe—ugbu a.</string>
+  <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
+  <string name="action_message_section_2">Nke a na-amalite na eziokwu a na-ekekọrịta. Gọọmenti, ụlọ ọrụ na ndị isi ọha kwesịrị ikwupụta eziokwu ọnụ, mepee data, ma kwekọọ ihe ndokwa oge ka omume bụrụ nke a haziri nke ọma, ọ bụghị nke agbajapụrụ.
+
+Iji chebe ndụ, belata nrụgide ndọrọ ndọrọ ala ụwa n’udo ma lekwasịgharịa akụrụngwa na mgbapụta na ịdịte aka mmadụ.
+
+Kpọkọta na ọkwa kacha elu na steeti, ụlọ ọrụ na ndị nnọchi anya ọha iji tinye aro n’elu tebụl, nyefe ndị ga-ahụ ya, ma kọọrọ ọganihu.
+
+Wepụ ihe mgbochi site n’ikwado nnwale mbu, ime ka ụkpụrụ hà n’otu, na itinye ego mbụ n’ịdịrịgide na nnweta.</string>
+  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
+  <string name="action_message_section_3">Gee ndị mpaghara na-anata mmetụta ntị, tụọ ọnụ n’usoro ihe egwu na ha, ma bipụta atụmatụ n’asụsụ dị mfe ka ọha mara ma kpọọ ha ka ha sonyere. Ịghara ime ihe ike, imekọrịta, nghọta doro anya, na sayensị bụ ihe nduzi mbọ a.
+
+Kwadebe kwa ọdịnihu: kuzie nkà bara uru, tinye ego na usoro ịdọ aka ná ntị n’oge, akụrụngwa dịgide, na ngwọta dabere n’okike, ma wuo ngwá ọrụ na data mepere emepe maka atụmatụ obodo.</string>
 </resources>

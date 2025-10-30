@@ -276,12 +276,16 @@
   <string name="faq_answer_4">Hayi. Usetyenziso lusimahla ngokupheleleyo. Nangona uyilo nophuhliso lwalufuna ixesha nemali kubadali, abangenelwa zimali buqu ngokuthe ngqo kulo.</string>
   <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
   <string name="faq_question_5">Ndinganegalelo kulo mzamo?</string>
-  <!-- src_hash: d56087c228256042d65da9946639185896f429c7 -->
-  <string name="faq_answer_5">Ewe, abavolontiya bamkelekile rhoqo. Ikhowudi yesicelo ingumthombo ovulekileyo kwi GitHub, kwaye unokunxibelelana nabadali ku contact@worldwidewaves.net (iimpendulo azisiqinisekiswanga). Eyona ndlela ilungileyo yokunceda kukusasaza umyalezo: yabelana ngeefoto neevidiyo zemisitho usebenzisa ii-hashtag ezicetyisiweyo, qhagamshelana nabachaphazeli basekuhlaleni ukwandisa umyalezo, thetha ngalo noluntu lwakho, yaye okona kubaluleke kakhulu, joyina igagasi!</string>
-  <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
-  <string name="faq_question_6">Ndingalulingisa njani igagasi?</string>
-  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
-  <string name="faq_answer_6">Cofa iqhosha elisezantsi ukuvula imo yelingiso. Kwizikrini zesiganeko, sebenzisa iqhosha lexesha elikufutshane neqhosha "Joyina igagasi" ukuze uqalise ilingiso usebenzisa iimpawu zesi siganeko (umhla, ixesha, indawo). Ukumisa ilingiso, sebenzisa iqhosha elifanayo. Ekugqibeleni, misa imo yelingiso usebenzisa i-icon yokumisa ekwimaleko ohlala ubonakala xa ugqibile.</string>
+  <!-- src_hash: 7beca4eb43ee70e8557e56ee3958a6bb50df9ee4 -->
+  <string name="faq_answer_5">Ewe, abavolontiya bamkelwa rhoqo. Ikhowudi yesicelo ivulekile (open-source) kwi GitHub, kwaye unokunxibelelana nabaqulunqi ku contact@worldwidewaves.net (iimpendulo aziqinisekiswanga). Eyona ndlela yokunceda kukusasaza igama: yabelana ngeefoto nevidiyo zeziganeko usebenzisa ii-hashtag ezicetyisiweyo, qhagamshelana nabachaphazeli basekhaya ukwandisa umyalezo, thetha ngale nto kuluntu lwakho, yaye okubaluleke kakhulu, joyina igagasi!</string>
+  <!-- src_hash: 69965154ce3f4c1e3fba2a6f8aa27d9ad779a228 -->
+  <string name="faq_question_6">Ndingazifumana phi iindawo endinokuya kuzo ngexesha lezi ziganeko?</string>
+  <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
+  <string name="faq_answer_6">Ungafumana uluhlu lwezenzo ezicetywayo, imisebenzi, kunye neendawo apha: https://luma.com/worldwidewaves.</string>
+  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
+  <string name="faq_question_7">Ndingalulingisa njani igagasi?</string>
+  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
+  <string name="faq_answer_7">Cofa iqhosha elingezantsi ukuze uvule imo yokulingisa. Kwiiskrini zeziganeko sebenzisa iqhosha loxesha elikufuphi neqhosha elithi "Join the wave" ukuqalisa ukulingisa kusetyenziswa iinkcukacha zesi siganeko (umhla, ixesha, indawo). Ukumisa ukulingisa, sebenzisa elo qhosha kwakhona. Ekugqibeleni, misa imo yokulingisa usebenzisa i-icon yokumisa (stop) kumaleko osisigxina xa ugqibile.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -606,6 +610,36 @@
   <string name="debug_storage_available_value">Iyafumaneka</string>
   <!-- src_hash: 5bb65df8e40b98916bd9a110898c9e7f7ff60c72 -->
   <string name="debug_device_orientation">Ukuma kwesixhobo</string>
-  <!-- src_hash: a8319bed2e56d59cfebb5b8d7abc61f9eeb725cc -->
-  <string name="debug_device_orientation_portrait">Imo nkqo</string>
+  <!-- src_hash: 8c0d4a7a62b814c539e62869793606fb7dcac4eb -->
+  <string name="debug_device_orientation_portrait">Nkqo</string>
+  <!-- src_hash: 4e44463f00e432d03f9f1c96d99f543d7322b251 -->
+  <string name="action_message_tab">Isenzo</string>
+  <!-- src_hash: d6fe8f76f6c4764a0df743d474afb576b6bc2370 -->
+  <string name="action_message_title">Igagasi elinye, umyalezo omnye</string>
+  <!-- src_hash: d0e48e832d1fdd60e7cc6d6734d1a8ff24c413c7 -->
+  <string name="action_message_phrase_1">Ukulungela ngoku, hayi kamva.</string>
+  <!-- src_hash: fcfa6009fb2ef56aa65c4eb3fd72210022a017c4 -->
+  <string name="action_message_phrase_2">Bizani inyani sonke.</string>
+  <!-- src_hash: 19deea7d2ba404acaa4e8b1ab9d829a73d7e1488 -->
+  <string name="action_message_phrase_3">Yehlisani uxinzelelo ukukhusela ubomi.</string>
+  <!-- src_hash: 37d357e06640e266681c8dcd2e8a88036ab09591 -->
+  <string name="action_message_phrase_4">Dibanani ngoku, gqibani msinyane.</string>
+  <!-- src_hash: 4f54399abbf1f266555a7245af955a2d1bb6896d -->
+  <string name="action_message_phrase_5">Susahani izithintelo zotshintsho.</string>
+  <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
+  <string name="action_message_phrase_6">Mamelani abendawo, lungiselelani kunye.</string>
+  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
+  <string name="action_message_section_1">Kuya kufuneka sisuke kulawulo lomonakalo siye ekulungeleleni. Amaqondo obushushu aza kudlula iinjongo, ngoko uluntu lufuna isikhokelo esicacileyo, iziqeqesho, nezixhobo ezilula — ngoku.</string>
+  <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
+  <string name="action_message_section_2">Oku kuqala ngenyani esabelwana ngayo. Oorhulumente, iinkampani, nabakhokeli boluntu mababhengeze iinyani kunye, bavule idatha, bade bahambise iishedyuli ukuze isenzo sihambiswane, hayi sihlakazeke.
+
+Ukukhusela ubomi, landelani ukwehliswa koxinzelelo ngeendlela zoxolo kwezo geopolitiki, nize nijolise kwakhona izibonelelo ekusindiseni abantu nasekuqinisekiseni uzinzo.
+
+Buthanani kwelona nqanaba liphezulu norhulumente, amashishini, nabameli boluntu ukuze kubekwe izindululo etafileni, kunikwe abanoxanduva, kuza kuxelwe inkqubela.
+
+Susahani izithintelo ngokugunyazisa iiprojekthi zovavanyo, nihambelaniswe imigangatho, nize nixhase kuqala ukomelela nokufikeleleka.</string>
+  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
+  <string name="action_message_section_3">Mamelani abadlali basekuhlaleni abajongene neziphumo, nibeke phambili izoyikiso kunye nabo, nize nipapashe izicwangciso ngolwimi olucacileyo nolula ukuze uluntu lwaziswe lize limenywe ukuba lubambe inxaxheba. Ukungabi-ndlobongela, ukubandakanywa, ukucaca, nesayensi makukhokele lo mzamo.
+
+Lungiselelani ikamva: fundisani izakhono ezisebenzayo, tyalani kwiinkqubo zesilumkiso sokuqala, kwiziseko ezingundoqo ezomeleleyo, nakwizisombululo ezisekelwe kwindalo, yaye yakheni izixhobo ezivulekileyo nedatha yokucwangcisa koluntu.</string>
 </resources>

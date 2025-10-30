@@ -276,12 +276,16 @@
   <string name="faq_answer_4">아닙니다. 앱은 완전히 무료입니다. 기획과 개발에 제작자의 시간과 비용이 들었지만, 그 대가로 개인적 금전적 이익을 직접적으로 얻지 않습니다.</string>
   <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
   <string name="faq_question_5">기여할 수 있나요?</string>
-  <!-- src_hash: d56087c228256042d65da9946639185896f429c7 -->
-  <string name="faq_answer_5">네, 언제나 자원봉사자를 환영합니다. 앱 코드는 GitHub에 오픈 소스로 공개되어 있으며, contact@worldwidewaves.net로 제작진에게 연락할 수 있습니다(회신을 보장하지 않습니다). 가장 좋은 도움은 널리 알리는 것입니다: 제안된 해시태그로 이벤트 사진과 영상을 공유하고, 지역 인플루언서에게 연락해 메시지를 확산시키고, 커뮤니티에서 이를 이야기하고, 그리고 무엇보다 파도에 참여하세요!</string>
-  <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
-  <string name="faq_question_6">파도를 어떻게 시뮬레이션할 수 있나요?</string>
-  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
-  <string name="faq_answer_6">아래 버튼을 눌러 시뮬레이션 모드를 켜세요. 이벤트 화면에서 이 이벤트의 속성(날짜, 시간, 위치)으로 시뮬레이션을 시작하려면 '웨이브 참여' 버튼 옆의 타이머 버튼을 사용하세요. 시뮬레이션을 중지하려면 같은 버튼을 사용하세요. 작업을 마쳤다면, 항상 표시되는 레이어의 중지 아이콘으로 시뮬레이션 모드를 종료하세요.</string>
+  <!-- src_hash: 7beca4eb43ee70e8557e56ee3958a6bb50df9ee4 -->
+  <string name="faq_answer_5">네, 언제나 자원봉사자를 환영합니다. 이 앱의 코드는 GitHub에서 오픈소스이며, 제작진은 contact@worldwidewaves.net 로 연락할 수 있습니다(답장은 보장되지 않습니다). 가장 좋은 도움은 확산입니다: 제안된 해시태그를 사용해 행사 사진과 영상을 공유하고, 지역 인플루언서에게 연락해 메시지를 키우고, 커뮤니티에서 이야기하고, 무엇보다 웨이브에 참여하세요!</string>
+  <!-- src_hash: 69965154ce3f4c1e3fba2a6f8aa27d9ad779a228 -->
+  <string name="faq_question_6">행사 때 갈 곳은 어디에서 찾을 수 있나요?</string>
+  <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
+  <string name="faq_answer_6">https://luma.com/worldwidewaves 에서 제안된 행동, 활동, 장소 목록을 확인할 수 있습니다.</string>
+  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
+  <string name="faq_question_7">웨이브를 어떻게 시뮬레이션하나요?</string>
+  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
+  <string name="faq_answer_7">아래 버튼을 눌러 시뮬레이션 모드를 활성화하세요. 이벤트 화면에서 "Join the wave" 버튼 옆의 타이머 버튼을 사용해 이 이벤트의 속성(날짜, 시간, 위치)으로 시뮬레이션을 시작합니다. 중지하려면 같은 버튼을 다시 누르세요. 완료되면 항상 표시되는 레이어의 중지 아이콘으로 시뮬레이션 모드를 종료하세요.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">미국</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -606,6 +610,28 @@
   <string name="debug_storage_available_value">사용 가능</string>
   <!-- src_hash: 5bb65df8e40b98916bd9a110898c9e7f7ff60c72 -->
   <string name="debug_device_orientation">기기 방향</string>
-  <!-- src_hash: a8319bed2e56d59cfebb5b8d7abc61f9eeb725cc -->
+  <!-- src_hash: 8c0d4a7a62b814c539e62869793606fb7dcac4eb -->
   <string name="debug_device_orientation_portrait">세로</string>
+  <!-- src_hash: 4e44463f00e432d03f9f1c96d99f543d7322b251 -->
+  <string name="action_message_tab">행동</string>
+  <!-- src_hash: d6fe8f76f6c4764a0df743d474afb576b6bc2370 -->
+  <string name="action_message_title">웨이브 하나, 메시지 하나</string>
+  <!-- src_hash: d0e48e832d1fdd60e7cc6d6734d1a8ff24c413c7 -->
+  <string name="action_message_phrase_1">지금 대비, 나중 말고.</string>
+  <!-- src_hash: fcfa6009fb2ef56aa65c4eb3fd72210022a017c4 -->
+  <string name="action_message_phrase_2">현실을 함께 직시하자.</string>
+  <!-- src_hash: 19deea7d2ba404acaa4e8b1ab9d829a73d7e1488 -->
+  <string name="action_message_phrase_3">생명을 위해 긴장을 완화하자.</string>
+  <!-- src_hash: 37d357e06640e266681c8dcd2e8a88036ab09591 -->
+  <string name="action_message_phrase_4">지금 만나, 신속히 결정하자.</string>
+  <!-- src_hash: 4f54399abbf1f266555a7245af955a2d1bb6896d -->
+  <string name="action_message_phrase_5">변화의 장애물을 제거하자.</string>
+  <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
+  <string name="action_message_phrase_6">현지의 목소리를 듣고 함께 준비하자.</string>
+  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
+  <string name="action_message_section_1">이제 피해 수습에서 대비로 전환해야 합니다. 온도는 목표를 넘어설 것이므로, 지역사회는 지금 명확한 지침과 훈련, 간단한 도구가 필요합니다.</string>
+  <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
+  <string name="action_message_section_2">이는 공동의 현실 인식에서 시작됩니다. 정부, 기업, 시민사회 리더가 함께 사실을 밝히고, 데이터를 개방하며, 일정을 맞춰 행동이 분절되지 않고 조정되도록 해야 합니다.\n\n생명을 보호하려면 지정학적 긴장을 평화적으로 완화하고, 자원을 인간의 생존과 안정에 다시 집중해야 합니다.\n\n국가, 기업, 시민 대표가 최고 수준에서 모여 제안을 상정하고, 책임자를 지정하며, 진행 상황을 보고해야 합니다.\n\n시범사업을 신속히 승인하고, 표준을 정합화하며, 회복력과 접근성에 우선 투자해 장애물을 제거해야 합니다.</string>
+  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
+  <string name="action_message_section_3">영향을 직접 겪는 지역 주체들의 목소리를 듣고, 그들과 함께 위협을 순위화하며, 대중이 정보를 얻고 참여할 수 있도록 쉬운 언어의 계획을 공개해야 합니다. 비폭력, 포용, 투명성, 과학이 이 노력을 이끕니다.\n\n또한 미래도 준비해야 합니다. 실용 기술을 가르치고, 조기경보 시스템, 회복력 있는 인프라, 자연 기반 해법에 투자하며, 공동체 계획을 위한 개방형 도구와 데이터를 구축해야 합니다.</string>
 </resources>

@@ -276,12 +276,16 @@
   <string name="faq_answer_4">Nu. Aplicația este complet gratuită. Deși designul și dezvoltarea ei au necesitat timp și bani din partea creatorilor, aceștia nu primesc niciun beneficiu financiar personal direct în schimb.</string>
   <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
   <string name="faq_question_5">Pot contribui la acest efort?</string>
-  <!-- src_hash: d56087c228256042d65da9946639185896f429c7 -->
-  <string name="faq_answer_5">Da, voluntarii sunt întotdeauna bineveniți. Codul aplicației este open-source pe GitHub, iar creatorii pot fi contactați la contact@worldwidewaves.net (răspunsurile nu sunt garantate). Cel mai bun mod de a ajuta este să dai vestea mai departe: distribuie fotografii și videoclipuri de la evenimente folosind hashtag-urile sugerate, contactează influenceri locali pentru a amplifica mesajul, vorbește cu comunitatea ta și, cel mai important, alătură-te valului!</string>
-  <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
-  <string name="faq_question_6">Cum pot simula un val?</string>
-  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
-  <string name="faq_answer_6">Apasă butonul de mai jos pentru a activa modul de simulare. Pe ecranele evenimentului, folosește butonul cronometrului de lângă butonul „Alătură-te valului” pentru a porni simularea folosind proprietățile acestui eveniment (data, ora, locația). Pentru a opri simularea, folosește același buton. Iar la final, oprește modul de simulare folosind pictograma de oprire de pe suprapunerea persistentă, când ai terminat.</string>
+  <!-- src_hash: 7beca4eb43ee70e8557e56ee3958a6bb50df9ee4 -->
+  <string name="faq_answer_5">Da, voluntarii sunt întotdeauna bineveniți. Codul aplicației este open-source pe GitHub, și îi poți contacta pe creatori la contact@worldwidewaves.net (răspunsurile nu sunt garantate). Cel mai bun mod de a ajuta este să răspândești vestea: distribuie fotografii și clipuri video de la evenimente folosind hashtagurile sugerate, contactează influenceri locali pentru a amplifica mesajul, vorbește despre asta cu comunitatea ta și, cel mai important, alătură-te valului!</string>
+  <!-- src_hash: 69965154ce3f4c1e3fba2a6f8aa27d9ad779a228 -->
+  <string name="faq_question_6">Unde găsesc locuri în care să merg în timpul evenimentelor?</string>
+  <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
+  <string name="faq_answer_6">Găsești o listă de acțiuni, activități și locuri propuse pe https://luma.com/worldwidewaves.</string>
+  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
+  <string name="faq_question_7">Cum pot simula un val?</string>
+  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
+  <string name="faq_answer_7">Atinge butonul de mai jos pentru a activa modul de simulare. Pe ecranele evenimentului, folosește butonul de cronometru de lângă butonul „Alătură-te valului” pentru a porni simularea folosind proprietățile acestui eveniment (dată, oră, locație). Pentru a opri simularea, folosește același buton. Iar la final, oprește modul de simulare folosind pictograma de oprire din suprapunerea persistentă.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">SUA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -606,6 +610,28 @@
   <string name="debug_storage_available_value">Disponibil</string>
   <!-- src_hash: 5bb65df8e40b98916bd9a110898c9e7f7ff60c72 -->
   <string name="debug_device_orientation">Orientarea dispozitivului</string>
-  <!-- src_hash: a8319bed2e56d59cfebb5b8d7abc61f9eeb725cc -->
+  <!-- src_hash: 8c0d4a7a62b814c539e62869793606fb7dcac4eb -->
   <string name="debug_device_orientation_portrait">Portret</string>
+  <!-- src_hash: 4e44463f00e432d03f9f1c96d99f543d7322b251 -->
+  <string name="action_message_tab">Acțiune</string>
+  <!-- src_hash: d6fe8f76f6c4764a0df743d474afb576b6bc2370 -->
+  <string name="action_message_title">Un val, un mesaj</string>
+  <!-- src_hash: d0e48e832d1fdd60e7cc6d6734d1a8ff24c413c7 -->
+  <string name="action_message_phrase_1">Pregătire acum, nu mai târziu.</string>
+  <!-- src_hash: fcfa6009fb2ef56aa65c4eb3fd72210022a017c4 -->
+  <string name="action_message_phrase_2">Spuneți lucrurilor pe nume, împreună.</string>
+  <!-- src_hash: 19deea7d2ba404acaa4e8b1ab9d829a73d7e1488 -->
+  <string name="action_message_phrase_3">Dezescaladați pentru a proteja viața.</string>
+  <!-- src_hash: 37d357e06640e266681c8dcd2e8a88036ab09591 -->
+  <string name="action_message_phrase_4">Întâlniți-vă acum, decideți rapid.</string>
+  <!-- src_hash: 4f54399abbf1f266555a7245af955a2d1bb6896d -->
+  <string name="action_message_phrase_5">Eliminați blocajele din calea schimbării.</string>
+  <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
+  <string name="action_message_phrase_6">Ascultați local, pregătiți împreună.</string>
+  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
+  <string name="action_message_section_1">Trebuie să trecem de la gestionarea pagubelor la pregătire. Temperaturile vor depăși țintele, așa că comunitățile au nevoie acum de îndrumări clare, exerciții și instrumente simple.</string>
+  <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
+  <string name="action_message_section_2">Asta începe cu o realitate comună. Guvernele, companiile și liderii civici ar trebui să prezinte împreună faptele, să deschidă datele și să alinieze calendarele, astfel încât acțiunea să fie coordonată, nu fragmentată.\n\nPentru a proteja viața, urmăriți dezescaladarea pașnică a tensiunilor geopolitice și reorientați resursele către supraviețuirea și stabilitatea umană.\n\nConvocați la cel mai înalt nivel statele, întreprinderile și reprezentanții publici pentru a pune pe masă propuneri, a desemna responsabili și a raporta progresul.\n\nEliminați blocajele prin aprobarea proiectelor pilot, armonizarea standardelor și finanțarea cu prioritate a rezilienței și accesibilității.</string>
+  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
+  <string name="action_message_section_3">Ascultați actorii locali care se confruntă cu efecte, prioritizați împreună cu ei amenințările și publicați planuri în limbaj clar, astfel încât publicul să fie informat și invitat să participe. Nonviolența, incluziunea, transparența și știința ghidează acest efort.\n\nPregătiți și viitorul: predați competențe practice, investiți în sisteme de avertizare timpurie, infrastructură rezilientă și soluții bazate pe natură și construiți instrumente și date deschise pentru planificarea comunității.</string>
 </resources>

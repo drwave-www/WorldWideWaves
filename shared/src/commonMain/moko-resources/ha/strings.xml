@@ -276,12 +276,16 @@
   <string name="faq_answer_4">A'a. Manhajar kyauta ce gaba ɗaya. Ko da yake ƙiranta da haɓaka ta buƙaci lokaci da kuɗi daga masu ƙirƙira, ba sa samun wani riba ta kuɗi kai tsaye daga gare ta.</string>
   <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
   <string name="faq_question_5">Zan iya ba da gudunmawa ga yunƙurin?</string>
-  <!-- src_hash: d56087c228256042d65da9946639185896f429c7 -->
-  <string name="faq_answer_5">Eh, ana maraba da masu sa kai koyaushe. Lambar shirin app ɗin buɗaɗɗiya ce a GitHub, kuma ana iya tuntuɓar masu ƙirƙira a contact@worldwidewaves.net (ba a tabbatar da amsa). Mafi kyawun taimako shi ne yada labari: raba hotuna da bidiyo daga taruka ta amfani da hashtags da aka ba da shawara, tuntuɓi masu tasiri na yankinku don faɗaɗa saƙon, yi magana da al’ummarku, kuma abu mafi muhimmanci, shiga igiyar!</string>
-  <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
-  <string name="faq_question_6">Ta yaya zan kwaikwayi igiya?</string>
-  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
-  <string name="faq_answer_6">Danna maɓallin da ke ƙasa don kunna yanayin kwaikwayo. A allonin taro, yi amfani da maɓallin mai ƙirga lokaci da ke kusa da maɓallin "Join the wave" don fara kwaikwayo ta amfani da bayanan wannan taron (kwanan wata, lokaci, wuri). Don dakatar da kwaikwayo, yi amfani da wannan maɓallin. A ƙarshe, dakatar da yanayin kwaikwayo ta amfani da alamar tsayawa da ke kan layin da ke ci gaba a saman allo idan kun gama.</string>
+  <!-- src_hash: 7beca4eb43ee70e8557e56ee3958a6bb50df9ee4 -->
+  <string name="faq_answer_5">Eh, ana maraba da masu aikin sa kai koyaushe. Lambar tushe ta app ɗin buɗaɗɗiya ce a GitHub, kuma za ka iya tuntubar masu ƙirƙira a contact@worldwidewaves.net (ba a tabbatar da samun amsa). Hanya mafi kyau ta taimaka ita ce yaɗa saƙo: raba hotuna da bidiyo daga taruka ta amfani da hashtags da aka ba da shawara, tuntubi masu tasiri na yankinku don ƙara ƙarfi ga saƙon, yi magana da al'ummarka, kuma mafi muhimmanci, ka shiga igiyar!</string>
+  <!-- src_hash: 69965154ce3f4c1e3fba2a6f8aa27d9ad779a228 -->
+  <string name="faq_question_6">Ina zan sami wuraren da zan je a lokacin taruka?</string>
+  <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
+  <string name="faq_answer_6">Za ka iya samun jerin shawarwarin matakai, ayyuka, da wurare a https://luma.com/worldwidewaves.</string>
+  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
+  <string name="faq_question_7">Ta yaya zan iya kwaikwayon igiya?</string>
+  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
+  <string name="faq_answer_7">Danna maɓallin da ke ƙasa don kunna yanayin kwaikwayo. A kan allon taro, yi amfani da maɓallin agogo kusa da maɓallin “Shiga igiya” don fara kwaikwayo da bayanan wannan taron (kwanan wata, lokaci, wuri). Don dakatar da kwaikwayon, yi amfani da wannan maɓallin. A ƙarshe, kashe yanayin kwaikwayo ta amfani da alamar tsayawa a saman ɓangaren da ke ci gaba da kasancewa idan ka gama.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">Amurka</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -606,6 +610,28 @@
   <string name="debug_storage_available_value">Akwai</string>
   <!-- src_hash: 5bb65df8e40b98916bd9a110898c9e7f7ff60c72 -->
   <string name="debug_device_orientation">Juyawar Na'ura</string>
-  <!-- src_hash: a8319bed2e56d59cfebb5b8d7abc61f9eeb725cc -->
+  <!-- src_hash: 8c0d4a7a62b814c539e62869793606fb7dcac4eb -->
   <string name="debug_device_orientation_portrait">Tsaye</string>
+  <!-- src_hash: 4e44463f00e432d03f9f1c96d99f543d7322b251 -->
+  <string name="action_message_tab">Aiki</string>
+  <!-- src_hash: d6fe8f76f6c4764a0df743d474afb576b6bc2370 -->
+  <string name="action_message_title">Igiya ɗaya, saƙo ɗaya</string>
+  <!-- src_hash: d0e48e832d1fdd60e7cc6d6734d1a8ff24c413c7 -->
+  <string name="action_message_phrase_1">Shiri yanzu, ba daga baya ba.</string>
+  <!-- src_hash: fcfa6009fb2ef56aa65c4eb3fd72210022a017c4 -->
+  <string name="action_message_phrase_2">Ayyana gaskiyar tare.</string>
+  <!-- src_hash: 19deea7d2ba404acaa4e8b1ab9d829a73d7e1488 -->
+  <string name="action_message_phrase_3">Rage rikici don kare rayuka.</string>
+  <!-- src_hash: 37d357e06640e266681c8dcd2e8a88036ab09591 -->
+  <string name="action_message_phrase_4">Haɗu yanzu, yanke shawara da sauri.</string>
+  <!-- src_hash: 4f54399abbf1f266555a7245af955a2d1bb6896d -->
+  <string name="action_message_phrase_5">Cire shingayen da ke hana sauyi.</string>
+  <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
+  <string name="action_message_phrase_6">Saurari na gida, ku shirya tare.</string>
+  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
+  <string name="action_message_section_1">Dole mu sauya daga sarrafa ɓarna zuwa shiri. Zafin jiki zai wuce manufofin da aka sa, don haka al'ummomi na buƙatar jagoranci a bayyane, atisaye, da kayan aiki masu sauƙi yanzu.</string>
+  <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
+  <string name="action_message_section_2">Wannan yana farawa da gaskiya gama-gari. Gwamnatoci, kamfanoni, da shugabannin al'umma su bayyana gaskiya tare, su buɗe bayanai, su daidaita jadawalin lokaci domin aiki ya kasance cikin tsari, ba a rarrabce ba.\n\nDon kare rayuka, a bi hanyar rage tashin hankali cikin lumana a rikice-rikicen siyasar duniya, kuma a mayar da albarkatu kan tsira da daidaiton rayuwar ɗan adam.\n\nA tattaro a matakin koli tare da jihohi, kamfanoni, da wakilan jama'a don gabatar da shawarwari, ware masu alhaki, kuma a rika ba da rahoton ci gaba.\n\nA cire shingaye ta hanyar ba da izinin gwaje-gwajen farko, daidaita ƙa'idoji, kuma a fi maida kuɗi kan juriya da samun sauƙin amfani da farko.</string>
+  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
+  <string name="action_message_section_3">Saurari masu ruwa da tsaki na gida da ke fuskantar tasiri, ku jeranta barazana tare da su, kuma ku wallafa tsare-tsare cikin yare mai sauƙi domin jama'a su samu bayani kuma a gayyace su su shiga. Rashin amfani da tashin hankali, haɗawa, bayyananniya, da kimiyya su ke jagorantar wannan yunƙuri.\n\nHaka kuma a shirya gaba: ku koyar da ƙwarewar aiki, ku zuba jari a tsarukan gargaɗi na farko, ababen more rayuwa masu juriya, da mafita masu dogaro da yanayi, kuma ku gina kayan aiki da bayanai buɗaɗɗe don tsare-tsaren al'umma.</string>
 </resources>

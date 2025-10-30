@@ -276,12 +276,16 @@
   <string name="faq_answer_4">Tidak. Aplikasi ini percuma sepenuhnya. Walaupun reka bentuk dan pembangunannya memerlukan masa dan wang daripada para pencipta, mereka tidak menerima manfaat kewangan peribadi secara langsung daripadanya.</string>
   <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
   <string name="faq_question_5">Bolehkah saya menyumbang kepada usaha ini?</string>
-  <!-- src_hash: d56087c228256042d65da9946639185896f429c7 -->
-  <string name="faq_answer_5">Ya, sukarelawan sentiasa dialu-alukan. Kod aplikasi ini adalah sumber terbuka di GitHub, dan anda boleh menghubungi penciptanya di contact@worldwidewaves.net (balasan tidak dijamin). Cara terbaik untuk membantu ialah sebarkan maklumat: kongsi foto dan video dari acara menggunakan hashtag yang dicadangkan, hubungi pempengaruh tempatan untuk menguatkan mesej, bincangkan bersama komuniti anda, dan yang paling penting, sertai gelombang!</string>
-  <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
-  <string name="faq_question_6">Bagaimana saya boleh menjalankan simulasi gelombang?</string>
-  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
-  <string name="faq_answer_6">Ketik butang di bawah untuk mengaktifkan mod simulasi. Pada skrin acara, gunakan butang pemasa berdekatan dengan butang "Sertai gelombang" untuk memulakan simulasi menggunakan butiran acara ini (tarikh, masa, lokasi). Untuk menghentikan simulasi, gunakan butang yang sama. Akhir sekali, hentikan mod simulasi menggunakan ikon berhenti pada lapisan yang kekal apabila anda selesai.</string>
+  <!-- src_hash: 7beca4eb43ee70e8557e56ee3958a6bb50df9ee4 -->
+  <string name="faq_answer_5">Ya, sukarelawan sentiasa dialu-alukan. Kod aplikasi ini sumber terbuka di GitHub, dan anda boleh menghubungi penciptanya di contact@worldwidewaves.net (balasan tidak dijamin). Cara terbaik untuk membantu ialah menyebarkan maklumat: kongsikan foto dan video dari acara menggunakan hashtag yang disarankan, hubungi pempengaruh tempatan untuk menguatkan mesej, bincangkan dengan komuniti anda, dan yang paling penting, sertai gelombang!</string>
+  <!-- src_hash: 69965154ce3f4c1e3fba2a6f8aa27d9ad779a228 -->
+  <string name="faq_question_6">Di mana saya boleh mencari tempat untuk dikunjungi semasa acara?</string>
+  <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
+  <string name="faq_answer_6">Anda boleh mendapatkan senarai tindakan, aktiviti, dan tempat yang dicadangkan di https://luma.com/worldwidewaves.</string>
+  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
+  <string name="faq_question_7">Bagaimana saya boleh mensimulasikan gelombang?</string>
+  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
+  <string name="faq_answer_7">Ketik butang di bawah untuk mengaktifkan mod simulasi. Pada skrin acara, gunakan butang pemasa berhampiran butang "Join the wave" untuk memulakan simulasi menggunakan sifat acara ini (tarikh, masa, lokasi). Untuk menghentikan simulasi, gunakan butang yang sama. Akhir sekali, hentikan mod simulasi menggunakan ikon berhenti pada lapisan yang kekal apabila anda selesai.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">Amerika Syarikat</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -606,6 +610,36 @@
   <string name="debug_storage_available_value">Tersedia</string>
   <!-- src_hash: 5bb65df8e40b98916bd9a110898c9e7f7ff60c72 -->
   <string name="debug_device_orientation">Orientasi Peranti</string>
-  <!-- src_hash: a8319bed2e56d59cfebb5b8d7abc61f9eeb725cc -->
+  <!-- src_hash: 8c0d4a7a62b814c539e62869793606fb7dcac4eb -->
   <string name="debug_device_orientation_portrait">Potret</string>
+  <!-- src_hash: 4e44463f00e432d03f9f1c96d99f543d7322b251 -->
+  <string name="action_message_tab">Tindakan</string>
+  <!-- src_hash: d6fe8f76f6c4764a0df743d474afb576b6bc2370 -->
+  <string name="action_message_title">Satu gelombang, satu mesej</string>
+  <!-- src_hash: d0e48e832d1fdd60e7cc6d6734d1a8ff24c413c7 -->
+  <string name="action_message_phrase_1">Kesediaan sekarang, bukan nanti.</string>
+  <!-- src_hash: fcfa6009fb2ef56aa65c4eb3fd72210022a017c4 -->
+  <string name="action_message_phrase_2">Nyatakan realiti bersama.</string>
+  <!-- src_hash: 19deea7d2ba404acaa4e8b1ab9d829a73d7e1488 -->
+  <string name="action_message_phrase_3">Redakan untuk melindungi nyawa.</string>
+  <!-- src_hash: 37d357e06640e266681c8dcd2e8a88036ab09591 -->
+  <string name="action_message_phrase_4">Bertemu sekarang, putuskan pantas.</string>
+  <!-- src_hash: 4f54399abbf1f266555a7245af955a2d1bb6896d -->
+  <string name="action_message_phrase_5">Hapuskan halangan kepada perubahan.</string>
+  <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
+  <string name="action_message_phrase_6">Dengar suara tempatan, bersiap bersama.</string>
+  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
+  <string name="action_message_section_1">Kita mesti beralih daripada kawalan kerosakan kepada kesiapsiagaan. Suhu akan melepasi sasaran, jadi komuniti memerlukan panduan yang jelas, latih tubi, dan alat ringkas sekarang.</string>
+  <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
+  <string name="action_message_section_2">Ini bermula dengan realiti bersama. Kerajaan, syarikat, dan pemimpin sivik harus menyatakan fakta bersama, membuka data, dan menyelaraskan garis masa supaya tindakan terselaras, bukan terpecah-pecah.
+
+Untuk melindungi nyawa, redakan ketegangan geopolitik secara aman dan fokuskan semula sumber pada kelangsungan dan kestabilan manusia.
+
+Himpunkan pada peringkat tertinggi bersama negara, perusahaan, dan wakil awam untuk mengemukakan cadangan, menetapkan pemilik tugas, dan melaporkan kemajuan.
+
+Hapuskan halangan dengan meluluskan projek perintis, menyeragamkan piawaian, dan membiayai daya tahan dan kebolehaksesan terlebih dahulu.</string>
+  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
+  <string name="action_message_section_3">Dengarkan pelaku tempatan yang berdepan kesan, susun keutamaan ancaman bersama mereka, dan terbitkan pelan berbahasa mudah supaya orang ramai dimaklumkan dan dijemput untuk turut serta. Tanpa kekerasan, keterangkuman, ketelusan, dan sains menjadi panduan usaha ini.
+
+Sediakan juga masa depan: ajar kemahiran praktikal, laburkan dalam sistem amaran awal, infrastruktur berdaya tahan, dan penyelesaian berasaskan alam semula jadi, serta bina alat dan data terbuka untuk perancangan komuniti.</string>
 </resources>

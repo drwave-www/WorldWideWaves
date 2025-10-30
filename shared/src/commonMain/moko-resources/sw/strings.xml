@@ -276,12 +276,16 @@
   <string name="faq_answer_4">La. Programu ni bure kabisa. Ingawa usanifu na utengenezaji wake vilihitaji muda na fedha kutoka kwa watunzi, hawapati faida ya kifedha binafsi moja kwa moja kutokana nayo.</string>
   <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
   <string name="faq_question_5">Naweza kuchangia jitihada hizi?</string>
-  <!-- src_hash: d56087c228256042d65da9946639185896f429c7 -->
-  <string name="faq_answer_5">Ndiyo, wajitolea wanakaribishwa wakati wowote. Msimbo wa programu ni chanzo huria kwenye GitHub, na unaweza kuwafikia watengenezaji kupitia contact@worldwidewaves.net (majibu hayahakikishwi). Njia bora ya kusaidia ni kusambaza habari: shiriki picha na video za matukio ukitumia hashtags zilizopendekezwa, wasiliana na washawishi wa eneo lako ili kueneza ujumbe, zungumzia na jamii yako, na muhimu zaidi, jiunge na wimbi!</string>
-  <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
-  <string name="faq_question_6">Ninawezaje kuiga wimbi?</string>
-  <!-- src_hash: 08497f8744fa9063c8fd6887b03b2668643a63b8 -->
-  <string name="faq_answer_6">Gusa kitufe kilicho hapa chini ili kuwasha hali ya uigaji. Kwenye skrini za tukio, tumia kitufe cha kipima muda kilicho karibu na kitufe la "Jiunge na wimbi" kuanzisha uigaji ukitumia sifa za tukio hili (tarehe, saa, eneo). Ili kusitisha uigaji, tumia kitufe hicho hicho. Na mwisho, zima hali ya uigaji ukitumia ikoni ya kusitisha kwenye safu inayoendelea kuonekana unapomaliza.</string>
+  <!-- src_hash: 7beca4eb43ee70e8557e56ee3958a6bb50df9ee4 -->
+  <string name="faq_answer_5">Ndiyo, tunawakaribisha wajitolea kila wakati. Msimbo wa programu ni chanzo-wazi kwenye GitHub, na unaweza kuwafikia waundaji kupitia contact@worldwidewaves.net (majibu hayakuhakikishiwa). Njia bora ya kusaidia ni kusambaza habari: shiriki picha na video za matukio ukitumia hashtag zilizopendekezwa, wasiliana na washawishi wa eneo ili kueneza ujumbe, zungumza na jumuiya yako, na muhimu zaidi, jiunge na wimbi!</string>
+  <!-- src_hash: 69965154ce3f4c1e3fba2a6f8aa27d9ad779a228 -->
+  <string name="faq_question_6">Naweza kupata wapi sehemu za kwenda wakati wa matukio?</string>
+  <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
+  <string name="faq_answer_6">Unaweza kupata orodha ya hatua, shughuli na maeneo kwenye https://luma.com/worldwidewaves.</string>
+  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
+  <string name="faq_question_7">Ninawezaje kuiga wimbi?</string>
+  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
+  <string name="faq_answer_7">Gusa kitufe kilicho hapa chini ili kuwezesha hali ya uigaji. Kwenye skrini za tukio, tumia kitufe cha kipima muda kilicho karibu na kitufe cha "Join the wave" kuanzisha uigaji ukitumia sifa za tukio hili (tarehe, saa, eneo). Ili kusitisha uigaji, tumia kitufe hicho hicho. Kisha maliza hali ya uigaji kwa kutumia ikoni ya kusitisha kwenye safu inayoendelea kuonekana unapomaliza.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">Marekani</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -606,6 +610,36 @@
   <string name="debug_storage_available_value">Inapatikana</string>
   <!-- src_hash: 5bb65df8e40b98916bd9a110898c9e7f7ff60c72 -->
   <string name="debug_device_orientation">Mwelekeo wa Kifaa</string>
-  <!-- src_hash: a8319bed2e56d59cfebb5b8d7abc61f9eeb725cc -->
+  <!-- src_hash: 8c0d4a7a62b814c539e62869793606fb7dcac4eb -->
   <string name="debug_device_orientation_portrait">Wima</string>
+  <!-- src_hash: 4e44463f00e432d03f9f1c96d99f543d7322b251 -->
+  <string name="action_message_tab">Hatua</string>
+  <!-- src_hash: d6fe8f76f6c4764a0df743d474afb576b6bc2370 -->
+  <string name="action_message_title">Wimbi moja, ujumbe mmoja</string>
+  <!-- src_hash: d0e48e832d1fdd60e7cc6d6734d1a8ff24c413c7 -->
+  <string name="action_message_phrase_1">Utayari sasa, si baadaye.</string>
+  <!-- src_hash: fcfa6009fb2ef56aa65c4eb3fd72210022a017c4 -->
+  <string name="action_message_phrase_2">Tuseme hali halisi pamoja.</string>
+  <!-- src_hash: 19deea7d2ba404acaa4e8b1ab9d829a73d7e1488 -->
+  <string name="action_message_phrase_3">Punguza mvutano kulinda uhai.</string>
+  <!-- src_hash: 37d357e06640e266681c8dcd2e8a88036ab09591 -->
+  <string name="action_message_phrase_4">Kutaneni sasa, amueni haraka.</string>
+  <!-- src_hash: 4f54399abbf1f266555a7245af955a2d1bb6896d -->
+  <string name="action_message_phrase_5">Ondoa vikwazo vya mabadiliko.</string>
+  <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
+  <string name="action_message_phrase_6">Sikiliza sauti za eneo, jiandae pamoja.</string>
+  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
+  <string name="action_message_section_1">Lazima tuhame kutoka kudhibiti madhara kwenda kwenye utayari. Viwango vya joto vitazidi malengo, kwa hiyo jamii zinahitaji mwongozo wazi, mazoezi ya utayari, na zana rahisi sasa.</string>
+  <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
+  <string name="action_message_section_2">Hili linaanza na uhalisia wa pamoja. Serikali, kampuni, na viongozi wa kiraia wanapaswa kutangaza ukweli kwa pamoja, kufungua data, na kuoanisha kalenda ili hatua ziratibiwe, zisivunjwevunje.
+
+Ili kulinda uhai, tafuta kupunguza mvutano wa kijiopolitiki kwa amani na kuelekeza upya rasilimali kwenye uhai na uthabiti wa binadamu.
+
+Itisheni kikao cha ngazi ya juu kabisa na nchi, biashara, na wawakilishi wa umma ili kuwasilisha mapendekezo, kuteua watekelezaji, na kuripoti maendeleo.
+
+Ondoa vikwazo kwa kuidhinisha majaribio, kuoanisha viwango, na kufadhili kwanza uthabiti na upatikanaji.</string>
+  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
+  <string name="action_message_section_3">Sikiliza wadau wa eneo wanaokabiliwa na athari, pangalieni kwa vipaumbele vitisho pamoja nao, na chapisha mipango kwa lugha rahisi ili umma ujulishwe na kualikwa kushiriki. Kutotumia vurugu, ujumuishaji, uwazi, na sayansi ndizo zinazoongoza jitihada hii.
+
+Andaa pia siku zijazo: fundisha stadi za vitendo, wekeza katika mifumo ya onyo la mapema, miundombinu thabiti, na suluhu zinazotokana na asili, na jenga zana na data huria kwa upangaji wa jamii.</string>
 </resources>
