@@ -24,7 +24,6 @@ package com.worldwidewaves.shared.data
 import android.content.Context
 import android.os.Build
 import com.google.android.play.core.splitcompat.SplitCompat
-import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker
 import com.worldwidewaves.shared.events.data.GeoJsonDataProvider
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.Dispatchers
@@ -224,9 +223,9 @@ actual suspend fun platformFetchToFile(
     withContext(Dispatchers.IO) {
         Log.d(TAG, "platformFetchToFile: Fetching $eventId.$extension to $destAbsolutePath")
 
-        if (!isMapAvailable(eventId)) {
-            return@withContext false
-        }
+        // Note: Removed isMapAvailable() check to support dynamic feature modules
+        // loaded from Android Studio (bundled but not in installedModules).
+        // The function handles FileNotFoundException gracefully via retry logic.
 
         val context: Context by inject(Context::class.java)
         val assetName = "$eventId.$extension"
@@ -249,18 +248,6 @@ private data class FetchResult(
     val success: Boolean,
     val lastException: Exception? = null,
 )
-
-/**
- * Checks if the map for the given event ID is downloaded.
- */
-private fun isMapAvailable(eventId: String): Boolean {
-    val mapChecker: MapAvailabilityChecker by inject(MapAvailabilityChecker::class.java)
-    if (!mapChecker.isMapDownloaded(eventId)) {
-        Log.w(TAG, "platformFetchToFile: Map $eventId not downloaded, aborting")
-        return false
-    }
-    return true
-}
 
 /**
  * Attempts to fetch a file with retries.
