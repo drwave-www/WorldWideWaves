@@ -511,6 +511,13 @@ abstract class AbstractEventMap<T>(
                 }
             }
 
+            // Pre-load event area bounds BEFORE camera setup
+            // This ensures valid bounds are available for camera positioning and area checks
+            // Prevents using fallback world bounds (-90,-180 to 90,180) during initialization
+            scope.launch {
+                event.area.bbox()
+            }
+
             // Configure initial camera position
             scope.launch {
                 // Wait for initial camera setup to complete before starting position updates
