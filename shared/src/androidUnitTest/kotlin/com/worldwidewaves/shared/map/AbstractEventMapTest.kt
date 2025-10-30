@@ -920,6 +920,183 @@ class AbstractEventMapTest : KoinTest {
         }
 
     // ============================================================
+    // MARKER AREA SKIP TESTS (iOS Production Fix)
+    // ============================================================
+
+    @Test
+    fun setUserPosition_skippedWhenUserOutsideAreaDuringWINDOWInit() =
+        runTest {
+            // Given: WINDOW mode with auto-target, user outside event area
+            val outsidePosition = Position(40.7128, -74.0060) // NYC - outside Paris
+            val mockArea = mockk<WWWEventArea>()
+            coEvery { mockArea.bbox() } returns testBounds
+            coEvery { mockArea.getCenter() } returns testCenter
+            coEvery { mockArea.isPositionWithin(outsidePosition) } returns false
+            every { mockArea.bboxIsOverride } returns false
+            every { mockEvent.area } returns mockArea
+
+            val configWithAutoTarget =
+                EventMapConfig(
+                    initialCameraPosition = MapCameraPosition.WINDOW,
+                    autoTargetUserOnFirstLocation = true,
+                )
+            eventMap =
+                TestEventMap(
+                    event = mockEvent,
+                    mapConfig = configWithAutoTarget,
+                    onLocationUpdate = { },
+                    mockMapLibreAdapter = mockMapLibreAdapter,
+                    mockLocationProvider = mockLocationProvider,
+                )
+
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+
+            // When: Position update with user outside area (before first location check)
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, outsidePosition)
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then: Marker should NOT be updated (prevents camera snap to SF on iOS)
+            coVerify(exactly = 0) {
+                mockMapLibreAdapter.setUserPosition(outsidePosition)
+            }
+        }
+
+    @Test
+    fun setUserPosition_calledWhenUserInsideAreaDuringWINDOWInit() =
+        runTest {
+            // Given: WINDOW mode with auto-target, user inside event area
+            val insidePosition = Position(48.86, 2.35)
+            val mockArea = mockk<WWWEventArea>()
+            coEvery { mockArea.bbox() } returns testBounds
+            coEvery { mockArea.getCenter() } returns testCenter
+            coEvery { mockArea.isPositionWithin(insidePosition) } returns true
+            every { mockArea.bboxIsOverride } returns false
+            every { mockEvent.area } returns mockArea
+
+            val configWithAutoTarget =
+                EventMapConfig(
+                    initialCameraPosition = MapCameraPosition.WINDOW,
+                    autoTargetUserOnFirstLocation = true,
+                )
+            eventMap =
+                TestEventMap(
+                    event = mockEvent,
+                    mapConfig = configWithAutoTarget,
+                    onLocationUpdate = { },
+                    mockMapLibreAdapter = mockMapLibreAdapter,
+                    mockLocationProvider = mockLocationProvider,
+                )
+
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+
+            // When: Position update with user inside area
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, insidePosition)
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then: Marker should be updated normally
+            coVerify(exactly = 1) {
+                mockMapLibreAdapter.setUserPosition(insidePosition)
+            }
+        }
+
+    @Test
+    fun setUserPosition_calledAfterUserHasBeenLocated() =
+        runTest {
+            // Given: WINDOW mode, user already been located
+            val outsidePosition = Position(40.7128, -74.0060)
+            val mockArea = mockk<WWWEventArea>()
+            coEvery { mockArea.bbox() } returns testBounds
+            coEvery { mockArea.getCenter() } returns testCenter
+            coEvery { mockArea.isPositionWithin(any()) } returns false
+            every { mockArea.bboxIsOverride } returns false
+            every { mockEvent.area } returns mockArea
+
+            val configWithAutoTarget =
+                EventMapConfig(
+                    initialCameraPosition = MapCameraPosition.WINDOW,
+                    autoTargetUserOnFirstLocation = true,
+                )
+            eventMap =
+                TestEventMap(
+                    event = mockEvent,
+                    mapConfig = configWithAutoTarget,
+                    onLocationUpdate = { },
+                    mockMapLibreAdapter = mockMapLibreAdapter,
+                    mockLocationProvider = mockLocationProvider,
+                )
+
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+
+            // First position update (triggers userHasBeenLocated = true)
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, outsidePosition)
+            testScope.testScheduler.advanceUntilIdle()
+
+            // When: Second position update (userHasBeenLocated is now true)
+            val secondPosition = Position(40.7129, -74.0061)
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, secondPosition)
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then: Marker should be updated (skip only applies to first location)
+            coVerify(atLeast = 1) {
+                mockMapLibreAdapter.setUserPosition(any())
+            }
+        }
+
+    @Test
+    fun setUserPosition_calledInBOUNDSModeRegardlessOfArea() =
+        runTest {
+            // Given: BOUNDS mode (event detail screen), user outside area
+            val outsidePosition = Position(40.7128, -74.0060)
+            val mockArea = mockk<WWWEventArea>()
+            coEvery { mockArea.bbox() } returns testBounds
+            coEvery { mockArea.getCenter() } returns testCenter
+            coEvery { mockArea.isPositionWithin(outsidePosition) } returns false
+            every { mockArea.bboxIsOverride } returns false
+            every { mockEvent.area } returns mockArea
+
+            val configBounds =
+                EventMapConfig(
+                    initialCameraPosition = MapCameraPosition.BOUNDS,
+                    autoTargetUserOnFirstLocation = false,
+                )
+            eventMap =
+                TestEventMap(
+                    event = mockEvent,
+                    mapConfig = configBounds,
+                    onLocationUpdate = { },
+                    mockMapLibreAdapter = mockMapLibreAdapter,
+                    mockLocationProvider = mockLocationProvider,
+                )
+
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+
+            // When: Position update
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, outsidePosition)
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then: Marker should still be updated (no skip in BOUNDS mode)
+            coVerify(exactly = 1) {
+                mockMapLibreAdapter.setUserPosition(outsidePosition)
+            }
+        }
+
+    // ============================================================
     // USER INTERACTION TESTS
     // ============================================================
 
