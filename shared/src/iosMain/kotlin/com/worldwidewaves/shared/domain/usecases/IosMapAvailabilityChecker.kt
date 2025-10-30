@@ -129,10 +129,28 @@ class IosMapAvailabilityChecker : MapAvailabilityChecker {
     }
 
     override fun requestMapDownload(eventId: String) {
+        com.worldwidewaves.shared.utils.Log.d(
+            "IosMapAvailabilityChecker",
+            "requestMapDownload called for: $eventId",
+        )
         onMain {
-            if (pinnedRequests.containsKey(eventId)) return@onMain
+            if (pinnedRequests.containsKey(eventId)) {
+                com.worldwidewaves.shared.utils.Log.d(
+                    "IosMapAvailabilityChecker",
+                    "requestMapDownload: $eventId already in pinnedRequests, skipping",
+                )
+                return@onMain
+            }
+            com.worldwidewaves.shared.utils.Log.d(
+                "IosMapAvailabilityChecker",
+                "Creating NSBundleResourceRequest for: $eventId",
+            )
             val req = NSBundleResourceRequest(setOf(eventId)).apply { loadingPriority = 1.0 }
             pinnedRequests[eventId] = req
+            com.worldwidewaves.shared.utils.Log.d(
+                "IosMapAvailabilityChecker",
+                "Calling beginAccessingResources for: $eventId",
+            )
             req.beginAccessingResourcesWithCompletionHandler { error ->
                 onMain {
                     val ok = (error == null)
