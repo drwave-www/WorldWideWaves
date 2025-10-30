@@ -24,21 +24,39 @@
 package com.worldwidewaves.shared.localization
 
 import platform.Foundation.NSLocale
-import platform.Foundation.currentLocale
-import platform.Foundation.languageCode
+import platform.Foundation.preferredLanguages
 
 /**
  * iOS implementation of platform locale detection.
  *
- * Uses NSLocale.currentLocale to retrieve the current iOS system locale.
- * This respects:
+ * Uses NSLocale.preferredLanguages to retrieve the user's actual language preference.
+ * This correctly respects:
  * - System-wide language setting (Settings → General → Language & Region)
  * - Per-app language setting (iOS 13+, Settings → [App] → Language)
- * - NSLocale.current changes when user modifies language settings
+ * - Changes when user modifies language settings
+ *
+ * ## Why preferredLanguages instead of currentLocale.languageCode?
+ * - currentLocale.languageCode returns the REGION FORMAT locale (e.g., "en" for US region)
+ * - preferredLanguages returns the user's actual LANGUAGE PREFERENCE (e.g., "fr" for French)
+ * - Example: User in US region with French language → currentLocale="en", preferredLanguages=["fr-US"]
  *
  * @return Language code (e.g., "en", "fr", "ja", "es")
+ * @see <a href="https://stackoverflow.com/q/1522210">NSLocale currentLocale always returns en_US</a>
  */
 actual fun getPlatformLocaleKey(): String {
-    val currentLocale = NSLocale.currentLocale
-    return currentLocale.languageCode ?: "en" // Fallback to English if unavailable
+    // Get the user's preferred languages (ordered by preference)
+    val preferredLanguages = NSLocale.preferredLanguages
+
+    if (preferredLanguages.isEmpty()) {
+        return "en" // Fallback to English if no preferences available
+    }
+
+    // First element is the primary language preference (e.g., "fr-FR", "en-US", "ja-JP")
+    val primaryLanguage = preferredLanguages.first() as String
+
+    // Extract language code from locale string (e.g., "fr-FR" -> "fr", "en-US" -> "en")
+    // Split on hyphen and take first part
+    val languageCode = primaryLanguage.split("-", "_").firstOrNull() ?: "en"
+
+    return languageCode.lowercase()
 }
