@@ -1,3 +1,22 @@
+# Copyright 2025 DrWave
+#
+# WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+# countries. The project aims to transcend physical and cultural
+# boundaries, fostering unity, community, and shared human experience by leveraging real-time
+# coordination and location-based services.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -86,8 +105,8 @@ Goal: produce natural, concise UI translations that match the source tone and in
 General rules:
 - Do NOT translate proper nouns (app name, neighborhoods, venues, brand names, hashtags, @handles, but translate countries and cities names if it's relevant
 - Prefer each language’s standard exonym/endonym for countries and cities when such localization is customary; otherwise keep the English name.
-- Keep placeholders and markup exactly as-is: %s, %1$s, %d, {{var}}, <b>…</b>, <i>…</i>, etc.
-- Preserve punctuation, numbers, and capitalization patterns unless the target language’s UI convention clearly differs.
+- Keep placeholders, escape sequences, and markup exactly as-is: %s, %1$s, %d, {{var}}, <b>…</b>, <i>…</i>, \n, \n\n, \t, etc.
+- Preserve punctuation, numbers, and capitalization patterns unless the target language's UI convention clearly differs.
 - Keep the same register and energy as the source. If the source is an imperative CTA, keep it imperative. Avoid added emojis or extra exclamation marks.
 - Respect any length hint in comments (Short/Medium/Long). If space is tight, prefer clarity over literalness.
 - Keep hashtags and usernames unchanged. Do not translate inside URLs.
@@ -253,7 +272,11 @@ Rules:
 - No extra quotes, bidi marks, or escaping beyond what is needed for JSON.
 - Return plain text for Arabic/Korean/Chinese; no directional marks.
 - Avoid leading/trailing whitespace unless present in source.
-- The data comes from an XML file, so keep related concepts as double newlines in the translation if any
+- Preserve ALL newlines and paragraph breaks exactly as they appear in the source:
+  • If source has literal escape sequences (\\n\\n or \\n), keep them as-is in translation
+  • If source has actual newline characters, preserve them in translation
+  • Double newlines (\\n\\n or actual blank lines) separate paragraphs - maintain this structure
+  • Place newlines at equivalent semantic breaks in your translation
 
 Translate these items:
 """
