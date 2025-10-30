@@ -35,6 +35,7 @@ import com.google.android.play.core.splitinstall.model.SplitInstallErrorCode
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.data.clearEventCache
+import com.worldwidewaves.shared.events.data.GeoJsonDataProvider
 import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.viewmodels.MapDownloadCoordinator
 import com.worldwidewaves.shared.viewmodels.MapDownloadUtils
@@ -44,6 +45,8 @@ import dev.icerock.moko.resources.desc.Resource
 import dev.icerock.moko.resources.desc.ResourceFormatted
 import dev.icerock.moko.resources.desc.StringDesc
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * Android implementation of MapViewModel using pure business logic composition.
@@ -59,7 +62,10 @@ import kotlinx.coroutines.launch
 class AndroidMapViewModel(
     application: Application,
 ) : AndroidViewModel(application),
-    MapViewModel {
+    MapViewModel,
+    KoinComponent {
+    private val geoJsonDataProvider: GeoJsonDataProvider by inject()
+
     private companion object {
         private const val TAG = "WWW.ViewModel.MapAndroid"
         private const val PLAY_STORE_AUTH_ERROR_CODE = -100
@@ -209,7 +215,7 @@ class AndroidMapViewModel(
         }
 
     // Pure business logic (no UI lifecycle concerns)
-    private val downloadManager: MapDownloadCoordinator = MapDownloadCoordinator(platformAdapter)
+    private val downloadManager: MapDownloadCoordinator = MapDownloadCoordinator(platformAdapter, geoJsonDataProvider)
 
     // Delegate public interface to business logic
     override val featureState = downloadManager.featureState

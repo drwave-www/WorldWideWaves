@@ -21,10 +21,13 @@ package com.worldwidewaves.shared.viewmodels
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.events.data.GeoJsonDataProvider
 import com.worldwidewaves.shared.map.PlatformMapManager
 import com.worldwidewaves.shared.ui.BaseViewModel
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * iOS implementation of MapViewModel using pure business logic composition.
@@ -39,7 +42,10 @@ import kotlinx.coroutines.launch
 class IosMapViewModel(
     private val platformMapManager: PlatformMapManager,
 ) : BaseViewModel(),
-    MapViewModel {
+    MapViewModel,
+    KoinComponent {
+    private val geoJsonDataProvider: GeoJsonDataProvider by inject()
+
     // Platform adapter for business logic
     private val platformAdapter =
         object : PlatformMapDownloadAdapter {
@@ -93,7 +99,7 @@ class IosMapViewModel(
         }
 
     // Pure business logic (no UI lifecycle concerns)
-    private val downloadManager: MapDownloadCoordinator = MapDownloadCoordinator(platformAdapter)
+    private val downloadManager: MapDownloadCoordinator = MapDownloadCoordinator(platformAdapter, geoJsonDataProvider)
 
     // Delegate public interface to business logic (same pattern as AndroidMapViewModel)
     override val featureState = downloadManager.featureState

@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.viewmodels
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.events.data.GeoJsonDataProvider
 import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,9 +39,11 @@ import kotlinx.coroutines.flow.StateFlow
  * • Progress tracking
  * • Error handling and recovery
  * • Platform-agnostic download workflow
+ * • GeoJSON cache invalidation after download
  *
  * DEPENDENCIES:
  * • PlatformMapDownloadAdapter (for platform-specific operations)
+ * • GeoJsonDataProvider (optional, for cache invalidation)
  *
  * USED BY:
  * • AndroidMapViewModel (composition)
@@ -48,6 +51,7 @@ import kotlinx.coroutines.flow.StateFlow
  */
 class MapDownloadCoordinator(
     private val platformAdapter: PlatformMapDownloadAdapter,
+    private val geoJsonDataProvider: GeoJsonDataProvider? = null,
 ) : IMapDownloadManager {
     private val _featureState = MutableStateFlow<MapFeatureState>(MapFeatureState.NotChecked)
     override val featureState: StateFlow<MapFeatureState> = _featureState
@@ -135,6 +139,13 @@ class MapDownloadCoordinator(
         Log.i(TAG, "Download completed successfully")
         _featureState.value = MapFeatureState.Installed
         retryManager.resetRetryCount()
+
+        // Invalidate GeoJSON cache to force fresh read from newly downloaded file
+        // This ensures event bounds are correctly extracted from the new GeoJSON data
+        currentMapId?.let { mapId ->
+            geoJsonDataProvider?.invalidateCache(mapId)
+            Log.d(TAG, "Invalidated GeoJSON cache for $mapId after successful download")
+        }
     }
 
     fun handleDownloadFailure(
