@@ -54,3 +54,8 @@ iosApp/worldwidewaves/Resources/Maps/
 iosApp/worldwidewaves/Maps/
 
 test_results/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
