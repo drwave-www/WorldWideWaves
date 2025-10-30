@@ -24,29 +24,77 @@ package com.worldwidewaves.shared.format
 import kotlinx.datetime.TimeZone
 import platform.Foundation.NSDate
 import platform.Foundation.NSDateFormatter
+import platform.Foundation.NSLocale
+import platform.Foundation.NSTimeZone
+import platform.Foundation.currentLocale
+import platform.Foundation.dateFormatFromTemplate
 import platform.Foundation.dateWithTimeIntervalSince1970
+import platform.Foundation.timeZoneWithName
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 @OptIn(ExperimentalTime::class)
 @Suppress("MatchingDeclarationName") // Platform-specific actual implementation matches expect declaration
 actual object DateTimeFormats {
+    /**
+     * Formats instant as localized day and month (e.g., "24 Dec" in English, "24. Dez" in German).
+     * Format respects the device's locale settings and applies the specified timezone.
+     */
     actual fun dayMonth(
         instant: Instant,
         timeZone: TimeZone,
     ): String {
         val formatter = NSDateFormatter()
-        formatter.dateFormat = "d MMM"
+
+        // Set locale to respect device language/region settings
+        formatter.locale = NSLocale.currentLocale
+
+        // Use locale-aware date format template (equivalent to Android's getBestDateTimePattern)
+        val template = "dMMM" // day + abbreviated month
+        val localeFormat =
+            NSDateFormatter.dateFormatFromTemplate(
+                template,
+                options = 0uL,
+                locale = NSLocale.currentLocale,
+            )
+        formatter.dateFormat = localeFormat ?: "d MMM" // Fallback to English if template fails
+
+        // Apply timezone (convert Kotlin TimeZone to NSTimeZone)
+        formatter.timeZone = NSTimeZone.timeZoneWithName(timeZone.id)
+            ?: NSTimeZone.timeZoneWithName("UTC") // Fallback to UTC if invalid timezone
+
         val date = NSDate.dateWithTimeIntervalSince1970(instant.epochSeconds.toDouble())
         return formatter.stringFromDate(date)
     }
 
+    /**
+     * Formats instant as localized short time (e.g., "2:30 PM" in 12-hour, "14:30" in 24-hour).
+     * Format respects the device's locale and 12/24-hour preference, and applies the specified timezone.
+     */
     actual fun timeShort(
         instant: Instant,
         timeZone: TimeZone,
     ): String {
         val formatter = NSDateFormatter()
-        formatter.dateFormat = "HH:mm"
+
+        // Set locale to respect device language/region settings
+        formatter.locale = NSLocale.currentLocale
+
+        // Use "jm" skeleton (hour + minute) which adapts to 12/24-hour preference per locale
+        // This matches Android's behavior with "jm" skeleton
+        val template = "jm" // hour + minute in locale order with device 12/24h preference
+        val localeFormat =
+            NSDateFormatter.dateFormatFromTemplate(
+                template,
+                options = 0uL,
+                locale = NSLocale.currentLocale,
+            )
+        formatter.dateFormat = localeFormat ?: "HH:mm" // Fallback to 24-hour if template fails
+
+        // Apply timezone (convert Kotlin TimeZone to NSTimeZone)
+        formatter.timeZone = NSTimeZone.timeZoneWithName(timeZone.id)
+            ?: NSTimeZone.timeZoneWithName("UTC") // Fallback to UTC if invalid timezone
+
         val date = NSDate.dateWithTimeIntervalSince1970(instant.epochSeconds.toDouble())
         return formatter.stringFromDate(date)
     }

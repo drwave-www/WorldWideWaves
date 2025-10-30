@@ -67,6 +67,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
     var nav: UINavigationController?
     let tag = "SceneDelegate"
+    private var localeObserver: NSObjectProtocol?
 
     /// Routes deep link URLs to the appropriate view controller.
     ///
@@ -353,6 +354,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         installPlatform()
 
+        // Observe locale changes for runtime language switching
+        localeObserver = NotificationCenter.default.addObserver(
+            forName: NSLocale.currentLocaleDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.onSystemLocaleChanged()
+        }
+        WWWLog.i(tag, "Locale change observer installed")
+
         if let ctx = connectionOptions.urlContexts.first {
             #if DEBUG
             WWWLog.d(tag, "deep link detected")
@@ -373,6 +384,40 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         } catch {
             WWWLog.e(tag, "Error creating MainViewController", error: error)
             fatalError("Cannot create main view controller: \(error)")
+        }
+    }
+
+    /// Handles system locale changes detected via NotificationCenter.
+    ///
+    /// ## Purpose
+    /// Called when the device language changes in Settings (General → Language & Region).
+    /// Notifies the Kotlin layer via LocalizationBridge to trigger UI recomposition
+    /// with localized strings in the new language.
+    ///
+    /// ## Behavior
+    /// 1. Detects NSLocale.currentLocaleDidChangeNotification from NotificationCenter
+    /// 2. Calls LocalizationBridge.notifyLocaleChanged() (Kotlin function)
+    /// 3. LocalizationManager emits new locale via StateFlow
+    /// 4. Compose UI recomposes with new localized strings
+    ///
+    /// ## Threading Model
+    /// Called on main thread (NotificationCenter default queue)
+    ///
+    /// ## Error Handling
+    /// Logs but doesn't crash on failure - localization is not critical for app function
+    ///
+    /// - Note: Requires LocalizationBridge.ios.kt to be implemented in shared module
+    /// - Note: Requires LocalizationManager to be registered in Koin
+    private func onSystemLocaleChanged() {
+        #if DEBUG
+        WWWLog.d(tag, "System locale changed detected")
+        #endif
+
+        do {
+            try LocalizationBridgeKt.notifyLocaleChanged()
+            WWWLog.i(tag, "Locale change notified to Kotlin layer")
+        } catch {
+            WWWLog.e(tag, "Failed to notify locale change", error: error)
         }
     }
 
@@ -426,6 +471,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             }
         } else {
             WWWLog.w(tag, "no VC for URL")
+        }
+    }
+
+    /// Cleanup when SceneDelegate is deallocated.
+    ///
+    /// Removes the locale change observer to prevent memory leaks and dangling notifications.
+    deinit {
+        if let observer = localeObserver {
+            NotificationCenter.default.removeObserver(observer)
+            WWWLog.d(tag, "Locale observer removed")
         }
     }
 

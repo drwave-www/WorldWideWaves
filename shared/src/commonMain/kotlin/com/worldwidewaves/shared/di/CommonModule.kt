@@ -23,6 +23,7 @@ package com.worldwidewaves.shared.di
 
 import com.worldwidewaves.shared.choreographies.SoundChoreographyPlayer
 import com.worldwidewaves.shared.events.WWWEvents
+import com.worldwidewaves.shared.localization.LocalizationManager
 import com.worldwidewaves.shared.sound.SoundChoreographyCoordinator
 import org.koin.dsl.module
 
@@ -113,4 +114,25 @@ val commonModule =
          * @see SoundChoreographyCoordinator for coordination API
          */
         single { SoundChoreographyCoordinator() }
+
+        /**
+         * Provides [LocalizationManager] as singleton for runtime locale change detection.
+         *
+         * **Scope**: Singleton - single locale observer for entire application
+         * **Thread-safety**: Yes - uses StateFlow for thread-safe locale emission
+         * **Lifecycle**: Created on first access, lives for entire app lifecycle
+         * **Dependencies**: None
+         *
+         * The LocalizationManager enables:
+         * - Runtime language switching without app restart
+         * - Reactive UI updates when device language changes
+         * - Platform-agnostic locale change observation (Android + iOS)
+         *
+         * Platform detection:
+         * - Android: MainActivity.onConfigurationChanged() calls notifyLocaleChanged()
+         * - iOS: SceneDelegate NotificationCenter observer calls LocalizationBridge.notifyLocaleChanged()
+         *
+         * @see LocalizationManager for locale change API
+         */
+        single { LocalizationManager() }
     }

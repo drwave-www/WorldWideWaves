@@ -122,6 +122,84 @@ Button(
 
 ---
 
+## Internationalization (i18n) Requirements [MANDATORY]
+
+> **Status**: ✅ 32 Languages | **Coverage**: 100% | **Runtime Switching**: ✅ Enabled
+
+### Language Support
+
+WorldWideWaves supports **32 languages** with complete translation coverage:
+- **Americas**: en, es, pt, fr (Canada)
+- **Europe**: de, fr, it, nl, pl, ro, ru, tr, uk
+- **Middle East**: ar, fa, he, ur
+- **Africa**: am, ha, ig, sw, xh, yo, zu
+- **Asia**: bn, hi, id, ja, ko, ms, pa, th, vi, zh, fil
+
+### All Localized Content Must
+
+- ✅ **Use MokoRes**: All strings via `stringResource(MokoRes.strings.key_name)`
+- ✅ **No hardcoded strings**: All user-facing text must be in strings.xml
+- ✅ **Parameter formatting**: Use `%1$s`, `%2$d` for string interpolation
+- ✅ **Locale-aware formatting**: Dates and times respect device locale/preferences
+- ✅ **RTL support**: Arabic, Hebrew, Farsi, Urdu properly handled
+
+### Date/Time Formatting
+
+**Android & iOS**: Both platforms now respect device locale and timezone
+
+```kotlin
+// Use platform-aware formatting
+DateTimeFormats.dayMonth(instant, timeZone)  // "24 Dec" (en) → "24. Dez" (de)
+DateTimeFormats.timeShort(instant, timeZone) // "2:30 PM" (12h) → "14:30" (24h)
+```
+
+### Runtime Language Switching
+
+Users can change language **without app restart**:
+
+**Android**: Settings → System → Languages → Add language
+**iOS**: Settings → General → Language & Region → [App] → Language
+
+**Implementation**:
+- LocalizationManager observes system locale changes
+- Emits via StateFlow to trigger Compose recomposition
+- UI updates automatically with new localized strings
+
+### Translation Validation
+
+**Before every commit with new strings**:
+```bash
+./gradlew :shared:lintDebug  # Validates all 32 languages have all strings
+```
+
+**Add new strings**:
+1. Add to `shared/src/commonMain/moko-resources/base/strings.xml`
+2. Run `python3 scripts/translate/update_translations.py`
+3. Verify lint passes
+4. Commit base + all translated files
+
+### Testing Requirements
+
+**i18n tests must cover**:
+- String resource accessibility (LocalizationTest.kt)
+- Date/time formatting (DateTimeFormatsTest.kt)
+- Platform-specific locale behavior (platform-specific tests)
+- Runtime locale change handling (LocalizationManagerTest.kt)
+
+### Common Issues
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| iOS dates always in English | Hardcoded format | Fixed in DateTimeFormats.ios.kt (Oct 2025) |
+| Missing translation warnings | Lint disabled | Re-enabled Oct 2025 |
+| Language change requires restart | No detection | LocalizationManager added Oct 2025 |
+| RTL layout issues | Missing semantics | Add `layoutDirection` to Compose |
+
+**See**: `shared/src/commonMain/moko-resources/` for all translations
+**See**: `shared/src/*/localization/` for runtime locale handling
+
+---
+
 ## Mandatory Development Requirements
 
 ### Platform Compatibility

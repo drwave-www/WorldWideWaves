@@ -21,6 +21,7 @@ package com.worldwidewaves.activities
  * limitations under the License.
  */
 
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -33,10 +34,13 @@ import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.shared.WWWGlobals
+import com.worldwidewaves.shared.localization.LocalizationManager
 import com.worldwidewaves.shared.ui.activities.MainScreen
 import com.worldwidewaves.utils.AndroidPlatformEnabler
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.mp.KoinPlatform
+import java.util.Locale
 
 // ----------------------------
 
@@ -45,6 +49,9 @@ open class MainActivity : AppCompatActivity() {
     private var isOfficialSplashDismissed = false
 
     private var mainActivityImpl: MainScreen? = null
+
+    /** Tracks the last known locale for detecting runtime language changes. */
+    private var lastKnownLocale: Locale? = null
 
     // ----------------------------
 
@@ -121,5 +128,53 @@ open class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         mainActivityImpl?.onDestroy()
         super.onDestroy()
+    }
+
+    /**
+     * Detects runtime locale/language changes and notifies LocalizationManager.
+     *
+     * ## Purpose
+     * Called by Android when configuration changes occur, including:
+     * - System language change (Settings → System → Languages)
+     * - Per-app language override (Android 13+)
+     * - Locale changes via Locale.setDefault()
+     * - Layout direction changes (LTR ↔ RTL)
+     *
+     * ## Behavior
+     * When a locale change is detected:
+     * 1. Compares new locale with lastKnownLocale
+     * 2. Notifies LocalizationManager via StateFlow emission
+     * 3. Triggers Compose UI recomposition with new localized strings
+     * 4. Updates lastKnownLocale for next comparison
+     *
+     * ## AndroidManifest Requirement
+     * Requires `android:configChanges="locale|layoutDirection"` in manifest
+     * to receive this callback instead of activity recreation.
+     *
+     * @param newConfig The new configuration with updated locale
+     */
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        val newLocale =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                newConfig.locales.get(0)
+            } else {
+                @Suppress("DEPRECATION")
+                newConfig.locale
+            }
+
+        if (newLocale != lastKnownLocale) {
+            lastKnownLocale = newLocale
+
+            // Notify LocalizationManager of the locale change
+            try {
+                val localizationManager = KoinPlatform.getKoin().get<LocalizationManager>()
+                localizationManager.notifyLocaleChanged(newLocale.toLanguageTag())
+            } catch (e: Exception) {
+                // Log but don't crash - localization is not critical for app function
+                android.util.Log.w("MainActivity", "Failed to notify locale change: ${e.message}")
+            }
+        }
     }
 }

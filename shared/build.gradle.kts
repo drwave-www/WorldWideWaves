@@ -217,7 +217,7 @@ android {
     lint {
         disable.addAll(
             listOf(
-                "MissingTranslation",
+                // "MissingTranslation", // Re-enabled: Validate translation completeness
                 "TypographyEllipsis",
                 "LogNotTimber",
                 "Typos",
