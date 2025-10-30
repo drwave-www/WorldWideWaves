@@ -34,6 +34,7 @@ import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.utils.PerformanceTracer
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -514,12 +515,17 @@ abstract class AbstractEventMap<T>(
             // Pre-load event area bounds BEFORE camera setup
             // This ensures valid bounds are available for camera positioning and area checks
             // Prevents using fallback world bounds (-90,-180 to 90,180) during initialization
-            scope.launch {
-                event.area.bbox()
-            }
+            // CRITICAL: This must complete BEFORE camera positioning to avoid race condition
+            val bboxPreload =
+                scope.async {
+                    event.area.bbox()
+                }
 
             // Configure initial camera position
             scope.launch {
+                // CRITICAL FIX: Wait for bbox to be loaded from GeoJSON before positioning camera
+                // Without this await(), bbox() returns cached (0,0,0,0) causing camera positioning to fail
+                bboxPreload.await()
                 // Wait for initial camera setup to complete before starting position updates
                 // This prevents race conditions between constraint setup and auto-target animations
                 val cameraSetupComplete = CompletableDeferred<Unit>()
