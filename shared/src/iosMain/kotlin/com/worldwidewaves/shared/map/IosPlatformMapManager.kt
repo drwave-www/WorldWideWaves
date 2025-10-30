@@ -171,8 +171,24 @@ class IosPlatformMapManager(
                                 .allow(mapId)
                             Log.d(TAG, "MapDownloadGate.allow called for: $mapId")
 
+                            // Eagerly copy files to cache to ensure availability check succeeds
+                            // This prevents race condition where refreshAvailability() is called
+                            // before files are persisted to cache
+                            Log.d(TAG, "Eagerly copying map files to cache for: $mapId")
+                            val geojsonPath =
+                                com.worldwidewaves.shared.data.getMapFileAbsolutePath(
+                                    mapId,
+                                    com.worldwidewaves.shared.data.MapFileExtension.GEOJSON,
+                                )
+                            val mbtilesPath =
+                                com.worldwidewaves.shared.data.getMapFileAbsolutePath(
+                                    mapId,
+                                    com.worldwidewaves.shared.data.MapFileExtension.MBTILES,
+                                )
+                            Log.i(TAG, "Files cached: geojson=${geojsonPath != null}, mbtiles=${mbtilesPath != null}")
+
                             // Synchronize UI state with availability checker
-                            // First ensure the map is tracked, then refresh all tracked maps
+                            // Now that files are in cache, availability check will succeed
                             mapAvailabilityChecker?.trackMaps(listOf(mapId))
                             mapAvailabilityChecker?.refreshAvailability()
                             Log.d(TAG, "IosMapAvailabilityChecker state synced for: $mapId")
