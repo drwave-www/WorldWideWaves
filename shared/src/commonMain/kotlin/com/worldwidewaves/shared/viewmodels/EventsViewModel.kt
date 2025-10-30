@@ -10,6 +10,7 @@ package com.worldwidewaves.shared.viewmodels
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
+import com.worldwidewaves.shared.WWWGlobals.Wave
 import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.domain.repository.EventsRepository
@@ -230,13 +231,15 @@ class EventsViewModel(
                     launch {
                         delay(WaveTiming.SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * MILLIS_PER_SECOND)
 
-                        // Restore to global backup speed (not per-event backup)
-                        val speedToRestore = globalBackupSpeed ?: 1
-                        platform.getSimulation()?.setSpeed(speedToRestore)
-                        Log.d(
-                            "EventsViewModel",
-                            "Event ${event.id}: hit sequence complete. Speed restored to $speedToRestore",
-                        )
+                        // Restore to MAX speed ONLY when simulation is active
+                        platform.getSimulation()?.let { simulation ->
+                            val speedToRestore = Wave.MAX_SIMULATION_SPEED
+                            simulation.setSpeed(speedToRestore)
+                            Log.d(
+                                "EventsViewModel",
+                                "Event ${event.id}: hit sequence complete. Speed restored to $speedToRestore",
+                            )
+                        }
                     }
                 }
             }
