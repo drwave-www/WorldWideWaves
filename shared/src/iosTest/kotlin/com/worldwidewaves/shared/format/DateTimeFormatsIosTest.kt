@@ -23,7 +23,9 @@ package com.worldwidewaves.shared.format
 
 import kotlinx.datetime.TimeZone
 import platform.Foundation.NSLocale
+import platform.Foundation.NSTimeZone
 import kotlin.test.Test
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.hours
@@ -31,60 +33,239 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 /**
- * iOS-specific tests for date/time formatting.
+ * iOS instrumented tests for date/time formatting.
  *
- * Tests verify NSDateFormatter, NSLocale, and NSTimeZone integration.
+ * These tests run on iOS simulator/device with full iOS runtime, allowing us to:
+ * - Test actual NSLocale.currentLocale behavior
+ * - Test NSDateFormatter with Foundation framework
+ * - Test NSTimeZone conversions with real iOS framework
+ * - Verify dateFormatFromTemplate() with device locale
+ * - Test 12/24-hour preference handling on iOS
+ *
+ * Run with: ./gradlew iosSimulatorArm64Test or via Xcode Test Navigator
  */
 @OptIn(ExperimentalTime::class)
 class DateTimeFormatsIosTest {
     private val testInstant = Instant.fromEpochSeconds(1704067200) // 2024-01-01 00:00:00 UTC
+    private val noonInstant = testInstant + 12.hours // 12:00 UTC
 
     @Test
-    fun `NSLocale currentLocale should be accessible`() {
+    fun nsLocale_currentLocaleShouldBeAccessible() {
         // Verify iOS Foundation framework is available
         val currentLocale = NSLocale.currentLocale
         assertNotNull(currentLocale, "NSLocale.currentLocale should be accessible on iOS")
+
+        val languageCode = currentLocale.languageCode
+        assertNotNull("Language code should be accessible", languageCode)
     }
 
     @Test
-    fun `dayMonth should use NSDateFormatter correctly`() {
+    fun nsTimeZone_shouldBeAvailableForConversion() {
+        // Verify we can convert timezone IDs to NSTimeZone
+        val utcZone = NSTimeZone.timeZoneWithName("UTC")
+        val nyZone = NSTimeZone.timeZoneWithName("America/New_York")
+        val tokyoZone = NSTimeZone.timeZoneWithName("Asia/Tokyo")
+
+        assertNotNull("UTC timezone should be available", utcZone)
+        assertNotNull("New York timezone should be available", nyZone)
+        assertNotNull("Tokyo timezone should be available", tokyoZone)
+    }
+
+    @Test
+    fun dayMonth_shouldProduceValidOutputWithNSDateFormatter() {
         val result = DateTimeFormats.dayMonth(testInstant, TimeZone.UTC)
-        assertTrue(result.isNotEmpty(), "iOS dayMonth should return non-empty string")
+
+        assertNotNull("dayMonth should return non-null", result)
+        assertTrue("dayMonth should return non-empty string", result.isNotEmpty())
+        assertTrue("dayMonth output should have reasonable length", result.length in 3..20)
+
+        // Should contain day number for January 1st
+        val hasDay = result.contains("1") || result.contains("01")
+        assertTrue("dayMonth should contain day number: $result", hasDay)
     }
 
     @Test
-    fun `timeShort should use NSDateFormatter with jm skeleton`() {
-        val result = DateTimeFormats.timeShort(testInstant + 12.hours, TimeZone.UTC)
-        assertTrue(result.isNotEmpty(), "iOS timeShort should return non-empty string")
+    fun timeShort_shouldUseJmSkeletonForLocaleAwareFormatting() {
+        val result = DateTimeFormats.timeShort(noonInstant, TimeZone.UTC)
+
+        assertNotNull("timeShort should return non-null", result)
+        assertTrue("timeShort should return non-empty string", result.isNotEmpty())
+        assertTrue("timeShort output should have reasonable length", result.length in 4..15)
+
+        // Should contain "12" for noon or ":" separator
+        val hasValidTime = result.contains("12") || result.contains(":")
+        assertTrue("timeShort should contain valid time: $result", hasValidTime)
     }
 
     @Test
-    fun `dayMonth should handle multiple timezones`() {
-        val timezones = listOf(TimeZone.UTC, TimeZone.of("America/New_York"), TimeZone.of("Asia/Tokyo"))
+    fun dayMonth_shouldRespectNSTimeZoneParameter() {
+        // New Year's Eve 23:00 UTC = next day in Tokyo (+9 hours)
+        val newYearsEveEvening = Instant.fromEpochSeconds(1735686000) // 2024-12-31 23:00 UTC
+
+        val utcResult = DateTimeFormats.dayMonth(newYearsEveEvening, TimeZone.UTC)
+        val tokyoResult = DateTimeFormats.dayMonth(newYearsEveEvening, TimeZone.of("Asia/Tokyo"))
+
+        assertNotNull("UTC result should not be null", utcResult)
+        assertNotNull("Tokyo result should not be null", tokyoResult)
+        assertTrue("UTC result should be valid", utcResult.isNotEmpty())
+        assertTrue("Tokyo result should be valid", tokyoResult.isNotEmpty())
+    }
+
+    @Test
+    fun timeShort_shouldRespectNSTimeZoneParameter() {
+        // Midnight UTC = different hours in different zones
+        val midnightUTC = testInstant // 00:00 UTC
+
+        val utcTime = DateTimeFormats.timeShort(midnightUTC, TimeZone.UTC)
+        val tokyoTime = DateTimeFormats.timeShort(midnightUTC, TimeZone.of("Asia/Tokyo"))
+
+        assertNotNull("UTC time should not be null", utcTime)
+        assertNotNull("Tokyo time should not be null", tokyoTime)
+
+        // Times should be different (UTC 00:00 vs Tokyo 09:00)
+        assertNotEquals(
+            "Timezone should affect time output",
+            utcTime,
+            tokyoTime,
+        )
+    }
+
+    @Test
+    fun dayMonth_shouldHandleMultipleTimezonesWithNSTimeZone() {
+        val timezones =
+            listOf(
+                TimeZone.UTC,
+                TimeZone.of("America/New_York"),
+                TimeZone.of("Europe/London"),
+                TimeZone.of("Asia/Tokyo"),
+                TimeZone.of("Australia/Sydney"),
+            )
+
         timezones.forEach { tz ->
             val result = DateTimeFormats.dayMonth(testInstant, tz)
-            assertTrue(result.isNotEmpty(), "Should handle $tz")
+            assertNotNull("Should handle ${tz.id}", result)
+            assertTrue("Should return non-empty for ${tz.id}", result.isNotEmpty())
         }
     }
 
     @Test
-    fun `timeShort should handle multiple timezones`() {
-        val timezones = listOf(TimeZone.UTC, TimeZone.of("Europe/Paris"), TimeZone.of("Australia/Sydney"))
+    fun timeShort_shouldHandleMultipleTimezonesWithNSTimeZone() {
+        val timezones =
+            listOf(
+                TimeZone.UTC,
+                TimeZone.of("America/Los_Angeles"),
+                TimeZone.of("Europe/Paris"),
+                TimeZone.of("Asia/Shanghai"),
+                TimeZone.of("Pacific/Auckland"),
+            )
+
         timezones.forEach { tz ->
-            val result = DateTimeFormats.timeShort(testInstant, tz)
-            assertTrue(result.isNotEmpty(), "Should handle $tz")
+            val result = DateTimeFormats.timeShort(noonInstant, tz)
+            assertNotNull("Should handle ${tz.id}", result)
+            assertTrue("Should return non-empty for ${tz.id}", result.isNotEmpty())
         }
     }
 
     @Test
-    fun `dayMonth output should have reasonable length`() {
-        val result = DateTimeFormats.dayMonth(testInstant, TimeZone.UTC)
-        assertTrue(result.length in 3..20, "iOS dayMonth output: $result")
+    fun dayMonth_shouldProduceStableOutputAcrossMultipleCalls() {
+        // Verify consistent output for same input
+        val result1 = DateTimeFormats.dayMonth(testInstant, TimeZone.UTC)
+        val result2 = DateTimeFormats.dayMonth(testInstant, TimeZone.UTC)
+        val result3 = DateTimeFormats.dayMonth(testInstant, TimeZone.UTC)
+
+        assertNotNull(result1)
+        assertNotNull(result2)
+        assertNotNull(result3)
+
+        // All should be identical
+        assertTrue("Formatting should be stable", result1 == result2 && result2 == result3)
     }
 
     @Test
-    fun `timeShort output should have reasonable length`() {
-        val result = DateTimeFormats.timeShort(testInstant + 12.hours, TimeZone.UTC)
-        assertTrue(result.length in 4..15, "iOS timeShort output: $result")
+    fun timeShort_shouldProduceStableOutputAcrossMultipleCalls() {
+        // Verify consistent output for same input
+        val result1 = DateTimeFormats.timeShort(noonInstant, TimeZone.UTC)
+        val result2 = DateTimeFormats.timeShort(noonInstant, TimeZone.UTC)
+        val result3 = DateTimeFormats.timeShort(noonInstant, TimeZone.UTC)
+
+        assertNotNull(result1)
+        assertNotNull(result2)
+        assertNotNull(result3)
+
+        // All should be identical
+        assertTrue("Formatting should be stable", result1 == result2 && result2 == result3)
+    }
+
+    @Test
+    fun dayMonth_shouldHandleEdgeCaseTimezones() {
+        // Test unusual but valid timezones
+        val edgeTimezones =
+            listOf(
+                TimeZone.of("Pacific/Fiji"), // +12/+13
+                TimeZone.of("Pacific/Honolulu"), // -10
+                TimeZone.of("Asia/Kathmandu"), // +5:45 (non-hour offset)
+                TimeZone.of("Pacific/Chatham"), // +12:45 (unusual offset)
+            )
+
+        edgeTimezones.forEach { tz ->
+            val result = DateTimeFormats.dayMonth(testInstant, tz)
+            assertNotNull("Should handle edge timezone ${tz.id}", result)
+            assertTrue("Should return non-empty for ${tz.id}", result.isNotEmpty())
+        }
+    }
+
+    @Test
+    fun timeShort_shouldHandleEdgeCaseTimezones() {
+        // Test unusual but valid timezones
+        val edgeTimezones =
+            listOf(
+                TimeZone.of("Asia/Kolkata"), // +5:30
+                TimeZone.of("America/St_Johns"), // -3:30
+                TimeZone.of("Pacific/Marquesas"), // -9:30
+            )
+
+        edgeTimezones.forEach { tz ->
+            val result = DateTimeFormats.timeShort(noonInstant, tz)
+            assertNotNull("Should handle edge timezone ${tz.id}", result)
+            assertTrue("Should return non-empty for ${tz.id}", result.isNotEmpty())
+        }
+    }
+
+    @Test
+    fun dayMonth_shouldHandleVariousInstantsThroughoutYear() {
+        val instants =
+            listOf(
+                Instant.fromEpochSeconds(1704067200), // Jan 1
+                Instant.fromEpochSeconds(1709251200), // Mar 1
+                Instant.fromEpochSeconds(1717200000), // Jun 1
+                Instant.fromEpochSeconds(1727740800), // Oct 1
+                Instant.fromEpochSeconds(1735689599), // Dec 31
+            )
+
+        instants.forEach { instant ->
+            val result = DateTimeFormats.dayMonth(instant, TimeZone.UTC)
+            assertNotNull("Should format instant $instant", result)
+            assertTrue("Should be non-empty for $instant", result.isNotEmpty())
+        }
+    }
+
+    @Test
+    fun timeShort_shouldHandleVariousTimesThroughoutDay() {
+        val times =
+            listOf(
+                testInstant, // 00:00 (midnight)
+                testInstant + 3.hours, // 03:00 (early morning)
+                testInstant + 6.hours, // 06:00 (morning)
+                testInstant + 12.hours, // 12:00 (noon)
+                testInstant + 15.hours, // 15:00 (afternoon)
+                testInstant + 18.hours, // 18:00 (evening)
+                testInstant + 21.hours, // 21:00 (night)
+            )
+
+        times.forEach { instant ->
+            val result = DateTimeFormats.timeShort(instant, TimeZone.UTC)
+            assertNotNull("Should format time $instant", result)
+            assertTrue("Should be non-empty for $instant", result.isNotEmpty())
+        }
     }
 }

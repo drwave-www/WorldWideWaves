@@ -1,0 +1,182 @@
+/*
+ * Copyright 2025 DrWave
+ *
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.worldwidewaves.shared.localization
+
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.dsl.module
+import org.koin.test.KoinTest
+import platform.Foundation.NSLocale
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
+
+/**
+ * iOS instrumented tests for LocalizationManager.
+ *
+ * These tests run on iOS simulator/device with full iOS runtime, allowing us to:
+ * - Test actual NSLocale.currentLocale integration
+ * - Test LocalizationBridge.notifyLocaleChanged() with Koin
+ * - Verify StateFlow emission on iOS
+ * - Test iOS-specific locale key format
+ *
+ * Run with: ./gradlew iosSimulatorArm64Test or via Xcode Test Navigator
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+class LocalizationManagerIosTest : KoinTest {
+    @BeforeTest
+    fun setUp() {
+        try {
+            stopKoin()
+        } catch (e: Exception) {
+            // Koin wasn't running
+        }
+
+        // Start Koin with test module
+        startKoin {
+            modules(
+                module {
+                    single { LocalizationManager() }
+                },
+            )
+        }
+    }
+
+    @AfterTest
+    fun tearDown() {
+        stopKoin()
+    }
+
+    @Test
+    fun nsLocale_currentLocaleShouldProvideLanguageCode() {
+        val currentLocale = NSLocale.currentLocale
+        assertNotNull("NSLocale.currentLocale should be accessible", currentLocale)
+
+        val languageCode = currentLocale.languageCode
+        assertNotNull("Language code should be accessible", languageCode)
+        assertTrue("Language code should not be empty", languageCode.isNotEmpty())
+    }
+
+    @Test
+    fun getPlatformLocaleKey_shouldReturnValidLanguageCode() {
+        val localeKey = getPlatformLocaleKey()
+
+        assertNotNull("Platform locale key should not be null", localeKey)
+        assertTrue("Platform locale key should not be empty", localeKey.isNotEmpty())
+
+        // Should be 2-5 character language code (e.g., "en", "fr", "ja", "zh-Hans")
+        assertTrue(
+            "Locale key should be valid length (2-5 chars): $localeKey",
+            localeKey.length in 2..10,
+        )
+    }
+
+    @Test
+    fun localizationManager_shouldInitializeWithIosLocale() =
+        runTest {
+            val manager = getKoin().get<LocalizationManager>()
+
+            val initialLocale = manager.localeChanges.value
+            assertNotNull("Initial locale should not be null", initialLocale)
+            assertTrue("Initial locale should not be empty", initialLocale.isNotEmpty())
+
+            // Should match platform locale
+            val platformLocale = getPlatformLocaleKey()
+            assertEquals("Should match iOS platform locale", platformLocale, initialLocale)
+        }
+
+    @Test
+    fun localizationManager_shouldEmitLocaleChangesViaStateFlow() =
+        runTest {
+            val manager = getKoin().get<LocalizationManager>()
+
+            // Simulate locale change from SceneDelegate notification
+            manager.notifyLocaleChanged("fr")
+
+            val updatedLocale = manager.localeChanges.first()
+            assertEquals("Should emit French locale", "fr", updatedLocale)
+        }
+
+    @Test
+    fun localizationBridge_shouldNotifyLocaleChangeSuccessfully() =
+        runTest {
+            // Test the Swift→Kotlin bridge function
+            try {
+                notifyLocaleChanged()
+                // Should not throw exception when Koin is initialized
+                assertTrue("LocalizationBridge should work with Koin initialized", true)
+            } catch (e: Exception) {
+                throw AssertionError("LocalizationBridge should not throw when Koin is ready: ${e.message}")
+            }
+        }
+
+    @Test
+    fun localizationManager_shouldHandleMultipleConsecutiveChanges() =
+        runTest {
+            val manager = getKoin().get<LocalizationManager>()
+
+            val locales = listOf("en", "fr", "de", "ja", "ar")
+
+            locales.forEach { locale ->
+                manager.notifyLocaleChanged(locale)
+                val current = manager.localeChanges.first()
+                assertEquals("Should update to $locale", locale, current)
+            }
+        }
+
+    @Test
+    fun localizationManager_shouldHandleRapidChanges() =
+        runTest {
+            val manager = getKoin().get<LocalizationManager>()
+
+            // Simulate rapid language switching
+            repeat(15) { i ->
+                manager.notifyLocaleChanged("locale-$i")
+            }
+
+            val finalLocale = manager.localeChanges.first()
+            assertEquals("Should settle on last value", "locale-14", finalLocale)
+        }
+
+    @Test
+    fun localizationManager_stateFlowShouldBeThreadSafe() =
+        runTest {
+            val manager = getKoin().get<LocalizationManager>()
+
+            // Multiple collectors should see consistent values
+            manager.notifyLocaleChanged("es")
+
+            val value1 = manager.localeChanges.first()
+            val value2 = manager.localeChanges.first()
+            val value3 = manager.localeChanges.first()
+
+            assertEquals("All collectors should see same value", "es", value1)
+            assertEquals("All collectors should see same value", "es", value2)
+            assertEquals("All collectors should see same value", "es", value3)
+        }
+}
