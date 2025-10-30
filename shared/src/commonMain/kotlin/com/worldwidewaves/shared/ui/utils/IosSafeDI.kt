@@ -12,6 +12,7 @@ package com.worldwidewaves.shared.ui.utils
 
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.localization.LocalizationManager
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -118,6 +119,27 @@ object IosSafeDI : KoinComponent {
      * Safe to access from @Composable functions via [getIosSafeClock].
      */
     val clock: IClock by inject()
+
+    /**
+     * Pre-resolved LocalizationManager instance.
+     *
+     * Resolved once when IosSafeDI is first accessed, then cached.
+     * Safe to access from @Composable functions via [getIosSafeLocalizationManager].
+     *
+     * Use this to observe runtime locale changes and trigger UI recomposition:
+     * ```kotlin
+     * @Composable
+     * fun MyScreen() {
+     *     val localizationManager = getIosSafeLocalizationManager()
+     *     val currentLocale by localizationManager.localeChanges.collectAsState()
+     *
+     *     key(currentLocale) {
+     *         // UI that needs to recompose on locale change
+     *     }
+     * }
+     * ```
+     */
+    val localizationManager: LocalizationManager by inject()
 }
 
 /**
@@ -141,3 +163,27 @@ fun getIosSafePlatform(): WWWPlatform = IosSafeDI.platform
  * @throws UninitializedPropertyAccessException if Koin not initialized before IosSafeDI access
  */
 fun getIosSafeClock(): IClock = IosSafeDI.clock
+
+/**
+ * Returns the iOS-safe LocalizationManager instance.
+ *
+ * Safe to call from @Composable functions as it accesses pre-resolved
+ * dependency from [IosSafeDI] singleton.
+ *
+ * Use this to observe locale changes and trigger UI recomposition:
+ * ```kotlin
+ * @Composable
+ * fun MyScreen() {
+ *     val localizationManager = getIosSafeLocalizationManager()
+ *     val currentLocale by localizationManager.localeChanges.collectAsState()
+ *
+ *     key(currentLocale) {
+ *         // Your UI components that need recomposition on locale change
+ *     }
+ * }
+ * ```
+ *
+ * @return Cached LocalizationManager instance
+ * @throws UninitializedPropertyAccessException if Koin not initialized before IosSafeDI access
+ */
+fun getIosSafeLocalizationManager(): LocalizationManager = IosSafeDI.localizationManager
