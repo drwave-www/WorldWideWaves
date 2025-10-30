@@ -94,6 +94,7 @@ class AbstractEventMapTest : KoinTest {
         every { mockEvent.map } returns mockEventMap
         coEvery { mockArea.bbox() } returns testBounds
         coEvery { mockArea.getCenter() } returns testCenter
+        coEvery { mockArea.isPositionWithin(any()) } returns true // Default: user inside area (override in specific tests)
         every { mockArea.bboxIsOverride } returns false
         every { mockEventMap.maxZoom } returns 18.0
         coEvery { mockWave.userClosestWaveLongitude() } returns 2.38

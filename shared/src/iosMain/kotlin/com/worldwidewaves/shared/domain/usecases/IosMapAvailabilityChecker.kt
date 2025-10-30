@@ -81,6 +81,10 @@ class IosMapAvailabilityChecker : MapAvailabilityChecker {
         }
 
         _mapStates.value = updated
+        com.worldwidewaves.shared.utils.Log.d(
+            "IosMapAvailabilityChecker",
+            "trackMaps: Updated mapStates for ${mapIds.size} map(s), total tracked: ${tracked.size}",
+        )
 
         // Auto-mount ONLY initial tags, on main
         val toAuto =
@@ -100,7 +104,17 @@ class IosMapAvailabilityChecker : MapAvailabilityChecker {
         val updated = mutableMapOf<String, Boolean>()
         for (id in trackedCopy) updated[id] = isMapDownloaded(id)
 
+        val oldStates = _mapStates.value
         _mapStates.value = updated
+
+        // Log state changes for debugging
+        val changedMaps = updated.filter { (id, newState) -> oldStates[id] != newState }
+        if (changedMaps.isNotEmpty()) {
+            com.worldwidewaves.shared.utils.Log.i(
+                "IosMapAvailabilityChecker",
+                "refreshAvailability: ${changedMaps.size} map(s) state changed: ${changedMaps.keys.joinToString()}",
+            )
+        }
     }
 
     override fun requestMapDownload(eventId: String) {
