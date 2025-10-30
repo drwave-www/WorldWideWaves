@@ -24,6 +24,7 @@ package com.worldwidewaves.shared.events.utils
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.format.DateTimeFormats
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.TimeZone
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -209,7 +210,8 @@ class SystemClock :
 
     override fun now(): Instant =
         if (getPlatformSafely()?.isOnSimulation() == true) {
-            platform?.getSimulation()?.now() ?: Clock.System.now()
+            // Use runBlocking since IClock.now() is not suspend but simulation.now() is
+            runBlocking { platform?.getSimulation()?.now() } ?: Clock.System.now()
         } else {
             Clock.System.now()
         }

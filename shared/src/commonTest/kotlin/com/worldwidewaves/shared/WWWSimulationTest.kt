@@ -100,52 +100,56 @@ class WWWSimulationTest {
 
     @Test
     fun `should return correct time with speed 1`() {
-        // GIVEN: Simulation with speed 1
-        val simulation = WWWSimulation(startDateTime, userPosition)
+        runBlocking {
+            // GIVEN: Simulation with speed 1
+            val simulation = WWWSimulation(startDateTime, userPosition)
 
-        // WHEN: Getting initial and subsequent time
-        val initialSimTime = simulation.now()
+            // WHEN: Getting initial and subsequent time
+            val initialSimTime = simulation.now()
 
-        // THEN: Initial time should be close to start time (allowing for microsecond differences)
-        val timeDifference = (initialSimTime - startDateTime).inWholeMilliseconds
-        assertTrue(
-            timeDifference < 100,
-            "Initial simulation time should be close to start time, got ${timeDifference}ms difference",
-        )
+            // THEN: Initial time should be close to start time (allowing for microsecond differences)
+            val timeDifference = (initialSimTime - startDateTime).inWholeMilliseconds
+            assertTrue(
+                timeDifference < 100,
+                "Initial simulation time should be close to start time, got ${timeDifference}ms difference",
+            )
 
-        // AND: Time should advance linearly with speed 1
-        // We test the calculation logic rather than real-time delays
-        val futureTime = simulation.now()
-        assertTrue(
-            futureTime >= initialSimTime,
-            "Simulation time should always advance forward",
-        )
+            // AND: Time should advance linearly with speed 1
+            // We test the calculation logic rather than real-time delays
+            val futureTime = simulation.now()
+            assertTrue(
+                futureTime >= initialSimTime,
+                "Simulation time should always advance forward",
+            )
+        }
     }
 
     @Test
     fun `should return correct time with speed greater than 1`() {
-        // GIVEN: Simulation with speed 10
-        val simulation = WWWSimulation(startDateTime, userPosition, 10)
+        runBlocking {
+            // GIVEN: Simulation with speed 10
+            val simulation = WWWSimulation(startDateTime, userPosition, 10)
 
-        // WHEN: Getting initial time
-        val initialSimTime = simulation.now()
+            // WHEN: Getting initial time
+            val initialSimTime = simulation.now()
 
-        // THEN: Initial time should be close to start time (allowing for microsecond differences)
-        val timeDifference = (initialSimTime - startDateTime).inWholeMilliseconds
-        assertTrue(
-            timeDifference < 100,
-            "Initial simulation time should be close to start time, got ${timeDifference}ms difference",
-        )
+            // THEN: Initial time should be close to start time (allowing for microsecond differences)
+            val timeDifference = (initialSimTime - startDateTime).inWholeMilliseconds
+            assertTrue(
+                timeDifference < 100,
+                "Initial simulation time should be close to start time, got ${timeDifference}ms difference",
+            )
 
-        // AND: Speed should be correctly set
-        assertEquals(10, simulation.speed, "Simulation speed should be 10")
+            // AND: Speed should be correctly set
+            assertEquals(10, simulation.speed, "Simulation speed should be 10")
 
-        // AND: Time advancement should work
-        val laterTime = simulation.now()
-        assertTrue(
-            laterTime >= initialSimTime,
-            "Simulation time should advance even with higher speed",
-        )
+            // AND: Time advancement should work
+            val laterTime = simulation.now()
+            assertTrue(
+                laterTime >= initialSimTime,
+                "Simulation time should advance even with higher speed",
+            )
+        }
     }
 
     @Test
@@ -518,4 +522,58 @@ class WWWSimulationTest {
         assertTrue(marker.lat > 90.0, "GPS_MARKER lat should be outside valid range (-90 to 90)")
         assertTrue(marker.lng > 180.0, "GPS_MARKER lng should be outside valid range (-180 to 180)")
     }
+
+    @Test
+    fun `test concurrent now() during setSpeed() is thread-safe`() =
+        runBlocking {
+            // GIVEN: Simulation with initial speed 10
+            val simulation = WWWSimulation(startDateTime, userPosition, 10)
+
+            // WHEN: Multiple coroutines concurrently read time while others change speed
+            val readJobs =
+                List(15) {
+                    async {
+                        // Continuously read time
+                        val times = mutableListOf<Instant>()
+                        repeat(5) {
+                            times.add(simulation.now())
+                            delay(1)
+                        }
+                        times
+                    }
+                }
+
+            val writeJobs =
+                List(10) { index ->
+                    async {
+                        delay(2) // Stagger writes slightly
+                        simulation.setSpeed((index + 1) * 10)
+                    }
+                }
+
+            // THEN: All operations should complete without crashes or inconsistent state
+            val allReadResults = readJobs.awaitAll().flatten()
+            writeJobs.awaitAll()
+
+            // AND: All time readings should be valid (never before start time)
+            allReadResults.forEach { time ->
+                assertTrue(
+                    time >= startDateTime,
+                    "Time should never be before start time: $time vs $startDateTime",
+                )
+            }
+
+            // AND: Final speed should be valid
+            assertTrue(
+                simulation.speed in WWWSimulation.MIN_SPEED..WWWSimulation.MAX_SPEED,
+                "Final speed should be valid: ${simulation.speed}",
+            )
+
+            // AND: Final time should be consistent (can be read without crashing)
+            val finalTime = simulation.now()
+            assertTrue(
+                finalTime >= startDateTime,
+                "Final time should be >= start time: $finalTime",
+            )
+        }
 }

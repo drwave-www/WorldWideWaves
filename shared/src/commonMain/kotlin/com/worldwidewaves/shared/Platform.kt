@@ -30,6 +30,7 @@ import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.ExperimentalTime
@@ -115,7 +116,9 @@ class WWWPlatform(
             } else {
                 position.toString()
             }
-        Log.i(::setSimulation.name, "Set simulation to ${simulation.now()} with position: $positionInfo")
+        // Use runBlocking for logging only - simulation.now() is now suspend
+        val simulationTime = runBlocking { simulation.now() }
+        Log.i(::setSimulation.name, "Set simulation to $simulationTime with position: $positionInfo")
 
         _simulation = simulation
 
