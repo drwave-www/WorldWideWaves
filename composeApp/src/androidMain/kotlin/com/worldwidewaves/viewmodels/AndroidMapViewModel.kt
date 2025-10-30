@@ -71,6 +71,7 @@ class AndroidMapViewModel(
     private var installStateListener: SplitInstallStateUpdatedListener? = null
     private var retryRunnable: Runnable? = null
     private val retryHandler = Handler(Looper.getMainLooper())
+    private val processedInstalledSessions = mutableSetOf<Int>() // Track processed INSTALLED events
 
     // Platform adapter for business logic
     private val platformAdapter =
@@ -214,7 +215,37 @@ class AndroidMapViewModel(
         autoDownload: Boolean,
     ) {
         viewModelScope.launch {
+            // First, check if there's an existing download session for this map
+            queryExistingDownloadSession(mapId)
+
             downloadManager.checkIfMapIsAvailable(mapId, autoDownload)
+        }
+    }
+
+    /**
+     * Queries PlayCore for existing download sessions and reconnects to them.
+     * This handles cases where download was started in a previous session or different screen.
+     */
+    private fun queryExistingDownloadSession(mapId: String) {
+        try {
+            val sessionStates = splitInstallManager.sessionStates.value
+            val existingSession =
+                sessionStates?.firstOrNull { state ->
+                    state.moduleNames().contains(mapId)
+                }
+
+            if (existingSession != null && existingSession.sessionId() != currentSessionId) {
+                Log.i(
+                    TAG,
+                    "Found existing download session for $mapId: " +
+                        "id=${existingSession.sessionId()}, status=${existingSession.status()}",
+                )
+                currentSessionId = existingSession.sessionId()
+                // Process current state to update UI
+                processAndroidInstallState(existingSession)
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to query existing download sessions: ${e.message}")
         }
     }
 
@@ -265,6 +296,14 @@ class AndroidMapViewModel(
                 downloadManager.setStateInstalling()
             }
             SplitInstallSessionStatus.INSTALLED -> {
+                // Deduplicate: Only process each session's INSTALLED event once
+                val sessionId = state.sessionId()
+                if (sessionId in processedInstalledSessions) {
+                    Log.d(TAG, "Ignoring duplicate INSTALLED event for session=$sessionId")
+                    return
+                }
+                processedInstalledSessions.add(sessionId)
+
                 Log.i(TAG, "Status: INSTALLED – modules=${state.moduleNames()}")
                 val moduleIds = getModuleIdsFromState(state)
                 downloadManager.handleInstallComplete(moduleIds)

@@ -201,6 +201,38 @@ class MapDownloadFileValidationIntegrationTest {
         }
 
     /**
+     * Beijing Issue: Download already in progress when user enters screen.
+     * Should not trigger new download, should show existing progress.
+     */
+    @Test
+    fun `downloadMap with active session should not start duplicate download`() =
+        runTest {
+            // Given: Download already in progress (69% like Beijing scenario)
+            testAdapter.setModuleInstalled("beijing_china", false)
+            testAdapter.setFilesAvailable("beijing_china", false)
+
+            // First download starts
+            manager.downloadMap("beijing_china")
+            assertEquals(MapFeatureState.Pending, manager.featureState.first())
+
+            // Simulate download progressing
+            manager.handleDownloadProgress(193849681, 133946804) // 69%
+            val progressState = manager.featureState.first() as MapFeatureState.Downloading
+            assertEquals(69, progressState.progress)
+
+            // When: User clicks download again (retry button)
+            testAdapter.resetCallFlags()
+            manager.downloadMap("beijing_china")
+
+            // Then: Should be ignored (not start new download)
+            assertFalse(testAdapter.startPlatformDownloadCalled, "Should not start duplicate download")
+
+            // And: State should remain Downloading with same progress
+            val stateAfter = manager.featureState.first()
+            assertTrue(stateAfter is MapFeatureState.Downloading, "Should still be downloading")
+        }
+
+    /**
      * Test helper adapter that simulates file-based validation.
      * Allows controlling module installation state AND file availability separately.
      */

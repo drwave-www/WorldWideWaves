@@ -281,7 +281,11 @@ class AndroidEventMap(
                 }
                 is MapFeatureState.Failed -> {
                     Log.e(TAG, "Map download failed: ${event.id}, errorCode=${mapState.mapFeatureState.errorCode}")
-                    mapState.setMapError(true)
+                    // Only set error state if not currently downloading
+                    // This prevents map load errors from showing error UI during active download
+                    if (!mapState.isMapDownloading) {
+                        mapState.setMapError(true)
+                    }
                     mapState.setIsMapDownloading(false)
                     mapState.setInitStarted(false)
                 }
@@ -534,8 +538,11 @@ class AndroidEventMap(
                             },
                             onMapError = {
                                 Log.e(TAG, "Error loading map: ${event.id}")
-                                mapState.setMapError(true)
-                                mapState.setInitStarted(false)
+                                // Don't set error during active download - files aren't ready yet
+                                if (!mapState.isMapDownloading) {
+                                    mapState.setMapError(true)
+                                    mapState.setInitStarted(false)
+                                }
                             },
                         )
                     }
@@ -554,7 +561,7 @@ class AndroidEventMap(
                         mapState.setUserCanceled(true)
                         mapState.mapViewModel.cancelDownload()
                     }
-                mapState.mapError && mapState.isMapDownloading ->
+                mapState.mapError && !mapState.isMapDownloading ->
                     MapErrorOverlay {
                         mapState.setMapError(false)
                         mapState.setInitStarted(false)
