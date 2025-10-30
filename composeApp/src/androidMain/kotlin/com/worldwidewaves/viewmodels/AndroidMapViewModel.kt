@@ -228,24 +228,29 @@ class AndroidMapViewModel(
      */
     private fun queryExistingDownloadSession(mapId: String) {
         try {
-            val sessionStates = splitInstallManager.sessionStates.value
-            val existingSession =
-                sessionStates?.firstOrNull { state ->
-                    state.moduleNames().contains(mapId)
-                }
+            splitInstallManager
+                .sessionStates
+                .addOnSuccessListener { sessionStates ->
+                    val existingSession =
+                        sessionStates.firstOrNull { state ->
+                            state.moduleNames().contains(mapId)
+                        }
 
-            if (existingSession != null && existingSession.sessionId() != currentSessionId) {
-                Log.i(
-                    TAG,
-                    "Found existing download session for $mapId: " +
-                        "id=${existingSession.sessionId()}, status=${existingSession.status()}",
-                )
-                currentSessionId = existingSession.sessionId()
-                // Process current state to update UI
-                processAndroidInstallState(existingSession)
-            }
+                    if (existingSession != null && existingSession.sessionId() != currentSessionId) {
+                        Log.i(
+                            TAG,
+                            "Found existing download session for $mapId: " +
+                                "id=${existingSession.sessionId()}, status=${existingSession.status()}",
+                        )
+                        currentSessionId = existingSession.sessionId()
+                        // Process current state to update UI
+                        processAndroidInstallState(existingSession)
+                    }
+                }.addOnFailureListener { e ->
+                    Log.w(TAG, "Failed to query existing download sessions: ${e.message}")
+                }
         } catch (e: Exception) {
-            Log.w(TAG, "Failed to query existing download sessions: ${e.message}")
+            Log.w(TAG, "Exception querying download sessions: ${e.message}")
         }
     }
 
