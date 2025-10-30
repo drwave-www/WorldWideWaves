@@ -37,6 +37,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -607,12 +608,25 @@ abstract class AbstractEventMap<T>(
         if (lastKnownPosition == null || lastKnownPosition != position) {
             // Position is now managed by PositionManager through unified system
 
-            // Update visual location marker on map (important for iOS simulation)
-            // Note: On iOS, this just updates the marker annotation, doesn't move camera
-            // Location component camera mode is NONE, so marker placement is safe
-            mapLibreAdapter.setUserPosition(position)
+            // In WINDOW mode with auto-target, skip marker update when user outside event area
+            // Production logs show setUserPosition() can trigger camera movement on iOS during initialization
+            // For other modes (BOUNDS, DEFAULT_CENTER), always update marker (camera won't move)
+            val shouldSkipMarker =
+                mapConfig.initialCameraPosition == MapCameraPosition.WINDOW &&
+                    mapConfig.autoTargetUserOnFirstLocation &&
+                    !userHasBeenLocated &&
+                    runBlocking { !event.area.isPositionWithin(position) }
 
-            // Notify caller
+            if (!shouldSkipMarker) {
+                mapLibreAdapter.setUserPosition(position)
+            } else {
+                Log.d(
+                    "AbstractEventMap",
+                    "Skipping marker update during WINDOW init: user outside event area (${position.latitude}, ${position.longitude})",
+                )
+            }
+
+            // Notify caller (always notify, even when outside area)
             onLocationUpdate(position)
 
             // Save current known position on map
