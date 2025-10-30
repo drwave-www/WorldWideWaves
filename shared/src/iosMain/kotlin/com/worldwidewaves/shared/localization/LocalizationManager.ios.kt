@@ -47,28 +47,28 @@ private const val TAG = "LocalizationManager.ios"
  * @see <a href="https://stackoverflow.com/q/1522210">NSLocale currentLocale always returns en_US</a>
  */
 actual fun getPlatformLocaleKey(): String {
+    Log.i(TAG, "=== getPlatformLocaleKey() called ===")
+
     // Get the user's preferred languages (ordered by preference)
     val preferredLanguages = NSLocale.preferredLanguages
-
-    // Debug logging
-    Log.d(TAG, "preferredLanguages = $preferredLanguages")
-    Log.d(TAG, "preferredLanguages.size = ${preferredLanguages.size}")
+    Log.i(TAG, "Got preferredLanguages, size = ${preferredLanguages.size}")
 
     if (preferredLanguages.isEmpty()) {
-        Log.w(TAG, "No preferred languages found, returning 'en'")
-        return "en" // Fallback to English if no preferences available
+        Log.w(TAG, "EMPTY preferredLanguages array, returning 'en'")
+        return "en"
     }
 
-    // First element is the primary language preference (e.g., "fr-FR", "en-US", "ja-JP")
-    val primaryLanguage = preferredLanguages.first() as String
-    Log.d(TAG, "primaryLanguage = '$primaryLanguage'")
+    val firstLang = preferredLanguages.first()
+    Log.i(TAG, "First element type: ${firstLang::class.simpleName}")
+    Log.i(TAG, "First element toString: $firstLang")
 
-    // Extract language code from locale string (e.g., "fr-FR" -> "fr", "en-US" -> "en")
-    // Split on hyphen and take first part
+    val primaryLanguage = firstLang as String
+    Log.i(TAG, "primaryLanguage cast to String: '$primaryLanguage'")
+
     val languageCode = primaryLanguage.split("-", "_").firstOrNull() ?: "en"
-    Log.d(TAG, "extracted languageCode = '$languageCode'")
+    Log.i(TAG, "extracted languageCode: '$languageCode'")
 
     val result = languageCode.lowercase()
-    Log.i(TAG, "getPlatformLocaleKey() returning: '$result'")
+    Log.i(TAG, "=== RETURNING: '$result' ===")
     return result
 }
