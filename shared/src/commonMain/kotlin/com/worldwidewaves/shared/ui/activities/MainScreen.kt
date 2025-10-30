@@ -196,8 +196,9 @@ open class MainScreen
 
                         // -----------------------------------------------------------------
                         //  Floating Debug Icon (green) - bottom right corner
+                        //  Only visible in debug builds
                         // -----------------------------------------------------------------
-                        if (ready && debugTabScreen != null) {
+                        if (ready && debugTabScreen != null && platformEnabler.isDebugBuild) {
                             val windowInfo = LocalWindowInfo.current
                             val density = LocalDensity.current
                             val densityScale = density.density
