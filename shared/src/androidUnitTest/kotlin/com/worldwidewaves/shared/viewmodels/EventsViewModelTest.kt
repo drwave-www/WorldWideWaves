@@ -1144,7 +1144,8 @@ class EventsViewModelTest : KoinTest {
 
             // When: Load events (this calls monitorSimulatedSpeed BEFORE startObservation)
             testViewModel.loadEvents()
-            delay(200) // Allow monitoring setup
+            kotlinx.coroutines.delay(100) // Give coroutines time to start on iOS K/N
+            waitForEvents(testViewModel, 1) // Wait for events to load properly
 
             // Then: Backup is captured at initialization, before any warming can occur
             // The fix ensures backup speed is captured as 'val' (immutable) at line 158
@@ -1177,8 +1178,9 @@ class EventsViewModelTest : KoinTest {
 
             // When: Load events and start monitoring
             testViewModel.loadEvents()
-            delay(200)
-            advanceTimeBy(1000)
+            kotlinx.coroutines.delay(100) // Give coroutines time to start on iOS K/N
+            waitForEvents(testViewModel, 1) // Wait for events to load properly
+            kotlinx.coroutines.delay(100) // Small delay for monitoring coroutines to launch
 
             // Then: Simulation monitoring setup does not crash and speed remains valid
             assertTrue(
