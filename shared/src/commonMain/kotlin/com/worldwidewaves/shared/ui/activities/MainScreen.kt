@@ -55,6 +55,7 @@ import com.worldwidewaves.shared.choreographies.SoundChoreographyPlayer
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.sound.SoundChoreographyCoordinator
 import com.worldwidewaves.shared.ui.AboutTabScreen
+import com.worldwidewaves.shared.ui.ActionMessageScreen
 import com.worldwidewaves.shared.ui.DebugTabScreen
 import com.worldwidewaves.shared.ui.EventsListScreen
 import com.worldwidewaves.shared.ui.TabNavigationCoordinator
@@ -95,6 +96,7 @@ open class MainScreen
 
         private val eventsListScreen: EventsListScreen by inject()
         private val aboutTabScreen: AboutTabScreen by inject()
+        private val actionMessageScreen: ActionMessageScreen by inject()
         // iOS FIX: debugTabScreen removed - will be retrieved directly in @Composable to avoid deadlock
         // See: docs/patterns/ios-safety-patterns.md - Rule #2: Never use by inject() during Compose composition
 
@@ -136,6 +138,7 @@ open class MainScreen
                 mutableListOf(
                     eventsListScreen,
                     aboutTabScreen,
+                    actionMessageScreen,
                 )
             // Debug screen removed from tab bar - will be accessed via floating icon
 

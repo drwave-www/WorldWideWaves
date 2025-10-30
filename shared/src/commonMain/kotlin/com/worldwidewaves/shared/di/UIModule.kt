@@ -27,6 +27,7 @@ import com.worldwidewaves.shared.domain.usecases.CheckEventFavoritesUseCase
 import com.worldwidewaves.shared.domain.usecases.FilterEventsUseCase
 import com.worldwidewaves.shared.domain.usecases.GetSortedEventsUseCase
 import com.worldwidewaves.shared.ui.AboutTabScreen
+import com.worldwidewaves.shared.ui.ActionMessageScreen
 import com.worldwidewaves.shared.ui.EventsListScreen
 import org.koin.dsl.module
 
@@ -95,6 +96,28 @@ val uiModule =
          * @see AboutTabScreen for screen implementation
          */
         single { AboutTabScreen(get()) }
+
+        /**
+         * Provides [ActionMessageScreen] as singleton Compose screen component.
+         *
+         * **Scope**: Singleton - single screen instance for the app
+         * **Thread-safety**: Yes - Compose is thread-safe
+         * **Lifecycle**: Lives for entire app lifecycle (lightweight, no state)
+         * **Dependencies**: None
+         *
+         * ActionMessageScreen is a stateless Compose component showing:
+         * - Call-to-action message with climate readiness themes
+         * - Bold action phrases
+         * - Explanatory sections on readiness and coordination
+         *
+         * Singleton scope is safe because:
+         * - Component is stateless (no mutable state)
+         * - Lightweight (just function references)
+         * - No per-instance resources to manage
+         *
+         * @see ActionMessageScreen for screen implementation
+         */
+        single { ActionMessageScreen() }
 
         /**
          * Provides [EventsListScreen] as singleton Compose screen component.

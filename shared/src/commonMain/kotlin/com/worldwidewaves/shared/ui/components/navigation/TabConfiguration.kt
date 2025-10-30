@@ -17,6 +17,8 @@ import com.worldwidewaves.shared.generated.resources.about_icon
 import com.worldwidewaves.shared.generated.resources.about_icon_selected
 import com.worldwidewaves.shared.generated.resources.debug_icon
 import com.worldwidewaves.shared.generated.resources.debug_icon_selected
+import com.worldwidewaves.shared.generated.resources.megaphon_icon
+import com.worldwidewaves.shared.generated.resources.megaphon_icon_selected
 import com.worldwidewaves.shared.generated.resources.waves_icon
 import com.worldwidewaves.shared.generated.resources.waves_icon_selected
 import org.jetbrains.compose.resources.DrawableResource
@@ -35,12 +37,14 @@ object TabConfiguration {
             listOf(
                 Res.drawable.waves_icon to Res.drawable.waves_icon_selected,
                 Res.drawable.about_icon to Res.drawable.about_icon_selected,
+                Res.drawable.megaphon_icon to Res.drawable.megaphon_icon_selected,
                 Res.drawable.debug_icon to Res.drawable.debug_icon_selected,
             )
         } else {
             listOf(
                 Res.drawable.waves_icon to Res.drawable.waves_icon_selected,
                 Res.drawable.about_icon to Res.drawable.about_icon_selected,
+                Res.drawable.megaphon_icon to Res.drawable.megaphon_icon_selected,
             )
         }
 }
@@ -58,7 +62,7 @@ fun ConfigurableTabBarItem(
     totalTabs: Int,
     modifier: Modifier = Modifier,
 ) {
-    val tabInfo = TabConfiguration.getTabInfo(totalTabs > 2)
+    val tabInfo = TabConfiguration.getTabInfo(totalTabs > 3)
     TabBarItem(
         isSelected = isSelected,
         selectedIcon = tabInfo[tabIndex].second,
