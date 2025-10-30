@@ -10,12 +10,13 @@
 1. [Quick Start](#quick-start)
 2. [Architecture Overview](#architecture-overview)
 3. [iOS Deadlock Prevention (CRITICAL)](#ios-deadlock-prevention-critical)
-4. [Setup and Configuration](#setup-and-configuration)
-5. [Building and Running](#building-and-running)
-6. [Debugging Guide](#debugging-guide)
-7. [Testing](#testing)
-8. [Common Issues and Solutions](#common-issues-and-solutions)
-9. [Advanced Topics](#advanced-topics)
+4. [iOS Cinterop Memory Safety (CRITICAL)](#ios-cinterop-memory-safety-critical)
+5. [Setup and Configuration](#setup-and-configuration)
+6. [Building and Running](#building-and-running)
+7. [Debugging Guide](#debugging-guide)
+8. [Testing](#testing)
+9. [Common Issues and Solutions](#common-issues-and-solutions)
+10. [Advanced Topics](#advanced-topics)
 
 ---
 
@@ -319,6 +320,63 @@ rg "^object.*: KoinComponent" shared/src/commonMain --type kotlin
 # Exit code 0 = safe
 # Exit code 1 = violations found
 ```
+
+---
+
+## iOS Cinterop Memory Safety [CRITICAL]
+
+> **Status**: ✅ REQUIRED | **Tests**: 10 passing | **Violations**: 0
+
+### Memory Safety Rules
+
+iOS Kotlin/Native requires **strict memory management** for C interop (CoreLocation, AVFoundation, POSIX APIs).
+
+#### The 3 Memory Safety Rules
+
+**❌ NEVER**:
+1. Use `NSData.create()` without `usePinned { }`
+2. Access struct fields (`.coordinate.latitude`) without `useContents { }`
+3. Use `addressOf()` outside pinned scope
+
+**✅ ALWAYS**:
+1. Pin ByteArray with `usePinned { }` before passing to C APIs
+2. Use `useContents { }` for struct field access
+3. Keep pointers within pinned scope - never escape them
+
+#### Quick Examples
+
+```kotlin
+// ✅ SAFE: Memory pinning
+bytes.usePinned { pinned ->
+    NSData.create(bytes = pinned.addressOf(0), length = bytes.size.toULong())
+        .writeToFile(path, atomically = true)
+}
+
+// ✅ SAFE: Struct access
+location.coordinate.useContents {
+    val position = Position(lat = latitude, lng = longitude)
+}
+
+// ❌ UNSAFE: No pinning
+val nsData = NSData.create(bytes = bytes[0], length = bytes.size.toULong())  // CRASH!
+
+// ❌ UNSAFE: Direct struct access
+val lat = location.coordinate.latitude  // UNDEFINED BEHAVIOR!
+```
+
+#### Verification
+
+**Before EVERY commit** touching iOS platform code:
+```bash
+./scripts/dev/verification/verify-ios-safety.sh
+```
+
+**Expected**: Zero violations in checks 8-11 (cinterop safety).
+
+**See**:
+- [Cinterop Memory Safety Patterns](docs/ios/cinterop-memory-safety-patterns.md) - Complete guide
+- [Platform API Usage Guide](docs/ios/platform-api-usage-guide.md) - Threading & safety
+- [Swift-Kotlin Bridging Guide](docs/ios/swift-kotlin-bridging-guide.md) - Type conversions
 
 ---
 
@@ -1230,6 +1288,9 @@ PositionManager.positionFlow
 - [docs/ios/ios-success-state.md](docs/ios/ios-success-state.md) - Success criteria
 - [docs/ios/ios-debugging-guide.md](docs/ios/ios-debugging-guide.md) - Advanced debugging
 - [docs/ios/ios-map-implementation-status.md](docs/ios/ios-map-implementation-status.md) - Map status
+- [docs/ios/cinterop-memory-safety-patterns.md](docs/ios/cinterop-memory-safety-patterns.md) - Memory pinning & struct access
+- [docs/ios/swift-kotlin-bridging-guide.md](docs/ios/swift-kotlin-bridging-guide.md) - Type conversions & protocols
+- [docs/ios/platform-api-usage-guide.md](docs/ios/platform-api-usage-guide.md) - UIKit/Foundation/CoreLocation
 
 ### External Resources
 - [Kotlin Multiplatform Mobile](https://kotlinlang.org/docs/multiplatform-mobile-getting-started.html)
