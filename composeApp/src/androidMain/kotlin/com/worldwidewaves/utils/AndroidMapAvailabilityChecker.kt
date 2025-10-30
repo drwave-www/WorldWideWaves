@@ -183,29 +183,75 @@ class AndroidMapAvailabilityChecker(
     }
 
     /**
-     * Checks if the map files (.mbtiles and .geojson) are actually accessible in the cache.
-     * PlayCore may report a module as INSTALLED before files are fully extracted,
-     * or files may be missing/corrupted.
+     * Checks if the map files (.mbtiles and .geojson) are actually accessible.
+     * First checks cache (fast path), then checks if files exist in bundled split assets.
+     * This ensures bundled maps from Android Studio builds are recognized as available.
      *
      * @param eventId The event/map ID to check
-     * @return true if both .mbtiles and .geojson files exist in cache, false otherwise
+     * @return true if both .mbtiles and .geojson files are accessible (cache or assets)
      */
     private fun areMapFilesAccessible(eventId: String): Boolean {
         val cacheDir = context.cacheDir
         val mbtilesFile = java.io.File(cacheDir, "$eventId.mbtiles")
         val geojsonFile = java.io.File(cacheDir, "$eventId.geojson")
 
-        val mbtilesExists = mbtilesFile.exists() && mbtilesFile.canRead() && mbtilesFile.length() > 0
-        val geojsonExists = geojsonFile.exists() && geojsonFile.canRead() && geojsonFile.length() > 0
+        val mbtilesInCache = mbtilesFile.exists() && mbtilesFile.canRead() && mbtilesFile.length() > 0
+        val geojsonInCache = geojsonFile.exists() && geojsonFile.canRead() && geojsonFile.length() > 0
 
-        if (!mbtilesExists || !geojsonExists) {
+        // Fast path: both files already in cache
+        if (mbtilesInCache && geojsonInCache) {
+            return true
+        }
+
+        // Check if files are accessible from bundled split assets
+        // This handles the case where dynamic feature modules are bundled from Android Studio
+        // but files haven't been copied to cache yet
+        val mbtilesInAssets = if (!mbtilesInCache) isAssetAccessible(eventId, "mbtiles") else true
+        val geojsonInAssets = if (!geojsonInCache) isAssetAccessible(eventId, "geojson") else true
+
+        val result = (mbtilesInCache || mbtilesInAssets) && (geojsonInCache || geojsonInAssets)
+
+        if (!result) {
             Log.d(
                 TAG,
-                "areMapFilesAccessible id=$eventId mbtiles=$mbtilesExists geojson=$geojsonExists",
+                "areMapFilesAccessible id=$eventId " +
+                    "mbtiles=(cache=$mbtilesInCache assets=$mbtilesInAssets) " +
+                    "geojson=(cache=$geojsonInCache assets=$geojsonInAssets)",
             )
         }
 
-        return mbtilesExists && geojsonExists
+        return result
+    }
+
+    /**
+     * Checks if a specific asset file is accessible in the split context.
+     * Used to verify bundled dynamic feature module assets.
+     *
+     * @param eventId The event/map ID
+     * @param extension The file extension (without dot)
+     * @return true if the asset can be opened, false otherwise
+     */
+    private fun isAssetAccessible(
+        eventId: String,
+        extension: String,
+    ): Boolean {
+        val assetName = "$eventId.$extension"
+        return try {
+            // Try to create split context for this event
+            val splitContext =
+                if (android.os.Build.VERSION.SDK_INT >= 26) {
+                    runCatching {
+                        context.createContextForSplit(eventId)
+                    }.getOrNull() ?: context
+                } else {
+                    context
+                }
+
+            // Try to open the asset (just check existence, don't read)
+            splitContext.assets.open(assetName).use { true }
+        } catch (e: Exception) {
+            false
+        }
     }
 
     override fun getDownloadedMaps(): List<String> {

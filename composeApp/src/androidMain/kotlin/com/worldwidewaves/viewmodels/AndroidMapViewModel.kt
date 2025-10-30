@@ -87,20 +87,32 @@ class AndroidMapViewModel(
                 val mbtilesFile = java.io.File(cacheDir, "$mapId.mbtiles")
                 val geojsonFile = java.io.File(cacheDir, "$mapId.geojson")
 
-                val mbtilesExists = mbtilesFile.exists() && mbtilesFile.canRead() && mbtilesFile.length() > 0
-                val geojsonExists = geojsonFile.exists() && geojsonFile.canRead() && geojsonFile.length() > 0
+                val mbtilesInCache = mbtilesFile.exists() && mbtilesFile.canRead() && mbtilesFile.length() > 0
+                val geojsonInCache = geojsonFile.exists() && geojsonFile.canRead() && geojsonFile.length() > 0
 
-                val filesAccessible = mbtilesExists && geojsonExists
+                // Fast path: both files already in cache
+                if (mbtilesInCache && geojsonInCache) {
+                    return true
+                }
 
-                if (!filesAccessible) {
+                // Check if files are accessible from bundled split assets
+                // This handles the case where dynamic feature modules are bundled from Android Studio
+                // but files haven't been copied to cache yet
+                val mbtilesInAssets = if (!mbtilesInCache) isAssetAccessible(mapId, "mbtiles") else true
+                val geojsonInAssets = if (!geojsonInCache) isAssetAccessible(mapId, "geojson") else true
+
+                val result = (mbtilesInCache || mbtilesInAssets) && (geojsonInCache || geojsonInAssets)
+
+                if (!result) {
                     Log.w(
                         TAG,
                         "isMapInstalled: module=$moduleInstalled but files not accessible for $mapId " +
-                            "(mbtiles=$mbtilesExists, geojson=$geojsonExists)",
+                            "(mbtiles: cache=$mbtilesInCache assets=$mbtilesInAssets, " +
+                            "geojson: cache=$geojsonInCache assets=$geojsonInAssets)",
                     )
                 }
 
-                return filesAccessible
+                return result
             }
 
             override suspend fun startPlatformDownload(
@@ -204,6 +216,37 @@ class AndroidMapViewModel(
 
     init {
         registerAndroidListeners()
+    }
+
+    /**
+     * Checks if a specific asset file is accessible in the split context.
+     * Used to verify bundled dynamic feature module assets.
+     *
+     * @param mapId The map/event ID
+     * @param extension The file extension (without dot)
+     * @return true if the asset can be opened, false otherwise
+     */
+    private fun isAssetAccessible(
+        mapId: String,
+        extension: String,
+    ): Boolean {
+        val assetName = "$mapId.$extension"
+        return try {
+            // Try to create split context for this map
+            val splitContext =
+                if (android.os.Build.VERSION.SDK_INT >= 26) {
+                    runCatching {
+                        getApplication<Application>().createContextForSplit(mapId)
+                    }.getOrNull() ?: getApplication()
+                } else {
+                    getApplication()
+                }
+
+            // Try to open the asset (just check existence, don't read)
+            splitContext.assets.open(assetName).use { true }
+        } catch (e: Exception) {
+            false
+        }
     }
 
     // ------------------------------------------------------------------------
