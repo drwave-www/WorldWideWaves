@@ -253,11 +253,14 @@ private fun createClickableText(
     onUrlOpen: (String) -> Unit,
 ): AnnotatedString {
     val linkColor = sharedQuinaryColoredBoldTextStyle(FAQ.RULE_ANSWER_FONTSIZE).color
+    val textColor = sharedCommonJustifiedTextStyle(FAQ.RULE_ANSWER_FONTSIZE).color
     val links = findClickableLinks(text)
 
     return buildAnnotatedString {
-        // First append all the text
+        // Apply base text color to all text (BasicText doesn't inherit TextStyle color)
+        pushStyle(SpanStyle(color = textColor))
         append(text)
+        pop()
 
         // Then add link annotations at the correct positions
         links.forEach { link ->
