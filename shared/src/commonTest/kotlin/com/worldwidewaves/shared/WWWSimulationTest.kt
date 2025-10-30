@@ -471,4 +471,51 @@ class WWWSimulationTest {
                 )
             }
         }
+
+    // ============================================================================
+    // GPS_MARKER Tests
+    // ============================================================================
+
+    @Test
+    fun `test GPS_MARKER is a valid Position`() {
+        // GPS_MARKER should be a Position that can be used in simulation
+        val simulation = WWWSimulation(startDateTime, WWWSimulation.GPS_MARKER)
+
+        assertEquals(WWWSimulation.GPS_MARKER, simulation.getUserPosition(), "GPS_MARKER should be stored correctly")
+        assertEquals(999.0, simulation.getUserPosition().lat, "GPS_MARKER lat should be 999.0")
+        assertEquals(999.0, simulation.getUserPosition().lng, "GPS_MARKER lng should be 999.0")
+    }
+
+    @Test
+    fun `test GPS_MARKER equality works correctly`() {
+        // Test that GPS_MARKER can be compared with == (unlike NaN)
+        val marker1 = WWWSimulation.GPS_MARKER
+        val marker2 = Position(999.0, 999.0)
+
+        assertEquals(marker1, marker2, "GPS_MARKER should equal Position(999.0, 999.0)")
+        assertTrue(marker1 == marker2, "GPS_MARKER should be comparable with ==")
+    }
+
+    @Test
+    fun `test isUsingGPS returns true for GPS_MARKER`() {
+        val simulation = WWWSimulation(startDateTime, WWWSimulation.GPS_MARKER)
+
+        assertTrue(simulation.isUsingGPS(), "isUsingGPS should return true when position is GPS_MARKER")
+    }
+
+    @Test
+    fun `test isUsingGPS returns false for normal position`() {
+        val simulation = WWWSimulation(startDateTime, userPosition)
+
+        assertTrue(!simulation.isUsingGPS(), "isUsingGPS should return false for normal position")
+    }
+
+    @Test
+    fun `test GPS_MARKER is outside valid coordinate range`() {
+        // Verify GPS_MARKER is clearly distinguishable from valid coordinates
+        val marker = WWWSimulation.GPS_MARKER
+
+        assertTrue(marker.lat > 90.0, "GPS_MARKER lat should be outside valid range (-90 to 90)")
+        assertTrue(marker.lng > 180.0, "GPS_MARKER lng should be outside valid range (-180 to 180)")
+    }
 }

@@ -44,8 +44,12 @@ class WWWSimulation(
          * actual GPS position instead of a simulated position. This is used when the user
          * is already physically present in the event area and wants to use simulation mode
          * for time acceleration only, without position override.
+         *
+         * Uses coordinates (999.0, 999.0) which are outside the valid lat/lng range
+         * (-90 to 90 for latitude, -180 to 180 for longitude) and can be reliably
+         * compared with == operator (unlike Double.NaN which has NaN != NaN semantics).
          */
-        val GPS_MARKER = Position(Double.NaN, Double.NaN)
+        val GPS_MARKER = Position(999.0, 999.0)
     }
 
     private var _speed: Int = validateSpeed(initialSpeed)
