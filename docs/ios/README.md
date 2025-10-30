@@ -13,6 +13,8 @@
 | Document | Purpose | Status |
 |----------|---------|--------|
 | [Cinterop Memory Safety Patterns](cinterop-memory-safety-patterns.md) | Memory safety for iOS C/ObjC interop | **CRITICAL** |
+| [Swift-Kotlin Bridging Guide](swift-kotlin-bridging-guide.md) | Type conversions, @objc protocols, bridges | **CRITICAL** |
+| [Platform API Usage Guide](platform-api-usage-guide.md) | UIKit/Foundation/CoreLocation threading | **CRITICAL** |
 | [Critical Fixes Completed](critical-fixes-completed.md) | Historical iOS fix log | Completed |
 | [iOS Violation Tracker](ios-violation-tracker.md) | Deadlock violation history (all fixed) | Reference |
 | [iOS/Android Parity Gap](ios-android-map-parity-gap-analysis.md) | Platform feature parity analysis | Completed |

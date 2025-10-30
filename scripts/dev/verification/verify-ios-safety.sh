@@ -201,6 +201,138 @@ else
 fi
 
 # ============================================================================
+# CHECK 8: Cinterop - Memory pinning for NSData/C API
+# ============================================================================
+echo "8️⃣  Checking for NSData.create without usePinned..."
+
+IOS_MAIN="$PROJECT_ROOT/shared/src/iosMain"
+
+if [ -d "$IOS_MAIN" ]; then
+    # Look for NSData.create not preceded by usePinned within reasonable context
+    # This is a heuristic check - may have false positives
+    UNPINNED_NSDATA=$(rg -B5 "NSData\.create\(" "$IOS_MAIN" --type kotlin 2>/dev/null | \
+        rg -v "usePinned" | \
+        rg "NSData\.create\(" || true)
+
+    if [ -n "$UNPINNED_NSDATA" ]; then
+        # Additional validation: check if these files actually use usePinned elsewhere
+        UNPINNED_FILES=$(rg -l "NSData\.create\(" "$IOS_MAIN" --type kotlin 2>/dev/null | \
+            xargs -I {} sh -c 'if ! rg -q "usePinned" "{}"; then echo "{}"; fi' || true)
+
+        if [ -n "$UNPINNED_FILES" ]; then
+            echo "   ⚠️  WARNING: NSData.create found without usePinned context"
+            echo ""
+            echo "$UNPINNED_FILES"
+            echo ""
+            echo "   Verify these files use proper memory pinning."
+            echo "   See: docs/ios/cinterop-memory-safety-patterns.md"
+            warnings=$((warnings + 1))
+        else
+            echo "   ✅ PASS: NSData.create with proper memory pinning"
+        fi
+    else
+        echo "   ✅ PASS: NSData.create with proper memory pinning"
+    fi
+else
+    echo "   ℹ️  INFO: No iosMain directory found (skipping)"
+fi
+
+# ============================================================================
+# CHECK 9: Cinterop - Struct access without useContents
+# ============================================================================
+echo "9️⃣  Checking for CLLocationCoordinate2D access without useContents..."
+
+if [ -d "$IOS_MAIN" ]; then
+    # Look for .coordinate.latitude without useContents
+    DIRECT_COORDINATE_ACCESS=$(rg "\.coordinate\.(latitude|longitude)" "$IOS_MAIN" --type kotlin 2>/dev/null | \
+        rg -v "useContents" || true)
+
+    if [ -n "$DIRECT_COORDINATE_ACCESS" ]; then
+        # Check if files with coordinate access use useContents
+        UNSAFE_COORDINATE_FILES=$(echo "$DIRECT_COORDINATE_ACCESS" | \
+            cut -d: -f1 | \
+            sort -u | \
+            xargs -I {} sh -c 'if ! rg -q "useContents" "{}"; then echo "{}"; fi' || true)
+
+        if [ -n "$UNSAFE_COORDINATE_FILES" ]; then
+            echo "   ❌ FAIL: CLLocationCoordinate2D access without useContents"
+            echo ""
+            echo "$UNSAFE_COORDINATE_FILES"
+            echo ""
+            echo "   Use: location.coordinate.useContents { latitude, longitude }"
+            echo "   See: docs/ios/cinterop-memory-safety-patterns.md"
+            violations=$((violations + 1))
+        else
+            echo "   ✅ PASS: Coordinate access with proper useContents"
+        fi
+    else
+        echo "   ✅ PASS: Coordinate access with proper useContents"
+    fi
+else
+    echo "   ℹ️  INFO: No iosMain directory found (skipping)"
+fi
+
+# ============================================================================
+# CHECK 10: Cinterop - Swift @objc bridge methods
+# ============================================================================
+echo "🔟  Checking Swift bridge methods have @objc..."
+
+IOS_APP="$PROJECT_ROOT/iosApp"
+
+if [ -d "$IOS_APP" ]; then
+    # Find public static methods in IOSMapBridge without @objc
+    MISSING_OBJC=$(rg -B1 "public static func" "$IOS_APP/worldwidewaves/MapLibre/IOSMapBridge.swift" 2>/dev/null | \
+        rg -v "@objc" | \
+        rg "public static func" || true)
+
+    if [ -n "$MISSING_OBJC" ]; then
+        echo "   ❌ FAIL: Swift bridge methods missing @objc"
+        echo ""
+        echo "$MISSING_OBJC"
+        echo ""
+        echo "   Add @objc before public static func declarations"
+        echo "   See: docs/ios/swift-kotlin-bridging-guide.md"
+        violations=$((violations + 1))
+    else
+        echo "   ✅ PASS: Swift bridge methods properly annotated"
+    fi
+else
+    echo "   ℹ️  INFO: No iosApp directory found (skipping)"
+fi
+
+# ============================================================================
+# CHECK 11: Cinterop - addressOf without usePinned
+# ============================================================================
+echo "1️⃣1️⃣  Checking for addressOf without usePinned..."
+
+if [ -d "$IOS_MAIN" ]; then
+    # Look for addressOf usage
+    ADDRESSOF_USAGE=$(rg -l "addressOf" "$IOS_MAIN" --type kotlin 2>/dev/null || true)
+
+    if [ -n "$ADDRESSOF_USAGE" ]; then
+        # Check if these files also use usePinned
+        UNSAFE_ADDRESSOF=$(echo "$ADDRESSOF_USAGE" | \
+            xargs -I {} sh -c 'if ! rg -q "usePinned" "{}"; then echo "{}"; fi' || true)
+
+        if [ -n "$UNSAFE_ADDRESSOF" ]; then
+            echo "   ❌ FAIL: addressOf usage without usePinned"
+            echo ""
+            echo "$UNSAFE_ADDRESSOF"
+            echo ""
+            echo "   Always use addressOf within usePinned { } scope"
+            echo "   See: docs/ios/cinterop-memory-safety-patterns.md"
+            violations=$((violations + 1))
+        else
+            echo "   ✅ PASS: addressOf with proper memory pinning"
+        fi
+    else
+        echo "   ✅ PASS: No addressOf usage (or properly pinned)"
+    fi
+else
+    echo "   ℹ️  INFO: No iosMain directory found (skipping)"
+fi
+
+# ============================================================================
 # SUMMARY
 # ============================================================================
 echo ""

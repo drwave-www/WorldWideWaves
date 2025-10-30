@@ -57,11 +57,16 @@ This layer is useful for:
 
 ## Why Not Kotlin/Native Cinterop?
 
-Per CLAUDE.md guidelines, we avoid Compose UI on iOS due to lifecycle crashes. Instead:
+While Kotlin/Native provides cinterop capabilities for calling C/Objective-C APIs, WorldWideWaves uses a Swift wrapper approach for MapLibre for several reasons:
 
-1. **Swift UI Layer**: EventMapView provides the visual map component
-2. **Kotlin Business Logic**: IOSEventMap handles ODR downloads, position updates, event data
-3. **Communication**: Kotlin exposes state/data, Swift UI observes and renders
+1. **MapLibre is Swift-first**: The iOS SDK is designed for Swift, with rich SwiftUI integration
+2. **Gesture handling complexity**: MapLibre's MLNMapViewDelegate provides fine-grained gesture control that's easier to implement in Swift
+3. **Maintenance**: Swift code is easier to maintain and debug for iOS-specific map features
+4. **Type safety**: Swift's type system better matches MapLibre's expectations than Kotlin/Native cinterop
+
+**Cinterop is used elsewhere**: For simpler iOS APIs (CoreLocation, Foundation, AVFoundation), the project uses direct Kotlin/Native cinterop. See [Platform API Usage Guide](../../../../docs/ios/platform-api-usage-guide.md) for patterns.
+
+The Swift wrapper provides a clean bridge between Kotlin business logic and MapLibre's Swift SDK via IOSMapBridge and MapWrapperRegistry. See [Swift-Kotlin Bridging Guide](../../../../docs/ios/swift-kotlin-bridging-guide.md) for implementation details.
 
 ## Usage in SwiftUI
 
@@ -150,3 +155,14 @@ xcodebuild -project worldwidewaves.xcodeproj -scheme worldwidewaves -destination
 - ⚠️ **No Compose on iOS**: Per CLAUDE.md, avoid `ComposeUIViewController` (crashes)
 - ✅ **Pure SwiftUI**: Use SwiftUI views calling Kotlin business logic functions
 - ✅ **@objc Compatible**: All wrapper methods use @objc-compatible types (NSNumber, separate lat/lng methods)
+
+## Related Documentation
+
+### iOS Development
+- [Swift-Kotlin Bridging Guide](../../../../docs/ios/swift-kotlin-bridging-guide.md) - Complete bridge patterns
+- [Platform API Usage Guide](../../../../docs/ios/platform-api-usage-guide.md) - UIKit/MapLibre threading
+- [Cinterop Memory Safety Patterns](../../../../docs/ios/cinterop-memory-safety-patterns.md) - Memory pinning & struct access
+
+### Architecture
+- [Map Architecture](../../../../docs/architecture/map-architecture-analysis.md) - Platform comparison
+- [iOS Safety Patterns](../../../../docs/patterns/ios-safety-patterns.md) - iOS-specific patterns

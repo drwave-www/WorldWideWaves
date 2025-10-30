@@ -605,6 +605,9 @@ WorldWideWaves/
 - **[CLAUDE_iOS.md](./CLAUDE_iOS.md)** - Complete iOS development guide
 - **[docs/ios/](docs/ios/)** - iOS-specific documentation hub
 - **[docs/patterns/ios-safety-patterns.md](docs/patterns/ios-safety-patterns.md)** - All iOS safety patterns
+- **[Cinterop Memory Safety Patterns](docs/ios/cinterop-memory-safety-patterns.md)** - Memory pinning & struct access
+- **[Swift-Kotlin Bridging Guide](docs/ios/swift-kotlin-bridging-guide.md)** - Type conversions & protocols
+- **[Platform API Usage Guide](docs/ios/platform-api-usage-guide.md)** - UIKit/Foundation/CoreLocation
 
 ### Android Development
 - **[docs/android/android-development-guide.md](docs/android/android-development-guide.md)** - Complete Android development guide

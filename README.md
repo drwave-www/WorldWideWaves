@@ -348,6 +348,9 @@ Comprehensive documentation is available in the `docs/` directory.
 
 ### Platform-Specific
 - [iOS Development](docs/ios/) - iOS-specific guides, debugging, and accessibility
+  - [iOS Cinterop Memory Safety](docs/ios/cinterop-memory-safety-patterns.md) - Memory pinning & struct access
+  - [Swift-Kotlin Bridging Guide](docs/ios/swift-kotlin-bridging-guide.md) - Type conversions & protocols
+  - [Platform API Usage Guide](docs/ios/platform-api-usage-guide.md) - UIKit/Foundation/CoreLocation
 - [Android Development](docs/android/) - Android MapLibre implementation reference
 
 ### Specialized Topics

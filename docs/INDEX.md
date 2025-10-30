@@ -128,6 +128,11 @@
 | [Critical Fixes Completed](ios/critical-fixes-completed.md) | Production-ready fixes summary | 420 lines | Status |
 | [iOS README](ios/README.md) | iOS documentation index | 210 lines | Index |
 
+### iOS Cinterop & Platform APIs
+- [Cinterop Memory Safety Patterns](ios/cinterop-memory-safety-patterns.md) - **CRITICAL** - usePinned, useContents, addressOf
+- [Swift-Kotlin Bridging Guide](ios/swift-kotlin-bridging-guide.md) - Type conversions, @objc, MapWrapperRegistry
+- [Platform API Usage Guide](ios/platform-api-usage-guide.md) - UIKit/Foundation/CoreLocation threading
+
 #### Android Documentation
 | Document | Description | Size |
 |----------|-------------|------|
