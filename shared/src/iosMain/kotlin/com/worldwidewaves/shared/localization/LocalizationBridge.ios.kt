@@ -22,6 +22,7 @@
 package com.worldwidewaves.shared.localization
 
 import com.worldwidewaves.shared.utils.Log
+import dev.icerock.moko.resources.desc.StringDesc
 import org.koin.mp.KoinPlatform
 
 /**
@@ -84,21 +85,30 @@ private const val TAG = "LocalizationBridge"
  *
  * ## What It Does
  * 1. Retrieves current locale key via getPlatformLocaleKey()
- * 2. Gets LocalizationManager singleton from Koin
- * 3. Calls notifyLocaleChanged() to emit new locale to StateFlow
- * 4. Logs the locale change for debugging
+ * 2. Updates MokoResources locale type to use the new locale
+ * 3. Gets LocalizationManager singleton from Koin
+ * 4. Calls notifyLocaleChanged() to emit new locale to StateFlow
+ * 5. Logs the locale change for debugging
  *
  * ## Thread Safety
- * Safe to call from main thread (standard NotificationCenter behavior).
+ * MUST be called from main thread (iOS threading requirement for MokoResources).
+ * StringDesc.localeType changes are ignored if not on main thread.
+ * This is guaranteed by SceneDelegate calling this from NotificationCenter.main queue.
  *
  * @throws Throwable if Koin is not initialized or LocalizationManager is unavailable
+ * @see <a href="https://github.com/icerockdev/moko-resources/issues/818">iOS threading requirements</a>
  */
 @Throws(Throwable::class)
 fun notifyLocaleChanged() {
     try {
         val newLocaleKey = getPlatformLocaleKey()
-        val localizationManager = KoinPlatform.getKoin().get<LocalizationManager>()
 
+        // Update MokoResources to use the new locale
+        // CRITICAL: This must run on main thread on iOS or the change is ignored
+        StringDesc.localeType = StringDesc.LocaleType.Custom(newLocaleKey)
+        Log.d(TAG, "MokoRes locale type updated to: $newLocaleKey")
+
+        val localizationManager = KoinPlatform.getKoin().get<LocalizationManager>()
         localizationManager.notifyLocaleChanged(newLocaleKey)
 
         Log.i(TAG, "Locale change notified: $newLocaleKey")

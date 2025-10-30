@@ -1,7 +1,7 @@
 
 TODAY :
 
-- Langue système pas prise en compte ? -> tester en rebootant le smartphone
+- ✅ FIXED: Langue système pas prise en compte -> Fixed MokoResources locale initialization (Platform.ios.kt + LocalizationBridge.ios.kt)
 - RESILIER abonnements non necessaires : InDesign, Deepl, ...
 
 ---------------------------------------------
@@ -11,8 +11,6 @@ TODAY :
 ANDROID:
 - modifier l'image back windmill + islamic ? (invert)
 - verifier les traductions
-- Add the 'message' to the app (cf PDF)
-- Add the link to events on event page
 
 ALL:
 - event does not disappear from the list when favorite is unchecked

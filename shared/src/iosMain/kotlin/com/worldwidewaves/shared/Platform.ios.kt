@@ -8,10 +8,12 @@ package com.worldwidewaves.shared
  */
 
 import com.worldwidewaves.shared.di.initializeSimulationMode
+import com.worldwidewaves.shared.localization.getPlatformLocaleKey
 import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.utils.initNapier
 import com.worldwidewaves.shared.utils.setupDebugSimulation
 import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.desc.StringDesc
 import dev.icerock.moko.resources.desc.desc
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
@@ -22,7 +24,19 @@ import org.koin.mp.KoinPlatform
 private const val TAG = "WWW.Platform.iOS"
 
 /**
- * Initialise Koin (unchanged pattern; keep as used in your app).
+ * Initialise Koin and configure MokoResources locale for iOS.
+ *
+ * ## Initialization Order
+ * 1. Initialize Napier logging
+ * 2. Configure MokoResources locale (CRITICAL for iOS localization)
+ * 3. Start Koin dependency injection
+ *
+ * ## MokoResources Locale Configuration
+ * On iOS, MokoResources requires explicit locale configuration via StringDesc.localeType.
+ * Unlike Android which uses Context for automatic locale handling, iOS needs manual setup.
+ * This ensures the app displays text in the device's system language from launch.
+ *
+ * @throws Throwable if platform initialization fails
  */
 @Throws(Throwable::class)
 fun doInitPlatform() {
@@ -32,6 +46,17 @@ fun doInitPlatform() {
     try {
         initNapier()
     } catch (_: Throwable) {
+    }
+
+    // Initialize MokoResources with device locale BEFORE Koin
+    // This ensures localized strings work correctly from app launch
+    try {
+        val deviceLocale = getPlatformLocaleKey()
+        StringDesc.localeType = StringDesc.LocaleType.Custom(deviceLocale)
+        Log.i(TAG, "MokoResources initialized with locale: $deviceLocale")
+    } catch (e: Exception) {
+        Log.e(TAG, "Failed to initialize locale, falling back to system default: ${e.message}")
+        // Don't throw - allow app to continue with default locale
     }
 
     try {
