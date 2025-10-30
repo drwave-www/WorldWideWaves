@@ -2138,11 +2138,13 @@ $dokka.location:com.worldwidewaves.shared/WWWShutdownHandler///PointingToDeclara
 $dokka.location:com.worldwidewaves.shared/WWWShutdownHandler/WWWShutdownHandler/#com.worldwidewaves.shared.events.utils.CoroutineScopeProvider#com.worldwidewaves.shared.events.WWWEvents/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared/-w-w-w-shutdown-handler/-w-w-w-shutdown-handler.html
 $dokka.location:com.worldwidewaves.shared/WWWShutdownHandler/onAppShutdown/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared/-w-w-w-shutdown-handler/on-app-shutdown.html
 $dokka.location:com.worldwidewaves.shared/WWWSimulation.Companion///PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared/-w-w-w-simulation/-companion/index.html
+$dokka.location:com.worldwidewaves.shared/WWWSimulation.Companion/GPS_MARKER/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared/-w-w-w-simulation/-companion/-g-p-s_-m-a-r-k-e-r.html
 $dokka.location:com.worldwidewaves.shared/WWWSimulation.Companion/MAX_SPEED/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared/-w-w-w-simulation/-companion/-m-a-x_-s-p-e-e-d.html
 $dokka.location:com.worldwidewaves.shared/WWWSimulation.Companion/MIN_SPEED/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared/-w-w-w-simulation/-companion/-m-i-n_-s-p-e-e-d.html
 $dokka.location:com.worldwidewaves.shared/WWWSimulation///PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared/-w-w-w-simulation/index.html
 $dokka.location:com.worldwidewaves.shared/WWWSimulation/WWWSimulation/#kotlin.time.Instant#com.worldwidewaves.shared.events.utils.Position#kotlin.Int/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared/-w-w-w-simulation/-w-w-w-simulation.html
 $dokka.location:com.worldwidewaves.shared/WWWSimulation/getUserPosition/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared/-w-w-w-simulation/get-user-position.html
+$dokka.location:com.worldwidewaves.shared/WWWSimulation/isUsingGPS/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared/-w-w-w-simulation/is-using-g-p-s.html
 $dokka.location:com.worldwidewaves.shared/WWWSimulation/now/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared/-w-w-w-simulation/now.html
 $dokka.location:com.worldwidewaves.shared/WWWSimulation/pause/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared/-w-w-w-simulation/pause.html
 $dokka.location:com.worldwidewaves.shared/WWWSimulation/reset/#/PointingToDeclaration/-world-wide-waves -shared/com.worldwidewaves.shared/-w-w-w-simulation/reset.html
