@@ -27,6 +27,7 @@ import android.location.LocationListener
 import android.os.Looper
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.toLocation
+import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
 import org.koin.java.KoinJavaComponent
 import org.maplibre.android.location.engine.LocationEngineCallback
@@ -54,7 +55,9 @@ class SimulationLocationEngine(
     private fun getSimulatedLocation(): Location? =
         if (platform.isOnSimulation()) {
             val simulation = platform.getSimulation()!!
-            simulation.getUserPosition().toLocation(simulation.now())
+            // Use runBlocking since simulation.now() is suspend but this context is not
+            // Safe here as this is called during location updates (not on main thread)
+            simulation.getUserPosition().toLocation(runBlocking { simulation.now() })
         } else {
             null
         }
