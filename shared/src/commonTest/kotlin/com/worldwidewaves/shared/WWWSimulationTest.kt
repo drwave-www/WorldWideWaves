@@ -462,9 +462,10 @@ class WWWSimulationTest {
             // AND: Time should be close to start time after all resets
             val currentTime = simulation.now()
             val timeDiff = (currentTime - startDateTime).inWholeMilliseconds
+            val toleranceMs = 20L * simulation.speed // allow small real-time magnification by speed
             assertTrue(
-                timeDiff < 200,
-                "Time should be close to start time after resets: ${timeDiff}ms",
+                timeDiff < toleranceMs,
+                "Time should be close to start time after resets (tolerance=${toleranceMs}ms): ${timeDiff}ms",
             )
 
             // AND: All intermediate time reads should be >= startDateTime
