@@ -30,9 +30,8 @@ import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -52,30 +51,18 @@ class WWWPlatform(
      * [simulationChanged] to react and restart any time-sensitive observation
      * flows that depend on the current simulation context.
      *
-     * Thread-safe: Protected by [simulationMutex] to prevent race conditions
-     * during concurrent simulation changes.
+     * Thread-safe: Uses StateFlow.update() for atomic, non-blocking increments.
      */
     private val _simulationChanged = MutableStateFlow(0)
     val simulationChanged: StateFlow<Int> = _simulationChanged.asStateFlow()
 
     /**
-     * Mutex to protect simulation state changes and counter increments.
-     * Ensures thread-safe updates when multiple coroutines attempt to
-     * modify simulation state concurrently.
-     */
-    private val simulationMutex = Mutex()
-
-    /**
      * Thread-safe increment of the simulation changed counter.
-     * Uses mutex to prevent race conditions when multiple threads
-     * attempt to increment concurrently.
+     * Uses StateFlow.update() for atomic, non-blocking updates that are
+     * safe to call from any thread including the main thread.
      */
     private fun incrementSimulationChanged() {
-        kotlinx.coroutines.runBlocking {
-            simulationMutex.withLock {
-                _simulationChanged.value = _simulationChanged.value + 1
-            }
-        }
+        _simulationChanged.update { it + 1 }
     }
 
     // -------------------------------------------------------------------- //
