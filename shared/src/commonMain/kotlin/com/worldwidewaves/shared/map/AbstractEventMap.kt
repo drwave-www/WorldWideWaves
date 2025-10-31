@@ -651,12 +651,15 @@ abstract class AbstractEventMap<T>(
                         mapLibreAdapter.setUserPosition(position)
                     }
                 } else {
-                    // User outside event area - don't target to prevent showing position without tiles
-                    // Also skip marker update to prevent camera interference on iOS
+                    // User outside event area - don't target camera but still update marker
                     Log.i(
                         "AbstractEventMap",
-                        "User outside event area (${position.latitude}, ${position.longitude}), keeping camera on event bounds, skipping marker",
+                        "User outside event area (${position.latitude}, ${position.longitude}), keeping camera on event bounds",
                     )
+                    // Update marker so user can see their position, just don't move camera
+                    if (lastKnownPosition == null || lastKnownPosition != position) {
+                        mapLibreAdapter.setUserPosition(position)
+                    }
                 }
                 // Always mark as located to prevent retrying on every position update
                 // This preserves "first location" semantics even when user is outside area
