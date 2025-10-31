@@ -26,6 +26,7 @@ import android.location.Location
 import android.location.LocationListener
 import android.os.Looper
 import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.isValidForLocation
 import com.worldwidewaves.shared.toLocation
 import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
@@ -52,20 +53,15 @@ class SimulationLocationEngine(
     KoinComponent {
     private val platform: WWWPlatform by KoinJavaComponent.inject(WWWPlatform::class.java)
 
-    private fun getSimulatedLocation(): Location? =
-        if (platform.isOnSimulation()) {
-            val simulation = platform.getSimulation()!!
-            val pos = simulation.getUserPosition()
-            // Validate before forwarding to MapLibre to avoid crashes on invalid coords
-            if (!pos.isValidForLocation()) {
-                return null
-            }
-            // Use runBlocking since simulation.now() is suspend but this context is not
-            // Safe here as this is called during location updates (not on main thread)
-            pos.toLocation(runBlocking { simulation.now() })
-        } else {
-            null
-        }
+    private fun getSimulatedLocation(): Location? {
+        if (!platform.isOnSimulation()) return null
+        val simulation = platform.getSimulation()!!
+        val pos = simulation.getUserPosition()
+        if (!pos.isValidForLocation()) return null
+        // Use runBlocking since simulation.now() is suspend but this context is not
+        // Safe here as this is called during location updates (not on main thread)
+        return pos.toLocation(runBlocking { simulation.now() })
+    }
 
     override fun getLastLocation(callback: LocationEngineCallback<LocationEngineResult>) =
         getSimulatedLocation()?.let { location ->
