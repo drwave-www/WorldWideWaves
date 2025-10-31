@@ -30,6 +30,7 @@ import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import kotlin.time.ExperimentalTime
 
@@ -49,10 +50,20 @@ class WWWPlatform(
      * (created, reset, or disabled).  UI or ViewModel layers can observe
      * [simulationChanged] to react and restart any time-sensitive observation
      * flows that depend on the current simulation context.
+     *
+     * Thread-safe: Uses StateFlow.update() for atomic, non-blocking increments.
      */
     private val _simulationChanged = MutableStateFlow(0)
     val simulationChanged: StateFlow<Int> = _simulationChanged.asStateFlow()
 
+    /**
+     * Thread-safe increment of the simulation changed counter.
+     * Uses StateFlow.update() for atomic, non-blocking updates that are
+     * safe to call from any thread including the main thread.
+     */
+    private fun incrementSimulationChanged() {
+        _simulationChanged.update { it + 1 }
+    }
     // -------------------------------------------------------------------- //
     //  Simulation *mode* flag (enables in-app testing UI)
     // -------------------------------------------------------------------- //
@@ -80,7 +91,7 @@ class WWWPlatform(
         // Clear simulation position from PositionManager
         positionManager?.clearPosition(PositionManager.PositionSource.SIMULATION)
         // Notify observers that the simulation context has changed
-        _simulationChanged.value = _simulationChanged.value + 1
+        incrementSimulationChanged()
     }
 
     fun setSimulation(simulation: WWWSimulation) {
@@ -90,7 +101,7 @@ class WWWPlatform(
         // Update PositionManager with simulation position
         positionManager?.updatePosition(PositionManager.PositionSource.SIMULATION, simulation.getUserPosition())
         // Notify observers that the simulation context has changed
-        _simulationChanged.value = _simulationChanged.value + 1
+        incrementSimulationChanged()
     }
 
     fun getSimulation(): WWWSimulation? = _simulation
