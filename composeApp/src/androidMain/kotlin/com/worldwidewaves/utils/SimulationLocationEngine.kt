@@ -55,9 +55,14 @@ class SimulationLocationEngine(
     private fun getSimulatedLocation(): Location? =
         if (platform.isOnSimulation()) {
             val simulation = platform.getSimulation()!!
+            val pos = simulation.getUserPosition()
+            // Validate before forwarding to MapLibre to avoid crashes on invalid coords
+            if (!pos.isValidForLocation()) {
+                return null
+            }
             // Use runBlocking since simulation.now() is suspend but this context is not
             // Safe here as this is called during location updates (not on main thread)
-            simulation.getUserPosition().toLocation(runBlocking { simulation.now() })
+            pos.toLocation(runBlocking { simulation.now() })
         } else {
             null
         }

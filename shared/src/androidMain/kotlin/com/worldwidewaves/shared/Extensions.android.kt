@@ -58,6 +58,15 @@ fun Position.toLocation(now: Instant): Location {
     return location
 }
 
+// Validation helper for coordinates used by Android location engine
+fun Position.isValidForLocation(): Boolean =
+    lat.isFinite() &&
+        lng.isFinite() &&
+        !lat.isNaN() &&
+        !lng.isNaN() &&
+        lat in -90.0..90.0 &&
+        lng in -180.0..180.0
+
 fun LatLng.toPosition(): Position = Position(this.latitude, this.longitude)
 
 fun Polygon.toMapLibrePolygon(): MapLibrePolygon {

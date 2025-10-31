@@ -74,7 +74,7 @@ fun BoxScope.SimulationButton(
     platform: WWWPlatform = getIosSafePlatform(),
 ) {
     // iOS FIX: Removed dangerous object : KoinComponent pattern
-    var simulationButtonState by remember { mutableStateOf("idle") }
+    var simulationButtonState by remember { mutableStateOf(if (platform.isOnSimulation()) "active" else "idle") }
     var pendingAction by remember { mutableStateOf<(suspend () -> Unit)?>(null) }
     val isSimulationEnabled by platform.simulationModeEnabled.collectAsState()
 
@@ -188,7 +188,9 @@ fun BoxScope.SimulationButton(
 
     // Reset button state when simulation is disabled externally - add event.id key for safety
     LaunchedEffect(event.id, isSimulationEnabled) {
-        if (!isSimulationEnabled && simulationButtonState == "active") {
+        if (isSimulationEnabled && simulationButtonState != "active") {
+            simulationButtonState = "active"
+        } else if (!isSimulationEnabled && simulationButtonState == "active") {
             simulationButtonState = "idle"
         }
     }
@@ -277,15 +279,10 @@ private suspend fun startSimulation(
         // Determine position for simulation: use GPS if user is already in area, otherwise random
         val positionManager = getIosSafePositionManager()
         val currentPosition = positionManager.getCurrentPosition()
-        val polygonsLoaded = event.area.polygonsLoaded.value
-        val polygons = if (polygonsLoaded) event.area.getPolygons() else null
 
         val isInArea =
             try {
-                currentPosition != null &&
-                    polygons != null &&
-                    polygons.isNotEmpty() &&
-                    event.area.isPositionWithin(currentPosition, polygons)
+                currentPosition != null && event.area.isPositionWithin(currentPosition)
             } catch (e: Exception) {
                 Log.e("SimulationButton", "Error checking if user is in area", throwable = e)
                 false // Fallback to random position on error
