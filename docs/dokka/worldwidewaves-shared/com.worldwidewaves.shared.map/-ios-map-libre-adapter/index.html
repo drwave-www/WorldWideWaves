@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>IosMapLibreAdapter</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+                    <a class="library-name--link" href="../../../index.html">
+                            worldwidewaves-shared
+                    </a>
+            </div>
+            <div class="library-version">
+            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":shared:dokkaHtml/iosMain">ios</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="worldwidewaves-shared::com.worldwidewaves.shared.map/IosMapLibreAdapter///PointingToDeclaration//59985791">
+  <div class="breadcrumbs"><a href="../../../index.html">worldwidewaves-shared</a><span class="delimiter">/</span><a href="../index.html">com.worldwidewaves.shared.map</a><span class="delimiter">/</span><span class="current">IosMapLibreAdapter</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Ios</span><wbr></wbr><span>Map</span><wbr></wbr><span>Libre</span><wbr></wbr><span><span>Adapter</span></span></h1>
+    <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">IosMapLibreAdapter</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span> : <span data-unresolved-link="com.worldwidewaves.shared.map/MapLibreAdapter///PointingToDeclaration/">MapLibreAdapter</span><span class="token operator">&lt;</span><span data-unresolved-link="platform.UIKit/UIImage///PointingToDeclaration/">UIImage</span><span class="token operator">&gt; </span></div><p class="paragraph">iOS MapLibreAdapter implementation.</p><p class="paragraph">Bridges Kotlin shared logic to Swift MapLibreViewWrapper via MapWrapperRegistry. Camera commands are stored in registry and executed immediately via callbacks.</p><p class="paragraph">Architecture: Kotlin → MapWrapperRegistry → Swift MapLibreViewWrapper → MapLibre SDK</p></div>    </div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="634245926%2FConstructors%2F59985791" anchor-label="IosMapLibreAdapter" id="634245926%2FConstructors%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ios-map-libre-adapter.html"><span>Ios</span><wbr></wbr><span>Map</span><wbr></wbr><span>Libre</span><wbr></wbr><span><span>Adapter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="634245926%2FConstructors%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="1637462260%2FProperties%2F59985791" anchor-label="currentPosition" id="1637462260%2FProperties%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="current-position.html"><span>current</span><wbr></wbr><span><span>Position</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1637462260%2FProperties%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="current-position.html">currentPosition</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span data-unresolved-link="com.worldwidewaves.shared.events.utils/Position///PointingToDeclaration/">Position</span><span class="token operator">?</span><span class="token operator">&gt;</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1796687478%2FProperties%2F59985791" anchor-label="currentZoom" id="-1796687478%2FProperties%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="current-zoom.html"><span>current</span><wbr></wbr><span><span>Zoom</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1796687478%2FProperties%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="current-zoom.html">currentZoom</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator">&gt;</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="1552566077%2FFunctions%2F59985791" anchor-label="addOnCameraIdleListener" id="1552566077%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="add-on-camera-idle-listener.html"><span>add</span><wbr></wbr><span>On</span><wbr></wbr><span>Camera</span><wbr></wbr><span>Idle</span><wbr></wbr><span><span>Listener</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1552566077%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="add-on-camera-idle-listener.html"><span class="token function">addOnCameraIdleListener</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">callback<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1689914348%2FFunctions%2F59985791" anchor-label="addWavePolygons" id="1689914348%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="add-wave-polygons.html"><span>add</span><wbr></wbr><span>Wave</span><wbr></wbr><span><span>Polygons</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1689914348%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="add-wave-polygons.html"><span class="token function">addWavePolygons</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">polygons<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">clearExisting<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1209319341%2FFunctions%2F59985791" anchor-label="animateCamera" id="1209319341%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="animate-camera.html"><span>animate</span><wbr></wbr><span><span>Camera</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1209319341%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="animate-camera.html"><span class="token function">animateCamera</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">position<span class="token operator">: </span><span data-unresolved-link="com.worldwidewaves.shared.events.utils/Position///PointingToDeclaration/">Position</span><span class="token punctuation">, </span></span><span class="parameter ">zoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">callback<span class="token operator">: </span><span data-unresolved-link="com.worldwidewaves.shared.map/MapCameraCallback///PointingToDeclaration/">MapCameraCallback</span><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1184276568%2FFunctions%2F59985791" anchor-label="animateCameraToBounds" id="-1184276568%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="animate-camera-to-bounds.html"><span>animate</span><wbr></wbr><span>Camera</span><wbr></wbr><span>To</span><wbr></wbr><span><span>Bounds</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1184276568%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="animate-camera-to-bounds.html"><span class="token function">animateCameraToBounds</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bounds<span class="token operator">: </span><span data-unresolved-link="com.worldwidewaves.shared.events.utils/BoundingBox///PointingToDeclaration/">BoundingBox</span><span class="token punctuation">, </span></span><span class="parameter ">padding<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">callback<span class="token operator">: </span><span data-unresolved-link="com.worldwidewaves.shared.map/MapCameraCallback///PointingToDeclaration/">MapCameraCallback</span><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="255111133%2FFunctions%2F59985791" anchor-label="drawOverridenBbox" id="255111133%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="draw-overriden-bbox.html"><span>draw</span><wbr></wbr><span>Overriden</span><wbr></wbr><span><span>Bbox</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="255111133%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="draw-overriden-bbox.html"><span class="token function">drawOverridenBbox</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bbox<span class="token operator">: </span><span data-unresolved-link="com.worldwidewaves.shared.events.utils/BoundingBox///PointingToDeclaration/">BoundingBox</span></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="553105174%2FFunctions%2F59985791" anchor-label="enableLocationComponent" id="553105174%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="enable-location-component.html"><span>enable</span><wbr></wbr><span>Location</span><wbr></wbr><span><span>Component</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="553105174%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="enable-location-component.html"><span class="token function">enableLocationComponent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="604920402%2FFunctions%2F59985791" anchor-label="getCameraPosition" id="604920402%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-camera-position.html"><span>get</span><wbr></wbr><span>Camera</span><wbr></wbr><span><span>Position</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="604920402%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-camera-position.html"><span class="token function">getCameraPosition</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.worldwidewaves.shared.events.utils/Position///PointingToDeclaration/">Position</span><span class="token operator">?</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1141491271%2FFunctions%2F59985791" anchor-label="getHeight" id="-1141491271%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-height.html"><span>get</span><wbr></wbr><span><span>Height</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1141491271%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-height.html"><span class="token function">getHeight</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-279581087%2FFunctions%2F59985791" anchor-label="getMinZoomLevel" id="-279581087%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-min-zoom-level.html"><span>get</span><wbr></wbr><span>Min</span><wbr></wbr><span>Zoom</span><wbr></wbr><span><span>Level</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-279581087%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-min-zoom-level.html"><span class="token function">getMinZoomLevel</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1296911916%2FFunctions%2F59985791" anchor-label="getVisibleRegion" id="-1296911916%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-visible-region.html"><span>get</span><wbr></wbr><span>Visible</span><wbr></wbr><span><span>Region</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1296911916%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-visible-region.html"><span class="token function">getVisibleRegion</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.worldwidewaves.shared.events.utils/BoundingBox///PointingToDeclaration/">BoundingBox</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1521234156%2FFunctions%2F59985791" anchor-label="getWidth" id="-1521234156%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-width.html"><span>get</span><wbr></wbr><span><span>Width</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1521234156%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-width.html"><span class="token function">getWidth</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-144984996%2FFunctions%2F59985791" anchor-label="moveCamera" id="-144984996%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="move-camera.html"><span>move</span><wbr></wbr><span><span>Camera</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-144984996%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="move-camera.html"><span class="token function">moveCamera</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bounds<span class="token operator">: </span><span data-unresolved-link="com.worldwidewaves.shared.events.utils/BoundingBox///PointingToDeclaration/">BoundingBox</span></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="879189184%2FFunctions%2F59985791" anchor-label="onMapSet" id="879189184%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-map-set.html"><span>on</span><wbr></wbr><span>Map</span><wbr></wbr><span><span>Set</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="879189184%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-map-set.html"><span class="token function">onMapSet</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">callback<span class="token operator">: </span><span class="token punctuation">(</span><span data-unresolved-link="com.worldwidewaves.shared.map/MapLibreAdapter///PointingToDeclaration/">MapLibreAdapter</span><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1656537295%2FFunctions%2F59985791" anchor-label="setAttributionMargins" id="-1656537295%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-attribution-margins.html"><span>set</span><wbr></wbr><span>Attribution</span><wbr></wbr><span><span>Margins</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1656537295%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-attribution-margins.html"><span class="token function">setAttributionMargins</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">left<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">top<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">right<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">bottom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1450532464%2FFunctions%2F59985791" anchor-label="setBoundsForCameraTarget" id="-1450532464%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-bounds-for-camera-target.html"><span>set</span><wbr></wbr><span>Bounds</span><wbr></wbr><span>For</span><wbr></wbr><span>Camera</span><wbr></wbr><span><span>Target</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1450532464%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-bounds-for-camera-target.html"><span class="token function">setBoundsForCameraTarget</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">constraintBounds<span class="token operator">: </span><span data-unresolved-link="com.worldwidewaves.shared.events.utils/BoundingBox///PointingToDeclaration/">BoundingBox</span><span class="token punctuation">, </span></span><span class="parameter ">applyZoomSafetyMargin<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">originalEventBounds<span class="token operator">: </span><span data-unresolved-link="com.worldwidewaves.shared.events.utils/BoundingBox///PointingToDeclaration/">BoundingBox</span><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="338916404%2FFunctions%2F59985791" anchor-label="setGesturesEnabled" id="338916404%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-gestures-enabled.html"><span>set</span><wbr></wbr><span>Gestures</span><wbr></wbr><span><span>Enabled</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="338916404%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-gestures-enabled.html"><span class="token function">setGesturesEnabled</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1070940970%2FFunctions%2F59985791" anchor-label="setMap" id="1070940970%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-map.html"><span>set</span><wbr></wbr><span><span>Map</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1070940970%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-map.html"><span class="token function">setMap</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">map<span class="token operator">: </span><span data-unresolved-link="platform.UIKit/UIImage///PointingToDeclaration/">UIImage</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Sets the map wrapper. Map rendering happens via SwiftUI EventMapView embedded in Compose.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1677609872%2FFunctions%2F59985791" anchor-label="setMaxZoomPreference" id="-1677609872%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-max-zoom-preference.html"><span>set</span><wbr></wbr><span>Max</span><wbr></wbr><span>Zoom</span><wbr></wbr><span><span>Preference</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1677609872%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-max-zoom-preference.html"><span class="token function">setMaxZoomPreference</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">maxZoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-393037218%2FFunctions%2F59985791" anchor-label="setMinZoomPreference" id="-393037218%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-min-zoom-preference.html"><span>set</span><wbr></wbr><span>Min</span><wbr></wbr><span>Zoom</span><wbr></wbr><span><span>Preference</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-393037218%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-min-zoom-preference.html"><span class="token function">setMinZoomPreference</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">minZoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-71548884%2FFunctions%2F59985791" anchor-label="setOnMapClickListener" id="-71548884%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-on-map-click-listener.html"><span>set</span><wbr></wbr><span>On</span><wbr></wbr><span>Map</span><wbr></wbr><span>Click</span><wbr></wbr><span><span>Listener</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-71548884%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-on-map-click-listener.html"><span class="token function">setOnMapClickListener</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">listener<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-438125903%2FFunctions%2F59985791" anchor-label="setStyle" id="-438125903%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-style.html"><span>set</span><wbr></wbr><span><span>Style</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-438125903%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-style.html"><span class="token function">setStyle</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">stylePath<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">callback<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1496695228%2FFunctions%2F59985791" anchor-label="setUserPosition" id="-1496695228%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-user-position.html"><span>set</span><wbr></wbr><span>User</span><wbr></wbr><span><span>Position</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1496695228%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-user-position.html"><span class="token function">setUserPosition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">position<span class="token operator">: </span><span data-unresolved-link="com.worldwidewaves.shared.events.utils/Position///PointingToDeclaration/">Position</span></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-428073636%2FFunctions%2F59985791" anchor-label="updateCameraPosition" id="-428073636%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-camera-position.html"><span>update</span><wbr></wbr><span>Camera</span><wbr></wbr><span><span>Position</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-428073636%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="update-camera-position.html"><span class="token function">updateCameraPosition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">latitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">longitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Update camera position from Swift delegate callback.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="8676252%2FFunctions%2F59985791" anchor-label="updateZoom" id="8676252%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-zoom.html"><span>update</span><wbr></wbr><span><span>Zoom</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="8676252%2FFunctions%2F59985791"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="update-zoom.html"><span class="token function">updateZoom</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">zoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Update zoom level from Swift delegate callback.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
