@@ -24,6 +24,7 @@ package com.worldwidewaves.shared
 import androidx.compose.runtime.Composable
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
+import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.position.PositionManager
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.StringResource
@@ -107,6 +108,11 @@ class WWWPlatform(
     fun getSimulation(): WWWSimulation? = _simulation
 
     fun isOnSimulation(): Boolean = _simulation != null
+
+    // Current GPS-based position (PositionManager) without simulation override
+    fun getCurrentPosition(): Position? = positionManager?.getCurrentPosition()
+
+    fun getCurrentPositionSource(): PositionManager.PositionSource? = positionManager?.getCurrentSource()
 }
 
 /**

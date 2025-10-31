@@ -273,8 +273,17 @@ private suspend fun startSimulation(
             Log.i("SimulationButton", "Stopping existing simulation to start new one for ${event.id}")
         }
 
-        // Generate random position within event area
-        val position = event.area.generateRandomPositionInArea()
+        // Prefer current device position if inside the event area; otherwise fall back to random
+        val devicePosition = platform.getCurrentPosition()
+        val position =
+            if (devicePosition != null && event.area.isPositionWithin(devicePosition)) {
+                Log.i("SimulationButton", "Using device position inside area for event ${event.id}: $devicePosition")
+                devicePosition
+            } else {
+                event.area.generateRandomPositionInArea().also {
+                    Log.i("SimulationButton", "Using random position inside area for event ${event.id}: $it")
+                }
+            }
 
         // Calculate time - start now
         val simulationDelay = 0.minutes
