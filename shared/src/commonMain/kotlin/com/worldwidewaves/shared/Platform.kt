@@ -109,23 +109,14 @@ class WWWPlatform(
     }
 
     fun setSimulation(simulation: WWWSimulation) {
-        val position = simulation.getUserPosition()
-        val positionInfo =
-            if (position == WWWSimulation.GPS_MARKER) {
-                "GPS marker (using device position)"
-            } else {
-                position.toString()
-            }
         // Use runBlocking for logging only - simulation.now() is now suspend
         val simulationTime = runBlocking { simulation.now() }
-        Log.i(::setSimulation.name, "Set simulation to $simulationTime with position: $positionInfo")
+        Log.i(::setSimulation.name, "Set simulation to $simulationTime and ${simulation.getUserPosition()}")
 
         _simulation = simulation
 
-        // Update PositionManager with simulation position only if not GPS marker
-        if (position != WWWSimulation.GPS_MARKER) {
-            positionManager?.updatePosition(PositionManager.PositionSource.SIMULATION, position)
-        }
+        // Update PositionManager with simulation position
+        positionManager?.updatePosition(PositionManager.PositionSource.SIMULATION, simulation.getUserPosition())
 
         // Notify observers that the simulation context has changed (thread-safe)
         incrementSimulationChanged()

@@ -81,36 +81,6 @@ open class Position(
     override fun hashCode(): Int = 31 * lat.hashCode() + lng.hashCode()
 }
 
-/**
- * Checks if this position has valid geographic coordinates.
- *
- * Valid ranges:
- * - Latitude: -90.0 to 90.0 degrees
- * - Longitude: -180.0 to 180.0 degrees
- *
- * @return true if coordinates are within valid geographic ranges, false otherwise
- *
- * Note: Returns false for sentinel values like WWWSimulation.GPS_MARKER (999.0, 999.0)
- */
-fun Position.isValidGeographic(): Boolean = lat in -90.0..90.0 && lng in -180.0..180.0
-
-/**
- * Checks if this position is the GPS_MARKER sentinel value.
- *
- * GPS_MARKER (999.0, 999.0) is a special sentinel used by WWWSimulation to indicate
- * that the actual device GPS position should be used instead of a simulated position.
- *
- * **WARNING**: GPS_MARKER should NEVER be used in:
- * - Geographic distance calculations
- * - Polygon containment checks
- * - Mapping API calls
- *
- * Always check isGPSMarker() before performing coordinate-based operations.
- *
- * @return true if this position is GPS_MARKER (999.0, 999.0), false otherwise
- */
-fun Position.isGPSMarker(): Boolean = lat == 999.0 && lng == 999.0
-
 // Can only be initialized from internal context
 internal fun <T : Position> T.init(): T =
     apply {

@@ -26,7 +26,6 @@ import android.location.Location
 import android.location.LocationListener
 import android.os.Looper
 import com.worldwidewaves.shared.WWWPlatform
-import com.worldwidewaves.shared.WWWSimulation
 import com.worldwidewaves.shared.toLocation
 import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
@@ -56,16 +55,9 @@ class SimulationLocationEngine(
     private fun getSimulatedLocation(): Location? =
         if (platform.isOnSimulation()) {
             val simulation = platform.getSimulation()!!
-            val position = simulation.getUserPosition()
-
-            // GPS_MARKER (999.0, 999.0) means use real device GPS - return null to fall back
-            if (position == WWWSimulation.GPS_MARKER) {
-                null
-            } else {
-                // Use runBlocking since simulation.now() is suspend but this context is not
-                // Safe here as this is called during location updates (not on main thread)
-                position.toLocation(runBlocking { simulation.now() })
-            }
+            // Use runBlocking since simulation.now() is suspend but this context is not
+            // Safe here as this is called during location updates (not on main thread)
+            simulation.getUserPosition().toLocation(runBlocking { simulation.now() })
         } else {
             null
         }

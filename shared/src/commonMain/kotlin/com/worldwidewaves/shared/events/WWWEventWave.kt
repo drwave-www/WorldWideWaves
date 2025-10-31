@@ -23,7 +23,6 @@ package com.worldwidewaves.shared.events
 
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWPlatform
-import com.worldwidewaves.shared.WWWSimulation
 import com.worldwidewaves.shared.choreographies.ChoreographySequenceBuilder
 import com.worldwidewaves.shared.choreographies.ChoreographySequenceBuilder.DisplayableSequence
 import com.worldwidewaves.shared.events.utils.Area
@@ -169,13 +168,7 @@ abstract class WWWEventWave :
             Napier.w("${WWWEventWave::class.simpleName}: Platform not found, simulation disabled")
         }
         return if (platform?.isOnSimulation() == true) {
-            val simulationPosition = platform.getSimulation()?.getUserPosition()
-            // If simulation is using GPS marker, fall back to actual GPS position
-            if (simulationPosition == WWWSimulation.GPS_MARKER) {
-                positionRequester?.invoke()
-            } else {
-                simulationPosition
-            }
+            platform.getSimulation()?.getUserPosition()
         } else {
             positionRequester?.invoke()
         }

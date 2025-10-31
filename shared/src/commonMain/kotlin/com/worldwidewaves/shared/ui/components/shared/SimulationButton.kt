@@ -293,8 +293,8 @@ private suspend fun startSimulation(
 
         val position =
             if (isInArea) {
-                Log.i("SimulationButton", "User is in event area, using GPS position for simulation")
-                WWWSimulation.GPS_MARKER
+                Log.i("SimulationButton", "User is in event area, using current GPS position for simulation")
+                requireNotNull(currentPosition) { "currentPosition must be non-null when isInArea is true" }
             } else {
                 Log.i("SimulationButton", "User is outside event area or position unavailable, using random position")
                 event.area.generateRandomPositionInArea()
@@ -317,11 +317,7 @@ private suspend fun startSimulation(
 
         // Set the simulation with protection against concurrent access
         Log.i("SimulationButton", "Setting simulation starting time to $simulationTime from event ${event.id}")
-        if (position == WWWSimulation.GPS_MARKER) {
-            Log.i("SimulationButton", "Simulation using GPS position (user in area) for event ${event.id}")
-        } else {
-            Log.i("SimulationButton", "Simulation using random position $position for event ${event.id}")
-        }
+        Log.i("SimulationButton", "Setting simulation user position to $position from event ${event.id}")
         platform.setSimulation(simulation)
 
         // Restart event observation to apply simulation

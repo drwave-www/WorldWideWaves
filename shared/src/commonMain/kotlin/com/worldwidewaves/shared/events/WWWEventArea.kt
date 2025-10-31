@@ -34,7 +34,6 @@ import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.MutableArea
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.events.utils.isGPSMarker
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -141,12 +140,6 @@ data class WWWEventArea(
      * Delegates to [EventAreaPositionTesting] for position checking.
      */
     suspend fun isPositionWithin(position: Position): Boolean {
-        // Defensive: GPS_MARKER should never reach here, but return false if it does
-        if (position.isGPSMarker()) {
-            Log.w("WWWEventArea", "GPS_MARKER passed to isPositionWithin - this should not happen")
-            return false
-        }
-
         val boundingBox = bbox()
         val polygons = getPolygons()
 

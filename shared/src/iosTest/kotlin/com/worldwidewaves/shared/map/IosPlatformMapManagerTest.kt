@@ -425,7 +425,6 @@ private class FakeMapAvailabilityChecker : MapAvailabilityChecker {
         private set
 
     val trackedMapIds = mutableListOf<String>()
-        private set
 
     private val _mapStates = MutableStateFlow<Map<String, Boolean>>(emptyMap())
     override val mapStates: StateFlow<Map<String, Boolean>> = _mapStates

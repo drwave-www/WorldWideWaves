@@ -165,8 +165,11 @@ class IosCameraCenterValidationTest {
                     ) to false,
             )
 
-        edgeTestCases.forEach { (testName, testCase) ->
-            val (position, expectedValid) = testCase
+        edgeTestCases.forEach { entry ->
+            val nameAndPosition = entry.component1()
+            val testName: String = nameAndPosition.component1()
+            val position: Position = nameAndPosition.component2()
+            val expectedValid: Boolean = entry.component2()
             val isValid = isPositionWithinBounds(position, constraintBounds, IOS_EPSILON)
 
             if (expectedValid) {
@@ -242,8 +245,11 @@ class IosCameraCenterValidationTest {
                     ) to true,
             )
 
-        cornerTestCases.forEach { (testName, testCase) ->
-            val (position, expectedValid) = testCase
+        cornerTestCases.forEach { entry ->
+            val nameAndPosition = entry.component1()
+            val testName: String = nameAndPosition.component1()
+            val position: Position = nameAndPosition.component2()
+            val expectedValid: Boolean = entry.component2()
             val isValid = isPositionWithinBounds(position, constraintBounds, IOS_EPSILON)
 
             if (expectedValid) {

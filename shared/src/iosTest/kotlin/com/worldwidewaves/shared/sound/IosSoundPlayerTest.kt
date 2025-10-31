@@ -24,6 +24,8 @@ package com.worldwidewaves.shared.sound
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -58,6 +60,7 @@ class IosSoundPlayerTest {
                 // Track execution order - should be sequential due to mutex
                 val executionOrder = mutableListOf<Int>()
                 val executing = mutableListOf<Boolean>()
+                val mutex = Mutex()
 
                 repeat(concurrentCalls) { executing.add(false) }
 
@@ -66,7 +69,7 @@ class IosSoundPlayerTest {
                         async {
                             try {
                                 // Mark as executing
-                                synchronized(executing) {
+                                mutex.withLock {
                                     executing[index] = true
                                     // Verify no other call is executing (mutex should prevent this)
                                     val currentlyExecuting = executing.count { it }
@@ -84,13 +87,13 @@ class IosSoundPlayerTest {
                                 )
 
                                 // Mark as complete
-                                synchronized(executing) {
+                                mutex.withLock {
                                     executing[index] = false
                                     executionOrder.add(index)
                                 }
                             } catch (e: Exception) {
                                 // Ignore exceptions from audio system (simulator limitations)
-                                synchronized(executing) {
+                                mutex.withLock {
                                     executing[index] = false
                                     executionOrder.add(index)
                                 }
