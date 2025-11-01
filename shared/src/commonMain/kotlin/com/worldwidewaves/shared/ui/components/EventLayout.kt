@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
@@ -33,6 +35,7 @@ import com.worldwidewaves.shared.ui.components.shared.ButtonWave
 import com.worldwidewaves.shared.ui.components.shared.SimulationButton
 import com.worldwidewaves.shared.ui.formatters.rememberEventState
 import com.worldwidewaves.shared.ui.utils.getIosSafePlatform
+import kotlinx.coroutines.launch
 
 /**
  * Standard event screen layout pattern used across multiple event activities.
@@ -60,6 +63,32 @@ fun EventLayout(
     // Dependencies now resolved safely outside composition
 
     val eventState = rememberEventState(event, platform)
+
+    // Stable coroutine scope for polygon preloading (iOS-safe, survives recomposition)
+    val stableScope = rememberCoroutineScope()
+
+    // Preload event area polygons in composition-stable scope
+    // Prevents polygon loading from being cancelled during observer lifecycle changes
+    DisposableEffect(event.id) {
+        val preloadJob =
+            stableScope.launch {
+                try {
+                    // Force polygon loading before observer starts
+                    // This ensures polygons are cached and won't be cancelled by observer restarts
+                    event.area.getPolygons()
+                } catch (e: Exception) {
+                    // Log but don't crash - observer will retry if needed
+                    com.worldwidewaves.shared.utils.Log.w(
+                        "EventLayout",
+                        "Polygon preload failed for ${event.id}: ${e.message}",
+                    )
+                }
+            }
+
+        onDispose {
+            preloadJob.cancel()
+        }
+    }
 
     Box(modifier = modifier) {
         Column(
