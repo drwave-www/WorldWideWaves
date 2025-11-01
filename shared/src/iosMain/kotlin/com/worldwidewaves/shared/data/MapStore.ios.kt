@@ -62,8 +62,22 @@ private fun invalidateGeoJsonDataCache(eventId: String) {
         geoJsonDataProvider.invalidateCache(eventId)
         Log.d("MapStore.ios", "Invalidated GeoJsonDataProvider cache for $eventId")
 
-        // Note: WWWEventArea.cachedAreaPolygons will be invalidated when polygonsLoaded changes
-        // after the next successful getGeoJsonData() call triggers polygon reload
+        // CRITICAL for iOS: Clear polygon cache when map downloads complete
+        // Without this, if user navigated to event before download, empty polygon cache
+        // from failed load attempt would be preserved, causing isInArea to stay false
+        // even after successful download.
+        val events = koin.get<com.worldwidewaves.shared.events.WWWEvents>()
+        val scopeProvider = koin.get<com.worldwidewaves.shared.events.utils.CoroutineScopeProvider>()
+        val event = events.getEventById(eventId)
+        if (event != null) {
+            // Launch in background scope - clearPolygonCacheForDownload is suspend (uses mutex)
+            scopeProvider.launchDefault {
+                event.area.clearPolygonCacheForDownload()
+                Log.d("MapStore.ios", "Cleared polygon cache for $eventId to force reload from downloaded file")
+            }
+        } else {
+            Log.w("MapStore.ios", "Event $eventId not found, could not clear polygon cache")
+        }
     } catch (e: Exception) {
         Log.w("MapStore.ios", "Failed to invalidate caches for $eventId: ${e.message}")
     }

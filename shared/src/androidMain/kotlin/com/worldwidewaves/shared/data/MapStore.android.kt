@@ -211,8 +211,30 @@ actual fun platformAppVersionStamp(): String =
     }.getOrElse { System.currentTimeMillis().toString() }
 
 actual fun platformInvalidateGeoJson(eventId: String) {
-    runCatching { inject<GeoJsonDataProvider>(GeoJsonDataProvider::class.java).value.invalidateCache(eventId) }
-        .onFailure { Log.w(TAG, "GeoJSON invalidate failed for $eventId: ${it.message}") }
+    runCatching {
+        // Invalidate GeoJsonDataProvider cache (raw GeoJSON string data)
+        inject<GeoJsonDataProvider>(GeoJsonDataProvider::class.java).value.invalidateCache(eventId)
+
+        // CRITICAL: Clear polygon cache when map downloads complete
+        // Ensures empty polygon cache from pre-download failed load attempts
+        // doesn't prevent detection after download succeeds
+        val events =
+            inject<com.worldwidewaves.shared.events.WWWEvents>(
+                com.worldwidewaves.shared.events.WWWEvents::class.java,
+            ).value
+        val scopeProvider =
+            inject<com.worldwidewaves.shared.events.utils.CoroutineScopeProvider>(
+                com.worldwidewaves.shared.events.utils.CoroutineScopeProvider::class.java,
+            ).value
+        val event = events.getEventById(eventId)
+        if (event != null) {
+            // Launch in background scope - clearPolygonCacheForDownload is suspend (uses mutex)
+            scopeProvider.launchDefault {
+                event.area.clearPolygonCacheForDownload()
+                Log.d(TAG, "Cleared polygon cache for $eventId to force reload from downloaded file")
+            }
+        }
+    }.onFailure { Log.w(TAG, "GeoJSON invalidate failed for $eventId: ${it.message}") }
 }
 
 actual suspend fun platformFetchToFile(

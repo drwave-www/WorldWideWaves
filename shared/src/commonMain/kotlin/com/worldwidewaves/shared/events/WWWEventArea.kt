@@ -130,6 +130,33 @@ data class WWWEventArea(
         Log.v("WWWEventArea", "clearCache() called for ${event?.id} - preserved polygon data, cleared derived caches")
     }
 
+    /**
+     * Clears polygon cache to force reload from newly downloaded GeoJSON file.
+     *
+     * This is called specifically when a map is downloaded mid-session.
+     * Unlike clearCache(), this MUST clear polygon data because the GeoJSON
+     * file has changed from non-existent to available on disk.
+     *
+     * THREAD SAFETY: Uses mutex to prevent race conditions with concurrent
+     * polygon loading operations. Ensures cache clear is atomic.
+     *
+     * Use case: User navigates to event → polygons try to load → file missing → empty cache.
+     * Then user downloads map → file now exists → must clear empty cache to force reload.
+     */
+    internal suspend fun clearPolygonCacheForDownload() {
+        polygonsCacheMutex.withLock {
+            cachedAreaPolygons = null
+            _polygonsLoaded.value = false
+            cachedBoundingBox = null
+            cachedCenter = null
+            cachedPositionWithinResult = null
+            Log.i(
+                "WWWEventArea",
+                "clearPolygonCacheForDownload() called for ${event?.id} - cleared all caches to reload from downloaded file",
+            )
+        }
+    }
+
     // ---------------------------
 
     fun setRelatedEvent(event: WWWEvent) {
