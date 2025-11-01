@@ -23,6 +23,7 @@ captures
 *.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
 iosApp/.swiftpm/
 iosApp/build/
+iosApp/build_ios/
 .swiftpm/
 *.xcworkspace/xcuserdata/
 

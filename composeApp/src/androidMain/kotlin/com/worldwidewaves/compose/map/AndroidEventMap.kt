@@ -77,6 +77,7 @@ import com.worldwidewaves.activities.event.EventFullMapActivity
 import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Timing
+import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
@@ -160,6 +161,9 @@ class AndroidEventMap(
 
     // Map availability and download state tracking
     private val mapAvailabilityChecker: AndroidMapAvailabilityChecker by inject(AndroidMapAvailabilityChecker::class.java)
+
+    // Platform for observing simulation changes
+    private val platform: WWWPlatform by inject(WWWPlatform::class.java)
 
     /**
      * Setup map state variables and return them as a data class
@@ -372,7 +376,8 @@ class AndroidEventMap(
                 val map = currentMap
                 if (map != null && map.locationComponent.isLocationComponentActivated) {
                     Log.i(TAG, "Simulation changed, refreshing LocationComponent for event ${event.id}")
-                    withContext(Dispatchers.Main) {
+                    // Launch on Main dispatcher as LocationComponent must be updated on UI thread
+                    launch(Dispatchers.Main) {
                         try {
                             // Force LocationComponent to re-query the location engine
                             // This ensures it picks up simulation position changes
