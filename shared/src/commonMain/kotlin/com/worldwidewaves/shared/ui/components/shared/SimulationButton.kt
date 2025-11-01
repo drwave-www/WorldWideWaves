@@ -302,14 +302,17 @@ private suspend fun startSimulation(
         Log.i("SimulationButton", "Setting simulation user position to $position from event ${event.id}")
         platform.resetAndSetSimulation(simulation)
 
-        // Reset event state to avoid validation errors (DONE -> NEXT, userHasBeenHit transitions)
-        event.observer.resetState()
-
         // Restart event observation to apply simulation
         // Note: stopObservation() is async, so we add a delay to ensure proper cleanup
         event.observer.stopObservation()
         delay(150.milliseconds) // Allow time for async cancellation to complete
         event.observer.startObservation()
+
+        // Reset event state AFTER observer restart to avoid race conditions
+        // Calling before restart creates timing window where UI observes intermediate false values
+        // Observer initialization takes 50-100ms, during which userIsInArea might be stale
+        delay(200.milliseconds) // Allow observer initialization to complete and update area detection
+        event.observer.resetState()
 
         onSimulationStarted(simulationStartedText)
         onStateChange("active")
