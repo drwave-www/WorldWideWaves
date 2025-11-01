@@ -35,6 +35,7 @@ import com.worldwidewaves.shared.position.PositionManager
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -348,6 +349,29 @@ class WWWEventObserver(
         unifiedObservationJob = null
         isObserving.value = false
         Log.v("WWWEventObserver", "Stopped observation for event ${event.id}")
+    }
+
+    /**
+     * Stops active observation and waits for cancellation to complete.
+     * Use this when you need to ensure all async operations are fully cancelled
+     * before starting a new observer (e.g., simulation restart).
+     *
+     * CRITICAL: Prevents race conditions where polygon loading from the cancelled
+     * observer interferes with the new observer's initialization.
+     */
+    suspend fun stopObservationAndWait() {
+        eventObserver.stopObservation()
+        val job = unifiedObservationJob
+        if (job != null) {
+            try {
+                job.cancelAndJoin() // Wait for cancellation to complete
+                Log.v("WWWEventObserver", "Stopped and joined observation for event ${event.id}")
+            } catch (e: Exception) {
+                Log.v("WWWEventObserver", "Exception during observer cancellation for ${event.id}: ${e.message}")
+            }
+        }
+        unifiedObservationJob = null
+        isObserving.value = false
     }
 
     /**

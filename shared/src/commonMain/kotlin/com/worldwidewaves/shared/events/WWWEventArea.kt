@@ -324,6 +324,10 @@ data class WWWEventArea(
                 if (tempPolygons.isNotEmpty()) {
                     Log.i("WWWEventArea", "loadAndCachePolygons: ${event.id} loaded ${tempPolygons.size} polygons from GeoJSON")
                 }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                Log.w("WWWEventArea", "Polygon loading cancelled for event ${event.id} (observer lifecycle)")
+                // Don't cache cancellation as failure - allow retry on next call
+                throw e
             } catch (e: kotlinx.serialization.SerializationException) {
                 Log.w("WWWEventArea", "GeoJSON parsing error for event ${event.id}: ${e.message}")
                 // Polygon loading errors are handled gracefully - empty polygon list is acceptable

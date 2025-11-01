@@ -303,14 +303,13 @@ private suspend fun startSimulation(
         platform.resetAndSetSimulation(simulation)
 
         // Reset event state to avoid validation errors (DONE -> NEXT, userHasBeenHit transitions)
-        // Safe to call before restart now that userIsInArea is preserved and
-        // updateAreaDetection() is always called on observer start
         event.observer.resetState()
 
         // Restart event observation to apply simulation
-        // Note: stopObservation() is async, so we add a delay to ensure proper cleanup
-        event.observer.stopObservation()
-        delay(150.milliseconds) // Allow time for async cancellation to complete
+        // CRITICAL: Use stopObservationAndWait() to ensure polygon loading from old observer
+        // is fully cancelled before new observer starts. This prevents race conditions where
+        // old scope's polygon loading gets cancelled mid-execution, leaving cache empty.
+        event.observer.stopObservationAndWait()
         event.observer.startObservation()
 
         onSimulationStarted(simulationStartedText)
