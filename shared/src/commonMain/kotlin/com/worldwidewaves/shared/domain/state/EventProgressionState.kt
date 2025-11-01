@@ -212,8 +212,13 @@ class EventProgressionState {
     }
 
     /**
-     * Resets all state to initial values.
+     * Resets wave progression state to initial values.
      * Used when restarting simulation to ensure clean state transitions.
+     *
+     * IMPORTANT: Does NOT reset userIsInArea - this is a real-time detection
+     * that gets recalculated by the observer on every position update.
+     * Resetting it causes race conditions where the UI sees false before
+     * the observer can detect true, leaving Join button disabled.
      */
     fun reset() {
         _eventStatus.value = Status.UNDEFINED
@@ -225,7 +230,7 @@ class EventProgressionState {
         _userPositionRatio.value = 0.0
         _timeBeforeHit.value = INFINITE
         _hitDateTime.value = DISTANT_FUTURE
-        _userIsInArea.value = false
+        // DO NOT reset _userIsInArea - real-time detection, not state to clear
 
         // Reset throttling cache
         lastEmittedProgression = -1.0
