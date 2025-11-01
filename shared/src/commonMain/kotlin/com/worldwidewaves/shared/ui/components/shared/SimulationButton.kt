@@ -302,15 +302,17 @@ private suspend fun startSimulation(
         Log.i("SimulationButton", "Setting simulation user position to $position from event ${event.id}")
         platform.resetAndSetSimulation(simulation)
 
-        // Reset event state to avoid validation errors (DONE -> NEXT, userHasBeenHit transitions)
-        event.observer.resetState()
-
         // Restart event observation to apply simulation
         // CRITICAL: Use stopObservationAndWait() to ensure polygon loading from old observer
         // is fully cancelled before new observer starts. This prevents race conditions where
         // old scope's polygon loading gets cancelled mid-execution, leaving cache empty.
         event.observer.stopObservationAndWait()
         event.observer.startObservation()
+
+        // Note: resetState() removed - observer naturally recalculates all state on restart.
+        // Resetting state here causes timing windows where UI sees intermediate values
+        // (userIsInArea=false, progression=0, status=UNDEFINED) before observer updates them,
+        // leading to disabled Join button and incorrect UI state.
 
         onSimulationStarted(simulationStartedText)
         onStateChange("active")
