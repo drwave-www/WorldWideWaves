@@ -302,17 +302,16 @@ private suspend fun startSimulation(
         Log.i("SimulationButton", "Setting simulation user position to $position from event ${event.id}")
         platform.resetAndSetSimulation(simulation)
 
-        // Restart event observation to apply simulation
-        // CRITICAL: Use stopObservationAndWait() to ensure polygon loading from old observer
-        // is fully cancelled before new observer starts. This prevents race conditions where
-        // old scope's polygon loading gets cancelled mid-execution, leaving cache empty.
-        event.observer.stopObservationAndWait()
-        event.observer.startObservation()
-
-        // Note: resetState() removed - observer naturally recalculates all state on restart.
-        // Resetting state here causes timing windows where UI sees intermediate values
-        // (userIsInArea=false, progression=0, status=UNDEFINED) before observer updates them,
-        // leading to disabled Join button and incorrect UI state.
+        // Note: Observer restart removed - observers automatically restart via simulationChanged flow.
+        // Manual restart here caused timing issues:
+        // 1. Manual stop/start happened immediately
+        // 2. Then simulationChanged triggered ALL 40+ observers to restart
+        // 3. During cascade, SoundChoreography sampled state and saw eventInArea = null
+        // 4. Join button disabled
+        //
+        // Solution: Let resetAndSetSimulation() trigger observer restart naturally.
+        // This synchronizes all observer restarts, so when SoundChoreography samples state,
+        // Paris observer has already updated userIsInArea.
 
         onSimulationStarted(simulationStartedText)
         onStateChange("active")
