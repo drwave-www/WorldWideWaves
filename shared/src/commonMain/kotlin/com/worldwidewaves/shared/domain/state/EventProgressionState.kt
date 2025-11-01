@@ -210,4 +210,26 @@ class EventProgressionState {
             lastEmittedTimeBeforeHit = newTime
         }
     }
+
+    /**
+     * Resets all state to initial values.
+     * Used when restarting simulation to ensure clean state transitions.
+     */
+    fun reset() {
+        _eventStatus.value = Status.UNDEFINED
+        _progression.value = 0.0
+        _isUserWarmingInProgress.value = false
+        _isStartWarmingInProgress.value = false
+        _userIsGoingToBeHit.value = false
+        _userHasBeenHit.value = false
+        _userPositionRatio.value = 0.0
+        _timeBeforeHit.value = INFINITE
+        _hitDateTime.value = DISTANT_FUTURE
+        _userIsInArea.value = false
+
+        // Reset throttling cache
+        lastEmittedProgression = -1.0
+        lastEmittedPositionRatio = -1.0
+        lastEmittedTimeBeforeHit = INFINITE
+    }
 }

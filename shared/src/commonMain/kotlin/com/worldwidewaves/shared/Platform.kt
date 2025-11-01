@@ -105,6 +105,28 @@ class WWWPlatform(
         incrementSimulationChanged()
     }
 
+    /**
+     * Atomically resets any existing simulation and sets a new one.
+     * Emits only a single simulationChanged notification instead of two,
+     * preventing observer restart cascade when switching simulations.
+     */
+    fun resetAndSetSimulation(simulation: WWWSimulation) {
+        val simulationTime = runBlocking { simulation.now() }
+        Log.i(::resetAndSetSimulation.name, "Resetting and setting simulation to $simulationTime and ${simulation.getUserPosition()}")
+
+        // Clear previous simulation position if any
+        if (_simulation != null) {
+            positionManager?.clearPosition(PositionManager.PositionSource.SIMULATION)
+        }
+
+        // Set new simulation
+        _simulation = simulation
+        positionManager?.updatePosition(PositionManager.PositionSource.SIMULATION, simulation.getUserPosition())
+
+        // Single notification for both operations
+        incrementSimulationChanged()
+    }
+
     fun getSimulation(): WWWSimulation? = _simulation
 
     fun isOnSimulation(): Boolean = _simulation != null

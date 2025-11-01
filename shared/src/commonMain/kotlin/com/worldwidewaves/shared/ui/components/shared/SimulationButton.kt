@@ -289,9 +289,6 @@ private suspend fun startSimulation(
         val simulationDelay = 0.minutes
         val simulationTime = event.getStartDateTime() + simulationDelay
 
-        // Reset any existing simulation before starting new one
-        platform.disableSimulation()
-
         // Create new simulation with unique identifier
         val simulation =
             WWWSimulation(
@@ -300,10 +297,13 @@ private suspend fun startSimulation(
                 initialSpeed = Wave.DEFAULT_SPEED_SIMULATION,
             )
 
-        // Set the simulation with protection against concurrent access
+        // Atomically reset and set simulation (single notification instead of two)
         Log.i("SimulationButton", "Setting simulation starting time to $simulationTime from event ${event.id}")
         Log.i("SimulationButton", "Setting simulation user position to $position from event ${event.id}")
-        platform.setSimulation(simulation)
+        platform.resetAndSetSimulation(simulation)
+
+        // Reset event state to avoid validation errors (DONE -> NEXT, userHasBeenHit transitions)
+        event.observer.resetState()
 
         // Restart event observation to apply simulation
         // Note: stopObservation() is async, so we add a delay to ensure proper cleanup

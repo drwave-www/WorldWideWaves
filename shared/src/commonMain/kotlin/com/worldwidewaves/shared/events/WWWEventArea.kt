@@ -103,15 +103,31 @@ data class WWWEventArea(
     // ---------------------------
 
     /**
-     * Clears all cached data to force fresh calculations.
-     * Useful when debugging or when polygon data has been updated.
+     * Clears transient cached data while preserving immutable polygon data.
+     *
+     * Polygons are derived from GeoJSON files and remain valid across observer
+     * lifecycle changes (simulation start/stop, screen navigation). Clearing
+     * them forces expensive re-parsing on every observer restart.
+     *
+     * Only position-dependent and derived data needs clearing:
+     * - Bounding box (can be recalculated from polygons if needed)
+     * - Center point (can be recalculated from polygons if needed)
+     * - Position containment result (depends on user position, must invalidate)
+     *
+     * Polygon data is immutable for a given event and should not be cleared
+     * unless the event's GeoJSON file actually changes (which doesn't happen
+     * during normal app usage).
      */
     fun clearCache() {
-        cachedAreaPolygons = null
-        cachedBoundingBox = null
-        cachedCenter = null
-        cachedPositionWithinResult = null
-        _polygonsLoaded.value = false
+        // DO NOT clear cachedAreaPolygons - immutable event data
+        // DO NOT clear _polygonsLoaded - accurate state indicator
+
+        // Clear derived/transient data
+        cachedBoundingBox = null // Recomputable from polygons
+        cachedCenter = null // Recomputable from polygons
+        cachedPositionWithinResult = null // Position-specific cache must be cleared
+
+        Log.v("WWWEventArea", "clearCache() called for ${event?.id} - preserved polygon data, cleared derived caches")
     }
 
     // ---------------------------
@@ -142,6 +158,16 @@ data class WWWEventArea(
     suspend fun isPositionWithin(position: Position): Boolean {
         val boundingBox = bbox()
         val polygons = getPolygons()
+
+        // Defensive check: warn if polygons not loaded (shouldn't happen after fix)
+        if (polygons.isEmpty()) {
+            Log.w(
+                "WWWEventArea",
+                "isPositionWithin called for ${event?.id} with empty polygons - " +
+                    "returning false. GeoJSON may not be loaded yet. Position: $position",
+            )
+            return false
+        }
 
         val (result, newCache) =
             EventAreaPositionTesting.isPositionWithin(

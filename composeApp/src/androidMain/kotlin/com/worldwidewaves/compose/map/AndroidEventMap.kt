@@ -362,6 +362,28 @@ class AndroidEventMap(
                 mapState.mapViewModel.downloadMap(event.id)
             }
         }
+
+        // Observe simulation changes and refresh LocationComponent
+        // Fixes issue where marker doesn't appear on event detail map when simulation
+        // starts after map is already initialized
+        LaunchedEffect(event.id) {
+            platform.simulationChanged.collect {
+                // Simulation state changed (started, stopped, or reset)
+                val map = currentMap
+                if (map != null && map.locationComponent.isLocationComponentActivated) {
+                    Log.i(TAG, "Simulation changed, refreshing LocationComponent for event ${event.id}")
+                    withContext(Dispatchers.Main) {
+                        try {
+                            // Force LocationComponent to re-query the location engine
+                            // This ensures it picks up simulation position changes
+                            updateLocationComponentWithStyle(map, context, mapState.hasLocationPermission)
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Failed to refresh LocationComponent on simulation change", e)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Composable

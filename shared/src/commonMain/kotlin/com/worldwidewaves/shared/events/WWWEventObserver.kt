@@ -33,6 +33,7 @@ import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.position.PositionManager
 import com.worldwidewaves.shared.utils.Log
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.component.KoinComponent
@@ -247,6 +248,13 @@ class WWWEventObserver(
     private var unifiedObservationJob: Job? = null
 
     /**
+     * Atomic flag to prevent concurrent observer restarts.
+     * Fixes race condition where multiple rapid startObservation() calls
+     * would cancel each other's observation flows before completion.
+     */
+    private val isObserving = atomic(false)
+
+    /**
      * Starts observing the wave event if not already started.
      *
      * This method delegates to specialized components:
@@ -254,40 +262,51 @@ class WWWEventObserver(
      * 2. WaveHitDetector - calculates event state
      * 3. EventProgressionState - manages StateFlow with throttling
      * 4. EventPositionTracker - handles area detection
+     *
+     * Uses atomic compareAndSet to prevent race conditions where multiple
+     * rapid calls would cancel observation flows before completion.
      */
     fun startObservation() {
-        if (unifiedObservationJob == null) {
-            coroutineScopeProvider.launchDefault {
-                Log.v("WWWEventObserver", "Starting unified observation for event ${event.id}")
+        // Atomic guard: Only proceed if not already observing
+        if (isObserving.compareAndSet(expect = false, update = true)) {
+            unifiedObservationJob =
+                coroutineScopeProvider.launchDefault {
+                    Log.v("WWWEventObserver", "Starting unified observation for event ${event.id}")
 
-                try {
-                    // Initialize state immediately
-                    initializeEventState()
+                    try {
+                        // Initialize state immediately
+                        initializeEventState()
 
-                    // Start observation using EventObserver component
-                    eventObserver.startObservation(
-                        onStateUpdate = { observation ->
-                            updateStates(observation.progression, observation.status)
-                        },
-                        onAreaUpdate = { isInArea ->
-                            progressionState.updateUserIsInArea(isInArea)
-                        },
-                        onPositionUpdate = {
-                            updateAreaDetection()
-                        },
-                        onPolygonLoad = { isLoaded ->
-                            if (isLoaded) {
-                                Log.v("WWWEventObserver", "Polygons loaded, updating area detection for event ${event.id}")
+                        // Start observation using EventObserver component
+                        eventObserver.startObservation(
+                            onStateUpdate = { observation ->
+                                updateStates(observation.progression, observation.status)
+                            },
+                            onAreaUpdate = { isInArea ->
+                                progressionState.updateUserIsInArea(isInArea)
+                            },
+                            onPositionUpdate = {
                                 updateAreaDetection()
-                            }
-                        },
-                    )
-                } catch (e: IllegalStateException) {
-                    handleInitializationStateError(e)
-                } catch (e: kotlinx.coroutines.CancellationException) {
-                    handleCancellationException(e)
+                            },
+                            onPolygonLoad = { isLoaded ->
+                                if (isLoaded) {
+                                    Log.v("WWWEventObserver", "Polygons loaded, updating area detection for event ${event.id}")
+                                    updateAreaDetection()
+                                }
+                            },
+                        )
+                    } catch (e: IllegalStateException) {
+                        handleInitializationStateError(e)
+                    } catch (e: kotlinx.coroutines.CancellationException) {
+                        handleCancellationException(e)
+                    } finally {
+                        // Always reset flag when observation ends (cancelled or completed)
+                        isObserving.value = false
+                        unifiedObservationJob = null
+                    }
                 }
-            }
+        } else {
+            Log.v("WWWEventObserver", "Observation already in progress for event ${event.id}, ignoring duplicate start request")
         }
     }
 
@@ -312,8 +331,26 @@ class WWWEventObserver(
         }
     }
 
+    /**
+     * Stops active observation and resets state.
+     * Ensures atomic flag is released for future restarts.
+     */
     fun stopObservation() {
         eventObserver.stopObservation()
+        unifiedObservationJob?.cancel()
+        unifiedObservationJob = null
+        isObserving.value = false
+        Log.v("WWWEventObserver", "Stopped observation for event ${event.id}")
+    }
+
+    /**
+     * Resets event state to initial values.
+     * Used when starting simulation to ensure clean state transitions and avoid
+     * validation errors like "DONE -> NEXT" or "userHasBeenHit cannot go to false".
+     */
+    fun resetState() {
+        progressionState.reset()
+        Log.v("WWWEventObserver", "Reset state for event ${event.id}")
     }
 
     /**
