@@ -295,6 +295,13 @@ class WWWEventObserver(
                                 }
                             },
                         )
+
+                        // CRITICAL: Always update area detection on observer start
+                        // The onPolygonLoad callback won't fire if polygonsLoaded is already true
+                        // (no state change to trigger onEach). This ensures isInArea is calculated
+                        // on every observer restart, especially important for simulation restarts.
+                        updateAreaDetection()
+                        Log.v("WWWEventObserver", "Initial area detection completed for event ${event.id}")
                     } catch (e: IllegalStateException) {
                         handleInitializationStateError(e)
                     } catch (e: kotlinx.coroutines.CancellationException) {
