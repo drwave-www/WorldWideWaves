@@ -25,12 +25,22 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.worldwidewaves.shared.events.IWWWEvent
@@ -63,6 +73,19 @@ fun WaveScreen(
     // Calculate height based on aspect ratio and available width (matches Event Detail screen)
     val calculatedHeight = calculateEventMapHeight()
 
+    // Track countdown height for dynamic choreography positioning
+    val density = LocalDensity.current
+    var countdownHeightPx by remember { mutableStateOf(0) }
+    val countdownHeight = with(density) { countdownHeightPx.toDp() }
+
+    // Calculate safe area bottom padding
+    val safeAreaBottomPadding = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
+
+    // Calculate choreography bottom padding dynamically
+    // This should account for: countdown height + space below it (will be dynamic based on remaining space)
+    // For now, we use a reasonable estimate that will be refined after layout
+    val choreographyBottomPadding: Dp = countdownHeight + safeAreaBottomPadding + 60.dp
+
     Box(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -81,16 +104,25 @@ fun WaveScreen(
 
             WaveProgressionBar(event)
 
-            // Always show counter in the proper position with spacing (exact working layout)
+            // Weighted spacers for smart countdown positioning (2:3 ratio)
+            // 2/3 of remaining space above countdown, 1/3 below
+            Spacer(modifier = Modifier.weight(2f))
+            WaveHitCounter(
+                event = event,
+                modifier =
+                    Modifier.onSizeChanged { size ->
+                        countdownHeightPx = size.height
+                    },
+            )
             Spacer(modifier = Modifier.weight(1f))
-            WaveHitCounter(event)
-            Spacer(modifier = Modifier.height(30.dp))
+            // Add safe area padding for devices with notches/home indicators
+            Spacer(modifier = Modifier.height(safeAreaBottomPadding))
         }
 
-        // Working choreographies with proper z-index
-
+        // Working choreographies with proper z-index and dynamic bottom padding
         WaveChoreographies(
             event = event,
+            bottomPadding = choreographyBottomPadding,
             modifier = Modifier.zIndex(10f),
         )
     }

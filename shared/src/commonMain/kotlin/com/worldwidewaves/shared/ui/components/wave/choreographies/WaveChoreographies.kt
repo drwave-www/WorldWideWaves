@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.choreographies.ChoreographySequenceBuilder.DisplayableSequence
@@ -85,6 +86,7 @@ private object WorkingChoreographyConstants {
 fun WaveChoreographies(
     event: IWWWEvent,
     modifier: Modifier = Modifier,
+    bottomPadding: Dp = 120.dp,
     // iOS FIX: Clock dependency passed as parameter to prevent deadlock
     clock: IClock = getIosSafeClock(),
 ) {
@@ -156,7 +158,7 @@ fun WaveChoreographies(
                     modifier =
                         modifier
                             .fillMaxWidth()
-                            .padding(bottom = 120.dp),
+                            .padding(bottom = bottomPadding),
                     onSequenceComplete = { warmingKey++ },
                 )
             }
@@ -168,7 +170,7 @@ fun WaveChoreographies(
                 event.wave.waitingChoregraphySequence(),
                 modifier
                     .fillMaxWidth()
-                    .padding(bottom = 120.dp),
+                    .padding(bottom = bottomPadding),
             )
         }
 
@@ -178,7 +180,7 @@ fun WaveChoreographies(
                 event.wave.hitChoregraphySequence(),
                 modifier
                     .fillMaxWidth()
-                    .padding(bottom = 120.dp),
+                    .padding(bottom = bottomPadding),
             )
         }
     }
