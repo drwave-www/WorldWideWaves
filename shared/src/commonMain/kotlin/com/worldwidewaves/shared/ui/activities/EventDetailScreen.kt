@@ -65,6 +65,7 @@ class EventDetailScreen(
                     is com.worldwidewaves.shared.map.MapFeatureState.NotAvailable -> true
                     is com.worldwidewaves.shared.map.MapFeatureState.Failed -> true
                     is com.worldwidewaves.shared.map.MapFeatureState.Available -> true // Re-check to validate
+                    is com.worldwidewaves.shared.map.MapFeatureState.Installed -> true // Re-check after installation
                     else -> false // Don't re-check during Downloading, Installing, Pending, etc.
                 }
 
