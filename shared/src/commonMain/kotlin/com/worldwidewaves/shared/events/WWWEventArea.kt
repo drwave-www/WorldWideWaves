@@ -386,11 +386,11 @@ data class WWWEventArea(
             // Notify that polygon data is now available
             _polygonsLoaded.value = true
         } else {
-            // Cache empty list to prevent redundant file I/O attempts
+            // DON'T cache empty list - allow retry when file becomes available
+            // This prevents permanent rejection if file I/O races with first position check
             // polygonsLoaded stays false so area detection is skipped
-            cachedAreaPolygons = emptyList()
             if (WWWGlobals.LogConfig.ENABLE_POSITION_TRACKING_LOGGING) {
-                Log.i("WWWEventArea", "cachePolygonsIfLoaded: ${event.id} cached empty polygon list (file not found or parsing failed)")
+                Log.i("WWWEventArea", "cachePolygonsIfLoaded: ${event.id} polygons not yet available, will retry on next call")
             }
         }
     }
