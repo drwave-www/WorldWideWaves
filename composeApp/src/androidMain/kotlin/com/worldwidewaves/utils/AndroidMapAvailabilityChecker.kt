@@ -279,6 +279,17 @@ class AndroidMapAvailabilityChecker(
         }
 
     /**
+     * Request uninstall of the dynamic-feature module corresponding to [eventId].
+     * Implements the MapAvailabilityChecker interface method.
+     *
+     * Returns `true` when the uninstall request was successfully scheduled,
+     * `false` otherwise.  On success the internal [_mapStates] flow is updated
+     * immediately and any cached artefacts are cleared so UI can reflect the
+     * change without polling.
+     */
+    override suspend fun requestMapUninstall(eventId: String): Boolean = uninstallMap(eventId)
+
+    /**
      * Uninstall the dynamic-feature module corresponding to [eventId].
      *
      * Returns `true` when the uninstall request was successfully scheduled,
@@ -286,7 +297,7 @@ class AndroidMapAvailabilityChecker(
      * immediately and any cached artefacts are cleared so UI can reflect the
      * change without polling.
      */
-    suspend fun uninstallMap(eventId: String): Boolean =
+    private suspend fun uninstallMap(eventId: String): Boolean =
         suspendCancellableCoroutine { cont ->
             try {
                 Log.i(TAG, "uninstallMap requested for $eventId")

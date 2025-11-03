@@ -30,6 +30,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import platform.Foundation.NSBundleResourceRequest
 import platform.Foundation.NSOperationQueue
+import kotlin.coroutines.resume
 
 /**
  * iOS ODR availability checker.
@@ -177,7 +178,52 @@ class IosMapAvailabilityChecker : MapAvailabilityChecker {
         }
     }
 
-    // Call this when you want to allow purge:
+    /**
+     * Request uninstall/release of a downloaded map.
+     * Implements the MapAvailabilityChecker interface method.
+     * Releases ODR resources and updates state immediately.
+     */
+    override suspend fun requestMapUninstall(eventId: String): Boolean =
+        kotlinx.coroutines.suspendCancellableCoroutine { cont ->
+            var wasRemoved = false
+            onMain {
+                scope.launch {
+                    com.worldwidewaves.shared.data.MapDownloadGate
+                        .disallow(eventId)
+                }
+
+                val request = pinnedRequests.remove(eventId)
+                wasRemoved = request != null
+                request?.let {
+                    try {
+                        it.endAccessingResources()
+                    } catch (_: Throwable) {
+                    }
+                }
+
+                // FIX: Update state immediately (was missing in releaseDownloadedMap!)
+                val updated = _mapStates.value.toMutableMap()
+                updated[eventId] = false
+                _mapStates.value = updated
+
+                com.worldwidewaves.shared.utils.Log.i(
+                    "IosMapAvailabilityChecker",
+                    "requestMapUninstall: Released map $eventId, state updated to false",
+                )
+
+                cont.resume(wasRemoved)
+            }
+            cont.invokeOnCancellation { }
+        }
+
+    /**
+     * Call this when you want to allow purge.
+     * @deprecated Use requestMapUninstall() instead for proper state management
+     */
+    @Deprecated(
+        "Use requestMapUninstall() instead",
+        ReplaceWith("requestMapUninstall(eventId)"),
+    )
     fun releaseDownloadedMap(eventId: String) {
         onMain {
             scope.launch {

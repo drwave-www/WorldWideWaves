@@ -63,6 +63,7 @@ fun EventsScreen(
     mapStates: Map<String, Boolean> = emptyMap(),
     onEventClick: (String) -> Unit = {},
     setEventFavorite: SetEventFavorite? = null,
+    onMapUninstallRequested: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Log.i("SharedEventsListScreen", "SharedEventsListScreen starting with ${events.size} events")
@@ -123,5 +124,6 @@ fun EventsScreen(
         onEventClick = onEventClick,
         setEventFavorite = setEventFavorite,
         onFavoriteChanged = onFavoriteChanged,
+        onMapUninstallRequested = onMapUninstallRequested,
     )
 }

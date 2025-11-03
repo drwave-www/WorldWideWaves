@@ -100,9 +100,12 @@ fun EventFlag(
 fun EventOverlayMapDownloaded(
     @Suppress("UNUSED_PARAMETER") eventId: String,
     isMapInstalled: Boolean,
+    onMapUninstallClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     if (isMapInstalled) {
+        val uninstallDescription = stringResource(MokoRes.strings.events_uninstall_map_title)
+
         Box(
             modifier =
                 modifier
@@ -117,8 +120,10 @@ fun EventOverlayMapDownloaded(
                 modifier =
                     Modifier
                         .size(48.dp)
-                        .clickable {
-                            // NOTE: Map uninstall dialog implementation pending
+                        .clickable { onMapUninstallClick() }
+                        .semantics {
+                            role = Role.Button
+                            contentDescription = uninstallDescription
                         },
                 contentAlignment = Alignment.Center,
             ) {

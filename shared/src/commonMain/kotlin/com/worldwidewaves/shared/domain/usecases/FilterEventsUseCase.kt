@@ -126,4 +126,15 @@ interface MapAvailabilityChecker {
     fun requestMapDownload(eventId: String) {
         // Default implementation does nothing - platforms can override
     }
+
+    /**
+     * Request uninstall/release of a downloaded map.
+     * Android: Schedules deferred uninstall via Play Core (files removed on next app update)
+     * iOS: Releases ODR resources for system purge (system decides when to delete)
+     * @param eventId The event/map ID to uninstall
+     * @return true if uninstall was successful or scheduled, false on error
+     */
+    suspend fun requestMapUninstall(eventId: String): Boolean {
+        return false // Default: unsupported
+    }
 }

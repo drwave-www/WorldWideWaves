@@ -25,11 +25,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker
+import com.worldwidewaves.shared.ui.components.AlertMapUninstall
 import com.worldwidewaves.shared.ui.screens.EventsScreen
+import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.viewmodels.EventsViewModel
 import org.koin.core.component.KoinComponent
 
@@ -54,6 +59,10 @@ class EventsListScreen(
         val events by viewModel.events.collectAsState()
         val mapStates by mapChecker.mapStates.collectAsState()
 
+        // Dialog state for map uninstall confirmation
+        var showUninstallDialog by remember { mutableStateOf(false) }
+        var pendingUninstallEventId by remember { mutableStateOf<String?>(null) }
+
         // Initialize EventsViewModel (iOS-safe pattern, Android compatible)
         LaunchedEffect(Unit) {
             viewModel.loadEvents()
@@ -70,12 +79,47 @@ class EventsListScreen(
             mapChecker.refreshAvailability()
         }
 
+        // Map uninstall request callback
+        val onMapUninstallRequested: (String) -> Unit = { eventId ->
+            pendingUninstallEventId = eventId
+            showUninstallDialog = true
+        }
+
+        // Handle uninstall confirmation
+        LaunchedEffect(showUninstallDialog) {
+            if (!showUninstallDialog && pendingUninstallEventId != null) {
+                val eventId = pendingUninstallEventId!!
+                Log.i("EventsListScreen", "Uninstalling map for event: $eventId")
+                val success = mapChecker.requestMapUninstall(eventId)
+                if (success) {
+                    Log.i("EventsListScreen", "Map uninstall successful for: $eventId")
+                    mapChecker.refreshAvailability() // Ensure state is refreshed
+                } else {
+                    Log.e("EventsListScreen", "Failed to uninstall map for: $eventId")
+                    // TODO: Show error feedback to user (toast/snackbar)
+                }
+                pendingUninstallEventId = null
+            }
+        }
+
+        // Show uninstall confirmation dialog
+        if (showUninstallDialog && pendingUninstallEventId != null) {
+            AlertMapUninstall(
+                onConfirm = { showUninstallDialog = false },
+                onDismiss = {
+                    showUninstallDialog = false
+                    pendingUninstallEventId = null
+                },
+            )
+        }
+
         // Use shared EventsListScreen for perfect UI parity
         EventsScreen(
             events = events,
             mapStates = mapStates,
             onEventClick = { eventId -> platformEnabler.openEventActivity(eventId) },
             setEventFavorite = setEventFavorite,
+            onMapUninstallRequested = onMapUninstallRequested,
             modifier = modifier,
         )
     }
