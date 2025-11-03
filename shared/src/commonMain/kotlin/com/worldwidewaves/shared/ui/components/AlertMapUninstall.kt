@@ -28,6 +28,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
 import com.worldwidewaves.shared.MokoRes
+import com.worldwidewaves.shared.ui.theme.onSurfaceVariantLight
 import com.worldwidewaves.shared.ui.theme.scrimLight
 import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
 import dev.icerock.moko.resources.compose.stringResource
@@ -56,7 +57,7 @@ fun AlertMapUninstall(
         text = {
             Text(
                 text = stringResource(MokoRes.strings.events_uninstall_map_confirmation),
-                style = sharedCommonTextStyle(),
+                style = sharedCommonTextStyle().copy(color = onSurfaceVariantLight),
             )
         },
         confirmButton = {
