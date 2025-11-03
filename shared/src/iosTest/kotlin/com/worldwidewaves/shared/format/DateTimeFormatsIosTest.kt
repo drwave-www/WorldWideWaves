@@ -24,6 +24,9 @@ package com.worldwidewaves.shared.format
 import kotlinx.datetime.TimeZone
 import platform.Foundation.NSLocale
 import platform.Foundation.NSTimeZone
+import platform.Foundation.currentLocale
+import platform.Foundation.languageCode
+import platform.Foundation.timeZoneWithName
 import kotlin.test.Test
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
@@ -56,7 +59,7 @@ class DateTimeFormatsIosTest {
         assertNotNull(currentLocale, "NSLocale.currentLocale should be accessible on iOS")
 
         val languageCode = currentLocale.languageCode
-        assertNotNull("Language code should be accessible", languageCode)
+        assertNotNull(languageCode, "Language code should be accessible")
     }
 
     @Test
@@ -66,35 +69,35 @@ class DateTimeFormatsIosTest {
         val nyZone = NSTimeZone.timeZoneWithName("America/New_York")
         val tokyoZone = NSTimeZone.timeZoneWithName("Asia/Tokyo")
 
-        assertNotNull("UTC timezone should be available", utcZone)
-        assertNotNull("New York timezone should be available", nyZone)
-        assertNotNull("Tokyo timezone should be available", tokyoZone)
+        assertNotNull(utcZone, "UTC timezone should be available")
+        assertNotNull(nyZone, "New York timezone should be available")
+        assertNotNull(tokyoZone, "Tokyo timezone should be available")
     }
 
     @Test
     fun dayMonth_shouldProduceValidOutputWithNSDateFormatter() {
         val result = DateTimeFormats.dayMonth(testInstant, TimeZone.UTC)
 
-        assertNotNull("dayMonth should return non-null", result)
-        assertTrue("dayMonth should return non-empty string", result.isNotEmpty())
-        assertTrue("dayMonth output should have reasonable length", result.length in 3..20)
+        assertNotNull(result, "dayMonth should return non-null")
+        assertTrue(result.isNotEmpty(), "dayMonth should return non-empty string")
+        assertTrue(result.length in 3..20, "dayMonth output should have reasonable length")
 
         // Should contain day number for January 1st
         val hasDay = result.contains("1") || result.contains("01")
-        assertTrue("dayMonth should contain day number: $result", hasDay)
+        assertTrue(hasDay, "dayMonth should contain day number: $result")
     }
 
     @Test
     fun timeShort_shouldUseJmSkeletonForLocaleAwareFormatting() {
         val result = DateTimeFormats.timeShort(noonInstant, TimeZone.UTC)
 
-        assertNotNull("timeShort should return non-null", result)
-        assertTrue("timeShort should return non-empty string", result.isNotEmpty())
-        assertTrue("timeShort output should have reasonable length", result.length in 4..15)
+        assertNotNull(result, "timeShort should return non-null")
+        assertTrue(result.isNotEmpty(), "timeShort should return non-empty string")
+        assertTrue(result.length in 4..15, "timeShort output should have reasonable length")
 
         // Should contain "12" for noon or ":" separator
         val hasValidTime = result.contains("12") || result.contains(":")
-        assertTrue("timeShort should contain valid time: $result", hasValidTime)
+        assertTrue(hasValidTime, "timeShort should contain valid time: $result")
     }
 
     @Test
@@ -105,10 +108,10 @@ class DateTimeFormatsIosTest {
         val utcResult = DateTimeFormats.dayMonth(newYearsEveEvening, TimeZone.UTC)
         val tokyoResult = DateTimeFormats.dayMonth(newYearsEveEvening, TimeZone.of("Asia/Tokyo"))
 
-        assertNotNull("UTC result should not be null", utcResult)
-        assertNotNull("Tokyo result should not be null", tokyoResult)
-        assertTrue("UTC result should be valid", utcResult.isNotEmpty())
-        assertTrue("Tokyo result should be valid", tokyoResult.isNotEmpty())
+        assertNotNull(utcResult, "UTC result should not be null")
+        assertNotNull(tokyoResult, "Tokyo result should not be null")
+        assertTrue(utcResult.isNotEmpty(), "UTC result should be valid")
+        assertTrue(tokyoResult.isNotEmpty(), "Tokyo result should be valid")
     }
 
     @Test
@@ -143,8 +146,8 @@ class DateTimeFormatsIosTest {
 
         timezones.forEach { tz ->
             val result = DateTimeFormats.dayMonth(testInstant, tz)
-            assertNotNull("Should handle ${tz.id}", result)
-            assertTrue("Should return non-empty for ${tz.id}", result.isNotEmpty())
+            assertNotNull(result, "Should handle ${tz.id}")
+            assertTrue(result.isNotEmpty(), "Should return non-empty for ${tz.id}")
         }
     }
 
@@ -161,8 +164,8 @@ class DateTimeFormatsIosTest {
 
         timezones.forEach { tz ->
             val result = DateTimeFormats.timeShort(noonInstant, tz)
-            assertNotNull("Should handle ${tz.id}", result)
-            assertTrue("Should return non-empty for ${tz.id}", result.isNotEmpty())
+            assertNotNull(result, "Should handle ${tz.id}")
+            assertTrue(result.isNotEmpty(), "Should return non-empty for ${tz.id}")
         }
     }
 
@@ -178,7 +181,7 @@ class DateTimeFormatsIosTest {
         assertNotNull(result3)
 
         // All should be identical
-        assertTrue("Formatting should be stable", result1 == result2 && result2 == result3)
+        assertTrue(result1 == result2 && result2 == result3, "Formatting should be stable")
     }
 
     @Test
@@ -193,7 +196,7 @@ class DateTimeFormatsIosTest {
         assertNotNull(result3)
 
         // All should be identical
-        assertTrue("Formatting should be stable", result1 == result2 && result2 == result3)
+        assertTrue(result1 == result2 && result2 == result3, "Formatting should be stable")
     }
 
     @Test
@@ -209,8 +212,8 @@ class DateTimeFormatsIosTest {
 
         edgeTimezones.forEach { tz ->
             val result = DateTimeFormats.dayMonth(testInstant, tz)
-            assertNotNull("Should handle edge timezone ${tz.id}", result)
-            assertTrue("Should return non-empty for ${tz.id}", result.isNotEmpty())
+            assertNotNull(result, "Should handle edge timezone ${tz.id}")
+            assertTrue(result.isNotEmpty(), "Should return non-empty for ${tz.id}")
         }
     }
 
@@ -226,8 +229,8 @@ class DateTimeFormatsIosTest {
 
         edgeTimezones.forEach { tz ->
             val result = DateTimeFormats.timeShort(noonInstant, tz)
-            assertNotNull("Should handle edge timezone ${tz.id}", result)
-            assertTrue("Should return non-empty for ${tz.id}", result.isNotEmpty())
+            assertNotNull(result, "Should handle edge timezone ${tz.id}")
+            assertTrue(result.isNotEmpty(), "Should return non-empty for ${tz.id}")
         }
     }
 
@@ -244,8 +247,8 @@ class DateTimeFormatsIosTest {
 
         instants.forEach { instant ->
             val result = DateTimeFormats.dayMonth(instant, TimeZone.UTC)
-            assertNotNull("Should format instant $instant", result)
-            assertTrue("Should be non-empty for $instant", result.isNotEmpty())
+            assertNotNull(result, "Should format instant $instant")
+            assertTrue(result.isNotEmpty(), "Should be non-empty for $instant")
         }
     }
 
@@ -264,8 +267,8 @@ class DateTimeFormatsIosTest {
 
         times.forEach { instant ->
             val result = DateTimeFormats.timeShort(instant, TimeZone.UTC)
-            assertNotNull("Should format time $instant", result)
-            assertTrue("Should be non-empty for $instant", result.isNotEmpty())
+            assertNotNull(result, "Should format time $instant")
+            assertTrue(result.isNotEmpty(), "Should be non-empty for $instant")
         }
     }
 }

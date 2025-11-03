@@ -29,6 +29,8 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import platform.Foundation.NSLocale
+import platform.Foundation.currentLocale
+import platform.Foundation.languageCode
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -75,24 +77,24 @@ class LocalizationManagerIosTest : KoinTest {
     @Test
     fun nsLocale_currentLocaleShouldProvideLanguageCode() {
         val currentLocale = NSLocale.currentLocale
-        assertNotNull("NSLocale.currentLocale should be accessible", currentLocale)
+        assertNotNull(currentLocale, "NSLocale.currentLocale should be accessible")
 
         val languageCode = currentLocale.languageCode
-        assertNotNull("Language code should be accessible", languageCode)
-        assertTrue("Language code should not be empty", languageCode.isNotEmpty())
+        assertNotNull(languageCode, "Language code should be accessible")
+        assertTrue(languageCode.isNotEmpty(), "Language code should not be empty")
     }
 
     @Test
     fun getPlatformLocaleKey_shouldReturnValidLanguageCode() {
         val localeKey = getPlatformLocaleKey()
 
-        assertNotNull("Platform locale key should not be null", localeKey)
-        assertTrue("Platform locale key should not be empty", localeKey.isNotEmpty())
+        assertNotNull(localeKey, "Platform locale key should not be null")
+        assertTrue(localeKey.isNotEmpty(), "Platform locale key should not be empty")
 
         // Should be 2-5 character language code (e.g., "en", "fr", "ja", "zh-Hans")
         assertTrue(
-            "Locale key should be valid length (2-5 chars): $localeKey",
             localeKey.length in 2..10,
+            "Locale key should be valid length (2-5 chars): $localeKey",
         )
     }
 
@@ -102,8 +104,8 @@ class LocalizationManagerIosTest : KoinTest {
             val manager = getKoin().get<LocalizationManager>()
 
             val initialLocale = manager.localeChanges.value
-            assertNotNull("Initial locale should not be null", initialLocale)
-            assertTrue("Initial locale should not be empty", initialLocale.isNotEmpty())
+            assertNotNull(initialLocale, "Initial locale should not be null")
+            assertTrue(initialLocale.isNotEmpty(), "Initial locale should not be empty")
 
             // Should match platform locale
             val platformLocale = getPlatformLocaleKey()
@@ -129,7 +131,7 @@ class LocalizationManagerIosTest : KoinTest {
             try {
                 notifyLocaleChanged()
                 // Should not throw exception when Koin is initialized
-                assertTrue("LocalizationBridge should work with Koin initialized", true)
+                assertTrue(true, "LocalizationBridge should work with Koin initialized")
             } catch (e: Exception) {
                 throw AssertionError("LocalizationBridge should not throw when Koin is ready: ${e.message}")
             }
