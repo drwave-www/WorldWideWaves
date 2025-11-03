@@ -140,9 +140,17 @@ abstract class BaseWaveActivityScreen(
             }
         }
 
-        // Propagate simulation changes to all relevant events via central helper
+        // Propagate simulation changes to both observer layers:
+        // 1. EventObserver (business logic) - handles event state, progression, etc.
+        // 2. WaveProgressionObserver (UI layer) - renders polygons on map
+        // Both need restart because WaveProgressionObserver's polygon clearing logic
+        // only executes in startObservation(), not automatically when flows change
         LaunchedEffect(simulationChanged) {
+            // Restart EventObserver (business logic layer) for all events
             events.restartObserversOnSimulationChange()
+            // Also restart WaveProgressionObserver (UI layer) to clear polygons and reset state
+            waveProgressionObserver?.stopObservation()
+            waveProgressionObserver?.startObservation()
         }
 
         // Also react when simulation *mode* is toggled; only restart if a
@@ -150,6 +158,9 @@ abstract class BaseWaveActivityScreen(
         LaunchedEffect(simMode) {
             if (platform.isOnSimulation()) {
                 events.restartObserversOnSimulationChange()
+                // Also restart WaveProgressionObserver to clear polygons
+                waveProgressionObserver?.stopObservation()
+                waveProgressionObserver?.startObservation()
             }
         }
     }
