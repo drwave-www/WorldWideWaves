@@ -608,6 +608,33 @@ class AndroidMapLibreAdapter(
     ) {
         val map = mapLibreMap ?: return
         val wavePolygons = polygons.filterIsInstance<Polygon>()
+
+        // Handle clearing polygons when empty list is provided with clearExisting flag
+        // This is used when simulation stops to remove all wave polygons from the map
+        if (wavePolygons.isEmpty() && clearExisting) {
+            Log.i(TAG, "Clearing all wave polygons from map (${waveLayerIds.size} layers)")
+            // Clear pending polygons if style not loaded yet
+            pendingPolygons = null
+            // Clear map layers if style is loaded
+            map.getStyle { style ->
+                try {
+                    // Remove all wave polygon layers and sources
+                    waveLayerIds.forEach { layerId ->
+                        style.removeLayer(layerId)
+                    }
+                    waveSourceIds.forEach { sourceId ->
+                        style.removeSource(sourceId)
+                    }
+                    // Clear tracking arrays
+                    waveLayerIds.clear()
+                    waveSourceIds.clear()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error clearing wave polygons", e)
+                }
+            }
+            return
+        }
+
         if (wavePolygons.isEmpty()) {
             Log.w(TAG, "No valid Polygon objects found in ${polygons.size} input polygons")
             return
