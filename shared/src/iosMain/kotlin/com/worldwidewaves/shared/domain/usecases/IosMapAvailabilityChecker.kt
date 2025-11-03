@@ -186,49 +186,54 @@ class IosMapAvailabilityChecker : MapAvailabilityChecker {
     override suspend fun requestMapUninstall(eventId: String): Boolean =
         kotlinx.coroutines.suspendCancellableCoroutine { cont ->
             var wasRemoved = false
-            onMain {
-                scope.launch {
-                    com.worldwidewaves.shared.data.MapDownloadGate
-                        .disallow(eventId)
 
-                    // Clear cache files to ensure isMapAvailable returns false
-                    // Matches Android behavior in AndroidMapAvailabilityChecker
-                    try {
-                        com.worldwidewaves.shared.data
-                            .clearEventCache(eventId)
-                        com.worldwidewaves.shared.utils.Log.i(
-                            "IosMapAvailabilityChecker",
-                            "Cache cleared for $eventId",
-                        )
-                    } catch (e: Exception) {
-                        com.worldwidewaves.shared.utils.Log.e(
-                            "IosMapAvailabilityChecker",
-                            "Failed to clear cache for $eventId",
-                            throwable = e,
-                        )
-                    }
+            scope.launch {
+                // Background: Clear cache and disallow downloads FIRST
+                com.worldwidewaves.shared.data.MapDownloadGate
+                    .disallow(eventId)
+
+                // Clear cache files to ensure isMapAvailable returns false
+                // Matches Android behavior in AndroidMapAvailabilityChecker
+                try {
+                    com.worldwidewaves.shared.data
+                        .clearEventCache(eventId)
+                    com.worldwidewaves.shared.data
+                        .clearUnavailableGeoJsonCache(eventId)
+                    com.worldwidewaves.shared.utils.Log.i(
+                        "IosMapAvailabilityChecker",
+                        "Cache cleared for $eventId",
+                    )
+                } catch (e: Exception) {
+                    com.worldwidewaves.shared.utils.Log.e(
+                        "IosMapAvailabilityChecker",
+                        "Failed to clear cache for $eventId",
+                        throwable = e,
+                    )
                 }
 
-                val request = pinnedRequests.remove(eventId)
-                wasRemoved = request != null
-                request?.let {
-                    try {
-                        it.endAccessingResources()
-                    } catch (_: Throwable) {
+                // Main thread: ODR release + state update (after cache cleared)
+                onMain {
+                    val request = pinnedRequests.remove(eventId)
+                    wasRemoved = request != null
+                    request?.let {
+                        try {
+                            it.endAccessingResources()
+                        } catch (_: Throwable) {
+                        }
                     }
+
+                    // Update state after cache is cleared (fixes race condition)
+                    val updated = _mapStates.value.toMutableMap()
+                    updated[eventId] = false
+                    _mapStates.value = updated
+
+                    com.worldwidewaves.shared.utils.Log.i(
+                        "IosMapAvailabilityChecker",
+                        "requestMapUninstall: Released map $eventId, state updated to false",
+                    )
+
+                    cont.resume(wasRemoved)
                 }
-
-                // FIX: Update state immediately (was missing in releaseDownloadedMap!)
-                val updated = _mapStates.value.toMutableMap()
-                updated[eventId] = false
-                _mapStates.value = updated
-
-                com.worldwidewaves.shared.utils.Log.i(
-                    "IosMapAvailabilityChecker",
-                    "requestMapUninstall: Released map $eventId, state updated to false",
-                )
-
-                cont.resume(wasRemoved)
             }
             cont.invokeOnCancellation { }
         }
