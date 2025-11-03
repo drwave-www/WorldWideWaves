@@ -30,6 +30,7 @@ import com.worldwidewaves.shared.data.cachedFilePath
 import com.worldwidewaves.shared.data.getCacheDir
 import com.worldwidewaves.shared.data.getMapFileAbsolutePath
 import com.worldwidewaves.shared.data.isCachedFileStale
+import com.worldwidewaves.shared.data.platformFileExists
 import com.worldwidewaves.shared.data.updateCacheMetadata
 import com.worldwidewaves.shared.events.data.MapDataProvider
 import com.worldwidewaves.shared.events.utils.DataValidator
@@ -117,14 +118,29 @@ class WWWEventMap(
 
         val styleFilename = "style-${event.id}.json"
 
-        // Check in-memory cache first, but validate file existence
+        // Check in-memory cache first, but validate both style JSON and mbtiles file exist
         _cachedStyleUri?.let { cached ->
-            // Verify cached file still exists on disk
+            // Verify cached style JSON file still exists on disk
             if (cachedFileExists(styleFilename)) {
-                Log.d("WWWEventMap", "getStyleUri: Using validated in-memory cached style URI: $cached")
-                return cached
+                // CRITICAL: Also verify mbtiles file exists before returning cached style
+                // Style JSON references mbtiles file - if mbtiles is missing (still copying
+                // asynchronously), MapLibre will show gray screen
+                val mbtilesPath = getMbtilesFilePath()
+                if (mbtilesPath != null) {
+                    val mbtilesExists = platformFileExists(mbtilesPath)
+                    if (mbtilesExists) {
+                        Log.d("WWWEventMap", "getStyleUri: Using validated cached style (mbtiles ready): $cached")
+                        return cached
+                    } else {
+                        Log.w("WWWEventMap", "getStyleUri: Mbtiles file missing (async copy in progress), invalidating style cache")
+                        _cachedStyleUri = null
+                    }
+                } else {
+                    Log.w("WWWEventMap", "getStyleUri: Cannot get mbtiles path, invalidating style cache")
+                    _cachedStyleUri = null
+                }
             } else {
-                Log.w("WWWEventMap", "getStyleUri: In-memory cache points to non-existent file, clearing cache")
+                Log.w("WWWEventMap", "getStyleUri: Style JSON missing, clearing in-memory cache")
                 _cachedStyleUri = null
             }
         }
