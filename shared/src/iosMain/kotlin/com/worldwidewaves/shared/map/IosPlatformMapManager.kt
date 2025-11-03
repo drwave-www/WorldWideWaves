@@ -187,6 +187,16 @@ class IosPlatformMapManager(
                                 )
                             Log.i(TAG, "Files cached: geojson=${geojsonPath != null}, mbtiles=${mbtilesPath != null}")
 
+                            // Verify at least one file was successfully cached before declaring success
+                            // Both files are attempted, but at minimum one must succeed for map to be usable
+                            if (geojsonPath == null && mbtilesPath == null) {
+                                Log.e(TAG, "❌ Map file caching FAILED for: $mapId (both geojson and mbtiles failed)")
+                                com.worldwidewaves.shared.data.MapDownloadGate
+                                    .disallow(mapId)
+                                onError(-2, "Failed to cache map files to Application Support directory")
+                                return@launch
+                            }
+
                             // Synchronize UI state with availability checker
                             // Now that files are in cache, availability check will succeed
                             mapAvailabilityChecker?.trackMaps(listOf(mapId))

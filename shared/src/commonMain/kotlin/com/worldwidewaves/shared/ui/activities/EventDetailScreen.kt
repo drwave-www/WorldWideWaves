@@ -55,9 +55,20 @@ class EventDetailScreen(
         var showMapRequiredDialog by remember { mutableStateOf(false) }
 
         // Map availability check - ensures state initialized before map renders
-        // React to mapFeatureState changes (e.g., after map download completes)
+        // Only check when state is NotChecked or when event changes
+        // Don't re-check after successful installation (Installed/Available) to avoid race conditions
         LaunchedEffect(event.id, mapFeatureState) {
-            mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
+            val shouldCheck =
+                when (mapFeatureState) {
+                    is com.worldwidewaves.shared.map.MapFeatureState.NotChecked -> true
+                    is com.worldwidewaves.shared.map.MapFeatureState.NotAvailable -> true
+                    is com.worldwidewaves.shared.map.MapFeatureState.Failed -> true
+                    else -> false // Don't re-check Installed, Available, Downloading, Pending, etc.
+                }
+
+            if (shouldCheck) {
+                mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
+            }
         }
 
         // Calculate responsive map height

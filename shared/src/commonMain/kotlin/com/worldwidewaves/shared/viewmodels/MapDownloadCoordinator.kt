@@ -77,9 +77,20 @@ class MapDownloadCoordinator(
         if (platformAdapter.isMapInstalled(mapId)) {
             _featureState.value = MapFeatureState.Available
         } else {
-            _featureState.value = MapFeatureState.NotAvailable
-            if (autoDownload) {
-                downloadMap(mapId)
+            // Defensive: Don't transition from Installed to NotAvailable
+            // This prevents race conditions where filesystem check runs before files are fully cached
+            val currentState = _featureState.value
+            if (currentState is MapFeatureState.Installed) {
+                Log.w(
+                    TAG,
+                    "Map reported as Installed but filesystem check failed for $mapId - keeping Installed state to avoid race condition",
+                )
+                // Keep current Installed state, don't overwrite to NotAvailable
+            } else {
+                _featureState.value = MapFeatureState.NotAvailable
+                if (autoDownload) {
+                    downloadMap(mapId)
+                }
             }
         }
     }
