@@ -12,14 +12,6 @@
         <!-- MapLibre/OpenStreetMap -->
         <domain includeSubdomains="true">tile.openstreetmap.org</domain>
         <domain includeSubdomains="true">nominatim.openstreetmap.org</domain>
-
-        <!-- Certificate pinning for critical services -->
-        <pin-set expiration="2026-01-01">
-            <!-- Firebase API pin (example - replace with actual pin) -->
-            <pin digest="SHA-256">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</pin>
-            <!-- Backup pin (rotate periodically) -->
-            <pin digest="SHA-256">BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=</pin>
-        </pin-set>
     </domain-config>
 
     <!-- Debug configuration - allow cleartext for testing -->
