@@ -294,8 +294,17 @@ abstract class AbstractEventMap<T>(
      */
     suspend fun targetWave() {
         // Use unified PositionManager (respects SIMULATION > GPS priority)
-        val currentLocation = positionManager.getCurrentPosition() ?: return
-        val closestWaveLongitude = event.wave.userClosestWaveLongitude() ?: return
+        val currentLocation = positionManager.getCurrentPosition()
+        if (currentLocation == null) {
+            Log.w("AbstractEventMap", "targetWave called but position not available (debounce pending?)")
+            return
+        }
+
+        val closestWaveLongitude = event.wave.userClosestWaveLongitude()
+        if (closestWaveLongitude == null) {
+            Log.w("AbstractEventMap", "targetWave called but wave longitude not available")
+            return
+        }
 
         val wavePosition = Position(currentLocation.latitude, closestWaveLongitude)
         runCameraAnimation { cb ->
@@ -307,7 +316,12 @@ abstract class AbstractEventMap<T>(
      * Moves the camera to the current user position
      */
     suspend fun targetUser() {
-        val userPosition = positionManager.getCurrentPosition() ?: return
+        val userPosition = positionManager.getCurrentPosition()
+        if (userPosition == null) {
+            Log.w("AbstractEventMap", "targetUser called but position not available")
+            return
+        }
+
         runCameraAnimation { cb ->
             mapLibreAdapter.animateCamera(userPosition, MapDisplay.TARGET_USER_ZOOM, cb)
         }

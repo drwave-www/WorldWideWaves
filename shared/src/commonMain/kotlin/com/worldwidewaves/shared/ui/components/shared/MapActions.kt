@@ -93,17 +93,26 @@ fun MapActions(
                     Modifier
                         .size(Event.TARGET_WAVE_IMAGE_SIZE.dp)
                         .clickable {
-                            if (isRunning && (clock.now() > event.getWaveStartDateTime())) {
+                            if (isRunning && hasPosition && (clock.now() > event.getWaveStartDateTime())) {
                                 onTargetWave()
                             }
                         }.semantics {
                             role = Role.Button
-                            stateDescription = if (isRunning) "Active" else "Inactive"
+                            stateDescription = if (isRunning && hasPosition) "Active" else "Inactive"
                         },
-                painter = painterResource(if (isRunning) Res.drawable.target_wave_active else Res.drawable.target_wave_inactive),
+                painter =
+                    painterResource(
+                        if (isRunning &&
+                            hasPosition
+                        ) {
+                            Res.drawable.target_wave_active
+                        } else {
+                            Res.drawable.target_wave_inactive
+                        },
+                    ),
                 contentDescription =
                     stringResource(
-                        if (isRunning) MokoRes.strings.event_target_wave_on else MokoRes.strings.event_target_wave_off,
+                        if (isRunning && hasPosition) MokoRes.strings.event_target_wave_on else MokoRes.strings.event_target_wave_off,
                     ),
             )
             Image(
