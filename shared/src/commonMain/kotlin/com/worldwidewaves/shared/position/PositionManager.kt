@@ -142,9 +142,11 @@ class PositionManager(
     }
 
     /**
-     * Gets the current position synchronously
+     * Gets the current position synchronously.
+     * Returns pending position (if available) to ensure consistency with reactive flows
+     * during the debounce window.
      */
-    fun getCurrentPosition(): Position? = _position.value
+    fun getCurrentPosition(): Position? = pendingUpdate?.position ?: _position.value
 
     /**
      * Gets the current position source

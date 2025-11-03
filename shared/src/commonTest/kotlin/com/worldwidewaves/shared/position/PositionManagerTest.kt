@@ -173,15 +173,43 @@ class PositionManagerTest {
             positionManager.updatePosition(PositionManager.PositionSource.GPS, position2)
             positionManager.updatePosition(PositionManager.PositionSource.GPS, position3)
 
-            // Should still be null before debounce delay
-            assertNull(positionManager.getCurrentPosition())
+            // Should return pending position (position3) during debounce window
+            assertEquals(position3, positionManager.getCurrentPosition())
 
             // Advance past debounce delay
             advanceTimeBy(100.milliseconds)
             testScheduler.runCurrent()
 
-            // Should now have the final position
+            // Should now have the final position committed
             assertEquals(position3, positionManager.getCurrentPosition())
+        }
+
+    @Test
+    fun `should return pending position during debounce window`() =
+        runTest {
+            val coroutineScopeProvider = TestCoroutineScopeProvider(this)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 100.milliseconds)
+            val gpsPosition = Position(lat = 48.8566, lng = 2.3522)
+
+            // Update position
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, gpsPosition)
+
+            // Immediately check - should return pending position
+            assertEquals(gpsPosition, positionManager.getCurrentPosition())
+
+            // Advance time but not past debounce
+            advanceTimeBy(50.milliseconds)
+            testScheduler.runCurrent()
+
+            // Should still return pending position
+            assertEquals(gpsPosition, positionManager.getCurrentPosition())
+
+            // Complete debounce
+            advanceTimeBy(50.milliseconds)
+            testScheduler.runCurrent()
+
+            // Should now return committed position (same value)
+            assertEquals(gpsPosition, positionManager.getCurrentPosition())
         }
 
     @Test
