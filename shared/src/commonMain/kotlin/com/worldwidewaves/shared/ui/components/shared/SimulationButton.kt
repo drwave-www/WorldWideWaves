@@ -73,7 +73,9 @@ fun BoxScope.SimulationButton(
     platform: WWWPlatform = getIosSafePlatform(),
 ) {
     // iOS FIX: Removed dangerous object : KoinComponent pattern
-    var simulationButtonState by remember { mutableStateOf("idle") }
+    var simulationButtonState by remember {
+        mutableStateOf(if (platform.isOnSimulation()) "active" else "idle")
+    }
     var pendingAction by remember { mutableStateOf<(suspend () -> Unit)?>(null) }
     val isSimulationEnabled by platform.simulationModeEnabled.collectAsState()
 
@@ -189,6 +191,15 @@ fun BoxScope.SimulationButton(
     LaunchedEffect(event.id, isSimulationEnabled) {
         if (!isSimulationEnabled && simulationButtonState == "active") {
             simulationButtonState = "idle"
+        }
+    }
+
+    // Sync button state with actual simulation running state
+    // This ensures button shows correct state when user navigates between screens
+    LaunchedEffect(event.id, platform) {
+        platform.simulationChanged.collect {
+            val isRunning = platform.isOnSimulation()
+            simulationButtonState = if (isRunning) "active" else "idle"
         }
     }
 }
