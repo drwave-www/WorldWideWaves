@@ -74,6 +74,10 @@ class PositionManager(
     private var debounceJob: Job? = null
     private var pendingUpdate: PositionState? = null
 
+    // GPS position storage - always keeps latest GPS position regardless of simulation priority
+    private var lastGPSPosition: Position? = null
+    private var pendingGPSPosition: Position? = null
+
     // Public reactive API with performance optimization
     private val _position = MutableStateFlow<Position?>(null)
     val position: StateFlow<Position?> = _position.asStateFlow()
@@ -97,6 +101,17 @@ class PositionManager(
     ) {
         if (WWWGlobals.LogConfig.ENABLE_POSITION_TRACKING_LOGGING) {
             Log.v(TAG, "[DEBUG] Position update from $source: $newPosition")
+        }
+
+        // Always store GPS position separately, regardless of priority system
+        // This ensures GPS position is available even when simulation is active
+        if (source == PositionSource.GPS) {
+            pendingGPSPosition = newPosition
+            // Immediately commit GPS position (no debouncing for GPS storage)
+            lastGPSPosition = newPosition
+            if (WWWGlobals.LogConfig.ENABLE_POSITION_TRACKING_LOGGING) {
+                Log.v(TAG, "[DEBUG] Stored GPS position: $newPosition")
+            }
         }
 
         val newState = PositionState(newPosition, if (newPosition == null) null else source)
@@ -149,6 +164,13 @@ class PositionManager(
     fun getCurrentPosition(): Position? = pendingUpdate?.position ?: _position.value
 
     /**
+     * Gets the GPS position specifically, ignoring simulation priority.
+     * This always returns the latest GPS position received, even when simulation is active.
+     * Used by SimulationButton to check if user's actual GPS position is in event area.
+     */
+    fun getGPSPosition(): Position? = pendingGPSPosition ?: lastGPSPosition
+
+    /**
      * Gets the current position source
      */
     fun getCurrentSource(): PositionSource? = _currentState.value.source
@@ -166,6 +188,8 @@ class PositionManager(
     fun clearAll() {
         debounceJob?.cancel()
         pendingUpdate = null
+        pendingGPSPosition = null
+        lastGPSPosition = null
         _currentState.value = PositionState(null, null)
         _position.value = null
         Log.v("PositionManager", "Cleared all position data")
@@ -224,6 +248,7 @@ class PositionManager(
         debounceJob?.cancel()
         debounceJob = null
         pendingUpdate = null
+        pendingGPSPosition = null
         Log.v("PositionManager", "Cleaned up resources")
     }
 }

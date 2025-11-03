@@ -132,7 +132,8 @@ class WWWPlatform(
     fun isOnSimulation(): Boolean = _simulation != null
 
     // Current GPS-based position (PositionManager) without simulation override
-    fun getCurrentPosition(): Position? = positionManager?.getCurrentPosition()
+    // Returns actual GPS position even when simulation is active
+    fun getCurrentPosition(): Position? = positionManager?.getGPSPosition()
 
     fun getCurrentPositionSource(): PositionManager.PositionSource? = positionManager?.getCurrentSource()
 }

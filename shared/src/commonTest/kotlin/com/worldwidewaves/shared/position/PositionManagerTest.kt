@@ -302,4 +302,83 @@ class PositionManagerTest {
             // Position should still be null (debounce was cancelled)
             assertNull(positionManager.getCurrentPosition())
         }
+
+    @Test
+    fun `should store GPS position separately even when simulation is active`() =
+        runTest {
+            val coroutineScopeProvider = TestCoroutineScopeProvider(this)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val gpsPosition = Position(lat = 48.8566, lng = 2.3522)
+            val simulationPosition = Position(lat = 40.7128, lng = -74.0060)
+
+            // Set GPS position first
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, gpsPosition)
+            testScheduler.runCurrent()
+            assertEquals(gpsPosition, positionManager.getGPSPosition())
+            assertEquals(gpsPosition, positionManager.getCurrentPosition())
+
+            // Set simulation position (higher priority)
+            positionManager.updatePosition(PositionManager.PositionSource.SIMULATION, simulationPosition)
+            testScheduler.runCurrent()
+
+            // Current position should be simulation
+            assertEquals(simulationPosition, positionManager.getCurrentPosition())
+            assertEquals(PositionManager.PositionSource.SIMULATION, positionManager.getCurrentSource())
+
+            // BUT GPS position should still be available
+            assertEquals(gpsPosition, positionManager.getGPSPosition())
+        }
+
+    @Test
+    fun `should update GPS position even when simulation is active`() =
+        runTest {
+            val coroutineScopeProvider = TestCoroutineScopeProvider(this)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val initialGPS = Position(lat = 48.8566, lng = 2.3522)
+            val updatedGPS = Position(lat = 48.8600, lng = 2.3600)
+            val simulationPosition = Position(lat = 40.7128, lng = -74.0060)
+
+            // Set simulation position
+            positionManager.updatePosition(PositionManager.PositionSource.SIMULATION, simulationPosition)
+            testScheduler.runCurrent()
+            assertEquals(simulationPosition, positionManager.getCurrentPosition())
+
+            // Update GPS position while simulation is active
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, initialGPS)
+            testScheduler.runCurrent()
+
+            // GPS position should be stored
+            assertEquals(initialGPS, positionManager.getGPSPosition())
+            // But current position should still be simulation
+            assertEquals(simulationPosition, positionManager.getCurrentPosition())
+
+            // Update GPS again
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, updatedGPS)
+            testScheduler.runCurrent()
+
+            // GPS position should be updated
+            assertEquals(updatedGPS, positionManager.getGPSPosition())
+            // Current position still simulation
+            assertEquals(simulationPosition, positionManager.getCurrentPosition())
+        }
+
+    @Test
+    fun `should clear GPS position when clearAll is called`() =
+        runTest {
+            val coroutineScopeProvider = TestCoroutineScopeProvider(this)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val gpsPosition = Position(lat = 48.8566, lng = 2.3522)
+
+            // Set GPS position
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, gpsPosition)
+            testScheduler.runCurrent()
+            assertEquals(gpsPosition, positionManager.getGPSPosition())
+
+            // Clear all
+            positionManager.clearAll()
+
+            // GPS position should be null
+            assertNull(positionManager.getGPSPosition())
+            assertNull(positionManager.getCurrentPosition())
+        }
 }
