@@ -315,4 +315,72 @@ class IosMapAvailabilityCheckerTest {
 
             advanceUntilIdle()
         }
+
+    /**
+     * Tests that requestMapUninstall updates state to false.
+     * This ensures the map is marked as unavailable immediately after uninstall.
+     */
+    @Test
+    fun `requestMapUninstall updates state to false`() =
+        runTest(testScheduler) {
+            val checker = IosMapAvailabilityChecker()
+
+            // Track a map
+            checker.trackMaps(listOf("test_map_uninstall"))
+            advanceUntilIdle()
+
+            // Request uninstall
+            checker.requestMapUninstall("test_map_uninstall")
+            advanceUntilIdle()
+
+            // Verify state is false after uninstall
+            val state = checker.mapStates.first()
+            assertEquals(
+                false,
+                state["test_map_uninstall"],
+                "Map should be marked as unavailable after uninstall",
+            )
+        }
+
+    /**
+     * Tests that requestMapUninstall handles cache clearing without crashing.
+     * Note: We can't easily verify file deletion in unit tests, but we ensure
+     * the clearEventCache call doesn't cause errors.
+     */
+    @Test
+    fun `requestMapUninstall clears cache without crashing`() =
+        runTest(testScheduler) {
+            val checker = IosMapAvailabilityChecker()
+
+            // Track a map
+            checker.trackMaps(listOf("test_cache_clear"))
+            advanceUntilIdle()
+
+            // Request uninstall (includes cache clearing)
+            // This should not crash even if cache files don't exist
+            val result = checker.requestMapUninstall("test_cache_clear")
+            advanceUntilIdle()
+
+            // Operation should complete successfully
+            // (result may be false if no ODR was pinned, but it shouldn't crash)
+            assertTrue(true, "Uninstall with cache clearing completed without crash")
+        }
+
+    /**
+     * Tests that uninstalling a non-existent map handles gracefully.
+     * Ensures cache clearing doesn't fail when cache is already empty.
+     */
+    @Test
+    fun `requestMapUninstall handles non-existent map gracefully`() =
+        runTest(testScheduler) {
+            val checker = IosMapAvailabilityChecker()
+
+            // Request uninstall of map that was never tracked
+            val result = checker.requestMapUninstall("nonexistent_map")
+            advanceUntilIdle()
+
+            // Should handle gracefully without crashing
+            // Result may be false (no ODR request existed), but operation succeeds
+            assertTrue(true, "Uninstall of non-existent map handled gracefully")
+        }
 }

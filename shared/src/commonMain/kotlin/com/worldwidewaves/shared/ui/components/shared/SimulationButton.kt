@@ -309,6 +309,8 @@ private suspend fun startSimulation(
             )
 
         // Atomically reset and set simulation (single notification instead of two)
+        // Note: Polygon clearing happens in WaveProgressionObserver.startObservation()
+        // when observers restart via simulationChanged flow
         Log.i("SimulationButton", "Setting simulation starting time to $simulationTime from event ${event.id}")
         Log.i("SimulationButton", "Setting simulation user position to $position from event ${event.id}")
         platform.resetAndSetSimulation(simulation)

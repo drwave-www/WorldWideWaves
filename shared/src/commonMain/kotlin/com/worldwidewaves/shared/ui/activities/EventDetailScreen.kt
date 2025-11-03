@@ -55,7 +55,8 @@ class EventDetailScreen(
         var showMapRequiredDialog by remember { mutableStateOf(false) }
 
         // Map availability check - ensures state initialized before map renders
-        LaunchedEffect(event.id) {
+        // React to mapFeatureState changes (e.g., after map download completes)
+        LaunchedEffect(event.id, mapFeatureState) {
             mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
         }
 

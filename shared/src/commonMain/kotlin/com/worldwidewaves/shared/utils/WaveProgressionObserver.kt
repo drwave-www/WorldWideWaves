@@ -65,6 +65,15 @@ class WaveProgressionObserver(
     fun startObservation() {
         val event = event ?: return
 
+        // Clear existing polygons on observation start/restart
+        // This ensures clean state when:
+        // 1. Simulation starts (all observers restart via simulationChanged)
+        // 2. Observer restarts for any reason
+        // 3. User stops simulation and returns to real-time observation
+        lastWavePolygons = emptyList()
+        eventMap?.updateWavePolygons(emptyList(), clearPolygons = true)
+        Log.d("WaveObserver", "Cleared wave polygons for event ${event.id} on observation start")
+
         scope.launch {
             // Initial observation setup
             when {

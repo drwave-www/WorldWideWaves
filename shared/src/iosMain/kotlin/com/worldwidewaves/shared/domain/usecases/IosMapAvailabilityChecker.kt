@@ -190,6 +190,23 @@ class IosMapAvailabilityChecker : MapAvailabilityChecker {
                 scope.launch {
                     com.worldwidewaves.shared.data.MapDownloadGate
                         .disallow(eventId)
+
+                    // Clear cache files to ensure isMapAvailable returns false
+                    // Matches Android behavior in AndroidMapAvailabilityChecker
+                    try {
+                        com.worldwidewaves.shared.data
+                            .clearEventCache(eventId)
+                        com.worldwidewaves.shared.utils.Log.i(
+                            "IosMapAvailabilityChecker",
+                            "Cache cleared for $eventId",
+                        )
+                    } catch (e: Exception) {
+                        com.worldwidewaves.shared.utils.Log.e(
+                            "IosMapAvailabilityChecker",
+                            "Failed to clear cache for $eventId",
+                            throwable = e,
+                        )
+                    }
                 }
 
                 val request = pinnedRequests.remove(eventId)

@@ -147,3 +147,30 @@ actual suspend fun updateCacheMetadata(fileName: String) {
             .writeToFile(metaPath, true, NSUTF8StringEncoding, null)
     }
 }
+
+/**
+ * Delete all cached artefacts (data + metadata files) that belong to a given map/event.
+ * iOS implementation matching Android behavior.
+ */
+fun clearEventCache(eventId: String) {
+    val root = cacheRoot()
+    val fileManager = NSFileManager.defaultManager
+
+    // List of files to delete (matching Android implementation)
+    val targets =
+        listOf(
+            "$eventId.mbtiles",
+            "$eventId.mbtiles.metadata",
+            "$eventId.geojson",
+            "$eventId.geojson.metadata",
+            "style-$eventId.json",
+            "style-$eventId.json.metadata",
+        )
+
+    targets.forEach { fileName ->
+        val fullPath = joinPath(root, fileName)
+        if (fileManager.fileExistsAtPath(fullPath)) {
+            fileManager.removeItemAtPath(fullPath, error = null)
+        }
+    }
+}

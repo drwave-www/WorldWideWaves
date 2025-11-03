@@ -246,8 +246,9 @@ class WaveProgressionObserverTest {
             observer.startObservation()
             testScheduler.runCurrent() // Process initial setup
 
-            // Assert - no polygon updates should occur
-            verify(exactly = 0) { mockEventMap.updateWavePolygons(any(), any()) }
+            // Assert - only the initial clear call should occur, no polygon rendering
+            verify(exactly = 1) { mockEventMap.updateWavePolygons(emptyList(), clearPolygons = true) }
+            verify(exactly = 0) { mockEventMap.updateWavePolygons(match { it.isNotEmpty() }, any()) }
 
             // Act - change to SOON
             statusFlow.value = IWWWEvent.Status.SOON
@@ -257,8 +258,9 @@ class WaveProgressionObserverTest {
             observer.stopObservation()
             testScheduler.advanceUntilIdle()
 
-            // Assert - still no polygon updates
-            verify(exactly = 0) { mockEventMap.updateWavePolygons(any(), any()) }
+            // Assert - still only the initial clear, no polygon rendering
+            verify(exactly = 1) { mockEventMap.updateWavePolygons(emptyList(), clearPolygons = true) }
+            verify(exactly = 0) { mockEventMap.updateWavePolygons(match { it.isNotEmpty() }, any()) }
         }
 
     @Test
@@ -446,8 +448,9 @@ class WaveProgressionObserverTest {
             advanceTimeBy(500.milliseconds)
             testScheduler.advanceUntilIdle()
 
-            // Assert - no new updates should occur after pause
-            verify(exactly = 0) { mockEventMap.updateWavePolygons(any(), any()) }
+            // Assert - only the initial clear call from startObservation, no polygon rendering after pause
+            verify(exactly = 1) { mockEventMap.updateWavePolygons(emptyList(), clearPolygons = true) }
+            verify(exactly = 0) { mockEventMap.updateWavePolygons(match { it.isNotEmpty() }, any()) }
         }
 
     @Test
@@ -487,8 +490,9 @@ class WaveProgressionObserverTest {
             advanceTimeBy(500.milliseconds)
             testScheduler.advanceUntilIdle()
 
-            // Assert - no new updates should occur after stop
-            verify(exactly = 0) { mockEventMap.updateWavePolygons(any(), any()) }
+            // Assert - only the initial clear call from startObservation, no polygon rendering after stop
+            verify(exactly = 1) { mockEventMap.updateWavePolygons(emptyList(), clearPolygons = true) }
+            verify(exactly = 0) { mockEventMap.updateWavePolygons(match { it.isNotEmpty() }, any()) }
         }
 
     @Test
@@ -625,8 +629,9 @@ class WaveProgressionObserverTest {
             observer.stopObservation()
             testScheduler.advanceUntilIdle()
 
-            // Assert - no polygon updates should occur
-            verify(exactly = 0) { mockEventMap.updateWavePolygons(any(), any()) }
+            // Assert - only the initial clear call, no polygon rendering for SOON status
+            verify(exactly = 1) { mockEventMap.updateWavePolygons(emptyList(), clearPolygons = true) }
+            verify(exactly = 0) { mockEventMap.updateWavePolygons(match { it.isNotEmpty() }, any()) }
         }
 
     @Test
@@ -868,5 +873,76 @@ class WaveProgressionObserverTest {
 
             // Assert - should have handled both observations
             verify(atLeast = 2) { mockEventMap.updateWavePolygons(any(), any()) }
+        }
+
+    /**
+     * Tests polygon clearing functionality when starting observation.
+     * Ensures clean state when simulation starts or observer restarts.
+     */
+    @Test
+    fun `startObservation clears existing polygons before starting`() =
+        runTest {
+            setup()
+            observer = WaveProgressionObserver(testScope, mockEventMap, mockEvent)
+
+            // Act - Start observation
+            observer!!.startObservation()
+            testScheduler.runCurrent()
+
+            // Assert - polygons were cleared with clearPolygons=true
+            verify { mockEventMap.updateWavePolygons(emptyList(), clearPolygons = true) }
+        }
+
+    /**
+     * Tests that polygons are cleared when observer restarts.
+     * This simulates what happens when a simulation starts and triggers observer cascade.
+     */
+    @Test
+    fun `observer restart clears polygons from previous observation`() =
+        runTest {
+            setup()
+            observer = WaveProgressionObserver(testScope, mockEventMap, mockEvent)
+
+            // First observation
+            statusFlow.value = IWWWEvent.Status.RUNNING
+            observer!!.startObservation()
+            testScheduler.runCurrent()
+
+            // Verify initial clear
+            verify(atLeast = 1) { mockEventMap.updateWavePolygons(emptyList(), clearPolygons = true) }
+
+            // Stop observation
+            observer!!.stopObservation()
+            testScheduler.runCurrent()
+
+            // Restart observation (simulating simulation start triggering observer restart)
+            observer!!.startObservation()
+            testScheduler.runCurrent()
+
+            // Verify polygons cleared again on restart
+            verify(atLeast = 2) { mockEventMap.updateWavePolygons(emptyList(), clearPolygons = true) }
+        }
+
+    /**
+     * Tests that multiple observer restarts consistently clear polygons.
+     * This verifies the fix works across multiple simulation start/stop cycles.
+     */
+    @Test
+    fun `multiple observer restarts clear polygons each time`() =
+        runTest {
+            setup()
+            observer = WaveProgressionObserver(testScope, mockEventMap, mockEvent)
+
+            // Cycle through start/stop 3 times
+            repeat(3) { cycle ->
+                observer!!.startObservation()
+                testScheduler.runCurrent()
+
+                observer!!.stopObservation()
+                testScheduler.runCurrent()
+            }
+
+            // Verify polygons cleared at least 3 times (once per start)
+            verify(atLeast = 3) { mockEventMap.updateWavePolygons(emptyList(), clearPolygons = true) }
         }
 }
