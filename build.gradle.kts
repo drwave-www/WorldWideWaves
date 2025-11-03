@@ -84,3 +84,95 @@ subprojects {
         exclude("**/build/**")
     }
 }
+
+// iOS Build Temporary Files Cleanup Task
+tasks.register("cleanupIOSTempFiles") {
+    group = "iOS Build"
+    description = "Clean up temporary files from iOS builds older than 2 days"
+
+    doLast {
+        // Skip if in CI environment
+        if (System.getenv("CI") != null) {
+            logger.info("ℹ️ Skipping iOS temp cleanup in CI environment")
+            return@doLast
+        }
+
+        // Skip if explicitly disabled
+        if (project.hasProperty("skipTempCleanup") && project.property("skipTempCleanup") == "true") {
+            logger.info("ℹ️ iOS temp cleanup disabled via skipTempCleanup property")
+            return@doLast
+        }
+
+        logger.lifecycle("🧹 Cleaning up iOS build temporary files (older than 2 days)...")
+
+        val tempBaseDir = File("/private/var/folders")
+        if (!tempBaseDir.exists()) {
+            logger.warn("Temp directory not found: ${tempBaseDir.absolutePath}")
+            return@doLast
+        }
+
+        var filesDeleted = 0
+        var bytesFreed = 0L
+        val twoDaysAgo = System.currentTimeMillis() - (2 * 24 * 60 * 60 * 1000L)
+
+        try {
+            // Clean Kotlin daemon logs
+            tempBaseDir.walkTopDown()
+                .filter { it.isFile }
+                .filter { it.name.startsWith("kotlin-daemon") && it.name.endsWith(".log") }
+                .filter { it.lastModified() < twoDaysAgo }
+                .forEach { file ->
+                    try {
+                        val size = file.length()
+                        if (file.delete()) {
+                            filesDeleted++
+                            bytesFreed += size
+                            logger.info("Deleted: ${file.absolutePath}")
+                        }
+                    } catch (e: Exception) {
+                        logger.debug("Could not delete ${file.absolutePath}: ${e.message}")
+                    }
+                }
+
+            // Clean Kotlin compiler temp directories
+            tempBaseDir.walkTopDown()
+                .maxDepth(3)
+                .filter { it.isDirectory }
+                .filter { it.name == "org.jetbrains.kotlin" }
+                .filter { it.lastModified() < twoDaysAgo }
+                .forEach { dir ->
+                    try {
+                        val size = dir.walkTopDown().filter { it.isFile }.sumOf { it.length() }
+                        if (dir.deleteRecursively()) {
+                            filesDeleted++
+                            bytesFreed += size
+                            logger.info("Deleted directory: ${dir.absolutePath}")
+                        }
+                    } catch (e: Exception) {
+                        logger.debug("Could not delete ${dir.absolutePath}: ${e.message}")
+                    }
+                }
+
+            val mbFreed = bytesFreed / (1024.0 * 1024.0)
+            if (filesDeleted > 0) {
+                logger.lifecycle("✅ iOS temp cleanup completed: $filesDeleted items deleted, %.2f MB freed".format(mbFreed))
+            } else {
+                logger.lifecycle("✅ iOS temp cleanup completed: No old temp files found")
+            }
+        } catch (e: Exception) {
+            logger.warn("iOS temp cleanup encountered an error: ${e.message}")
+        }
+    }
+}
+
+// Hook cleanup into iOS framework build process
+afterEvaluate {
+    project(":shared").afterEvaluate {
+        tasks.findByName("embedAndSignAppleFrameworkForXcode")?.let { embedTask ->
+            val cleanupTask = rootProject.tasks.findByName("cleanupIOSTempFiles")
+            if (cleanupTask != null) {
+                embedTask.finalizedBy(cleanupTask)
+            }
+        }
+    }
+}

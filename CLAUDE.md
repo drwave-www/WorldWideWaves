@@ -462,6 +462,30 @@ rm -rf ~/Library/Developer/Xcode/DerivedData/worldwidewaves-*
 ./gradlew :shared:embedAndSignAppleFrameworkForXcode
 ```
 
+### Automatic Temp File Cleanup
+
+iOS builds automatically clean up temporary files older than 2 days from `/var/folders/` to prevent disk space accumulation.
+
+**What gets cleaned:**
+- Kotlin/Native compiler artifacts (`kotlin-daemon.*.log`)
+- Kotlin compiler temp directories (`org.jetbrains.kotlin/*`)
+
+**Cleanup behavior:**
+- Runs automatically after `embedAndSignAppleFrameworkForXcode`
+- Skips files newer than 2 days (safety threshold)
+- Skips in CI environments (GitHub Actions)
+- Logs cleanup summary (files deleted, space freed)
+
+**Opt-out:**
+```bash
+./gradlew :shared:embedAndSignAppleFrameworkForXcode -PskipTempCleanup=true
+```
+
+**Manual cleanup:**
+```bash
+./gradlew cleanupIOSTempFiles
+```
+
 ---
 
 ## Production-Ready Definition
