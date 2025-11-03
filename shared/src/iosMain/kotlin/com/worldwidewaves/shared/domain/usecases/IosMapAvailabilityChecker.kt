@@ -60,8 +60,10 @@ class IosMapAvailabilityChecker : MapAvailabilityChecker {
 
     private fun inPersistentCache(eventId: String): Boolean {
         val root =
-            com.worldwidewaves.shared.data
-                .platformCacheRoot()
+            kotlinx.coroutines.runBlocking {
+                com.worldwidewaves.shared.data
+                    .platformCacheRoot()
+            }
         val fm = platform.Foundation.NSFileManager.defaultManager
         return fm.fileExistsAtPath("$root/$eventId.geojson") ||
             fm.fileExistsAtPath("$root/$eventId.mbtiles")

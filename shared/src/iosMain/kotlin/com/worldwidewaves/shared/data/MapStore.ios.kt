@@ -235,35 +235,51 @@ actual suspend fun platformTryCopyInitialTagToCache(
 }
 
 // ---------- platform shims ----------
-actual fun platformCacheRoot(): String = appSupportMapsDir()
+actual suspend fun platformCacheRoot(): String =
+    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+        appSupportMapsDir()
+    }
 
-actual fun platformFileExists(path: String): Boolean = NSFileManager.defaultManager.fileExistsAtPath(path)
+actual suspend fun platformFileExists(path: String): Boolean =
+    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+        NSFileManager.defaultManager.fileExistsAtPath(path)
+    }
 
-actual fun platformReadText(path: String): String = (NSString.stringWithContentsOfFile(path, NSUTF8StringEncoding, null) ?: "")
+actual suspend fun platformReadText(path: String): String =
+    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+        (NSString.stringWithContentsOfFile(path, NSUTF8StringEncoding, null) ?: "")
+    }
 
 @OptIn(BetaInteropApi::class)
-actual fun platformWriteText(
+actual suspend fun platformWriteText(
     path: String,
     content: String,
 ) {
-    NSString
-        .create(string = content)
-        .writeToFile(path, atomically = true, encoding = NSUTF8StringEncoding, error = null)
+    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+        NSString
+            .create(string = content)
+            .writeToFile(path, atomically = true, encoding = NSUTF8StringEncoding, error = null)
+    }
 }
 
-actual fun platformDeleteFile(path: String) {
-    NSFileManager.defaultManager.removeItemAtPath(path, null)
+actual suspend fun platformDeleteFile(path: String) {
+    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+        NSFileManager.defaultManager.removeItemAtPath(path, null)
+    }
 }
 
-actual fun platformEnsureDir(path: String) {
-    NSFileManager.defaultManager.createDirectoryAtPath(path, true, null, null)
+actual suspend fun platformEnsureDir(path: String) {
+    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+        NSFileManager.defaultManager.createDirectoryAtPath(path, true, null, null)
+    }
 }
 
-actual fun platformAppVersionStamp(): String {
-    val short = NSBundle.mainBundle.objectForInfoDictionaryKey("CFBundleShortVersionString") as? String ?: "0"
-    val build = NSBundle.mainBundle.objectForInfoDictionaryKey("CFBundleVersion") as? String ?: "0"
-    return "$short+$build"
-}
+actual suspend fun platformAppVersionStamp(): String =
+    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+        val short = NSBundle.mainBundle.objectForInfoDictionaryKey("CFBundleShortVersionString") as? String ?: "0"
+        val build = NSBundle.mainBundle.objectForInfoDictionaryKey("CFBundleVersion") as? String ?: "0"
+        "$short+$build"
+    }
 
 actual fun platformInvalidateGeoJson(eventId: String) {
     // Invalidate area polygon cache when geojson changes
@@ -365,34 +381,35 @@ private fun copyResourceToDestination(
 }
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
-actual fun cacheStringToFile(
+actual suspend fun cacheStringToFile(
     fileName: String,
     content: String,
-): String? {
-    val root = platformCacheRoot()
-    val path = "$root/$fileName"
-    Log.d("MapStore.ios", "cacheStringToFile: root=$root, fileName=$fileName")
-    Log.d("MapStore.ios", "cacheStringToFile: full path=$path")
-    Log.d("MapStore.ios", "cacheStringToFile: content length=${content.length}")
+): String? =
+    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+        val root = platformCacheRoot()
+        val path = "$root/$fileName"
+        Log.d("MapStore.ios", "cacheStringToFile: root=$root, fileName=$fileName")
+        Log.d("MapStore.ios", "cacheStringToFile: full path=$path")
+        Log.d("MapStore.ios", "cacheStringToFile: content length=${content.length}")
 
-    val nsPath = NSString.create(string = path)
-    val parent = nsPath.stringByDeletingLastPathComponent
-    Log.d("MapStore.ios", "cacheStringToFile: parent dir=$parent")
+        val nsPath = NSString.create(string = path)
+        val parent = nsPath.stringByDeletingLastPathComponent
+        Log.d("MapStore.ios", "cacheStringToFile: parent dir=$parent")
 
-    val fm = NSFileManager.defaultManager
-    val dirCreated = fm.createDirectoryAtPath(parent, true, null, null)
-    Log.d("MapStore.ios", "cacheStringToFile: directory created=$dirCreated")
+        val fm = NSFileManager.defaultManager
+        val dirCreated = fm.createDirectoryAtPath(parent, true, null, null)
+        Log.d("MapStore.ios", "cacheStringToFile: directory created=$dirCreated")
 
-    val nsContent = NSString.create(string = content)
-    val success = nsContent.writeToFile(path, atomically = true, encoding = NSUTF8StringEncoding, error = null)
+        val nsContent = NSString.create(string = content)
+        val success = nsContent.writeToFile(path, atomically = true, encoding = NSUTF8StringEncoding, error = null)
 
-    return if (success) {
-        Log.i("MapStore.ios", "cacheStringToFile: SUCCESS - File written to $path")
-        val exists = fm.fileExistsAtPath(path)
-        Log.d("MapStore.ios", "cacheStringToFile: File exists check=$exists")
-        path
-    } else {
-        Log.e("MapStore.ios", "cacheStringToFile: FAILED to write file to $path")
-        null
+        if (success) {
+            Log.i("MapStore.ios", "cacheStringToFile: SUCCESS - File written to $path")
+            val exists = fm.fileExistsAtPath(path)
+            Log.d("MapStore.ios", "cacheStringToFile: File exists check=$exists")
+            path
+        } else {
+            Log.e("MapStore.ios", "cacheStringToFile: FAILED to write file to $path")
+            null
+        }
     }
-}

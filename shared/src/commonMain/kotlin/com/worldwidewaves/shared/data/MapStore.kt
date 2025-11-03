@@ -26,22 +26,22 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 // -------- platform shims (implemented per platform) ----------
-expect fun platformCacheRoot(): String
+expect suspend fun platformCacheRoot(): String
 
-expect fun platformFileExists(path: String): Boolean
+expect suspend fun platformFileExists(path: String): Boolean
 
-expect fun platformReadText(path: String): String
+expect suspend fun platformReadText(path: String): String
 
-expect fun platformWriteText(
+expect suspend fun platformWriteText(
     path: String,
     content: String,
 )
 
-expect fun platformDeleteFile(path: String)
+expect suspend fun platformDeleteFile(path: String)
 
-expect fun platformEnsureDir(path: String)
+expect suspend fun platformEnsureDir(path: String)
 
-expect fun platformAppVersionStamp(): String
+expect suspend fun platformAppVersionStamp(): String
 
 expect fun platformInvalidateGeoJson(eventId: String)
 
@@ -221,7 +221,7 @@ suspend fun getMapFileAbsolutePath(
         return dataPath
     }
 
-expect fun cacheStringToFile(
+expect suspend fun cacheStringToFile(
     fileName: String,
     content: String,
 ): String?

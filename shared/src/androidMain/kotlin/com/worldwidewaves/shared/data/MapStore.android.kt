@@ -179,36 +179,53 @@ private fun copyBufferedStream(
 }
 
 // ---- platform shims ----
-actual fun platformCacheRoot(): String = ctx().cacheDir.absolutePath
+actual suspend fun platformCacheRoot(): String =
+    withContext(Dispatchers.IO) {
+        ctx().cacheDir.absolutePath
+    }
 
-actual fun platformFileExists(path: String) = File(path).exists()
+actual suspend fun platformFileExists(path: String): Boolean =
+    withContext(Dispatchers.IO) {
+        File(path).exists()
+    }
 
-actual fun platformReadText(path: String) = File(path).readText()
+actual suspend fun platformReadText(path: String): String =
+    withContext(Dispatchers.IO) {
+        File(path).readText()
+    }
 
-actual fun platformWriteText(
+actual suspend fun platformWriteText(
     path: String,
     content: String,
 ) {
-    File(path).writeText(content)
+    withContext(Dispatchers.IO) {
+        File(path).writeText(content)
+    }
 }
 
-actual fun platformDeleteFile(path: String) {
-    runCatching { File(path).delete() }
+actual suspend fun platformDeleteFile(path: String) {
+    withContext(Dispatchers.IO) {
+        runCatching { File(path).delete() }
+    }
 }
 
-actual fun platformEnsureDir(path: String) {
-    File(path).mkdirs()
+actual suspend fun platformEnsureDir(path: String) {
+    withContext(Dispatchers.IO) {
+        File(path).mkdirs()
+    }
 }
 
-actual fun platformAppVersionStamp(): String =
-    // changes on app update AND on dynamic feature split updates
-    runCatching {
-        ctx()
-            .packageManager
-            .getPackageInfo(ctx().packageName, 0)
-            .lastUpdateTime
-            .toString()
-    }.getOrElse { System.currentTimeMillis().toString() }
+actual suspend fun platformAppVersionStamp(): String =
+    withContext(Dispatchers.IO) {
+        // changes on app update AND on dynamic feature split updates
+        runCatching {
+            ctx()
+                .packageManager
+                .getPackageInfo(ctx().packageName, 0)
+                .lastUpdateTime
+                .toString()
+        }.getOrElse { System.currentTimeMillis().toString() }
+    }
 
 actual fun platformInvalidateGeoJson(eventId: String) {
     runCatching {
@@ -340,21 +357,22 @@ private fun attemptSingleFetch(
         SingleFetchResult(success = false, shouldRetry = false, exception = e)
     }
 
-actual fun cacheStringToFile(
+actual suspend fun cacheStringToFile(
     fileName: String,
     content: String,
-): String? {
-    val root = platformCacheRoot()
-    val f = File(root, fileName)
-    f.parentFile?.mkdirs()
-    Log.v(TAG, "cacheStringToFile: Caching data to $fileName")
-    return try {
-        f.writeText(content)
-        val absolutePath = f.toURI().path
-        Log.d(TAG, "cacheStringToFile: Successfully cached to: $absolutePath")
-        absolutePath
-    } catch (e: Exception) {
-        Log.e(TAG, "cacheStringToFile: Failed to cache $fileName: ${e.message}", e)
-        null
+): String? =
+    withContext(Dispatchers.IO) {
+        val root = platformCacheRoot()
+        val f = File(root, fileName)
+        f.parentFile?.mkdirs()
+        Log.v(TAG, "cacheStringToFile: Caching data to $fileName")
+        try {
+            f.writeText(content)
+            val absolutePath = f.toURI().path
+            Log.d(TAG, "cacheStringToFile: Successfully cached to: $absolutePath")
+            absolutePath
+        } catch (e: Exception) {
+            Log.e(TAG, "cacheStringToFile: Failed to cache $fileName: ${e.message}", e)
+            null
+        }
     }
-}

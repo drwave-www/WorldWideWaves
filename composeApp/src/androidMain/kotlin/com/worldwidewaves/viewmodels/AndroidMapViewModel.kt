@@ -79,12 +79,36 @@ class AndroidMapViewModel(
     private val retryHandler = Handler(Looper.getMainLooper())
     private val processedInstalledSessions = mutableSetOf<Int>() // Track processed INSTALLED events
 
+    // In-memory cache for map availability results (reduces redundant file system checks)
+    private data class AvailabilityCacheEntry(
+        val isAvailable: Boolean,
+        val timestamp: Long,
+    )
+
+    private val availabilityCache = java.util.concurrent.ConcurrentHashMap<String, AvailabilityCacheEntry>()
+    private val CACHE_EXPIRY_MS = 30_000L // 30 seconds
+
     // Platform adapter for business logic
     private val platformAdapter =
         object : PlatformMapDownloadAdapter {
             override suspend fun isMapInstalled(mapId: String): Boolean {
+                // Check cache first
+                val cached = availabilityCache[mapId]
+                if (cached != null) {
+                    val age = System.currentTimeMillis() - cached.timestamp
+                    if (age < CACHE_EXPIRY_MS) {
+                        Log.v(TAG, "isMapInstalled: Using cached result for $mapId (age=${age}ms)")
+                        return cached.isAvailable
+                    } else {
+                        // Remove stale entry
+                        availabilityCache.remove(mapId)
+                    }
+                }
+
                 val moduleInstalled = splitInstallManager.installedModules.contains(mapId)
                 if (!moduleInstalled) {
+                    // Cache negative result
+                    availabilityCache[mapId] = AvailabilityCacheEntry(false, System.currentTimeMillis())
                     return false
                 }
 
@@ -98,6 +122,8 @@ class AndroidMapViewModel(
 
                 // Fast path: both files already in cache
                 if (mbtilesInCache && geojsonInCache) {
+                    // Cache positive result
+                    availabilityCache[mapId] = AvailabilityCacheEntry(true, System.currentTimeMillis())
                     return true
                 }
 
@@ -118,6 +144,8 @@ class AndroidMapViewModel(
                     )
                 }
 
+                // Cache the final result
+                availabilityCache[mapId] = AvailabilityCacheEntry(result, System.currentTimeMillis())
                 return result
             }
 
@@ -360,6 +388,13 @@ class AndroidMapViewModel(
 
                 Log.i(TAG, "Status: INSTALLED – modules=${state.moduleNames()}")
                 val moduleIds = getModuleIdsFromState(state)
+
+                // Invalidate availability cache for installed modules (force re-check)
+                moduleIds.forEach { mapId ->
+                    availabilityCache.remove(mapId)
+                    Log.v(TAG, "Invalidated availability cache for $mapId after installation")
+                }
+
                 downloadManager.handleInstallComplete(moduleIds)
                 currentSessionId = 0
             }

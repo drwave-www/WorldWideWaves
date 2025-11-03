@@ -24,6 +24,8 @@ import android.os.Build
 import com.worldwidewaves.shared.events.data.GeoJsonDataProvider
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.utils.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.java.KoinJavaComponent.inject
 import java.io.File
@@ -118,44 +120,47 @@ actual fun getCacheDir(): String {
  * application's lastUpdateTime (which also changes when dynamic-feature
  * splits are updated through the Play Store).
  */
-actual fun isCachedFileStale(fileName: String): Boolean {
-    val context: Context by inject(Context::class.java)
-    val cacheDir = context.cacheDir
+actual suspend fun isCachedFileStale(fileName: String): Boolean =
+    withContext(Dispatchers.IO) {
+        val context: Context by inject(Context::class.java)
+        val cacheDir = context.cacheDir
 
-    val dataFile = File(cacheDir, fileName)
-    if (!dataFile.exists()) return true
+        val dataFile = File(cacheDir, fileName)
+        if (!dataFile.exists()) return@withContext true
 
-    val metadataFile = File(cacheDir, "$fileName.metadata")
-    val cachedTime =
-        try {
-            metadataFile.takeIf { it.exists() }?.readText()?.toLong() ?: 0L
-        } catch (_: Exception) {
-            0L
-        }
+        val metadataFile = File(cacheDir, "$fileName.metadata")
+        val cachedTime =
+            try {
+                metadataFile.takeIf { it.exists() }?.readText()?.toLong() ?: 0L
+            } catch (_: Exception) {
+                0L
+            }
 
-    // Use cached app update time to avoid repeated PackageManager binder calls
-    val appUpdateTime =
-        cachedAppUpdateTime ?: try {
-            val updateTime = context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
-            cachedAppUpdateTime = updateTime
-            updateTime
-        } catch (_: Exception) {
-            System.currentTimeMillis()
-        }
+        // Use cached app update time to avoid repeated PackageManager binder calls
+        val appUpdateTime =
+            cachedAppUpdateTime ?: try {
+                val updateTime = context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
+                cachedAppUpdateTime = updateTime
+                updateTime
+            } catch (_: Exception) {
+                System.currentTimeMillis()
+            }
 
-    return appUpdateTime > cachedTime
-}
+        appUpdateTime > cachedTime
+    }
 
 /**
  * Force-update (or create) the metadata timestamp associated with a cached file.
  */
-actual fun updateCacheMetadata(fileName: String) {
-    val context: Context by inject(Context::class.java)
-    val metadataFile = File(context.cacheDir, "$fileName.metadata")
-    try {
-        metadataFile.writeText(System.currentTimeMillis().toString())
-    } catch (e: Exception) {
-        Log.e(::updateCacheMetadata.name, "Could not write metadata for $fileName", e)
+actual suspend fun updateCacheMetadata(fileName: String) {
+    withContext(Dispatchers.IO) {
+        val context: Context by inject(Context::class.java)
+        val metadataFile = File(context.cacheDir, "$fileName.metadata")
+        try {
+            metadataFile.writeText(System.currentTimeMillis().toString())
+        } catch (e: Exception) {
+            Log.e(::updateCacheMetadata.name, "Could not write metadata for $fileName", e)
+        }
     }
 }
 

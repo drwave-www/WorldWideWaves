@@ -200,117 +200,125 @@ class MapStoreTest {
         }
 
     @Test
-    fun `platformFileExists works correctly`() {
-        // Given: A test file
-        val testFile = File(testCacheDir, "test.txt")
+    fun `platformFileExists works correctly`() =
+        runTest {
+            // Given: A test file
+            val testFile = File(testCacheDir, "test.txt")
 
-        // When: File doesn't exist
-        assertFalse(platformFileExists(testFile.absolutePath))
+            // When: File doesn't exist
+            assertFalse(platformFileExists(testFile.absolutePath))
 
-        // When: File is created
-        testFile.writeText("test")
-        assertTrue(platformFileExists(testFile.absolutePath))
+            // When: File is created
+            testFile.writeText("test")
+            assertTrue(platformFileExists(testFile.absolutePath))
 
-        // When: File is deleted
-        testFile.delete()
-        assertFalse(platformFileExists(testFile.absolutePath))
-    }
-
-    @Test
-    fun `platformReadText and platformWriteText work correctly`() {
-        // Given: A test file path
-        val testFile = File(testCacheDir, "test_rw.txt")
-        val testContent = "Test content with special chars: 🌊🌍"
-
-        // When: Write content
-        platformWriteText(testFile.absolutePath, testContent)
-
-        // Then: File should exist and contain correct content
-        assertTrue(testFile.exists())
-        val readContent = platformReadText(testFile.absolutePath)
-        assertEquals(testContent, readContent)
-    }
+            // When: File is deleted
+            testFile.delete()
+            assertFalse(platformFileExists(testFile.absolutePath))
+        }
 
     @Test
-    fun `platformDeleteFile works correctly`() {
-        // Given: An existing file
-        val testFile = File(testCacheDir, "test_delete.txt")
-        testFile.writeText("delete me")
-        assertTrue(testFile.exists())
+    fun `platformReadText and platformWriteText work correctly`() =
+        runTest {
+            // Given: A test file path
+            val testFile = File(testCacheDir, "test_rw.txt")
+            val testContent = "Test content with special chars: 🌊🌍"
 
-        // When: Delete file
-        platformDeleteFile(testFile.absolutePath)
+            // When: Write content
+            platformWriteText(testFile.absolutePath, testContent)
 
-        // Then: File should not exist
-        assertFalse(testFile.exists())
-    }
-
-    @Test
-    fun `platformEnsureDir creates directory structure`() {
-        // Given: A nested directory path
-        val nestedDir = File(testCacheDir, "level1/level2/level3")
-        assertFalse(nestedDir.exists())
-
-        // When: Ensure directory
-        platformEnsureDir(nestedDir.absolutePath)
-
-        // Then: Directory should exist
-        assertTrue(nestedDir.exists())
-        assertTrue(nestedDir.isDirectory)
-    }
+            // Then: File should exist and contain correct content
+            assertTrue(testFile.exists())
+            val readContent = platformReadText(testFile.absolutePath)
+            assertEquals(testContent, readContent)
+        }
 
     @Test
-    fun `platformAppVersionStamp returns consistent format`() {
-        // When: Get version stamp
-        val stamp = platformAppVersionStamp()
+    fun `platformDeleteFile works correctly`() =
+        runTest {
+            // Given: An existing file
+            val testFile = File(testCacheDir, "test_delete.txt")
+            testFile.writeText("delete me")
+            assertTrue(testFile.exists())
 
-        // Then: Should return timestamp string
-        assertTrue(stamp.isNotEmpty())
-        assertTrue(stamp.toLongOrNull() != null, "Version stamp should be a valid long timestamp")
-    }
+            // When: Delete file
+            platformDeleteFile(testFile.absolutePath)
 
-    @Test
-    fun `platformCacheRoot returns valid cache directory`() {
-        // When: Get cache root
-        val cacheRoot = platformCacheRoot()
-
-        // Then: Should be the mocked cache directory
-        assertEquals(testCacheDir.absolutePath, cacheRoot)
-        assertTrue(File(cacheRoot).exists())
-    }
+            // Then: File should not exist
+            assertFalse(testFile.exists())
+        }
 
     @Test
-    fun `cacheStringToFile creates file with content`() {
-        // Given: Content to cache
-        val fileName = "cached_test.json"
-        val content = """{"test": "data", "emoji": "🌊"}"""
+    fun `platformEnsureDir creates directory structure`() =
+        runTest {
+            // Given: A nested directory path
+            val nestedDir = File(testCacheDir, "level1/level2/level3")
+            assertFalse(nestedDir.exists())
 
-        // When: Cache string to file
-        val resultPath = cacheStringToFile(fileName, content)
+            // When: Ensure directory
+            platformEnsureDir(nestedDir.absolutePath)
 
-        // Then: Should return absolute path and file should exist with correct content
-        val expectedPath = File(testCacheDir, fileName).toURI().path
-        assertEquals(expectedPath, resultPath)
-        val cachedFile = File(testCacheDir, fileName)
-        assertTrue(cachedFile.exists())
-        assertEquals(content, cachedFile.readText())
-    }
+            // Then: Directory should exist
+            assertTrue(nestedDir.exists())
+            assertTrue(nestedDir.isDirectory)
+        }
 
     @Test
-    fun `cacheStringToFile creates parent directories`() {
-        // Given: Nested file path
-        val fileName = "nested/dir/test.json"
-        val content = """{"nested": true}"""
+    fun `platformAppVersionStamp returns consistent format`() =
+        runTest {
+            // When: Get version stamp
+            val stamp = platformAppVersionStamp()
 
-        // When: Cache string to file
-        cacheStringToFile(fileName, content)
+            // Then: Should return timestamp string
+            assertTrue(stamp.isNotEmpty())
+            assertTrue(stamp.toLongOrNull() != null, "Version stamp should be a valid long timestamp")
+        }
 
-        // Then: Parent directories should be created
-        val cachedFile = File(testCacheDir, fileName)
-        assertTrue(cachedFile.exists())
-        assertTrue(cachedFile.parentFile?.exists() ?: false)
-        assertEquals(content, cachedFile.readText())
-    }
+    @Test
+    fun `platformCacheRoot returns valid cache directory`() =
+        runTest {
+            // When: Get cache root
+            val cacheRoot = platformCacheRoot()
+
+            // Then: Should be the mocked cache directory
+            assertEquals(testCacheDir.absolutePath, cacheRoot)
+            assertTrue(File(cacheRoot).exists())
+        }
+
+    @Test
+    fun `cacheStringToFile creates file with content`() =
+        runTest {
+            // Given: Content to cache
+            val fileName = "cached_test.json"
+            val content = """{"test": "data", "emoji": "🌊"}"""
+
+            // When: Cache string to file
+            val resultPath = cacheStringToFile(fileName, content)
+
+            // Then: Should return absolute path and file should exist with correct content
+            val expectedPath = File(testCacheDir, fileName).toURI().path
+            assertEquals(expectedPath, resultPath)
+            val cachedFile = File(testCacheDir, fileName)
+            assertTrue(cachedFile.exists())
+            assertEquals(content, cachedFile.readText())
+        }
+
+    @Test
+    fun `cacheStringToFile creates parent directories`() =
+        runTest {
+            // Given: Nested file path
+            val fileName = "nested/dir/test.json"
+            val content = """{"nested": true}"""
+
+            // When: Cache string to file
+            cacheStringToFile(fileName, content)
+
+            // Then: Parent directories should be created
+            val cachedFile = File(testCacheDir, fileName)
+            assertTrue(cachedFile.exists())
+            assertTrue(cachedFile.parentFile?.exists() ?: false)
+            assertEquals(content, cachedFile.readText())
+        }
 
     @Test
     fun `platformTryCopyInitialTagToCache uses suspending delay not blocking sleep`() =

@@ -64,7 +64,7 @@ expect fun getCacheDir(): String
  * @param fileName The name of the file to check (without path)
  * @return true if the file is stale or metadata is missing, false if fresh
  */
-expect fun isCachedFileStale(fileName: String): Boolean
+expect suspend fun isCachedFileStale(fileName: String): Boolean
 
 /**
  * Updates the cache metadata for a file to mark it as fresh.
@@ -72,4 +72,4 @@ expect fun isCachedFileStale(fileName: String): Boolean
  *
  * @param fileName The name of the file whose metadata should be updated
  */
-expect fun updateCacheMetadata(fileName: String)
+expect suspend fun updateCacheMetadata(fileName: String)

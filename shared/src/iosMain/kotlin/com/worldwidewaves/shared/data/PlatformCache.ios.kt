@@ -107,40 +107,43 @@ actual suspend fun cacheDeepFile(fileName: String) {
  * This uses version stamps (e.g., "1.0+7") instead of bundle modification time
  * to prevent cached maps from being invalidated on every app update.
  */
-actual fun isCachedFileStale(fileName: String): Boolean {
-    val root = cacheRoot()
-    val dataPath = joinPath(root, fileName)
-    if (!NSFileManager.defaultManager.fileExistsAtPath(dataPath)) return true
+actual suspend fun isCachedFileStale(fileName: String): Boolean =
+    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+        val root = cacheRoot()
+        val dataPath = joinPath(root, fileName)
+        if (!NSFileManager.defaultManager.fileExistsAtPath(dataPath)) return@withContext true
 
-    val metaPath = joinPath(root, "$fileName.metadata")
-    val metaText = NSString.stringWithContentsOfFile(metaPath, NSUTF8StringEncoding, null)
+        val metaPath = joinPath(root, "$fileName.metadata")
+        val metaText = NSString.stringWithContentsOfFile(metaPath, NSUTF8StringEncoding, null)
 
-    // If no metadata exists, cache is stale
-    if (metaText == null || metaText.isEmpty()) return true
+        // If no metadata exists, cache is stale
+        if (metaText == null || metaText.isEmpty()) return@withContext true
 
-    // Get current app version stamp (from MapStore.ios.kt)
-    val currentStamp =
-        com.worldwidewaves.shared.data
-            .platformAppVersionStamp()
+        // Get current app version stamp (from MapStore.ios.kt)
+        val currentStamp =
+            com.worldwidewaves.shared.data
+                .platformAppVersionStamp()
 
-    // Compare version stamps - cache is stale if they don't match
-    return metaText != currentStamp
-}
+        // Compare version stamps - cache is stale if they don't match
+        metaText != currentStamp
+    }
 
-actual fun updateCacheMetadata(fileName: String) {
-    val metaPath = joinPath(cacheRoot(), "$fileName.metadata")
-    val parent = NSString.create(string = metaPath).stringByDeletingLastPathComponent
-    NSFileManager.defaultManager.createDirectoryAtPath(
-        path = parent,
-        withIntermediateDirectories = true,
-        attributes = null,
-        error = null,
-    )
-    // Write version stamp instead of timestamp for consistency with MapStore
-    val versionStamp =
-        com.worldwidewaves.shared.data
-            .platformAppVersionStamp()
-    NSString
-        .create(string = versionStamp)
-        .writeToFile(metaPath, true, NSUTF8StringEncoding, null)
+actual suspend fun updateCacheMetadata(fileName: String) {
+    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+        val metaPath = joinPath(cacheRoot(), "$fileName.metadata")
+        val parent = NSString.create(string = metaPath).stringByDeletingLastPathComponent
+        NSFileManager.defaultManager.createDirectoryAtPath(
+            path = parent,
+            withIntermediateDirectories = true,
+            attributes = null,
+            error = null,
+        )
+        // Write version stamp instead of timestamp for consistency with MapStore
+        val versionStamp =
+            com.worldwidewaves.shared.data
+                .platformAppVersionStamp()
+        NSString
+            .create(string = versionStamp)
+            .writeToFile(metaPath, true, NSUTF8StringEncoding, null)
+    }
 }
