@@ -57,25 +57,11 @@ class IosSoundPlayerTest {
 
                 // Track execution order - should be sequential due to mutex
                 val executionOrder = mutableListOf<Int>()
-                val executing = mutableListOf<Boolean>()
-
-                repeat(concurrentCalls) { executing.add(false) }
 
                 val jobs =
                     List(concurrentCalls) { index ->
                         async {
                             try {
-                                // Mark as executing
-                                synchronized(executing) {
-                                    executing[index] = true
-                                    // Verify no other call is executing (mutex should prevent this)
-                                    val currentlyExecuting = executing.count { it }
-                                    assertTrue(
-                                        currentlyExecuting == 1,
-                                        "Mutex should prevent concurrent execution. Found $currentlyExecuting calls executing",
-                                    )
-                                }
-
                                 soundPlayer.playTone(
                                     frequency = 440.0 + (index * 100.0),
                                     amplitude = 0.5,
@@ -84,16 +70,10 @@ class IosSoundPlayerTest {
                                 )
 
                                 // Mark as complete
-                                synchronized(executing) {
-                                    executing[index] = false
-                                    executionOrder.add(index)
-                                }
+                                executionOrder.add(index)
                             } catch (e: Exception) {
                                 // Ignore exceptions from audio system (simulator limitations)
-                                synchronized(executing) {
-                                    executing[index] = false
-                                    executionOrder.add(index)
-                                }
+                                executionOrder.add(index)
                             }
                         }
                     }

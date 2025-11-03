@@ -32,49 +32,52 @@ import kotlin.test.assertTrue
  */
 class IosMapStoreTest {
     @Test
-    fun `platformCacheRoot returns iOS Application Support directory`() {
-        val cacheRoot = platformCacheRoot()
+    fun `platformCacheRoot returns iOS Application Support directory`() =
+        runTest {
+            val cacheRoot = platformCacheRoot()
 
-        assertNotNull(cacheRoot, "Cache root should not be null")
-        assertTrue(cacheRoot.isNotEmpty(), "Cache root should not be empty")
-        assertTrue(
-            cacheRoot.contains("Application Support") || cacheRoot.contains("tmp"),
-            "Should use iOS Application Support or temp directory",
-        )
-        assertTrue(cacheRoot.endsWith("Maps"), "Should end with Maps subdirectory")
-    }
-
-    @Test
-    fun `platformAppVersionStamp returns iOS bundle version format`() {
-        val stamp = platformAppVersionStamp()
-
-        assertNotNull(stamp, "Version stamp should not be null")
-        assertTrue(stamp.isNotEmpty(), "Version stamp should not be empty")
-        assertTrue(stamp.contains("+"), "Should contain version+build format (e.g., '1.0+123')")
-    }
+            assertNotNull(cacheRoot, "Cache root should not be null")
+            assertTrue(cacheRoot.isNotEmpty(), "Cache root should not be empty")
+            assertTrue(
+                cacheRoot.contains("Application Support") || cacheRoot.contains("tmp"),
+                "Should use iOS Application Support or temp directory",
+            )
+            assertTrue(cacheRoot.endsWith("Maps"), "Should end with Maps subdirectory")
+        }
 
     @Test
-    fun `iOS file operations work correctly`() {
-        val testDir = "${platformCacheRoot()}/ios_test"
-        val testFile = "$testDir/test_ios.txt"
-        val testContent = "iOS MapStore test content with emoji: 🍎"
+    fun `platformAppVersionStamp returns iOS bundle version format`() =
+        runTest {
+            val stamp = platformAppVersionStamp()
 
-        // Ensure directory
-        platformEnsureDir(testDir)
-        assertTrue(platformFileExists(testDir), "Directory should be created")
+            assertNotNull(stamp, "Version stamp should not be null")
+            assertTrue(stamp.isNotEmpty(), "Version stamp should not be empty")
+            assertTrue(stamp.contains("+"), "Should contain version+build format (e.g., '1.0+123')")
+        }
 
-        // Write file
-        platformWriteText(testFile, testContent)
-        assertTrue(platformFileExists(testFile), "File should exist after write")
+    @Test
+    fun `iOS file operations work correctly`() =
+        runTest {
+            val testDir = "${platformCacheRoot()}/ios_test"
+            val testFile = "$testDir/test_ios.txt"
+            val testContent = "iOS MapStore test content with emoji: 🍎"
 
-        // Read file
-        val readContent = platformReadText(testFile)
-        assertEquals(testContent, readContent, "Content should match including Unicode")
+            // Ensure directory
+            platformEnsureDir(testDir)
+            assertTrue(platformFileExists(testDir), "Directory should be created")
 
-        // Delete file
-        platformDeleteFile(testFile)
-        assertFalse(platformFileExists(testFile), "File should not exist after deletion")
-    }
+            // Write file
+            platformWriteText(testFile, testContent)
+            assertTrue(platformFileExists(testFile), "File should exist after write")
+
+            // Read file
+            val readContent = platformReadText(testFile)
+            assertEquals(testContent, readContent, "Content should match including Unicode")
+
+            // Delete file
+            platformDeleteFile(testFile)
+            assertFalse(platformFileExists(testFile), "File should not exist after deletion")
+        }
 
     // Note: platformFetchToFile test is skipped because it requires main queue processing
     // which doesn't work properly in test environment (causes UncompletedCoroutinesError)

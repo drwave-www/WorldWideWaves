@@ -424,7 +424,7 @@ private class FakeMapAvailabilityChecker : MapAvailabilityChecker {
     var trackMapsCallCount = 0
         private set
 
-    val trackedMapIds = mutableListOf<String>()
+    var trackedMapIds = mutableListOf<String>()
         private set
 
     private val _mapStates = MutableStateFlow<Map<String, Boolean>>(emptyMap())

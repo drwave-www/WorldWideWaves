@@ -120,53 +120,62 @@ class IosCameraCenterValidationTest {
         val edgeTestCases =
             listOf(
                 // North edge
-                "North Inside" to
+                "North Inside" to (
                     Position(
                         constraintBounds.northeast.latitude - HALF_EPSILON,
                         constraintBounds.center().longitude,
-                    ) to true,
-                "North Outside" to
+                    ) to true
+                ),
+                "North Outside" to (
                     Position(
                         constraintBounds.northeast.latitude + HALF_EPSILON,
                         constraintBounds.center().longitude,
-                    ) to false,
+                    ) to false
+                ),
                 // South edge
-                "South Inside" to
+                "South Inside" to (
                     Position(
                         constraintBounds.southwest.latitude + HALF_EPSILON,
                         constraintBounds.center().longitude,
-                    ) to true,
-                "South Outside" to
+                    ) to true
+                ),
+                "South Outside" to (
                     Position(
                         constraintBounds.southwest.latitude - HALF_EPSILON,
                         constraintBounds.center().longitude,
-                    ) to false,
+                    ) to false
+                ),
                 // East edge
-                "East Inside" to
+                "East Inside" to (
                     Position(
                         constraintBounds.center().latitude,
                         constraintBounds.northeast.longitude - HALF_EPSILON,
-                    ) to true,
-                "East Outside" to
+                    ) to true
+                ),
+                "East Outside" to (
                     Position(
                         constraintBounds.center().latitude,
                         constraintBounds.northeast.longitude + HALF_EPSILON,
-                    ) to false,
+                    ) to false
+                ),
                 // West edge
-                "West Inside" to
+                "West Inside" to (
                     Position(
                         constraintBounds.center().latitude,
                         constraintBounds.southwest.longitude + HALF_EPSILON,
-                    ) to true,
-                "West Outside" to
+                    ) to true
+                ),
+                "West Outside" to (
                     Position(
                         constraintBounds.center().latitude,
                         constraintBounds.southwest.longitude - HALF_EPSILON,
-                    ) to false,
+                    ) to false
+                ),
             )
 
         edgeTestCases.forEach { (testName, testCase) ->
-            val (position, expectedValid) = testCase
+            val position = testCase.first
+            val expectedValid = testCase.second
             val isValid = isPositionWithinBounds(position, constraintBounds, IOS_EPSILON)
 
             if (expectedValid) {
@@ -197,53 +206,62 @@ class IosCameraCenterValidationTest {
         val cornerTestCases =
             listOf(
                 // NE corner (most restrictive - both lat and lng maxed)
-                "NE Inside" to
+                "NE Inside" to (
                     Position(
                         constraintBounds.northeast.latitude - HALF_EPSILON,
                         constraintBounds.northeast.longitude - HALF_EPSILON,
-                    ) to true,
-                "NE Outside Lat" to
+                    ) to true
+                ),
+                "NE Outside Lat" to (
                     Position(
                         constraintBounds.northeast.latitude + HALF_EPSILON,
                         constraintBounds.northeast.longitude - HALF_EPSILON,
-                    ) to false,
-                "NE Outside Lng" to
+                    ) to false
+                ),
+                "NE Outside Lng" to (
                     Position(
                         constraintBounds.northeast.latitude - HALF_EPSILON,
                         constraintBounds.northeast.longitude + HALF_EPSILON,
-                    ) to false,
+                    ) to false
+                ),
                 // SW corner (most restrictive - both lat and lng minimized)
-                "SW Inside" to
+                "SW Inside" to (
                     Position(
                         constraintBounds.southwest.latitude + HALF_EPSILON,
                         constraintBounds.southwest.longitude + HALF_EPSILON,
-                    ) to true,
-                "SW Outside Lat" to
+                    ) to true
+                ),
+                "SW Outside Lat" to (
                     Position(
                         constraintBounds.southwest.latitude - HALF_EPSILON,
                         constraintBounds.southwest.longitude + HALF_EPSILON,
-                    ) to false,
-                "SW Outside Lng" to
+                    ) to false
+                ),
+                "SW Outside Lng" to (
                     Position(
                         constraintBounds.southwest.latitude + HALF_EPSILON,
                         constraintBounds.southwest.longitude - HALF_EPSILON,
-                    ) to false,
+                    ) to false
+                ),
                 // NW corner
-                "NW Inside" to
+                "NW Inside" to (
                     Position(
                         constraintBounds.northeast.latitude - HALF_EPSILON,
                         constraintBounds.southwest.longitude + HALF_EPSILON,
-                    ) to true,
+                    ) to true
+                ),
                 // SE corner
-                "SE Inside" to
+                "SE Inside" to (
                     Position(
                         constraintBounds.southwest.latitude + HALF_EPSILON,
                         constraintBounds.northeast.longitude - HALF_EPSILON,
-                    ) to true,
+                    ) to true
+                ),
             )
 
         cornerTestCases.forEach { (testName, testCase) ->
-            val (position, expectedValid) = testCase
+            val position = testCase.first
+            val expectedValid = testCase.second
             val isValid = isPositionWithinBounds(position, constraintBounds, IOS_EPSILON)
 
             if (expectedValid) {

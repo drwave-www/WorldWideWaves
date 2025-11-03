@@ -75,23 +75,25 @@ class PlatformIosTest {
         }
 
     @Test
-    fun `isCachedFileStale checks bundle modification time`() {
-        val fileName = "ios_stale_test.txt"
+    fun `isCachedFileStale checks bundle modification time`() =
+        runTest {
+            val fileName = "ios_stale_test.txt"
 
-        // iOS implementation checks against bundle modification time
-        // Should not crash and return a boolean value
-        val isStale = isCachedFileStale(fileName)
-        assertNotNull(isStale, "Staleness check should return a value")
-    }
+            // iOS implementation checks against bundle modification time
+            // Should not crash and return a boolean value
+            val isStale = isCachedFileStale(fileName)
+            assertNotNull(isStale, "Staleness check should return a value")
+        }
 
     @Test
-    fun `updateCacheMetadata updates metadata file on iOS`() {
-        val fileName = "ios_metadata_test.txt"
+    fun `updateCacheMetadata updates metadata file on iOS`() =
+        runTest {
+            val fileName = "ios_metadata_test.txt"
 
-        // Should not throw exceptions
-        updateCacheMetadata(fileName)
-        updateCacheMetadata(fileName) // Should be idempotent
-    }
+            // Should not throw exceptions
+            updateCacheMetadata(fileName)
+            updateCacheMetadata(fileName) // Should be idempotent
+        }
 
     @Test
     fun `cacheDeepFile handles iOS resource caching`() =

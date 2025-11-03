@@ -478,7 +478,7 @@ class WWWSimulationTest {
         }
 
     @Test
-    fun `test concurrent now() during setSpeed() is thread-safe`() =
+    fun testConcurrentNowDuringSetSpeedIsThreadSafe() =
         runBlocking {
             // GIVEN: Simulation with initial speed 10
             val simulation = WWWSimulation(startDateTime, userPosition, 10)
