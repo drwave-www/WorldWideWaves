@@ -35,6 +35,8 @@ import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.MutableArea
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.utils.Log
+import kotlinx.atomicfu.AtomicBoolean
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -100,6 +102,11 @@ data class WWWEventArea(
     @Transient private val _polygonsLoaded = MutableStateFlow(false)
     val polygonsLoaded: StateFlow<Boolean> = _polygonsLoaded.asStateFlow()
 
+    // Log-once flags to prevent excessive logging for undownloaded maps
+    @Transient private val loggedMissingPolygons: AtomicBoolean = atomic(false)
+
+    @Transient private val loggedInvalidBbox: AtomicBoolean = atomic(false)
+
     // ---------------------------
 
     /**
@@ -150,6 +157,11 @@ data class WWWEventArea(
             cachedBoundingBox = null
             cachedCenter = null
             cachedPositionWithinResult = null
+
+            // Reset log flags - allow logging if issues persist after download
+            loggedMissingPolygons.value = false
+            loggedInvalidBbox.value = false
+
             Log.i(
                 "WWWEventArea",
                 "clearPolygonCacheForDownload() called for ${event?.id} - cleared all caches to reload from downloaded file",
@@ -186,13 +198,14 @@ data class WWWEventArea(
         val boundingBox = bbox()
         val polygons = getPolygons()
 
-        // Defensive check: warn if polygons not loaded (shouldn't happen after fix)
+        // Defensive check: log once if polygons not loaded (expected for undownloaded maps)
         if (polygons.isEmpty()) {
-            Log.w(
-                "WWWEventArea",
-                "isPositionWithin called for ${event?.id} with empty polygons - " +
-                    "returning false. GeoJSON may not be loaded yet. Position: $position",
-            )
+            if (!loggedMissingPolygons.getAndSet(true)) {
+                Log.v(
+                    "WWWEventArea",
+                    "isPositionWithin: ${event?.id} - empty polygons, GeoJSON not loaded yet. Position: $position",
+                )
+            }
             return false
         }
 
@@ -288,10 +301,13 @@ data class WWWEventArea(
         if (isValidBbox) {
             cachedBoundingBox = bbox
         } else {
-            Log.w(
-                "WWWEventArea",
-                "bbox: ${event.id} - Invalid bbox (0,0,0,0) not cached. GeoJSON may not be loaded yet.",
-            )
+            // Log once per event (expected for undownloaded maps)
+            if (!loggedInvalidBbox.getAndSet(true)) {
+                Log.v(
+                    "WWWEventArea",
+                    "bbox: ${event.id} - invalid (0,0,0,0), GeoJSON not loaded yet",
+                )
+            }
         }
 
         return bbox
