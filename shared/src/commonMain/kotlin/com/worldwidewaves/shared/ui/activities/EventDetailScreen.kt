@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.ui.activities
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +53,11 @@ class EventDetailScreen(
         // Map availability for simulation button
         val mapFeatureState by mapViewModel.featureState.collectAsState()
         var showMapRequiredDialog by remember { mutableStateOf(false) }
+
+        // Map availability check - ensures state initialized before map renders
+        LaunchedEffect(event.id) {
+            mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
+        }
 
         // Calculate responsive map height
         val calculatedHeight = calculateEventMapHeight()
