@@ -47,9 +47,11 @@ import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWGlobals.BackNav
+import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.ic_arrow_back
+import com.worldwidewaves.shared.ui.components.TitleBarFavoriteButton
 import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
 import dev.icerock.moko.resources.compose.stringResource
@@ -58,6 +60,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import org.jetbrains.compose.resources.painterResource
+import org.koin.core.component.inject
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -80,6 +83,12 @@ abstract class BaseEventBackgroundScreen(
     private var selectedEvent by mutableStateOf<IWWWEvent?>(null)
     private var onFinish by mutableStateOf<(() -> Unit)?>(null)
     private val waitingHandlers: MutableList<(IWWWEvent) -> Unit> = mutableListOf()
+
+    /**
+     * iOS SAFETY: Injected via Koin DI (safe pattern - class property injection).
+     * Used for favorite button in title bar.
+     */
+    private val setEventFavorite: SetEventFavorite by inject()
 
     // iOS FIX: Removed init{} block to prevent Dispatchers.Main deadlock
     // Event tracking now must be triggered from @Composable LaunchedEffect
@@ -199,6 +208,14 @@ abstract class BaseEventBackgroundScreen(
                                 sharedQuinaryColoredBoldTextStyle(BackNav.EVENT_LOCATION_FONTSIZE).copy(
                                     textAlign = TextAlign.Center,
                                 ),
+                        )
+                    }
+                    // Favorite button (right side of title bar)
+                    if (selectedEvent != null) {
+                        TitleBarFavoriteButton(
+                            event = selectedEvent!!,
+                            setEventFavorite = setEventFavorite,
+                            modifier = Modifier.align(Alignment.BottomEnd),
                         )
                     }
                 }
