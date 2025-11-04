@@ -40,6 +40,11 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
+
+    // Apply default hierarchy template to create intermediate source sets (iosMain, etc.)
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    applyDefaultHierarchyTemplate()
+
     listOf(
         iosX64(),
         iosArm64(),
