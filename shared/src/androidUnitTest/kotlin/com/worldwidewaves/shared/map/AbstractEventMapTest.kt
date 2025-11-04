@@ -98,6 +98,7 @@ class AbstractEventMapTest : KoinTest {
         every { mockArea.bboxIsOverride } returns false
         every { mockEventMap.maxZoom } returns 18.0
         coEvery { mockWave.userClosestWaveLongitude() } returns 2.38
+        coEvery { mockWave.getWaveFrontCenterPosition() } returns Position(48.85, 2.38) // Center latitude + wave longitude
 
         // Setup mock MapLibreAdapter
         mockMapLibreAdapter = mockk()
@@ -374,18 +375,18 @@ class AbstractEventMapTest : KoinTest {
         }
 
     @Test
-    fun targetWave_returnsEarlyWhenNoWaveLongitude() =
+    fun targetWave_returnsEarlyWhenBothMethodsFail() =
         runTest {
-            // Given
-            every { mockLocationProvider.currentLocation.value } returns testUserPosition
+            // Given - both new method and fallback fail
+            coEvery { mockEvent.wave.getWaveFrontCenterPosition() } returns null
+            every { mockLocationProvider.currentLocation.value } returns null
             coEvery { mockEvent.wave.userClosestWaveLongitude() } returns null
 
             // When
             eventMap.targetWave()
             testScope.testScheduler.advanceUntilIdle()
 
-            // Then - should not animate
-            // Just verify it doesn't crash
+            // Then - should not animate (just verify it doesn't crash)
         }
 
     @Test
@@ -1476,6 +1477,9 @@ class AbstractEventMapTest : KoinTest {
             coVerify { mockMapLibreAdapter.animateCameraToBounds(testBounds, any(), any()) }
         }
 
+    // ============================================================
+    // NOTE: Wave front center position is comprehensively tested in WWWEventWaveLinearTest.kt
+    // with 30+ test cases covering various polygon shapes, directions, and progressions
     // ============================================================
     // TEST IMPLEMENTATION
     // ============================================================

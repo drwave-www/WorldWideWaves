@@ -790,4 +790,494 @@ class WWWEventWaveLinearTest : KoinTest {
 
             unmockkObject(GeoUtils)
         }
+
+    // ===== WAVE FRONT CENTER POSITION TESTS =====
+
+    @Test
+    fun `test wave front center position with simple north-south rectangle`() =
+        runBlocking {
+            // GIVEN: Simple rectangle aligned north-south
+            val bbox = BoundingBox.fromCorners(Position(10.0, 20.0), Position(30.0, 40.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = startTime + 10.minutes
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns currentTime
+
+            // WHEN: Get wave front center position
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN: Should return position with center latitude
+            assertNotNull(result, "Wave front center position should not be null")
+            assertEquals(20.0, result.latitude, 0.0001, "Latitude should be center of bbox")
+            assertTrue(result.longitude >= 20.0 && result.longitude <= 40.0, "Longitude should be within bbox")
+        }
+
+    @Test
+    fun `test wave front center position with rotated rectangle`() =
+        runBlocking {
+            // GIVEN: Rotated rectangle (diagonal orientation)
+            val bbox = BoundingBox.fromCorners(Position(-10.0, -15.0), Position(25.0, 35.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns startTime + 5.minutes
+
+            // WHEN: Get wave front center position
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN: Should use geometric center latitude
+            assertNotNull(result)
+            assertEquals(7.5, result.latitude, 0.0001, "Latitude should be geometric center")
+        }
+
+    @Test
+    fun `test wave front center position with L-shaped polygon area`() =
+        runBlocking {
+            // GIVEN: L-shaped bounding box representation
+            val bbox = BoundingBox.fromCorners(Position(0.0, 0.0), Position(50.0, 50.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns startTime + 15.minutes
+
+            // WHEN
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN: Uses bbox center even for complex shapes
+            assertNotNull(result)
+            assertEquals(25.0, result.latitude, 0.0001)
+        }
+
+    @Test
+    fun `test wave front center position with U-shaped polygon area`() =
+        runBlocking {
+            // GIVEN: U-shaped bounding box
+            val bbox = BoundingBox.fromCorners(Position(-20.0, 10.0), Position(40.0, 60.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns startTime + 20.minutes
+
+            // WHEN
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN
+            assertNotNull(result)
+            assertEquals(10.0, result.latitude, 0.0001, "Should use bbox center latitude")
+        }
+
+    @Test
+    fun `test wave front center position with concave polygon`() =
+        runBlocking {
+            // GIVEN: Concave polygon with indentations
+            val bbox = BoundingBox.fromCorners(Position(5.0, 15.0), Position(45.0, 55.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns startTime + 8.minutes
+
+            // WHEN
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN: Uses simple bbox center
+            assertNotNull(result)
+            assertEquals(25.0, result.latitude, 0.0001)
+        }
+
+    @Test
+    fun `test wave front center position crossing equator`() =
+        runBlocking {
+            // GIVEN: Area crossing equator (negative to positive latitudes)
+            val bbox = BoundingBox.fromCorners(Position(-30.0, 10.0), Position(30.0, 50.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns startTime + 12.minutes
+
+            // WHEN
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN: Center should be at equator
+            assertNotNull(result)
+            assertEquals(0.0, result.latitude, 0.0001, "Center should be at equator")
+        }
+
+    @Test
+    fun `test wave front center position crossing prime meridian`() =
+        runBlocking {
+            // GIVEN: Area crossing prime meridian (negative to positive longitudes)
+            val bbox = BoundingBox.fromCorners(Position(20.0, -10.0), Position(40.0, 10.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns startTime + 5.minutes
+
+            // WHEN
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN
+            assertNotNull(result)
+            assertEquals(30.0, result.latitude, 0.0001)
+            assertTrue(result.longitude >= -10.0 && result.longitude <= 10.0)
+        }
+
+    @Test
+    fun `test wave front center position with very narrow polygon`() =
+        runBlocking {
+            // GIVEN: Very narrow polygon (high aspect ratio)
+            val bbox = BoundingBox.fromCorners(Position(45.0, 2.0), Position(45.1, 98.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns startTime + 3.minutes
+
+            // WHEN
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN
+            assertNotNull(result)
+            assertEquals(45.05, result.latitude, 0.0001, "Should handle narrow areas")
+        }
+
+    @Test
+    fun `test wave front center position with very wide polygon`() =
+        runBlocking {
+            // GIVEN: Very wide polygon (large longitude range)
+            val bbox = BoundingBox.fromCorners(Position(10.0, -120.0), Position(20.0, 120.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns startTime + 30.minutes
+
+            // WHEN
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN
+            assertNotNull(result)
+            assertEquals(15.0, result.latitude, 0.0001, "Should handle wide areas")
+        }
+
+    @Test
+    fun `test wave front center position with irregular 8-vertex polygon`() =
+        runBlocking {
+            // GIVEN: Irregular octagon bounding box
+            val bbox = BoundingBox.fromCorners(Position(-5.0, -8.0), Position(35.0, 42.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns startTime + 7.minutes
+
+            // WHEN
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN
+            assertNotNull(result)
+            assertEquals(15.0, result.latitude, 0.0001)
+        }
+
+    @Test
+    fun `test wave front center position with irregular 12-vertex polygon`() =
+        runBlocking {
+            // GIVEN: Complex 12-sided polygon
+            val bbox = BoundingBox.fromCorners(Position(22.0, 33.0), Position(58.0, 77.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns startTime + 18.minutes
+
+            // WHEN
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN
+            assertNotNull(result)
+            assertEquals(40.0, result.latitude, 0.0001)
+        }
+
+    @Test
+    fun `test wave front center position with irregular 20-vertex polygon`() =
+        runBlocking {
+            // GIVEN: Very complex 20-sided polygon
+            val bbox = BoundingBox.fromCorners(Position(-15.0, 5.0), Position(65.0, 95.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns startTime + 25.minutes
+
+            // WHEN
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN
+            assertNotNull(result)
+            assertEquals(25.0, result.latitude, 0.0001)
+        }
+
+    @Test
+    fun `test wave front center position with minimal area polygon`() =
+        runBlocking {
+            // GIVEN: Minimal area polygon
+            val bbox = BoundingBox.fromCorners(Position(42.0, 13.0), Position(42.001, 13.001))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns startTime + 1.minutes
+
+            // WHEN
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN
+            assertNotNull(result)
+            assertEquals(42.0005, result.latitude, 0.0001, "Should handle minimal areas")
+        }
+
+    @Test
+    fun `test wave front center position at 0% progression`() =
+        runBlocking {
+            // GIVEN: Wave at start (0% progression)
+            val bbox = BoundingBox.fromCorners(Position(10.0, 20.0), Position(30.0, 80.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns startTime // No time elapsed
+
+            // WHEN
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN: Should be at starting longitude
+            assertNotNull(result)
+            assertEquals(20.0, result.latitude, 0.0001)
+            assertEquals(20.0, result.longitude, 0.0001, "Should be at start longitude for EAST direction")
+        }
+
+    @Test
+    fun `test wave front center position at 25% progression`() =
+        runBlocking {
+            // GIVEN: Wave at some time after start
+            val bbox = BoundingBox.fromCorners(Position(10.0, 0.0), Position(30.0, 100.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = startTime + 10.minutes
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns currentTime
+
+            // WHEN
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN
+            assertNotNull(result)
+            assertEquals(20.0, result.latitude, 0.0001, "Latitude should be bbox center")
+            // Longitude should be within bounds
+            assertTrue(result.longitude >= 0.0 && result.longitude <= 100.0, "Longitude should be within bounds")
+        }
+
+    @Test
+    fun `test wave front center position at 50% progression`() =
+        runBlocking {
+            // GIVEN: Wave at some mid-point time
+            val bbox = BoundingBox.fromCorners(Position(15.0, 10.0), Position(35.0, 90.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = startTime + 20.minutes
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns currentTime
+
+            // WHEN
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN
+            assertNotNull(result)
+            assertEquals(25.0, result.latitude, 0.0001)
+            assertTrue(result.longitude >= 10.0 && result.longitude <= 90.0)
+        }
+
+    @Test
+    fun `test wave front center position at 75% progression`() =
+        runBlocking {
+            // GIVEN: Wave at later time
+            val bbox = BoundingBox.fromCorners(Position(20.0, 30.0), Position(60.0, 150.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = startTime + 30.minutes
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns currentTime
+
+            // WHEN
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN
+            assertNotNull(result)
+            assertEquals(40.0, result.latitude, 0.0001)
+            assertTrue(result.longitude >= 30.0 && result.longitude <= 150.0)
+        }
+
+    @Test
+    fun `test wave front center position at 100% progression`() =
+        runBlocking {
+            // GIVEN: Wave well past duration (will be at end)
+            val bbox = BoundingBox.fromCorners(Position(25.0, 40.0), Position(55.0, 160.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = startTime + 2.hours // Far beyond typical duration
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns currentTime
+
+            // WHEN
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN: Should be at or past ending longitude
+            assertNotNull(result)
+            assertEquals(40.0, result.latitude, 0.0001)
+            assertTrue(result.longitude >= 40.0, "Longitude should be at or past start for EAST direction")
+        }
+
+    @Test
+    fun `test wave front center position with WEST direction`() =
+        runBlocking {
+            // GIVEN: Wave moving WEST
+            waveLinear =
+                WWWEventWaveLinear(
+                    speed = 100.0,
+                    direction = WWWEventWave.Direction.WEST,
+                    approxDuration = 60,
+                ).setRelatedEvent(mockEvent)
+
+            val bbox = BoundingBox.fromCorners(Position(10.0, 20.0), Position(30.0, 80.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = startTime + 10.minutes
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns currentTime
+
+            // WHEN
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN: Should move from maxLongitude (WEST direction)
+            assertNotNull(result)
+            assertEquals(20.0, result.latitude, 0.0001)
+            assertTrue(result.longitude <= 80.0, "Should start from max longitude for WEST")
+        }
+
+    @Test
+    fun `test wave front center position with EAST direction`() =
+        runBlocking {
+            // GIVEN: Wave moving EAST (already default)
+            val bbox = BoundingBox.fromCorners(Position(15.0, 25.0), Position(45.0, 125.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = startTime + 15.minutes
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns currentTime
+
+            // WHEN
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN: Should move from minLongitude (EAST direction)
+            assertNotNull(result)
+            assertEquals(30.0, result.latitude, 0.0001)
+            assertTrue(result.longitude >= 25.0, "Should start from min longitude for EAST")
+        }
+
+    @Test
+    fun `test wave front center position consistency across multiple calls`() =
+        runBlocking {
+            // GIVEN: Fixed time and bbox
+            val bbox = BoundingBox.fromCorners(Position(12.0, 18.0), Position(48.0, 72.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val fixedTime = startTime + 20.minutes
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns fixedTime
+
+            // WHEN: Call multiple times
+            val result1 = waveLinear.getWaveFrontCenterPosition()
+            val result2 = waveLinear.getWaveFrontCenterPosition()
+            val result3 = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN: Results should be identical
+            assertNotNull(result1)
+            assertNotNull(result2)
+            assertNotNull(result3)
+            assertEquals(result1.latitude, result2.latitude, 0.0001)
+            assertEquals(result2.latitude, result3.latitude, 0.0001)
+            assertEquals(result1.longitude, result2.longitude, 0.0001)
+            assertEquals(result2.longitude, result3.longitude, 0.0001)
+        }
+
+    @Test
+    fun `test wave front center position with different aspect ratios - square`() =
+        runBlocking {
+            // GIVEN: Square area (1:1 aspect ratio)
+            val bbox = BoundingBox.fromCorners(Position(20.0, 30.0), Position(30.0, 40.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns startTime + 5.minutes
+
+            // WHEN
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN
+            assertNotNull(result)
+            assertEquals(25.0, result.latitude, 0.0001, "Center of square")
+        }
+
+    @Test
+    fun `test wave front center position with different aspect ratios - 2 to 1 rectangle`() =
+        runBlocking {
+            // GIVEN: 2:1 aspect ratio (wider than tall)
+            val bbox = BoundingBox.fromCorners(Position(10.0, 0.0), Position(30.0, 40.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns startTime + 8.minutes
+
+            // WHEN
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN
+            assertNotNull(result)
+            assertEquals(20.0, result.latitude, 0.0001)
+        }
+
+    @Test
+    fun `test wave front center position with different aspect ratios - 1 to 5 tall rectangle`() =
+        runBlocking {
+            // GIVEN: 1:5 aspect ratio (much taller than wide)
+            val bbox = BoundingBox.fromCorners(Position(-40.0, 50.0), Position(40.0, 60.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+
+            coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns startTime + 2.minutes
+
+            // WHEN
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN
+            assertNotNull(result)
+            assertEquals(0.0, result.latitude, 0.0001, "Center of tall rectangle")
+        }
 }

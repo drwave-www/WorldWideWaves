@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.events.utils.Position
 import io.github.aakira.napier.Antilog
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -92,6 +93,8 @@ class WWWEventWaveTest : KoinTest {
                 override suspend fun userHitDateTime(): Instant? = null
 
                 override suspend fun closestWaveLongitude(latitude: Double): Double = 0.0
+
+                override suspend fun getWaveFrontCenterPosition(): Position? = null
 
                 override suspend fun userPositionToWaveRatio() = 0.0
             }.setRelatedEvent(mockEvent)

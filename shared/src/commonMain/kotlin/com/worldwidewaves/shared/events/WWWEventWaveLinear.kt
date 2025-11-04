@@ -232,6 +232,13 @@ data class WWWEventWaveLinear(
         }
     }
 
+    override suspend fun getWaveFrontCenterPosition(): Position? {
+        val bbox = bbox()
+        val centerLatitude = (bbox.ne.lat + bbox.sw.lat) / 2
+        val waveFrontLongitude = closestWaveLongitude(centerLatitude)
+        return Position(centerLatitude, waveFrontLongitude)
+    }
+
     @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     override suspend fun userPositionToWaveRatio(): Double? {
         val userPosition = getUserPosition()

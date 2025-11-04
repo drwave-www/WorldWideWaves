@@ -59,6 +59,10 @@ data class WWWEventWaveDeep(
         TODO("Not yet implemented")
     }
 
+    override suspend fun getWaveFrontCenterPosition(): com.worldwidewaves.shared.events.utils.Position? {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun userPositionToWaveRatio(): Double? {
         TODO("Not yet implemented")
     }

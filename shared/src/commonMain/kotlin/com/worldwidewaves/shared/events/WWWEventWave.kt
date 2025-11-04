@@ -126,6 +126,8 @@ abstract class WWWEventWave :
 
     abstract suspend fun closestWaveLongitude(latitude: Double): Double
 
+    abstract suspend fun getWaveFrontCenterPosition(): Position?
+
     abstract suspend fun userPositionToWaveRatio(): Double?
 
     // ---------------------------

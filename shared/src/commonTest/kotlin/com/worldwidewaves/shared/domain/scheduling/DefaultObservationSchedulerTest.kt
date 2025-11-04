@@ -27,6 +27,7 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEventObserver
 import com.worldwidewaves.shared.events.WWWEventWave
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
@@ -179,6 +180,8 @@ class DefaultObservationSchedulerTest : KoinTest {
                 }
 
                 override suspend fun closestWaveLongitude(latitude: Double): Double = 0.0
+
+                override suspend fun getWaveFrontCenterPosition(): Position? = null
 
                 override suspend fun userPositionToWaveRatio(): Double? = null
 

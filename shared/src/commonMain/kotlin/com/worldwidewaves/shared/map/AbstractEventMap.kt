@@ -292,23 +292,26 @@ abstract class AbstractEventMap<T>(
     // Camera targeting methods - shared logic for all platforms --------------
 
     /**
-     * Moves the camera to the current wave longitude, keeping current latitude
+     * Moves the camera to the wave front center position
+     * Falls back to user latitude + wave longitude if wave front center is unavailable
      */
     suspend fun targetWave() {
-        // Use unified PositionManager (respects SIMULATION > GPS priority)
-        val currentLocation = positionManager.getCurrentPosition()
-        if (currentLocation == null) {
-            Log.w("AbstractEventMap", "targetWave called but position not available (debounce pending?)")
-            return
+        var wavePosition = event.wave.getWaveFrontCenterPosition()
+
+        // Fallback to previous implementation if new method fails
+        if (wavePosition == null) {
+            Log.w("AbstractEventMap", "Wave front center position not available, falling back to user position")
+            val currentLocation = positionManager.getCurrentPosition()
+            val closestWaveLongitude = event.wave.userClosestWaveLongitude()
+
+            if (currentLocation != null && closestWaveLongitude != null) {
+                wavePosition = Position(currentLocation.latitude, closestWaveLongitude)
+            } else {
+                Log.w("AbstractEventMap", "targetWave called but position not available")
+                return
+            }
         }
 
-        val closestWaveLongitude = event.wave.userClosestWaveLongitude()
-        if (closestWaveLongitude == null) {
-            Log.w("AbstractEventMap", "targetWave called but wave longitude not available")
-            return
-        }
-
-        val wavePosition = Position(currentLocation.latitude, closestWaveLongitude)
         runCameraAnimation { cb ->
             mapLibreAdapter.animateCamera(wavePosition, MapDisplay.TARGET_WAVE_ZOOM, cb)
         }
@@ -344,27 +347,36 @@ abstract class AbstractEventMap<T>(
      * - Wave progression (early = tight focus, late = full coverage)
      * - User-wave distance (expands if needed)
      * - Event edge proximity (ensures boundary visibility)
+     * Falls back to user latitude + wave longitude if wave front center is unavailable
      */
     @Suppress("ComplexCondition") // Necessary validation: null + NaN checks prevent IllegalArgumentException
     suspend fun targetUserAndWave() {
         val userPosition = positionManager.getCurrentPosition()
-        val closestWaveLongitude = event.wave.userClosestWaveLongitude()
+        var wavePosition = event.wave.getWaveFrontCenterPosition()
+
+        // Fallback to previous implementation if new method fails
+        if (wavePosition == null && userPosition != null) {
+            val closestWaveLongitude = event.wave.userClosestWaveLongitude()
+            if (closestWaveLongitude != null) {
+                wavePosition = Position(userPosition.latitude, closestWaveLongitude)
+                Log.w("AbstractEventMap", "Wave front center position not available, using fallback position")
+            }
+        }
 
         // Validate that we have valid data (not null and not NaN)
         if (userPosition == null ||
-            closestWaveLongitude == null ||
-            closestWaveLongitude.isNaN() ||
+            wavePosition == null ||
             userPosition.latitude.isNaN() ||
-            userPosition.longitude.isNaN()
+            userPosition.longitude.isNaN() ||
+            wavePosition.latitude.isNaN() ||
+            wavePosition.longitude.isNaN()
         ) {
             Log.w(
                 "AbstractEventMap",
-                "WARNING: targetUserAndWave: missing or invalid data (userPos=$userPosition, waveLng=$closestWaveLongitude)",
+                "WARNING: targetUserAndWave: missing or invalid data (userPos=$userPosition, wavePos=$wavePosition)",
             )
             return
         }
-
-        val wavePosition = Position(userPosition.latitude, closestWaveLongitude)
 
         // Create the bounds containing user and wave positions
         val bounds = BoundingBox.fromCorners(listOf(userPosition, wavePosition))
