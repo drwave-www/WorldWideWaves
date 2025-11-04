@@ -93,6 +93,11 @@ fun BoxScope.SimulationButton(
             else -> false
         }
 
+    Log.d(
+        "SimulationButton",
+        "Map availability check for ${event.id}: mapFeatureState=$mapFeatureState, isAvailable=$isMapAvailableForSimulation",
+    )
+
     // Determine content description and state based on current state
     val contentDescriptionText =
         when (simulationButtonState) {
@@ -227,9 +232,17 @@ private fun handleSimulationClick(
     when (simulationButtonState) {
         "idle" -> {
             if (!isMapAvailableForSimulation) {
+                Log.w(
+                    "SimulationButton",
+                    "Map NOT available for simulation - triggering dialog for event ${event.id}",
+                )
                 onMapNotAvailable()
                 null
             } else {
+                Log.i(
+                    "SimulationButton",
+                    "Map IS available - starting simulation for event ${event.id}",
+                )
                 onStateChange("loading")
                 suspend {
                     try {

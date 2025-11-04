@@ -35,6 +35,7 @@ import com.worldwidewaves.shared.ui.components.AlertMapNotDownloadedOnSimulation
 import com.worldwidewaves.shared.ui.components.EventLayout
 import com.worldwidewaves.shared.ui.components.MapPolygonDisplay
 import com.worldwidewaves.shared.ui.formatters.calculateEventMapHeight
+import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.viewmodels.MapViewModel
 import kotlin.time.ExperimentalTime
 
@@ -65,9 +66,13 @@ class EventDetailScreen(
                     is com.worldwidewaves.shared.map.MapFeatureState.NotAvailable -> true
                     is com.worldwidewaves.shared.map.MapFeatureState.Failed -> true
                     is com.worldwidewaves.shared.map.MapFeatureState.Available -> true // Re-check to validate
-                    is com.worldwidewaves.shared.map.MapFeatureState.Installed -> true // Re-check after installation
                     else -> false // Don't re-check during Downloading, Installing, Pending, etc.
                 }
+
+            Log.d(
+                "EventDetailScreen",
+                "Map state check: event=${event.id}, state=$mapFeatureState, shouldCheck=$shouldCheck",
+            )
 
             if (shouldCheck) {
                 mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)

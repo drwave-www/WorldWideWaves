@@ -71,10 +71,12 @@ class MapDownloadCoordinator(
         mapId: String,
         autoDownload: Boolean,
     ) {
-        Log.d(TAG, "checkIfMapIsAvailable id=$mapId auto=$autoDownload")
+        val previousState = _featureState.value
+        Log.d(TAG, "checkIfMapIsAvailable id=$mapId auto=$autoDownload currentState=$previousState")
         currentMapId = mapId
 
         if (platformAdapter.isMapInstalled(mapId)) {
+            Log.i(TAG, "Map is installed, transitioning state from $previousState to Available")
             _featureState.value = MapFeatureState.Available
         } else {
             // Defensive: Don't transition from Installed to NotAvailable
@@ -87,6 +89,7 @@ class MapDownloadCoordinator(
                 )
                 // Keep current Installed state, don't overwrite to NotAvailable
             } else {
+                Log.i(TAG, "Map is not installed, transitioning state from $previousState to NotAvailable")
                 _featureState.value = MapFeatureState.NotAvailable
                 if (autoDownload) {
                     downloadMap(mapId)
@@ -147,7 +150,8 @@ class MapDownloadCoordinator(
     }
 
     fun handleDownloadSuccess() {
-        Log.i(TAG, "Download completed successfully")
+        val previousState = _featureState.value
+        Log.i(TAG, "Download completed successfully, transitioning state from $previousState to Installed")
         _featureState.value = MapFeatureState.Installed
         retryManager.resetRetryCount()
 
