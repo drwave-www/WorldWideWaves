@@ -104,9 +104,9 @@ fun WaveScreen(
 
             WaveProgressionBar(event)
 
-            // Weighted spacers for smart countdown positioning (2:3 ratio)
-            // 2/3 of remaining space above countdown, 1/3 below
-            Spacer(modifier = Modifier.weight(2f))
+            // Weighted spacers for smart countdown positioning (1:2 ratio)
+            // 1/3 of remaining space above countdown, 2/3 below
+            Spacer(modifier = Modifier.weight(1f))
             WaveHitCounter(
                 event = event,
                 modifier =
@@ -114,7 +114,7 @@ fun WaveScreen(
                         countdownHeightPx = size.height
                     },
             )
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(2f))
             // Add safe area padding for devices with notches/home indicators
             Spacer(modifier = Modifier.height(safeAreaBottomPadding))
         }
