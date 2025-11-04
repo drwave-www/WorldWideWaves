@@ -23,7 +23,6 @@ package com.worldwidewaves.shared.ui.components.global
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,18 +50,20 @@ import dev.icerock.moko.resources.compose.stringResource
  * Uses platform-specific icons through expect/actual pattern.
  *
  * @param platform The WWWPlatform instance to observe simulation mode state and handle actions
+ * @param modifier The modifier to apply to this chip (positioning should be handled by caller)
  */
 @Composable
-fun BoxScope.SimulationModeChip(platform: WWWPlatform) {
+fun SimulationModeChip(
+    platform: WWWPlatform,
+    modifier: Modifier = Modifier,
+) {
     val simulationModeEnabled by platform.simulationModeEnabled.collectAsState()
 
     if (simulationModeEnabled) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier =
-                Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = 8.dp, end = 8.dp)
+                modifier
                     .clip(RoundedCornerShape(4.dp))
                     .background(Color.Red)
                     .clickable {

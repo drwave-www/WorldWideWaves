@@ -20,9 +20,12 @@ package com.worldwidewaves.shared.ui.activities
  * limitations under the License. */
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -203,37 +206,45 @@ open class MainScreen
                             }
 
                             // -----------------------------------------------------------------
-                            //  Global Simulation-Mode chip shown whenever the mode is enabled
+                            //  Bottom overlay indicators - vertically aligned
+                            //  Debug button (far left) and Simulation chip (far right)
                             // -----------------------------------------------------------------
-                            SimulationModeChip(platform)
+                            val windowInfo = LocalWindowInfo.current
+                            val density = LocalDensity.current
+                            val densityScale = density.density
+                            val containerHeightPx = windowInfo.containerSize.height
+                            val screenHeightDp = (containerHeightPx / densityScale).dp
+                            val bottomOffset = screenHeightDp * 0.15f
 
-                            // -----------------------------------------------------------------
-                            //  Floating Debug Icon (green) - bottom right corner
-                            //  Only visible in debug builds
-                            // -----------------------------------------------------------------
-                            if (ready && debugTabScreen != null && platformEnabler.isDebugBuild) {
-                                val windowInfo = LocalWindowInfo.current
-                                val density = LocalDensity.current
-                                val densityScale = density.density
-                                val containerHeightPx = windowInfo.containerSize.height
-                                val screenHeightDp = (containerHeightPx / densityScale).dp
-                                val bottomOffset = screenHeightDp * 0.15f
-
-                                FloatingActionButton(
-                                    onClick = { showDebugScreen = !showDebugScreen },
-                                    modifier =
-                                        Modifier
-                                            .align(Alignment.BottomEnd)
-                                            .padding(end = 16.dp, bottom = bottomOffset),
-                                    containerColor = UIConstants.DEBUG_BUTTON_COLOR,
-                                    shape = CircleShape,
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.BugReport,
-                                        contentDescription = stringResource(MokoRes.strings.accessibility_debug_screen),
-                                        tint = Color.White,
-                                    )
+                            Row(
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.BottomCenter)
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = bottomOffset),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                // Debug button (green) - positioned at far left
+                                if (ready && debugTabScreen != null && platformEnabler.isDebugBuild) {
+                                    FloatingActionButton(
+                                        onClick = { showDebugScreen = !showDebugScreen },
+                                        containerColor = UIConstants.DEBUG_BUTTON_COLOR,
+                                        shape = CircleShape,
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.BugReport,
+                                            contentDescription = stringResource(MokoRes.strings.accessibility_debug_screen),
+                                            tint = Color.White,
+                                        )
+                                    }
                                 }
+
+                                // Simulation mode chip (red) - positioned at far right
+                                SimulationModeChip(
+                                    platform = platform,
+                                    modifier = Modifier,
+                                )
                             }
                         }
                     }
