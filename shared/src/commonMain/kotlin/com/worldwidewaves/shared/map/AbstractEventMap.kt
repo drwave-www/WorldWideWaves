@@ -154,18 +154,20 @@ abstract class AbstractEventMap<T>(
                 bounds.ne.lat == 0.0 &&
                 bounds.ne.lng == 0.0
         if (isInvalidBbox) {
-            Log.w(
-                "AbstractEventMap",
-                "moveToMapBounds: Invalid bbox (0,0,0,0) detected for event ${event.id}. " +
-                    "Camera will show entire world. GeoJSON may not be loaded yet.",
-            )
-        } else {
             Log.d(
                 "AbstractEventMap",
-                "moveToMapBounds: Using bbox SW(${bounds.sw.lat},${bounds.sw.lng}) " +
-                    "NE(${bounds.ne.lat},${bounds.ne.lng}) for event ${event.id}",
+                "moveToMapBounds: Invalid bbox (0,0,0,0) for event ${event.id}. " +
+                    "Skipping camera movement - GeoJSON not loaded yet (expected for non-downloaded maps).",
             )
+            onComplete()
+            return
         }
+
+        Log.d(
+            "AbstractEventMap",
+            "moveToMapBounds: Using bbox SW(${bounds.sw.lat},${bounds.sw.lng}) " +
+                "NE(${bounds.ne.lat},${bounds.ne.lng}) for event ${event.id}",
+        )
 
         // Initialize constraint manager with BOUNDS mode (zero padding for tight fit)
         constraintManager = MapBoundsEnforcer(bounds, mapLibreAdapter, isWindowMode = false) { suppressCorrections }

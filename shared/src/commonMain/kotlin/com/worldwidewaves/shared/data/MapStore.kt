@@ -102,7 +102,7 @@ suspend fun readGeoJson(eventId: String): String? {
     Log.d("MapStore", "readGeoJson: Reading GeoJSON for $eventId")
     val p = getMapFileAbsolutePath(eventId, MapFileExtension.GEOJSON)
     if (p == null) {
-        Log.w("MapStore", "readGeoJson: No file path for $eventId")
+        Log.d("MapStore", "readGeoJson: No file path for $eventId (map not downloaded)")
         return null
     }
     Log.d("MapStore", "readGeoJson: Reading from $p")
@@ -203,7 +203,10 @@ suspend fun getMapFileAbsolutePath(
                 Log.i("MapStore", "getMapFileAbsolutePath: Copied from bundle/ODR -> $dataPath")
                 return dataPath
             }
-            Log.w("MapStore", "getMapFileAbsolutePath: Failed to copy from bundle/ODR for $eventId.$extension")
+            Log.d(
+                "MapStore",
+                "getMapFileAbsolutePath: Map not available in bundle/ODR for $eventId.$extension (expected for non-downloaded maps)",
+            )
             return null
         }
 
