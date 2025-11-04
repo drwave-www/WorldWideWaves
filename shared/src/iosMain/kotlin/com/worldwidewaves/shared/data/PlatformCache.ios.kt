@@ -151,10 +151,13 @@ actual suspend fun updateCacheMetadata(fileName: String) {
 /**
  * Delete all cached artefacts (data + metadata files) that belong to a given map/event.
  * iOS implementation matching Android behavior.
+ *
+ * @return true if at least one file was deleted, false otherwise
  */
-fun clearEventCache(eventId: String) {
-    val root = cacheRoot()
+fun clearEventCache(eventId: String): Boolean {
+    val root = getAppSupportMapsDirectory()
     val fileManager = NSFileManager.defaultManager
+    var deletedAny = false
 
     // List of files to delete (matching Android implementation)
     val targets =
@@ -168,9 +171,23 @@ fun clearEventCache(eventId: String) {
         )
 
     targets.forEach { fileName ->
-        val fullPath = joinPath(root, fileName)
+        val fullPath = "$root/$fileName"
         if (fileManager.fileExistsAtPath(fullPath)) {
-            fileManager.removeItemAtPath(fullPath, error = null)
+            val success = fileManager.removeItemAtPath(fullPath, error = null)
+            if (success) {
+                deletedAny = true
+                com.worldwidewaves.shared.utils.Log.v(
+                    "PlatformCache",
+                    "Deleted $fileName for $eventId",
+                )
+            } else {
+                com.worldwidewaves.shared.utils.Log.w(
+                    "PlatformCache",
+                    "Failed to delete $fileName for $eventId",
+                )
+            }
         }
     }
+
+    return deletedAny
 }

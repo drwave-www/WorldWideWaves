@@ -185,7 +185,8 @@ class IosMapAvailabilityChecker : MapAvailabilityChecker {
      */
     override suspend fun requestMapUninstall(eventId: String): Boolean =
         kotlinx.coroutines.suspendCancellableCoroutine { cont ->
-            var wasRemoved = false
+            var cacheCleared = false
+            var odrReleased = false
 
             scope.launch {
                 // Background: Clear cache and disallow downloads FIRST
@@ -195,13 +196,14 @@ class IosMapAvailabilityChecker : MapAvailabilityChecker {
                 // Clear cache files to ensure isMapAvailable returns false
                 // Matches Android behavior in AndroidMapAvailabilityChecker
                 try {
-                    com.worldwidewaves.shared.data
-                        .clearEventCache(eventId)
+                    cacheCleared =
+                        com.worldwidewaves.shared.data
+                            .clearEventCache(eventId)
                     com.worldwidewaves.shared.data
                         .clearUnavailableGeoJsonCache(eventId)
                     com.worldwidewaves.shared.utils.Log.i(
                         "IosMapAvailabilityChecker",
-                        "Cache cleared for $eventId",
+                        "Cache cleared for $eventId (files deleted: $cacheCleared)",
                     )
                 } catch (e: Exception) {
                     com.worldwidewaves.shared.utils.Log.e(
@@ -214,7 +216,7 @@ class IosMapAvailabilityChecker : MapAvailabilityChecker {
                 // Main thread: ODR release + state update (after cache cleared)
                 onMain {
                     val request = pinnedRequests.remove(eventId)
-                    wasRemoved = request != null
+                    odrReleased = request != null
                     request?.let {
                         try {
                             it.endAccessingResources()
@@ -227,12 +229,16 @@ class IosMapAvailabilityChecker : MapAvailabilityChecker {
                     updated[eventId] = false
                     _mapStates.value = updated
 
+                    // Success if either cache was cleared OR ODR was released
+                    val success = cacheCleared || odrReleased
+
                     com.worldwidewaves.shared.utils.Log.i(
                         "IosMapAvailabilityChecker",
-                        "requestMapUninstall: Released map $eventId, state updated to false",
+                        "requestMapUninstall: $eventId " +
+                            "(cache=$cacheCleared, odr=$odrReleased, success=$success)",
                     )
 
-                    cont.resume(wasRemoved)
+                    cont.resume(success)
                 }
             }
             cont.invokeOnCancellation { }
