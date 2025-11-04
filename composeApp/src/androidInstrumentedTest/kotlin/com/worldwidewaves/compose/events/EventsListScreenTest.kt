@@ -448,7 +448,7 @@ class EventsListScreenTest {
             if (filteredEvents.isEmpty()) {
                 "Events list: Empty state"
             } else {
-                "Events list: ${currentFilter.capitalize()} filter, ${filteredEvents.size} events"
+                "Events list: ${currentFilter.replaceFirstChar { it.uppercase() }} filter, ${filteredEvents.size} events"
             }
 
         Column {

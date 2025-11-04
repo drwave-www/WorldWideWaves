@@ -41,6 +41,15 @@ class TestApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        // Explicitly load MapLibre native library before SDK initialization
+        // This is required for instrumented tests where native libraries aren't auto-loaded
+        try {
+            System.loadLibrary("maplibre")
+        } catch (e: UnsatisfiedLinkError) {
+            android.util.Log.e("TestApplication", "Failed to load maplibre native library", e)
+            // Continue anyway - MapLibre.getInstance will provide more specific error
+        }
+
         // Initialize MapLibre SDK with application context
         // This is critical for FileSource to have proper context for cache/preferences
         MapLibre.getInstance(this)

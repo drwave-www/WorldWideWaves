@@ -191,6 +191,13 @@ android {
     // Real Integration Test Configuration
     testOptions {
         unitTests.isReturnDefaultValues = true
+
+        // Ensure native libraries are packaged in androidTest APK
+        packaging {
+            jniLibs {
+                useLegacyPackaging = true
+            }
+        }
     }
     dynamicFeatures +=
         setOf(
@@ -268,6 +275,10 @@ dependencies {
     implementation(libs.firebase.crashlytics.ndk)
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.perf)
+
+    // AndroidTest needs MapLibre with native libraries for map integration tests
+    androidTestImplementation(libs.maplibre.android)
+    androidTestImplementation(libs.maplibre.android.annotation)
 }
 
 // Force protobuf version resolution to fix instrumented test conflicts
