@@ -31,6 +31,8 @@ import com.worldwidewaves.shared.events.utils.MutableArea
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.utils.Log
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.double
@@ -50,9 +52,10 @@ import kotlinx.serialization.json.jsonPrimitive
 object GeoJsonAreaParser {
     // Track events that have already logged parsing errors to prevent spam
     private val loggedParsingErrors = mutableSetOf<String>()
+    private val logMutex = Mutex()
 
-    private fun shouldLogParsingError(eventId: String): Boolean =
-        synchronized(loggedParsingErrors) {
+    private suspend fun shouldLogParsingError(eventId: String): Boolean =
+        logMutex.withLock {
             if (eventId in loggedParsingErrors) {
                 false
             } else {

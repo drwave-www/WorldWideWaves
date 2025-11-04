@@ -28,6 +28,8 @@ import com.worldwidewaves.shared.events.utils.Area
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.utils.Log
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.double
@@ -46,9 +48,10 @@ import kotlinx.serialization.json.jsonPrimitive
 object EventAreaGeometry {
     // Track events that have already logged GeoJSON parsing warnings to prevent spam
     private val loggedGeoJsonErrors = mutableSetOf<String>()
+    private val logMutex = Mutex()
 
-    private fun shouldLogGeoJsonError(eventId: String): Boolean =
-        synchronized(loggedGeoJsonErrors) {
+    private suspend fun shouldLogGeoJsonError(eventId: String): Boolean =
+        logMutex.withLock {
             if (eventId in loggedGeoJsonErrors) {
                 false
             } else {
