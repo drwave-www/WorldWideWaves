@@ -48,6 +48,19 @@ import kotlinx.serialization.json.jsonPrimitive
  * - Position extraction and constraint
  */
 object GeoJsonAreaParser {
+    // Track events that have already logged parsing errors to prevent spam
+    private val loggedParsingErrors = mutableSetOf<String>()
+
+    private fun shouldLogParsingError(eventId: String): Boolean =
+        synchronized(loggedParsingErrors) {
+            if (eventId in loggedParsingErrors) {
+                false
+            } else {
+                loggedParsingErrors.add(eventId)
+                true
+            }
+        }
+
     /**
      * Loads polygons from GeoJSON data for the given event.
      */
@@ -64,10 +77,16 @@ object GeoJsonAreaParser {
                 processGeoJsonData(event.id, geoJsonData, bboxOverride, tempPolygons)
             }
         } catch (e: kotlinx.serialization.SerializationException) {
-            Log.w("GeoJsonAreaParser", "GeoJSON parsing error for event ${event.id}: ${e.message}")
+            // Only log once per event to prevent spam from multiple threads/retries
+            if (shouldLogParsingError(event.id)) {
+                Log.w("GeoJsonAreaParser", "GeoJSON parsing error for event ${event.id}: ${e.message}")
+            }
             // GeoJSON data loading errors are handled gracefully
         } catch (e: Exception) {
-            Log.w("GeoJsonAreaParser", "Error loading GeoJSON for event ${event.id}: ${e.message}")
+            // Only log once per event to prevent spam from multiple threads/retries
+            if (shouldLogParsingError(event.id)) {
+                Log.w("GeoJsonAreaParser", "Error loading GeoJSON for event ${event.id}: ${e.message}")
+            }
             // GeoJSON data loading errors are handled gracefully
         }
     }

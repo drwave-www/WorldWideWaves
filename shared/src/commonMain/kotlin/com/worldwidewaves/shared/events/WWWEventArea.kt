@@ -46,6 +46,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * Geospatial definition of an event: polygons and bounding-box.
@@ -71,6 +73,55 @@ data class WWWEventArea(
     val bbox: String? = null,
 ) : KoinComponent,
     DataValidator {
+    companion object {
+        // Circuit breaker: Track failed polygon loading attempts to prevent retry storms
+        // Maps event ID to timestamp (milliseconds) of last failed load attempt
+        private val failedLoadAttempts = mutableMapOf<String, Long>()
+        private val failedLoadMutex = Mutex()
+
+        // Retry backoff period: Don't retry for 60 seconds after failure
+        private const val CIRCUIT_BREAKER_COOLDOWN_MS = 60_000L
+
+        /**
+         * Checks if we should skip loading attempt due to recent failure (circuit breaker open)
+         */
+        @OptIn(ExperimentalTime::class)
+        private suspend fun shouldSkipLoadDueToRecentFailure(eventId: String): Boolean {
+            failedLoadMutex.withLock {
+                val lastFailureTime = failedLoadAttempts[eventId] ?: return false
+                val timeSinceFailure = Clock.System.now().toEpochMilliseconds() - lastFailureTime
+
+                if (timeSinceFailure < CIRCUIT_BREAKER_COOLDOWN_MS) {
+                    // Circuit breaker still open - skip retry
+                    return true
+                } else {
+                    // Cooldown expired - allow retry and remove from map
+                    failedLoadAttempts.remove(eventId)
+                    return false
+                }
+            }
+        }
+
+        /**
+         * Records a failed load attempt to activate circuit breaker
+         */
+        @OptIn(ExperimentalTime::class)
+        private suspend fun recordFailedLoadAttempt(eventId: String) {
+            failedLoadMutex.withLock {
+                failedLoadAttempts[eventId] = Clock.System.now().toEpochMilliseconds()
+            }
+        }
+
+        /**
+         * Clears failed load attempt record (called after successful load or manual cache clear)
+         */
+        private suspend fun clearFailedLoadAttempt(eventId: String) {
+            failedLoadMutex.withLock {
+                failedLoadAttempts.remove(eventId)
+            }
+        }
+    }
+
     private var _event: IWWWEvent? = null
     private var event: IWWWEvent
         get() = _event ?: error("Event not set")
@@ -161,6 +212,9 @@ data class WWWEventArea(
             // Reset log flags - allow logging if issues persist after download
             loggedMissingPolygons.value = false
             loggedInvalidBbox.value = false
+
+            // Clear circuit breaker - allow immediate retry since file is now available
+            clearFailedLoadAttempt(event.id)
 
             Log.i(
                 "WWWEventArea",
@@ -345,6 +399,17 @@ data class WWWEventArea(
      * Loads polygons from GeoJSON and caches them with mutex protection
      */
     private suspend fun loadAndCachePolygons(): Area {
+        // Circuit breaker: Skip loading if we recently failed (prevents retry storms)
+        if (shouldSkipLoadDueToRecentFailure(event.id)) {
+            if (WWWGlobals.LogConfig.ENABLE_POSITION_TRACKING_LOGGING) {
+                Log.v(
+                    "WWWEventArea",
+                    "loadAndCachePolygons: ${event.id} skipping load due to recent failure (circuit breaker active)",
+                )
+            }
+            return emptyList()
+        }
+
         polygonsCacheMutex.withLock {
             // Double-check pattern: another coroutine might have populated the cache
             cachedAreaPolygons?.let {
@@ -353,6 +418,7 @@ data class WWWEventArea(
 
             // Build polygons in a temporary mutable list
             val tempPolygons: MutableArea = mutableListOf()
+            var loadFailed = false
 
             try {
                 coroutineScopeProvider.withDefaultContext {
@@ -366,6 +432,11 @@ data class WWWEventArea(
                 // Only log on successful load or failure, not empty result
                 if (tempPolygons.isNotEmpty()) {
                     Log.i("WWWEventArea", "loadAndCachePolygons: ${event.id} loaded ${tempPolygons.size} polygons from GeoJSON")
+                    // Clear circuit breaker on successful load
+                    clearFailedLoadAttempt(event.id)
+                } else {
+                    // Empty result indicates file not available or corrupt - activate circuit breaker
+                    loadFailed = true
                 }
             } catch (e: kotlinx.coroutines.CancellationException) {
                 Log.w("WWWEventArea", "Polygon loading cancelled for event ${event.id} (observer lifecycle)")
@@ -374,9 +445,16 @@ data class WWWEventArea(
             } catch (e: kotlinx.serialization.SerializationException) {
                 Log.w("WWWEventArea", "GeoJSON parsing error for event ${event.id}: ${e.message}")
                 // Polygon loading errors are handled gracefully - empty polygon list is acceptable
+                loadFailed = true
             } catch (e: Exception) {
                 Log.w("WWWEventArea", "Error loading polygons for event ${event.id}: ${e.message}")
                 // Polygon loading errors are handled gracefully - empty polygon list is acceptable
+                loadFailed = true
+            }
+
+            // Activate circuit breaker if load failed
+            if (loadFailed) {
+                recordFailedLoadAttempt(event.id)
             }
 
             cachePolygonsIfLoaded(tempPolygons)

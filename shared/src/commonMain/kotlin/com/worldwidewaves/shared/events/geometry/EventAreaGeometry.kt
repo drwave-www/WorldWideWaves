@@ -44,6 +44,19 @@ import kotlinx.serialization.json.jsonPrimitive
  * - Extent calculations from GeoJSON
  */
 object EventAreaGeometry {
+    // Track events that have already logged GeoJSON parsing warnings to prevent spam
+    private val loggedGeoJsonErrors = mutableSetOf<String>()
+
+    private fun shouldLogGeoJsonError(eventId: String): Boolean =
+        synchronized(loggedGeoJsonErrors) {
+            if (eventId in loggedGeoJsonErrors) {
+                false
+            } else {
+                loggedGeoJsonErrors.add(eventId)
+                true
+            }
+        }
+
     /**
      * Computes the bounding box for the event area using multiple strategies.
      *
@@ -166,10 +179,13 @@ object EventAreaGeometry {
                     )
                 }
         } catch (e: Exception) {
-            Log.w(
-                "parseGeoJsonBbox",
-                "$eventId: Malformed or missing bbox in GeoJSON (${e.message})",
-            )
+            // Only log once per event to prevent spam from multiple threads/retries
+            if (shouldLogGeoJsonError(eventId)) {
+                Log.w(
+                    "parseGeoJsonBbox",
+                    "$eventId: Malformed or missing bbox in GeoJSON (${e.message})",
+                )
+            }
             null
         }
 
@@ -187,10 +203,13 @@ object EventAreaGeometry {
             processGeoJsonForExtent(eventId, geoJsonDataProvider, extentAccumulator)
             extentAccumulator.createBoundingBox(eventId)
         } catch (e: Exception) {
-            Log.w(
-                "computeExtentFromGeoJson",
-                "$eventId: Error scanning GeoJSON for extent (${e.message})",
-            )
+            // Only log once per event to prevent spam from multiple threads/retries
+            if (shouldLogGeoJsonError(eventId)) {
+                Log.w(
+                    "computeExtentFromGeoJson",
+                    "$eventId: Error scanning GeoJSON for extent (${e.message})",
+                )
+            }
             null
         }
 
