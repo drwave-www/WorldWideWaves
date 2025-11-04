@@ -411,6 +411,132 @@ class IosPlatformMapManagerTest {
             assertEquals(0, checker.refreshCallCount, "refreshAvailability should not be called on failure")
             assertTrue(checker.trackedMapIds.isEmpty(), "No maps should be tracked on failure")
         }
+
+    // ---- Error Handling Tests ----------------------------------------------------------------
+
+    @Test
+    fun `downloadMap handles NSError gracefully without crashing`() =
+        runTest {
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            val scope = TestScope(dispatcher)
+            val manager = IosPlatformMapManager(scope = scope, callbackDispatcher = dispatcher)
+
+            var errorCode: Int? = null
+            var errorMessage: String? = null
+            var progressReached100 = false
+
+            manager.downloadMap(
+                mapId = "nonexistent_tag",
+                onProgress = { if (it == 100) progressReached100 = true },
+                onSuccess = { /* should not happen */ },
+                onError = { code, msg ->
+                    errorCode = code
+                    errorMessage = msg
+                },
+            )
+
+            // Drive the simulated progress and completion
+            advanceTimeBy(35_000)
+            advanceUntilIdle()
+
+            // Verify error was reported properly
+            assertNotNull(errorCode, "Error code should be set")
+            assertNotNull(errorMessage, "Error message should be set")
+            assertTrue(progressReached100, "Progress should reach 100 even on error (UX consistency)")
+            assertTrue(errorMessage!!.isNotEmpty(), "Error message should not be empty")
+        }
+
+    @Test
+    fun `downloadMap with invalid mapId completes without crashing`() =
+        runTest {
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            val scope = TestScope(dispatcher)
+            val manager = IosPlatformMapManager(scope = scope, callbackDispatcher = dispatcher)
+
+            var callbackInvoked = false
+
+            // Test with various invalid inputs
+            val invalidMapIds = listOf("", "!@#$%^&*()", "very_very_long_" + "x".repeat(1000))
+
+            for (mapId in invalidMapIds) {
+                callbackInvoked = false
+                manager.downloadMap(
+                    mapId = mapId,
+                    onProgress = { /* ignore */ },
+                    onSuccess = { callbackInvoked = true },
+                    onError = { _, _ -> callbackInvoked = true },
+                )
+
+                advanceTimeBy(35_000)
+                advanceUntilIdle()
+
+                // Should complete (either success or error) without crashing
+                assertTrue(callbackInvoked, "Callback should be invoked for mapId: $mapId")
+            }
+        }
+
+    @Test
+    fun `downloadMap progress reaches 100 on both success and error paths`() =
+        runTest {
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            val scope = TestScope(dispatcher)
+            val manager = IosPlatformMapManager(scope = scope, callbackDispatcher = dispatcher)
+
+            val progress = mutableListOf<Int>()
+
+            manager.downloadMap(
+                mapId = "test_map",
+                onProgress = { progress += it },
+                onSuccess = { /* ignore */ },
+                onError = { _, _ -> /* ignore */ },
+            )
+
+            advanceTimeBy(35_000)
+            advanceUntilIdle()
+
+            // Verify progress behavior
+            assertTrue(progress.contains(0), "Progress should start at 0")
+            assertTrue(progress.contains(100), "Progress should reach 100")
+            assertTrue(progress.size > 2, "Progress should have intermediate values")
+            // Progress values should be monotonically increasing
+            for (i in 1 until progress.size) {
+                assertTrue(progress[i] >= progress[i - 1], "Progress should not decrease")
+            }
+        }
+
+    @Test
+    fun `concurrent downloads handle errors independently`() =
+        runTest {
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            val scope = TestScope(dispatcher)
+            val manager = IosPlatformMapManager(scope = scope, callbackDispatcher = dispatcher)
+
+            val errors = mutableMapOf<String, String?>()
+            val successes = mutableMapOf<String, Boolean>()
+
+            val mapIds = listOf("map1", "map2", "map3")
+
+            for (mapId in mapIds) {
+                manager.downloadMap(
+                    mapId = mapId,
+                    onProgress = { /* ignore */ },
+                    onSuccess = { successes[mapId] = true },
+                    onError = { _, msg -> errors[mapId] = msg },
+                )
+            }
+
+            advanceTimeBy(35_000)
+            advanceUntilIdle()
+
+            // All downloads should complete with errors (no ODR resources)
+            assertEquals(mapIds.size, errors.size, "All downloads should report errors")
+            assertTrue(successes.isEmpty(), "No downloads should succeed without ODR resources")
+            // Each error should have a message
+            for (mapId in mapIds) {
+                assertNotNull(errors[mapId], "Error message should exist for $mapId")
+                assertTrue(errors[mapId]!!.isNotEmpty(), "Error message should not be empty for $mapId")
+            }
+        }
 }
 
 /**

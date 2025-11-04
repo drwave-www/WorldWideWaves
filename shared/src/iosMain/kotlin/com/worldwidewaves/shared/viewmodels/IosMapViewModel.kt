@@ -21,10 +21,13 @@ package com.worldwidewaves.shared.viewmodels
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.events.data.GeoJsonDataProvider
 import com.worldwidewaves.shared.map.PlatformMapManager
 import com.worldwidewaves.shared.ui.BaseViewModel
 import com.worldwidewaves.shared.utils.Log
+import dev.icerock.moko.resources.desc.StringDesc
+import dev.icerock.moko.resources.desc.desc
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -84,13 +87,28 @@ class IosMapViewModel(
                 }
             }
 
-            override fun getLocalizedErrorMessage(errorCode: Int): String =
-                when (errorCode) {
-                    -1 -> "ODR resource download failed"
-                    -2 -> "Unknown error during ODR download"
-                    -3 -> "Download already in progress"
-                    else -> "Unknown error (code: $errorCode)"
+            override fun getLocalizedErrorMessage(errorCode: Int): String {
+                // Map iOS ODR error codes to localized strings (same pattern as Android)
+                val resource =
+                    when (errorCode) {
+                        -100 -> MokoRes.strings.map_error_insufficient_storage
+                        -101 -> MokoRes.strings.map_error_network
+                        -102 -> MokoRes.strings.map_error_service_died
+                        -103 -> MokoRes.strings.map_error_module_unavailable
+                        -104 -> MokoRes.strings.map_error_invalid_request
+                        -2 -> MokoRes.strings.map_error_download // Legacy: caching failed
+                        -3 -> MokoRes.strings.map_error_download // Legacy: download in progress
+                        else -> MokoRes.strings.map_error_unknown
+                    }
+
+                return if (resource == MokoRes.strings.map_error_unknown) {
+                    // Format with error code for unknown errors
+                    StringDesc.ResourceFormatted(resource, errorCode).localized()
+                } else {
+                    // Use simple localized string
+                    resource.desc().localized()
                 }
+            }
 
             override fun clearCacheForInstalledMaps(mapIds: List<String>) {
                 Log.d("IosMapViewModel", "clearCacheForInstalledMaps for: ${mapIds.joinToString()}")
