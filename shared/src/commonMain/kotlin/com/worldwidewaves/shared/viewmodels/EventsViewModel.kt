@@ -233,9 +233,9 @@ class EventsViewModel(
                     scope.launch {
                         delay(WaveTiming.SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * MILLIS_PER_SECOND)
 
-                        // Restore to MAX speed ONLY when simulation is active
+                        // Restore to DEFAULT speed ONLY when simulation is active
                         platform.getSimulation()?.let { simulation ->
-                            val speedToRestore = Wave.MAX_SIMULATION_SPEED
+                            val speedToRestore = Wave.DEFAULT_SPEED_SIMULATION
                             simulation.setSpeed(speedToRestore)
                             Log.d(
                                 "EventsViewModel",
