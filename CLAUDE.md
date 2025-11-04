@@ -1,6 +1,6 @@
 # WorldWideWaves - Claude Code Instructions
 
-> **Quick Links**: [🚨 Commit Policy](#-commit-policy-critical) | [iOS Safety](#ios-requirements-critical) | [Testing](#testing-requirements) | [Build Commands](#build-commands) | [Code Quality](#code-quality-standards)
+> **Quick Links**: [🚨 Commit Policy](#-commit-policy-critical) | [iOS Safety](#ios-requirements-critical) | [Debugging](#debugging-guidelines-critical) | [Testing](#testing-requirements) | [Build Commands](#build-commands) | [Code Quality](#code-quality-standards)
 
 ---
 
@@ -503,6 +503,107 @@ A file/module is production-ready when:
 - ✅ Proper error handling (specific exceptions)
 - ✅ Memory leak prevention (cleanup methods)
 - ✅ iOS safety compliance (no deadlock patterns)
+
+---
+
+## Debugging Guidelines [CRITICAL]
+
+### Debugging State Synchronization Issues
+
+When encountering state synchronization bugs (e.g., "UI shows X but validation fails"):
+
+#### Step 1: Map Data Flow FIRST (5 minutes)
+
+**BEFORE adding any logging or code:**
+
+1. **Identify the observer**: What component is checking the state?
+   - Use Grep to find where the validation/check happens
+   - Example: `SimulationButton` checks `mapFeatureState`
+
+2. **Trace state source**: Where does that state come from?
+   - Example: `mapFeatureState` comes from `MapViewModel.featureState`
+
+3. **Identify the actor**: What triggers the state change?
+   - Example: Download button calls `EventMapDownloadManager.downloadMap()`
+
+4. **Check the connection**: Does the actor update the observer's state source?
+   - Example: Does `EventMapDownloadManager` notify `MapViewModel`? **NO!**
+   - **Issue found in 5 minutes.**
+
+#### Step 2: Use Explore Agent for Complex Flows
+
+For multi-component issues, use Task tool with Explore agent:
+
+```
+Find all code paths related to [FEATURE]:
+1. Where does [COMPONENT A] get its state?
+2. Where does [COMPONENT B] trigger state changes?
+3. How do these two communicate?
+Thoroughness: very thorough
+```
+
+#### Step 3: Check for Dual Implementations
+
+**Common pattern in this codebase:**
+- `EventMapDownloadManager` (UI-focused, per-map state)
+- `MapViewModel/MapDownloadCoordinator` (business logic, global state)
+
+When debugging, check if multiple systems exist:
+```bash
+grep -r "class.*Manager\|interface.*Manager" shared/src/ | grep -i "download\|state"
+```
+
+#### What to Do
+
+✅ **DO**:
+- Spend 5-10 minutes mapping data flow FIRST
+- Use Explore agent for complex multi-component issues
+- Look for architectural issues (dual systems, missing connections)
+- Verify hypothesis with logs AFTER understanding flow
+
+❌ **DON'T**:
+- Add logging before understanding architecture
+- Assume race conditions without evidence
+- Fix symptoms without understanding root cause
+- Make multiple attempts without changing approach
+
+### Common Debugging Anti-Patterns
+
+#### 1. Debugging in the Dark
+
+❌ **Bad**: Add logging → test → add more logging → test → eventually stumble on answer
+
+✅ **Good**: Understand architecture → form hypothesis → add targeted verification → fix
+
+#### 2. Trusting First Hypothesis
+
+❌ **Bad**: "It's probably a race condition" → spend hours on that assumption
+
+✅ **Good**: "Could be race condition OR dual systems OR missing callback" → verify systematically
+
+#### 3. Manual Exploration for Complex Issues
+
+❌ **Bad**: Use grep → read files → grep more → read more files → get lost
+
+✅ **Good**: Use Explore agent with clear question: "How does X connect to Y?"
+
+#### 4. Ignoring Log Evidence
+
+❌ **Bad**: See `SystemA: success` but not `SystemB: updated` → keep assuming they're connected
+
+✅ **Good**: Notice missing logs → immediately question if systems are connected
+
+### Example: Correct Debugging Flow
+
+**Issue**: "Download works, simulation fails with 'map required' dialog"
+
+**Correct approach (5 minutes)**:
+1. Grep: `SimulationButton.*mapFeatureState` → sees it reads `MapViewModel`
+2. Grep: `downloadMap.*EventMapDownloadManager` → download button uses `EventMapDownloadManager`
+3. Question: "Does EventMapDownloadManager update MapViewModel?"
+4. Grep: `EventMapDownloadManager` → no calls to `MapViewModel`
+5. **Root cause found**: Two separate systems, no connection
+6. Fix: Add callback to connect them
 
 ---
 
