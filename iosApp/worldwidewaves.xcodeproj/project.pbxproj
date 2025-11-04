@@ -386,7 +386,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export PATH=\"/opt/homebrew/opt/openjdk@17/bin:/opt/homebrew/bin:$PATH\"\nexport JAVA_HOME=\"/opt/homebrew/opt/openjdk@17\"\ncd \"$SRCROOT/..\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode \\\n  -PXCODE_CONFIGURATION=${CONFIGURATION} \\\n  -PPLATFORM_NAME=${PLATFORM_NAME} \\\n  -PARCHS=\"${ARCHS}\"\n";
+			shellScript = "export PATH=\"/opt/homebrew/opt/openjdk@17/bin:/opt/homebrew/bin:$PATH\"\nexport JAVA_HOME=\"/opt/homebrew/opt/openjdk@17\"\ncd \"$SRCROOT/..\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode \\\n  -PXCODE_CONFIGURATION=${CONFIGURATION} \\\n  -PPLATFORM_NAME=${PLATFORM_NAME} \\\n  -PARCHS=\"${ARCHS}\" \\\n  -Pbuildkonfig.flavor=$(echo ${CONFIGURATION} | tr '[:upper:]' '[:lower:]')\n";
 		};
 		C1A719FD2E969942005B6CD9 /* Generate Firebase config */ = {
 			isa = PBXShellScriptBuildPhase;
