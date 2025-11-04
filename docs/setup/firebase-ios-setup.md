@@ -301,6 +301,44 @@ error: no such module 'FirebaseCore'
 2. Clean build folder (Cmd+Shift+K)
 3. Rebuild project (Cmd+B)
 
+### Manual dSYM Upload
+
+If automatic uploads fail or you need to upload dSYMs manually (e.g., for App Store builds):
+
+**For local builds:**
+```bash
+cd iosApp/build_ios/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics
+
+# Upload app dSYM
+./upload-symbols \
+  -gsp ../../../../../../worldwidewaves/GoogleService-Info.plist \
+  -p ios \
+  ~/Library/Developer/Xcode/DerivedData/worldwidewaves-*/Build/Intermediates.noindex/ArchiveIntermediates/worldwidewaves/BuildProductsPath/Release-iphoneos/worldwidewaves.app.dSYM
+
+# Upload Kotlin/Native framework dSYM (important for KMM crashes!)
+./upload-symbols \
+  -gsp ../../../../../../worldwidewaves/GoogleService-Info.plist \
+  -p ios \
+  ~/Library/Developer/Xcode/DerivedData/worldwidewaves-*/Build/Intermediates.noindex/ArchiveIntermediates/worldwidewaves/BuildProductsPath/Release-iphoneos/Shared.framework.dSYM
+```
+
+**For App Store Connect downloads:**
+1. Download dSYMs from App Store Connect → Activity → Version → Download dSYM
+2. Unzip the downloaded file
+3. Upload all dSYMs:
+```bash
+cd iosApp/build_ios/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics
+./upload-symbols \
+  -gsp <path-to-GoogleService-Info.plist> \
+  -p ios \
+  <path-to-downloaded-dsyms>/*.dSYM
+```
+
+**Verify upload:**
+- Check for "Successfully uploaded Crashlytics symbols" message
+- UUIDs will be printed for each architecture uploaded
+- Wait 5-10 minutes, then check Firebase Console → Crashlytics → Settings → dSYMs
+
 ## Best Practices
 
 1. **Never commit** `GoogleService-Info.plist` to version control
