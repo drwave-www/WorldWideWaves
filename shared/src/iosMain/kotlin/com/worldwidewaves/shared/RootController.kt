@@ -238,6 +238,7 @@ fun makeEventViewController(eventId: String): UIViewController =
                     // BOUNDS mode: Shows entire event area (matches Android behavior)
                     // Gestures DISABLED (user must open full map screen for interaction)
                     registryKey = "${event.id}-event", // Unique key to prevent conflicts with full map
+                    mapViewModel = mapVm, // Pass mapViewModel to sync download state
                 )
             },
             onFinish = finish,
@@ -273,6 +274,7 @@ fun makeEventViewController(eventId: String): UIViewController =
 fun makeWaveViewController(eventId: String): UIViewController =
     makeComposeVC("IOS WAVE VIEW CONTROLLER") { finish ->
         val enabler = diEnabler()
+        val mapVm = diMapVm()
 
         val host =
             remember(eventId) {
@@ -294,6 +296,7 @@ fun makeWaveViewController(eventId: String): UIViewController =
                     // BOUNDS mode: Shows full event area initially (matches event detail screen)
                     // Then targetUserAndWave() from MapZoomAndLocationUpdate takes over when user enters area
                     registryKey = "${event.id}-wave", // Unique key to prevent conflicts
+                    mapViewModel = mapVm, // Pass mapViewModel to sync download state
                 )
             },
             onFinish = finish,
@@ -332,6 +335,7 @@ fun makeWaveViewController(eventId: String): UIViewController =
 fun makeFullMapViewController(eventId: String): UIViewController =
     makeComposeVC("IOS FULL MAP VIEW CONTROLLER") { finish ->
         val enabler = diEnabler()
+        val mapVm = diMapVm()
 
         val host =
             remember(eventId) {
@@ -351,6 +355,7 @@ fun makeFullMapViewController(eventId: String): UIViewController =
                             gesturesEnabled = true, // Full map allows user interaction
                         ),
                     registryKey = "${event.id}-fullmap", // Unique key to prevent conflicts
+                    mapViewModel = mapVm, // Pass mapViewModel to sync download state
                 )
             },
             onFinish = finish,

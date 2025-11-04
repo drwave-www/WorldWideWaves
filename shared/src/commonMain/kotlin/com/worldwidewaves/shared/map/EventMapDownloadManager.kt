@@ -8,9 +8,11 @@ package com.worldwidewaves.shared.map
  */
 
 import com.worldwidewaves.shared.utils.Log
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 /**
  * EventMap-specific download manager for map resources.
@@ -68,8 +70,12 @@ class EventMapDownloadManager(
 
     /**
      * Start map download with auto state management
+     * @param onDownloadComplete Optional callback invoked after successful download and state update
      */
-    suspend fun downloadMap(mapId: String) {
+    suspend fun downloadMap(
+        mapId: String,
+        onDownloadComplete: (suspend () -> Unit)? = null,
+    ) {
         Log.i(TAG, "Starting download for: $mapId")
 
         // Reset state
@@ -90,6 +96,12 @@ class EventMapDownloadManager(
                         progress = 100,
                         error = null,
                     )
+                }
+                // Notify caller that download completed (launch in coroutine since callback is suspend)
+                onDownloadComplete?.let { callback ->
+                    MainScope().launch {
+                        callback()
+                    }
                 }
             },
             onError = { code, message ->

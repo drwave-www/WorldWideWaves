@@ -81,6 +81,7 @@ class IosEventMap(
     mapConfig: EventMapConfig = EventMapConfig(),
     private val onMapClick: (() -> Unit)? = null,
     private val registryKey: String? = null, // Optional unique key for wrapper registry (prevents conflicts)
+    private val mapViewModel: com.worldwidewaves.shared.viewmodels.MapViewModel? = null, // For syncing download state
 ) : AbstractEventMap<UIImage>(event, mapConfig, onLocationUpdate) {
     // Use unique registry key if provided (e.g., "paris_france-fullmap" vs "paris_france-event")
     // This prevents wrapper conflicts when multiple screens show the same event
@@ -262,7 +263,13 @@ class IosEventMap(
                         errorMessage = downloadState.error!!,
                         onRetry = {
                             MainScope().launch {
-                                downloadCoordinator.downloadMap(event.id)
+                                downloadCoordinator.downloadMap(
+                                    mapId = event.id,
+                                    onDownloadComplete = {
+                                        // Sync MapViewModel state after download completes
+                                        mapViewModel?.checkIfMapIsAvailable(event.id, autoDownload = false)
+                                    },
+                                )
                             }
                         },
                     )
@@ -271,7 +278,13 @@ class IosEventMap(
                 !downloadState.isAvailable && !downloadState.isDownloading -> {
                     MapDownloadButton {
                         MainScope().launch {
-                            downloadCoordinator.downloadMap(event.id)
+                            downloadCoordinator.downloadMap(
+                                mapId = event.id,
+                                onDownloadComplete = {
+                                    // Sync MapViewModel state after download completes
+                                    mapViewModel?.checkIfMapIsAvailable(event.id, autoDownload = false)
+                                },
+                            )
                         }
                     }
                 }
