@@ -43,6 +43,7 @@ import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
+import org.maplibre.android.MapLibre
 import kotlin.time.ExperimentalTime
 
 open class MainApplication :
@@ -76,6 +77,21 @@ open class MainApplication :
 
         // Ensure split compat is installed
         SplitCompat.install(this)
+
+        // -------------------------------------------------------------------- //
+        //  Initialize MapLibre early to prevent FileSource race conditions
+        //  MapLibre's FileSource spawns background AsyncTasks that access
+        //  SharedPreferences. Early initialization with application context
+        //  prevents NullPointerException crashes if tasks run before lazy init.
+        //  Matches TestApplication pattern (commit c222e027).
+        // -------------------------------------------------------------------- //
+        try {
+            System.loadLibrary("maplibre")
+        } catch (e: UnsatisfiedLinkError) {
+            Log.e("MainApplication", "Failed to load maplibre native library", e)
+            // Continue anyway - MapLibre.getInstance will provide more specific error
+        }
+        MapLibre.getInstance(this)
 
         startKoin {
             androidContext(this@MainApplication)
