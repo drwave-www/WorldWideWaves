@@ -569,7 +569,7 @@
   <!-- src_hash: 790e5ad24754eb222a1c46b05faa3f5a85a63ad6 -->
   <string name="accessibility_download_complete">下载完成</string>
   <!-- src_hash: b3e627fdf3b75974ca299e48c6f99db792993fd4 -->
-  <string name="accessibility_download_percent">%1$d%</string>
+  <string name="accessibility_download_percent">%1$d%%</string>
   <!-- src_hash: 33d10d42eaf1874427e9cb4f67ed96760b48e76f -->
   <string name="debug_information">调试信息</string>
   <!-- src_hash: 3209bfd9e317615ab4b6ad88e04791327fb6bf5f -->

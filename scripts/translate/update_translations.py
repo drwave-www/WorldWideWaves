@@ -104,8 +104,9 @@ Goal: produce natural, concise UI translations that match the source tone and in
 
 General rules:
 - Do NOT translate proper nouns (app name, neighborhoods, venues, brand names, hashtags, @handles, but translate countries and cities names if it's relevant
-- Prefer each language’s standard exonym/endonym for countries and cities when such localization is customary; otherwise keep the English name.
+- Prefer each language's standard exonym/endonym for countries and cities when such localization is customary; otherwise keep the English name.
 - Keep placeholders, escape sequences, and markup exactly as-is: %s, %1$s, %d, {{var}}, <b>…</b>, <i>…</i>, \n, \n\n, \t, etc.
+- CRITICAL: These strings use Java format syntax. Any literal % sign in your translation MUST be escaped as %%. For example, if translating "percent" to "%", write "%%" not "%". Placeholders like %1$d already have the % and should NOT be doubled.
 - Preserve punctuation, numbers, and capitalization patterns unless the target language's UI convention clearly differs.
 - Keep the same register and energy as the source. If the source is an imperative CTA, keep it imperative. Avoid added emojis or extra exclamation marks.
 - Respect any length hint in comments (Short/Medium/Long). If space is tight, prefer clarity over literalness.
