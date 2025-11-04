@@ -52,6 +52,7 @@ fun EventLayout(
     onSimulationStopped: (String) -> Unit = {},
     onSimulationError: (String, String) -> Unit = { _, _ -> },
     onMapNotAvailable: () -> Unit = {},
+    onUrlOpen: (String) -> Unit = {},
     modifier: Modifier = Modifier,
     mapHeight: Dp,
     mapArea: @Composable () -> Unit = {},
@@ -135,7 +136,7 @@ fun EventLayout(
             // Standard event footer components
             NotifyAreaUserPosition(event)
             EventNumbers(event)
-            WWWEventSocialNetworks(event)
+            WWWEventSocialNetworks(event, onUrlOpen = onUrlOpen)
 
             // Optional additional content
             additionalContent()

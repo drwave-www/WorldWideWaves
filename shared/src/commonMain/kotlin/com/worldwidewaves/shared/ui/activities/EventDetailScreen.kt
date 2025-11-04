@@ -95,6 +95,7 @@ class EventDetailScreen(
             onSimulationStopped = { message -> platformEnabler.toast(message) },
             onSimulationError = { title, message -> platformEnabler.toast("$title: $message") },
             onMapNotAvailable = { showMapRequiredDialog = true },
+            onUrlOpen = { url -> platformEnabler.openUrl(url) },
             modifier = modifier,
             mapHeight = calculatedHeight,
             mapArea = {
