@@ -30,18 +30,21 @@ import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.position.PositionManager
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
 
 /**
@@ -207,6 +210,7 @@ class EventObserver(
     /**
      * Creates a flow that emits when simulation changes.
      */
+    @OptIn(FlowPreview::class) // debounce is stable in practice, preview status is historical
     private fun createSimulationFlow() =
         callbackFlow {
             try {
@@ -227,11 +231,18 @@ class EventObserver(
 
                 send(Unit) // Emit initial value
 
-                // Then collect simulation changes
-                platform.simulationChanged.collect {
-                    Log.v("EventObserver", "Simulation change detected for event ${event.id}")
-                    send(Unit)
-                }
+                // Collect simulation changes with debouncing to prevent cascade restarts
+                // Debouncing at the observer level (not platform level) ensures:
+                // - Platform notification remains immediate (no UI freeze)
+                // - Rapid changes are coalesced per-observer
+                // - Initial map loading still happens immediately
+                // - Prevents 40+ observer restart storms from rapid toggles
+                platform.simulationChanged
+                    .debounce(500.milliseconds)
+                    .collect {
+                        Log.v("EventObserver", "Simulation change detected (debounced) for event ${event.id}")
+                        send(Unit)
+                    }
             } catch (e: CancellationException) {
                 Log.v("EventObserver", "Simulation observation cancelled for event ${event.id}")
                 handleCancellationException(e)

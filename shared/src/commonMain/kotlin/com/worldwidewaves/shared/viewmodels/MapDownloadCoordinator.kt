@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.viewmodels
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.data.clearUnavailableGeoJsonCache
 import com.worldwidewaves.shared.events.data.GeoJsonDataProvider
 import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.utils.Log
@@ -155,11 +156,15 @@ class MapDownloadCoordinator(
         _featureState.value = MapFeatureState.Installed
         retryManager.resetRetryCount()
 
-        // Invalidate GeoJSON cache to force fresh read from newly downloaded file
-        // This ensures event bounds are correctly extracted from the new GeoJSON data
+        // Clear all caches to force fresh read from newly downloaded file:
+        // 1. Removes event from "unavailable" set (allows retry)
+        // 2. Calls platformInvalidateGeoJson() which:
+        //    - Invalidates GeoJsonDataProvider cache (raw GeoJSON string data)
+        //    - Clears WWWEventArea polygon cache (parsed polygon data)
+        // This ensures map becomes immediately usable after download completes
         currentMapId?.let { mapId ->
-            geoJsonDataProvider?.invalidateCache(mapId)
-            Log.d(TAG, "Invalidated GeoJSON cache for $mapId after successful download")
+            clearUnavailableGeoJsonCache(mapId)
+            Log.d(TAG, "Cleared all caches for $mapId after successful download")
         }
     }
 

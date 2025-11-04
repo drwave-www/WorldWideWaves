@@ -198,7 +198,8 @@ class WaveProgressionObserver(
             return
         } else {
             lastWavePolygons = polygons
-            Log.i("WaveObserver", "📊 Updating wave polygons: ${polygons.size} polygons")
+            // Log at VERBOSE level to reduce production log volume (called every 250ms)
+            Log.v("WaveObserver", "📊 Updating wave polygons: ${polygons.size} polygons")
             eventMap?.updateWavePolygons(polygons, true)
             Log.v("WaveObserver", "✅ updateWavePolygons called successfully")
         }

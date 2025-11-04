@@ -363,7 +363,17 @@ class AndroidEventMap(
 
             // Auto-download if needed
             if (!mapState.isMapAvailable && autoMapDownload && !mapState.userCanceled) {
-                mapState.mapViewModel.downloadMap(event.id)
+                mapState.mapViewModel.downloadMap(
+                    mapId = event.id,
+                    onMapDownloaded = {
+                        // Sync MapViewModel state after download completes
+                        // Ensures map availability is rechecked after successful download
+                        launch {
+                            mapState.mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
+                            mapState.setIsMapAvailable(mapAvailabilityChecker.isMapDownloaded(event.id))
+                        }
+                    },
+                )
             }
         }
 
