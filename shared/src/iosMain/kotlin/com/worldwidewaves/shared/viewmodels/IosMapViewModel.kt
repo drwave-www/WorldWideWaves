@@ -26,8 +26,9 @@ import com.worldwidewaves.shared.events.data.GeoJsonDataProvider
 import com.worldwidewaves.shared.map.PlatformMapManager
 import com.worldwidewaves.shared.ui.BaseViewModel
 import com.worldwidewaves.shared.utils.Log
+import dev.icerock.moko.resources.desc.Resource
+import dev.icerock.moko.resources.desc.ResourceFormatted
 import dev.icerock.moko.resources.desc.StringDesc
-import dev.icerock.moko.resources.desc.desc
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -106,7 +107,7 @@ class IosMapViewModel(
                     StringDesc.ResourceFormatted(resource, errorCode).localized()
                 } else {
                     // Use simple localized string
-                    resource.desc().localized()
+                    StringDesc.Resource(resource).localized()
                 }
             }
 
