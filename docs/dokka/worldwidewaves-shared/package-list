@@ -1367,6 +1367,13 @@ $dokka.location:com.worldwidewaves.shared.sound/WaveformGenerator///PointingToDe
 $dokka.location:com.worldwidewaves.shared.sound/WaveformGenerator/generateWaveform/#kotlin.Int#kotlin.Double#kotlin.Double#kotlin.time.Duration#com.worldwidewaves.shared.sound.SoundPlayer.Waveform/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.sound/-waveform-generator/generate-waveform.html
 $dokka.location:com.worldwidewaves.shared.sound/WaveformGenerator/midiPitchToFrequency/#kotlin.Int/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.sound/-waveform-generator/midi-pitch-to-frequency.html
 $dokka.location:com.worldwidewaves.shared.sound/WaveformGenerator/midiVelocityToAmplitude/#kotlin.Int/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.sound/-waveform-generator/midi-velocity-to-amplitude.html
+$dokka.location:com.worldwidewaves.shared.test////PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.test/index.html
+$dokka.location:com.worldwidewaves.shared.test/TestDataSeeder///PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.test/-test-data-seeder/index.html
+$dokka.location:com.worldwidewaves.shared.test/TestDataSeeder/seedTestData/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.test/-test-data-seeder/seed-test-data.html
+$dokka.location:com.worldwidewaves.shared.test/UITestMode///PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.test/-u-i-test-mode/index.html
+$dokka.location:com.worldwidewaves.shared.test/UITestMode/disableUITestMode/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.test/-u-i-test-mode/disable-u-i-test-mode.html
+$dokka.location:com.worldwidewaves.shared.test/UITestMode/enableUITestMode/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.test/-u-i-test-mode/enable-u-i-test-mode.html
+$dokka.location:com.worldwidewaves.shared.test/UITestMode/isEnabled/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.test/-u-i-test-mode/is-enabled.html
 $dokka.location:com.worldwidewaves.shared.testing////PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.testing/index.html
 $dokka.location:com.worldwidewaves.shared.testing/BackgroundTaskUsage///PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.testing/-background-task-usage/index.html
 $dokka.location:com.worldwidewaves.shared.testing/BackgroundTaskUsage/BackgroundTaskUsage/#kotlin.Boolean#kotlin.Boolean/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.testing/-background-task-usage/-background-task-usage.html
@@ -1581,7 +1588,7 @@ $dokka.location:com.worldwidewaves.shared.ui.formatters/EventState/isInArea/#/Po
 $dokka.location:com.worldwidewaves.shared.ui.formatters/EventState/isSimulationModeEnabled/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.formatters/-event-state/is-simulation-mode-enabled.html
 $dokka.location:com.worldwidewaves.shared.ui.formatters/EventState/progression/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.formatters/-event-state/progression.html
 $dokka.location:com.worldwidewaves.shared.ui.screens.about////PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.screens.about/index.html
-$dokka.location:com.worldwidewaves.shared.ui.screens.about//AboutFaqScreen/#com.worldwidewaves.shared.WWWPlatform#androidx.compose.ui.Modifier#kotlin.Function1[kotlin.String,kotlin.Unit]#kotlin.Function0[kotlin.Unit]/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.screens.about/-about-faq-screen.html
+$dokka.location:com.worldwidewaves.shared.ui.screens.about//AboutFaqScreen/#com.worldwidewaves.shared.WWWPlatform#androidx.compose.ui.Modifier#kotlin.Function1[kotlin.String,kotlin.Unit]#kotlin.Function1[kotlin.Int,kotlin.Unit]/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.screens.about/-about-faq-screen.html
 $dokka.location:com.worldwidewaves.shared.ui.screens.about//AboutInfoScreen/#androidx.compose.ui.Modifier#kotlin.Function1[kotlin.String,kotlin.Unit]/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.screens.about/-about-info-screen.html
 $dokka.location:com.worldwidewaves.shared.ui.screens////PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.screens/index.html
 $dokka.location:com.worldwidewaves.shared.ui.screens//AboutScreen/#com.worldwidewaves.shared.WWWPlatform#com.worldwidewaves.shared.PlatformEnabler#androidx.compose.ui.Modifier#kotlin.Function1[kotlin.String,kotlin.Unit]/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.screens/-about-screen.html
@@ -2089,14 +2096,6 @@ $dokka.location:com.worldwidewaves.shared/WWWGlobals.LogConfig/ENABLE_PERFORMANC
 $dokka.location:com.worldwidewaves.shared/WWWGlobals.LogConfig/ENABLE_POSITION_TRACKING_LOGGING/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-log-config/-e-n-a-b-l-e_-p-o-s-i-t-i-o-n_-t-r-a-c-k-i-n-g_-l-o-g-g-i-n-g.html
 $dokka.location:com.worldwidewaves.shared/WWWGlobals.LogConfig/ENABLE_VERBOSE_LOGGING/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-log-config/-e-n-a-b-l-e_-v-e-r-b-o-s-e_-l-o-g-g-i-n-g.html
 $dokka.location:com.worldwidewaves.shared/WWWGlobals.MapDisplay///PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-map-display/index.html
-$dokka.location:com.worldwidewaves.shared/WWWGlobals.MapDisplay/ADAPTIVE_CAMERA_DISTANCE_PADDING/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-map-display/-a-d-a-p-t-i-v-e_-c-a-m-e-r-a_-d-i-s-t-a-n-c-e_-p-a-d-d-i-n-g.html
-$dokka.location:com.worldwidewaves.shared/WWWGlobals.MapDisplay/ADAPTIVE_CAMERA_EDGE_MIN_SPAN/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-map-display/-a-d-a-p-t-i-v-e_-c-a-m-e-r-a_-e-d-g-e_-m-i-n_-s-p-a-n.html
-$dokka.location:com.worldwidewaves.shared/WWWGlobals.MapDisplay/ADAPTIVE_CAMERA_EDGE_THRESHOLD/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-map-display/-a-d-a-p-t-i-v-e_-c-a-m-e-r-a_-e-d-g-e_-t-h-r-e-s-h-o-l-d.html
-$dokka.location:com.worldwidewaves.shared/WWWGlobals.MapDisplay/ADAPTIVE_CAMERA_PHASE_1_MAX_SPAN/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-map-display/-a-d-a-p-t-i-v-e_-c-a-m-e-r-a_-p-h-a-s-e_1_-m-a-x_-s-p-a-n.html
-$dokka.location:com.worldwidewaves.shared/WWWGlobals.MapDisplay/ADAPTIVE_CAMERA_PHASE_2_MAX_SPAN/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-map-display/-a-d-a-p-t-i-v-e_-c-a-m-e-r-a_-p-h-a-s-e_2_-m-a-x_-s-p-a-n.html
-$dokka.location:com.worldwidewaves.shared/WWWGlobals.MapDisplay/ADAPTIVE_CAMERA_PHASE_2_START/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-map-display/-a-d-a-p-t-i-v-e_-c-a-m-e-r-a_-p-h-a-s-e_2_-s-t-a-r-t.html
-$dokka.location:com.worldwidewaves.shared/WWWGlobals.MapDisplay/ADAPTIVE_CAMERA_PHASE_3_MAX_SPAN/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-map-display/-a-d-a-p-t-i-v-e_-c-a-m-e-r-a_-p-h-a-s-e_3_-m-a-x_-s-p-a-n.html
-$dokka.location:com.worldwidewaves.shared/WWWGlobals.MapDisplay/ADAPTIVE_CAMERA_PHASE_3_START/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-map-display/-a-d-a-p-t-i-v-e_-c-a-m-e-r-a_-p-h-a-s-e_3_-s-t-a-r-t.html
 $dokka.location:com.worldwidewaves.shared/WWWGlobals.MapDisplay/CHANGE_THRESHOLD/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-map-display/-c-h-a-n-g-e_-t-h-r-e-s-h-o-l-d.html
 $dokka.location:com.worldwidewaves.shared/WWWGlobals.MapDisplay/DEGREES_TO_RADIANS_FACTOR/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-map-display/-d-e-g-r-e-e-s_-t-o_-r-a-d-i-a-n-s_-f-a-c-t-o-r.html
 $dokka.location:com.worldwidewaves.shared/WWWGlobals.MapDisplay/MAX_SHRINKAGE_PERCENTAGE/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-map-display/-m-a-x_-s-h-r-i-n-k-a-g-e_-p-e-r-c-e-n-t-a-g-e.html
@@ -2118,7 +2117,9 @@ $dokka.location:com.worldwidewaves.shared/WWWGlobals.Timing///PointingToDeclarat
 $dokka.location:com.worldwidewaves.shared/WWWGlobals.Timing/GPS_PERMISSION_REASK_DELAY/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-timing/-g-p-s_-p-e-r-m-i-s-s-i-o-n_-r-e-a-s-k_-d-e-l-a-y.html
 $dokka.location:com.worldwidewaves.shared/WWWGlobals.Timing/GPS_UPDATE_INTERVAL/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-timing/-g-p-s_-u-p-d-a-t-e_-i-n-t-e-r-v-a-l.html
 $dokka.location:com.worldwidewaves.shared/WWWGlobals.Timing/MAP_CAMERA_ANIMATION_DURATION_MS/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-timing/-m-a-p_-c-a-m-e-r-a_-a-n-i-m-a-t-i-o-n_-d-u-r-a-t-i-o-n_-m-s.html
+$dokka.location:com.worldwidewaves.shared/WWWGlobals.Timing/MAP_CAMERA_UPDATE_INTERVAL_DONE_MS/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-timing/-m-a-p_-c-a-m-e-r-a_-u-p-d-a-t-e_-i-n-t-e-r-v-a-l_-d-o-n-e_-m-s.html
 $dokka.location:com.worldwidewaves.shared/WWWGlobals.Timing/MAP_CAMERA_UPDATE_INTERVAL_MS/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-timing/-m-a-p_-c-a-m-e-r-a_-u-p-d-a-t-e_-i-n-t-e-r-v-a-l_-m-s.html
+$dokka.location:com.worldwidewaves.shared/WWWGlobals.Timing/MILLIS_PER_SECOND/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-timing/-m-i-l-l-i-s_-p-e-r_-s-e-c-o-n-d.html
 $dokka.location:com.worldwidewaves.shared/WWWGlobals.Timing/SPLASH_MIN_DURATION/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-timing/-s-p-l-a-s-h_-m-i-n_-d-u-r-a-t-i-o-n.html
 $dokka.location:com.worldwidewaves.shared/WWWGlobals.Timing/SYSTEM_SPLASH_DURATION/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-timing/-s-y-s-t-e-m_-s-p-l-a-s-h_-d-u-r-a-t-i-o-n.html
 $dokka.location:com.worldwidewaves.shared/WWWGlobals.Wave///PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-globals/-wave/index.html
@@ -2152,7 +2153,9 @@ $dokka.location:com.worldwidewaves.shared/WWWPlatform/getCurrentPositionSource/#
 $dokka.location:com.worldwidewaves.shared/WWWPlatform/getSimulation/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-platform/get-simulation.html
 $dokka.location:com.worldwidewaves.shared/WWWPlatform/isOnSimulation/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-platform/is-on-simulation.html
 $dokka.location:com.worldwidewaves.shared/WWWPlatform/name/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-platform/name.html
+$dokka.location:com.worldwidewaves.shared/WWWPlatform/preferredSimulationSpeed/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-platform/preferred-simulation-speed.html
 $dokka.location:com.worldwidewaves.shared/WWWPlatform/resetAndSetSimulation/#com.worldwidewaves.shared.WWWSimulation/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-platform/reset-and-set-simulation.html
+$dokka.location:com.worldwidewaves.shared/WWWPlatform/setPreferredSimulationSpeed/#kotlin.Int/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-platform/set-preferred-simulation-speed.html
 $dokka.location:com.worldwidewaves.shared/WWWPlatform/setSimulation/#com.worldwidewaves.shared.WWWSimulation/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-platform/set-simulation.html
 $dokka.location:com.worldwidewaves.shared/WWWPlatform/simulationChanged/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-platform/simulation-changed.html
 $dokka.location:com.worldwidewaves.shared/WWWPlatform/simulationModeEnabled/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared/-w-w-w-platform/simulation-mode-enabled.html
@@ -2198,6 +2201,7 @@ com.worldwidewaves.shared.map
 com.worldwidewaves.shared.position
 com.worldwidewaves.shared.resources
 com.worldwidewaves.shared.sound
+com.worldwidewaves.shared.test
 com.worldwidewaves.shared.testing
 com.worldwidewaves.shared.ui
 com.worldwidewaves.shared.ui.activities
