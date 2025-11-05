@@ -74,6 +74,9 @@ class EventsViewModel(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    private val _refreshTrigger = MutableStateFlow(0)
+    val refreshTrigger: StateFlow<Int> = _refreshTrigger.asStateFlow()
+
     // Exception handler removed - unused in the codebase
 
     // Simulation speed management for multi-event coordination
@@ -134,7 +137,11 @@ class EventsViewModel(
      */
     fun refreshEvents() {
         _events.value = _events.value.toList() // New list instance triggers collectors
-        Log.d("EventsViewModel", "Events list refreshed: ${_events.value.size} events")
+        _refreshTrigger.value++ // Increment trigger to force LaunchedEffect re-execution
+        Log.d(
+            "EventsViewModel",
+            "Events list refreshed: ${_events.value.size} events, trigger: ${_refreshTrigger.value}",
+        )
     }
 
     /**

@@ -61,6 +61,7 @@ data class EventsFilterCallbacks(
 fun EventsScreen(
     events: List<IWWWEvent>,
     mapStates: Map<String, Boolean> = emptyMap(),
+    viewModelRefreshTrigger: Int = 0,
     onEventClick: (String) -> Unit = {},
     setEventFavorite: SetEventFavorite? = null,
     onMapUninstallRequested: (String) -> Unit = {},
@@ -78,7 +79,8 @@ fun EventsScreen(
 
     // Filter logic - EXACT Android match with refresh trigger
     // Note: mapStates dependency ensures filter updates when maps are downloaded
-    LaunchedEffect(starredSelected, downloadedSelected, events, mapStates, refreshTrigger) {
+    // viewModelRefreshTrigger ensures updates when favorites change from detail screen
+    LaunchedEffect(starredSelected, downloadedSelected, events, mapStates, refreshTrigger, viewModelRefreshTrigger) {
         filteredEvents =
             when {
                 starredSelected -> events.filter { it.favorite }

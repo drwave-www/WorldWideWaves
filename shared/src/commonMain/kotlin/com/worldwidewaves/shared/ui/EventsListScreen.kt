@@ -58,6 +58,7 @@ class EventsListScreen(
     ) {
         val events by viewModel.events.collectAsState()
         val mapStates by mapChecker.mapStates.collectAsState()
+        val viewModelRefreshTrigger by viewModel.refreshTrigger.collectAsState()
 
         // Dialog state for map uninstall confirmation
         var showUninstallDialog by remember { mutableStateOf(false) }
@@ -117,6 +118,7 @@ class EventsListScreen(
         EventsScreen(
             events = events,
             mapStates = mapStates,
+            viewModelRefreshTrigger = viewModelRefreshTrigger,
             onEventClick = { eventId -> platformEnabler.openEventActivity(eventId) },
             setEventFavorite = setEventFavorite,
             onMapUninstallRequested = onMapUninstallRequested,
