@@ -32,6 +32,7 @@ import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.MapCameraCallback
 import com.worldwidewaves.shared.map.MapLibreAdapter
 import com.worldwidewaves.shared.toLatLngBounds
+import com.worldwidewaves.shared.toMapLibrePolygon
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.maplibre.android.camera.CameraPosition
@@ -52,6 +53,7 @@ import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.Point
 import org.maplibre.geojson.Polygon
+import com.worldwidewaves.shared.events.utils.Polygon as SharedPolygon
 
 /**
  * Android-specific implementation of the shared [MapLibreAdapter].
@@ -138,10 +140,13 @@ class AndroidMapLibreAdapter(
         }
 
         // Execute any pending callbacks
+        Log.d(TAG, "setMap called, executing ${onMapSetCallbacks.size} pending callbacks")
         onMapSetCallbacks.forEach { callback ->
+            Log.d(TAG, "Executing queued callback")
             callback(this)
         }
         onMapSetCallbacks.clear()
+        Log.d(TAG, "Cleared callback queue")
     }
 
     override fun setStyle(
@@ -175,12 +180,15 @@ class AndroidMapLibreAdapter(
     }
 
     override fun onMapSet(callback: (MapLibreAdapter<*>) -> Unit) {
+        Log.d(TAG, "onMapSet called, mapLibreMap=${mapLibreMap != null}, current queue size=${onMapSetCallbacks.size}")
         if (mapLibreMap != null) {
             // Map is already set, execute callback immediately
+            Log.d(TAG, "Map already set, executing callback immediately")
             callback(this)
         } else {
             // Store callback for execution when map is set
             onMapSetCallbacks.add(callback)
+            Log.d(TAG, "Map not set, queued callback (new queue size: ${onMapSetCallbacks.size})")
         }
     }
 
@@ -607,7 +615,12 @@ class AndroidMapLibreAdapter(
         clearExisting: Boolean,
     ) {
         val map = mapLibreMap ?: return
-        val wavePolygons = polygons.filterIsInstance<Polygon>()
+        val wavePolygons =
+            polygons
+                .filterIsInstance<SharedPolygon>()
+                .map { it.toMapLibrePolygon() }
+
+        Log.d(TAG, "addWavePolygons: ${wavePolygons.size} polygons, clearExisting=$clearExisting, styleLoaded=$styleLoaded")
 
         // Handle clearing polygons when empty list is provided with clearExisting flag
         // This is used when simulation stops to remove all wave polygons from the map
@@ -649,7 +662,9 @@ class AndroidMapLibreAdapter(
         }
 
         // Style is loaded - render with iOS-style layer reuse pattern
+        Log.d(TAG, "Style IS loaded, attempting to render ${wavePolygons.size} polygons")
         map.getStyle { style ->
+            Log.d(TAG, "getStyle callback executing for ${wavePolygons.size} polygons")
             try {
                 // Phase 1: Remove excess layers if polygon count decreased (iOS pattern)
                 if (wavePolygons.size < waveLayerIds.size) {
@@ -686,6 +701,7 @@ class AndroidMapLibreAdapter(
                         addNewPolygon(style, sourceId, layerId, polygon)
                     }
                 }
+                Log.d(TAG, "Successfully rendered ${wavePolygons.size} polygons")
             } catch (ise: IllegalStateException) {
                 Log.e(TAG, "Map style in invalid state for wave polygons", ise)
             } catch (iae: IllegalArgumentException) {

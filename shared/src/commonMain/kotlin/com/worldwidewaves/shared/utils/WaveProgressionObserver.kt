@@ -128,14 +128,21 @@ class WaveProgressionObserver(
         event: IWWWEvent,
         eventMap: AbstractEventMap<*>?,
     ) {
+        Log.d(
+            "WaveObserver",
+            "addFullWavePolygons START for event ${event.id}, eventMap=${eventMap != null}, adapter=${eventMap?.mapLibreAdapter != null}",
+        )
         eventMap?.mapLibreAdapter?.onMapSet { mapLibre ->
+            Log.d("WaveObserver", "onMapSet callback EXECUTING for event ${event.id}")
             scope.launch {
                 // Render all original polygons independently (no holes merge)
                 val polygons = event.area.getPolygons()
+                Log.d("WaveObserver", "Got ${polygons.size} polygons from event.area for ${event.id}")
 
                 mapLibre.addWavePolygons(polygons, true)
+                Log.d("WaveObserver", "Called addWavePolygons with ${polygons.size} polygons for ${event.id}")
             }
-        }
+        } ?: Log.w("WaveObserver", "eventMap.mapLibreAdapter is null for event ${event.id}!")
     }
 
     /**
