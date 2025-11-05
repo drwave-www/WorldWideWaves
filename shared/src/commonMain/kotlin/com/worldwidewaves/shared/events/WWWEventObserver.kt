@@ -184,6 +184,19 @@ class WWWEventObserver(
     private val positionObserver: PositionObserver by inject()
     private val eventStateHolder: EventStateHolder by inject()
     private val observationScheduler: ObservationScheduler by inject()
+    private val favoriteEventsStore: com.worldwidewaves.shared.data.FavoriteEventsStore by inject()
+    private val notificationManager: com.worldwidewaves.shared.notifications.NotificationManager? =
+        try {
+            get()
+        } catch (_: Exception) {
+            null // Gracefully handle missing notification manager (tests)
+        }
+    private val notificationContentProvider: com.worldwidewaves.shared.notifications.NotificationContentProvider? =
+        try {
+            get()
+        } catch (_: Exception) {
+            null // Gracefully handle missing content provider (tests)
+        }
 
     // -- Specialized Components (Facade Pattern) --
 
@@ -254,6 +267,12 @@ class WWWEventObserver(
      * would cancel each other's observation flows before completion.
      */
     private val isObserving = atomic(false)
+
+    /**
+     * Tracks previous wave hit state to detect transitions.
+     * Phase 4: Used to trigger wave hit notification on transition from false → true.
+     */
+    private var previousUserHasBeenHit = false
 
     /**
      * Starts observing the wave event if not already started.
@@ -381,6 +400,7 @@ class WWWEventObserver(
      */
     fun resetState() {
         progressionState.reset()
+        previousUserHasBeenHit = false // Reset wave hit tracking
         Log.v("WWWEventObserver", "Reset state for event ${event.id}")
     }
 
@@ -429,6 +449,9 @@ class WWWEventObserver(
 
                 // Update state flows with calculated values using smart throttling (via EventProgressionState)
                 progressionState.updateFromEventState(calculatedState)
+
+                // Phase 4: Detect wave hit transition and trigger immediate notification
+                detectAndNotifyWaveHit(calculatedState)
             } else {
                 // Fall back to basic state updates for safety
                 progressionState.updateProgressionAndStatus(progression, status)
@@ -526,5 +549,60 @@ class WWWEventObserver(
     private fun handleCancellationException(e: kotlinx.coroutines.CancellationException): Nothing {
         // Expected during cancellation, re-throw to maintain coroutine semantics
         throw e
+    }
+
+    /**
+     * Phase 4: Detects wave hit transition and triggers immediate notification.
+     *
+     * ## Wave Hit Detection
+     * Triggers notification when ALL conditions are met:
+     * 1. User has just been hit (transition from false → true)
+     * 2. Event is favorited by user
+     * 3. Notification manager and content provider are available
+     *
+     * ## Notification Behavior
+     * - Immediate delivery via NotificationManager.deliverNow()
+     * - Only fires once per wave hit (prevents duplicate notifications)
+     * - Works when app is open or backgrounded
+     *
+     * ## Thread Safety
+     * Called from updateStates() which runs on coroutineScopeProvider.scopeDefault()
+     * Safe to call suspend functions for notification delivery.
+     *
+     * @param calculatedState The newly calculated event state
+     */
+    private suspend fun detectAndNotifyWaveHit(calculatedState: EventState) {
+        val currentHit = calculatedState.userHasBeenHit
+
+        // Detect transition: not hit → hit
+        if (currentHit && !previousUserHasBeenHit) {
+            try {
+                // Check if event is favorited
+                val isFavorite = favoriteEventsStore.isFavorite(event.id)
+
+                if (isFavorite) {
+                    // Trigger wave hit notification
+                    notificationManager?.let { manager ->
+                        notificationContentProvider?.let { provider ->
+                            val content = provider.generateWaveHitNotification(event)
+                            manager.deliverNow(
+                                eventId = event.id,
+                                trigger = com.worldwidewaves.shared.notifications.NotificationTrigger.WaveHit,
+                                content = content,
+                            )
+                            Log.i(
+                                "WWWEventObserver",
+                                "Wave hit notification delivered for favorited event ${event.id}",
+                            )
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("WWWEventObserver", "Error delivering wave hit notification for event ${event.id}: $e")
+            }
+        }
+
+        // Update previous state for next comparison
+        previousUserHasBeenHit = currentHit
     }
 }

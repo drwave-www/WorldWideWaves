@@ -96,12 +96,22 @@ val datastoreModule =
          * **Scope**: Factory - created per favorite update request
          * **Thread-safety**: Yes - FavoriteEventsStore handles thread-safe writes
          * **Lifecycle**: Created on-demand, disposed after update completes
-         * **Dependencies**: FavoriteEventsStore (injected from platform modules)
+         * **Dependencies**:
+         * - FavoriteEventsStore (injected from platform modules)
+         * - NotificationScheduler (optional, injected if available)
          *
          * SetEventFavorite is used when users:
-         * 1. Mark an event as favorite (star/heart action)
-         * 2. Remove an event from favorites (unstar/unheart action)
+         * 1. Mark an event as favorite (star/heart action) → schedules notifications
+         * 2. Remove an event from favorites (unstar/unheart action) → cancels notifications
          * 3. Sync favorites across sessions
+         *
+         * ## Phase 4 Integration
+         * When favoriting an event, SetEventFavorite automatically:
+         * - Schedules 6 time-based notifications (1h, 30m, 10m, 5m, 1m, finished)
+         * - Validates simulation mode compatibility (speed == 1 only)
+         * - Checks event hasn't started yet
+         *
+         * When unfavoriting, cancels all scheduled notifications.
          *
          * Factory scope ensures:
          * - Fresh instance for each update operation
@@ -111,10 +121,16 @@ val datastoreModule =
          * Usage pattern:
          * ```kotlin
          * val setFavorite: SetEventFavorite = get()
-         * setFavorite.execute(eventId, isFavorite = true)
+         * setFavorite.call(event, isFavorite = true)
          * ```
          *
          * @see SetEventFavorite for favorite update logic
+         * @see com.worldwidewaves.shared.notifications.NotificationScheduler for scheduling logic
          */
-        factory { SetEventFavorite(favoriteEventsStore = get()) }
+        factory {
+            SetEventFavorite(
+                favoriteEventsStore = get(),
+                notificationScheduler = getOrNull(),
+            )
+        }
     }

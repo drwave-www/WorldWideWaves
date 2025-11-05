@@ -68,14 +68,49 @@ class InitFavoriteEvent(
  * Persists the flag through [FavoriteEventsStore] **and** mirrors the change
  * back into `event.favorite` so callers do not have to mutate the model
  * themselves.
+ *
+ * ## Notification Integration (Phase 4)
+ * When an event is favorited, this class automatically schedules notifications
+ * for that event. When unfavorited, all notifications are cancelled.
+ *
+ * ### Scheduled Notifications
+ * - 1 hour before start
+ * - 30 minutes before start
+ * - 10 minutes before start
+ * - 5 minutes before start
+ * - 1 minute before start
+ * - Event finished (at end time)
+ *
+ * Total: 6 scheduled notifications per favorited event
+ *
+ * ### Wave Hit Notification
+ * Wave hit notifications are delivered immediately by WWWEventObserver when:
+ * - App is open/backgrounded during wave hit
+ * - Event is favorited
+ * - Wave reaches user position
+ *
+ * @param favoriteEventsStore Store for persisting favorite status
+ * @param notificationScheduler Optional scheduler for notifications (null in tests)
  */
 class SetEventFavorite(
     private val favoriteEventsStore: FavoriteEventsStore,
+    private val notificationScheduler: com.worldwidewaves.shared.notifications.NotificationScheduler? = null,
 ) {
     suspend fun call(
         event: IWWWEvent,
         isFavorite: Boolean,
-    ) = favoriteEventsStore
-        .setFavoriteStatus(event.id, isFavorite)
-        .also { event.favorite = isFavorite }
+    ) {
+        favoriteEventsStore
+            .setFavoriteStatus(event.id, isFavorite)
+            .also { event.favorite = isFavorite }
+
+        // Schedule/cancel notifications based on favorite status
+        notificationScheduler?.let { scheduler ->
+            if (isFavorite && scheduler.shouldScheduleNotifications(event)) {
+                scheduler.scheduleAllNotifications(event)
+            } else if (!isFavorite) {
+                scheduler.cancelAllNotifications(event.id)
+            }
+        }
+    }
 }
