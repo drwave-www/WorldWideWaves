@@ -85,13 +85,13 @@ def add_lighting_effects(img):
 def create_foreground(source_img, size):
     """
     Create adaptive icon foreground layer.
-    The icon content should be in the center 66% (safe zone).
+    The icon content fills 72% (Android's maximum mask size per official spec).
     """
-    # Adaptive icons are 108dp, content fits in 66% circle (standard Android safe zone)
+    # Adaptive icons are 108dp, maximum mask reaches 72dp (72/108 = 66.7%)
     foreground = Image.new('RGBA', (size, size), (0, 0, 0, 0))
 
-    # Scale source to fit in safe zone (66% of size)
-    safe_zone = int(size * 0.66)
+    # Scale source to 72% of canvas (Android's documented maximum before clipping)
+    safe_zone = int(size * 0.72)
     source_resized = source_img.resize((safe_zone, safe_zone), Image.LANCZOS)
 
     # Center the icon
