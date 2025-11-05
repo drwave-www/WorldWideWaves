@@ -57,6 +57,7 @@ class WaveProgressionObserver(
     private var statusJob: Job? = null
     private var polygonsJob: Job? = null
     private var lastWavePolygons: List<Polygon> = emptyList()
+    private var fullPolygonsRendered = false
 
     /**
      * Entry-point – inspects current state then launches coroutines that will
@@ -64,6 +65,9 @@ class WaveProgressionObserver(
      */
     fun startObservation() {
         val event = event ?: return
+
+        // Reset render tracking flag when observation restarts
+        fullPolygonsRendered = false
 
         // Check current status to determine if we should clear polygons
         // For DONE events, don't clear - the full wave area should remain visible
@@ -165,8 +169,14 @@ class WaveProgressionObserver(
                                 // Stop polygon observation to prevent continuous updates
                                 polygonsJob?.cancel()
                                 polygonsJob = null
-                                // Show full wave polygons once
-                                addFullWavePolygons(event, eventMap)
+                                // Show full wave polygons once (only if not already rendered)
+                                if (!fullPolygonsRendered) {
+                                    addFullWavePolygons(event, eventMap)
+                                    fullPolygonsRendered = true
+                                    Log.d("WaveObserver", "Full polygons rendered for ${event.id}, will not re-render")
+                                } else {
+                                    Log.d("WaveObserver", "Full polygons already rendered for ${event.id}, skipping duplicate render")
+                                }
                             }
                             else -> { /* No-op */ }
                         }
