@@ -13,7 +13,7 @@ package com.worldwidewaves.shared.ui.components.shared
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -59,9 +59,10 @@ import kotlin.time.ExperimentalTime
 /**
  * Shared simulation button component for testing event waves.
  * Works identically on both Android and iOS platforms.
+ * Positioned at top-right of event overlay, below the "Soon/Running" status badge.
  */
 @Composable
-fun BoxScope.SimulationButton(
+fun SimulationButton(
     event: IWWWEvent,
     mapFeatureState: MapFeatureState,
     onMapNotAvailable: () -> Unit = {},
@@ -117,62 +118,68 @@ fun BoxScope.SimulationButton(
 
     Box(
         modifier =
-            modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 16.dp)
-                .offset(y = (-8).dp)
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(onPrimaryLight)
-                .focusIndicator()
-                .clickable(enabled = simulationButtonState != "loading") {
-                    val action =
-                        handleSimulationClick(
-                            simulationButtonState = simulationButtonState,
-                            isMapAvailableForSimulation = isMapAvailableForSimulation,
-                            onMapNotAvailable = onMapNotAvailable,
-                            onStateChange = { simulationButtonState = it },
-                            event = event,
-                            platform = platform,
-                            onSimulationStarted = onSimulationStarted,
-                            onSimulationStopped = onSimulationStopped,
-                            onError = onError,
-                            simulationErrorText = simulationErrorText,
-                            stopErrorText = stopErrorText,
-                            simulationStartedText = simulationStartedText,
-                            simulationStoppedText = simulationStoppedText,
-                        )
-                    pendingAction = action
-                }.semantics {
-                    role = Role.Button
-                    contentDescription = contentDescriptionText
-                    stateDescription = stateDescriptionText
-                },
-        contentAlignment = Alignment.Center,
+            Modifier
+                .fillMaxWidth()
+                .offset(y = (-5).dp),
+        contentAlignment = Alignment.TopEnd,
     ) {
-        when (simulationButtonState) {
-            "idle" -> {
-                Icon(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = stringResource(MokoRes.strings.test_simulation),
-                    tint = Color.Red,
-                    modifier = Modifier.size(24.dp),
-                )
-            }
-            "loading" -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    strokeWidth = 2.dp,
-                    color = Color.Red,
-                )
-            }
-            "active" -> {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = stringResource(MokoRes.strings.accessibility_stop_simulation),
-                    tint = Color.Red,
-                    modifier = Modifier.size(24.dp),
-                )
+        Box(
+            modifier =
+                modifier
+                    .padding(top = 56.dp, end = 16.dp)
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Color.Red)
+                    .focusIndicator()
+                    .clickable(enabled = simulationButtonState != "loading") {
+                        val action =
+                            handleSimulationClick(
+                                simulationButtonState = simulationButtonState,
+                                isMapAvailableForSimulation = isMapAvailableForSimulation,
+                                onMapNotAvailable = onMapNotAvailable,
+                                onStateChange = { simulationButtonState = it },
+                                event = event,
+                                platform = platform,
+                                onSimulationStarted = onSimulationStarted,
+                                onSimulationStopped = onSimulationStopped,
+                                onError = onError,
+                                simulationErrorText = simulationErrorText,
+                                stopErrorText = stopErrorText,
+                                simulationStartedText = simulationStartedText,
+                                simulationStoppedText = simulationStoppedText,
+                            )
+                        pendingAction = action
+                    }.semantics {
+                        role = Role.Button
+                        contentDescription = contentDescriptionText
+                        stateDescription = stateDescriptionText
+                    },
+            contentAlignment = Alignment.Center,
+        ) {
+            when (simulationButtonState) {
+                "idle" -> {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = stringResource(MokoRes.strings.test_simulation),
+                        tint = onPrimaryLight,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
+                "loading" -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp,
+                        color = onPrimaryLight,
+                    )
+                }
+                "active" -> {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = stringResource(MokoRes.strings.accessibility_stop_simulation),
+                        tint = onPrimaryLight,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
             }
         }
     }

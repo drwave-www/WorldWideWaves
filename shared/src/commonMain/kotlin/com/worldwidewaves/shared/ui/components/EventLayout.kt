@@ -96,12 +96,27 @@ fun EventLayout(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(30.dp),
         ) {
-            // Standard event header components
-            EventOverlay(event)
+            // Standard event header components with simulation button overlay
+            Box(modifier = Modifier.fillMaxWidth()) {
+                EventOverlay(event)
+
+                // Simulation button when enabled - positioned at top-right
+                if (eventState.isSimulationModeEnabled) {
+                    SimulationButton(
+                        event = event,
+                        mapFeatureState = mapFeatureState,
+                        onMapNotAvailable = onMapNotAvailable,
+                        onSimulationStarted = onSimulationStarted,
+                        onSimulationStopped = onSimulationStopped,
+                        onError = onSimulationError,
+                    )
+                }
+            }
+
             EventDescription(event)
             DividerLine()
 
-            // Integrated button area with simulation support
+            // Integrated button area
             Box(modifier = Modifier.fillMaxWidth()) {
                 ButtonWave(
                     event.id,
@@ -114,18 +129,6 @@ fun EventLayout(
                         },
                     modifier = Modifier.align(Alignment.Center),
                 )
-
-                // Simulation button when enabled
-                if (eventState.isSimulationModeEnabled) {
-                    SimulationButton(
-                        event = event,
-                        mapFeatureState = mapFeatureState,
-                        onMapNotAvailable = onMapNotAvailable,
-                        onSimulationStarted = onSimulationStarted,
-                        onSimulationStopped = onSimulationStopped,
-                        onError = onSimulationError,
-                    )
-                }
             }
 
             // Map area with calculated height
