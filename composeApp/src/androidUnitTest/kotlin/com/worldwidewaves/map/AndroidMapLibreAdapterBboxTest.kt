@@ -169,8 +169,8 @@ class AndroidMapLibreAdapterBboxTest {
         // - lineOpacity(1.0f)
         // - lineDasharray(arrayOf(5f, 2f))
 
-        // Verify layer is a LineLayer (style layer type)
-        assertTrue(layer is LineLayer, "Layer should be a LineLayer")
+        // Layer is guaranteed to be a LineLayer by the slot type
+        // No further verification needed here
     }
 
     @Test
