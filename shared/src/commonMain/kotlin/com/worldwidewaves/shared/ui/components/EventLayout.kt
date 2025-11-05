@@ -100,7 +100,7 @@ fun EventLayout(
             Box(modifier = Modifier.fillMaxWidth()) {
                 EventOverlay(event)
 
-                // Simulation button when enabled - positioned at top-right
+                // Simulation button when enabled - positioned at top-left
                 if (eventState.isSimulationModeEnabled) {
                     SimulationButton(
                         event = event,

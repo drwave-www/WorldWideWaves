@@ -121,13 +121,15 @@ fun SimulationButton(
         modifier =
             Modifier
                 .fillMaxWidth(),
-        contentAlignment = Alignment.TopEnd,
+        contentAlignment = Alignment.TopStart,
     ) {
         Box(
             modifier =
                 modifier
-                    .padding(top = (Dimensions.DEFAULT_EXT_PADDING + EventsList.SELECTOR_HEIGHT + Dimensions.SPACER_SMALL).dp, end = 16.dp)
-                    .size(48.dp)
+                    .padding(
+                        top = (Dimensions.DEFAULT_EXT_PADDING + EventsList.SELECTOR_HEIGHT + Dimensions.SPACER_SMALL).dp,
+                        start = 16.dp,
+                    ).size(48.dp)
                     .clip(CircleShape)
                     .background(Color.Red)
                     .focusIndicator()
