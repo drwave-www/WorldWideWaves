@@ -85,13 +85,13 @@ def add_lighting_effects(img):
 def create_foreground(source_img, size):
     """
     Create adaptive icon foreground layer.
-    The icon content should be in the center 66% (safe zone).
+    The icon content should be in the center 73% (safe zone).
     """
-    # Adaptive icons are 108dp, content fits in 66% circle
+    # Adaptive icons are 108dp, content fits in 73% circle (optimized for circular masks)
     foreground = Image.new('RGBA', (size, size), (0, 0, 0, 0))
 
-    # Scale source to fit in safe zone (66% of size)
-    safe_zone = int(size * 0.66)
+    # Scale source to fit in safe zone (73% of size, up from standard 66% for better visibility)
+    safe_zone = int(size * 0.73)
     source_resized = source_img.resize((safe_zone, safe_zone), Image.LANCZOS)
 
     # Center the icon
