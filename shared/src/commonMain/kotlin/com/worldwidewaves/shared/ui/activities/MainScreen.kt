@@ -53,6 +53,8 @@ import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWGlobals
+import com.worldwidewaves.shared.WWWGlobals.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.EventsList
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.choreographies.SoundChoreographyPlayer
 import com.worldwidewaves.shared.events.WWWEvents
@@ -215,7 +217,7 @@ open class MainScreen
                             val containerHeightPx = windowInfo.containerSize.height
                             val screenHeightDp = (containerHeightPx / densityScale).dp
                             val bottomOffset = screenHeightDp * 0.15f
-                            val topOffset = screenHeightDp * 0.14f
+                            val topOffset = (Dimensions.DEFAULT_EXT_PADDING + EventsList.SELECTOR_HEIGHT + Dimensions.SPACER_SMALL).dp
 
                             // Simulation mode chip (red) - positioned at top-left
                             Row(

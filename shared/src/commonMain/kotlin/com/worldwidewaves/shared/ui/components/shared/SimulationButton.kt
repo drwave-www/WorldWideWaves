@@ -14,7 +14,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -41,6 +40,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
+import com.worldwidewaves.shared.WWWGlobals.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.EventsList
 import com.worldwidewaves.shared.WWWGlobals.Wave
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.WWWSimulation
@@ -119,14 +120,13 @@ fun SimulationButton(
     Box(
         modifier =
             Modifier
-                .fillMaxWidth()
-                .offset(y = (-5).dp),
+                .fillMaxWidth(),
         contentAlignment = Alignment.TopEnd,
     ) {
         Box(
             modifier =
                 modifier
-                    .padding(top = 56.dp, end = 16.dp)
+                    .padding(top = (Dimensions.DEFAULT_EXT_PADDING + EventsList.SELECTOR_HEIGHT + Dimensions.SPACER_SMALL).dp, end = 16.dp)
                     .size(48.dp)
                     .clip(CircleShape)
                     .background(Color.Red)
