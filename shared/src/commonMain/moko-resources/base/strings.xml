@@ -202,7 +202,7 @@
     <string name="faq_answer_6">You can find a list of proposed actions, activities, and places at https://luma.com/worldwidewaves.</string>
 
     <string name="faq_question_7">How can I simulate a wave?</string>
-    <string name="faq_answer_7">Tap the button below to activate the simulation mode. On event screens, use the "play" button at the top-left of the location image to start a simulation using that event's properties (date, time, location). To stop the simulation, use the same button. When finished, stop the simulation mode using the stop icon on the persistent overlay.</string>
+    <string name="faq_answer_7">Tap the button below to activate simulation mode. On the event screens, use the "play" button at the top-left of the location image to start a simulation with this event's properties (date, time, location). To stop the simulation, press the same button. Finally, when you're finished, exit simulation mode by clicking the stop icon on the persistent layer.</string>
 
     <!-- Context: Countries where the events happen, Size: short (limited size, about 20/25 chars) -->
     <string name="country_usa">USA</string>
