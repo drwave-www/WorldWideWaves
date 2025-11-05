@@ -356,6 +356,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         installPlatform()
 
+        // Check for UI testing mode
+        let launchArgs = ProcessInfo.processInfo.arguments
+        if launchArgs.contains("--uitesting") {
+            WWWLog.i(tag, "UI Testing mode detected - initializing test environment")
+            do {
+                try UITestMode.shared.enableUITestMode()
+                WWWLog.i(tag, "UI test mode enabled successfully")
+            } catch {
+                WWWLog.e(tag, "Failed to enable UI test mode", error: error)
+            }
+        }
+
         // Observe locale changes for runtime language switching
         localeObserver = NotificationCenter.default.addObserver(
             forName: NSLocale.currentLocaleDidChangeNotification,

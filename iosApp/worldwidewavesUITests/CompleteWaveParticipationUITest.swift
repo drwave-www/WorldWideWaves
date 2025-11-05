@@ -40,30 +40,19 @@ import XCTest
 /// - Paris France event exists in test data
 /// - Event is in "running" state
 /// - paris_france map is downloaded
-class CompleteWaveParticipationUITest: XCTestCase {
-    var app: XCUIApplication!
-    var screenshotCounter = 0
-
-    override func setUpWithError() throws {
-        continueAfterFailure = false
-
-        app = XCUIApplication()
-        app.launchArguments = ["--uitesting", "--simulation-enabled"]
-        app.launch()
-
-        screenshotCounter = 0
-    }
-
-    override func tearDownWithError() throws {
-        // Optional: Capture final state
-        // captureScreenshot(name: "final_state")
-    }
+class CompleteWaveParticipationUITest: BaseUITest {
+    // Inherited from BaseUITest:
+    // - var app: XCUIApplication!
+    // - var screenshotCounter: Int
+    // - setUpWithError() - launches app with test arguments
+    // - tearDownWithError() - cleanup
+    // - Helper methods: waitForAppReady(), captureScreenshot(), etc.
 
     // swiftlint:disable function_body_length
     // Function body length justified: Comprehensive E2E test covering 20 user journey steps
     func testCompleteWaveParticipationJourney() throws {
         // STEP 1: APP LAUNCH IN DEBUG MODE
-        XCTAssertTrue(app.wait(for: .runningForeground, timeout: 5))
+        // App is already launched and ready via BaseUITest.setUpWithError()
         captureStepScreenshot(description: "app_launch_simulation_enabled")
         verifyMainScreenLoaded()
 
@@ -241,16 +230,38 @@ class CompleteWaveParticipationUITest: XCTestCase {
     // MARK: - Verification Helpers
 
     func verifyMainScreenLoaded() {
+        print("=== DEBUG: Verifying main screen loaded ===")
         verifyElementExists(app.otherElements["EventsList"], message: "Events list should be visible")
     }
 
     func verifyEventsListLoaded() {
-        XCTAssertTrue(app.otherElements["EventsList"].waitForExistence(timeout: 5))
-        Thread.sleep(forTimeInterval: 1) // Allow events to load
+        print("=== DEBUG: Verifying events list loaded ===")
+        XCTAssertTrue(app.otherElements["EventsList"].waitForExistence(timeout: 10),
+                     "Events list did not load in time")
+        Thread.sleep(forTimeInterval: 2) // Allow events to load from Firebase
+        print("Events list loaded successfully")
     }
 
     func verifyEmptyFavorites() {
-        XCTAssertTrue(app.staticTexts["No favorite events"].waitForExistence(timeout: 3))
+        print("=== DEBUG: Verifying empty favorites ===")
+        print("Current UI hierarchy:")
+        print(app.debugDescription)
+
+        let emptyMessage = app.staticTexts["No favorite events"]
+        print("Looking for text: 'No favorite events'")
+        print("Element exists:", emptyMessage.exists)
+        print("Element is hittable:", emptyMessage.isHittable)
+
+        // List all staticTexts to help debug
+        print("All staticTexts visible:")
+        for (index, element) in app.staticTexts.allElementsBoundByIndex.enumerated() {
+            print("  [\(index)]: '\(element.label)'")
+        }
+
+        // Increased timeout from 3s to 10s for slower Firebase loads
+        XCTAssertTrue(emptyMessage.waitForExistence(timeout: 10),
+                     "Expected to find 'No favorite events' text but it was not found. " +
+                     "Check console output above for available UI elements.")
     }
 
     func verifyFavoriteIconFilled() {
