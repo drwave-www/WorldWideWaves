@@ -33,7 +33,8 @@ package com.worldwidewaves.shared.di
  * 1. **commonModule** - Core event and sound infrastructure (no dependencies)
  * 2. **helpersModule** - Utility services and domain logic (depends on commonModule)
  * 3. **datastoreModule** - Data persistence layer (depends on helpersModule)
- * 4. **uiModule** - UI components and ViewModels (depends on all above)
+ * 4. **notificationsModule** - Push notifications for favorited events (depends on helpersModule, datastoreModule)
+ * 5. **uiModule** - UI components and ViewModels (depends on all above)
  *
  * ## Platform Integration
  * This module list is used by both Android and iOS platforms:
@@ -52,11 +53,13 @@ package com.worldwidewaves.shared.di
  * - **commonModule**: Event management, sound choreography
  * - **helpersModule**: Position tracking, wave progression, scheduling
  * - **datastoreModule**: Event favorites, persistent storage
+ * - **notificationsModule**: Push notifications for favorited wave events
  * - **uiModule**: Repositories, use cases, shared UI components
  *
  * @see commonModule for core event and sound dependencies
  * @see helpersModule for utility and domain services
  * @see datastoreModule for data persistence
+ * @see notificationsModule for push notifications
  * @see uiModule for UI-related dependencies
  */
 val sharedModule =
@@ -64,5 +67,6 @@ val sharedModule =
         commonModule,
         helpersModule,
         datastoreModule,
+        notificationsModule,
         uiModule,
     )
