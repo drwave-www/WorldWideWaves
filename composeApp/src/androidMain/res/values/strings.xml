@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">WorldWideWaves</string>
+    <string name="app_name">World Wide Waves</string>
 
     <!-- Dynamic-feature titles (English only) -->
     <string name="map_title_bangalore_india">Map Bangalore</string>
