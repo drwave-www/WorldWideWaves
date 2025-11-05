@@ -91,7 +91,8 @@ class AndroidMapLibreAdapter(
 
     // Queue for polygons that arrive before style loads
     // Only stores the most recent set since wave progression contains all previous circles
-    private var pendingPolygons: List<Polygon>? = null
+    // Stores SharedPolygon objects before conversion to preserve type for deferred rendering
+    private var pendingPolygons: List<SharedPolygon>? = null
     private var styleLoaded = false
 
     // Cache for camera bounds calculations to avoid expensive getCameraForLatLngBounds calls
@@ -615,16 +616,13 @@ class AndroidMapLibreAdapter(
         clearExisting: Boolean,
     ) {
         val map = mapLibreMap ?: return
-        val wavePolygons =
-            polygons
-                .filterIsInstance<SharedPolygon>()
-                .map { it.toMapLibrePolygon() }
+        val sharedPolygons = polygons.filterIsInstance<SharedPolygon>()
 
-        Log.d(TAG, "addWavePolygons: ${wavePolygons.size} polygons, clearExisting=$clearExisting, styleLoaded=$styleLoaded")
+        Log.d(TAG, "addWavePolygons: ${sharedPolygons.size} shared polygons, clearExisting=$clearExisting, styleLoaded=$styleLoaded")
 
         // Handle clearing polygons when empty list is provided with clearExisting flag
         // This is used when simulation stops to remove all wave polygons from the map
-        if (wavePolygons.isEmpty() && clearExisting) {
+        if (sharedPolygons.isEmpty() && clearExisting) {
             Log.i(TAG, "Clearing all wave polygons from map (${waveLayerIds.size} layers)")
             // Clear pending polygons if style not loaded yet
             pendingPolygons = null
@@ -648,18 +646,22 @@ class AndroidMapLibreAdapter(
             return
         }
 
-        if (wavePolygons.isEmpty()) {
+        if (sharedPolygons.isEmpty()) {
             Log.w(TAG, "No valid Polygon objects found in ${polygons.size} input polygons")
             return
         }
 
-        // If style not loaded yet, store most recent polygons for later
-        // Only the most recent set matters (wave progression contains all previous circles)
+        // If style not loaded yet, store unconverted polygons for deferred rendering
+        // CRITICAL: Store SharedPolygon objects BEFORE conversion so they can be re-filtered
+        // when the deferred rendering executes and calls addWavePolygons() recursively
         if (!styleLoaded) {
-            Log.w(TAG, "Style not ready - storing ${wavePolygons.size} polygons (most recent)")
-            pendingPolygons = wavePolygons
+            Log.w(TAG, "Style not ready - storing ${sharedPolygons.size} SharedPolygons for deferred rendering")
+            pendingPolygons = sharedPolygons
             return
         }
+
+        // Convert to MapLibre format for rendering
+        val wavePolygons = sharedPolygons.map { it.toMapLibrePolygon() }
 
         // Style is loaded - render with iOS-style layer reuse pattern
         Log.d(TAG, "Style IS loaded, attempting to render ${wavePolygons.size} polygons")
