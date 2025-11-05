@@ -85,16 +85,14 @@ def add_lighting_effects(img):
 def create_foreground(source_img, size):
     """
     Create adaptive icon foreground layer.
-    The icon content fills 72% (Android's maximum mask size per official spec).
+    Scales to 66% of canvas (standard Android safe zone).
     """
-    # Adaptive icons are 108dp, maximum mask reaches 72dp (72/108 = 66.7%)
-    foreground = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-
-    # Scale source to 72% of canvas (Android's documented maximum before clipping)
-    safe_zone = int(size * 0.72)
+    # Scale source to 66% of canvas (standard Android safe zone)
+    safe_zone = int(size * 0.66)
     source_resized = source_img.resize((safe_zone, safe_zone), Image.LANCZOS)
 
-    # Center the icon
+    # Center in foreground canvas
+    foreground = Image.new('RGBA', (size, size), (0, 0, 0, 0))
     offset = (size - safe_zone) // 2
     foreground.paste(source_resized, (offset, offset), source_resized)
 
@@ -103,19 +101,10 @@ def create_foreground(source_img, size):
 def create_background(source_img, size):
     """
     Create adaptive icon background layer.
-    Use the dominant dark color from the source.
+    Uses theme dark blue (#011026) for consistent appearance.
     """
-    # Extract the background color from source (top-left corner area)
-    sample = source_img.crop((0, 0, 50, 50))
-    pixels = list(sample.getdata())
-
-    # Get average color
-    r = sum(p[0] for p in pixels) // len(pixels)
-    g = sum(p[1] for p in pixels) // len(pixels)
-    b = sum(p[2] for p in pixels) // len(pixels)
-
-    # Create solid background
-    background = Image.new('RGB', (size, size), (r, g, b))
+    # Create background with theme dark blue color (#011026)
+    background = Image.new('RGB', (size, size), (1, 16, 38))
 
     return background
 
