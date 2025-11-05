@@ -102,7 +102,8 @@ fun AboutScreen(
                                 platform = platform,
                                 modifier = modifier,
                                 onUrlOpen = onUrlOpen,
-                                onSimulateClick = {
+                                onSimulateClick = { speed ->
+                                    platform.setPreferredSimulationSpeed(speed)
                                     platform.enableSimulationMode()
                                 },
                             )
