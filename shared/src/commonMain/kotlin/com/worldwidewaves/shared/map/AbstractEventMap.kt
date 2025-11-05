@@ -26,7 +26,6 @@ import androidx.compose.ui.Modifier
 import com.worldwidewaves.shared.WWWGlobals.MapDisplay
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.BoundingBox
-import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.position.PositionManager
@@ -342,12 +341,11 @@ abstract class AbstractEventMap<T>(
     }
 
     /**
-     * Moves the camera to show both the user and wave positions with adaptive zoom.
-     * Uses intelligent zoom strategy based on:
-     * - Wave progression (early = tight focus, late = full coverage)
-     * - User-wave distance (expands if needed)
-     * - Event edge proximity (ensures boundary visibility)
-     * Falls back to user latitude + wave longitude if wave front center is unavailable
+     * Moves the camera to show both the user and wave positions with dynamic bounding box zoom.
+     * Creates a bounding box containing both positions with 20% horizontal and 10% vertical padding,
+     * ensuring both user position and wave front center are always visible on screen.
+     * Falls back to user latitude + wave longitude if wave front center is unavailable.
+     * Zoom level adapts automatically to fit both positions within the event area boundaries.
      */
     @Suppress("ComplexCondition") // Necessary validation: null + NaN checks prevent IllegalArgumentException
     suspend fun targetUserAndWave() {
@@ -385,79 +383,17 @@ abstract class AbstractEventMap<T>(
             return
         }
 
-        // Get the area's bounding box
+        // Get the area's bounding box for constraints
         val areaBbox = event.area.bbox()
-
-        // ============================================================
-        // ADAPTIVE LOGIC: Calculate context-aware maximum span
-        // ============================================================
-
         val eventLatSpan = areaBbox.ne.lat - areaBbox.sw.lat
         val eventLngSpan = areaBbox.ne.lng - areaBbox.sw.lng
 
-        // 1. Calculate wave progression (0.0 = start, 1.0 = end)
-        val waveProgression = calculateWaveProgression()
-
-        // 2. Calculate user-wave distance as percentage of event size
-        val userWaveLatDistance = kotlin.math.abs(userPosition.latitude - wavePosition.latitude)
-        val userWaveLngDistance = kotlin.math.abs(userPosition.longitude - wavePosition.longitude)
-        val latDistanceRatio = userWaveLatDistance / eventLatSpan
-        val lngDistanceRatio = userWaveLngDistance / eventLngSpan
-
-        // 3. Check if user or wave is near event edges
-        val userNearEdge = isNearEdge(userPosition, areaBbox, MapDisplay.ADAPTIVE_CAMERA_EDGE_THRESHOLD)
-        val waveNearEdge = isNearEdge(wavePosition, areaBbox, MapDisplay.ADAPTIVE_CAMERA_EDGE_THRESHOLD)
-
-        // 4. Determine adaptive maximum span based on progression phase
-        val baseMaxSpanRatio =
-            when {
-                // Phase 3: Late wave (70-100%) - prioritize visibility
-                waveProgression >= MapDisplay.ADAPTIVE_CAMERA_PHASE_3_START -> MapDisplay.ADAPTIVE_CAMERA_PHASE_3_MAX_SPAN
-
-                // Phase 2: Mid wave (40-70%) - balanced view
-                waveProgression >= MapDisplay.ADAPTIVE_CAMERA_PHASE_2_START -> MapDisplay.ADAPTIVE_CAMERA_PHASE_2_MAX_SPAN
-
-                // Phase 1: Early wave (0-40%) - tight focus
-                else -> MapDisplay.ADAPTIVE_CAMERA_PHASE_1_MAX_SPAN
-            }
-
-        // 5. Apply adaptive overrides
-        val adaptiveMaxLatRatio =
-            when {
-                // Override: User-wave distance requires more space
-                latDistanceRatio > baseMaxSpanRatio ->
-                    kotlin.math.min(latDistanceRatio * MapDisplay.ADAPTIVE_CAMERA_DISTANCE_PADDING, 1.0)
-
-                // Override: Near edge - need more context
-                userNearEdge || waveNearEdge ->
-                    kotlin.math.max(baseMaxSpanRatio, MapDisplay.ADAPTIVE_CAMERA_EDGE_MIN_SPAN)
-
-                // Normal: Use phase-based maximum
-                else -> baseMaxSpanRatio
-            }
-
-        val adaptiveMaxLngRatio =
-            when {
-                lngDistanceRatio > baseMaxSpanRatio ->
-                    kotlin.math.min(lngDistanceRatio * MapDisplay.ADAPTIVE_CAMERA_DISTANCE_PADDING, 1.0)
-                userNearEdge || waveNearEdge ->
-                    kotlin.math.max(baseMaxSpanRatio, MapDisplay.ADAPTIVE_CAMERA_EDGE_MIN_SPAN)
-                else -> baseMaxSpanRatio
-            }
-
-        val maxLatSpan = eventLatSpan * adaptiveMaxLatRatio
-        val maxLngSpan = eventLngSpan * adaptiveMaxLngRatio
-
-        // ============================================================
-        // EXISTING PADDING AND BOUNDS LOGIC
-        // ============================================================
-
-        // Calculate padding as percentages of the area's dimensions
+        // Calculate padding as percentages of the event area dimensions
         val horizontalPadding = eventLngSpan * 0.2
         val verticalPadding = eventLatSpan * 0.1
 
-        // Create new bounds with padding, constrained by the area's bounding box
-        val paddedBounds =
+        // Create padded bounds ensuring we stay within event area boundaries
+        val finalBounds =
             BoundingBox.fromCorners(
                 Position(
                     maxOf(bounds.southLatitude - minOf(verticalPadding, bounds.southLatitude - areaBbox.sw.lat), areaBbox.sw.lat),
@@ -468,33 +404,6 @@ abstract class AbstractEventMap<T>(
                     minOf(bounds.eastLongitude + minOf(horizontalPadding, areaBbox.ne.lng - bounds.eastLongitude), areaBbox.ne.lng),
                 ),
             )
-
-        val currentLatSpan = paddedBounds!!.ne.lat - paddedBounds.sw.lat
-        val currentLngSpan = paddedBounds.ne.lng - paddedBounds.sw.lng
-
-        // Apply adaptive maximum span
-        val finalBounds =
-            if (currentLatSpan > maxLatSpan || currentLngSpan > maxLngSpan) {
-                // Bounds exceed adaptive maximum - center on user+wave midpoint with max span
-                val midLat = (paddedBounds.sw.lat + paddedBounds.ne.lat) / 2.0
-                val midLng = (paddedBounds.sw.lng + paddedBounds.ne.lng) / 2.0
-
-                val useLat = minOf(currentLatSpan, maxLatSpan) / 2.0
-                val useLng = minOf(currentLngSpan, maxLngSpan) / 2.0
-
-                BoundingBox.fromCorners(
-                    Position(
-                        maxOf(midLat - useLat, areaBbox.sw.lat),
-                        maxOf(midLng - useLng, areaBbox.sw.lng),
-                    ),
-                    Position(
-                        minOf(midLat + useLat, areaBbox.ne.lat),
-                        minOf(midLng + useLng, areaBbox.ne.lng),
-                    ),
-                )
-            } else {
-                paddedBounds
-            }
 
         runCameraAnimation { _ ->
             mapLibreAdapter.animateCameraToBounds(finalBounds)
@@ -725,44 +634,6 @@ abstract class AbstractEventMap<T>(
      */
     @OptIn(kotlin.time.ExperimentalTime::class)
     @Suppress("ReturnCount") // Early returns for guard clauses are appropriate
-    private suspend fun calculateWaveProgression(): Double {
-        val clock: IClock by inject()
-        val now = clock.now()
-        val waveStart = event.getWaveStartDateTime()
-        val waveEnd = event.getEndDateTime()
-
-        if (now < waveStart) return 0.0
-        if (now >= waveEnd) return 1.0
-
-        val elapsed = (now - waveStart).inWholeMilliseconds.toDouble()
-        val total = (waveEnd - waveStart).inWholeMilliseconds.toDouble()
-
-        return (elapsed / total).coerceIn(0.0, 1.0)
-    }
-
-    /**
-     * Check if position is near event area edges
-     * @param position Position to check
-     * @param bbox Event area bounding box
-     * @param threshold Distance from edge as ratio (0.2 = within 20% of boundary)
-     * @return true if position is within threshold distance from any edge
-     */
-    private fun isNearEdge(
-        position: Position,
-        bbox: BoundingBox,
-        threshold: Double,
-    ): Boolean {
-        val latMargin = (bbox.ne.lat - bbox.sw.lat) * threshold
-        val lngMargin = (bbox.ne.lng - bbox.sw.lng) * threshold
-
-        val nearSouth = position.latitude < (bbox.sw.lat + latMargin)
-        val nearNorth = position.latitude > (bbox.ne.lat - latMargin)
-        val nearWest = position.longitude < (bbox.sw.lng + lngMargin)
-        val nearEast = position.longitude > (bbox.ne.lng - lngMargin)
-
-        return nearSouth || nearNorth || nearWest || nearEast
-    }
-
     // ============================================================
 
     abstract fun updateWavePolygons(
