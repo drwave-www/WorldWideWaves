@@ -91,6 +91,9 @@ object MapWrapperRegistry {
     // Store pending polygon data that Swift will render
     private val pendingPolygons = mutableMapOf<String, PendingPolygonData>()
 
+    // Store pending bbox draw requests that Swift will render
+    private val pendingBboxDraws = mutableMapOf<String, BoundingBox>()
+
     // Store pending camera commands that Swift will execute
     // Configuration commands (bounds/zoom) are stored separately and applied immediately
     // Animation commands (AnimateToPosition, AnimateToBounds) use single slot (latest wins)
@@ -691,26 +694,27 @@ object MapWrapperRegistry {
 
     /**
      * Draw debug bounding box overlay (for testing constraint bounds).
+     * Stores bbox as pending, to be rendered by Swift via IOSMapBridge.
      */
     fun drawDebugBbox(
         eventId: String,
         bbox: BoundingBox,
     ) {
-        Log.d(TAG, "Drawing debug bbox for event: $eventId")
-        val wrapper = getWrapper(eventId)
-        if (wrapper != null) {
-            platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
-                // Cast to MapLibreViewWrapper and call Swift method
-                (wrapper as? MapLibreViewWrapper)?.drawOverrideBboxWithSwLat(
-                    swLat = bbox.sw.lat,
-                    swLng = bbox.sw.lng,
-                    neLat = bbox.ne.lat,
-                    neLng = bbox.ne.lng,
-                )
-                Log.i(TAG, "Debug bbox drawn for event: $eventId")
-            }
-        }
+        Log.d(TAG, "Storing pending bbox for event: $eventId")
+        pendingBboxDraws[eventId] = bbox
     }
+
+    /**
+     * Check if there is a pending bbox draw for this event.
+     * Called from Swift IOSMapBridge to poll for bbox requests.
+     */
+    fun hasPendingBboxDraw(eventId: String): Boolean = pendingBboxDraws.containsKey(eventId)
+
+    /**
+     * Get and clear pending bbox draw.
+     * Called from Swift IOSMapBridge after rendering.
+     */
+    fun getPendingBboxDraw(eventId: String): BoundingBox? = pendingBboxDraws.remove(eventId)
 
     /**
      * Update camera position from Swift (for StateFlow reactive updates).

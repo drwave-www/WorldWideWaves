@@ -690,4 +690,46 @@ import CoreLocation
         )
         return true
     }
+
+    /// Renders pending bbox draw if one exists.
+    ///
+    /// ## Purpose
+    /// Similar to renderPendingPolygons - checks for pending bbox draw requests from Kotlin
+    /// and renders them on the map. Called periodically after map style loads.
+    ///
+    /// ## Timing Problem
+    /// Kotlin may request bbox draw before Swift map view is ready, so request is stored
+    /// as "pending" and Swift polls for it after initialization.
+    ///
+    /// ## Threading Model
+    /// Main thread only (MapLibre/UIKit requirement)
+    ///
+    /// - Parameters:
+    ///   - eventId: Unique event identifier (registry key)
+    /// - Returns: True if bbox was rendered, false if no pending bbox or no wrapper
+    /// - Important: Must be called on main thread
+    /// - Important: Call after map style loads to catch pending bbox requests
+    @objc public static func renderPendingBbox(eventId: String) -> Bool {
+        guard Shared.MapWrapperRegistry.shared.hasPendingBboxDraw(eventId: eventId) else {
+            return false
+        }
+
+        guard let wrapper = Shared.MapWrapperRegistry.shared.getWrapper(eventId: eventId) as? MapLibreViewWrapper else {
+            WWWLog.w("IOSMapBridge", "No wrapper found for pending bbox draw: \(eventId)")
+            return false
+        }
+
+        guard let bbox = Shared.MapWrapperRegistry.shared.getPendingBboxDraw(eventId: eventId) else {
+            return false
+        }
+
+        WWWLog.i("IOSMapBridge", "Rendering pending bbox for event: \(eventId)")
+        wrapper.drawOverrideBbox(
+            swLat: bbox.sw.lat,
+            swLng: bbox.sw.lng,
+            neLat: bbox.ne.lat,
+            neLng: bbox.ne.lng
+        )
+        return true
+    }
 }

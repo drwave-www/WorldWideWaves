@@ -155,6 +155,9 @@ struct EventMapView: UIViewRepresentable {
         // Check for pending polygons and render them
         _ = IOSMapBridge.renderPendingPolygons(eventId: eventId)
 
+        // Check for pending bbox draw and render it
+        _ = IOSMapBridge.renderPendingBbox(eventId: eventId)
+
         // Check for pending camera commands and execute them
         IOSMapBridge.executePendingCameraCommand(eventId: eventId)
     }

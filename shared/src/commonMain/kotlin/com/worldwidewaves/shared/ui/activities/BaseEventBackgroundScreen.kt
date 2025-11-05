@@ -54,6 +54,7 @@ import com.worldwidewaves.shared.generated.resources.ic_arrow_back
 import com.worldwidewaves.shared.ui.components.TitleBarFavoriteButton
 import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
+import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -96,6 +97,7 @@ abstract class BaseEventBackgroundScreen(
      * Default implementation does nothing.
      */
     protected open fun onFavoriteChanged() {
+        Log.d("BaseEventBackgroundScreen", "onFavoriteChanged called (base implementation)")
         // Default: no-op (subclasses can override if needed)
     }
 
