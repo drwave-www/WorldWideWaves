@@ -636,6 +636,32 @@
   <string name="action_message_section_1">We moeten omschakelen van schadebeperking naar paraatheid voor schokken. De temperatuur zal de doelstellingen overschrijden, dus hebben gemeenschappen nu duidelijke richtlijnen, oefeningen en eenvoudige hulpmiddelen nodig.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">Dit begint met een gedeelde realiteit. Overheden, bedrijven en maatschappelijke leiders moeten samen de feiten benoemen, data openstellen en tijdlijnen op elkaar afstemmen zodat actie gecoördineerd is, niet versnipperd.\n\nOm levens te beschermen: zet in op vreedzame de-escalatie van geopolitieke spanningen en richt middelen opnieuw op menselijk overleven en stabiliteit.\n\nKom op het hoogste niveau bijeen met staten, ondernemingen en publieke vertegenwoordigers om voorstellen op tafel te leggen, eigenaars aan te wijzen en voortgang te rapporteren.\n\nVerwijder blokkades door pilots groen licht te geven, standaarden te harmoniseren en eerst veerkracht en toegankelijkheid te financieren.</string>
-  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
-  <string name="action_message_section_3">Luister naar lokale actoren die met de gevolgen te maken hebben, rangschik de bedreigingen samen met hen en publiceer plannen in gewone taal zodat het publiek geïnformeerd is en wordt uitgenodigd om mee te doen. Geweldloosheid, inclusie, transparantie en wetenschap sturen deze inspanning.\n\nBereid ook de toekomst voor: leer praktische vaardigheden, investeer in vroegtijdige waarschuwingssystemen, veerkrachtige infrastructuur en op de natuur gebaseerde oplossingen, en bouw open tools en data voor gemeenschapsplanning.</string>
+  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
+  <string name="action_message_section_3">Luister naar lokale partijen die met de gevolgen te maken hebben, stel samen met hen prioriteiten voor de dreigingen en publiceer plannen in begrijpelijke taal zodat het publiek geïnformeerd is en wordt uitgenodigd om mee te doen. Geweldloosheid, inclusie, transparantie en wetenschap sturen deze inzet.
+
+Bereid ook de toekomst voor: leer praktische vaardigheden aan, investeer in vroegtijdige waarschuwingssystemen, veerkrachtige infrastructuur en op de natuur gebaseerde oplossingen, en bouw open hulpmiddelen en data voor gemeenschapsplanning.</string>
+  <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
+  <string name="notification_event_starting_soon">Golf start binnenkort</string>
+  <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
+  <string name="notification_event_finished">Golf afgelopen</string>
+  <!-- src_hash: a754deec084228db5eb4e7494ece4899d15d5bdb -->
+  <string name="notification_wave_hit">Golf bereikt je!</string>
+  <!-- src_hash: b59ce446e02917542cf980c05434510e8fac89d5 -->
+  <string name="notification_1h_before">%1$s start over 1 uur</string>
+  <!-- src_hash: edf14570c85158c248c34c39e3309084c270f9b5 -->
+  <string name="notification_30m_before">%1$s start over 30 minuten</string>
+  <!-- src_hash: 3956289fe7c912cd60f175ff5fef61c42cf2187b -->
+  <string name="notification_10m_before">%1$s start over 10 minuten</string>
+  <!-- src_hash: afab5ffa7152140e4576dfe14dc3af121ec0a19b -->
+  <string name="notification_5m_before">%1$s start over 5 minuten</string>
+  <!-- src_hash: aeda84fa74cb3b740771cdb5e97b7c99a48a5acf -->
+  <string name="notification_1m_before">%1$s start over 1 minuut!</string>
+  <!-- src_hash: 8a7ac9cbac318f9af717ff2c6a722d83c5bc5e0f -->
+  <string name="notification_event_finished_body">De %1$s-golf is afgelopen</string>
+  <!-- src_hash: 20c369d47a787e9435d0ffd0c0398d78b7a1f70e -->
+  <string name="notification_wave_hit_body">De golf heeft je net bereikt in %1$s!</string>
+  <!-- src_hash: c771b7ea17490dffedd973a684b3cac26030c296 -->
+  <string name="notification_permission_rationale">Ontvang meldingen wanneer je favoriete golven beginnen</string>
+  <!-- src_hash: c685868070c0875387031ecfb82bdc7ab8ff32ca -->
+  <string name="notification_permission_denied">Meldingen uitgeschakeld. Schakel ze in via Instellingen</string>
 </resources>

@@ -636,6 +636,32 @@
   <string name="action_message_section_1">Musimy przejść od kontroli szkód do gotowości na wstrząsy. Temperatury przekroczą cele, więc społeczności potrzebują teraz jasnych wytycznych, ćwiczeń i prostych narzędzi.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">To zaczyna się od wspólnego obrazu rzeczywistości. Rządy, firmy i liderzy społeczni powinni wspólnie przedstawić fakty, otworzyć dane i zestrajać harmonogramy, aby działania były skoordynowane, a nie rozproszone.\n\nAby chronić życie, dążmy do pokojowej deeskalacji napięć geopolitycznych i przekierujmy zasoby na przetrwanie ludzi i stabilność.\n\nZwołajmy spotkanie na najwyższym szczeblu z państwami, przedsiębiorstwami i przedstawicielami społeczeństwa, aby przedstawić propozycje, przypisać odpowiedzialnych i raportować postępy.\n\nUsuńmy bariery, dając zielone światło pilotażom, ujednolicając standardy oraz w pierwszej kolejności finansując odporność i dostępność.</string>
-  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
-  <string name="action_message_section_3">Słuchajmy lokalnych podmiotów mierzących się ze skutkami, razem z nimi klasyfikujmy zagrożenia i publikujmy plany w prostym języku, aby społeczeństwo było poinformowane i zaproszone do udziału. Tę pracę prowadzą zasady niestosowania przemocy, włączania, przejrzystości i nauki.\n\nPrzygotowujmy też przyszłość: uczmy praktycznych umiejętności, inwestujmy w systemy wczesnego ostrzegania, odporną infrastrukturę i rozwiązania oparte na naturze oraz budujmy otwarte narzędzia i dane do planowania społeczności.</string>
+  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
+  <string name="action_message_section_3">Słuchaj lokalnych podmiotów dotkniętych skutkami, razem z nimi klasyfikuj zagrożenia i publikuj plany w prostym języku, aby społeczeństwo było poinformowane i zaproszone do udziału. Tym wysiłkiem kierują zasady: bez przemocy, włączenie, przejrzystość i nauka.
+
+Przygotuj też przyszłość: ucz praktycznych umiejętności, inwestuj w systemy wczesnego ostrzegania, odporną infrastrukturę i rozwiązania oparte na przyrodzie, a także twórz otwarte narzędzia i dane do planowania społecznościowego.</string>
+  <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
+  <string name="notification_event_starting_soon">Wkrótce start fali</string>
+  <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
+  <string name="notification_event_finished">Fala zakończona</string>
+  <!-- src_hash: a754deec084228db5eb4e7494ece4899d15d5bdb -->
+  <string name="notification_wave_hit">Fala dotarła!</string>
+  <!-- src_hash: b59ce446e02917542cf980c05434510e8fac89d5 -->
+  <string name="notification_1h_before">%1$s zaczyna się za 1 godzinę</string>
+  <!-- src_hash: edf14570c85158c248c34c39e3309084c270f9b5 -->
+  <string name="notification_30m_before">%1$s zaczyna się za 30 minut</string>
+  <!-- src_hash: 3956289fe7c912cd60f175ff5fef61c42cf2187b -->
+  <string name="notification_10m_before">%1$s zaczyna się za 10 minut</string>
+  <!-- src_hash: afab5ffa7152140e4576dfe14dc3af121ec0a19b -->
+  <string name="notification_5m_before">%1$s zaczyna się za 5 minut</string>
+  <!-- src_hash: aeda84fa74cb3b740771cdb5e97b7c99a48a5acf -->
+  <string name="notification_1m_before">%1$s zaczyna się za 1 minutę!</string>
+  <!-- src_hash: 8a7ac9cbac318f9af717ff2c6a722d83c5bc5e0f -->
+  <string name="notification_event_finished_body">Fala %1$s zakończyła się</string>
+  <!-- src_hash: 20c369d47a787e9435d0ffd0c0398d78b7a1f70e -->
+  <string name="notification_wave_hit_body">Fala właśnie dotarła do ciebie w %1$s!</string>
+  <!-- src_hash: c771b7ea17490dffedd973a684b3cac26030c296 -->
+  <string name="notification_permission_rationale">Otrzymuj powiadomienia, gdy zaczynają się twoje ulubione fale</string>
+  <!-- src_hash: c685868070c0875387031ecfb82bdc7ab8ff32ca -->
+  <string name="notification_permission_denied">Powiadomienia wyłączone. Włącz je w Ustawieniach</string>
 </resources>

@@ -636,6 +636,32 @@
   <string name="action_message_section_1">사후 수습에서 충격 대비로 전환해야 합니다. 기온이 목표치를 넘을 것이므로, 지역사회에는 지금 명확한 지침, 모의훈련, 간단한 도구가 필요합니다.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">이는 공동의 현실 인식에서 시작됩니다. 정부, 기업, 시민사회 리더가 함께 사실을 밝히고, 데이터를 개방하며, 일정을 맞춰 행동이 분절되지 않고 조정되도록 해야 합니다.\n\n생명을 보호하려면 지정학적 긴장을 평화적으로 완화하고, 자원을 인간의 생존과 안정에 다시 집중해야 합니다.\n\n국가, 기업, 시민 대표가 최고 수준에서 모여 제안을 상정하고, 책임자를 지정하며, 진행 상황을 보고해야 합니다.\n\n시범사업을 신속히 승인하고, 표준을 정합화하며, 회복력과 접근성에 우선 투자해 장애물을 제거해야 합니다.</string>
-  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
-  <string name="action_message_section_3">영향을 직접 겪는 지역 주체들의 목소리를 듣고, 그들과 함께 위협을 순위화하며, 대중이 정보를 얻고 참여할 수 있도록 쉬운 언어의 계획을 공개해야 합니다. 비폭력, 포용, 투명성, 과학이 이 노력을 이끕니다.\n\n또한 미래도 준비해야 합니다. 실용 기술을 가르치고, 조기경보 시스템, 회복력 있는 인프라, 자연 기반 해법에 투자하며, 공동체 계획을 위한 개방형 도구와 데이터를 구축해야 합니다.</string>
+  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
+  <string name="action_message_section_3">영향을 겪는 현지 당사자들의 말을 듣고, 그들과 함께 위협의 우선순위를 정하며, 대중이 이해하고 참여할 수 있도록 쉬운 언어의 계획을 공개하세요. 비폭력, 포용, 투명성, 과학이 이 노력을 이끕니다.
+
+미래도 준비하세요: 실용 기술을 가르치고, 조기경보 시스템·회복력 있는 인프라·자연 기반 해법에 투자하며, 공동체 계획을 위한 개방형 도구와 데이터를 구축하세요.</string>
+  <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
+  <string name="notification_event_starting_soon">곧 웨이브 시작</string>
+  <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
+  <string name="notification_event_finished">웨이브 종료</string>
+  <!-- src_hash: a754deec084228db5eb4e7494ece4899d15d5bdb -->
+  <string name="notification_wave_hit">웨이브 도착!</string>
+  <!-- src_hash: b59ce446e02917542cf980c05434510e8fac89d5 -->
+  <string name="notification_1h_before">%1$s 1시간 후 시작</string>
+  <!-- src_hash: edf14570c85158c248c34c39e3309084c270f9b5 -->
+  <string name="notification_30m_before">%1$s 30분 후 시작</string>
+  <!-- src_hash: 3956289fe7c912cd60f175ff5fef61c42cf2187b -->
+  <string name="notification_10m_before">%1$s 10분 후 시작</string>
+  <!-- src_hash: afab5ffa7152140e4576dfe14dc3af121ec0a19b -->
+  <string name="notification_5m_before">%1$s 5분 후 시작</string>
+  <!-- src_hash: aeda84fa74cb3b740771cdb5e97b7c99a48a5acf -->
+  <string name="notification_1m_before">%1$s 1분 후 시작!</string>
+  <!-- src_hash: 8a7ac9cbac318f9af717ff2c6a722d83c5bc5e0f -->
+  <string name="notification_event_finished_body">%1$s 웨이브가 종료되었습니다</string>
+  <!-- src_hash: 20c369d47a787e9435d0ffd0c0398d78b7a1f70e -->
+  <string name="notification_wave_hit_body">웨이브가 방금 %1$s에 도착했습니다!</string>
+  <!-- src_hash: c771b7ea17490dffedd973a684b3cac26030c296 -->
+  <string name="notification_permission_rationale">좋아하는 웨이브가 시작될 때 알림 받기</string>
+  <!-- src_hash: c685868070c0875387031ecfb82bdc7ab8ff32ca -->
+  <string name="notification_permission_denied">알림이 꺼져 있습니다. 설정에서 활성화하세요</string>
 </resources>

@@ -636,6 +636,30 @@
   <string name="action_message_section_1">Dole mu sauya daga rage barna zuwa shirin fuskantar girgiza. Zafin jiki zai wuce manufofin da aka sa, don haka al’ummomi na bukatar jagora a fili, atisa’i, da kayan aiki masu sauƙi yanzu.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">Wannan yana farawa da gaskiya gama-gari. Gwamnatoci, kamfanoni, da shugabannin al'umma su bayyana gaskiya tare, su buɗe bayanai, su daidaita jadawalin lokaci domin aiki ya kasance cikin tsari, ba a rarrabce ba.\n\nDon kare rayuka, a bi hanyar rage tashin hankali cikin lumana a rikice-rikicen siyasar duniya, kuma a mayar da albarkatu kan tsira da daidaiton rayuwar ɗan adam.\n\nA tattaro a matakin koli tare da jihohi, kamfanoni, da wakilan jama'a don gabatar da shawarwari, ware masu alhaki, kuma a rika ba da rahoton ci gaba.\n\nA cire shingaye ta hanyar ba da izinin gwaje-gwajen farko, daidaita ƙa'idoji, kuma a fi maida kuɗi kan juriya da samun sauƙin amfani da farko.</string>
-  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
-  <string name="action_message_section_3">Saurari masu ruwa da tsaki na gida da ke fuskantar tasiri, ku jeranta barazana tare da su, kuma ku wallafa tsare-tsare cikin yare mai sauƙi domin jama'a su samu bayani kuma a gayyace su su shiga. Rashin amfani da tashin hankali, haɗawa, bayyananniya, da kimiyya su ke jagorantar wannan yunƙuri.\n\nHaka kuma a shirya gaba: ku koyar da ƙwarewar aiki, ku zuba jari a tsarukan gargaɗi na farko, ababen more rayuwa masu juriya, da mafita masu dogaro da yanayi, kuma ku gina kayan aiki da bayanai buɗaɗɗe don tsare-tsaren al'umma.</string>
+  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
+  <string name="action_message_section_3">Ku saurari masu ruwa da tsaki na yankinku da ke fuskantar tasiri, ku ba barazana fifiko tare da su, ku wallafa tsare-tsare a sauƙaƙen harshe domin jama'a su samu bayani kuma a gayyace su su shiga. Rashin tashin hankali, haɗawa, bayyanawa, da kimiyya ne ke jagorantar wannan ƙoƙari.\n\nKu shirya gaba ma: ku koyar da ƙwarewar aikace-aikace, ku zuba jari a tsarin gargaɗin farko, ababen more rayuwa masu juriya, da mafita bisa yanayi, sannan ku gina buɗaɗɗun kayan aiki da bayanai don tsare-tsaren al'umma.</string>
+  <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
+  <string name="notification_event_starting_soon">Igiya na kusa farawa</string>
+  <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
+  <string name="notification_event_finished">An kammala igiya</string>
+  <!-- src_hash: a754deec084228db5eb4e7494ece4899d15d5bdb -->
+  <string name="notification_wave_hit">Igiya ta iso!</string>
+  <!-- src_hash: b59ce446e02917542cf980c05434510e8fac89d5 -->
+  <string name="notification_1h_before">Za a fara %1$s cikin awa 1</string>
+  <!-- src_hash: edf14570c85158c248c34c39e3309084c270f9b5 -->
+  <string name="notification_30m_before">Za a fara %1$s cikin mintuna 30</string>
+  <!-- src_hash: 3956289fe7c912cd60f175ff5fef61c42cf2187b -->
+  <string name="notification_10m_before">Za a fara %1$s cikin mintuna 10</string>
+  <!-- src_hash: afab5ffa7152140e4576dfe14dc3af121ec0a19b -->
+  <string name="notification_5m_before">Za a fara %1$s cikin mintuna 5</string>
+  <!-- src_hash: aeda84fa74cb3b740771cdb5e97b7c99a48a5acf -->
+  <string name="notification_1m_before">Za a fara %1$s cikin minti 1!</string>
+  <!-- src_hash: 8a7ac9cbac318f9af717ff2c6a722d83c5bc5e0f -->
+  <string name="notification_event_finished_body">An kammala igiyar %1$s</string>
+  <!-- src_hash: 20c369d47a787e9435d0ffd0c0398d78b7a1f70e -->
+  <string name="notification_wave_hit_body">Igiya ta isa wurinku a %1$s!</string>
+  <!-- src_hash: c771b7ea17490dffedd973a684b3cac26030c296 -->
+  <string name="notification_permission_rationale">Samu sanarwa idan igiyoyin da kuka fi so za su fara</string>
+  <!-- src_hash: c685868070c0875387031ecfb82bdc7ab8ff32ca -->
+  <string name="notification_permission_denied">An kashe sanarwa. Kunna a Saituna</string>
 </resources>

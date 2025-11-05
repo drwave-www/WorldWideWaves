@@ -636,6 +636,32 @@
   <string name="action_message_section_1">Dobbiamo passare dalla gestione dei danni alla preparazione agli shock. Le temperature supereranno gli obiettivi, quindi le comunità hanno bisogno ora di indicazioni chiare, esercitazioni e strumenti semplici.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">Questo inizia da una realtà condivisa. Governi, imprese e leader civici dovrebbero dichiarare insieme i fatti, aprire i dati e allineare le tempistiche, così che l’azione sia coordinata e non frammentata.\n\nPer proteggere la vita, perseguire una de-escalation pacifica delle tensioni geopolitiche e rifocalizzare le risorse sulla sopravvivenza e la stabilità umana.\n\nRiunirsi al massimo livello con stati, imprese e rappresentanti pubblici per presentare proposte, assegnare responsabili e rendicontare i progressi.\n\nRimuovere gli ostacoli autorizzando progetti pilota, armonizzando gli standard e finanziando prima di tutto resilienza e accessibilità.</string>
-  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
-  <string name="action_message_section_3">Ascoltare gli attori locali che affrontano gli impatti, definire con loro le priorità delle minacce e pubblicare piani in linguaggio semplice, così che il pubblico sia informato e invitato a partecipare. Non violenza, inclusione, trasparenza e scienza guidano questo sforzo.\n\nPreparare anche il futuro: insegnare competenze pratiche, investire in sistemi di allerta precoce, infrastrutture resilienti e soluzioni basate sulla natura, e costruire strumenti e dati aperti per la pianificazione comunitaria.</string>
+  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
+  <string name="action_message_section_3">Ascolta gli attori locali che affrontano gli impatti, valuta con loro le minacce e pubblica piani in linguaggio semplice, così che il pubblico sia informato e invitato a partecipare. La nonviolenza, l’inclusione, la trasparenza e la scienza guidano questo impegno.
+
+Prepara anche il futuro: insegna competenze pratiche, investi in sistemi di allerta precoce, infrastrutture resilienti e soluzioni basate sulla natura, e crea strumenti e dati aperti per la pianificazione comunitaria.</string>
+  <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
+  <string name="notification_event_starting_soon">Onda in arrivo</string>
+  <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
+  <string name="notification_event_finished">Onda conclusa</string>
+  <!-- src_hash: a754deec084228db5eb4e7494ece4899d15d5bdb -->
+  <string name="notification_wave_hit">Onda arrivata!</string>
+  <!-- src_hash: b59ce446e02917542cf980c05434510e8fac89d5 -->
+  <string name="notification_1h_before">%1$s inizia tra 1 ora</string>
+  <!-- src_hash: edf14570c85158c248c34c39e3309084c270f9b5 -->
+  <string name="notification_30m_before">%1$s inizia tra 30 minuti</string>
+  <!-- src_hash: 3956289fe7c912cd60f175ff5fef61c42cf2187b -->
+  <string name="notification_10m_before">%1$s inizia tra 10 minuti</string>
+  <!-- src_hash: afab5ffa7152140e4576dfe14dc3af121ec0a19b -->
+  <string name="notification_5m_before">%1$s inizia tra 5 minuti</string>
+  <!-- src_hash: aeda84fa74cb3b740771cdb5e97b7c99a48a5acf -->
+  <string name="notification_1m_before">%1$s inizia tra 1 minuto!</string>
+  <!-- src_hash: 8a7ac9cbac318f9af717ff2c6a722d83c5bc5e0f -->
+  <string name="notification_event_finished_body">L’onda %1$s si è conclusa</string>
+  <!-- src_hash: 20c369d47a787e9435d0ffd0c0398d78b7a1f70e -->
+  <string name="notification_wave_hit_body">L’onda ti ha appena raggiunto a %1$s!</string>
+  <!-- src_hash: c771b7ea17490dffedd973a684b3cac26030c296 -->
+  <string name="notification_permission_rationale">Ricevi notifiche quando iniziano le tue onde preferite</string>
+  <!-- src_hash: c685868070c0875387031ecfb82bdc7ab8ff32ca -->
+  <string name="notification_permission_denied">Notifiche disattivate. Attivale in Impostazioni</string>
 </resources>

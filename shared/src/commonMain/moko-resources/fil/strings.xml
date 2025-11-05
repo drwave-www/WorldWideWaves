@@ -642,8 +642,32 @@ Upang protektahan ang buhay, itaguyod ang mapayapang pagpapahupa sa mga tensiyon
 Magpulong sa pinakamataas na antas kasama ang mga estado, negosyo, at mga kinatawan ng publiko upang ihain ang mga panukala, italaga ang mga may pananagutan, at iulat ang progreso.
 
 Alisin ang mga hadlang sa pamamagitan ng pag-apruba sa mga pilot project, pagharmonisa ng mga pamantayan, at pagpondo muna sa katatagan at accessibility.</string>
-  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
-  <string name="action_message_section_3">Makinig sa mga lokal na kumikilos na humaharap sa mga epekto, iranggo ang mga banta kasama nila, at maglathala ng mga planong nasa payak na wika upang maipabatid sa publiko at maanyayahan silang makilahok. Gabay ng gawaing ito ang hindi-karahasan, inklusyon, pagiging bukás, at agham.
+  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
+  <string name="action_message_section_3">Makinig sa mga lokal na kumikilos na direktang apektado, tasahin kasama nila ang mga banta, at maglabas ng mga planong malinaw ang wika para maabisuhan ang publiko at maanyayahan silang makilahok. Di-karahasan, inklusyon, pagiging bukás, at agham ang gagabay sa gawaing ito.
 
-Ihanda rin ang kinabukasan: ituro ang mga praktikal na kasanayan, mamuhunan sa mga sistema ng maagang babala, matatag na imprastraktura, at mga solusyong nakabatay sa kalikasan, at bumuo ng bukás na mga kasangkapan at datos para sa pagpaplanong pangkomunidad.</string>
+Maghanda rin para sa kinabukasan: ituro ang mga praktikal na kasanayan, mamuhunan sa mga sistema ng maagang babala, matatag na imprastruktura, at mga solusyong nakabatay sa kalikasan, at bumuo ng bukás na mga kasangkapan at datos para sa pagpaplanong pangkomunidad.</string>
+  <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
+  <string name="notification_event_starting_soon">Malapit nang magsimula ang alon</string>
+  <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
+  <string name="notification_event_finished">Tapos na ang alon</string>
+  <!-- src_hash: a754deec084228db5eb4e7494ece4899d15d5bdb -->
+  <string name="notification_wave_hit">Dumating na ang alon!</string>
+  <!-- src_hash: b59ce446e02917542cf980c05434510e8fac89d5 -->
+  <string name="notification_1h_before">Magsisimula ang %1$s sa loob ng 1 oras</string>
+  <!-- src_hash: edf14570c85158c248c34c39e3309084c270f9b5 -->
+  <string name="notification_30m_before">Magsisimula ang %1$s sa loob ng 30 minuto</string>
+  <!-- src_hash: 3956289fe7c912cd60f175ff5fef61c42cf2187b -->
+  <string name="notification_10m_before">Magsisimula ang %1$s sa loob ng 10 minuto</string>
+  <!-- src_hash: afab5ffa7152140e4576dfe14dc3af121ec0a19b -->
+  <string name="notification_5m_before">Magsisimula ang %1$s sa loob ng 5 minuto</string>
+  <!-- src_hash: aeda84fa74cb3b740771cdb5e97b7c99a48a5acf -->
+  <string name="notification_1m_before">Magsisimula ang %1$s sa loob ng 1 minuto!</string>
+  <!-- src_hash: 8a7ac9cbac318f9af717ff2c6a722d83c5bc5e0f -->
+  <string name="notification_event_finished_body">Tapos na ang alon ng %1$s</string>
+  <!-- src_hash: 20c369d47a787e9435d0ffd0c0398d78b7a1f70e -->
+  <string name="notification_wave_hit_body">Kakarating lang ng alon sa iyo sa %1$s!</string>
+  <!-- src_hash: c771b7ea17490dffedd973a684b3cac26030c296 -->
+  <string name="notification_permission_rationale">Tumanggap ng abiso kapag nagsisimula na ang mga paborito mong alon</string>
+  <!-- src_hash: c685868070c0875387031ecfb82bdc7ab8ff32ca -->
+  <string name="notification_permission_denied">Hindi pinagana ang mga abiso. Paganahin sa Settings</string>
 </resources>

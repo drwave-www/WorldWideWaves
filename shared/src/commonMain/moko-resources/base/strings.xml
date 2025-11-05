@@ -441,4 +441,22 @@
     <string name="action_message_section_2">This starts with a shared reality. Governments, companies, and civic leaders should state facts together, open data, and align timelines so action is coordinated, not fragmented.\n\nTo protect life, pursue peaceful de-escalation of geopolitical tensions and refocus resources on human survival and stability.\n\nConvene at the highest level with states, enterprises, and public representatives to table proposals, assign owners, and report progress.\n\nRemove blockers by green-lighting pilots, harmonizing standards, and funding resilience and accessibility first. </string>
     <string name="action_message_section_3">Listen to local actors facing impacts, rank threats with them, and publish plain-language plans so the public is informed and invited to participate. Non-violence, inclusion, transparency, and science guide this effort.\n\nAlso prepare the future: teach practical skills, invest in early warning systems, resilient infrastructure, and nature-based solutions, and build open tools and data for community planning. </string>
 
+    <!-- Context: Notification titles, Size: Short -->
+    <string name="notification_event_starting_soon">Wave starting soon</string>
+    <string name="notification_event_finished">Wave completed</string>
+    <string name="notification_wave_hit">Wave hit!</string>
+
+    <!-- Context: Notification bodies (with %1$s = event name), Size: Medium -->
+    <string name="notification_1h_before">%1$s starts in 1 hour</string>
+    <string name="notification_30m_before">%1$s starts in 30 minutes</string>
+    <string name="notification_10m_before">%1$s starts in 10 minutes</string>
+    <string name="notification_5m_before">%1$s starts in 5 minutes</string>
+    <string name="notification_1m_before">%1$s starts in 1 minute!</string>
+    <string name="notification_event_finished_body">The %1$s wave has finished</string>
+    <string name="notification_wave_hit_body">The wave just reached you in %1$s!</string>
+
+    <!-- Context: Permission rationale for notifications (for future use), Size: Medium -->
+    <string name="notification_permission_rationale">Get notified when your favorite waves are starting</string>
+    <string name="notification_permission_denied">Notifications disabled. Enable in Settings</string>
+
 </resources>

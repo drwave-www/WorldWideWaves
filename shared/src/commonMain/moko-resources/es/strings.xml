@@ -642,8 +642,32 @@ Para proteger la vida, promover la desescalada pacífica de las tensiones geopol
 Reunirse al más alto nivel con Estados, empresas y representantes públicos para presentar propuestas, asignar responsables e informar avances.
 
 Eliminar obstáculos dando luz verde a pilotos, armonizando estándares y financiando primero la resiliencia y la accesibilidad.</string>
-  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
-  <string name="action_message_section_3">Escuchar a los actores locales que enfrentan impactos, priorizar con ellos las amenazas y publicar planes en lenguaje sencillo para que el público esté informado e invitado a participar. La no violencia, la inclusión, la transparencia y la ciencia guían este esfuerzo.
+  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
+  <string name="action_message_section_3">Escucha a los actores locales que enfrentan impactos, prioriza las amenazas con ellos y publica planes en lenguaje claro para informar e invitar a la participación. La no violencia, la inclusión, la transparencia y la ciencia guían este esfuerzo.
 
-También preparar el futuro: enseñar habilidades prácticas, invertir en sistemas de alerta temprana, infraestructura resiliente y soluciones basadas en la naturaleza, y crear herramientas y datos abiertos para la planificación comunitaria.</string>
+También prepara el futuro: enseña habilidades prácticas, invierte en sistemas de alerta temprana, infraestructura resiliente y soluciones basadas en la naturaleza, y crea herramientas y datos abiertos para la planificación comunitaria.</string>
+  <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
+  <string name="notification_event_starting_soon">La ola comienza pronto</string>
+  <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
+  <string name="notification_event_finished">Ola finalizada</string>
+  <!-- src_hash: a754deec084228db5eb4e7494ece4899d15d5bdb -->
+  <string name="notification_wave_hit">¡Llegó la ola!</string>
+  <!-- src_hash: b59ce446e02917542cf980c05434510e8fac89d5 -->
+  <string name="notification_1h_before">%1$s comienza en 1 hora</string>
+  <!-- src_hash: edf14570c85158c248c34c39e3309084c270f9b5 -->
+  <string name="notification_30m_before">%1$s comienza en 30 minutos</string>
+  <!-- src_hash: 3956289fe7c912cd60f175ff5fef61c42cf2187b -->
+  <string name="notification_10m_before">%1$s comienza en 10 minutos</string>
+  <!-- src_hash: afab5ffa7152140e4576dfe14dc3af121ec0a19b -->
+  <string name="notification_5m_before">%1$s comienza en 5 minutos</string>
+  <!-- src_hash: aeda84fa74cb3b740771cdb5e97b7c99a48a5acf -->
+  <string name="notification_1m_before">¡%1$s comienza en 1 minuto!</string>
+  <!-- src_hash: 8a7ac9cbac318f9af717ff2c6a722d83c5bc5e0f -->
+  <string name="notification_event_finished_body">La ola %1$s ha finalizado</string>
+  <!-- src_hash: 20c369d47a787e9435d0ffd0c0398d78b7a1f70e -->
+  <string name="notification_wave_hit_body">¡La ola acaba de alcanzarte en %1$s!</string>
+  <!-- src_hash: c771b7ea17490dffedd973a684b3cac26030c296 -->
+  <string name="notification_permission_rationale">Recibe notificaciones cuando comiencen tus olas favoritas</string>
+  <!-- src_hash: c685868070c0875387031ecfb82bdc7ab8ff32ca -->
+  <string name="notification_permission_denied">Notificaciones desactivadas. Actívalas en Ajustes</string>
 </resources>

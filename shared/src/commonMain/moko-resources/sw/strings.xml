@@ -642,8 +642,30 @@ Ili kulinda uhai, tafuta kupunguza mvutano wa kijiopolitiki kwa amani na kueleke
 Itisheni kikao cha ngazi ya juu kabisa na nchi, biashara, na wawakilishi wa umma ili kuwasilisha mapendekezo, kuteua watekelezaji, na kuripoti maendeleo.
 
 Ondoa vikwazo kwa kuidhinisha majaribio, kuoanisha viwango, na kufadhili kwanza uthabiti na upatikanaji.</string>
-  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
-  <string name="action_message_section_3">Sikiliza wadau wa eneo wanaokabiliwa na athari, pangalieni kwa vipaumbele vitisho pamoja nao, na chapisha mipango kwa lugha rahisi ili umma ujulishwe na kualikwa kushiriki. Kutotumia vurugu, ujumuishaji, uwazi, na sayansi ndizo zinazoongoza jitihada hii.
-
-Andaa pia siku zijazo: fundisha stadi za vitendo, wekeza katika mifumo ya onyo la mapema, miundombinu thabiti, na suluhu zinazotokana na asili, na jenga zana na data huria kwa upangaji wa jamii.</string>
+  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
+  <string name="action_message_section_3">Sikiliza wadau wa eneo wanaokumbwa na athari, pima nao vitisho, na chapisha mipango kwa lugha rahisi ili umma ujulishwe na ualikwe kushiriki. Kutokutumia vurugu, ujumuishaji, uwazi, na sayansi ndizo zinazoongoza jitihada hii.\n\nAndaa pia mustakabali: fundisha stadi za vitendo, wekeza katika mifumo ya onyo la mapema, miundombinu inayostahimili, na suluhisho za asili, na jenga zana na data huria kwa mipango ya jamii.</string>
+  <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
+  <string name="notification_event_starting_soon">Wimbi linaanza hivi karibuni</string>
+  <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
+  <string name="notification_event_finished">Wimbi limekamilika</string>
+  <!-- src_hash: a754deec084228db5eb4e7494ece4899d15d5bdb -->
+  <string name="notification_wave_hit">Wimbi limekufikia!</string>
+  <!-- src_hash: b59ce446e02917542cf980c05434510e8fac89d5 -->
+  <string name="notification_1h_before">%1$s inaanza baada ya saa 1</string>
+  <!-- src_hash: edf14570c85158c248c34c39e3309084c270f9b5 -->
+  <string name="notification_30m_before">%1$s inaanza baada ya dakika 30</string>
+  <!-- src_hash: 3956289fe7c912cd60f175ff5fef61c42cf2187b -->
+  <string name="notification_10m_before">%1$s inaanza baada ya dakika 10</string>
+  <!-- src_hash: afab5ffa7152140e4576dfe14dc3af121ec0a19b -->
+  <string name="notification_5m_before">%1$s inaanza baada ya dakika 5</string>
+  <!-- src_hash: aeda84fa74cb3b740771cdb5e97b7c99a48a5acf -->
+  <string name="notification_1m_before">%1$s inaanza baada ya dakika 1!</string>
+  <!-- src_hash: 8a7ac9cbac318f9af717ff2c6a722d83c5bc5e0f -->
+  <string name="notification_event_finished_body">Wimbi la %1$s limekamilika</string>
+  <!-- src_hash: 20c369d47a787e9435d0ffd0c0398d78b7a1f70e -->
+  <string name="notification_wave_hit_body">Wimbi limekufikia sasa hivi huko %1$s!</string>
+  <!-- src_hash: c771b7ea17490dffedd973a684b3cac26030c296 -->
+  <string name="notification_permission_rationale">Pokea arifa wakati mawimbi unayoyapenda yanapoanza</string>
+  <!-- src_hash: c685868070c0875387031ecfb82bdc7ab8ff32ca -->
+  <string name="notification_permission_denied">Arifa zimezimwa. Washa kwenye Mipangilio</string>
 </resources>

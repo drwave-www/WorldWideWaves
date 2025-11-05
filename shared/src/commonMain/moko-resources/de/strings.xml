@@ -642,8 +642,32 @@ Zum Schutz von Leben: Setzt auf friedliche Deeskalation geopolitischer Spannunge
 Kommt auf höchster Ebene mit Staaten, Unternehmen und öffentlichen Vertretungen zusammen, um Vorschläge einzubringen, Verantwortliche zu benennen und Fortschritte zu berichten.
 
 Entfernt Blockaden, indem Pilotprojekte freigegeben, Standards harmonisiert und zuerst Resilienz und Zugänglichkeit finanziert werden.</string>
-  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
-  <string name="action_message_section_3">Hört auf Beteiligte vor Ort, die von den Auswirkungen betroffen sind, bewertet gemeinsam mit ihnen die Bedrohungen und veröffentlicht verständliche Pläne, damit die Öffentlichkeit informiert ist und zur Teilnahme eingeladen wird. Gewaltfreiheit, Inklusion, Transparenz und Wissenschaft leiten dieses Vorhaben.
+  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
+  <string name="action_message_section_3">Hört auf lokale Akteur:innen, die mit den Folgen konfrontiert sind, bewertet gemeinsam Bedrohungen und veröffentlicht leicht verständliche Pläne, damit die Öffentlichkeit informiert ist und zur Teilnahme eingeladen wird. Gewaltfreiheit, Inklusion, Transparenz und Wissenschaft leiten dieses Vorhaben.
 
-Bereitet auch die Zukunft vor: Vermittelt praktische Fähigkeiten, investiert in Frühwarnsysteme, resiliente Infrastruktur und naturbasierte Lösungen und baut offene Werkzeuge und Daten für die Gemeinschaftsplanung auf.</string>
+Bereitet auch die Zukunft vor: vermittelt praktische Fähigkeiten, investiert in Frühwarnsysteme, widerstandsfähige Infrastruktur und naturbasierte Lösungen und entwickelt offene Werkzeuge und Daten für die Gemeinschaftsplanung.</string>
+  <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
+  <string name="notification_event_starting_soon">Welle beginnt bald</string>
+  <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
+  <string name="notification_event_finished">Welle beendet</string>
+  <!-- src_hash: a754deec084228db5eb4e7494ece4899d15d5bdb -->
+  <string name="notification_wave_hit">Welle ist da!</string>
+  <!-- src_hash: b59ce446e02917542cf980c05434510e8fac89d5 -->
+  <string name="notification_1h_before">%1$s beginnt in 1 Stunde</string>
+  <!-- src_hash: edf14570c85158c248c34c39e3309084c270f9b5 -->
+  <string name="notification_30m_before">%1$s beginnt in 30 Minuten</string>
+  <!-- src_hash: 3956289fe7c912cd60f175ff5fef61c42cf2187b -->
+  <string name="notification_10m_before">%1$s beginnt in 10 Minuten</string>
+  <!-- src_hash: afab5ffa7152140e4576dfe14dc3af121ec0a19b -->
+  <string name="notification_5m_before">%1$s beginnt in 5 Minuten</string>
+  <!-- src_hash: aeda84fa74cb3b740771cdb5e97b7c99a48a5acf -->
+  <string name="notification_1m_before">%1$s beginnt in 1 Minute!</string>
+  <!-- src_hash: 8a7ac9cbac318f9af717ff2c6a722d83c5bc5e0f -->
+  <string name="notification_event_finished_body">Die %1$s-Welle ist beendet</string>
+  <!-- src_hash: 20c369d47a787e9435d0ffd0c0398d78b7a1f70e -->
+  <string name="notification_wave_hit_body">Die Welle hat dich soeben in %1$s erreicht!</string>
+  <!-- src_hash: c771b7ea17490dffedd973a684b3cac26030c296 -->
+  <string name="notification_permission_rationale">Erhalte Benachrichtigungen, wenn deine Lieblingswellen beginnen</string>
+  <!-- src_hash: c685868070c0875387031ecfb82bdc7ab8ff32ca -->
+  <string name="notification_permission_denied">Benachrichtigungen deaktiviert. In den Einstellungen aktivieren</string>
 </resources>

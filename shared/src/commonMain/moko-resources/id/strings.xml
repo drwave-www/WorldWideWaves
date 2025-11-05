@@ -636,6 +636,30 @@
   <string name="action_message_section_1">Kita harus beralih dari penanganan dampak ke kesiapsiagaan menghadapi guncangan. Suhu akan melampaui target, jadi komunitas membutuhkan panduan yang jelas, latihan, dan alat sederhana sekarang.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">Ini dimulai dengan realitas bersama. Pemerintah, perusahaan, dan pemimpin sipil harus menyatakan fakta bersama, membuka data, dan menyelaraskan jadwal agar tindakan terkoordinasi, bukan terpecah-pecah.\n\nUntuk melindungi kehidupan, tempuh deeskalasi damai atas ketegangan geopolitik dan fokuskan kembali sumber daya pada kelangsungan hidup manusia dan stabilitas.\n\nSelenggarakan pertemuan di tingkat tertinggi dengan negara, pelaku usaha, dan perwakilan publik untuk mengajukan proposal, menetapkan penanggung jawab, dan melaporkan kemajuan.\n\nSingkirkan penghalang dengan mengizinkan uji coba (pilot), menyelaraskan standar, serta mendanai ketangguhan dan aksesibilitas terlebih dahulu.</string>
-  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
-  <string name="action_message_section_3">Dengarkan para pelaku lokal yang menghadapi dampak, urutkan ancaman bersama mereka, dan publikasikan rencana dengan bahasa yang sederhana agar publik mendapat informasi dan diundang untuk berpartisipasi. Tanpa kekerasan, inklusi, transparansi, dan ilmu pengetahuan menjadi panduan upaya ini.\n\nSiapkan juga masa depan: ajarkan keterampilan praktis, investasikan pada sistem peringatan dini, infrastruktur yang tangguh, dan solusi berbasis alam, serta bangun alat dan data terbuka untuk perencanaan komunitas.</string>
+  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
+  <string name="action_message_section_3">Dengarkan pemangku kepentingan lokal yang menghadapi dampak, susun peringkat ancaman bersama mereka, dan publikasikan rencana berbahasa sederhana agar publik mendapat informasi dan diundang untuk berpartisipasi. Nirkekerasan, inklusi, transparansi, dan sains menjadi pedoman upaya ini.\n\nSiapkan juga masa depan: ajarkan keterampilan praktis, berinvestasi dalam sistem peringatan dini, infrastruktur yang tangguh, dan solusi berbasis alam, serta bangun alat dan data terbuka untuk perencanaan komunitas.</string>
+  <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
+  <string name="notification_event_starting_soon">Gelombang segera dimulai</string>
+  <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
+  <string name="notification_event_finished">Gelombang selesai</string>
+  <!-- src_hash: a754deec084228db5eb4e7494ece4899d15d5bdb -->
+  <string name="notification_wave_hit">Gelombang tiba!</string>
+  <!-- src_hash: b59ce446e02917542cf980c05434510e8fac89d5 -->
+  <string name="notification_1h_before">%1$s dimulai dalam 1 jam</string>
+  <!-- src_hash: edf14570c85158c248c34c39e3309084c270f9b5 -->
+  <string name="notification_30m_before">%1$s dimulai dalam 30 menit</string>
+  <!-- src_hash: 3956289fe7c912cd60f175ff5fef61c42cf2187b -->
+  <string name="notification_10m_before">%1$s dimulai dalam 10 menit</string>
+  <!-- src_hash: afab5ffa7152140e4576dfe14dc3af121ec0a19b -->
+  <string name="notification_5m_before">%1$s dimulai dalam 5 menit</string>
+  <!-- src_hash: aeda84fa74cb3b740771cdb5e97b7c99a48a5acf -->
+  <string name="notification_1m_before">%1$s dimulai dalam 1 menit!</string>
+  <!-- src_hash: 8a7ac9cbac318f9af717ff2c6a722d83c5bc5e0f -->
+  <string name="notification_event_finished_body">Gelombang %1$s telah berakhir</string>
+  <!-- src_hash: 20c369d47a787e9435d0ffd0c0398d78b7a1f70e -->
+  <string name="notification_wave_hit_body">Gelombang baru saja mencapai Anda di %1$s!</string>
+  <!-- src_hash: c771b7ea17490dffedd973a684b3cac26030c296 -->
+  <string name="notification_permission_rationale">Dapatkan notifikasi saat gelombang favorit Anda akan dimulai</string>
+  <!-- src_hash: c685868070c0875387031ecfb82bdc7ab8ff32ca -->
+  <string name="notification_permission_denied">Notifikasi dinonaktifkan. Aktifkan di Pengaturan</string>
 </resources>

@@ -642,8 +642,30 @@
 国家、企業、市民の代表が最高レベルで集まり、提案を提示し、責任者を割り当て、進捗を報告する。
 
 試行にゴーサインを出し、標準を調和させ、まずレジリエンスとアクセシビリティに資金を投じて、阻害要因を取り除く。</string>
-  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
-  <string name="action_message_section_3">影響に直面する地域の担い手に耳を傾け、彼らと共に脅威の優先順位を付け、誰にでもわかる言葉で計画を公開して、社会に情報を届け、参加を促す。非暴力、包摂、透明性、科学がこの取り組みを導く。
-
-未来にも備える。実践的なスキルを教え、早期警戒システム、強靭なインフラ、自然に基づく解決策に投資し、地域の計画づくりのためのオープンなツールとデータを整備する。</string>
+  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
+  <string name="action_message_section_3">影響に直面する地域の当事者の声を聴き、共に脅威の優先順位を付け、誰にでもわかる言葉で計画を公開して、市民に周知し参加を呼びかけましょう。非暴力・包摂・透明性・科学がこの取り組みを導きます。\n\nまた、未来にも備えましょう。実践的な技能を教え、早期警戒システム、強靭なインフラ、自然に基づく解決策に投資し、地域計画のためのオープンなツールとデータを整備しましょう。</string>
+  <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
+  <string name="notification_event_starting_soon">まもなくウェーブ開始</string>
+  <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
+  <string name="notification_event_finished">ウェーブ完了</string>
+  <!-- src_hash: a754deec084228db5eb4e7494ece4899d15d5bdb -->
+  <string name="notification_wave_hit">ウェーブ到達！</string>
+  <!-- src_hash: b59ce446e02917542cf980c05434510e8fac89d5 -->
+  <string name="notification_1h_before">%1$sは1時間後に始まります</string>
+  <!-- src_hash: edf14570c85158c248c34c39e3309084c270f9b5 -->
+  <string name="notification_30m_before">%1$sは30分後に始まります</string>
+  <!-- src_hash: 3956289fe7c912cd60f175ff5fef61c42cf2187b -->
+  <string name="notification_10m_before">%1$sは10分後に始まります</string>
+  <!-- src_hash: afab5ffa7152140e4576dfe14dc3af121ec0a19b -->
+  <string name="notification_5m_before">%1$sは5分後に始まります</string>
+  <!-- src_hash: aeda84fa74cb3b740771cdb5e97b7c99a48a5acf -->
+  <string name="notification_1m_before">%1$sは1分後に始まります！</string>
+  <!-- src_hash: 8a7ac9cbac318f9af717ff2c6a722d83c5bc5e0f -->
+  <string name="notification_event_finished_body">「%1$s」のウェーブは終了しました</string>
+  <!-- src_hash: 20c369d47a787e9435d0ffd0c0398d78b7a1f70e -->
+  <string name="notification_wave_hit_body">今、%1$sにウェーブが届きました！</string>
+  <!-- src_hash: c771b7ea17490dffedd973a684b3cac26030c296 -->
+  <string name="notification_permission_rationale">お気に入りのウェーブの開始をお知らせします</string>
+  <!-- src_hash: c685868070c0875387031ecfb82bdc7ab8ff32ca -->
+  <string name="notification_permission_denied">通知はオフです。設定で有効にしてください</string>
 </resources>

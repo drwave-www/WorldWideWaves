@@ -642,8 +642,30 @@ Ukukhusela ubomi, landelani ukwehliswa koxinzelelo ngeendlela zoxolo kwezo geopo
 Buthanani kwelona nqanaba liphezulu norhulumente, amashishini, nabameli boluntu ukuze kubekwe izindululo etafileni, kunikwe abanoxanduva, kuza kuxelwe inkqubela.
 
 Susahani izithintelo ngokugunyazisa iiprojekthi zovavanyo, nihambelaniswe imigangatho, nize nixhase kuqala ukomelela nokufikeleleka.</string>
-  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
-  <string name="action_message_section_3">Mamelani abadlali basekuhlaleni abajongene neziphumo, nibeke phambili izoyikiso kunye nabo, nize nipapashe izicwangciso ngolwimi olucacileyo nolula ukuze uluntu lwaziswe lize limenywe ukuba lubambe inxaxheba. Ukungabi-ndlobongela, ukubandakanywa, ukucaca, nesayensi makukhokele lo mzamo.
-
-Lungiselelani ikamva: fundisani izakhono ezisebenzayo, tyalani kwiinkqubo zesilumkiso sokuqala, kwiziseko ezingundoqo ezomeleleyo, nakwizisombululo ezisekelwe kwindalo, yaye yakheni izixhobo ezivulekileyo nedatha yokucwangcisa koluntu.</string>
+  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
+  <string name="action_message_section_3">Phulaphulani abathathi-nxaxheba basekuhlaleni abajongene neempembelelo, nibeke iingozi ngokwamanqanaba kunye nabo, nize nishicilele izicwangciso ngolwimi olucacileyo nolulula ukuze uluntu luziswe ngolwazi kwaye lumenywe ukuba luthathe inxaxheba. Ukungasebenzisi ugonyamelo, ukubandakanywa, ukucaca, kunye nenzululwazi zikhokela lo mzamo.\n\nKwakhona zilungiselele ikamva: fundisani izakhono ezisebenzayo, tyalani kwiinkqubo zezilumkiso zangethuba, iziseko ezingundoqo ezinyamezelayo, nasezisombululweni ezisekelwe kwindalo, nize nakhe izixhobo ezivulekileyo nedatha yocwangciso loluntu.</string>
+  <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
+  <string name="notification_event_starting_soon">Igagasi liqala kungekudala</string>
+  <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
+  <string name="notification_event_finished">Igagasi ligqityiwe</string>
+  <!-- src_hash: a754deec084228db5eb4e7494ece4899d15d5bdb -->
+  <string name="notification_wave_hit">Igagasi lifikile!</string>
+  <!-- src_hash: b59ce446e02917542cf980c05434510e8fac89d5 -->
+  <string name="notification_1h_before">%1$s iqala emva kwiyure eyi-1</string>
+  <!-- src_hash: edf14570c85158c248c34c39e3309084c270f9b5 -->
+  <string name="notification_30m_before">%1$s iqala emva kwemizuzu engama-30</string>
+  <!-- src_hash: 3956289fe7c912cd60f175ff5fef61c42cf2187b -->
+  <string name="notification_10m_before">%1$s iqala emva kwemizuzu eli-10</string>
+  <!-- src_hash: afab5ffa7152140e4576dfe14dc3af121ec0a19b -->
+  <string name="notification_5m_before">%1$s iqala emva kwemizuzu emi-5</string>
+  <!-- src_hash: aeda84fa74cb3b740771cdb5e97b7c99a48a5acf -->
+  <string name="notification_1m_before">%1$s iqala emva komzuzu o-1!</string>
+  <!-- src_hash: 8a7ac9cbac318f9af717ff2c6a722d83c5bc5e0f -->
+  <string name="notification_event_finished_body">Igagasi le-%1$s ligqityiwe</string>
+  <!-- src_hash: 20c369d47a787e9435d0ffd0c0398d78b7a1f70e -->
+  <string name="notification_wave_hit_body">Igagasi lisandula ukukufikelela e-%1$s!</string>
+  <!-- src_hash: c771b7ea17490dffedd973a684b3cac26030c296 -->
+  <string name="notification_permission_rationale">Fumana izaziso xa amagagasi owathandayo eqala</string>
+  <!-- src_hash: c685868070c0875387031ecfb82bdc7ab8ff32ca -->
+  <string name="notification_permission_denied">Izaziso zikhubaziwe. Zivule kuseto</string>
 </resources>

@@ -642,8 +642,30 @@
 ከግዛቶች፣ ከድርጅቶች እና ከህዝብ ተወካዮች ጋር በከፍተኛ ደረጃ ይጉብኙ፣ ጥቆማዎችን ወደ ጠረጴዛ ያቅርቡ፣ ኃላፊዎችን ያመድፉ እና እድገትን ያመለክቱ።
 
 እንቅፋቶችን የሙከራ ፕሮጀክቶችን በመፍቀድ፣ መስፈርቶችን በማስማማት እና በመጀመሪያ በመቋቋምነትና በተደራሽነት ላይ የገንዘብ ድጋፍ በመስጠት ያስወግዱ.</string>
-  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
-  <string name="action_message_section_3">ተፅእኖውን በፊት ለፊት የሚያጋጥሙ የአካባቢ ተካፋዮችን ያድምጡ፣ አደጋዎችን ከእነርሱ ጋር ቅደም ተከተል ያስቀምጡ እና ህዝቡ እንዲገነዘብ እና ለመሳተፍ እንዲጋበዙ በቀላል ቋንቋ የተዘጋጀ ዕቅድ ይፋ ያድርጉ። ይህን ጥረት የሚመሩት ጥቃት-አለመድረግ፣ አካተት፣ ግልጽነት እና ሳይንስ ናቸው።
-
-እንዲሁም ወደፊትን ያዘጋጁ፡ ተግባራዊ ክህሎቶችን አስተምሩ፣ በቀዳሚ ማስጠንቀቂያ ስርዓቶች፣ በጠንካራ ኢንፍራስትራክቸር እና በተፈጥሮ-ተመሰረቱ መፍትሄዎች ላይ ኢንቨስት አድርጉ፣ ለማህበረሰብ እቅድ ክፍት መሳሪያዎችንና መረጃን ይገነቡ.</string>
+  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
+  <string name="action_message_section_3">ተፅእኖ እየተጋጠሙ ያሉ አካባቢ ተሳታፊዎችን ይስማሙ፣ ስጋቶችን ከእነርሱ ጋር ደረጃ ያስቀምጡ፣ ህዝቡ እንዲያውቅና እንዲሳተፍ በቀላል ቋንቋ ዕቅዶችን ይፋ ያድርጉ። በኃይል አለመጠቀም፣ አካተት፣ ግልጽነት እና ሳይንስ ይህን ሙከራ ይመራሉ።\n\nእንዲሁም ለወደፊት ዝግጁ ይሁኑ፡ ተግባራዊ ክህሎቶችን ያስተምሩ፣ ቀድሞ ማስጠንቀቂያ ስርዓቶች፣ ጽኑ ኢንፍራስትራክቸር እና በተፈጥሮ የተመረኮዙ መፍትሄዎች ላይ ኢንቨስት አድርጉ፣ ለማህበረሰብ ዕቅድ ክፍት መሳሪያዎችና ውሂብ ይገንቡ።</string>
+  <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
+  <string name="notification_event_starting_soon">ሞገድ በቅርቡ ይጀምራል</string>
+  <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
+  <string name="notification_event_finished">ሞገዱ ተጠናቀቀ</string>
+  <!-- src_hash: a754deec084228db5eb4e7494ece4899d15d5bdb -->
+  <string name="notification_wave_hit">ሞገድ ደረሰ!</string>
+  <!-- src_hash: b59ce446e02917542cf980c05434510e8fac89d5 -->
+  <string name="notification_1h_before">%1$s በ1 ሰዓት ውስጥ ይጀምራል</string>
+  <!-- src_hash: edf14570c85158c248c34c39e3309084c270f9b5 -->
+  <string name="notification_30m_before">%1$s በ30 ደቂቃ ውስጥ ይጀምራል</string>
+  <!-- src_hash: 3956289fe7c912cd60f175ff5fef61c42cf2187b -->
+  <string name="notification_10m_before">%1$s በ10 ደቂቃ ውስጥ ይጀምራል</string>
+  <!-- src_hash: afab5ffa7152140e4576dfe14dc3af121ec0a19b -->
+  <string name="notification_5m_before">%1$s በ5 ደቂቃ ውስጥ ይጀምራል</string>
+  <!-- src_hash: aeda84fa74cb3b740771cdb5e97b7c99a48a5acf -->
+  <string name="notification_1m_before">%1$s በ1 ደቂቃ ውስጥ ይጀምራል!</string>
+  <!-- src_hash: 8a7ac9cbac318f9af717ff2c6a722d83c5bc5e0f -->
+  <string name="notification_event_finished_body">የ%1$s ሞገድ ተጠናቀቀ</string>
+  <!-- src_hash: 20c369d47a787e9435d0ffd0c0398d78b7a1f70e -->
+  <string name="notification_wave_hit_body">ሞገዱ አሁን በ%1$s ደርሷል!</string>
+  <!-- src_hash: c771b7ea17490dffedd973a684b3cac26030c296 -->
+  <string name="notification_permission_rationale">የሚወዱት ሞገዶች ሲጀምሩ ማሳወቂያ ይቀበሉ</string>
+  <!-- src_hash: c685868070c0875387031ecfb82bdc7ab8ff32ca -->
+  <string name="notification_permission_denied">ማሳወቂያዎች ተሰናክለዋል። በቅንብሮች ውስጥ ያነቃቁ</string>
 </resources>

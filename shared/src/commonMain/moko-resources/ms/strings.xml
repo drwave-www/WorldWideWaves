@@ -642,8 +642,32 @@ Untuk melindungi nyawa, redakan ketegangan geopolitik secara aman dan fokuskan s
 Himpunkan pada peringkat tertinggi bersama negara, perusahaan, dan wakil awam untuk mengemukakan cadangan, menetapkan pemilik tugas, dan melaporkan kemajuan.
 
 Hapuskan halangan dengan meluluskan projek perintis, menyeragamkan piawaian, dan membiayai daya tahan dan kebolehaksesan terlebih dahulu.</string>
-  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
-  <string name="action_message_section_3">Dengarkan pelaku tempatan yang berdepan kesan, susun keutamaan ancaman bersama mereka, dan terbitkan pelan berbahasa mudah supaya orang ramai dimaklumkan dan dijemput untuk turut serta. Tanpa kekerasan, keterangkuman, ketelusan, dan sains menjadi panduan usaha ini.
+  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
+  <string name="action_message_section_3">Dengar pihak tempatan yang berdepan impak, susun keutamaan ancaman bersama mereka, dan terbitkan pelan berbahasa mudah agar orang ramai dimaklumkan dan dijemput untuk turut serta. Prinsip tanpa keganasan, keterangkuman, ketelusan dan sains membimbing usaha ini.
 
-Sediakan juga masa depan: ajar kemahiran praktikal, laburkan dalam sistem amaran awal, infrastruktur berdaya tahan, dan penyelesaian berasaskan alam semula jadi, serta bina alat dan data terbuka untuk perancangan komuniti.</string>
+Sediakan juga masa depan: ajar kemahiran praktikal, labur dalam sistem amaran awal, infrastruktur berdaya tahan dan penyelesaian berasaskan alam semula jadi, serta bina alat dan data terbuka untuk perancangan komuniti.</string>
+  <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
+  <string name="notification_event_starting_soon">Gelombang bermula sebentar lagi</string>
+  <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
+  <string name="notification_event_finished">Gelombang selesai</string>
+  <!-- src_hash: a754deec084228db5eb4e7494ece4899d15d5bdb -->
+  <string name="notification_wave_hit">Gelombang tiba!</string>
+  <!-- src_hash: b59ce446e02917542cf980c05434510e8fac89d5 -->
+  <string name="notification_1h_before">%1$s bermula dalam 1 jam</string>
+  <!-- src_hash: edf14570c85158c248c34c39e3309084c270f9b5 -->
+  <string name="notification_30m_before">%1$s bermula dalam 30 minit</string>
+  <!-- src_hash: 3956289fe7c912cd60f175ff5fef61c42cf2187b -->
+  <string name="notification_10m_before">%1$s bermula dalam 10 minit</string>
+  <!-- src_hash: afab5ffa7152140e4576dfe14dc3af121ec0a19b -->
+  <string name="notification_5m_before">%1$s bermula dalam 5 minit</string>
+  <!-- src_hash: aeda84fa74cb3b740771cdb5e97b7c99a48a5acf -->
+  <string name="notification_1m_before">%1$s bermula dalam 1 minit!</string>
+  <!-- src_hash: 8a7ac9cbac318f9af717ff2c6a722d83c5bc5e0f -->
+  <string name="notification_event_finished_body">Gelombang %1$s telah selesai</string>
+  <!-- src_hash: 20c369d47a787e9435d0ffd0c0398d78b7a1f70e -->
+  <string name="notification_wave_hit_body">Gelombang baru sahaja sampai kepada anda di %1$s!</string>
+  <!-- src_hash: c771b7ea17490dffedd973a684b3cac26030c296 -->
+  <string name="notification_permission_rationale">Terima pemberitahuan apabila gelombang kegemaran anda bermula</string>
+  <!-- src_hash: c685868070c0875387031ecfb82bdc7ab8ff32ca -->
+  <string name="notification_permission_denied">Pemberitahuan dimatikan. Aktifkan dalam Tetapan</string>
 </resources>

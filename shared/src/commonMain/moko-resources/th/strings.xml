@@ -642,8 +642,30 @@
 จัดประชุมในระดับสูงสุดร่วมกับรัฐ ภาคธุรกิจ และผู้แทนสาธารณะ เพื่อนำข้อเสนอขึ้นโต๊ะ กำหนดผู้รับผิดชอบ และรายงานความคืบหน้า.
 
 ขจัดอุปสรรคโดยอนุมัติโครงการนำร่อง ปรับมาตรฐานให้สอดคล้องกัน และจัดสรรงบประมาณให้ความยืดหยุ่นและการเข้าถึงเป็นอันดับแรก.</string>
-  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
-  <string name="action_message_section_3">รับฟังผู้มีส่วนเกี่ยวข้องในพื้นที่ที่เผชิญผลกระทบ จัดลำดับภัยคุกคามร่วมกับพวกเขา และเผยแพร่แผนงานที่ใช้ภาษาง่ายเพื่อให้สาธารณชนรับรู้และได้รับเชิญให้มีส่วนร่วม แนวทางนี้ยึดหลักไม่ใช้ความรุนแรง การมีส่วนร่วมอย่างทั่วถึง ความโปร่งใส และวิทยาศาสตร์เป็นตัวนำ.
-
-เตรียมอนาคตไปพร้อมกัน: สอนทักษะเชิงปฏิบัติ ลงทุนในระบบเตือนภัยล่วงหน้า โครงสร้างพื้นฐานที่ยืดหยุ่น และแนวทางแก้ปัญหาที่อาศัยธรรมชาติ และสร้างเครื่องมือและข้อมูลแบบเปิดเพื่อการวางแผนของชุมชน.</string>
+  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
+  <string name="action_message_section_3">รับฟังผู้ปฏิบัติในพื้นที่ที่เผชิญผลกระทบ จัดลำดับภัยคุกคามร่วมกัน และเผยแพร่แผนที่ใช้ภาษาง่ายให้สาธารณะรับรู้และมีส่วนร่วม ยึดหลักไม่ใช้ความรุนแรง ความครอบคลุม ความโปร่งใส และวิทยาศาสตร์เป็นตัวนำของความพยายามนี้\n\nเตรียมอนาคตไว้ด้วย: สอนทักษะที่ใช้ได้จริง ลงทุนในระบบเตือนภัยล่วงหน้า โครงสร้างพื้นฐานที่ยืดหยุ่น และแนวทางที่พึ่งพาธรรมชาติ ตลอดจนพัฒนาเครื่องมือและข้อมูลแบบเปิดเพื่อการวางแผนระดับชุมชน</string>
+  <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
+  <string name="notification_event_starting_soon">เวฟกำลังจะเริ่ม</string>
+  <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
+  <string name="notification_event_finished">เวฟเสร็จสิ้น</string>
+  <!-- src_hash: a754deec084228db5eb4e7494ece4899d15d5bdb -->
+  <string name="notification_wave_hit">เวฟมาถึงแล้ว!</string>
+  <!-- src_hash: b59ce446e02917542cf980c05434510e8fac89d5 -->
+  <string name="notification_1h_before">%1$s จะเริ่มใน 1 ชั่วโมง</string>
+  <!-- src_hash: edf14570c85158c248c34c39e3309084c270f9b5 -->
+  <string name="notification_30m_before">%1$s จะเริ่มใน 30 นาที</string>
+  <!-- src_hash: 3956289fe7c912cd60f175ff5fef61c42cf2187b -->
+  <string name="notification_10m_before">%1$s จะเริ่มใน 10 นาที</string>
+  <!-- src_hash: afab5ffa7152140e4576dfe14dc3af121ec0a19b -->
+  <string name="notification_5m_before">%1$s จะเริ่มใน 5 นาที</string>
+  <!-- src_hash: aeda84fa74cb3b740771cdb5e97b7c99a48a5acf -->
+  <string name="notification_1m_before">%1$s จะเริ่มใน 1 นาที!</string>
+  <!-- src_hash: 8a7ac9cbac318f9af717ff2c6a722d83c5bc5e0f -->
+  <string name="notification_event_finished_body">เวฟ %1$s สิ้นสุดแล้ว</string>
+  <!-- src_hash: 20c369d47a787e9435d0ffd0c0398d78b7a1f70e -->
+  <string name="notification_wave_hit_body">เวฟเพิ่งมาถึงคุณที่ %1$s!</string>
+  <!-- src_hash: c771b7ea17490dffedd973a684b3cac26030c296 -->
+  <string name="notification_permission_rationale">รับการแจ้งเตือนเมื่อเวฟที่คุณชื่นชอบกำลังจะเริ่ม</string>
+  <!-- src_hash: c685868070c0875387031ecfb82bdc7ab8ff32ca -->
+  <string name="notification_permission_denied">ปิดการแจ้งเตือนอยู่ เปิดในการตั้งค่า</string>
 </resources>

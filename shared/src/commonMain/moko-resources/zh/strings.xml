@@ -642,8 +642,30 @@
 在最高层级召集各国、企业与公众代表，提出方案、明确责任人，并汇报进展。
 
 通过放行试点、统一标准，并优先投入韧性与可及性建设来清除障碍。</string>
-  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
-  <string name="action_message_section_3">倾听受影响的一线行动者，与他们一起评估威胁优先级，并用通俗语言发布计划，让公众知情并受邀参与。非暴力、包容、透明与科学将引领这一努力。
-
-同时为未来做好准备：教授实用技能，投资预警系统、韧性基础设施与基于自然的解决方案，并为社区规划建设开放的工具与数据。</string>
+  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
+  <string name="action_message_section_3">倾听受影响的本地行动者，与他们共同评估并排序威胁，发布通俗易懂的方案，让公众知情并受邀参与。以非暴力、包容、透明和科学为指引。\n\n也要为未来做准备：教授实用技能，投入预警系统、韧性基础设施和基于自然的解决方案，并为社区规划建设开放的工具和数据。</string>
+  <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
+  <string name="notification_event_starting_soon">人浪即将开始</string>
+  <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
+  <string name="notification_event_finished">人浪已结束</string>
+  <!-- src_hash: a754deec084228db5eb4e7494ece4899d15d5bdb -->
+  <string name="notification_wave_hit">人浪到达！</string>
+  <!-- src_hash: b59ce446e02917542cf980c05434510e8fac89d5 -->
+  <string name="notification_1h_before">%1$s 将在 1 小时后开始</string>
+  <!-- src_hash: edf14570c85158c248c34c39e3309084c270f9b5 -->
+  <string name="notification_30m_before">%1$s 将在 30 分钟后开始</string>
+  <!-- src_hash: 3956289fe7c912cd60f175ff5fef61c42cf2187b -->
+  <string name="notification_10m_before">%1$s 将在 10 分钟后开始</string>
+  <!-- src_hash: afab5ffa7152140e4576dfe14dc3af121ec0a19b -->
+  <string name="notification_5m_before">%1$s 将在 5 分钟后开始</string>
+  <!-- src_hash: aeda84fa74cb3b740771cdb5e97b7c99a48a5acf -->
+  <string name="notification_1m_before">%1$s 将在 1 分钟后开始！</string>
+  <!-- src_hash: 8a7ac9cbac318f9af717ff2c6a722d83c5bc5e0f -->
+  <string name="notification_event_finished_body">%1$s 的人浪已结束</string>
+  <!-- src_hash: 20c369d47a787e9435d0ffd0c0398d78b7a1f70e -->
+  <string name="notification_wave_hit_body">人浪刚刚抵达你所在的 %1$s！</string>
+  <!-- src_hash: c771b7ea17490dffedd973a684b3cac26030c296 -->
+  <string name="notification_permission_rationale">在你喜欢的人浪开始时收到通知</string>
+  <!-- src_hash: c685868070c0875387031ecfb82bdc7ab8ff32ca -->
+  <string name="notification_permission_denied">通知已禁用。请在设置中启用</string>
 </resources>

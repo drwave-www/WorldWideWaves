@@ -642,8 +642,30 @@ Láti bó ìyè, jẹ́ kí a dín ìfarapa ìṣèlú-àyíká àgbáyé kù n�
 Pe ipàdé ní ipele gíga jù lọ pẹ̀lú àwọn ìpínlẹ̀, ilé-iṣẹ́, àti aṣojú aráàlú láti gbé àbá kalẹ̀, yàn ẹni tó ní ojúṣe, kí wọ́n sì máa jẹ́rìí ìlọsíwájú.
 
 Yọ ìdènà kúrò nípa fí ọwọ́ sílẹ̀ fún àwọn ìdánwò kékeré, dọ̀gba àwọn ìlànà, àti kíkọ ináwó sí ìfaradà àti ìraye-sí kọ́kọ́.</string>
-  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
-  <string name="action_message_section_3">Gbọ́ ti àwọn olùṣe agbègbè tí ń koju ipa, ṣe ìtọ́ka ewu pẹ̀lú wọn, kí ẹ sì tẹ̀jáde ètò ní èdè kedere kí gbogbo ará mọ̀, kí a sì pe wọn sí ìkópa. Aìlìwa-ipa, ìfikún-gbogbo ènìyàn, ìmọ̀làíláìpamọ́, àti sáyẹ́ǹsì ni yóò darí ìsapá yìí.
-
-Tún mura ọ̀la: kọ́ ọ̀nà ìṣe amúlò, fi owó sí àwọn eto ìkìlọ̀ tete, àmàyédẹrùn aláfaradà, àti ìmúlò tó da lórí isedá, kí ẹ sì kọ irinṣẹ́ ṣíṣi àti data fún ìlànà àwùjọ.</string>
+  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
+  <string name="action_message_section_3">Gbọ́ ohùn àwọn olùkópa agbègbè tí ń koju ìpa, ṣe ìtòlẹ́sẹẹsẹ̀ àwọn eewu pọ̀ mọ́ wọn, kí o sì tẹ ètò ní èdè tó rọrùn jáde kí gbogbo ènìyàn lè mọ̀ tó àti kí a pe wọ́n sí kópa. Aìní-ìwa-ipa, ìfaramọ̀ gbogbo ènìyàn, ìfihàn gbangba, àti sáyẹ́ǹsì ni ń dari ìsapá yìí.\n\nṢètò òla pẹ̀lú: kọ́ ọgbọ́n ọwọ́ tó wúlò, ṣe idoko-owo sínú àwọn eto ìkìlọ̀ tete, amáyédẹrùn tí ó lè fara da ìpa, àti ojútùú tí ó dá lórí isedá; kí o sì dá irinṣẹ́ ṣiṣi àti dáta sílẹ̀ fún ìmòṣètò àwùjọ.</string>
+  <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
+  <string name="notification_event_starting_soon">Ìgbi ń bẹ̀rẹ̀ laipẹ́</string>
+  <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
+  <string name="notification_event_finished">Ìgbi parí</string>
+  <!-- src_hash: a754deec084228db5eb4e7494ece4899d15d5bdb -->
+  <string name="notification_wave_hit">Ìgbi dé!</string>
+  <!-- src_hash: b59ce446e02917542cf980c05434510e8fac89d5 -->
+  <string name="notification_1h_before">%1$s yóò bẹ̀rẹ̀ lẹ́yìn wákàtí kan</string>
+  <!-- src_hash: edf14570c85158c248c34c39e3309084c270f9b5 -->
+  <string name="notification_30m_before">%1$s yóò bẹ̀rẹ̀ lẹ́yìn ìṣẹ́jú 30</string>
+  <!-- src_hash: 3956289fe7c912cd60f175ff5fef61c42cf2187b -->
+  <string name="notification_10m_before">%1$s yóò bẹ̀rẹ̀ lẹ́yìn ìṣẹ́jú 10</string>
+  <!-- src_hash: afab5ffa7152140e4576dfe14dc3af121ec0a19b -->
+  <string name="notification_5m_before">%1$s yóò bẹ̀rẹ̀ lẹ́yìn ìṣẹ́jú 5</string>
+  <!-- src_hash: aeda84fa74cb3b740771cdb5e97b7c99a48a5acf -->
+  <string name="notification_1m_before">%1$s yóò bẹ̀rẹ̀ lẹ́yìn ìṣẹ́jú 1!</string>
+  <!-- src_hash: 8a7ac9cbac318f9af717ff2c6a722d83c5bc5e0f -->
+  <string name="notification_event_finished_body">Ìgbi %1$s ti parí</string>
+  <!-- src_hash: 20c369d47a787e9435d0ffd0c0398d78b7a1f70e -->
+  <string name="notification_wave_hit_body">Ìgbi náà ṣẹ̀ṣẹ̀ dé ọdọ rẹ ní %1$s!</string>
+  <!-- src_hash: c771b7ea17490dffedd973a684b3cac26030c296 -->
+  <string name="notification_permission_rationale">Gba ìkìlọ̀ nígbà tí àwọn ìgbi ayanfẹ rẹ bá ń bẹ̀rẹ̀</string>
+  <!-- src_hash: c685868070c0875387031ecfb82bdc7ab8ff32ca -->
+  <string name="notification_permission_denied">A ti pa ìkìlọ̀. Ṣí i ní Ìṣètò</string>
 </resources>

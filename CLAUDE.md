@@ -476,6 +476,45 @@ fun performOperation() {
 }
 ```
 
+### Notifications System
+
+**Status**: ✅ Production-Ready | **Tests**: 77/77 passing | **Phase**: 7 Complete
+
+The notification system delivers time-based and immediate alerts for wave events to favorited events only.
+
+**Key Files**:
+- **Shared Core** (expect/actual pattern):
+  - `shared/src/commonMain/kotlin/com/worldwidewaves/shared/notifications/NotificationTrigger.kt` - 3 trigger types (EventStarting, EventFinished, WaveHit)
+  - `shared/src/commonMain/kotlin/com/worldwidewaves/shared/notifications/NotificationManager.kt` - Interface for scheduling/delivery
+  - `shared/src/commonMain/kotlin/com/worldwidewaves/shared/notifications/NotificationScheduler.kt` - Eligibility logic (favorited + simulation mode compatible)
+  - `shared/src/commonMain/kotlin/com/worldwidewaves/shared/notifications/NotificationContent.kt` - Localization keys + deep links
+  - `shared/src/commonMain/kotlin/com/worldwidewaves/shared/notifications/NotificationContentProvider.kt` - Content generation
+
+- **Android**:
+  - `shared/src/androidMain/kotlin/com/worldwidewaves/shared/notifications/AndroidNotificationManager.kt` - WorkManager for scheduled, NotificationCompat for immediate (lines 38-150)
+  - `shared/src/androidMain/kotlin/com/worldwidewaves/shared/notifications/NotificationWorker.kt` - CoroutineWorker for delivery
+  - `shared/src/androidMain/kotlin/com/worldwidewaves/shared/notifications/NotificationChannelManager.kt` - Channel setup (HIGH importance)
+
+- **iOS**:
+  - `shared/src/iosMain/kotlin/com/worldwidewaves/shared/notifications/IOSNotificationManager.kt` - UNUserNotificationCenter (class-based, lazy init for iOS safety)
+  - `iosApp/worldwidewaves/NotificationPermissionBridge.swift` - Permission request bridge
+
+**Notification Types**: 6 scheduled (1h, 30m, 10m, 5m, 1m before) + 1 immediate (wave hit) = 7 total per favorited event
+
+**Eligibility**: Event is favorited AND (no simulation OR speed == 1) AND event hasn't started
+
+**Limits**: iOS 64 pending max (typical <60 with favorites-only), Android ~500 (typical <60)
+
+**Development**:
+1. When event favorited: Call `notificationScheduler.scheduleAllNotifications(event)`
+2. When event unfavorited: Call `notificationScheduler.cancelAllNotifications(eventId)`
+3. On app launch: Call `notificationScheduler.syncNotifications(favorites, events)`
+4. Wave hit detection: Call `notificationManager.deliverNow(eventId, WaveHit, content)`
+
+**Testing**: `./gradlew :shared:testDebugUnitTest` includes 77 notification tests (commonTest + androidUnitTest + iosTest)
+
+**See**: [docs/features/notification-system.md](docs/features/notification-system.md) for comprehensive system documentation
+
 ---
 
 ## Build Commands

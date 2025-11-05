@@ -636,6 +636,32 @@
   <string name="action_message_section_1">Trebuie să trecem de la gestionarea pagubelor la pregătirea pentru șocuri. Temperaturile vor depăși țintele, așa că comunitățile au nevoie acum de îndrumări clare, exerciții și instrumente simple.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">Asta începe cu o realitate comună. Guvernele, companiile și liderii civici ar trebui să prezinte împreună faptele, să deschidă datele și să alinieze calendarele, astfel încât acțiunea să fie coordonată, nu fragmentată.\n\nPentru a proteja viața, urmăriți dezescaladarea pașnică a tensiunilor geopolitice și reorientați resursele către supraviețuirea și stabilitatea umană.\n\nConvocați la cel mai înalt nivel statele, întreprinderile și reprezentanții publici pentru a pune pe masă propuneri, a desemna responsabili și a raporta progresul.\n\nEliminați blocajele prin aprobarea proiectelor pilot, armonizarea standardelor și finanțarea cu prioritate a rezilienței și accesibilității.</string>
-  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
-  <string name="action_message_section_3">Ascultați actorii locali care se confruntă cu efecte, prioritizați împreună cu ei amenințările și publicați planuri în limbaj clar, astfel încât publicul să fie informat și invitat să participe. Nonviolența, incluziunea, transparența și știința ghidează acest efort.\n\nPregătiți și viitorul: predați competențe practice, investiți în sisteme de avertizare timpurie, infrastructură rezilientă și soluții bazate pe natură și construiți instrumente și date deschise pentru planificarea comunității.</string>
+  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
+  <string name="action_message_section_3">Ascultă actorii locali care se confruntă cu efectele, prioritizează împreună cu ei amenințările și publică planuri în limbaj simplu, pentru ca publicul să fie informat și invitat să participe. Nonviolența, incluziunea, transparența și știința ghidează acest demers.
+
+Pregătește și viitorul: predă abilități practice, investește în sisteme de avertizare timpurie, infrastructură rezilientă și soluții bazate pe natură și creează instrumente și date deschise pentru planificarea comunitară.</string>
+  <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
+  <string name="notification_event_starting_soon">Valul începe în curând</string>
+  <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
+  <string name="notification_event_finished">Val încheiat</string>
+  <!-- src_hash: a754deec084228db5eb4e7494ece4899d15d5bdb -->
+  <string name="notification_wave_hit">Valul a ajuns!</string>
+  <!-- src_hash: b59ce446e02917542cf980c05434510e8fac89d5 -->
+  <string name="notification_1h_before">%1$s începe în 1 oră</string>
+  <!-- src_hash: edf14570c85158c248c34c39e3309084c270f9b5 -->
+  <string name="notification_30m_before">%1$s începe în 30 de minute</string>
+  <!-- src_hash: 3956289fe7c912cd60f175ff5fef61c42cf2187b -->
+  <string name="notification_10m_before">%1$s începe în 10 minute</string>
+  <!-- src_hash: afab5ffa7152140e4576dfe14dc3af121ec0a19b -->
+  <string name="notification_5m_before">%1$s începe în 5 minute</string>
+  <!-- src_hash: aeda84fa74cb3b740771cdb5e97b7c99a48a5acf -->
+  <string name="notification_1m_before">%1$s începe în 1 minut!</string>
+  <!-- src_hash: 8a7ac9cbac318f9af717ff2c6a722d83c5bc5e0f -->
+  <string name="notification_event_finished_body">Valul %1$s s-a încheiat</string>
+  <!-- src_hash: 20c369d47a787e9435d0ffd0c0398d78b7a1f70e -->
+  <string name="notification_wave_hit_body">Valul tocmai a ajuns la tine în %1$s!</string>
+  <!-- src_hash: c771b7ea17490dffedd973a684b3cac26030c296 -->
+  <string name="notification_permission_rationale">Primește notificări când valurile tale preferate încep</string>
+  <!-- src_hash: c685868070c0875387031ecfb82bdc7ab8ff32ca -->
+  <string name="notification_permission_denied">Notificări dezactivate. Activează în Setări</string>
 </resources>

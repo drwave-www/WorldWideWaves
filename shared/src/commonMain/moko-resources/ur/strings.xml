@@ -642,8 +642,32 @@
 ریاستوں، اداروں اور عوامی نمائندگان کے ساتھ اعلیٰ ترین سطح پر اجلاس کریں تاکہ تجاویز پیش ہوں، ذمہ داریاں سونپی جائیں، اور پیش رفت رپورٹ کی جائے۔
 
 رکاوٹیں ہٹانے کے لیے پائلٹس کو گرین لائٹ دیں، معیارات ہم آہنگ کریں، اور پہلے لچک اور رسائی پذیری کے لیے فنڈنگ کریں۔</string>
-  <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->
-  <string name="action_message_section_3">متاثر ہونے والے مقامی فریقین کی سنیں، ان کے ساتھ مل کر خطرات کی درجہ بندی کریں، اور سادہ زبان میں منصوبے شائع کریں تاکہ عوام باخبر ہوں اور شمولیت کی دعوت پائیں۔ عدم تشدد، شمولیت، شفافیت اور سائنس اس کوشش کی رہنمائی کریں۔
+  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
+  <string name="action_message_section_3">مقامی فریقین کی بات سنیں جو اثرات کا سامنا کر رہے ہیں، ان کے ساتھ مل کر خطرات کی درجہ بندی کریں، اور سادہ زبان میں منصوبے شائع کریں تاکہ عوام باخبر ہوں اور شرکت کی دعوت پائیں۔ عدم تشدد، شمولیت، شفافیت اور سائنس اس کوشش کی رہنمائی کرتی ہیں۔
 
-آئندہ کے لیے بھی تیاری کریں: عملی مہارتیں سکھائیں، ابتدائی انتباہی نظاموں، لچک دار بنیادی ڈھانچے اور فطرت پر مبنی حلوں میں سرمایہ کریں، اور کمیونٹی کی منصوبہ بندی کے لیے اوپن ٹولز اور ڈیٹا تیار کریں۔</string>
+اور مستقبل کی تیاری کریں: عملی مہارتیں سکھائیں، ابتدائی انتباہی نظاموں، لچکدار بنیادی ڈھانچے اور فطرت پر مبنی حلوں میں سرمایہ کاری کریں، اور کمیونٹی منصوبہ بندی کے لیے کھلے اوزار اور ڈیٹا تیار کریں۔</string>
+  <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
+  <string name="notification_event_starting_soon">لہر جلد شروع ہو رہی ہے</string>
+  <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
+  <string name="notification_event_finished">لہر مکمل ہو گئی</string>
+  <!-- src_hash: a754deec084228db5eb4e7494ece4899d15d5bdb -->
+  <string name="notification_wave_hit">لہر پہنچ گئی!</string>
+  <!-- src_hash: b59ce446e02917542cf980c05434510e8fac89d5 -->
+  <string name="notification_1h_before">%1$s شروع ہونے میں 1 گھنٹہ باقی ہے</string>
+  <!-- src_hash: edf14570c85158c248c34c39e3309084c270f9b5 -->
+  <string name="notification_30m_before">%1$s شروع ہونے میں 30 منٹ باقی ہیں</string>
+  <!-- src_hash: 3956289fe7c912cd60f175ff5fef61c42cf2187b -->
+  <string name="notification_10m_before">%1$s شروع ہونے میں 10 منٹ باقی ہیں</string>
+  <!-- src_hash: afab5ffa7152140e4576dfe14dc3af121ec0a19b -->
+  <string name="notification_5m_before">%1$s شروع ہونے میں 5 منٹ باقی ہیں</string>
+  <!-- src_hash: aeda84fa74cb3b740771cdb5e97b7c99a48a5acf -->
+  <string name="notification_1m_before">%1$s شروع ہونے میں 1 منٹ باقی ہے!</string>
+  <!-- src_hash: 8a7ac9cbac318f9af717ff2c6a722d83c5bc5e0f -->
+  <string name="notification_event_finished_body">%1$s کی لہر ختم ہو گئی ہے</string>
+  <!-- src_hash: 20c369d47a787e9435d0ffd0c0398d78b7a1f70e -->
+  <string name="notification_wave_hit_body">لہر ابھی %1$s میں آپ تک پہنچ گئی ہے!</string>
+  <!-- src_hash: c771b7ea17490dffedd973a684b3cac26030c296 -->
+  <string name="notification_permission_rationale">جب آپ کی پسندیدہ لہریں شروع ہوں تو اطلاع پائیں</string>
+  <!-- src_hash: c685868070c0875387031ecfb82bdc7ab8ff32ca -->
+  <string name="notification_permission_denied">اطلاعات بند ہیں۔ ترتیبات میں فعال کریں</string>
 </resources>
