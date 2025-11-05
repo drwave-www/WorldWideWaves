@@ -172,7 +172,6 @@ import Shared
             mapView.isPitchEnabled = swiftEnabled
         }
     }
-    // swiftlint:enable function_body_length
 
     @objc public func setStyle(styleURL: String, completion: @escaping () -> Void) {
         WWWLog.d(Self.tag, "setStyle called with URL: \(styleURL)")
@@ -1356,4 +1355,4 @@ extension UIColor {
     }
 }
 
-// swiftlint:enable file_length type_body_length
+// swiftlint:enable type_body_length
