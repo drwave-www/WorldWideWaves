@@ -126,7 +126,10 @@ private fun Events(
         } else {
             item {
                 Text(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .testTag("EmptyStateText"),
                     text =
                         stringResource(
                             when {

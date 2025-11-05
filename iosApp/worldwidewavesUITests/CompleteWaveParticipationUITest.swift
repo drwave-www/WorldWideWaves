@@ -162,14 +162,17 @@ class CompleteWaveParticipationUITest: BaseUITest {
 
     func clickAllEventsFilter() {
         app.otherElements["FilterButton_All"].waitForExistenceAndTap()
+        Thread.sleep(forTimeInterval: 1.5) // Wait for Compose recomposition after filter change
     }
 
     func clickFavoritesFilter() {
         app.otherElements["FilterButton_Favorites"].waitForExistenceAndTap()
+        Thread.sleep(forTimeInterval: 1.5) // Wait for Compose recomposition after filter change
     }
 
     func clickDownloadedFilter() {
         app.otherElements["FilterButton_Downloaded"].waitForExistenceAndTap()
+        Thread.sleep(forTimeInterval: 1.5) // Wait for Compose recomposition after filter change
     }
 
     // MARK: - Event Interactions
@@ -233,27 +236,33 @@ class CompleteWaveParticipationUITest: BaseUITest {
 
     func verifyEmptyFavorites() {
         print("=== DEBUG: Verifying empty favorites ===")
-        print("Current UI hierarchy:")
-        print(app.debugDescription)
 
-        // Use partial text matching because the actual localized string is:
-        // "No events has been added as favorite, start by clicking on the star icon on your favorite event!"
-        // Instead of exact match "No favorite events"
-        let emptyMessage = app.staticTexts.containing(NSPredicate(format: "label CONTAINS[c] 'favorite'")).firstMatch
-        print("Looking for text containing: 'favorite' (case-insensitive)")
+        // Use testTag for reliable element access
+        // The empty state Text in EventsList.kt has testTag("EmptyStateText")
+        let emptyMessage = app.staticTexts["EmptyStateText"]
+        print("Looking for element with testTag: 'EmptyStateText'")
         print("Element exists:", emptyMessage.exists)
         print("Element is hittable:", emptyMessage.isHittable)
 
-        // List all staticTexts to help debug
-        print("All staticTexts visible:")
-        for (index, element) in app.staticTexts.allElementsBoundByIndex.enumerated() {
-            print("  [\(index)]: '\(element.label)'")
+        // List all staticTexts to help debug if assertion fails
+        if !emptyMessage.exists {
+            print("EmptyStateText not found. All staticTexts visible:")
+            for (index, element) in app.staticTexts.allElementsBoundByIndex.enumerated() {
+                print("  [\(index)]: '\(element.label)'")
+            }
         }
 
-        // Increased timeout from 3s to 10s for slower Firebase loads
+        // Wait for element with increased timeout for Firebase/Compose rendering
         XCTAssertTrue(emptyMessage.waitForExistence(timeout: 10),
-                     "Expected to find favorites empty state text containing 'favorite' but it was not found. " +
+                     "Expected to find EmptyStateText but it was not found. " +
                      "Check console output above for available UI elements.")
+
+        // Verify the text actually mentions favorites
+        let labelText = emptyMessage.label.lowercased()
+        XCTAssertTrue(labelText.contains("favorite"),
+                     "Empty state text should contain 'favorite' but found: '\(emptyMessage.label)'")
+
+        print("✓ Empty favorites state verified successfully")
     }
 
     func verifyFavoriteIconFilled() {
