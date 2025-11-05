@@ -157,10 +157,6 @@ class WaveProgressionObserver(
                                 // Stop polygon observation to prevent continuous updates
                                 polygonsJob?.cancel()
                                 polygonsJob = null
-                                // Clear progressive wave polygons before showing full area
-                                lastWavePolygons = emptyList()
-                                eventMap?.updateWavePolygons(emptyList(), clearPolygons = true)
-                                Log.d("WaveObserver", "Event ${event.id} DONE - clearing progressive polygons")
                                 // Show full wave polygons once
                                 addFullWavePolygons(event, eventMap)
                             }
