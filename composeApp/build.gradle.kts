@@ -123,6 +123,8 @@ android {
 
         ndk {
             // Ship only the arm64-v8a ABI to minimise download size
+            // Suppressing ChromeOS warning - we intentionally don't support ChromeOS
+            @Suppress("ChromeOsAbiSupport")
             abiFilters += listOf("arm64-v8a")
         }
     }
