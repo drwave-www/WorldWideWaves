@@ -41,7 +41,10 @@ fun AlertMapNotDownloadedOnSimulationLaunch(onDismiss: () -> Unit) {
         text = {
             Text(
                 text = stringResource(MokoRes.strings.simulation_map_required_message),
-                style = sharedCommonTextStyle(),
+                style =
+                    sharedCommonTextStyle().copy(
+                        color = scrimLight,
+                    ),
             )
         },
         confirmButton = {
