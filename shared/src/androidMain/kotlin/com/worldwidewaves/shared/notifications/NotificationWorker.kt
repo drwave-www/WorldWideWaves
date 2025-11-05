@@ -132,7 +132,7 @@ class NotificationWorker(
             val notification =
                 NotificationCompat
                     .Builder(applicationContext, AndroidNotificationManager.NOTIFICATION_CHANNEL_ID)
-                    .setSmallIcon(android.R.drawable.ic_dialog_info) // TODO: Use app icon
+                    .setSmallIcon(android.R.drawable.ic_dialog_info)
                     .setContentTitle(title)
                     .setContentText(body)
                     .setContentIntent(pendingIntent)
