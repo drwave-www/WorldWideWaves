@@ -330,6 +330,70 @@ val wave = requireNotNull(linear ?: deep ?: linearSplit) {
 
 **See**: [docs/patterns/null-safety-patterns.md](docs/patterns/null-safety-patterns.md)
 
+### Import Management & Qualified Names [MANDATORY]
+
+**Rule**: NEVER use fully qualified class names in code. ALWAYS use imports.
+
+**Why**: Qualified names create visual clutter, reduce readability, and make code harder to maintain.
+
+```kotlin
+// ❌ NEVER - Qualified names in code
+fun initialize() {
+    val platform = com.worldwidewaves.shared.WWWPlatform.instance
+    val logger = com.worldwidewaves.shared.utils.Log
+    return com.worldwidewaves.shared.domain.Position(0.0, 0.0)
+}
+
+// ✅ ALWAYS - Clean imports
+import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.utils.Log
+import com.worldwidewaves.shared.domain.Position
+
+fun initialize() {
+    val platform = WWWPlatform.instance
+    val logger = Log
+    return Position(0.0, 0.0)
+}
+```
+
+**Disambiguation with Type Aliases**:
+
+When name conflicts occur, use type aliases instead of qualified names:
+
+```kotlin
+// ❌ NEVER - Mixing qualified and unqualified names
+import com.worldwidewaves.shared.domain.Position
+
+fun convert(location: android.location.Location) {
+    return Position(
+        location.latitude,
+        location.longitude
+    )
+}
+
+// ✅ ALWAYS - Type aliases for clarity
+import com.worldwidewaves.shared.domain.Position
+import android.location.Location as AndroidLocation
+
+fun convert(location: AndroidLocation) {
+    return Position(
+        location.latitude,
+        location.longitude
+    )
+}
+```
+
+**Common Aliases**:
+- `import android.location.Location as AndroidLocation`
+- `import platform.CoreLocation.CLLocation as IOSLocation`
+- `import kotlinx.datetime.Instant as KotlinInstant`
+- `import java.time.Instant as JavaInstant`
+
+**Enforcement**:
+- Use `./gradlew detekt` to catch qualified names
+- Code reviews must reject qualified names
+- No exceptions - refactor if needed
+
 ### Thread Safety
 
 Any mutable shared state MUST have explicit synchronization:
@@ -497,6 +561,7 @@ A file/module is production-ready when:
 - ✅ Zero detekt/SwiftLint warnings (or justified suppressions)
 - ✅ File header present and correct
 - ✅ No unsafe `!!` operators (Kotlin) or force unwraps (Swift)
+- ✅ No qualified class names in code (use imports + aliases)
 - ✅ Thread safety explicit (Mutex, synchronized)
 - ✅ Accessibility semantics on interactive elements
 - ✅ No hardcoded user-facing strings
@@ -618,23 +683,28 @@ grep -r "class.*Manager\|interface.*Manager" shared/src/ | grep -i "download\|st
 - ❌ **Git push has costs** - GitHub Actions not free, only push when explicitly requested
 - **Search for similar patterns** when fixing bugs (find other instances)
 - **Never bypass git hooks** (pre-commit, pre-push)
-- **Use short names** in code (imports for readability, not long qualified names)
+- ❌ **NEVER use qualified class names** in code (e.g., `com.foo.Bar`) - ALWAYS use imports + aliases for disambiguation
 - **Fix warnings immediately** - prevent accumulation
 
 ### Import Management [CRITICAL]
 
 **ALWAYS check existing imports BEFORE modifying code.**
 
+**NEVER use qualified class names in code - ALWAYS add proper imports.**
+
 When adding function calls/classes:
 1. Check if required import exists
-2. Add missing imports in same change
-3. Verify compilation before commit
+2. Add missing imports in same change (NEVER use `com.foo.Bar` directly in code)
+3. Use type aliases (`as`) if name conflicts occur
+4. Verify compilation before commit
 
 **Common imports**:
 - Coroutines: `kotlinx.coroutines.runBlocking`, `withContext`, etc.
 - Compose: `androidx.compose.runtime.key`, `LaunchedEffect`, etc.
 - Platform: `platform.UIKit.*`, `platform.Foundation.*` (iOS)
 - Logging: `com.worldwidewaves.shared.utils.Log`
+
+**See**: [Code Quality Standards → Import Management](#import-management--qualified-names-mandatory) for detailed examples and type alias patterns
 
 ### Git Workflow
 
@@ -771,6 +841,6 @@ WorldWideWaves/
 
 ---
 
-**Last Updated**: October 27, 2025
-**Version**: 3.0 (Optimized for AI context efficiency)
+**Last Updated**: November 5, 2025
+**Version**: 3.1 (Added explicit import management and qualified names guidelines)
 **Maintainer**: WorldWideWaves Development Team
