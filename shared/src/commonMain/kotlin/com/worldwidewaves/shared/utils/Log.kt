@@ -23,7 +23,6 @@ package com.worldwidewaves.shared.utils
 
 import com.worldwidewaves.shared.WWWGlobals
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.runBlocking
 
 /**
  * Production-ready logging wrapper that respects build configuration flags for performance and security.
@@ -37,10 +36,12 @@ import kotlinx.coroutines.runBlocking
  * - Structured logging with key-value pairs
  *
  * ## Correlation ID Support
- * All log methods automatically include correlation IDs when running within a correlation context:
+ * Correlation IDs are available via [CorrelationContext] but are not automatically included
+ * in log messages to avoid iOS threading issues. To include correlation IDs:
  * ```kotlin
- * withCorrelation("REQUEST-123") {
- *     Log.i("Handler", "Processing request") // Logs: [REQUEST-123] Processing request
+ * suspend fun logWithCorrelation() = withCorrelation("REQUEST-123") {
+ *     val cid = CorrelationContext.getCurrentId()
+ *     Log.i("Handler", "[$cid] Processing request")
  * }
  * ```
  *
@@ -60,14 +61,13 @@ import kotlinx.coroutines.runBlocking
 object Log {
     /**
      * Get the current correlation ID prefix for log messages.
-     * Returns formatted prefix "[CID] " or empty string if no correlation context.
+     * Returns empty string since correlation IDs are only available in suspend contexts.
+     *
+     * Note: Correlation ID support in non-suspend log methods has been removed to avoid
+     * iOS threading issues with runBlocking. For correlation ID support, use structured
+     * logging within suspend functions or access CorrelationContext.getCurrentId() manually.
      */
-    private fun getCorrelationPrefix(): String {
-        // Use runBlocking to access suspend function from non-suspend context
-        // This is acceptable for logging as it's a quick context lookup
-        val correlationId = runBlocking { CorrelationContext.getCurrentId() }
-        return correlationId?.let { "[$it] " } ?: ""
-    }
+    private fun getCorrelationPrefix(): String = ""
 
     /**
      * Verbose logging - disabled in release builds for performance.
@@ -222,7 +222,6 @@ object Log {
      * Output: `event=wave_detected event_id=abc123 distance_m=50.0`
      *
      * Respects build configuration flags (verbose/debug disabled in release builds).
-     * Automatically includes correlation IDs when running within a correlation context.
      */
     fun structured(
         tag: String,

@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.runBlocking
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -96,8 +95,7 @@ class WWWPlatform(
     }
 
     fun setSimulation(simulation: WWWSimulation) {
-        val simulationTime = runBlocking { simulation.now() }
-        Log.i(::setSimulation.name, "Set simulation to $simulationTime and ${simulation.getUserPosition()}")
+        Log.i(::setSimulation.name, "Set simulation at position ${simulation.getUserPosition()}")
         _simulation = simulation
         // Update PositionManager with simulation position
         positionManager?.updatePosition(PositionManager.PositionSource.SIMULATION, simulation.getUserPosition())
@@ -111,8 +109,7 @@ class WWWPlatform(
      * preventing observer restart cascade when switching simulations.
      */
     fun resetAndSetSimulation(simulation: WWWSimulation) {
-        val simulationTime = runBlocking { simulation.now() }
-        Log.i(::resetAndSetSimulation.name, "Resetting and setting simulation to $simulationTime and ${simulation.getUserPosition()}")
+        Log.i(::resetAndSetSimulation.name, "Resetting and setting simulation at position ${simulation.getUserPosition()}")
 
         // Clear previous simulation position if any
         if (_simulation != null) {

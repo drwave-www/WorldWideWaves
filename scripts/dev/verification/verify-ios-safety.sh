@@ -144,20 +144,20 @@ else
 fi
 
 # ============================================================================
-# CHECK 5: Verify IOSSafeDI singleton exists
+# CHECK 5: Verify IosSafeDI singleton exists
 # ============================================================================
-echo "5️⃣  Verifying IOSSafeDI singleton exists..."
+echo "5️⃣  Verifying IosSafeDI singleton exists..."
 
-IOSSAFEDI_COUNT=$(rg "object IOSSafeDI : KoinComponent" "$SHARED_MAIN" --type kotlin 2>/dev/null | wc -l | tr -d ' ')
+IOSSAFEDI_COUNT=$(rg "object IosSafeDI : KoinComponent" "$SHARED_MAIN" --type kotlin 2>/dev/null | wc -l | tr -d ' ')
 
 if [ "$IOSSAFEDI_COUNT" -eq 1 ]; then
-    echo "   ✅ PASS: IOSSafeDI singleton found"
+    echo "   ✅ PASS: IosSafeDI singleton found"
 elif [ "$IOSSAFEDI_COUNT" -eq 0 ]; then
-    echo "   ⚠️  WARNING: IOSSafeDI singleton not found"
-    echo "   Expected: object IOSSafeDI : KoinComponent"
+    echo "   ⚠️  WARNING: IosSafeDI singleton not found"
+    echo "   Expected: object IosSafeDI : KoinComponent"
     warnings=$((warnings + 1))
 else
-    echo "   ⚠️  WARNING: Multiple IOSSafeDI singletons found ($IOSSAFEDI_COUNT)"
+    echo "   ⚠️  WARNING: Multiple IosSafeDI singletons found ($IOSSAFEDI_COUNT)"
     warnings=$((warnings + 1))
 fi
 
