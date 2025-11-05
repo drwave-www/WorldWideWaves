@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Eine Liste vorgeschlagener Aktionen, Aktivitäten und Orte findest du unter https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Wie kann ich eine Welle simulieren?</string>
-  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
-  <string name="faq_answer_7">Tippe unten auf die Schaltfläche, um den Simulationsmodus zu aktivieren. In den Veranstaltungsansichten startest du eine Simulation mit den Eigenschaften der Veranstaltung (Datum, Uhrzeit, Ort) über die "Play"-Schaltfläche oben links auf dem Standortbild. Um die Simulation zu stoppen, verwende dieselbe Schaltfläche. Wenn du fertig bist, beende den Simulationsmodus über das Stopp-Symbol in der permanenten Einblendung.</string>
+  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
+  <string name="faq_answer_7">Tippe unten auf die Schaltfläche, um den Simulationsmodus zu aktivieren. Auf den Event-Bildschirmen starte über die "play"-Schaltfläche oben links auf dem Standortbild eine Simulation mit den Eigenschaften dieses Events (Datum, Uhrzeit, Ort). Um die Simulation zu beenden, tippe erneut auf dieselbe Schaltfläche. Wenn du fertig bist, verlasse den Simulationsmodus, indem du das Stopp-Symbol in der permanenten Leiste antippst.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Makakakita ka ng listahan ng mga mungkahing aksyon, aktibidad, at lugar sa https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Paano ako mag-simulate ng alon?</string>
-  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
-  <string name="faq_answer_7">I-tap ang button sa ibaba para i-activate ang simulation mode. Sa mga screen ng event, gamitin ang button na "play" sa itaas-kaliwa ng imahe ng lokasyon para magsimula ng simulation gamit ang mga detalye ng event (petsa, oras, lokasyon). Para ihinto ang simulation, gamitin ang parehong button. Kapag tapos na, ihinto ang simulation mode gamit ang icon na "stop" sa palagiang overlay.</string>
+  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
+  <string name="faq_answer_7">I-tap ang button sa ibaba para paganahin ang simulation mode. Sa mga screen ng event, gamitin ang button na "play" sa itaas-kaliwa ng larawan ng lokasyon para simulan ang simulation gamit ang mga katangian ng event na ito (petsa, oras, lokasyon). Para ihinto ang simulation, pindutin ang parehong button. Sa huli, kapag tapos ka na, lumabas sa simulation mode sa pamamagitan ng pag-tap sa stop icon sa persistent layer.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

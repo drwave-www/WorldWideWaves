@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Je vindt een lijst met voorgestelde acties, activiteiten en plekken op https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Hoe kan ik een wave simuleren?</string>
-  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
-  <string name="faq_answer_7">Tik op de knop hieronder om de simulatiemodus te activeren. Op de evenementenschermen gebruik je de "play"-knop linksboven op de afbeelding van de locatie om een simulatie te starten met de eigenschappen van dat evenement (datum, tijd, locatie). Om de simulatie te stoppen, gebruik je dezelfde knop. Als je klaar bent, stop je de simulatiemodus met het stoppictogram op de permanente overlay.</string>
+  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
+  <string name="faq_answer_7">Tik op de knop hieronder om de simulatiemodus te activeren. Op de schermen van het evenement gebruik je de "play"-knop linksboven op de locatieafbeelding om een simulatie te starten met de eigenschappen van dit evenement (datum, tijd, locatie). Om de simulatie te stoppen, druk je op dezelfde knop. Als je klaar bent, schakel je de simulatiemodus uit door op het stop-icoon in de vaste balk te tikken.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">VS</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Listę proponowanych działań, aktywności i miejsc znajdziesz na https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Jak zasymulować falę?</string>
-  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
-  <string name="faq_answer_7">Stuknij przycisk poniżej, aby włączyć tryb symulacji. Na ekranach wydarzeń użyj przycisku "play" w lewym górnym rogu obrazu lokalizacji, aby uruchomić symulację z parametrami tego wydarzenia (data, godzina, lokalizacja). Aby zatrzymać symulację, użyj tego samego przycisku. Po zakończeniu wyłącz tryb symulacji, używając ikony stop na stałej nakładce.</string>
+  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
+  <string name="faq_answer_7">Stuknij przycisk poniżej, aby włączyć tryb symulacji. Na ekranach wydarzenia użyj przycisku „Odtwórz” w lewym górnym rogu obrazu lokalizacji, aby uruchomić symulację z parametrami tego wydarzenia (data, godzina, lokalizacja). Aby zatrzymać symulację, naciśnij ten sam przycisk. Na koniec, gdy skończysz, wyjdź z trybu symulacji, stukając ikonę zatrzymania na trwałej nakładce.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

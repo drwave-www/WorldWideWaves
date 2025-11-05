@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Bạn có thể xem danh sách các hành động, hoạt động và địa điểm được đề xuất tại https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Tôi mô phỏng một làn sóng như thế nào?</string>
-  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
-  <string name="faq_answer_7">Nhấn nút bên dưới để bật chế độ mô phỏng. Trên màn hình sự kiện, dùng nút "phát" ở góc trên bên trái của ảnh địa điểm để bắt đầu mô phỏng với các thuộc tính của sự kiện đó (ngày, giờ, địa điểm). Để dừng mô phỏng, dùng cùng nút đó. Khi xong, tắt chế độ mô phỏng bằng biểu tượng dừng trên lớp phủ luôn hiển thị.</string>
+  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
+  <string name="faq_answer_7">Nhấn nút bên dưới để kích hoạt chế độ mô phỏng. Trên màn hình sự kiện, dùng nút "play" ở góc trên bên trái ảnh địa điểm để bắt đầu mô phỏng với các thuộc tính của sự kiện này (ngày, giờ, địa điểm). Để dừng mô phỏng, nhấn lại nút đó. Cuối cùng, khi xong, thoát chế độ mô phỏng bằng cách nhấn biểu tượng dừng trên lớp phủ cố định.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">Hoa Kỳ</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

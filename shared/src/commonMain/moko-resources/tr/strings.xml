@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Önerilen eylemler, etkinlikler ve mekanların listesini https://luma.com/worldwidewaves adresinde bulabilirsiniz.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Bir dalgayı nasıl simüle ederim?</string>
-  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
-  <string name="faq_answer_7">Aşağıdaki düğmeye dokunarak simülasyon modunu etkinleştirin. Etkinlik ekranlarında, konum görselinin sol üstündeki "play" düğmesini kullanarak o etkinliğin özellikleriyle (tarih, saat, konum) bir simülasyon başlatın. Simülasyonu durdurmak için aynı düğmeyi kullanın. İşiniz bittiğinde, kalıcı bindirme üzerindeki durdur simgesiyle simülasyon modunu kapatın.</string>
+  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
+  <string name="faq_answer_7">Simülasyon modunu etkinleştirmek için aşağıdaki düğmeye dokunun. Etkinlik ekranlarında, konum görselinin sol üst köşesindeki "Oynat" düğmesini kullanarak bu etkinliğin özellikleriyle (tarih, saat, konum) bir simülasyon başlatın. Simülasyonu durdurmak için aynı düğmeye yeniden dokunun. Son olarak, işiniz bittiğinde sabit katmandaki durdur simgesine dokunarak simülasyon modundan çıkın.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">ABD</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

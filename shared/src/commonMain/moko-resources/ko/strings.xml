@@ -284,8 +284,8 @@
   <string name="faq_answer_6">https://luma.com/worldwidewaves 에서 제안된 행동, 활동, 장소 목록을 확인할 수 있습니다.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">웨이브를 어떻게 시뮬레이션하나요?</string>
-  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
-  <string name="faq_answer_7">아래 버튼을 눌러 시뮬레이션 모드를 활성화하세요. 이벤트 화면에서 장소 이미지의 왼쪽 상단에 있는 "재생" 버튼으로 해당 이벤트의 속성(날짜, 시간, 장소)으로 시뮬레이션을 시작하세요. 중지하려면 같은 버튼을 사용하세요. 완료되면 항상 표시되는 오버레이의 중지 아이콘으로 시뮬레이션 모드를 종료하세요.</string>
+  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
+  <string name="faq_answer_7">아래 버튼을 눌러 시뮬레이션 모드를 활성화하세요. 이벤트 화면에서 위치 이미지의 왼쪽 상단에 있는 재생 버튼으로 이 이벤트의 설정(날짜, 시간, 위치)으로 시뮬레이션을 시작하세요. 시뮬레이션을 중지하려면 같은 버튼을 누르세요. 마지막으로, 완료되면 항상 표시되는 오버레이의 정지 아이콘을 눌러 시뮬레이션 모드를 종료하세요.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">미국</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

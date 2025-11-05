@@ -284,8 +284,8 @@
   <string name="faq_answer_6">የተመከሩ እርምጃዎች፣ እንቅስቃሴዎች እና ቦታዎች ዝርዝርን በ https://luma.com/worldwidewaves ላይ ታገኛሉ.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">ሞገድን እንዴት ማመሳሰል እችላለሁ?</string>
-  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
-  <string name="faq_answer_7">ስምሌሽን ሁነታን ለማንቃት ከታች ያለውን ቁልፍ ይንኩ. በክስተት ገጾች ላይ በቦታው ምስል ላይ ከላይ ግራ ያለውን "play" ቁልፍ በመጠቀም ቀን፣ ሰዓትና ቦታውን እያካተተ ስምሌሽን ይጀምሩ. ለማቆም ደግሞ ያውኑን ቁልፍ ይጠቀሙ. ሲጨርሱ በቋሚ ኦቭርሌይ ላይ ያለውን የማቆሚያ አዶ ተጠቅመው የስምሌሽን ሁነታን ያቁሙ.</string>
+  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
+  <string name="faq_answer_7">ስር ያለውን አዝራር ይንኩ እና ማስመሰል ሁነታን ያነቃቁ። በክስተት ገጾች ላይ ይህን ክስተት ባህሪዎች (ቀን፣ ሰዓት፣ ቦታ) ጋር ማስመሰል ለመጀመር በቦታው ምስል ግራ ላይ ካለው "play" አዝራር ይጠቀሙ። ማስመሰሉን ለማቆም ተመሳሳይ አዝራሩን ይጫኑ። መጨረሻ ሲጨርሱ በቋሚ ንብርብር ላይ ካለው የማቆሚያ አዶ በመጫን ከማስመሰል ሁነታ ውጡ።</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">አሜሪካ</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

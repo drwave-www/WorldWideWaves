@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Podes encontrar uma lista de ações, atividades e locais propostos em https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Como posso simular uma onda?</string>
-  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
-  <string name="faq_answer_7">Toque no botão abaixo para ativar o modo de simulação. Nos ecrãs de evento, use o botão "play" no canto superior esquerdo da imagem do local para iniciar uma simulação com as propriedades desse evento (data, hora, local). Para parar a simulação, use o mesmo botão. Quando terminar, desative o modo de simulação usando o ícone "stop" na sobreposição persistente.</string>
+  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
+  <string name="faq_answer_7">Toque no botão abaixo para ativar o modo de simulação. Nos ecrãs do evento, use o botão "play" no canto superior esquerdo da imagem do local para iniciar uma simulação com as propriedades deste evento (data, hora, local). Para parar a simulação, toque no mesmo botão. Por fim, quando terminar, saia do modo de simulação tocando no ícone de parar na camada persistente.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">Estados Unidos</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

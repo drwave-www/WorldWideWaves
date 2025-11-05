@@ -38,6 +38,7 @@ import hashlib
 import json
 import os
 import re
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -472,6 +473,55 @@ def main():
         generate_language(lang, base_entries, base_root, run_logs_dir)
 
     print("Done.")
+
+    # Auto-commit changes if there are any
+    vprint("\n=== Git Auto-Commit ===")
+    try:
+        # Check if there are changes to commit
+        status_result = subprocess.run(
+            ["git", "status", "--porcelain", "shared/src/commonMain/moko-resources/"],
+            cwd=str(base_root),
+            capture_output=True,
+            text=True,
+            check=True
+        )
+
+        if status_result.stdout.strip():
+            vprint("Changes detected in translation files. Committing...")
+
+            # Stage all translation files
+            subprocess.run(
+                ["git", "add", "shared/src/commonMain/moko-resources/"],
+                cwd=str(base_root),
+                check=True
+            )
+
+            # Create commit with detailed message
+            timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+            commit_message = f"""chore(i18n): update translations for {len(langs)} languages
+
+Auto-generated translation update from update_translations.py
+Timestamp: {timestamp}
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"""
+
+            subprocess.run(
+                ["git", "commit", "-m", commit_message],
+                cwd=str(base_root),
+                check=True
+            )
+
+            vprint("✓ Changes committed successfully")
+        else:
+            vprint("No changes to commit")
+
+    except subprocess.CalledProcessError as e:
+        vprint(f"Warning: Git commit failed: {e}")
+        vprint("Please commit changes manually if needed")
+    except Exception as e:
+        vprint(f"Warning: Unexpected error during git commit: {e}")
 
 if __name__ == "__main__":
     main()

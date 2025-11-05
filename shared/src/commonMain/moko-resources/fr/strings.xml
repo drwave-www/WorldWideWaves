@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Vous trouverez une liste d’actions, d’activités et de lieux proposés sur https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Comment simuler une vague ?</string>
-  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
-  <string name="faq_answer_7">Appuyez sur le bouton ci-dessous pour activer le mode simulation. Sur les écrans d’événement, utilisez le bouton « play » en haut à gauche de l’image du lieu pour lancer une simulation avec les propriétés de cet événement (date, heure, lieu). Pour arrêter la simulation, utilisez le même bouton. Lorsque vous avez terminé, quittez le mode simulation à l’aide de l’icône d’arrêt sur la superposition persistante.</string>
+  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
+  <string name="faq_answer_7">Appuyez sur le bouton ci-dessous pour activer le mode simulation. Sur les écrans d’événement, utilisez le bouton « Lecture » en haut à gauche de l’image du lieu pour lancer une simulation avec les propriétés de cet événement (date, heure, lieu). Pour arrêter la simulation, appuyez sur le même bouton. Enfin, lorsque vous avez terminé, quittez le mode simulation en appuyant sur l’icône d’arrêt dans le bandeau persistant.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">États-Unis</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

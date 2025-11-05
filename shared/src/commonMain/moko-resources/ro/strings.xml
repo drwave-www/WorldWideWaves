@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Găsești o listă de acțiuni, activități și locuri propuse pe https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Cum pot simula un val?</string>
-  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
-  <string name="faq_answer_7">Atinge butonul de mai jos pentru a activa modul de simulare. Pe ecranele evenimentelor, folosește butonul „play” din stânga sus a imaginii locației pentru a porni o simulare folosind proprietățile evenimentului respectiv (data, ora, locația). Pentru a opri simularea, folosește același buton. La final, oprește modul de simulare folosind pictograma de oprire de pe suprapunerea persistentă.</string>
+  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
+  <string name="faq_answer_7">Apasă butonul de mai jos pentru a activa modul de simulare. Pe ecranele evenimentului, folosește butonul "play" din colțul din stânga sus al imaginii locației pentru a porni o simulare cu parametrii acestui eveniment (data, ora, locația). Pentru a opri simularea, apasă același buton. În final, când ai terminat, ieși din modul de simulare apăsând pictograma "stop" de pe stratul persistent.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">SUA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

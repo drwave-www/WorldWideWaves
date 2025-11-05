@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Anda boleh mendapatkan senarai tindakan, aktiviti, dan tempat yang dicadangkan di https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Bagaimana saya boleh mensimulasikan gelombang?</string>
-  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
-  <string name="faq_answer_7">Ketuk butang di bawah untuk mengaktifkan mod simulasi. Pada skrin acara, gunakan butang "play" di kiri atas imej lokasi untuk memulakan simulasi menggunakan butiran acara tersebut (tarikh, masa, lokasi). Untuk menghentikan simulasi, gunakan butang yang sama. Apabila selesai, hentikan mod simulasi menggunakan ikon "stop" pada lapisan kekal yang sentiasa terpapar.</string>
+  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
+  <string name="faq_answer_7">Ketik butang di bawah untuk aktifkan mod simulasi. Pada skrin acara, gunakan butang "main" di kiri atas imej lokasi untuk memulakan simulasi dengan butiran acara ini (tarikh, masa, lokasi). Untuk menghentikan simulasi, tekan butang yang sama. Akhir sekali, apabila selesai, keluar dari mod simulasi dengan mengetik ikon berhenti pada lapisan kekal.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">Amerika Syarikat</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
