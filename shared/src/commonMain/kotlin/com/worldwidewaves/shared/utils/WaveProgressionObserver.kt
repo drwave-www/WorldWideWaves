@@ -65,25 +65,37 @@ class WaveProgressionObserver(
     fun startObservation() {
         val event = event ?: return
 
-        // Clear existing polygons on observation start/restart
-        // This ensures clean state when:
-        // 1. Simulation starts (all observers restart via simulationChanged)
-        // 2. Observer restarts for any reason
-        // 3. User stops simulation and returns to real-time observation
-        lastWavePolygons = emptyList()
-        eventMap?.updateWavePolygons(emptyList(), clearPolygons = true)
-        Log.d("WaveObserver", "Cleared wave polygons for event ${event.id} on observation start")
+        // Check current status to determine if we should clear polygons
+        // For DONE events, don't clear - the full wave area should remain visible
+        val currentStatus = event.observer.eventStatus.value
+
+        if (currentStatus != IWWWEvent.Status.DONE) {
+            // Clear existing polygons for non-DONE events
+            // This ensures clean state when:
+            // 1. Simulation starts (all observers restart via simulationChanged)
+            // 2. Observer restarts for any reason
+            // 3. User stops simulation and returns to real-time observation
+            lastWavePolygons = emptyList()
+            eventMap?.updateWavePolygons(emptyList(), clearPolygons = true)
+            Log.d("WaveObserver", "Cleared wave polygons for event ${event.id} on observation start (status: $currentStatus)")
+        }
 
         scope.launch {
             // Initial observation setup
             when {
-                event.isRunning() -> startPolygonsObservation(event, eventMap)
+                event.isRunning() -> {
+                    startPolygonsObservation(event, eventMap)
+                }
                 event.isDone() -> {
                     // Event is already done - show polygons once and don't observe progression
+                    // Polygons were NOT cleared above, so full wave area will be visible immediately
                     addFullWavePolygons(event, eventMap)
                     Log.d("WaveObserver", "Event already DONE - showing final polygons without observation")
                 }
-                else -> { /* wait for RUNNING status */ }
+                else -> {
+                    // Event not started yet - wait for status changes
+                    Log.d("WaveObserver", "Event ${event.id} not started - waiting for RUNNING status")
+                }
             }
 
             // Observe status changes
@@ -145,6 +157,10 @@ class WaveProgressionObserver(
                                 // Stop polygon observation to prevent continuous updates
                                 polygonsJob?.cancel()
                                 polygonsJob = null
+                                // Clear progressive wave polygons before showing full area
+                                lastWavePolygons = emptyList()
+                                eventMap?.updateWavePolygons(emptyList(), clearPolygons = true)
+                                Log.d("WaveObserver", "Event ${event.id} DONE - clearing progressive polygons")
                                 // Show full wave polygons once
                                 addFullWavePolygons(event, eventMap)
                             }

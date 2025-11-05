@@ -883,6 +883,10 @@ class WaveProgressionObserverTest {
     fun `startObservation clears existing polygons before starting`() =
         runTest {
             setup()
+            // Mock event status - not running and not done (UNDEFINED/SOON)
+            coEvery { mockEvent.isRunning() } returns false
+            coEvery { mockEvent.isDone() } returns false
+
             observer = WaveProgressionObserver(testScope, mockEventMap, mockEvent)
 
             // Act - Start observation
@@ -901,6 +905,10 @@ class WaveProgressionObserverTest {
     fun `observer restart clears polygons from previous observation`() =
         runTest {
             setup()
+            // Mock event status - running initially
+            coEvery { mockEvent.isRunning() } returns true
+            coEvery { mockEvent.isDone() } returns false
+
             observer = WaveProgressionObserver(testScope, mockEventMap, mockEvent)
 
             // First observation
@@ -931,6 +939,10 @@ class WaveProgressionObserverTest {
     fun `multiple observer restarts clear polygons each time`() =
         runTest {
             setup()
+            // Mock event status - not running and not done (UNDEFINED/SOON)
+            coEvery { mockEvent.isRunning() } returns false
+            coEvery { mockEvent.isDone() } returns false
+
             observer = WaveProgressionObserver(testScope, mockEventMap, mockEvent)
 
             // Cycle through start/stop 3 times
