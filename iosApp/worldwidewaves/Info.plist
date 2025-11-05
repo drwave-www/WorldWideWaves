@@ -6,6 +6,8 @@
 	<false/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>WorldWideWaves needs your location to determine when you're within wave events and coordinate synchronized participation with others.</string>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>WorldWideWaves sends you notifications about wave events you've favorited, including start reminders and wave hit alerts.</string>
 	<key>FirebaseCrashlyticsCollectionEnabled</key>
 	<true/>
 	<key>FirebaseAppDelegateProxyEnabled</key>
