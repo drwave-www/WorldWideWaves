@@ -198,19 +198,6 @@ class BaseUITest: XCTestCase {
         print("========================")
     }
 
-    /// Verifies an element exists with extended timeout
-    ///
-    /// ## Parameters
-    /// - element: The element to verify
-    /// - timeout: Maximum wait time (default: 10 seconds)
-    /// - message: Custom failure message
-    func verifyElementExists(
-        _ element: XCUIElement,
-        timeout: TimeInterval = 10,
-        message: String? = nil
-    ) {
-        let exists = element.waitForExistence(timeout: timeout)
-        let failureMessage = message ?? "Element should exist: \(element)"
-        XCTAssertTrue(exists, failureMessage)
-    }
+    // Note: verifyElementExists() is already defined in XCUITestExtensions.swift
+    // No need to redefine it here
 }

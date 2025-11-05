@@ -154,20 +154,9 @@ class CompleteWaveParticipationUITest: BaseUITest {
     // swiftlint:enable function_body_length
 
     // MARK: - Screenshot Helpers
-
-    func captureScreenshot(name: String) {
-        ScreenshotHelper.captureScreenshot(app: app, name: name, testCase: self)
-    }
-
-    func captureStepScreenshot(description: String) {
-        screenshotCounter += 1
-        ScreenshotHelper.captureStepScreenshot(
-            app: app,
-            stepNumber: screenshotCounter,
-            description: description,
-            testCase: self
-        )
-    }
+    // Inherited from BaseUITest:
+    // - captureScreenshot(name:)
+    // - captureStepScreenshot(description:)
 
     // MARK: - Filter Interactions
 
@@ -247,8 +236,11 @@ class CompleteWaveParticipationUITest: BaseUITest {
         print("Current UI hierarchy:")
         print(app.debugDescription)
 
-        let emptyMessage = app.staticTexts["No favorite events"]
-        print("Looking for text: 'No favorite events'")
+        // Use partial text matching because the actual localized string is:
+        // "No events has been added as favorite, start by clicking on the star icon on your favorite event!"
+        // Instead of exact match "No favorite events"
+        let emptyMessage = app.staticTexts.containing(NSPredicate(format: "label CONTAINS[c] 'favorite'")).firstMatch
+        print("Looking for text containing: 'favorite' (case-insensitive)")
         print("Element exists:", emptyMessage.exists)
         print("Element is hittable:", emptyMessage.isHittable)
 
@@ -260,7 +252,7 @@ class CompleteWaveParticipationUITest: BaseUITest {
 
         // Increased timeout from 3s to 10s for slower Firebase loads
         XCTAssertTrue(emptyMessage.waitForExistence(timeout: 10),
-                     "Expected to find 'No favorite events' text but it was not found. " +
+                     "Expected to find favorites empty state text containing 'favorite' but it was not found. " +
                      "Check console output above for available UI elements.")
     }
 
