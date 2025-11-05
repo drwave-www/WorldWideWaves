@@ -1,5 +1,7 @@
 @file:OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 
+@file:OptIn(kotlin.time.ExperimentalTime::class)
+
 package com.worldwidewaves.shared.notifications
 
 /*
@@ -327,7 +329,7 @@ class NotificationSchedulerTest {
             // ARRANGE: Favorited future event with accelerated simulation
             val event = MockEvent("event-1", clock.now() + 2.hours, clock.now() + 3.hours)
             favoriteStore.setFavoriteStatus("event-1", true)
-            val simulation = WWWSimulation(clock.now(), Position(0.0, 0.0), speed = 10)
+            val simulation = WWWSimulation(clock.now(), Position(0.0, 0.0), initialSpeed = 10)
             platform.setSimulation(simulation)
 
             // ACT: Check if should schedule
@@ -357,7 +359,7 @@ class NotificationSchedulerTest {
             // ARRANGE: Favorited future event with realistic simulation (speed=1)
             val event = MockEvent("event-1", clock.now() + 2.hours, clock.now() + 3.hours)
             favoriteStore.setFavoriteStatus("event-1", true)
-            val simulation = WWWSimulation(clock.now(), Position(0.0, 0.0), speed = 1)
+            val simulation = WWWSimulation(clock.now(), Position(0.0, 0.0), initialSpeed = 1)
             platform.setSimulation(simulation)
 
             // ACT: Check if should schedule
@@ -615,7 +617,7 @@ class NotificationSchedulerTest {
             // ARRANGE: Favorited event with accelerated simulation
             favoriteStore.setFavoriteStatus("event-1", true)
             val event = MockEvent("event-1", clock.now() + 2.hours, clock.now() + 3.hours)
-            val simulation = WWWSimulation(clock.now(), Position(0.0, 0.0), speed = 10)
+            val simulation = WWWSimulation(clock.now(), Position(0.0, 0.0), initialSpeed = 10)
             platform.setSimulation(simulation)
             val favoriteIds = setOf("event-1")
             val events = listOf(event)
