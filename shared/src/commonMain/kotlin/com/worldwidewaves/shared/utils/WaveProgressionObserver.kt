@@ -122,7 +122,12 @@ class WaveProgressionObserver(
             scope.launch {
                 event.observer.progression
                     .sample(250.milliseconds) // Built-in throttling for better performance
-                    .collect {
+                    .collect { progression ->
+                        // Debug logging for speed investigation
+                        Log.v(
+                            "WaveProgressionObserver",
+                            "Event ${event.id}: progression=$progression, updating polygons",
+                        )
                         updateWavePolygons(event, eventMap)
                     }
             }

@@ -10,7 +10,6 @@ package com.worldwidewaves.shared.viewmodels
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Wave
 import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.domain.repository.EventsRepository
@@ -218,13 +217,13 @@ class EventsViewModel(
                         "Event ${event.id} exited warming. Total warming events: $count",
                     )
 
-                    // Only restore speed when ALL events exit warming
-                    if (count == 0) {
+                    // Only restore speed when ALL events exit warming AND user has been hit
+                    if (count == 0 && event.observer.userHasBeenHit.value) {
                         val speedToRestore = globalBackupSpeed ?: 1
                         platform.getSimulation()?.setSpeed(speedToRestore)
                         Log.d(
                             "EventsViewModel",
-                            "All events exited warming. Speed restored to $speedToRestore",
+                            "All events exited warming after hit. Speed restored to $speedToRestore",
                         )
                     }
                     wasWarming = false
@@ -245,9 +244,9 @@ class EventsViewModel(
                     scope.launch {
                         delay(WaveTiming.SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * MILLIS_PER_SECOND)
 
-                        // Restore to DEFAULT speed ONLY when simulation is active
+                        // Restore to user's preferred speed ONLY when simulation is active
                         platform.getSimulation()?.let { simulation ->
-                            val speedToRestore = Wave.DEFAULT_SPEED_SIMULATION
+                            val speedToRestore = platform.preferredSimulationSpeed.value
                             simulation.setSpeed(speedToRestore)
                             Log.d(
                                 "EventsViewModel",

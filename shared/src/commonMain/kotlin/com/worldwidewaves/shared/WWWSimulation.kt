@@ -23,6 +23,7 @@ package com.worldwidewaves.shared
 
 import com.worldwidewaves.shared.WWWGlobals.Wave
 import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
@@ -114,7 +115,16 @@ class WWWSimulation(
         val simulatedElapsedTime = elapsedRealTimeSinceCheckpoint * _speed
 
         // Add the simulated elapsed time to the last checkpoint's simulated time
-        return lastCheckpoint.simulatedTime + simulatedElapsedTime
+        val result = lastCheckpoint.simulatedTime + simulatedElapsedTime
+
+        // Debug logging for speed investigation
+        Log.v(
+            "WWWSimulation",
+            "calculateCurrentTime: speed=$_speed, realElapsed=${elapsedRealTimeSinceCheckpoint.inWholeMilliseconds}ms, " +
+                "simulatedElapsed=${simulatedElapsedTime.inWholeMilliseconds}ms, result=$result",
+        )
+
+        return result
     }
 
     /**
