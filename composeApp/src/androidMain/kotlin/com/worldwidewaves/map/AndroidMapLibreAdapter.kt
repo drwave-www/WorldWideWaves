@@ -32,7 +32,6 @@ import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.MapCameraCallback
 import com.worldwidewaves.shared.map.MapLibreAdapter
 import com.worldwidewaves.shared.toLatLngBounds
-import com.worldwidewaves.shared.toMapLibrePolygon
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.maplibre.android.camera.CameraPosition
@@ -53,7 +52,6 @@ import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.Point
 import org.maplibre.geojson.Polygon
-import com.worldwidewaves.shared.events.utils.Polygon as SharedPolygon
 
 /**
  * Android-specific implementation of the shared [MapLibreAdapter].
@@ -91,8 +89,7 @@ class AndroidMapLibreAdapter(
 
     // Queue for polygons that arrive before style loads
     // Only stores the most recent set since wave progression contains all previous circles
-    // Stores SharedPolygon objects before conversion to preserve type for deferred rendering
-    private var pendingPolygons: List<SharedPolygon>? = null
+    private var pendingPolygons: List<Polygon>? = null
     private var styleLoaded = false
 
     // Cache for camera bounds calculations to avoid expensive getCameraForLatLngBounds calls
@@ -616,13 +613,13 @@ class AndroidMapLibreAdapter(
         clearExisting: Boolean,
     ) {
         val map = mapLibreMap ?: return
-        val sharedPolygons = polygons.filterIsInstance<SharedPolygon>()
+        val wavePolygons = polygons.filterIsInstance<Polygon>()
 
-        Log.d(TAG, "addWavePolygons: ${sharedPolygons.size} shared polygons, clearExisting=$clearExisting, styleLoaded=$styleLoaded")
+        Log.d(TAG, "addWavePolygons: ${wavePolygons.size} polygons, clearExisting=$clearExisting, styleLoaded=$styleLoaded")
 
         // Handle clearing polygons when empty list is provided with clearExisting flag
         // This is used when simulation stops to remove all wave polygons from the map
-        if (sharedPolygons.isEmpty() && clearExisting) {
+        if (wavePolygons.isEmpty() && clearExisting) {
             Log.i(TAG, "Clearing all wave polygons from map (${waveLayerIds.size} layers)")
             // Clear pending polygons if style not loaded yet
             pendingPolygons = null
@@ -646,22 +643,18 @@ class AndroidMapLibreAdapter(
             return
         }
 
-        if (sharedPolygons.isEmpty()) {
+        if (wavePolygons.isEmpty()) {
             Log.w(TAG, "No valid Polygon objects found in ${polygons.size} input polygons")
             return
         }
 
-        // If style not loaded yet, store unconverted polygons for deferred rendering
-        // CRITICAL: Store SharedPolygon objects BEFORE conversion so they can be re-filtered
-        // when the deferred rendering executes and calls addWavePolygons() recursively
+        // If style not loaded yet, store most recent polygons for later
+        // Only the most recent set matters (wave progression contains all previous circles)
         if (!styleLoaded) {
-            Log.w(TAG, "Style not ready - storing ${sharedPolygons.size} SharedPolygons for deferred rendering")
-            pendingPolygons = sharedPolygons
+            Log.w(TAG, "Style not ready - storing ${wavePolygons.size} polygons (most recent)")
+            pendingPolygons = wavePolygons
             return
         }
-
-        // Convert to MapLibre format for rendering
-        val wavePolygons = sharedPolygons.map { it.toMapLibrePolygon() }
 
         // Style is loaded - render with iOS-style layer reuse pattern
         Log.d(TAG, "Style IS loaded, attempting to render ${wavePolygons.size} polygons")
