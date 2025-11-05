@@ -215,6 +215,7 @@ open class MainScreen
                             val containerHeightPx = windowInfo.containerSize.height
                             val screenHeightDp = (containerHeightPx / densityScale).dp
                             val bottomOffset = screenHeightDp * 0.15f
+                            val topOffset = screenHeightDp * 0.13f
 
                             // Simulation mode chip (red) - positioned at top-left
                             Row(
@@ -222,7 +223,7 @@ open class MainScreen
                                     Modifier
                                         .align(Alignment.TopStart)
                                         .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = bottomOffset),
+                                        .padding(horizontal = 16.dp, vertical = topOffset),
                                 horizontalArrangement = Arrangement.Start,
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
