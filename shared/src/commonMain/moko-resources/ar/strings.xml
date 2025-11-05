@@ -168,6 +168,10 @@
   <string name="simulation_mode">أوقف وضع المحاكاة</string>
   <!-- src_hash: 4a66b217223c21d295055c3e7ce6c3abb730b2b0 -->
   <string name="test_simulation">فعّل وضع المحاكاة</string>
+  <!-- src_hash: 62c21d80ece499104c19305a08f259831f5d2fda -->
+  <string name="test_simulation_fast">تفعيل المحاكاة السريعة</string>
+  <!-- src_hash: 6c1710ced123612d92e91adc360caeb3a857face -->
+  <string name="test_simulation_realistic">تفعيل المحاكاة الواقعية</string>
   <!-- src_hash: 91658052e0f261ad9f41d80e9987f5f396998dc0 -->
   <string name="simulation_error">خطأ في المحاكاة</string>
   <!-- src_hash: 389e3b61ef3cc49d6e7a288c0f1970858c6e9445 -->

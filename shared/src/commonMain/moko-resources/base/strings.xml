@@ -122,6 +122,8 @@
     <string name="simulation_stop">Stop simulation</string>
     <string name="simulation_mode">Stop simulation mode</string>
     <string name="test_simulation">Activate simulation mode</string>
+    <string name="test_simulation_fast">Enable Fast Simulation</string>
+    <string name="test_simulation_realistic">Enable Realistic Simulation</string>
     <string name="simulation_error">Simulation Error</string>
     <string name="simulation_stop_error">Stop Error</string>
     <string name="simulation_started">Simulation started</string>
