@@ -207,7 +207,7 @@ open class MainScreen
 
                             // -----------------------------------------------------------------
                             //  Bottom overlay indicators - vertically aligned
-                            //  Debug button (far left) and Simulation chip (far right)
+                            //  Simulation chip (top-left) and Debug button (bottom-right)
                             // -----------------------------------------------------------------
                             val windowInfo = LocalWindowInfo.current
                             val density = LocalDensity.current
@@ -216,17 +216,33 @@ open class MainScreen
                             val screenHeightDp = (containerHeightPx / densityScale).dp
                             val bottomOffset = screenHeightDp * 0.15f
 
+                            // Simulation mode chip (red) - positioned at top-left
                             Row(
                                 modifier =
                                     Modifier
-                                        .align(Alignment.BottomCenter)
+                                        .align(Alignment.TopStart)
                                         .fillMaxWidth()
                                         .padding(horizontal = 16.dp, vertical = bottomOffset),
-                                horizontalArrangement = Arrangement.SpaceBetween,
+                                horizontalArrangement = Arrangement.Start,
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                // Debug button (green) - positioned at far left
-                                if (ready && debugTabScreen != null && platformEnabler.isDebugBuild) {
+                                SimulationModeChip(
+                                    platform = platform,
+                                    modifier = Modifier,
+                                )
+                            }
+
+                            // Debug button (green) - positioned at bottom-right
+                            if (ready && debugTabScreen != null && platformEnabler.isDebugBuild) {
+                                Row(
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.BottomEnd)
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = bottomOffset),
+                                    horizontalArrangement = Arrangement.End,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
                                     FloatingActionButton(
                                         onClick = { showDebugScreen = !showDebugScreen },
                                         containerColor = UIConstants.DEBUG_BUTTON_COLOR,
@@ -239,12 +255,6 @@ open class MainScreen
                                         )
                                     }
                                 }
-
-                                // Simulation mode chip (red) - positioned at far right
-                                SimulationModeChip(
-                                    platform = platform,
-                                    modifier = Modifier,
-                                )
                             }
                         }
                     }
