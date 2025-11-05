@@ -3,34 +3,20 @@ package com.worldwidewaves.shared.ui.components.permissions
 /*
  * Copyright 2025 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
- * boundaries, fostering unity, community, and shared human experience by leveraging real-time
- * coordination and location-based services.
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.worldwidewaves.shared.MokoRes
+import com.worldwidewaves.shared.ui.components.StyledAlertDialog
 import dev.icerock.moko.resources.compose.stringResource
 
 /**
@@ -78,20 +64,14 @@ private fun LocationPermissionDialog(
     onGranted: () -> Unit,
     onDenied: () -> Unit,
 ) {
-    AlertDialog(
+    StyledAlertDialog(
         onDismissRequest = onDenied,
-        title = { Text(stringResource(MokoRes.strings.geoloc_yourein)) },
-        text = { Text(stringResource(MokoRes.strings.geoloc_yourenotin)) },
-        confirmButton = {
-            Button(onClick = onGranted) {
-                Text(stringResource(MokoRes.strings.ok))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDenied) {
-                Text(stringResource(MokoRes.strings.map_cancel_download))
-            }
-        },
+        title = stringResource(MokoRes.strings.geoloc_yourein),
+        text = stringResource(MokoRes.strings.geoloc_yourenotin),
+        confirmButtonText = stringResource(MokoRes.strings.ok),
+        onConfirm = onGranted,
+        dismissButtonText = stringResource(MokoRes.strings.map_cancel_download),
+        onDismiss = onDenied,
     )
 }
 
@@ -144,20 +124,14 @@ private fun GPSEnableDialog(
     onEnable: () -> Unit,
     onCancel: () -> Unit,
 ) {
-    AlertDialog(
+    StyledAlertDialog(
         onDismissRequest = onCancel,
-        title = { Text(stringResource(MokoRes.strings.geoloc_yourein)) },
-        text = { Text(stringResource(MokoRes.strings.geoloc_yourenotin)) },
-        confirmButton = {
-            Button(onClick = onEnable) {
-                Text(stringResource(MokoRes.strings.ok))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onCancel) {
-                Text(stringResource(MokoRes.strings.map_cancel_download))
-            }
-        },
+        title = stringResource(MokoRes.strings.ask_gps_enable),
+        text = stringResource(MokoRes.strings.geoloc_yourenotin),
+        confirmButtonText = stringResource(MokoRes.strings.yes),
+        onConfirm = onEnable,
+        dismissButtonText = stringResource(MokoRes.strings.no),
+        onDismiss = onCancel,
     )
 }
 
