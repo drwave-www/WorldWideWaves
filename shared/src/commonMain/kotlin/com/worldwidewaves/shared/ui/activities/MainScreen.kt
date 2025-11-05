@@ -215,7 +215,7 @@ open class MainScreen
                             val containerHeightPx = windowInfo.containerSize.height
                             val screenHeightDp = (containerHeightPx / densityScale).dp
                             val bottomOffset = screenHeightDp * 0.15f
-                            val topOffset = screenHeightDp * 0.13f
+                            val topOffset = screenHeightDp * 0.14f
 
                             // Simulation mode chip (red) - positioned at top-left
                             Row(
