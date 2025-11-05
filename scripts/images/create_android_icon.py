@@ -85,13 +85,13 @@ def add_lighting_effects(img):
 def create_foreground(source_img, size):
     """
     Create adaptive icon foreground layer.
-    The icon content should be in the center 80% (optimized for visibility).
+    The icon content should be in the center 66% (safe zone).
     """
-    # Adaptive icons are 108dp, content fills 80% for better prominence across launchers
+    # Adaptive icons are 108dp, content fits in 66% circle (standard Android safe zone)
     foreground = Image.new('RGBA', (size, size), (0, 0, 0, 0))
 
-    # Scale source to fit in 80% of size (larger than standard 66% for better visibility)
-    safe_zone = int(size * 0.80)
+    # Scale source to fit in safe zone (66% of size)
+    safe_zone = int(size * 0.66)
     source_resized = source_img.resize((safe_zone, safe_zone), Image.LANCZOS)
 
     # Center the icon
@@ -122,10 +122,10 @@ def create_background(source_img, size):
 def create_legacy_icon(source_img, size):
     """
     Create legacy launcher icon (pre-Oreo).
-    Full square with slight padding.
+    Used by some launchers for home screen shortcuts.
     """
-    # Legacy icons use 80% of available space
-    icon_size = int(size * 0.8)
+    # Legacy icons use 90% of available space for better visibility on home screen
+    icon_size = int(size * 0.90)
     icon = source_img.resize((icon_size, icon_size), Image.LANCZOS)
 
     # Create with transparent background
