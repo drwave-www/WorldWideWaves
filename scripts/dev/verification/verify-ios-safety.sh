@@ -131,7 +131,12 @@ fi
 # ============================================================================
 echo "4️⃣  Checking for runBlocking usage..."
 
-RUNBLOCKING=$(rg -n "runBlocking" "$SHARED_MAIN" --type kotlin 2>/dev/null || true)
+# Search for actual runBlocking usage (exclude comments and documentation)
+# Filter out lines that are comments or documentation strings
+RUNBLOCKING=$(rg -n "runBlocking" "$SHARED_MAIN" --type kotlin 2>/dev/null | \
+    rg -v "^\s*\*" | \
+    rg -v "^\s*//" | \
+    rg -v "issues with runBlocking" || true)
 
 if [ -n "$RUNBLOCKING" ]; then
     echo "   ⚠️  WARNING: Found runBlocking usage"
@@ -148,7 +153,9 @@ fi
 # ============================================================================
 echo "5️⃣  Verifying IosSafeDI singleton exists..."
 
-IOSSAFEDI_COUNT=$(rg "object IosSafeDI : KoinComponent" "$SHARED_MAIN" --type kotlin 2>/dev/null | wc -l | tr -d ' ')
+# Search for actual object declarations (exclude comments and documentation)
+# Use ^object to match only lines starting with "object" (not in comments)
+IOSSAFEDI_COUNT=$(rg "^object IosSafeDI : KoinComponent" "$SHARED_MAIN" --type kotlin 2>/dev/null | wc -l | tr -d ' ')
 
 if [ "$IOSSAFEDI_COUNT" -eq 1 ]; then
     echo "   ✅ PASS: IosSafeDI singleton found"
