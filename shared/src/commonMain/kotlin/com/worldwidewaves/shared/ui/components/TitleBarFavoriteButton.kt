@@ -81,21 +81,17 @@ fun TitleBarFavoriteButton(
     // Handle favorite toggle
     LaunchedEffect(pendingFavoriteToggle) {
         if (pendingFavoriteToggle) {
-            Log.d("TitleBarFavoriteButton", "pendingFavoriteToggle=true, processing...")
             setEventFavorite?.let { favoriteSetter ->
                 try {
                     isFavorite = !isFavorite
-                    Log.i("TitleBarFavoriteButton", "Calling setEventFavorite for ${event.id}: $isFavorite")
                     favoriteSetter.call(event, isFavorite)
-                    Log.i("TitleBarFavoriteButton", "Calling onFavoriteChanged callback")
                     onFavoriteChanged()
-                    Log.i("TitleBarFavoriteButton", "Favorite toggled for ${event.id}: $isFavorite")
                 } catch (e: Exception) {
                     // Revert on error
                     isFavorite = !isFavorite
                     Log.e("TitleBarFavoriteButton", "Failed to toggle favorite for ${event.id}", e)
                 }
-            } ?: Log.w("TitleBarFavoriteButton", "setEventFavorite is null!")
+            }
             pendingFavoriteToggle = false
         }
     }

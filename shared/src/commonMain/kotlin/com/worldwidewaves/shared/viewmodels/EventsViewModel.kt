@@ -138,10 +138,6 @@ class EventsViewModel(
     fun refreshEvents() {
         _events.value = _events.value.toList() // New list instance triggers collectors
         _refreshTrigger.value++ // Increment trigger to force LaunchedEffect re-execution
-        Log.d(
-            "EventsViewModel",
-            "Events list refreshed: ${_events.value.size} events, trigger: ${_refreshTrigger.value}",
-        )
     }
 
     /**

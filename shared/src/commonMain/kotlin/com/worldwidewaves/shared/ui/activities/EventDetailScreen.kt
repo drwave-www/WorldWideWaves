@@ -51,7 +51,6 @@ class EventDetailScreen(
     private val eventsViewModel: EventsViewModel by inject()
 
     override fun onFavoriteChanged() {
-        Log.i("EventDetailScreen", "onFavoriteChanged called, refreshing events")
         eventsViewModel.refreshEvents()
     }
 
