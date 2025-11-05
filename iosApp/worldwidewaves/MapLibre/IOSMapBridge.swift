@@ -9,6 +9,8 @@ import Foundation
 import Shared
 import CoreLocation
 
+// swiftlint:disable file_length type_body_length
+
 /// Bridge between Kotlin shared module and Swift MapLibre implementation.
 ///
 /// ## Purpose
@@ -733,3 +735,5 @@ import CoreLocation
         return true
     }
 }
+
+// swiftlint:enable file_length type_body_length

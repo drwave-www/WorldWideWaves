@@ -27,7 +27,7 @@ import Shared
 
 // Note: File exceeds 1000 lines due to comprehensive MapLibre feature set
 // Includes: camera control, wave polygons, accessibility, callbacks, location component
-// swiftlint:disable type_body_length
+// swiftlint:disable file_length type_body_length
 
 /// Swift bridging layer for MapLibre Native iOS SDK.
 /// Provides @objc methods for controlling MapLibre from Kotlin or Swift.
@@ -1355,4 +1355,4 @@ extension UIColor {
     }
 }
 
-// swiftlint:enable type_body_length
+// swiftlint:enable file_length type_body_length
