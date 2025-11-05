@@ -6,11 +6,6 @@
 
 package com.worldwidewaves.map
 
-import com.mapbox.geojson.Point
-import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.mapboxsdk.maps.Style
-import com.mapbox.mapboxsdk.style.layers.LineLayer
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.position.Position
 import io.mockk.every
@@ -20,6 +15,11 @@ import io.mockk.verify
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.Style
+import org.maplibre.android.style.layers.LineLayer
+import org.maplibre.android.style.sources.GeoJsonSource
+import org.maplibre.geojson.Point
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -34,7 +34,7 @@ import kotlin.test.assertTrue
  * - Error handling for null map/style
  */
 class AndroidMapLibreAdapterBboxTest {
-    private lateinit var mockMap: MapboxMap
+    private lateinit var mockMap: MapLibreMap
     private lateinit var mockStyle: Style
     private lateinit var adapter: AndroidMapLibreAdapter
 
@@ -176,7 +176,7 @@ class AndroidMapLibreAdapterBboxTest {
     @Test
     fun drawOverridenBbox_requiresStyleLoaded() {
         // Given: Map with null style
-        val mapWithoutStyle = mockk<MapboxMap>(relaxed = true)
+        val mapWithoutStyle = mockk<MapLibreMap>(relaxed = true)
         every { mapWithoutStyle.style } returns null
 
         val testAdapter = createAdapterWithMockMap(mapWithoutStyle)
@@ -211,7 +211,7 @@ class AndroidMapLibreAdapterBboxTest {
     }
 
     // Helper method to create adapter with mocked map
-    private fun createAdapterWithMockMap(map: MapboxMap): AndroidMapLibreAdapter {
+    private fun createAdapterWithMockMap(map: MapLibreMap): AndroidMapLibreAdapter {
         val adapter = AndroidMapLibreAdapter()
         // In production code, the map is set via setMap() method
         adapter.setMap("test-map") // This would normally initialize mapLibreMap
