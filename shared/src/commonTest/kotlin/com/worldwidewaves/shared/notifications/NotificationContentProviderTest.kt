@@ -1,3 +1,5 @@
+@file:OptIn(kotlin.time.ExperimentalTime::class)
+
 package com.worldwidewaves.shared.notifications
 
 /*
@@ -21,6 +23,7 @@ package com.worldwidewaves.shared.notifications
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.WWWEventArea
@@ -96,10 +99,7 @@ class NotificationContentProviderTest {
 
         override fun getMapImage(): Any? = null
 
-        override fun getLocation(): StringResource =
-            object : StringResource {
-                override val resourceId: String = locationName
-            }
+        override fun getLocation(): StringResource = MokoRes.strings.empty
 
         override fun getDescription(): StringResource = throw NotImplementedError("Mock method")
 

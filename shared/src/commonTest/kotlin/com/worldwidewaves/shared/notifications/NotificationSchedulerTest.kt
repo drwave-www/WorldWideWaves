@@ -1,6 +1,7 @@
-@file:OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-
-@file:OptIn(kotlin.time.ExperimentalTime::class)
+@file:OptIn(
+    kotlinx.coroutines.ExperimentalCoroutinesApi::class,
+    kotlin.time.ExperimentalTime::class,
+)
 
 package com.worldwidewaves.shared.notifications
 
@@ -25,6 +26,7 @@ package com.worldwidewaves.shared.notifications
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.WWWSimulation
 import com.worldwidewaves.shared.data.FavoriteEventsStore
@@ -37,7 +39,6 @@ import com.worldwidewaves.shared.events.WWWEventWaveWarming
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Position
 import dev.icerock.moko.resources.StringResource
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -163,19 +164,6 @@ class NotificationSchedulerTest {
     }
 
     /**
-     * Mock WWWPlatform for simulation testing.
-     */
-    private class MockPlatform(
-        private var simulation: WWWSimulation? = null,
-    ) : WWWPlatform {
-        override fun getSimulation(): WWWSimulation? = simulation
-
-        fun setSimulation(sim: WWWSimulation?) {
-            simulation = sim
-        }
-    }
-
-    /**
      * Mock event for testing.
      */
     private class MockEvent(
@@ -227,10 +215,7 @@ class NotificationSchedulerTest {
 
         override fun getMapImage(): Any? = null
 
-        override fun getLocation(): StringResource =
-            object : StringResource {
-                override val resourceId: String = locationName
-            }
+        override fun getLocation(): StringResource = MokoRes.strings.empty
 
         override fun getDescription(): StringResource = throw NotImplementedError("Mock method")
 
@@ -264,7 +249,7 @@ class NotificationSchedulerTest {
     }
 
     private lateinit var clock: TestClock
-    private lateinit var platform: MockPlatform
+    private lateinit var platform: WWWPlatform
     private lateinit var favoriteStore: TestFavoriteEventsStore
     private lateinit var notificationManager: MockNotificationManager
     private lateinit var contentProvider: NotificationContentProvider
@@ -273,7 +258,7 @@ class NotificationSchedulerTest {
     @BeforeTest
     fun setUp() {
         clock = TestClock(Instant.fromEpochMilliseconds(1000000))
-        platform = MockPlatform()
+        platform = WWWPlatform(name = "TestPlatform")
         favoriteStore = TestFavoriteEventsStore()
         notificationManager = MockNotificationManager()
         contentProvider = DefaultNotificationContentProvider()
@@ -285,6 +270,14 @@ class NotificationSchedulerTest {
                 notificationManager = notificationManager,
                 contentProvider = contentProvider,
             )
+    }
+
+    private fun setSimulation(sim: WWWSimulation?) {
+        if (sim != null) {
+            platform.setSimulation(sim)
+        } else {
+            platform.disableSimulation()
+        }
     }
 
     @AfterTest
@@ -330,7 +323,7 @@ class NotificationSchedulerTest {
             val event = MockEvent("event-1", clock.now() + 2.hours, clock.now() + 3.hours)
             favoriteStore.setFavoriteStatus("event-1", true)
             val simulation = WWWSimulation(clock.now(), Position(0.0, 0.0), initialSpeed = 10)
-            platform.setSimulation(simulation)
+            setSimulation(simulation)
 
             // ACT: Check if should schedule
             val result = scheduler.shouldScheduleNotifications(event)
@@ -360,7 +353,7 @@ class NotificationSchedulerTest {
             val event = MockEvent("event-1", clock.now() + 2.hours, clock.now() + 3.hours)
             favoriteStore.setFavoriteStatus("event-1", true)
             val simulation = WWWSimulation(clock.now(), Position(0.0, 0.0), initialSpeed = 1)
-            platform.setSimulation(simulation)
+            setSimulation(simulation)
 
             // ACT: Check if should schedule
             val result = scheduler.shouldScheduleNotifications(event)
@@ -618,7 +611,7 @@ class NotificationSchedulerTest {
             favoriteStore.setFavoriteStatus("event-1", true)
             val event = MockEvent("event-1", clock.now() + 2.hours, clock.now() + 3.hours)
             val simulation = WWWSimulation(clock.now(), Position(0.0, 0.0), initialSpeed = 10)
-            platform.setSimulation(simulation)
+            setSimulation(simulation)
             val favoriteIds = setOf("event-1")
             val events = listOf(event)
 
