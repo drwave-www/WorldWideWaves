@@ -90,6 +90,15 @@ abstract class BaseEventBackgroundScreen(
      */
     private val setEventFavorite: SetEventFavorite by inject()
 
+    /**
+     * Callback invoked when favorite state changes in title bar.
+     * Subclasses can override to handle favorite changes (e.g., refresh lists).
+     * Default implementation does nothing.
+     */
+    protected open fun onFavoriteChanged() {
+        // Default: no-op (subclasses can override if needed)
+    }
+
     // iOS FIX: Removed init{} block to prevent Dispatchers.Main deadlock
     // Event tracking now must be triggered from @Composable LaunchedEffect
 
@@ -215,6 +224,7 @@ abstract class BaseEventBackgroundScreen(
                         TitleBarFavoriteButton(
                             event = selectedEvent!!,
                             setEventFavorite = setEventFavorite,
+                            onFavoriteChanged = { onFavoriteChanged() },
                             modifier = Modifier.align(Alignment.BottomEnd),
                         )
                     }
