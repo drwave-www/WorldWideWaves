@@ -59,6 +59,11 @@ class EventsListScreen(
         val events by viewModel.events.collectAsState()
         val mapStates by mapChecker.mapStates.collectAsState()
 
+        // Refresh events list when screen becomes active (picks up favorite changes from detail screen)
+        LaunchedEffect(Unit) {
+            viewModel.refreshEvents()
+        }
+
         // Dialog state for map uninstall confirmation
         var showUninstallDialog by remember { mutableStateOf(false) }
         var pendingUninstallEventId by remember { mutableStateOf<String?>(null) }
