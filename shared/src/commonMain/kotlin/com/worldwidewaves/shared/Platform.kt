@@ -22,6 +22,7 @@ package com.worldwidewaves.shared
  */
 
 import androidx.compose.runtime.Composable
+import com.worldwidewaves.shared.WWWGlobals.Wave
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.Position
@@ -78,12 +79,30 @@ class WWWPlatform(
     private val _simulationModeEnabled = MutableStateFlow(false)
     val simulationModeEnabled: StateFlow<Boolean> = _simulationModeEnabled.asStateFlow()
 
+    /**
+     * Stores the preferred simulation speed (in m/s) to use when starting new simulations.
+     * Defaults to [Wave.DEFAULT_SPEED_SIMULATION] (50 m/s).
+     * Can be changed to 1 m/s for realistic (normal time) simulations.
+     */
+    private val _preferredSimulationSpeed = MutableStateFlow(Wave.DEFAULT_SPEED_SIMULATION)
+    val preferredSimulationSpeed: StateFlow<Int> = _preferredSimulationSpeed.asStateFlow()
+
     fun enableSimulationMode() {
         _simulationModeEnabled.value = true
     }
 
     fun disableSimulationMode() {
         _simulationModeEnabled.value = false
+    }
+
+    /**
+     * Sets the preferred simulation speed to use when starting new simulations.
+     * This speed will be used by SimulationButton when creating WWWSimulation instances.
+     *
+     * @param speed Speed in m/s (typically 1 for realistic or 50 for fast simulation)
+     */
+    fun setPreferredSimulationSpeed(speed: Int) {
+        _preferredSimulationSpeed.value = speed
     }
 
     fun disableSimulation() {

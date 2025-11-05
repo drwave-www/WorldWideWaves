@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.EventsList
-import com.worldwidewaves.shared.WWWGlobals.Wave
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.WWWSimulation
 import com.worldwidewaves.shared.events.IWWWEvent
@@ -323,11 +322,12 @@ private suspend fun startSimulation(
         val simulationTime = event.getStartDateTime() + simulationDelay
 
         // Create new simulation with unique identifier
+        // Use preferred simulation speed from platform (default 50 m/s or user-selected 1 m/s)
         val simulation =
             WWWSimulation(
                 startDateTime = simulationTime,
                 userPosition = position,
-                initialSpeed = Wave.DEFAULT_SPEED_SIMULATION,
+                initialSpeed = platform.preferredSimulationSpeed.value,
             )
 
         // Atomically reset and set simulation (single notification instead of two)

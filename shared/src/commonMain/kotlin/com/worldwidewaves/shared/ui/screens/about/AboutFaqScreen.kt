@@ -69,6 +69,7 @@ import androidx.compose.ui.unit.sp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.FAQ
+import com.worldwidewaves.shared.WWWGlobals.Wave
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.resources.faq_contents
 import com.worldwidewaves.shared.resources.rules_hierarchy
@@ -109,7 +110,8 @@ fun AboutFaqScreen(
     onUrlOpen: (String) -> Unit = { url ->
         Log.i("AboutFaqScreen", "URL click: $url")
     },
-    onSimulateClick: () -> Unit = {
+    onSimulateClick: (speed: Int) -> Unit = { speed ->
+        platform.setPreferredSimulationSpeed(speed)
         platform.enableSimulationMode()
     },
 ) {
@@ -161,7 +163,7 @@ fun AboutFaqScreen(
                     answer,
                     expandedFaqItem,
                     onExpand = { expandedFaqItem = it },
-                    showSimulateButton = (question == MokoRes.strings.faq_question_7),
+                    showSimulateButtons = (question == MokoRes.strings.faq_question_7),
                     onSimulateClick = onSimulateClick,
                     onUrlOpen = onUrlOpen,
                 )
@@ -293,8 +295,8 @@ private fun FAQItem(
     answerResource: StringResource,
     expandedFaqItem: Int,
     onExpand: (Int) -> Unit,
-    showSimulateButton: Boolean = false,
-    onSimulateClick: () -> Unit,
+    showSimulateButtons: Boolean = false,
+    onSimulateClick: (speed: Int) -> Unit,
     onUrlOpen: (String) -> Unit,
 ) {
     Column(
@@ -332,10 +334,11 @@ private fun FAQItem(
                         contentDescription = "FAQ answer with clickable links"
                     },
             )
-            if (showSimulateButton) {
+            if (showSimulateButtons) {
                 Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
+                // Fast simulation button (50 m/s - default)
                 Button(
-                    onClick = onSimulateClick,
+                    onClick = { onSimulateClick(Wave.DEFAULT_SPEED_SIMULATION) },
                     colors =
                         ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
@@ -343,7 +346,22 @@ private fun FAQItem(
                         ),
                 ) {
                     Text(
-                        text = stringResource(MokoRes.strings.test_simulation),
+                        text = stringResource(MokoRes.strings.test_simulation_fast),
+                        style = sharedCommonBoldStyle(FAQ.RULE_QUESTION_FONTSIZE - 2),
+                    )
+                }
+                Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
+                // Realistic simulation button (1 m/s - normal time)
+                Button(
+                    onClick = { onSimulateClick(1) },
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = MaterialTheme.colorScheme.onSecondary,
+                        ),
+                ) {
+                    Text(
+                        text = stringResource(MokoRes.strings.test_simulation_realistic),
                         style = sharedCommonBoldStyle(FAQ.RULE_QUESTION_FONTSIZE - 2),
                     )
                 }
