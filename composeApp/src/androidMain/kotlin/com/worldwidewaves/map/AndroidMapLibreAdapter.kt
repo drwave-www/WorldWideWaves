@@ -138,13 +138,10 @@ class AndroidMapLibreAdapter(
         }
 
         // Execute any pending callbacks
-        Log.d(TAG, "setMap called, executing ${onMapSetCallbacks.size} pending callbacks")
         onMapSetCallbacks.forEach { callback ->
-            Log.d(TAG, "Executing queued callback")
             callback(this)
         }
         onMapSetCallbacks.clear()
-        Log.d(TAG, "Cleared callback queue")
     }
 
     override fun setStyle(
@@ -178,15 +175,12 @@ class AndroidMapLibreAdapter(
     }
 
     override fun onMapSet(callback: (MapLibreAdapter<*>) -> Unit) {
-        Log.d(TAG, "onMapSet called, mapLibreMap=${mapLibreMap != null}, current queue size=${onMapSetCallbacks.size}")
         if (mapLibreMap != null) {
             // Map is already set, execute callback immediately
-            Log.d(TAG, "Map already set, executing callback immediately")
             callback(this)
         } else {
             // Store callback for execution when map is set
             onMapSetCallbacks.add(callback)
-            Log.d(TAG, "Map not set, queued callback (new queue size: ${onMapSetCallbacks.size})")
         }
     }
 
@@ -615,8 +609,6 @@ class AndroidMapLibreAdapter(
         val map = mapLibreMap ?: return
         val wavePolygons = polygons.filterIsInstance<Polygon>()
 
-        Log.d(TAG, "addWavePolygons: ${wavePolygons.size} polygons, clearExisting=$clearExisting, styleLoaded=$styleLoaded")
-
         // Handle clearing polygons when empty list is provided with clearExisting flag
         // This is used when simulation stops to remove all wave polygons from the map
         if (wavePolygons.isEmpty() && clearExisting) {
@@ -657,9 +649,8 @@ class AndroidMapLibreAdapter(
         }
 
         // Style is loaded - render with iOS-style layer reuse pattern
-        Log.d(TAG, "Style IS loaded, attempting to render ${wavePolygons.size} polygons")
+        Log.d(TAG, "Rendering ${wavePolygons.size} wave polygons")
         map.getStyle { style ->
-            Log.d(TAG, "getStyle callback executing for ${wavePolygons.size} polygons")
             try {
                 // Phase 1: Remove excess layers if polygon count decreased (iOS pattern)
                 if (wavePolygons.size < waveLayerIds.size) {
@@ -696,7 +687,7 @@ class AndroidMapLibreAdapter(
                         addNewPolygon(style, sourceId, layerId, polygon)
                     }
                 }
-                Log.d(TAG, "Successfully rendered ${wavePolygons.size} polygons")
+                Log.d(TAG, "Successfully rendered ${wavePolygons.size} wave polygons")
             } catch (ise: IllegalStateException) {
                 Log.e(TAG, "Map style in invalid state for wave polygons", ise)
             } catch (iae: IllegalArgumentException) {
