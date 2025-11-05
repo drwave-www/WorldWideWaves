@@ -7,7 +7,7 @@
 package com.worldwidewaves.map
 
 import com.worldwidewaves.shared.events.utils.BoundingBox
-import com.worldwidewaves.shared.position.Position
+import com.worldwidewaves.shared.events.utils.Position
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -214,10 +214,9 @@ class AndroidMapLibreAdapterBboxTest {
     private fun createAdapterWithMockMap(map: MapLibreMap): AndroidMapLibreAdapter {
         val adapter = AndroidMapLibreAdapter()
         // In production code, the map is set via setMap() method
-        adapter.setMap("test-map") // This would normally initialize mapLibreMap
+        adapter.setMap(map) // Inject the mocked map
 
-        // Since we can't easily inject the mock, we'll use a test double
-        // For now, return the adapter that will use the mocked map
+        // Return the adapter with the mocked map
         return adapter
     }
 }

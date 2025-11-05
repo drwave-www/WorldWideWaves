@@ -71,6 +71,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.koin.test)
             implementation(libs.mockk.android.v1120)
+            implementation(projects.shared)
         }
         androidInstrumentedTest.dependencies {
             implementation(libs.androidx.junit)
