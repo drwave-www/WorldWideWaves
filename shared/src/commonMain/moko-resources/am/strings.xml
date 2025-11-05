@@ -284,8 +284,8 @@
   <string name="faq_answer_6">የተመከሩ እርምጃዎች፣ እንቅስቃሴዎች እና ቦታዎች ዝርዝርን በ https://luma.com/worldwidewaves ላይ ታገኛሉ.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">ሞገድን እንዴት ማመሳሰል እችላለሁ?</string>
-  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
-  <string name="faq_answer_7">የማመሳሰል ሁነታን ለማንቃት ከታች ያለውን አዝራር ይንኩ። በክስተት ገጾች ላይ ከ"Join the wave" አዝራር አጠገብ ያለውን የታይመር አዝራር በመጠቀም ማመሳሰሉን ይጀምሩ፤ ይህ የዚህ ክስተት ባህሪዎችን (ቀን፣ ሰዓት፣ ቦታ) ይጠቀማል። ማመሳሰሉን ለማቆም ደግሞ ተመሳሳይ አዝራር ይጠቀሙ። መጨረሻም ከጨረሱ በኋላ በሁልጊዜ የሚታይ ንብርብር ላይ ያለውን የማቆሚያ አዶ በመጠቀም የማመሳሰል ሁነታውን ያቁሙ።</string>
+  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
+  <string name="faq_answer_7">ስምሌሽን ሁነታን ለማንቃት ከታች ያለውን ቁልፍ ይንኩ. በክስተት ገጾች ላይ በቦታው ምስል ላይ ከላይ ግራ ያለውን "play" ቁልፍ በመጠቀም ቀን፣ ሰዓትና ቦታውን እያካተተ ስምሌሽን ይጀምሩ. ለማቆም ደግሞ ያውኑን ቁልፍ ይጠቀሙ. ሲጨርሱ በቋሚ ኦቭርሌይ ላይ ያለውን የማቆሚያ አዶ ተጠቅመው የስምሌሽን ሁነታን ያቁሙ.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">አሜሪካ</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -628,8 +628,8 @@
   <string name="action_message_phrase_5">ለለውጥ እንቅፋቶችን ያስወግዱ.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">አካባቢን ያድምጡ፣ በአንድነት ዝግጁ ይሁኑ.</string>
-  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
-  <string name="action_message_section_1">ከጉዳት መቆጣጠር ወደ ዝግጁነት መቀየር አለብን። ሙቀት ከተወሰኑት አላማዎች ይበልጣል፣ ስለዚህ ማህበረሰቦች አሁን ግልጽ መመሪያ፣ ልምምዶች እና ቀላል መሳሪያዎች ይፈልጋሉ.</string>
+  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
+  <string name="action_message_section_1">ከጉዳት መቆጣጠር ወደ ድንጋጤ ዝግጁነት መቀየር አለብን። የሙቀት መጠን ከተመደቡት አላማዎች ይበልጣል፣ ስለዚህ ማህበረሰቦች አሁን ግልጽ መመሪያ፣ ልምምዶች እና ቀላል መሳሪያዎች ያስፈልጋቸዋል።</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">ይህ ከተጋራ እውነታ ይጀምራል። መንግስታት፣ ኩባንያዎች እና የህብረተሰብ መሪዎች እውነታዎችን በአንድነት ይገልጹ፣ መረጃን ይክፈቱ እና የጊዜ መስመሮችን ያስማሙ እንዲሁም እርምጃ የተቀናጀ እንጂ የተበታተነ እንዳይሆን።
 

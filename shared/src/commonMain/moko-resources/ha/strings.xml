@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Za ka iya samun jerin shawarwarin matakai, ayyuka, da wurare a https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Ta yaya zan iya kwaikwayon igiya?</string>
-  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
-  <string name="faq_answer_7">Danna maɓallin da ke ƙasa don kunna yanayin kwaikwayo. A kan allon taro, yi amfani da maɓallin agogo kusa da maɓallin “Shiga igiya” don fara kwaikwayo da bayanan wannan taron (kwanan wata, lokaci, wuri). Don dakatar da kwaikwayon, yi amfani da wannan maɓallin. A ƙarshe, kashe yanayin kwaikwayo ta amfani da alamar tsayawa a saman ɓangaren da ke ci gaba da kasancewa idan ka gama.</string>
+  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
+  <string name="faq_answer_7">Taɓa maɓallin da ke ƙasa don kunna yanayin kwaikwayo. A allon taro, yi amfani da maɓallin "play" a kusurwar sama ta hagu na hoton wurin don fara kwaikwayo bisa bayanan taron (kwanan wata, lokaci, wuri). Don dakatar da kwaikwayon, yi amfani da wannan maɓallin. Da zarar an gama, daina yanayin kwaikwayo ta amfani da alamar tsayawa a kan murfin saman allo na dindindin.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">Amurka</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -628,8 +628,8 @@
   <string name="action_message_phrase_5">Cire shingayen da ke hana sauyi.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">Saurari na gida, ku shirya tare.</string>
-  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
-  <string name="action_message_section_1">Dole mu sauya daga sarrafa ɓarna zuwa shiri. Zafin jiki zai wuce manufofin da aka sa, don haka al'ummomi na buƙatar jagoranci a bayyane, atisaye, da kayan aiki masu sauƙi yanzu.</string>
+  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
+  <string name="action_message_section_1">Dole mu sauya daga rage barna zuwa shirin fuskantar girgiza. Zafin jiki zai wuce manufofin da aka sa, don haka al’ummomi na bukatar jagora a fili, atisa’i, da kayan aiki masu sauƙi yanzu.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">Wannan yana farawa da gaskiya gama-gari. Gwamnatoci, kamfanoni, da shugabannin al'umma su bayyana gaskiya tare, su buɗe bayanai, su daidaita jadawalin lokaci domin aiki ya kasance cikin tsari, ba a rarrabce ba.\n\nDon kare rayuka, a bi hanyar rage tashin hankali cikin lumana a rikice-rikicen siyasar duniya, kuma a mayar da albarkatu kan tsira da daidaiton rayuwar ɗan adam.\n\nA tattaro a matakin koli tare da jihohi, kamfanoni, da wakilan jama'a don gabatar da shawarwari, ware masu alhaki, kuma a rika ba da rahoton ci gaba.\n\nA cire shingaye ta hanyar ba da izinin gwaje-gwajen farko, daidaita ƙa'idoji, kuma a fi maida kuɗi kan juriya da samun sauƙin amfani da farko.</string>
   <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->

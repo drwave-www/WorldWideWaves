@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Eine Liste vorgeschlagener Aktionen, Aktivitäten und Orte findest du unter https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Wie kann ich eine Welle simulieren?</string>
-  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
-  <string name="faq_answer_7">Tippe unten auf die Schaltfläche, um den Simulationsmodus zu aktivieren. Auf den Event-Seiten starte die Simulation mit dem Timer-Symbol neben dem Button "Der Welle beitreten" – dabei werden die Eigenschaften dieses Events (Datum, Uhrzeit, Ort) verwendet. Zum Beenden der Simulation das gleiche Symbol erneut verwenden. Den Simulationsmodus schließlich über das Stopp-Symbol auf der dauerhaft sichtbaren Ebene beenden.</string>
+  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
+  <string name="faq_answer_7">Tippe unten auf die Schaltfläche, um den Simulationsmodus zu aktivieren. In den Veranstaltungsansichten startest du eine Simulation mit den Eigenschaften der Veranstaltung (Datum, Uhrzeit, Ort) über die "Play"-Schaltfläche oben links auf dem Standortbild. Um die Simulation zu stoppen, verwende dieselbe Schaltfläche. Wenn du fertig bist, beende den Simulationsmodus über das Stopp-Symbol in der permanenten Einblendung.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -628,8 +628,8 @@
   <string name="action_message_phrase_5">Hindernisse für Wandel beseitigen.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">Lokal zuhören, gemeinsam vorbereiten.</string>
-  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
-  <string name="action_message_section_1">Wir müssen von Schadensbegrenzung zu Bereitschaft wechseln. Die Temperaturen werden die Ziele überschreiten, daher brauchen Gemeinschaften jetzt klare Leitlinien, Übungen und einfache Werkzeuge.</string>
+  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
+  <string name="action_message_section_1">Wir müssen von der Schadensbegrenzung zur Krisenbereitschaft für Schocks übergehen. Die Temperaturen werden die Zielwerte überschreiten; deshalb brauchen Gemeinschaften schon jetzt klare Leitlinien, Übungen und einfache Werkzeuge.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">Das beginnt mit einer gemeinsamen Realität. Regierungen, Unternehmen und zivilgesellschaftliche Führungspersonen sollten Fakten gemeinsam benennen, Daten öffnen und Zeitpläne abstimmen, damit Handeln koordiniert statt fragmentiert ist.
 

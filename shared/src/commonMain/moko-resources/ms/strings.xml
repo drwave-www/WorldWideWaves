@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Anda boleh mendapatkan senarai tindakan, aktiviti, dan tempat yang dicadangkan di https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Bagaimana saya boleh mensimulasikan gelombang?</string>
-  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
-  <string name="faq_answer_7">Ketik butang di bawah untuk mengaktifkan mod simulasi. Pada skrin acara, gunakan butang pemasa berhampiran butang "Join the wave" untuk memulakan simulasi menggunakan sifat acara ini (tarikh, masa, lokasi). Untuk menghentikan simulasi, gunakan butang yang sama. Akhir sekali, hentikan mod simulasi menggunakan ikon berhenti pada lapisan yang kekal apabila anda selesai.</string>
+  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
+  <string name="faq_answer_7">Ketuk butang di bawah untuk mengaktifkan mod simulasi. Pada skrin acara, gunakan butang "play" di kiri atas imej lokasi untuk memulakan simulasi menggunakan butiran acara tersebut (tarikh, masa, lokasi). Untuk menghentikan simulasi, gunakan butang yang sama. Apabila selesai, hentikan mod simulasi menggunakan ikon "stop" pada lapisan kekal yang sentiasa terpapar.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">Amerika Syarikat</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -628,8 +628,8 @@
   <string name="action_message_phrase_5">Hapuskan halangan kepada perubahan.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">Dengar suara tempatan, bersiap bersama.</string>
-  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
-  <string name="action_message_section_1">Kita mesti beralih daripada kawalan kerosakan kepada kesiapsiagaan. Suhu akan melepasi sasaran, jadi komuniti memerlukan panduan yang jelas, latih tubi, dan alat ringkas sekarang.</string>
+  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
+  <string name="action_message_section_1">Kita mesti beralih daripada kawalan kerosakan kepada kesiapsiagaan menghadapi kejutan. Suhu akan melebihi sasaran, oleh itu komuniti memerlukan panduan yang jelas, latihan, dan alat ringkas sekarang.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">Ini bermula dengan realiti bersama. Kerajaan, syarikat, dan pemimpin sivik harus menyatakan fakta bersama, membuka data, dan menyelaraskan garis masa supaya tindakan terselaras, bukan terpecah-pecah.
 

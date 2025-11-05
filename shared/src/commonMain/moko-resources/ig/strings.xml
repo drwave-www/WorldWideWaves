@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Ị nwere ike ịhụ ndepụta ihe a tụrụ aro—omume, ọrụ, na ebe—na https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Olee otú m ga-esi nwalee ebili?</string>
-  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
-  <string name="faq_answer_7">Pịa bọtịnụ dị n’okpuru iji kpalite ọnọdụ nnwale. Na ihuenyo mmemme, jiri bọtịnụ taịma dị nso na bọtịnụ "Join the wave" iji bido nnwale site n’iji njirimara mmemme a (ụbọchị, oge, ebe). Iji kwụsị nnwale, jiri bọtịnụ ahụ. N’ikpeazụ, kwụsị ọnọdụ nnwale site n’iji ikọn nkwụsị dị na ogwe na-anọgide n’elu ihuenyo mgbe ị gụchara.</string>
+  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
+  <string name="faq_answer_7">Pịa bọtịnụ dị n'okpuru iji kpalite ọnọdụ simulashọn. Na ihuenyo ihe omume, jiri bọtịnụ "play" dị n'elu aka ekpe nke onyonyo nke ebe ahụ iji malite simulashọn site na njirimara ihe omume ahụ (ụbọchị, oge, ebe). Iji kwụsị simulashọn, jiri otu bọtịnụ ahụ. Mgbe ị gwụchara, kwụsị ọnọdụ simulashọn site n'iji akara ngosi "stop" dị na mpuchi na-anọgide n'elu ihuenyo.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -628,8 +628,8 @@
   <string name="action_message_phrase_5">Wepụ ihe na-egbochi mgbanwe.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">Gee ndị obodo ntị, kwadebe ọnụ.</string>
-  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
-  <string name="action_message_section_1">Anyị kwesịrị ịgbanwe site n’ịchịkwa mmebi gaa na nkwadebe. Okpomọkụ ga-agafe ebumnuche a tụrụ, ya mere obodo chọrọ nduzi doro anya, mmega mberede, na ngwá ọrụ dị mfe—ugbu a.</string>
+  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
+  <string name="action_message_section_1">Anyị kwesịrị ịgbanwe site n’ịchịkwa mmebi gaa n’ịdị njikere maka mberede. Okpomọkụ ga-agafe ebumnuche e tụrụ, ya mere obodo chọrọ nduzi doro anya, mmega mberede, na ngwaọrụ dị mfe ugbu a.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">Nke a na-amalite na eziokwu a na-ekekọrịta. Gọọmenti, ụlọ ọrụ na ndị isi ọha kwesịrị ikwupụta eziokwu ọnụ, mepee data, ma kwekọọ ihe ndokwa oge ka omume bụrụ nke a haziri nke ọma, ọ bụghị nke agbajapụrụ.
 

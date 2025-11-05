@@ -284,8 +284,8 @@
   <string name="faq_answer_6">O lè rí àkójọ àwọn ìgbésẹ̀, àwọn iṣẹ́-ṣe, àti àwọn ibi tí a daba ní https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Báwo ni mo ṣe lè ṣe àfọwọ́kọ ìgbì?</string>
-  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
-  <string name="faq_answer_7">Tẹ bọ́tìnì tó wà ní isalẹ láti mu ìpo àfọwọ́kọ ṣiṣẹ́. Lórí iboju ìṣẹ̀lẹ̀, lo bọ́tìnì aago tó sún mọ́ bọ́tìnì "Join the wave" láti bẹ̀rẹ̀ àfọwọ́kọ pẹ̀lú àwọn àtọka ìṣẹ̀lẹ̀ yìí (ọjọ́, àkókò, ibi). Láti dá àfọwọ́kọ dúró, lo bọ́tìnì kan náà. Ní ìkẹyìn, dá ìpo àfọwọ́kọ dúró pẹ̀lú àmì idádúró lórí fẹ́lẹ̀fẹ́lẹ̀ tó ń wà níbẹ̀ nígbà gbogbo nígbà tí o bá parí.</string>
+  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
+  <string name="faq_answer_7">Tẹ bọ́tìnì ní isalẹ láti mu ipo ìṣe àfọwọ́kọ ṣiṣẹ. Lórí àwọn iboju ìṣẹ̀lẹ̀, lo bọ́tìnì "play" ní òkè-òsì ti àwòrán ipo láti bẹ̀rẹ̀ ìṣe àfọwọ́kọ pẹ̀lú àwọn àbùdá ìṣẹ̀lẹ̀ yẹn (ọjọ́, àkókò, ipo). Láti dá ìṣe àfọwọ́kọ dúró, lo bọ́tìnì kan náà. Nígbà tí o bá parí, dá ipo ìṣe àfọwọ́kọ dúró nípasẹ̀ àmì "stop" lórí àgbékalẹ̀ tó ń dúró lórí iboju nígbà gbogbo.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -628,8 +628,8 @@
   <string name="action_message_phrase_5">Yọ ìdènà kúrò kí ìyípadà lè ṣẹlẹ̀.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">Feti sí ti agbègbè, mura pọ̀.</string>
-  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
-  <string name="action_message_section_1">Gbọ́dọ̀ yí padà kúrò ní ìṣàkóso ìpalára sí ìmúríyà. Ìgbóná yóò kọjá ibi-afẹ̀, nítorí náà, àwọn àwùjọ nílò ìtọ́sọ́nà kedere, ìdárayá ìmúríyà, àti irinṣẹ́ rọrùn ní báyìí.</string>
+  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
+  <string name="action_message_section_1">A gbọ́dọ̀ yí padà kúrò ní ìṣàkóso ìpalára sí ìmúrẹ́lẹ̀ sí ìṣẹ̀lẹ̀ lójiji. Ìwọn ìgbóná ojú-ọjọ̀ yóò kọjá ibi-afẹ́de, nítorí náà, àwọn àwùjọ nílò ìtọ́nisọ́nà kedere, ẹ̀kọ́ ìmúlò ìmúrẹ́lẹ̀, àti irinṣẹ́ rọrùn ní báyìí.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">Èyí bẹ̀rẹ̀ pẹ̀lú òtítọ́ tí a pín pọ̀. Ìjọba, ilé-iṣẹ́, àti àwọn olórí àwùjọ yẹ kí wọ́n jọ sọ òtítọ́, ṣí data sílẹ̀, kí wọ́n sì ṣọ̀kan àsìkò kí ìṣe lè rọ̀pọ̀, kì í ṣe kí ó ya sílẹ̀.
 

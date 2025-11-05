@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Bạn có thể xem danh sách các hành động, hoạt động và địa điểm được đề xuất tại https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Tôi mô phỏng một làn sóng như thế nào?</string>
-  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
-  <string name="faq_answer_7">Nhấn nút bên dưới để bật chế độ mô phỏng. Trên màn hình sự kiện, dùng nút hẹn giờ gần nút "Tham gia làn sóng" để bắt đầu mô phỏng theo thuộc tính của sự kiện này (ngày, giờ, địa điểm). Để dừng mô phỏng, dùng lại nút đó. Cuối cùng, khi xong, hãy tắt chế độ mô phỏng bằng biểu tượng dừng trên lớp luôn hiển thị.</string>
+  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
+  <string name="faq_answer_7">Nhấn nút bên dưới để bật chế độ mô phỏng. Trên màn hình sự kiện, dùng nút "phát" ở góc trên bên trái của ảnh địa điểm để bắt đầu mô phỏng với các thuộc tính của sự kiện đó (ngày, giờ, địa điểm). Để dừng mô phỏng, dùng cùng nút đó. Khi xong, tắt chế độ mô phỏng bằng biểu tượng dừng trên lớp phủ luôn hiển thị.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">Hoa Kỳ</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -628,8 +628,8 @@
   <string name="action_message_phrase_5">Gỡ bỏ rào cản để thay đổi.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">Lắng nghe địa phương, cùng chuẩn bị.</string>
-  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
-  <string name="action_message_section_1">Chúng ta phải chuyển từ xử lý hậu quả sang trạng thái sẵn sàng. Nhiệt độ sẽ vượt mục tiêu, vì vậy cộng đồng cần hướng dẫn rõ ràng, diễn tập và các công cụ đơn giản ngay bây giờ.</string>
+  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
+  <string name="action_message_section_1">Chúng ta phải chuyển từ đối phó hậu quả sang sẵn sàng trước các cú sốc. Nhiệt độ sẽ vượt các mục tiêu đề ra, vì vậy cộng đồng cần hướng dẫn rõ ràng, diễn tập và các công cụ đơn giản ngay bây giờ.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">Điều này bắt đầu từ một thực tại chung. Chính phủ, doanh nghiệp và các lãnh đạo xã hội dân sự cần cùng nhau nêu rõ sự thật, mở dữ liệu và đồng bộ mốc thời gian để hành động được phối hợp, không rời rạc.
 

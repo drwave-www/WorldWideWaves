@@ -284,8 +284,8 @@
   <string name="faq_answer_6">https://luma.com/worldwidewaves 에서 제안된 행동, 활동, 장소 목록을 확인할 수 있습니다.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">웨이브를 어떻게 시뮬레이션하나요?</string>
-  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
-  <string name="faq_answer_7">아래 버튼을 눌러 시뮬레이션 모드를 활성화하세요. 이벤트 화면에서 "Join the wave" 버튼 옆의 타이머 버튼을 사용해 이 이벤트의 속성(날짜, 시간, 위치)으로 시뮬레이션을 시작합니다. 중지하려면 같은 버튼을 다시 누르세요. 완료되면 항상 표시되는 레이어의 중지 아이콘으로 시뮬레이션 모드를 종료하세요.</string>
+  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
+  <string name="faq_answer_7">아래 버튼을 눌러 시뮬레이션 모드를 활성화하세요. 이벤트 화면에서 장소 이미지의 왼쪽 상단에 있는 "재생" 버튼으로 해당 이벤트의 속성(날짜, 시간, 장소)으로 시뮬레이션을 시작하세요. 중지하려면 같은 버튼을 사용하세요. 완료되면 항상 표시되는 오버레이의 중지 아이콘으로 시뮬레이션 모드를 종료하세요.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">미국</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -628,8 +628,8 @@
   <string name="action_message_phrase_5">변화의 장애물을 제거하자.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">현지의 목소리를 듣고 함께 준비하자.</string>
-  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
-  <string name="action_message_section_1">이제 피해 수습에서 대비로 전환해야 합니다. 온도는 목표를 넘어설 것이므로, 지역사회는 지금 명확한 지침과 훈련, 간단한 도구가 필요합니다.</string>
+  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
+  <string name="action_message_section_1">사후 수습에서 충격 대비로 전환해야 합니다. 기온이 목표치를 넘을 것이므로, 지역사회에는 지금 명확한 지침, 모의훈련, 간단한 도구가 필요합니다.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">이는 공동의 현실 인식에서 시작됩니다. 정부, 기업, 시민사회 리더가 함께 사실을 밝히고, 데이터를 개방하며, 일정을 맞춰 행동이 분절되지 않고 조정되도록 해야 합니다.\n\n생명을 보호하려면 지정학적 긴장을 평화적으로 완화하고, 자원을 인간의 생존과 안정에 다시 집중해야 합니다.\n\n국가, 기업, 시민 대표가 최고 수준에서 모여 제안을 상정하고, 책임자를 지정하며, 진행 상황을 보고해야 합니다.\n\n시범사업을 신속히 승인하고, 표준을 정합화하며, 회복력과 접근성에 우선 투자해 장애물을 제거해야 합니다.</string>
   <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->

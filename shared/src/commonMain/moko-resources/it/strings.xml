@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Trovi un elenco di azioni, attività e luoghi proposti su https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Come posso simulare un’onda?</string>
-  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
-  <string name="faq_answer_7">Tocca il pulsante qui sotto per attivare la modalità simulazione. Nelle schermate dell’evento usa il pulsante timer vicino al pulsante "Unisciti all’onda" per avviare la simulazione usando le proprietà di questo evento (data, ora, luogo). Per interrompere la simulazione, usa lo stesso pulsante. Infine, quando hai finito, disattiva la modalità simulazione con l’icona di stop sull’overlay persistente.</string>
+  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
+  <string name="faq_answer_7">Tocca il pulsante qui sotto per attivare la modalità simulazione. Nelle schermate dell'evento, usa il pulsante "play" in alto a sinistra sull'immagine del luogo per avviare una simulazione con le proprietà di quell'evento (data, ora, luogo). Per interrompere la simulazione, usa lo stesso pulsante. Al termine, disattiva la modalità simulazione usando l'icona di stop sull'overlay persistente.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -628,8 +628,8 @@
   <string name="action_message_phrase_5">Rimuovere gli ostacoli al cambiamento.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">Ascoltare il territorio, prepararci insieme.</string>
-  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
-  <string name="action_message_section_1">Dobbiamo passare dal contenimento dei danni alla preparazione. Le temperature supereranno gli obiettivi, quindi alle comunità servono subito indicazioni chiare, esercitazioni e strumenti semplici.</string>
+  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
+  <string name="action_message_section_1">Dobbiamo passare dalla gestione dei danni alla preparazione agli shock. Le temperature supereranno gli obiettivi, quindi le comunità hanno bisogno ora di indicazioni chiare, esercitazioni e strumenti semplici.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">Questo inizia da una realtà condivisa. Governi, imprese e leader civici dovrebbero dichiarare insieme i fatti, aprire i dati e allineare le tempistiche, così che l’azione sia coordinata e non frammentata.\n\nPer proteggere la vita, perseguire una de-escalation pacifica delle tensioni geopolitiche e rifocalizzare le risorse sulla sopravvivenza e la stabilità umana.\n\nRiunirsi al massimo livello con stati, imprese e rappresentanti pubblici per presentare proposte, assegnare responsabili e rendicontare i progressi.\n\nRimuovere gli ostacoli autorizzando progetti pilota, armonizzando gli standard e finanziando prima di tutto resilienza e accessibilità.</string>
   <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->

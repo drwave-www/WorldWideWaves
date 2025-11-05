@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Ungathola uhlu lwezenzo, imisebenzi, nezindawo eziphakanyisiwe ku-https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Ngingalingisa kanjani igagasi?</string>
-  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
-  <string name="faq_answer_7">Thepha inkinobho engezansi ukuze uvule imodi yokulingisa. Ezikrinini zomcimbi, sebenzisa inkinobho yesibali sikhathi esiseduze kwebhathini elithi "Join the wave" ukuze uqale ukulingisa usebenzisa imininingwane yalomcimbi (usuku, isikhathi, indawo). Ukuwumisa, sebenzisa leyo nkinobho efanayo. Ekugcineni, misa imodi yokulingisa usebenzisa isithonjana sokumisa kusendlalelo esihlala sibonakala uma usuqedile.</string>
+  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
+  <string name="faq_answer_7">Thepha inkinobho engezansi ukuze uqalise imodi yokulingisa. Ezikrinini zomcimbi, sebenzisa inkinobho ethi "play" ekhoneni eliphezulu kwesokunxele kwesithombe sendawo ukuze uqale ukulingisa usebenzisa imininingwane yalowo mcimbi (usuku, isikhathi, indawo). Ukumisa ukulingisa, sebenzisa inkinobho efanayo. Uma usuqedile, misa imodi yokulingisa usebenzisa isithonjana sokumisa esikungqimba olungaphezulu oluhlala lubonakala.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -628,8 +628,8 @@
   <string name="action_message_phrase_5">Susa izithiyo zoshintsho.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">Lalelani abakule ndawo, nilungise ndawonye.</string>
-  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
-  <string name="action_message_section_1">Kumele sishintshe sisuke ekulawuleni umonakalo siye ekulungeleleni. Izinga lokushisa lizodlula izinhloso, ngakho imiphakathi idinga imiyalelo ecacile, izivivinyo, namathuluzi alula manje.</string>
+  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
+  <string name="action_message_section_1">Kumelwe sishintshe sisuke ekulawuleni umonakalo siye ekulungiseleleni ukushaqeka. Amazinga okushisa azodlula izinhloso ezibekiwe, ngakho imiphakathi idinga isiqondiso esicacile, izivivinyo, namathuluzi alula manje.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">Lokhu kuqala ngeqiniso elihlanganyelwayo. Ohulumeni, izinkampani, nabaholi bomphakathi kufanele baveze amaqiniso ndawonye, bavule idatha, futhi bahambise izinsuku nezikhathi ukuze isenzo sihlanganyelwe, hhayi sihlakazeke.
 

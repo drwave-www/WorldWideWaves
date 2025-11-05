@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Găsești o listă de acțiuni, activități și locuri propuse pe https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Cum pot simula un val?</string>
-  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
-  <string name="faq_answer_7">Atinge butonul de mai jos pentru a activa modul de simulare. Pe ecranele evenimentului, folosește butonul de cronometru de lângă butonul „Alătură-te valului” pentru a porni simularea folosind proprietățile acestui eveniment (dată, oră, locație). Pentru a opri simularea, folosește același buton. Iar la final, oprește modul de simulare folosind pictograma de oprire din suprapunerea persistentă.</string>
+  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
+  <string name="faq_answer_7">Atinge butonul de mai jos pentru a activa modul de simulare. Pe ecranele evenimentelor, folosește butonul „play” din stânga sus a imaginii locației pentru a porni o simulare folosind proprietățile evenimentului respectiv (data, ora, locația). Pentru a opri simularea, folosește același buton. La final, oprește modul de simulare folosind pictograma de oprire de pe suprapunerea persistentă.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">SUA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -628,8 +628,8 @@
   <string name="action_message_phrase_5">Eliminați blocajele din calea schimbării.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">Ascultați local, pregătiți împreună.</string>
-  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
-  <string name="action_message_section_1">Trebuie să trecem de la gestionarea pagubelor la pregătire. Temperaturile vor depăși țintele, așa că comunitățile au nevoie acum de îndrumări clare, exerciții și instrumente simple.</string>
+  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
+  <string name="action_message_section_1">Trebuie să trecem de la gestionarea pagubelor la pregătirea pentru șocuri. Temperaturile vor depăși țintele, așa că comunitățile au nevoie acum de îndrumări clare, exerciții și instrumente simple.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">Asta începe cu o realitate comună. Guvernele, companiile și liderii civici ar trebui să prezinte împreună faptele, să deschidă datele și să alinieze calendarele, astfel încât acțiunea să fie coordonată, nu fragmentată.\n\nPentru a proteja viața, urmăriți dezescaladarea pașnică a tensiunilor geopolitice și reorientați resursele către supraviețuirea și stabilitatea umană.\n\nConvocați la cel mai înalt nivel statele, întreprinderile și reprezentanții publici pentru a pune pe masă propuneri, a desemna responsabili și a raporta progresul.\n\nEliminați blocajele prin aprobarea proiectelor pilot, armonizarea standardelor și finanțarea cu prioritate a rezilienței și accesibilității.</string>
   <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->

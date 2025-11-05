@@ -284,8 +284,8 @@
   <string name="faq_answer_6">https://luma.com/worldwidewaves で提案されているアクション、アクティビティ、場所の一覧を確認できます。</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">ウェーブをシミュレーションするには？</string>
-  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
-  <string name="faq_answer_7">下のボタンをタップしてシミュレーションモードを有効にします。イベント画面では、「ウェーブに参加」ボタンの近くにあるタイマーボタンで、このイベントの情報（日時・場所）を使ったシミュレーションを開始できます。停止するときは同じボタンを使ってください。最後に、完了したら常時表示のレイヤーの停止アイコンでシミュレーションモードを終了します。</string>
+  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
+  <string name="faq_answer_7">下のボタンをタップしてシミュレーションモードを有効にします。イベント画面では、場所画像の左上にある「再生」ボタンで、そのイベントの設定（日付・時刻・場所）を使ってシミュレーションを開始できます。停止は同じボタンです。終わったら、常時表示のオーバーレイ上の停止アイコンでシミュレーションモードを終了してください。</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">米国</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -628,8 +628,8 @@
   <string name="action_message_phrase_5">変化を妨げるものを取り除く。</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">地域の声を聴き、共に備える。</string>
-  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
-  <string name="action_message_section_1">被害対応から備えへ転換しなければなりません。気温は目標を上回るでしょう。だからこそ今、地域社会には明確な指針、訓練、簡単に使えるツールが必要です。</string>
+  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
+  <string name="action_message_section_1">被害の後始末から、気候ショックへの備えへと転換しなければなりません。気温は目標を上回るため、地域社会には今すぐ、明確な指針、訓練、そして簡便なツールが必要です。</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">これは、共有された現実から始まります。政府、企業、市民リーダーが事実を共に明言し、データを公開し、タイムラインをそろえて、行動が断片化ではなく連携されるようにする。
 

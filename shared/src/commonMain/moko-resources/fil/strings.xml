@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Makakakita ka ng listahan ng mga mungkahing aksyon, aktibidad, at lugar sa https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Paano ako mag-simulate ng alon?</string>
-  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
-  <string name="faq_answer_7">I-tap ang button sa ibaba para i-activate ang simulation mode. Sa mga screen ng event, gamitin ang timer button na malapit sa "Join the wave" button para simulan ang simulation gamit ang mga katangian ng event na ito (petsa, oras, lokasyon). Para ihinto ang simulation, gamitin ang parehong button. Pagkatapos, ihinto ang simulation mode gamit ang stop icon sa nananatiling layer kapag tapos ka na.</string>
+  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
+  <string name="faq_answer_7">I-tap ang button sa ibaba para i-activate ang simulation mode. Sa mga screen ng event, gamitin ang button na "play" sa itaas-kaliwa ng imahe ng lokasyon para magsimula ng simulation gamit ang mga detalye ng event (petsa, oras, lokasyon). Para ihinto ang simulation, gamitin ang parehong button. Kapag tapos na, ihinto ang simulation mode gamit ang icon na "stop" sa palagiang overlay.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -628,8 +628,8 @@
   <string name="action_message_phrase_5">Alisin ang mga hadlang sa pagbabago.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">Makinig sa lokal, maghanda nang sama-sama.</string>
-  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
-  <string name="action_message_section_1">Dapat tayong lumipat mula sa pagresponde sa pinsala tungo sa kahandaan. Hihigit sa mga target ang mga temperatura, kaya kailangan na ng mga komunidad ng malinaw na gabay, mga pagsasanay, at simpleng kasangkapan.</string>
+  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
+  <string name="action_message_section_1">Dapat tayong lumipat mula sa pamamahala ng pinsala tungo sa kahandaan sa mga dagok. Lalagpas sa mga target ang temperatura, kaya kailangan na ngayon ng mga komunidad ang malinaw na gabay, mga drill, at simpleng kagamitan.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">Nagsisimula ito sa magkatuwang na pagharap sa realidad. Dapat sabay-sabay na magpahayag ng mga katotohanan ang mga pamahalaan, kumpanya, at mga pinunong sibiko, magbukas ng datos, at iayon ang mga iskedyul upang magkakaugnay ang pagkilos, hindi pira-piraso.
 

@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Je vindt een lijst met voorgestelde acties, activiteiten en plekken op https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Hoe kan ik een wave simuleren?</string>
-  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
-  <string name="faq_answer_7">Tik op de knop hieronder om de simulatiemodus te activeren. Op de evenementenschermen gebruik je de timerknop naast de knop "Join the wave" om de simulatie te starten met de eigenschappen van dit evenement (datum, tijd, locatie). Gebruik dezelfde knop om de simulatie te stoppen. Beëindig tot slot de simulatiemodus via het stop-icoon op de vaste overlay wanneer je klaar bent.</string>
+  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
+  <string name="faq_answer_7">Tik op de knop hieronder om de simulatiemodus te activeren. Op de evenementenschermen gebruik je de "play"-knop linksboven op de afbeelding van de locatie om een simulatie te starten met de eigenschappen van dat evenement (datum, tijd, locatie). Om de simulatie te stoppen, gebruik je dezelfde knop. Als je klaar bent, stop je de simulatiemodus met het stoppictogram op de permanente overlay.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">VS</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -628,8 +628,8 @@
   <string name="action_message_phrase_5">Verwijder blokkades voor verandering.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">Luister lokaal, bereid samen voor.</string>
-  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
-  <string name="action_message_section_1">We moeten verschuiven van schadebeperking naar voorbere idheid. Temperaturen zullen de doelen overschrijden, dus gemeenschappen hebben nu duidelijke richtlijnen, oefeningen en eenvoudige hulpmiddelen nodig.</string>
+  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
+  <string name="action_message_section_1">We moeten omschakelen van schadebeperking naar paraatheid voor schokken. De temperatuur zal de doelstellingen overschrijden, dus hebben gemeenschappen nu duidelijke richtlijnen, oefeningen en eenvoudige hulpmiddelen nodig.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">Dit begint met een gedeelde realiteit. Overheden, bedrijven en maatschappelijke leiders moeten samen de feiten benoemen, data openstellen en tijdlijnen op elkaar afstemmen zodat actie gecoördineerd is, niet versnipperd.\n\nOm levens te beschermen: zet in op vreedzame de-escalatie van geopolitieke spanningen en richt middelen opnieuw op menselijk overleven en stabiliteit.\n\nKom op het hoogste niveau bijeen met staten, ondernemingen en publieke vertegenwoordigers om voorstellen op tafel te leggen, eigenaars aan te wijzen en voortgang te rapporteren.\n\nVerwijder blokkades door pilots groen licht te geven, standaarden te harmoniseren en eerst veerkracht en toegankelijkheid te financieren.</string>
   <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->

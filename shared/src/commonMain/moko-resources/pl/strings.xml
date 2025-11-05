@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Listę proponowanych działań, aktywności i miejsc znajdziesz na https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Jak zasymulować falę?</string>
-  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
-  <string name="faq_answer_7">Stuknij przycisk poniżej, aby włączyć tryb symulacji. Na ekranach wydarzeń użyj przycisku timera obok przycisku "Dołącz do fali", aby uruchomić symulację z użyciem parametrów tego wydarzenia (data, godzina, lokalizacja). Aby zatrzymać symulację, użyj tego samego przycisku. Na koniec wyłącz tryb symulacji, stukając ikonę stop na stale widocznej nakładce, gdy skończysz.</string>
+  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
+  <string name="faq_answer_7">Stuknij przycisk poniżej, aby włączyć tryb symulacji. Na ekranach wydarzeń użyj przycisku "play" w lewym górnym rogu obrazu lokalizacji, aby uruchomić symulację z parametrami tego wydarzenia (data, godzina, lokalizacja). Aby zatrzymać symulację, użyj tego samego przycisku. Po zakończeniu wyłącz tryb symulacji, używając ikony stop na stałej nakładce.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -628,8 +628,8 @@
   <string name="action_message_phrase_5">Usuńmy przeszkody na drodze do zmian.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">Słuchajmy lokalnie, przygotowujmy się razem.</string>
-  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
-  <string name="action_message_section_1">Musimy przejść od doraźnego reagowania do gotowości. Temperatury przekroczą wyznaczone cele, więc społeczności potrzebują już teraz jasnych wytycznych, ćwiczeń i prostych narzędzi.</string>
+  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
+  <string name="action_message_section_1">Musimy przejść od kontroli szkód do gotowości na wstrząsy. Temperatury przekroczą cele, więc społeczności potrzebują teraz jasnych wytycznych, ćwiczeń i prostych narzędzi.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">To zaczyna się od wspólnego obrazu rzeczywistości. Rządy, firmy i liderzy społeczni powinni wspólnie przedstawić fakty, otworzyć dane i zestrajać harmonogramy, aby działania były skoordynowane, a nie rozproszone.\n\nAby chronić życie, dążmy do pokojowej deeskalacji napięć geopolitycznych i przekierujmy zasoby na przetrwanie ludzi i stabilność.\n\nZwołajmy spotkanie na najwyższym szczeblu z państwami, przedsiębiorstwami i przedstawicielami społeczeństwa, aby przedstawić propozycje, przypisać odpowiedzialnych i raportować postępy.\n\nUsuńmy bariery, dając zielone światło pilotażom, ujednolicając standardy oraz w pierwszej kolejności finansując odporność i dostępność.</string>
   <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->

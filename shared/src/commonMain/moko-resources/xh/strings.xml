@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Ungafumana uluhlu lwezenzo ezicetywayo, imisebenzi, kunye neendawo apha: https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Ndingalulingisa njani igagasi?</string>
-  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
-  <string name="faq_answer_7">Cofa iqhosha elingezantsi ukuze uvule imo yokulingisa. Kwiiskrini zeziganeko sebenzisa iqhosha loxesha elikufuphi neqhosha elithi "Join the wave" ukuqalisa ukulingisa kusetyenziswa iinkcukacha zesi siganeko (umhla, ixesha, indawo). Ukumisa ukulingisa, sebenzisa elo qhosha kwakhona. Ekugqibeleni, misa imo yokulingisa usebenzisa i-icon yokumisa (stop) kumaleko osisigxina xa ugqibile.</string>
+  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
+  <string name="faq_answer_7">Cofa iqhosha elingezantsi ukuze uvule imo yokulinganisa. Kwizikrini zeziganeko, sebenzisa iqhosha elithi "play" ekona ephezulu ekhohlo yomfanekiso wendawo ukuqala ukulinganisa usebenzisa iimpawu zeso siganeko (umhla, ixesha, indawo). Ukumisa ukulinganisa, sebenzisa elo qhosha linye. Xa ugqibile, misa imo yokulinganisa usebenzisa i-icon yokumisa ekumaleko ongaphezulu osisigxina.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -628,8 +628,8 @@
   <string name="action_message_phrase_5">Susahani izithintelo zotshintsho.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">Mamelani abendawo, lungiselelani kunye.</string>
-  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
-  <string name="action_message_section_1">Kuya kufuneka sisuke kulawulo lomonakalo siye ekulungeleleni. Amaqondo obushushu aza kudlula iinjongo, ngoko uluntu lufuna isikhokelo esicacileyo, iziqeqesho, nezixhobo ezilula — ngoku.</string>
+  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
+  <string name="action_message_section_1">Kufuneka sitshintshele kulawulo lomonakalo siye kukulungela izothuso. Amaqondo obushushu aza kudlula iinjongo esijolise kuzo, ngoko iiluntu zifuna isikhokelo esicacileyo, iziqheliso, nezixhobo ezilula ngoku.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">Oku kuqala ngenyani esabelwana ngayo. Oorhulumente, iinkampani, nabakhokeli boluntu mababhengeze iinyani kunye, bavule idatha, bade bahambise iishedyuli ukuze isenzo sihambiswane, hayi sihlakazeke.
 

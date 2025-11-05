@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Vous trouverez une liste d’actions, d’activités et de lieux proposés sur https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Comment simuler une vague ?</string>
-  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
-  <string name="faq_answer_7">Appuyez sur le bouton ci-dessous pour activer le mode simulation. Sur les écrans d’événement, utilisez le bouton minuteur près du bouton « Rejoindre la vague » pour lancer la simulation avec les propriétés de cet événement (date, heure, lieu). Pour arrêter la simulation, utilisez le même bouton. Enfin, quittez le mode simulation en appuyant sur l’icône d’arrêt sur le bandeau persistant quand vous avez terminé.</string>
+  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
+  <string name="faq_answer_7">Appuyez sur le bouton ci-dessous pour activer le mode simulation. Sur les écrans d’événement, utilisez le bouton « play » en haut à gauche de l’image du lieu pour lancer une simulation avec les propriétés de cet événement (date, heure, lieu). Pour arrêter la simulation, utilisez le même bouton. Lorsque vous avez terminé, quittez le mode simulation à l’aide de l’icône d’arrêt sur la superposition persistante.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">États-Unis</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -628,8 +628,8 @@
   <string name="action_message_phrase_5">Lever les freins au changement.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">Écouter le terrain, préparer ensemble.</string>
-  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
-  <string name="action_message_section_1">Nous devons passer de la limitation des dégâts à la préparation. Les températures dépasseront les objectifs ; les communautés ont donc besoin dès maintenant de consignes claires, d’exercices et d’outils simples.</string>
+  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
+  <string name="action_message_section_1">Nous devons passer de la limitation des dégâts à la préparation aux chocs. Les températures dépasseront les objectifs ; les communautés ont donc besoin dès maintenant de consignes claires, d'exercices et d'outils simples.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">Cela commence par une réalité partagée. Les gouvernements, les entreprises et les leaders civiques doivent énoncer les faits ensemble, ouvrir les données et aligner les calendriers pour que l’action soit coordonnée, pas fragmentée.
 

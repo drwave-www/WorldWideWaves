@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Unaweza kupata orodha ya hatua, shughuli na maeneo kwenye https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Ninawezaje kuiga wimbi?</string>
-  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
-  <string name="faq_answer_7">Gusa kitufe kilicho hapa chini ili kuwezesha hali ya uigaji. Kwenye skrini za tukio, tumia kitufe cha kipima muda kilicho karibu na kitufe cha "Join the wave" kuanzisha uigaji ukitumia sifa za tukio hili (tarehe, saa, eneo). Ili kusitisha uigaji, tumia kitufe hicho hicho. Kisha maliza hali ya uigaji kwa kutumia ikoni ya kusitisha kwenye safu inayoendelea kuonekana unapomaliza.</string>
+  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
+  <string name="faq_answer_7">Gonga kitufe kilicho hapa chini ili kuwasha hali ya uigaji. Kwenye skrini za tukio, tumia kitufe cha "play" kilicho katika kona ya juu-kushoto ya picha ya eneo kuanzisha uigaji ukitumia sifa za tukio hilo (tarehe, muda, eneo). Ili kusitisha uigaji, tumia kitufe hicho hicho. Ukimaliza, simamisha hali ya uigaji kwa kutumia ikoni ya kusimamisha kwenye kifuniko cha kudumu.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">Marekani</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -628,8 +628,8 @@
   <string name="action_message_phrase_5">Ondoa vikwazo vya mabadiliko.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">Sikiliza sauti za eneo, jiandae pamoja.</string>
-  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
-  <string name="action_message_section_1">Lazima tuhame kutoka kudhibiti madhara kwenda kwenye utayari. Viwango vya joto vitazidi malengo, kwa hiyo jamii zinahitaji mwongozo wazi, mazoezi ya utayari, na zana rahisi sasa.</string>
+  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
+  <string name="action_message_section_1">Lazima tubadilishe kutoka kudhibiti madhara hadi utayari kwa mishtuko. Halijoto itazidi malengo, kwa hivyo jamii zinahitaji mwongozo ulio wazi, mazoezi ya dharura, na zana rahisi sasa.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">Hili linaanza na uhalisia wa pamoja. Serikali, kampuni, na viongozi wa kiraia wanapaswa kutangaza ukweli kwa pamoja, kufungua data, na kuoanisha kalenda ili hatua ziratibiwe, zisivunjwevunje.
 

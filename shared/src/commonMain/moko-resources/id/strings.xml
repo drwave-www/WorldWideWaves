@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Anda dapat menemukan daftar aksi, aktivitas, dan tempat yang disarankan di https://luma.com/worldwidewaves.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Bagaimana cara mensimulasikan gelombang?</string>
-  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
-  <string name="faq_answer_7">Ketuk tombol di bawah untuk mengaktifkan mode simulasi. Di layar acara, gunakan tombol timer di dekat tombol "Gabung Gelombang" untuk memulai simulasi dengan properti acara ini (tanggal, waktu, lokasi). Untuk menghentikan simulasi, gunakan tombol yang sama. Dan terakhir, hentikan mode simulasi menggunakan ikon berhenti pada panel yang tetap muncul ketika Anda selesai.</string>
+  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
+  <string name="faq_answer_7">Ketuk tombol di bawah untuk mengaktifkan mode simulasi. Di layar acara, gunakan tombol "putar" di kiri atas gambar lokasi untuk memulai simulasi menggunakan parameter acara (tanggal, waktu, lokasi). Untuk menghentikan simulasi, gunakan tombol yang sama. Jika sudah selesai, hentikan mode simulasi dengan ikon berhenti pada overlay permanen.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">Amerika Serikat</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -628,8 +628,8 @@
   <string name="action_message_phrase_5">Singkirkan penghalang perubahan.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">Dengarkan suara lokal, bersiap bersama.</string>
-  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
-  <string name="action_message_section_1">Kita harus beralih dari penanggulangan dampak ke kesiapsiagaan. Suhu akan melampaui target, jadi komunitas memerlukan panduan yang jelas, latihan, dan alat sederhana mulai sekarang.</string>
+  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
+  <string name="action_message_section_1">Kita harus beralih dari penanganan dampak ke kesiapsiagaan menghadapi guncangan. Suhu akan melampaui target, jadi komunitas membutuhkan panduan yang jelas, latihan, dan alat sederhana sekarang.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">Ini dimulai dengan realitas bersama. Pemerintah, perusahaan, dan pemimpin sipil harus menyatakan fakta bersama, membuka data, dan menyelaraskan jadwal agar tindakan terkoordinasi, bukan terpecah-pecah.\n\nUntuk melindungi kehidupan, tempuh deeskalasi damai atas ketegangan geopolitik dan fokuskan kembali sumber daya pada kelangsungan hidup manusia dan stabilitas.\n\nSelenggarakan pertemuan di tingkat tertinggi dengan negara, pelaku usaha, dan perwakilan publik untuk mengajukan proposal, menetapkan penanggung jawab, dan melaporkan kemajuan.\n\nSingkirkan penghalang dengan mengizinkan uji coba (pilot), menyelaraskan standar, serta mendanai ketangguhan dan aksesibilitas terlebih dahulu.</string>
   <!-- src_hash: f98623964101bf3fbca09ff9859aae05ae4b0969 -->

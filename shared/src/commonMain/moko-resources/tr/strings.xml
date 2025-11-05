@@ -284,8 +284,8 @@
   <string name="faq_answer_6">Önerilen eylemler, etkinlikler ve mekanların listesini https://luma.com/worldwidewaves adresinde bulabilirsiniz.</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">Bir dalgayı nasıl simüle ederim?</string>
-  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
-  <string name="faq_answer_7">Simülasyon modunu etkinleştirmek için aşağıdaki düğmeye dokunun. Etkinlik ekranlarında, "Dalgaya katıl" düğmesinin yanındaki zamanlayıcı düğmesini kullanarak bu etkinliğin özellikleriyle (tarih, saat, konum) simülasyonu başlatın. Simülasyonu durdurmak için aynı düğmeyi kullanın. İşiniz bittiğinde, kalıcı katmandaki durdur simgesiyle simülasyon modunu sonlandırın.</string>
+  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
+  <string name="faq_answer_7">Aşağıdaki düğmeye dokunarak simülasyon modunu etkinleştirin. Etkinlik ekranlarında, konum görselinin sol üstündeki "play" düğmesini kullanarak o etkinliğin özellikleriyle (tarih, saat, konum) bir simülasyon başlatın. Simülasyonu durdurmak için aynı düğmeyi kullanın. İşiniz bittiğinde, kalıcı bindirme üzerindeki durdur simgesiyle simülasyon modunu kapatın.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">ABD</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -628,8 +628,8 @@
   <string name="action_message_phrase_5">Değişimin önündeki engelleri kaldırın.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">Yerelde dinleyin, birlikte hazırlanın.</string>
-  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
-  <string name="action_message_section_1">Hasar kontrolünden hazırlığa geçmeliyiz. Sıcaklıklar hedefleri aşacak; bu yüzden toplulukların şimdi net yönergelere, tatbikatlara ve basit araçlara ihtiyacı var.</string>
+  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
+  <string name="action_message_section_1">Hasar kontrolünden şoklara hazırlığa geçmeliyiz. Sıcaklıklar hedefleri aşacak; bu yüzden toplulukların şimdi açık talimatlara, tatbikatlara ve basit araçlara ihtiyacı var.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">Bu, ortak bir gerçeklikle başlar. Hükümetler, şirketler ve sivil liderler gerçekleri birlikte ifade etmeli, verileri açmalı ve eylem parçalı değil, eşgüdümlü olsun diye takvimleri hizalamalıdır.
 

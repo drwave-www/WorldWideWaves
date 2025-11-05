@@ -284,8 +284,8 @@
   <string name="faq_answer_6">你可以在 https://luma.com/worldwidewaves 查看建议的行动、活动与地点列表。</string>
   <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
   <string name="faq_question_7">如何模拟一场人浪？</string>
-  <!-- src_hash: 984d2b076c6cfb2b50e9b7822e9dbdabf65036c8 -->
-  <string name="faq_answer_7">点按下方按钮开启模拟模式。在活动页面，使用“加入人浪”按钮旁的计时器按钮，基于该活动的日期、时间和地点开始模拟。停止模拟时再按同一按钮。完成后，点按常驻浮层上的停止图标以退出模拟模式。</string>
+  <!-- src_hash: d3f1f7ed2fbb9adfb4735bd8cf656c3f16506920 -->
+  <string name="faq_answer_7">点击下方按钮以启用模拟模式。在活动界面，使用位置图片左上角的“播放”按钮，按该活动的属性（日期、时间、地点）开始模拟。要停止模拟，再次使用同一按钮。完成后，通过常驻浮层上的停止图标停用模拟模式。</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">美国</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -628,8 +628,8 @@
   <string name="action_message_phrase_5">扫清变革阻碍。</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">倾听本地声音，共同准备。</string>
-  <!-- src_hash: aacc1c422330e716ee6116096e2dfb61a864030d -->
-  <string name="action_message_section_1">我们必须从事后应对转向事前准备。气温将超过目标，因此各社区现在就需要清晰指引、演练和简单易用的工具。</string>
+  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
+  <string name="action_message_section_1">我们必须从损害控制转向应对冲击的准备。升温将超出目标，因此社区现在需要明确指引、演练和简单工具。</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">这要从达成共同的现实认知开始。政府、企业与公民社会领袖应共同陈述事实、开放数据、对齐时间表，使行动协同一致，而非碎片化。
 
