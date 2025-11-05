@@ -53,7 +53,7 @@ val applicationModule =
             }
         }
 
-        viewModel {
+        single {
             EventsViewModel(
                 eventsRepository = get(),
                 getSortedEventsUseCase = get(),
