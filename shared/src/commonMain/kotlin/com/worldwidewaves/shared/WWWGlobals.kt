@@ -192,6 +192,9 @@ object WWWGlobals {
      * UI Timing Constants
      */
     object Timing {
+        /** Milliseconds per second conversion constant */
+        const val MILLIS_PER_SECOND = 1000
+
         /** System splash screen duration (Android 12+ splash API) - short handoff */
         val SYSTEM_SPLASH_DURATION = 500.milliseconds
 
@@ -201,8 +204,11 @@ object WWWGlobals {
         /** Camera animation duration for map transitions (milliseconds) */
         const val MAP_CAMERA_ANIMATION_DURATION_MS = 500
 
-        /** Camera update interval for wave tracking (milliseconds, real time) */
+        /** Camera update interval for wave tracking when event is running (milliseconds, real time) */
         const val MAP_CAMERA_UPDATE_INTERVAL_MS = 1000
+
+        /** Camera update interval when event is done - wave stationary, only track user position (milliseconds) */
+        const val MAP_CAMERA_UPDATE_INTERVAL_DONE_MS = 5000
 
         /** GPS update timer interval */
         val GPS_UPDATE_INTERVAL = 3000.milliseconds

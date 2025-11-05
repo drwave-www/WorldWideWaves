@@ -34,7 +34,8 @@ import kotlinx.coroutines.delay
 /**
  * Shared map zoom and location update component.
  * Automatically targets the user and wave when the user enters the event area.
- * Continuously updates camera to show user+wave as wave progresses (throttled to 1 second intervals).
+ * Continuously updates camera to show user+wave as wave progresses.
+ * Throttling: 1s when event running (wave moving), 5s when event done (wave stationary, track user only).
  * Works with any AbstractEventMap implementation (Android, iOS).
  */
 @Composable
@@ -44,8 +45,8 @@ fun MapZoomAndLocationUpdate(
 ) {
     val isInArea by event.observer.userIsInArea.collectAsState()
 
-    // Time-based throttling: Update camera every 1 second (real time, not simulated)
-    // Use LaunchedEffect with delay instead of progression-based throttling
+    // Time-based throttling: Dynamic interval based on event status (real time, not simulated)
+    // 1s when running (wave moving), 5s when done (wave stationary, only track user position)
     LaunchedEffect(isInArea) {
         if (!isInArea || eventMap == null) return@LaunchedEffect
 
@@ -56,12 +57,21 @@ fun MapZoomAndLocationUpdate(
         )
         eventMap.targetUserAndWave()
 
-        // Continuous updates every 1 second (real time) while in area
+        // Continuous updates with dynamic throttle based on event status
         while (isInArea) {
-            delay(WWWGlobals.Timing.MAP_CAMERA_UPDATE_INTERVAL_MS.toLong())
+            val isDone = event.isDone()
+            val intervalMs =
+                if (isDone) {
+                    WWWGlobals.Timing.MAP_CAMERA_UPDATE_INTERVAL_DONE_MS
+                } else {
+                    WWWGlobals.Timing.MAP_CAMERA_UPDATE_INTERVAL_MS
+                }
+
+            delay(intervalMs.toLong())
+            val intervalSeconds = intervalMs / WWWGlobals.Timing.MILLIS_PER_SECOND
             Log.v(
                 "MapZoomAndLocationUpdate",
-                "Periodic targetUserAndWave() for event: ${event.id} (1s throttle)",
+                "Periodic targetUserAndWave() for event: ${event.id} (${intervalSeconds}s throttle, done=$isDone)",
             )
             eventMap.targetUserAndWave()
         }
