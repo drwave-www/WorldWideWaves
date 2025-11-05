@@ -36,9 +36,11 @@ import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.localization.LocalizationManager
 import com.worldwidewaves.shared.ui.activities.MainScreen
+import com.worldwidewaves.shared.viewmodels.EventsViewModel
 import com.worldwidewaves.utils.AndroidPlatformEnabler
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import org.koin.mp.KoinPlatform
 import java.util.Locale
 
@@ -52,6 +54,9 @@ open class MainActivity : AppCompatActivity() {
 
     /** Tracks the last known locale for detecting runtime language changes. */
     private var lastKnownLocale: Locale? = null
+
+    /** EventsViewModel for refreshing events list when returning from EventActivity. */
+    private val eventsViewModel: EventsViewModel by inject()
 
     // ----------------------------
 
@@ -118,6 +123,11 @@ open class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         mainActivityImpl?.onResume()
+
+        // Refresh events list when returning from EventActivity (picks up favorite changes)
+        lifecycleScope.launch {
+            eventsViewModel.refreshEvents()
+        }
     }
 
     override fun onPause() {
