@@ -12,14 +12,12 @@ package com.worldwidewaves.shared.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -28,10 +26,10 @@ import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
 import com.worldwidewaves.shared.ui.theme.surfaceLight
 
 /**
- * Styled alert dialog with modern glassmorphism design.
+ * Styled alert dialog with modern design.
  *
  * Features:
- * - Semi-transparent dark blue background with blur effect
+ * - Semi-transparent dark blue background
  * - White 2px border with rounded corners (14dp)
  * - White bold title and normal text
  * - Outlined green buttons
@@ -100,11 +98,9 @@ fun StyledAlertDialog(
                 null
             },
         shape = RoundedCornerShape(14.dp),
-        containerColor = surfaceLight.copy(alpha = 0.9f),
+        containerColor = surfaceLight,
         modifier =
             Modifier
-                .border(2.dp, Color.White, RoundedCornerShape(14.dp))
-                .blur(12.dp)
-                .padding(4.dp),
+                .border(2.dp, Color.White, RoundedCornerShape(14.dp)),
     )
 }
