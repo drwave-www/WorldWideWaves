@@ -2,6 +2,8 @@
 
 package com.worldwidewaves.shared.utils
 
+import kotlinx.cinterop.ExperimentalForeignApi
+
 /*
  * Copyright 2025 DrWave
  *
@@ -26,47 +28,119 @@ package com.worldwidewaves.shared.utils
 /**
  * iOS implementation of Crashlytics integration.
  *
- * ## Implementation Details
- * - iOS Crashlytics integration is handled natively in Swift (AppDelegate/SceneDelegate)
- * - This implementation is a no-op stub since Firebase is initialized and managed in iOS app layer
- * - Actual crash reporting happens automatically via Firebase iOS SDK
- * - Non-fatal error reporting can be added via Swift bridge pattern if needed in future
+ * ## Current Status: LOGGING ONLY (Bridge Ready for Integration)
  *
- * ## Why No-Op?
- * Firebase Crashlytics on iOS works best when initialized in AppDelegate and used directly from Swift.
- * The Kotlin/Native -> Swift bridging for error reporting introduces complexity without significant benefit
- * since crashes are already captured automatically by Firebase SDK.
+ * This implementation currently logs exceptions locally while the Swift bridge
+ * (CrashlyticsBridge.swift) is integrated into the Xcode project.
  *
- * ## Future Enhancement
- * To enable non-fatal error reporting from Kotlin code:
- * 1. Create Swift wrapper in iosApp/worldwidewaves/Utils/
- * 2. Expose via KMM native interop (not external object)
- * 3. Call from this implementation
+ * ## Architecture
+ * ```
+ * Kotlin Shared Code → CrashlyticsLogger.ios.kt (logs locally)
+ *                   ↓
+ *            (Future: CrashlyticsBridge.swift → Firebase iOS SDK)
+ * ```
+ *
+ * ## Integration Steps Required
+ * 1. Add CrashlyticsBridge.swift to Xcode project manually
+ * 2. Add CrashlyticsBridge.h to Xcode project manually
+ * 3. Implement proper Objective-C interop in this file
+ * 4. Rebuild iOS app to link the bridge
+ *
+ * ## What Works Now
+ * - Fatal crashes: ✅ Automatically captured by Firebase
+ * - Non-fatal exceptions from Kotlin: ⚠️ Logged locally (not sent to Firebase)
+ * - dSYM upload: ✅ Enabled for all configurations
+ * - Crashlytics initialization: ✅ Explicit init in AppDelegate
+ *
+ * ## What Needs Manual Integration
+ * - Swift bridge needs to be added to Xcode project (file exists, needs linking)
+ * - Objective-C interop needs cinterop def file or direct platform imports
+ * - After integration, uncomment proper bridge calls in this file
  *
  * ## Threading Model
- * No-op implementation is thread-safe (does nothing)
+ * - All calls are thread-safe (just logging for now)
+ * - Future bridge: Firebase SDK handles thread safety
  *
  * ## Production Safety
- * Safe no-op - no crashes, no side effects
+ * - No force unwraps or unsafe operations
+ * - Graceful fallback (logs locally)
+ * - No crashes from Crashlytics integration itself
  */
+@OptIn(ExperimentalForeignApi::class)
 actual object CrashlyticsLogger {
+    private const val TAG = "CrashlyticsLogger.iOS"
+
+    /**
+     * Record a non-fatal exception from Kotlin code.
+     *
+     * CURRENT: Logs exception locally for debugging
+     * FUTURE: Will send to Firebase once bridge is integrated
+     *
+     * @param throwable The exception that occurred
+     * @param tag The component/module where the exception occurred
+     * @param message Additional context message
+     */
     actual fun recordException(
         throwable: Throwable,
         tag: String,
         message: String,
     ) {
-        // No-op: iOS Firebase Crashlytics handles crashes automatically
-        // Non-fatal errors can be logged via Swift bridge in future if needed
+        // Get stack trace as string
+        val stackTrace = throwable.stackTraceToString()
+
+        // Build full error message
+        val fullMessage = "$message: ${throwable.message ?: "Unknown error"}"
+
+        // TODO: Once CrashlyticsBridge.swift is added to Xcode project, uncomment:
+        // CrashlyticsBridge.recordException(message: fullMessage, tag: tag, stackTrace: stackTrace)
+
+        // For now, log locally
+        Log.e(TAG, "[$tag] $fullMessage\n$stackTrace")
+        Log.i(TAG, "Note: Exception logged locally. Add CrashlyticsBridge.swift to Xcode to send to Firebase.")
     }
 
+    /**
+     * Log a message that will appear as breadcrumb in crash reports.
+     *
+     * CURRENT: Logs locally for debugging
+     * FUTURE: Will appear in Firebase crash reports once bridge is integrated
+     *
+     * @param message The breadcrumb message
+     */
     actual fun log(message: String) {
-        // No-op: Breadcrumbs can be added via Swift bridge in future if needed
+        // Extract tag from message if present (format: "[Tag] Message")
+        val (tag, cleanMessage) =
+            if (message.startsWith("[") && message.contains("]")) {
+                val endIndex = message.indexOf("]")
+                message.substring(1, endIndex) to message.substring(endIndex + 2)
+            } else {
+                "App" to message
+            }
+
+        // TODO: Once CrashlyticsBridge.swift is added to Xcode project, uncomment:
+        // CrashlyticsBridge.log(message: cleanMessage, tag: tag)
+
+        // For now, log locally
+        Log.d(TAG, "Breadcrumb: [$tag] $cleanMessage")
     }
 
+    /**
+     * Set a custom key-value pair that will appear in crash reports.
+     *
+     * CURRENT: Logs locally for debugging
+     * FUTURE: Will appear in Firebase crash reports once bridge is integrated
+     *
+     * @param key The key name
+     * @param value The value (will be converted to string)
+     */
     actual fun setCustomKey(
         key: String,
         value: String,
     ) {
-        // No-op: Custom keys can be set via Swift bridge in future if needed
+        // TODO: Once CrashlyticsBridge.swift is added to Xcode project, uncomment:
+        // CrashlyticsBridge.setCustomKey(key: key, value: value)
+
+        // For now, log locally
+        Log.d(TAG, "Custom key: $key = $value")
     }
 }

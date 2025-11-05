@@ -427,7 +427,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n if [ \"${CONFIGURATION}\" = \"Release\" ] && [ \"${EFFECTIVE_PLATFORM_NAME}\" = \"-iphoneos\" ]; then\n     echo \"Uploading dSYMs to Crashlytics...\"\n     \"${SRCROOT}/build_ios/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n else\n     echo \"Skipping dSYM upload: ${CONFIGURATION} build for ${EFFECTIVE_PLATFORM_NAME}\"\n fi\n";
+			shellScript = "# Upload dSYMs to Firebase Crashlytics for crash symbolication\n# Now supports Debug builds and Simulator for better crash debugging\n\nif [ -f \"${SRCROOT}/build_ios/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\" ]; then\n    echo \"Uploading dSYMs to Crashlytics (${CONFIGURATION} - ${EFFECTIVE_PLATFORM_NAME})...\"\n    \"${SRCROOT}/build_ios/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n    \n    if [ $? -eq 0 ]; then\n        echo \"✅ dSYM upload successful\"\n    else\n        echo \"⚠️ dSYM upload failed (non-fatal for development builds)\"\n    fi\nelse\n    echo \"⚠️ Firebase upload script not found - dSYM upload skipped\"\n    echo \"Run './gradlew :shared:embedAndSignAppleFrameworkForXcode' to download dependencies\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

@@ -6,6 +6,10 @@
 	<false/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>WorldWideWaves needs your location to determine when you're within wave events and coordinate synchronized participation with others.</string>
+	<key>FirebaseCrashlyticsCollectionEnabled</key>
+	<true/>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

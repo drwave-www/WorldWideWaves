@@ -80,11 +80,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Initialize Firebase
         FirebaseApp.configure()
 
-        // Enable Crashlytics collection
-        // Crashlytics is automatically enabled when FirebaseApp.configure() is called
-        // and will automatically collect crash reports
+        // Explicitly initialize Crashlytics (improves crash reporting reliability)
+        let crashlytics = Crashlytics.crashlytics()
 
-        WWWLog.i("AppDelegate", "Firebase configured successfully")
+        // Set custom keys for crash context
+        crashlytics.setCustomValue(Bundle.main.appVersion, forKey: "app_version")
+        crashlytics.setCustomValue(Bundle.main.appBuild, forKey: "build_number")
+        crashlytics.setCustomValue("iOS", forKey: "platform")
+        crashlytics.setCustomValue(UIDevice.current.systemVersion, forKey: "ios_version")
+
+        // Log successful initialization
+        crashlytics.log("Firebase Crashlytics initialized successfully")
+        WWWLog.i("AppDelegate", "Firebase & Crashlytics configured successfully")
 
         return true
     }
@@ -158,4 +165,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return false
     }
 
+}
+
+// MARK: - Bundle Extensions for Crashlytics
+
+extension Bundle {
+    /// App version (CFBundleShortVersionString) - e.g., "1.0.0"
+    var appVersion: String {
+        return object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown"
+    }
+
+    /// Build number (CFBundleVersion) - e.g., "42"
+    var appBuild: String {
+        return object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "unknown"
+    }
 }
