@@ -38,6 +38,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
@@ -70,6 +71,9 @@ fun EventCard(
     onMapUninstallRequested: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
+    // Collect event status once per card to minimize StateFlow subscriptions
+    val eventStatus by event.observer.eventStatus.collectAsState()
+
     val eventLocation = stringResource(event.getLocation())
     val accessibilityDescription = stringResource(MokoRes.strings.accessibility_event_in, eventLocation)
     Column(
@@ -86,6 +90,7 @@ fun EventCard(
     ) {
         EventOverlay(
             event,
+            eventStatus,
             isMapInstalled,
             starredSelected,
             setEventFavorite,
@@ -102,6 +107,7 @@ fun EventCard(
 @Composable
 private fun EventOverlay(
     event: IWWWEvent,
+    eventStatus: IWWWEvent.Status,
     isMapInstalled: Boolean,
     starredSelected: Boolean,
     setEventFavorite: SetEventFavorite?,
@@ -110,7 +116,6 @@ private fun EventOverlay(
     modifier: Modifier = Modifier,
 ) {
     val heightModifier = Modifier.height(EventsList.OVERLAY_HEIGHT.dp)
-    val eventStatus by event.observer.eventStatus.collectAsState()
 
     Box(modifier = heightModifier) {
         Box(modifier = heightModifier) {
@@ -118,7 +123,12 @@ private fun EventOverlay(
             val eventImageResource = event.getLocationImage() as? DrawableResource
             if (eventImageResource != null) {
                 Image(
-                    modifier = modifier.fillMaxWidth(),
+                    modifier =
+                        modifier
+                            .fillMaxWidth()
+                            .graphicsLayer {
+                                // Layer composition for better iOS scrolling performance
+                            },
                     contentScale = ContentScale.Crop,
                     alignment = Alignment.TopCenter,
                     painter = painterResource(eventImageResource),

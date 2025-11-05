@@ -111,7 +111,7 @@ private fun Events(
         modifier = modifier.testTag("EventsList"),
     ) {
         if (events.isNotEmpty()) {
-            items(events) { event ->
+            items(events, key = { event -> event.id }) { event ->
                 val isMapInstalled = mapStates[event.id] ?: false
                 EventCard(
                     event,

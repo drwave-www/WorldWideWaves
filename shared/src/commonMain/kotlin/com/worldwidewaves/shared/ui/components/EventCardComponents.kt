@@ -38,14 +38,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
@@ -72,6 +73,7 @@ import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredTextStyle
 import com.worldwidewaves.shared.ui.utils.focusIndicator
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.ExperimentalTime
@@ -86,7 +88,12 @@ fun EventFlag(
     contentDescription: String,
 ) {
     Image(
-        modifier = modifier.width(EventsList.FLAG_WIDTH.dp),
+        modifier =
+            modifier
+                .width(EventsList.FLAG_WIDTH.dp)
+                .graphicsLayer {
+                    // Layer composition for better iOS scrolling performance
+                },
         contentScale = ContentScale.FillWidth,
         painter = painterResource(imageResource),
         contentDescription = contentDescription,
@@ -148,15 +155,17 @@ fun EventOverlayFavorite(
     onFavoriteChanged: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    var isFavorite by remember { mutableStateOf(event.favorite) }
-    var pendingFavoriteToggle by remember { mutableStateOf(false) }
+    // Use event.favorite directly as source of truth, synced via remember
+    var isFavorite by remember(event.id, event.favorite) { mutableStateOf(event.favorite) }
+    val coroutineScope = rememberCoroutineScope()
 
-    // Handle favorite toggle
-    LaunchedEffect(pendingFavoriteToggle) {
-        if (pendingFavoriteToggle) {
-            setEventFavorite?.let { favoriteSetter ->
+    // Handle favorite toggle with optimistic updates
+    val handleToggle: () -> Unit = {
+        setEventFavorite?.let { favoriteSetter ->
+            isFavorite = !isFavorite
+            // Launch async update without blocking UI
+            coroutineScope.launch {
                 try {
-                    isFavorite = !isFavorite
                     favoriteSetter.call(event, isFavorite)
                     onFavoriteChanged()
                     Log.i("SharedEventsListScreen", "Favorite toggled for ${event.id}: $isFavorite")
@@ -166,13 +175,7 @@ fun EventOverlayFavorite(
                     Log.e("SharedEventsListScreen", "Failed to toggle favorite for ${event.id}", e)
                 }
             }
-            pendingFavoriteToggle = false
         }
-    }
-
-    // Sync with event favorite state changes - EXACT Android match
-    LaunchedEffect(event.favorite) {
-        isFavorite = event.favorite
     }
 
     val favoriteContentDesc = stringResource(MokoRes.strings.accessibility_favorite_button)
@@ -195,11 +198,8 @@ fun EventOverlayFavorite(
                     .testTag("EventFavoriteButton_${event.id}")
                     .size(48.dp)
                     .focusIndicator()
-                    .clickable {
-                        setEventFavorite?.let {
-                            pendingFavoriteToggle = true
-                        }
-                    }.semantics {
+                    .clickable { handleToggle() }
+                    .semantics {
                         role = Role.Checkbox
                         contentDescription = favoriteContentDesc
                         toggleableState = if (isFavorite) ToggleableState.On else ToggleableState.Off
@@ -238,7 +238,7 @@ fun EventLocationAndDate(
     modifier: Modifier = Modifier,
 ) {
     val eventDate =
-        remember(event.id) {
+        remember(event.id, event.date, event.timeZone) {
             try {
                 DateTimeFormats.dayMonth(event.getStartDateTime(), event.getTZ())
             } catch (e: Exception) {
