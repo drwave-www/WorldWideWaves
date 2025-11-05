@@ -244,6 +244,82 @@ class AbstractEventMapTest : KoinTest {
             coEvery { mockMapLibreAdapter.drawOverridenBbox(testBounds) }
         }
 
+    @Test
+    fun setupMap_doesNotDrawBboxWhenNotOverride() =
+        runTest {
+            // Given
+            every { mockEvent.area.bboxIsOverride } returns false
+
+            // When
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then: drawOverridenBbox should NOT be called
+            coVerify(exactly = 0) { mockMapLibreAdapter.drawOverridenBbox(any()) }
+        }
+
+    @Test
+    fun setupMap_passesCorrectBboxCoordinates() =
+        runTest {
+            // Given
+            every { mockEvent.area.bboxIsOverride } returns true
+            val customBbox =
+                BoundingBox.fromCorners(
+                    Position(37.70559, -122.539501), // SF southwest
+                    Position(37.833685, -122.343807), // SF northeast
+                )
+            coEvery { mockEvent.area.bbox() } returns customBbox
+
+            // When
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then: Should be called with exact bbox coordinates
+            val bboxSlot = slot<BoundingBox>()
+            coVerify { mockMapLibreAdapter.drawOverridenBbox(capture(bboxSlot)) }
+
+            // Verify captured bbox has correct coordinates
+            assertEquals(37.70559, bboxSlot.captured.sw.lat, 0.000001)
+            assertEquals(-122.539501, bboxSlot.captured.sw.lng, 0.000001)
+            assertEquals(37.833685, bboxSlot.captured.ne.lat, 0.000001)
+            assertEquals(-122.343807, bboxSlot.captured.ne.lng, 0.000001)
+        }
+
+    @Test
+    fun setupMap_handlesBboxDrawFailureGracefully() =
+        runTest {
+            // Given: drawOverridenBbox throws an exception
+            every { mockEvent.area.bboxIsOverride } returns true
+            coEvery { mockMapLibreAdapter.drawOverridenBbox(any()) } throws
+                IllegalStateException("Map style not loaded")
+
+            // When: Setup map (should not crash)
+            var setupCompleted = false
+            try {
+                eventMap.setupMap(
+                    map = "test-map",
+                    scope = testScope,
+                    stylePath = "/path/to/style.json",
+                )
+                testScope.testScheduler.advanceUntilIdle()
+                setupCompleted = true
+            } catch (e: Exception) {
+                // Test fails if exception propagates
+                throw AssertionError("setupMap should handle bbox draw failure gracefully", e)
+            }
+
+            // Then: Setup should complete despite bbox draw failure
+            assertTrue(setupCompleted, "setupMap should complete despite bbox draw failure")
+        }
+
     // ============================================================
     // CAMERA POSITIONING TESTS
     // ============================================================

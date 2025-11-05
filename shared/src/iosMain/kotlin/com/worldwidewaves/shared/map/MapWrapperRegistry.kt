@@ -692,7 +692,6 @@ object MapWrapperRegistry {
     /**
      * Draw debug bounding box overlay (for testing constraint bounds).
      */
-    @Suppress("UnusedParameter")
     fun drawDebugBbox(
         eventId: String,
         bbox: BoundingBox,
@@ -701,10 +700,14 @@ object MapWrapperRegistry {
         val wrapper = getWrapper(eventId)
         if (wrapper != null) {
             platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
-                // Swift wrapper will handle drawing via IOSMapBridge or direct call
-                Log.i(TAG, "Debug bbox draw dispatched for: $eventId")
-                // Note: Swift wrapper already has drawOverrideBbox() method at line 438
-                // bbox parameter available for future use in direct Swift call
+                // Cast to MapLibreViewWrapper and call Swift method
+                (wrapper as? MapLibreViewWrapper)?.drawOverrideBboxWithSwLat(
+                    swLat = bbox.sw.lat,
+                    swLng = bbox.sw.lng,
+                    neLat = bbox.ne.lat,
+                    neLng = bbox.ne.lng,
+                )
+                Log.i(TAG, "Debug bbox drawn for event: $eventId")
             }
         }
     }

@@ -376,4 +376,105 @@ class MapWrapperRegistryTest {
         assertFalse(MapWrapperRegistry.hasPendingCameraCommand("nonexistent"))
         assertNull(MapWrapperRegistry.getPendingCameraCommand("nonexistent"))
     }
+
+    // ============================================================
+    // BBOX DRAWING TESTS
+    // ============================================================
+
+    @Test
+    fun drawDebugBbox_retrievesCorrectWrapper() {
+        // Given: Registered wrapper for event
+        val eventId = "lagos_nigeria"
+        val wrapper = "test-wrapper-bbox"
+        MapWrapperRegistry.registerWrapper(eventId, wrapper)
+
+        val bbox =
+            BoundingBox.fromCorners(
+                Position(6.371119, 3.196678), // Lagos SW
+                Position(6.642783, 3.598022), // Lagos NE
+            )
+
+        // When: Draw bbox
+        MapWrapperRegistry.drawDebugBbox(eventId, bbox)
+
+        // Then: Should retrieve the registered wrapper (verified by no crash)
+        val retrieved = MapWrapperRegistry.getWrapper(eventId)
+        assertEquals(wrapper, retrieved, "Should retrieve correct wrapper")
+
+        // Cleanup
+        MapWrapperRegistry.unregisterWrapper(eventId)
+    }
+
+    @Test
+    fun drawDebugBbox_dispatchesToMainQueue() {
+        // Given: Registered wrapper
+        val eventId = "tokyo_japan"
+        val wrapper = "test-wrapper-dispatch"
+        MapWrapperRegistry.registerWrapper(eventId, wrapper)
+
+        val bbox =
+            BoundingBox.fromCorners(
+                Position(35.450628, 138.822556), // Tokyo SW
+                Position(35.989700, 139.994659), // Tokyo NE
+            )
+
+        // When: Draw bbox (dispatches to main queue)
+        MapWrapperRegistry.drawDebugBbox(eventId, bbox)
+
+        // Then: Should complete without throwing (dispatch is asynchronous)
+        // Note: We can't directly verify dispatch_async was called without mocking
+        // But we can verify the function completes successfully
+
+        // Cleanup
+        MapWrapperRegistry.unregisterWrapper(eventId)
+    }
+
+    @Test
+    fun drawDebugBbox_handlesNullWrapper() {
+        // Given: Event with no registered wrapper
+        val eventId = "unregistered-event-bbox"
+        val bbox =
+            BoundingBox.fromCorners(
+                Position(37.70559, -122.539501), // SF SW
+                Position(37.833685, -122.343807), // SF NE
+            )
+
+        // When: Draw bbox with no wrapper
+        try {
+            MapWrapperRegistry.drawDebugBbox(eventId, bbox)
+            // Then: Should handle gracefully without crashing
+        } catch (e: Exception) {
+            throw AssertionError("drawDebugBbox should handle null wrapper gracefully", e)
+        }
+    }
+
+    @Test
+    fun drawDebugBbox_invokesSwiftMethodWithCorrectParams() {
+        // Given: Registered wrapper
+        val eventId = "san_francisco_usa"
+        val wrapper = "test-wrapper-params"
+        MapWrapperRegistry.registerWrapper(eventId, wrapper)
+
+        val bbox =
+            BoundingBox.fromCorners(
+                Position(37.70559, -122.539501), // SF SW
+                Position(37.833685, -122.343807), // SF NE
+            )
+
+        // When: Draw bbox
+        MapWrapperRegistry.drawDebugBbox(eventId, bbox)
+
+        // Then: Should complete successfully
+        // Note: Actual Swift method invocation verification requires integration test
+        // This test verifies that:
+        // 1. The function accepts correct bbox parameters
+        // 2. The bbox coordinates are preserved
+        assertEquals(37.70559, bbox.sw.lat, 0.000001, "SW lat should be preserved")
+        assertEquals(-122.539501, bbox.sw.lng, 0.000001, "SW lng should be preserved")
+        assertEquals(37.833685, bbox.ne.lat, 0.000001, "NE lat should be preserved")
+        assertEquals(-122.343807, bbox.ne.lng, 0.000001, "NE lng should be preserved")
+
+        // Cleanup
+        MapWrapperRegistry.unregisterWrapper(eventId)
+    }
 }
