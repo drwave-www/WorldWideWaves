@@ -129,6 +129,15 @@ class EventsViewModel(
     }
 
     /**
+     * Force refresh of events list by re-emitting current state.
+     * Used when event state mutates without repository emission (e.g., favorite toggle from detail screen).
+     */
+    fun refreshEvents() {
+        _events.value = _events.value.toList() // New list instance triggers collectors
+        Log.d("EventsViewModel", "Events list refreshed: ${_events.value.size} events")
+    }
+
+    /**
      * Process a new list of sorted events for UI updates
      */
     private suspend fun processEventsList(sortedEvents: List<IWWWEvent>) {

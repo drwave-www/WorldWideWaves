@@ -36,7 +36,9 @@ import com.worldwidewaves.shared.ui.components.EventLayout
 import com.worldwidewaves.shared.ui.components.MapPolygonDisplay
 import com.worldwidewaves.shared.ui.formatters.calculateEventMapHeight
 import com.worldwidewaves.shared.utils.Log
+import com.worldwidewaves.shared.viewmodels.EventsViewModel
 import com.worldwidewaves.shared.viewmodels.MapViewModel
+import org.koin.core.component.inject
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -46,6 +48,12 @@ class EventDetailScreen(
     val mapViewModel: MapViewModel,
     showSplash: Boolean = false,
 ) : BaseWaveActivityScreen(eventId, platformEnabler, showSplash) {
+    private val eventsViewModel: EventsViewModel by inject()
+
+    override fun onFavoriteChanged() {
+        eventsViewModel.refreshEvents()
+    }
+
     @Composable
     override fun Event(
         event: IWWWEvent,
