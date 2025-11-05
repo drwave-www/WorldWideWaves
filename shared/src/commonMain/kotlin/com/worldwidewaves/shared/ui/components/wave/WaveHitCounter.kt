@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.WWWGlobals.DisplayText
@@ -74,14 +75,16 @@ fun WaveHitCounter(
         ) {
             AutoSizeText(
                 text = text,
-                style = sharedPrimaryColoredBoldTextStyle(WaveDisplay.TIMEBEFOREHIT_FONTSIZE),
+                style =
+                    sharedPrimaryColoredBoldTextStyle(WaveDisplay.TIMEBEFOREHIT_FONTSIZE)
+                        .copy(fontFamily = FontFamily.Monospace),
                 color = Color.White,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 4.dp),
+                        .padding(horizontal = 2.dp),
             )
         }
     }
