@@ -446,14 +446,14 @@
     <string name="notification_event_finished">Wave completed</string>
     <string name="notification_wave_hit">Wave hit!</string>
 
-    <!-- Context: Notification bodies (with %1$s = event name), Size: Medium -->
-    <string name="notification_1h_before">%1$s starts in 1 hour</string>
-    <string name="notification_30m_before">%1$s starts in 30 minutes</string>
-    <string name="notification_10m_before">%1$s starts in 10 minutes</string>
-    <string name="notification_5m_before">%1$s starts in 5 minutes</string>
-    <string name="notification_1m_before">%1$s starts in 1 minute!</string>
-    <string name="notification_event_finished_body">The %1$s wave has finished</string>
-    <string name="notification_wave_hit_body">The wave just reached you in %1$s!</string>
+    <!-- Context: Notification bodies, Size: Medium -->
+    <string name="notification_1h_before">Wave starts in 1 hour</string>
+    <string name="notification_30m_before">Wave starts in 30 minutes</string>
+    <string name="notification_10m_before">Wave starts in 10 minutes</string>
+    <string name="notification_5m_before">Wave starts in 5 minutes</string>
+    <string name="notification_1m_before">Wave starts in 1 minute!</string>
+    <string name="notification_event_finished_body">The wave has finished</string>
+    <string name="notification_wave_hit_body">The wave just reached you!</string>
 
     <!-- Context: Permission rationale for notifications (for future use), Size: Medium -->
     <string name="notification_permission_rationale">Get notified when your favorite waves are starting</string>

@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.notifications
  */
 
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.localizeString
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
@@ -41,11 +42,11 @@ import kotlin.time.Duration.Companion.minutes
  *
  * ## Example Flow
  * ```kotlin
- * // 1. Shared code generates content with keys
+ * // 1. Shared code generates content with keys and resolved location string
  * val content = contentProvider.generateStartingNotification(event, 1.hours)
  * // content.titleKey = "notification_event_starting_soon"
  * // content.bodyKey = "notification_1h_before"
- * // content.bodyArgs = ["New York"]
+ * // content.bodyArgs = ["New York"]  // Resolved by contentProvider
  *
  * // 2. Android resolves at delivery time
  * val title = context.getString(R.string.notification_event_starting_soon)
@@ -74,9 +75,13 @@ interface NotificationContentProvider {
      * Body string format: "%1$s starts in [duration]"
      * - %1$s = event location name (e.g., "New York")
      *
+     * ## Location Resolution
+     * This method is responsible for resolving event.getLocation() from StringResource
+     * to the actual localized location name string.
+     *
      * @param event The event triggering the notification
      * @param timeUntilStart Duration until event starts
-     * @return Notification content with localization keys
+     * @return Notification content with localization keys and resolved location in bodyArgs
      */
     fun generateStartingNotification(
         event: IWWWEvent,
@@ -91,8 +96,12 @@ interface NotificationContentProvider {
      * - Body: "notification_event_finished_body" → "The %1$s wave has finished"
      *   - %1$s = event location name
      *
+     * ## Location Resolution
+     * This method is responsible for resolving event.getLocation() from StringResource
+     * to the actual localized location name string.
+     *
      * @param event The event that finished
-     * @return Notification content with localization keys
+     * @return Notification content with localization keys and resolved location in bodyArgs
      */
     fun generateFinishedNotification(event: IWWWEvent): NotificationContent
 
@@ -107,8 +116,12 @@ interface NotificationContentProvider {
      * - Body: "notification_wave_hit_body" → "The wave just reached you in %1$s!"
      *   - %1$s = event location name
      *
+     * ## Location Resolution
+     * This method is responsible for resolving event.getLocation() from StringResource
+     * to the actual localized location name string.
+     *
      * @param event The event whose wave hit the user
-     * @return Notification content with localization keys
+     * @return Notification content with localization keys and resolved location in bodyArgs
      */
     fun generateWaveHitNotification(event: IWWWEvent): NotificationContent
 }
@@ -141,27 +154,38 @@ class DefaultNotificationContentProvider : NotificationContentProvider {
                 else -> "notification_event_starting_soon" // Fallback
             }
 
+        // Resolve location StringResource to actual localized location name string
+        val locationName = localizeString(event.getLocation())
+
         return NotificationContent(
             titleKey = "notification_event_starting_soon",
             bodyKey = bodyKey,
-            bodyArgs = listOf(event.getLocation().resourceId.toString()),
+            bodyArgs = listOf(locationName),
             deepLink = "worldwidewaves://event?id=${event.id}",
         )
     }
 
-    override fun generateFinishedNotification(event: IWWWEvent): NotificationContent =
-        NotificationContent(
+    override fun generateFinishedNotification(event: IWWWEvent): NotificationContent {
+        // Resolve location StringResource to actual localized location name string
+        val locationName = localizeString(event.getLocation())
+
+        return NotificationContent(
             titleKey = "notification_event_finished",
             bodyKey = "notification_event_finished_body",
-            bodyArgs = listOf(event.getLocation().resourceId.toString()),
+            bodyArgs = listOf(locationName),
             deepLink = "worldwidewaves://event?id=${event.id}",
         )
+    }
 
-    override fun generateWaveHitNotification(event: IWWWEvent): NotificationContent =
-        NotificationContent(
+    override fun generateWaveHitNotification(event: IWWWEvent): NotificationContent {
+        // Resolve location StringResource to actual localized location name string
+        val locationName = localizeString(event.getLocation())
+
+        return NotificationContent(
             titleKey = "notification_wave_hit",
             bodyKey = "notification_wave_hit_body",
-            bodyArgs = listOf(event.getLocation().resourceId.toString()),
+            bodyArgs = listOf(locationName),
             deepLink = "worldwidewaves://event?id=${event.id}",
         )
+    }
 }

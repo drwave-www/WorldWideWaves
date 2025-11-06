@@ -244,6 +244,7 @@ class DefaultNotificationScheduler(
                 // Only schedule if notification time is in the future
                 val delay = notificationTime - now
                 val trigger = NotificationTrigger.EventStarting(interval)
+                // ContentProvider will resolve the location StringResource to a localized string
                 val content = contentProvider.generateStartingNotification(event, interval)
 
                 notificationManager.scheduleNotification(
@@ -259,6 +260,7 @@ class DefaultNotificationScheduler(
         val endTime = event.getEndDateTime()
         if (endTime > now) {
             val delay = endTime - now
+            // ContentProvider will resolve the location StringResource to a localized string
             val content = contentProvider.generateFinishedNotification(event)
 
             notificationManager.scheduleNotification(

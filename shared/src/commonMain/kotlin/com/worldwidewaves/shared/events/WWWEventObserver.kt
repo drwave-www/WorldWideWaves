@@ -584,6 +584,7 @@ class WWWEventObserver(
                     // Trigger wave hit notification
                     notificationManager?.let { manager ->
                         notificationContentProvider?.let { provider ->
+                            // ContentProvider will resolve the location StringResource to a localized string
                             val content = provider.generateWaveHitNotification(event)
                             manager.deliverNow(
                                 eventId = event.id,
