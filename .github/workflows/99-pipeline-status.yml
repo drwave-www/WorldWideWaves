@@ -52,7 +52,7 @@ jobs:
               '03 • Quality & Security Gates',
               '01 • Build Android',
               '02 • Build iOS',
-              '05 • End-to-End Tests'
+              'Test Quality Validation'
             ];
 
             const workflowResults = {};
