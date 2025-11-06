@@ -648,22 +648,22 @@ Yọ ìdènà kúrò nípa fí ọwọ́ sílẹ̀ fún àwọn ìdánwò kéker
   <string name="notification_event_starting_soon">Ìgbi ń bẹ̀rẹ̀ laipẹ́</string>
   <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
   <string name="notification_event_finished">Ìgbi parí</string>
-  <!-- src_hash: a754deec084228db5eb4e7494ece4899d15d5bdb -->
-  <string name="notification_wave_hit">Ìgbi dé!</string>
-  <!-- src_hash: b59ce446e02917542cf980c05434510e8fac89d5 -->
-  <string name="notification_1h_before">%1$s yóò bẹ̀rẹ̀ lẹ́yìn wákàtí kan</string>
-  <!-- src_hash: edf14570c85158c248c34c39e3309084c270f9b5 -->
-  <string name="notification_30m_before">%1$s yóò bẹ̀rẹ̀ lẹ́yìn ìṣẹ́jú 30</string>
-  <!-- src_hash: 3956289fe7c912cd60f175ff5fef61c42cf2187b -->
-  <string name="notification_10m_before">%1$s yóò bẹ̀rẹ̀ lẹ́yìn ìṣẹ́jú 10</string>
-  <!-- src_hash: afab5ffa7152140e4576dfe14dc3af121ec0a19b -->
-  <string name="notification_5m_before">%1$s yóò bẹ̀rẹ̀ lẹ́yìn ìṣẹ́jú 5</string>
-  <!-- src_hash: aeda84fa74cb3b740771cdb5e97b7c99a48a5acf -->
-  <string name="notification_1m_before">%1$s yóò bẹ̀rẹ̀ lẹ́yìn ìṣẹ́jú 1!</string>
+  <!-- src_hash: e343d2e92e39ef1eed11a161b6c1ece5032826fa -->
+  <string name="notification_wave_hit">Igbi de!</string>
+  <!-- src_hash: f69d665ec4fc5d895f1b303020bbe11374d735c6 -->
+  <string name="notification_1h_before">Igbi %1$s yoo bere ni wakati 1</string>
+  <!-- src_hash: f3d9a40957bc1007bee1600b4d7baac58bd97547 -->
+  <string name="notification_30m_before">Igbi %1$s yoo bere ni iseju 30</string>
+  <!-- src_hash: c56876367306fb66598e8ada416a1035fa994ca4 -->
+  <string name="notification_10m_before">Igbi %1$s yoo bere ni iseju 10</string>
+  <!-- src_hash: c7d25b8f8a812a2d8f3b000ef02985d830b8b454 -->
+  <string name="notification_5m_before">Igbi %1$s yoo bere ni iseju 5</string>
+  <!-- src_hash: bfd9489c14c4401815ad5edfc26565559cc23204 -->
+  <string name="notification_1m_before">Igbi %1$s yoo bere ni iseju 1!</string>
   <!-- src_hash: 8a7ac9cbac318f9af717ff2c6a722d83c5bc5e0f -->
   <string name="notification_event_finished_body">Ìgbi %1$s ti parí</string>
-  <!-- src_hash: 20c369d47a787e9435d0ffd0c0398d78b7a1f70e -->
-  <string name="notification_wave_hit_body">Ìgbi náà ṣẹ̀ṣẹ̀ dé ọdọ rẹ ní %1$s!</string>
+  <!-- src_hash: ace9f9e70e87fc6d2f147f74c39a8d6a80078c21 -->
+  <string name="notification_wave_hit_body">Igbi %1$s ti de odo re bayii!</string>
   <!-- src_hash: c771b7ea17490dffedd973a684b3cac26030c296 -->
   <string name="notification_permission_rationale">Gba ìkìlọ̀ nígbà tí àwọn ìgbi ayanfẹ rẹ bá ń bẹ̀rẹ̀</string>
   <!-- src_hash: c685868070c0875387031ecfb82bdc7ab8ff32ca -->
