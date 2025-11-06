@@ -23,6 +23,7 @@ package com.worldwidewaves
 
 import android.app.Application
 import android.content.Context
+import android.os.Build
 import androidx.work.Configuration
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.di.applicationModule
@@ -31,6 +32,7 @@ import com.worldwidewaves.shared.WWWShutdownHandler
 import com.worldwidewaves.shared.di.androidModule
 import com.worldwidewaves.shared.di.initializeSimulationMode
 import com.worldwidewaves.shared.di.sharedModule
+import com.worldwidewaves.shared.notifications.NotificationChannelManager
 import com.worldwidewaves.shared.utils.CloseableCoroutineScope
 import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.utils.RuntimeLogConfig
@@ -111,6 +113,15 @@ open class MainApplication :
         // -------------------------------------------------------------------- //
         if (BuildConfig.ENABLE_SIMULATION_MODE) {
             setupDebugSimulation()
+        }
+
+        // -------------------------------------------------------------------- //
+        //  Initialize notification channel for Android O+ (API 26+)
+        //  Required before any notifications can be shown on Android 8.0+
+        // -------------------------------------------------------------------- //
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannelManager.createChannel(this)
+            Log.i("MainApplication", "Notification channel initialized")
         }
 
         // -------------------------------------------------------------------- //

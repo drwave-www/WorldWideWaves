@@ -21,6 +21,7 @@
 import UIKit
 import FirebaseCore
 import FirebaseCrashlytics
+import UserNotifications
 
 /// The app delegate for WorldWideWaves iOS app, handling app-wide lifecycle and legacy URL routing.
 ///
@@ -57,7 +58,7 @@ import FirebaseCrashlytics
 /// - Important: Platform initialization (Koin, MokoResources, SKIKO) is in SceneDelegate, not here
 /// - Note: @main attribute designates this as the app's entry point
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     /// UIApplicationDelegate method called when the app finishes launching.
     ///
     /// ## Purpose
@@ -92,6 +93,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Log successful initialization
         crashlytics.log("Firebase Crashlytics initialized successfully")
         WWWLog.i("AppDelegate", "Firebase & Crashlytics configured successfully")
+
+        // Configure notification center delegate for handling notification taps
+        UNUserNotificationCenter.current().delegate = self
+        WWWLog.i("AppDelegate", "UNUserNotificationCenter delegate configured")
 
         return true
     }
@@ -163,6 +168,87 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             return true
         }
         return false
+    }
+
+    // MARK: - UNUserNotificationCenterDelegate
+
+    /// Handles notification tap while app is in foreground.
+    ///
+    /// ## Purpose
+    /// Called when user taps a notification while the app is active in the foreground.
+    /// Required to handle notification deep links and navigation.
+    ///
+    /// ## Behavior
+    /// Extracts deep link from notification userInfo and routes using SceneDelegate.
+    ///
+    /// - Parameters:
+    ///   - center: The notification center that received the notification
+    ///   - response: The notification response containing the user's action
+    ///   - completionHandler: Must be called after handling the notification
+    /// - Note: completionHandler must be called on the main thread
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        let userInfo = response.notification.request.content.userInfo
+        #if DEBUG
+        WWWLog.d("AppDelegate", "userNotificationCenter:didReceive notification: \(userInfo)")
+        #endif
+
+        // Extract deep link from notification
+        if let deepLink = userInfo["deepLink"] as? String,
+           let url = URL(string: deepLink),
+           let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let sceneDelegate = scene.delegate as? SceneDelegate {
+            #if DEBUG
+            WWWLog.d("AppDelegate", "Routing notification deep link: \(deepLink)")
+            #endif
+
+            if let viewController = sceneDelegate.viewController(for: url) {
+                if let nav = sceneDelegate.nav {
+                    nav.pushViewController(viewController, animated: true)
+                } else {
+                    sceneDelegate.setRoot(viewController, in: scene)
+                }
+            }
+        }
+
+        completionHandler()
+    }
+
+    /// Handles notification display while app is in foreground.
+    ///
+    /// ## Purpose
+    /// Called when a notification arrives while the app is actively running in foreground.
+    /// By default, iOS does not show notifications for the active app unless this delegate
+    /// is implemented.
+    ///
+    /// ## Behavior
+    /// Display the notification banner/alert while app is in foreground.
+    ///
+    /// - Parameters:
+    ///   - center: The notification center that received the notification
+    ///   - notification: The notification to display
+    ///   - completionHandler: Callback with display option (must be called)
+    /// - Note: Must call completionHandler on main thread to display notification
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        let userInfo = notification.request.content.userInfo
+        #if DEBUG
+        WWWLog.d("AppDelegate", "userNotificationCenter:willPresent: \(userInfo)")
+        #endif
+
+        // Display notification banner while app is in foreground
+        // Use .banner + .sound + .badge for full notification experience
+        if #available(iOS 14.0, *) {
+            completionHandler([.banner, .sound, .badge])
+        } else {
+            completionHandler([.sound, .badge])
+        }
     }
 
 }
