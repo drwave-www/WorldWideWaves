@@ -50,6 +50,19 @@ fun setupDebugSimulation() {
                 Log.d("DebugSimulation", "Setting up cross-platform DEBUG simulation")
 
                 val wwwPlatform = KoinPlatform.getKoin().get<WWWPlatform>()
+                val timeZone = TimeZone.of("Europe/Paris")
+                val now = LocalDateTime(2026, 7, 14, 16, 58).toInstant(timeZone)
+
+                wwwPlatform.setSimulation(
+                    WWWSimulation(
+                        startDateTime = now,
+                        // Use test-verified Paris coordinates (known to be inside paris_france event area)
+                        userPosition = Position(lat = 48.8566, lng = 2.3522),
+                        initialSpeed = 1,
+                    ),
+                ) // In Paris, 1h wave duration = 2mn real time
+
+                /*
                 val timeZone = TimeZone.of("America/New_York")
                 val now = LocalDateTime(2026, 7, 4, 16, 59).toInstant(timeZone)
 
@@ -61,6 +74,7 @@ fun setupDebugSimulation() {
                         initialSpeed = 1,
                     ),
                 )
+                 */
 
                 Log.i("DebugSimulation", "Cross-platform DEBUG simulation setup completed")
             } else {
