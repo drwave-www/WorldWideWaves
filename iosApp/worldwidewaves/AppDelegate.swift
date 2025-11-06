@@ -104,6 +104,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             if !granted {
                 WWWLog.w("AppDelegate", "User denied notification permission - notifications will not appear")
             }
+            // Note: If permission is granted, notifications scheduled before this will work
+            // iOS will deliver them once authorization is granted
         }
 
         return true
