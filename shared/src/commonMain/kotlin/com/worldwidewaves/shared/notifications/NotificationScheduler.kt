@@ -211,31 +211,58 @@ class DefaultNotificationScheduler(
     }
 
     override suspend fun shouldScheduleNotifications(event: IWWWEvent): Boolean {
+        val TAG = "NotificationScheduler"
+
         // Check if event is favorited
-        if (!favoriteStore.isFavorite(event.id)) {
+        val isFavorite = favoriteStore.isFavorite(event.id)
+        com.worldwidewaves.shared.utils.Log
+            .d(TAG, "Event ${event.id} favorite status: $isFavorite")
+        if (!isFavorite) {
+            com.worldwidewaves.shared.utils.Log
+                .d(TAG, "Event ${event.id} NOT favorited - skipping notifications")
             return false
         }
 
         // Check if event has already started
         val now = clock.now()
-        if (event.getStartDateTime() <= now) {
+        val startTime = event.getStartDateTime()
+        com.worldwidewaves.shared.utils.Log
+            .d(TAG, "Event ${event.id} timing - now: $now, starts: $startTime")
+        if (startTime <= now) {
+            com.worldwidewaves.shared.utils.Log
+                .w(TAG, "Event ${event.id} already started - skipping notifications")
             return false
         }
 
         // Check simulation mode compatibility
         val simulation = platform.getSimulation()
+        val simSpeed = simulation?.speed
+        com.worldwidewaves.shared.utils.Log
+            .d(TAG, "Simulation mode - active: ${simulation != null}, speed: $simSpeed")
         if (simulation != null && simulation.speed != 1) {
             // Accelerated simulation - notifications would fire at wrong times
+            com.worldwidewaves.shared.utils.Log
+                .w(TAG, "Simulation speed is $simSpeed (not 1) - skipping notifications (incompatible)")
             return false
         }
 
         // All checks passed
+        com.worldwidewaves.shared.utils.Log.i(
+            TAG,
+            "Event ${event.id} ELIGIBLE for notifications (favorited, future, simulation compatible)",
+        )
         return true
     }
 
     override suspend fun scheduleAllNotifications(event: IWWWEvent) {
+        val TAG = "NotificationScheduler"
         val now = clock.now()
         val startTime = event.getStartDateTime()
+
+        com.worldwidewaves.shared.utils.Log
+            .i(TAG, "Scheduling notifications for event ${event.id} (starts: $startTime, now: $now)")
+
+        var scheduledCount = 0
 
         // Schedule start notifications (1h, 30m, 10m, 5m, 1m)
         NOTIFICATION_INTERVALS.forEach { interval ->
@@ -247,12 +274,21 @@ class DefaultNotificationScheduler(
                 // ContentProvider will resolve the location StringResource to a localized string
                 val content = contentProvider.generateStartingNotification(event, interval)
 
+                com.worldwidewaves.shared.utils.Log.d(
+                    TAG,
+                    "Scheduling ${interval.inWholeMinutes}m before notification for ${event.id} (delay: ${delay.inWholeMinutes}m)",
+                )
+
                 notificationManager.scheduleNotification(
                     eventId = event.id,
                     trigger = trigger,
                     delay = delay,
                     content = content,
                 )
+                scheduledCount++
+            } else {
+                com.worldwidewaves.shared.utils.Log
+                    .d(TAG, "Skipping ${interval.inWholeMinutes}m before notification (time already passed)")
             }
         }
 
@@ -263,13 +299,20 @@ class DefaultNotificationScheduler(
             // ContentProvider will resolve the location StringResource to a localized string
             val content = contentProvider.generateFinishedNotification(event)
 
+            com.worldwidewaves.shared.utils.Log
+                .d(TAG, "Scheduling event finished notification (delay: ${delay.inWholeMinutes}m)")
+
             notificationManager.scheduleNotification(
                 eventId = event.id,
                 trigger = NotificationTrigger.EventFinished,
                 delay = delay,
                 content = content,
             )
+            scheduledCount++
         }
+
+        com.worldwidewaves.shared.utils.Log
+            .i(TAG, "Scheduled $scheduledCount notifications for event ${event.id}")
     }
 
     override suspend fun cancelAllNotifications(eventId: String) {

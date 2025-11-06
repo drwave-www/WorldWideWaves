@@ -96,19 +96,45 @@ class SetEventFavorite(
     private val favoriteEventsStore: FavoriteEventsStore,
     private val notificationScheduler: com.worldwidewaves.shared.notifications.NotificationScheduler? = null,
 ) {
+    companion object {
+        private const val TAG = "SetEventFavorite"
+    }
+
     suspend fun call(
         event: IWWWEvent,
         isFavorite: Boolean,
     ) {
+        com.worldwidewaves.shared.utils.Log
+            .d(TAG, "Setting favorite status for event ${event.id}: $isFavorite")
+
         favoriteEventsStore
             .setFavoriteStatus(event.id, isFavorite)
             .also { event.favorite = isFavorite }
 
         // Schedule/cancel notifications based on favorite status
-        notificationScheduler?.let { scheduler ->
-            if (isFavorite && scheduler.shouldScheduleNotifications(event)) {
-                scheduler.scheduleAllNotifications(event)
-            } else if (!isFavorite) {
+        if (notificationScheduler == null) {
+            com.worldwidewaves.shared.utils.Log
+                .w(TAG, "NotificationScheduler is null - notifications will not be scheduled")
+        } else {
+            val scheduler = notificationScheduler
+            if (isFavorite) {
+                val shouldSchedule = scheduler.shouldScheduleNotifications(event)
+                com.worldwidewaves.shared.utils.Log
+                    .d(TAG, "Event ${event.id} favorited. Should schedule notifications: $shouldSchedule")
+
+                if (shouldSchedule) {
+                    com.worldwidewaves.shared.utils.Log
+                        .i(TAG, "Scheduling notifications for favorited event ${event.id}")
+                    scheduler.scheduleAllNotifications(event)
+                } else {
+                    com.worldwidewaves.shared.utils.Log.w(
+                        TAG,
+                        "Event ${event.id} favorited but notifications NOT scheduled (check eligibility)",
+                    )
+                }
+            } else {
+                com.worldwidewaves.shared.utils.Log
+                    .i(TAG, "Event ${event.id} unfavorited. Cancelling all notifications")
                 scheduler.cancelAllNotifications(event.id)
             }
         }
