@@ -1,12 +1,11 @@
-name: 02 • Build iOS [TESTING]
+name: 02 • Build iOS
 
 on:
-  # Temporarily only workflow_dispatch for testing
   workflow_dispatch:
-  # push:
-  #   branches: [ main ]
-  # pull_request:
-  #   branches: [ main ]
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 concurrency:
   group: build-ios-${{ github.ref }}
@@ -38,9 +37,19 @@ jobs:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Build iOS Framework (Simulator)
+        env:
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_PROJECT_NUMBER: ${{ secrets.FIREBASE_PROJECT_NUMBER }}
+          FIREBASE_IOS_APP_ID: ${{ secrets.FIREBASE_IOS_APP_ID }}
+          FIREBASE_IOS_API_KEY: ${{ secrets.FIREBASE_IOS_API_KEY }}
         run: ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64 --stacktrace
 
       - name: Build iOS Framework (Device)
+        env:
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_PROJECT_NUMBER: ${{ secrets.FIREBASE_PROJECT_NUMBER }}
+          FIREBASE_IOS_APP_ID: ${{ secrets.FIREBASE_IOS_APP_ID }}
+          FIREBASE_IOS_API_KEY: ${{ secrets.FIREBASE_IOS_API_KEY }}
         run: ./gradlew :shared:linkDebugFrameworkIosArm64 --stacktrace
 
   # iOS App build disabled - framework build is sufficient for KMM
