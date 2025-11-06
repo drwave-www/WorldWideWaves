@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>NotificationScheduler</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+                    <a class="library-name--link" href="../../../index.html">
+                            worldwidewaves-shared
+                    </a>
+            </div>
+            <div class="library-version">
+            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":shared:dokkaHtml/commonMain">common</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="worldwidewaves-shared::com.worldwidewaves.shared.notifications/NotificationScheduler///PointingToDeclaration//-1127283753">
+  <div class="breadcrumbs"><a href="../../../index.html">worldwidewaves-shared</a><span class="delimiter">/</span><a href="../index.html">com.worldwidewaves.shared.notifications</a><span class="delimiter">/</span><span class="current">NotificationScheduler</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Notification</span><wbr></wbr><span><span>Scheduler</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">NotificationScheduler</a><span class="clearfix"><span class="floating-right">(<a href="https://github.com/mglcel/WorldWideWaves/tree/main/shared/src/commonMain/kotlin/com/worldwidewaves/shared/notifications/NotificationScheduler.kt#L71">source</a>)</span></span></div><p class="paragraph">Manages notification scheduling logic for wave events.</p><h2 class="">Purpose</h2><p class="paragraph">Determines when and which notifications should be scheduled for favorited events:</p><ul><li><p class="paragraph">Calculates notification timing (1h, 30m, 10m, 5m, 1m before start)</p></li><li><p class="paragraph">Checks eligibility (favorited events only)</p></li><li><p class="paragraph">Validates simulation mode compatibility (speed == 1 only)</p></li><li><p class="paragraph">Coordinates with NotificationManager for actual scheduling</p></li></ul><h2 class="">Eligibility Criteria</h2><p class="paragraph">Notifications are scheduled only if:</p><ol><li><p class="paragraph">Event is favorited by user</p></li><li><p class="paragraph">Simulation mode is off OR speed == 1 (realistic mode)</p></li><li><p class="paragraph">Event hasn't started yet</p></li></ol><h2 class="">Simulation Mode Behavior</h2><ul><li><p class="paragraph"><strong>Real events</strong>: Always schedule ✅</p></li><li><p class="paragraph"><strong>Realistic simulation (speed=1)</strong>: Schedule (real-time compatible) ✅</p></li><li><p class="paragraph"><strong>Accelerated simulation (speed</strong>><strong>1)</strong>: Skip (time mismatch) ❌</p></li></ul><h2 class="">Usage</h2><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">class EventFavoriteHandler(<br>    private val scheduler: NotificationScheduler,<br>    private val notificationManager: NotificationManager<br>) {<br>    suspend fun onEventFavorited(event: IWWWEvent) {<br>        if (scheduler.shouldScheduleNotifications(event)) {<br>            scheduler.scheduleAllNotifications(event)<br>        }<br>    }<br>}</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><h4 class="">See also</h4><div class="table"><div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-notification-manager/index.html"><span>Notification</span><wbr></wbr><span><span>Manager</span></span></a></div></span></div><div><div class="title"><p class="paragraph">for platform-specific scheduling</p></div></div></div></div><div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../com.worldwidewaves.shared.data/-favorite-events-store/index.html"><span>Favorite</span><wbr></wbr><span>Events</span><wbr></wbr><span><span>Store</span></span></a></div></span></div><div><div class="title"><p class="paragraph">for favorite status</p></div></div></div></div></div><h4 class="">Inheritors</h4><div class="table"><div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-default-notification-scheduler/index.html">DefaultNotificationScheduler</a></div></span></div><div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="343065131%2FFunctions%2F-1127283753" anchor-label="cancelAllNotifications" id="343065131%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="cancel-all-notifications.html"><span>cancel</span><wbr></wbr><span>All</span><wbr></wbr><span><span>Notifications</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="343065131%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="cancel-all-notifications.html"><span class="token function">cancelAllNotifications</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Cancels all scheduled notifications for an event.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1050270088%2FFunctions%2F-1127283753" anchor-label="scheduleAllNotifications" id="1050270088%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="schedule-all-notifications.html"><span>schedule</span><wbr></wbr><span>All</span><wbr></wbr><span><span>Notifications</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1050270088%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="schedule-all-notifications.html"><span class="token function">scheduleAllNotifications</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">event<span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events/-i-w-w-w-event/index.html">IWWWEvent</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Schedules all time-based notifications for an event.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1046049102%2FFunctions%2F-1127283753" anchor-label="shouldScheduleNotifications" id="1046049102%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="should-schedule-notifications.html"><span>should</span><wbr></wbr><span>Schedule</span><wbr></wbr><span><span>Notifications</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1046049102%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="should-schedule-notifications.html"><span class="token function">shouldScheduleNotifications</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">event<span class="token operator">: </span><a href="../../com.worldwidewaves.shared.events/-i-w-w-w-event/index.html">IWWWEvent</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Determines if notifications should be scheduled for an event.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="962148770%2FFunctions%2F-1127283753" anchor-label="syncNotifications" id="962148770%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="sync-notifications.html"><span>sync</span><wbr></wbr><span><span>Notifications</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="962148770%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="sync-notifications.html"><span class="token function">syncNotifications</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">favoriteIds<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">currentEvents<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../com.worldwidewaves.shared.events/-i-w-w-w-event/index.html">IWWWEvent</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Syncs scheduled notifications with current state.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>NotificationWorker</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+                    <a class="library-name--link" href="../../../index.html">
+                            worldwidewaves-shared
+                    </a>
+            </div>
+            <div class="library-version">
+            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":shared:dokkaHtml/androidMain">android</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="worldwidewaves-shared::com.worldwidewaves.shared.notifications/NotificationWorker///PointingToDeclaration//1360135971">
+  <div class="breadcrumbs"><a href="../../../index.html">worldwidewaves-shared</a><span class="delimiter">/</span><a href="../index.html">com.worldwidewaves.shared.notifications</a><span class="delimiter">/</span><span class="current">NotificationWorker</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Notification</span><wbr></wbr><span><span>Worker</span></span></h1>
+    <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">NotificationWorker</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span></span><span class="parameter ">params<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/work/WorkerParameters.html">WorkerParameters</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/androidx/work/CoroutineWorker.html">CoroutineWorker</a></div><p class="paragraph">WorkManager worker for delivering scheduled notifications.</p><h2 class="">Architecture</h2><ul><li><p class="paragraph">Extends <code class="lang-kotlin">CoroutineWorker</code> for suspend function support</p></li><li><p class="paragraph">Retrieves notification data from <code class="lang-kotlin">inputData</code> (set by AndroidNotificationManager)</p></li><li><p class="paragraph">Resolves localization keys using Android resources (not MokoRes)</p></li><li><p class="paragraph">Shows notification via NotificationCompat.Builder</p></li><li><p class="paragraph">Handles deep links to open specific event screens</p></li></ul><h2 class="">Localization Strategy</h2><p class="paragraph">WorkManager runs in a separate process context, so it cannot access MokoRes. Instead:</p><ol><li><p class="paragraph">AndroidNotificationManager passes localization KEYS in inputData</p></li><li><p class="paragraph">NotificationWorker resolves keys using <code class="lang-kotlin">context.resources.getIdentifier()</code></p></li><li><p class="paragraph">Falls back to key itself if resource not found (development safety)</p></li></ol><h2 class="">Input Data Format</h2><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">eventId: String          // &quot;event123&quot;<br>triggerId: String        // &quot;start_60m&quot;, &quot;finished&quot;, &quot;wave_hit&quot;<br>titleKey: String         // &quot;notification_event_starting_soon&quot;<br>bodyKey: String          // &quot;notification_1h_before&quot;<br>bodyArgs: Array&lt;String&gt;  // [&quot;New York&quot;, &quot;14:00&quot;]<br>deepLink: String         // &quot;worldwidewaves://event?id=event123&quot;</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><h2 class="">Deep Link Behavior</h2><ul><li><p class="paragraph">Opens MainActivity with deep link intent</p></li><li><p class="paragraph">Flags: NEW_TASK | CLEAR_TOP (brings app to foreground)</p></li><li><p class="paragraph">PendingIntent: UPDATE_CURRENT | IMMUTABLE (Android 12+ requirement)</p></li></ul><h2 class="">Error Handling</h2><ul><li><p class="paragraph">Returns <code class="lang-kotlin">Result.failure()</code> if required input missing</p></li><li><p class="paragraph">Returns <code class="lang-kotlin">Result.success()</code> on successful delivery</p></li><li><p class="paragraph">Logs errors but doesn't throw exceptions</p></li></ul><h2 class="">Example Usage</h2><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">// Enqueued by AndroidNotificationManager<br>val inputData = Data.Builder()<br>    .putString(INPUT_EVENT_ID, &quot;event123&quot;)<br>    .putString(INPUT_TRIGGER_ID, &quot;start_60m&quot;)<br>    .putString(INPUT_TITLE_KEY, &quot;notification_event_starting_soon&quot;)<br>    .putString(INPUT_BODY_KEY, &quot;notification_1h_before&quot;)<br>    .putStringArray(INPUT_BODY_ARGS, arrayOf(&quot;New York&quot;))<br>    .putString(INPUT_DEEP_LINK, &quot;worldwidewaves://event?id=event123&quot;)<br>    .build()<br><br>val workRequest = OneTimeWorkRequestBuilder&lt;NotificationWorker&gt;()<br>    .setInputData(inputData)<br>    .setInitialDelay(60, TimeUnit.MINUTES)<br>    .build()</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><h4 class="">Parameters</h4><div class="table"><div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>context</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Android application context</p></div></div></div></div><div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>params</span></span></u></div></span></div><div><div class="title"><p class="paragraph">WorkerParameters containing input data</p></div></div></div></div></div><h4 class="">See also</h4><div class="table"><div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-android-notification-manager/index.html"><span>Android</span><wbr></wbr><span>Notification</span><wbr></wbr><span><span>Manager</span></span></a></div></span></div><div><div class="title"><p class="paragraph">for enqueueing logic</p></div></div></div></div><div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-notification-channel-manager/index.html"><span>Notification</span><wbr></wbr><span>Channel</span><wbr></wbr><span><span>Manager</span></span></a></div></span></div><div><div class="title"><p class="paragraph">for channel setup</p></div></div></div></div></div></div>    </div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="1244078954%2FConstructors%2F1360135971" anchor-label="NotificationWorker" id="1244078954%2FConstructors%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-notification-worker.html"><span>Notification</span><wbr></wbr><span><span>Worker</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1244078954%2FConstructors%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span></span><span class="parameter ">params<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/work/WorkerParameters.html">WorkerParameters</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="">Types</h2>
+        <div class="table"><a data-name="-534613882%2FClasslikes%2F1360135971" anchor-label="Companion" id="-534613882%2FClasslikes%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-534613882%2FClasslikes%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="1269180052%2FProperties%2F1360135971" anchor-label="coroutineContext" id="1269180052%2FProperties%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1269180052%2FProperties%2F1360135971"><span>coroutine</span><wbr></wbr><span><span>Context</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1269180052%2FProperties%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">val </span><a href="index.html#1269180052%2FProperties%2F1360135971"><strike>coroutineContext</strike></a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineDispatcher///PointingToDeclaration/">CoroutineDispatcher</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="508680383%2FFunctions%2F1360135971" anchor-label="doWork" id="508680383%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="do-work.html"><span>do</span><wbr></wbr><span><span>Work</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="508680383%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="do-work.html"><span class="token function">doWork</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/work/ListenableWorker.Result.html">ListenableWorker.Result</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-560782721%2FFunctions%2F1360135971" anchor-label="getApplicationContext" id="-560782721%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-560782721%2FFunctions%2F1360135971"><span>get</span><wbr></wbr><span>Application</span><wbr></wbr><span><span>Context</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-560782721%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">fun </span><a href="index.html#-560782721%2FFunctions%2F1360135971"><span class="token function">getApplicationContext</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1421258461%2FFunctions%2F1360135971" anchor-label="getBackgroundExecutor" id="1421258461%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1421258461%2FFunctions%2F1360135971"><span>get</span><wbr></wbr><span>Background</span><wbr></wbr><span><span>Executor</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1421258461%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr></wbr><span class="token punctuation">]</span></span><wbr></wbr><span class="token punctuation">)</span></div><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#1421258461%2FFunctions%2F1360135971"><span class="token function">getBackgroundExecutor</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/util/concurrent/Executor.html">Executor</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1577343784%2FFunctions%2F1360135971" anchor-label="getForegroundInfo" id="1577343784%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1577343784%2FFunctions%2F1360135971"><span>get</span><wbr></wbr><span>Foreground</span><wbr></wbr><span><span>Info</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1577343784%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="index.html#1577343784%2FFunctions%2F1360135971"><span class="token function">getForegroundInfo</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/work/ForegroundInfo.html">ForegroundInfo</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="67363926%2FFunctions%2F1360135971" anchor-label="getForegroundInfoAsync" id="67363926%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#67363926%2FFunctions%2F1360135971"><span>get</span><wbr></wbr><span>Foreground</span><wbr></wbr><span>Info</span><wbr></wbr><span><span>Async</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="67363926%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">override </span><span class="token keyword">fun </span><a href="index.html#67363926%2FFunctions%2F1360135971"><span class="token function">getForegroundInfoAsync</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.google.common.util.concurrent/ListenableFuture///PointingToDeclaration/">ListenableFuture</span><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/androidx/work/ForegroundInfo.html">ForegroundInfo</a><span class="token operator">&gt;</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1759193821%2FFunctions%2F1360135971" anchor-label="getId" id="-1759193821%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1759193821%2FFunctions%2F1360135971"><span>get</span><wbr></wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1759193821%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">fun </span><a href="index.html#-1759193821%2FFunctions%2F1360135971"><span class="token function">getId</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/util/UUID.html">UUID</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-907781528%2FFunctions%2F1360135971" anchor-label="getInputData" id="-907781528%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-907781528%2FFunctions%2F1360135971"><span>get</span><wbr></wbr><span>Input</span><wbr></wbr><span><span>Data</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-907781528%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">fun </span><a href="index.html#-907781528%2FFunctions%2F1360135971"><span class="token function">getInputData</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/work/Data.html">Data</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1225012274%2FFunctions%2F1360135971" anchor-label="getNetwork" id="-1225012274%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1225012274%2FFunctions%2F1360135971"><span>get</span><wbr></wbr><span><span>Network</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1225012274%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RequiresApi.html"><span class="token annotation builtin">RequiresApi</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="breakable-word"><span class="token constant">28</span></span></span><wbr></wbr><span class="token punctuation">)</span></div><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/Nullable.html"><span class="token annotation builtin">Nullable</span></a></div></div><span class="token keyword">fun </span><a href="index.html#-1225012274%2FFunctions%2F1360135971"><span class="token function">getNetwork</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/net/Network.html">Network</a><span class="token operator">?</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1096617839%2FFunctions%2F1360135971" anchor-label="getRunAttemptCount" id="1096617839%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1096617839%2FFunctions%2F1360135971"><span>get</span><wbr></wbr><span>Run</span><wbr></wbr><span>Attempt</span><wbr></wbr><span><span>Count</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1096617839%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/IntRange.html"><span class="token annotation builtin">IntRange</span></a><span class="token punctuation">(</span><span>from<span class="token operator"> = </span><span class="breakable-word"><span class="token constant">0</span></span></span><wbr></wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><a href="index.html#1096617839%2FFunctions%2F1360135971"><span class="token function">getRunAttemptCount</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1809449288%2FFunctions%2F1360135971" anchor-label="getStopReason" id="-1809449288%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1809449288%2FFunctions%2F1360135971"><span>get</span><wbr></wbr><span>Stop</span><wbr></wbr><span><span>Reason</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1809449288%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RequiresApi.html"><span class="token annotation builtin">RequiresApi</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="breakable-word"><span class="token constant">31</span></span></span><wbr></wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><a href="index.html#-1809449288%2FFunctions%2F1360135971"><span class="token function">getStopReason</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1356325797%2FFunctions%2F1360135971" anchor-label="getTags" id="1356325797%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1356325797%2FFunctions%2F1360135971"><span>get</span><wbr></wbr><span><span>Tags</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1356325797%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">fun </span><a href="index.html#1356325797%2FFunctions%2F1360135971"><span class="token function">getTags</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-mutable-set/index.html">MutableSet</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1625383462%2FFunctions%2F1360135971" anchor-label="getTaskExecutor" id="1625383462%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1625383462%2FFunctions%2F1360135971"><span>get</span><wbr></wbr><span>Task</span><wbr></wbr><span><span>Executor</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1625383462%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr></wbr><span class="token punctuation">]</span></span><wbr></wbr><span class="token punctuation">)</span></div><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#1625383462%2FFunctions%2F1360135971"><span class="token function">getTaskExecutor</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="androidx.work.impl.utils.taskexecutor/TaskExecutor///PointingToDeclaration/">TaskExecutor</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="514689021%2FFunctions%2F1360135971" anchor-label="getTriggeredContentAuthorities" id="514689021%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#514689021%2FFunctions%2F1360135971"><span>get</span><wbr></wbr><span>Triggered</span><wbr></wbr><span>Content</span><wbr></wbr><span><span>Authorities</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="514689021%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RequiresApi.html"><span class="token annotation builtin">RequiresApi</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="breakable-word"><span class="token constant">24</span></span></span><wbr></wbr><span class="token punctuation">)</span></div><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">fun </span><a href="index.html#514689021%2FFunctions%2F1360135971"><span class="token function">getTriggeredContentAuthorities</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-mutable-list/index.html">MutableList</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1016068107%2FFunctions%2F1360135971" anchor-label="getTriggeredContentUris" id="-1016068107%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1016068107%2FFunctions%2F1360135971"><span>get</span><wbr></wbr><span>Triggered</span><wbr></wbr><span>Content</span><wbr></wbr><span><span>Uris</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1016068107%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RequiresApi.html"><span class="token annotation builtin">RequiresApi</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="breakable-word"><span class="token constant">24</span></span></span><wbr></wbr><span class="token punctuation">)</span></div><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">fun </span><a href="index.html#-1016068107%2FFunctions%2F1360135971"><span class="token function">getTriggeredContentUris</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-mutable-list/index.html">MutableList</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/android/net/Uri.html">Uri</a><span class="token operator">&gt;</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-473896752%2FFunctions%2F1360135971" anchor-label="getWorkerFactory" id="-473896752%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-473896752%2FFunctions%2F1360135971"><span>get</span><wbr></wbr><span>Worker</span><wbr></wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-473896752%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr></wbr><span class="token punctuation">]</span></span><wbr></wbr><span class="token punctuation">)</span></div><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-473896752%2FFunctions%2F1360135971"><span class="token function">getWorkerFactory</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/work/WorkerFactory.html">WorkerFactory</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-43937871%2FFunctions%2F1360135971" anchor-label="isStopped" id="-43937871%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-43937871%2FFunctions%2F1360135971"><span>is</span><wbr></wbr><span><span>Stopped</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-43937871%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html#-43937871%2FFunctions%2F1360135971"><span class="token function">isStopped</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2101847327%2FFunctions%2F1360135971" anchor-label="isUsed" id="2101847327%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#2101847327%2FFunctions%2F1360135971"><span>is</span><wbr></wbr><span><span>Used</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2101847327%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr></wbr><span class="token punctuation">]</span></span><wbr></wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><a href="index.html#2101847327%2FFunctions%2F1360135971"><span class="token function">isUsed</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1990082143%2FFunctions%2F1360135971" anchor-label="onStopped" id="-1990082143%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1990082143%2FFunctions%2F1360135971"><span>on</span><wbr></wbr><span><span>Stopped</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1990082143%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">override </span><span class="token keyword">fun </span><a href="index.html#-1990082143%2FFunctions%2F1360135971"><span class="token function">onStopped</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="317365985%2FFunctions%2F1360135971" anchor-label="setForeground" id="317365985%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#317365985%2FFunctions%2F1360135971"><span>set</span><wbr></wbr><span><span>Foreground</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="317365985%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="index.html#317365985%2FFunctions%2F1360135971"><span class="token function">setForeground</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">foregroundInfo<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/work/ForegroundInfo.html">ForegroundInfo</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1269350234%2FFunctions%2F1360135971" anchor-label="setForegroundAsync" id="-1269350234%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1269350234%2FFunctions%2F1360135971"><span>set</span><wbr></wbr><span>Foreground</span><wbr></wbr><span><span>Async</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1269350234%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">fun </span><a href="index.html#-1269350234%2FFunctions%2F1360135971"><span class="token function">setForegroundAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>foregroundInfo<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/work/ForegroundInfo.html">ForegroundInfo</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.google.common.util.concurrent/ListenableFuture///PointingToDeclaration/">ListenableFuture</span><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Void.html">Void</a><span class="token operator">&gt;</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1755411902%2FFunctions%2F1360135971" anchor-label="setProgress" id="1755411902%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1755411902%2FFunctions%2F1360135971"><span>set</span><wbr></wbr><span><span>Progress</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1755411902%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="index.html#1755411902%2FFunctions%2F1360135971"><span class="token function">setProgress</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">data<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/work/Data.html">Data</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-348364649%2FFunctions%2F1360135971" anchor-label="setProgressAsync" id="-348364649%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-348364649%2FFunctions%2F1360135971"><span>set</span><wbr></wbr><span>Progress</span><wbr></wbr><span><span>Async</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-348364649%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-348364649%2FFunctions%2F1360135971"><span class="token function">setProgressAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>data<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/work/Data.html">Data</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.google.common.util.concurrent/ListenableFuture///PointingToDeclaration/">ListenableFuture</span><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Void.html">Void</a><span class="token operator">&gt;</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1019169525%2FFunctions%2F1360135971" anchor-label="setUsed" id="1019169525%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1019169525%2FFunctions%2F1360135971"><span>set</span><wbr></wbr><span><span>Used</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1019169525%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr></wbr><span class="token punctuation">]</span></span><wbr></wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><a href="index.html#1019169525%2FFunctions%2F1360135971"><span class="token function">setUsed</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1181660772%2FFunctions%2F1360135971" anchor-label="startWork" id="-1181660772%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1181660772%2FFunctions%2F1360135971"><span>start</span><wbr></wbr><span><span>Work</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1181660772%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">override </span><span class="token keyword">fun </span><a href="index.html#-1181660772%2FFunctions%2F1360135971"><span class="token function">startWork</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.google.common.util.concurrent/ListenableFuture///PointingToDeclaration/">ListenableFuture</span><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/androidx/work/ListenableWorker.Result.html">ListenableWorker.Result</a><span class="token operator">&gt;</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1498077086%2FFunctions%2F1360135971" anchor-label="stop" id="-1498077086%2FFunctions%2F1360135971" data-filterable-set=":shared:dokkaHtml/androidMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1498077086%2FFunctions%2F1360135971"><span><span>stop</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1498077086%2FFunctions%2F1360135971"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/androidMain" data-filterable-set=":shared:dokkaHtml/androidMain" data-active="" data-toggle=":shared:dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr></wbr><span class="token punctuation">]</span></span><wbr></wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><a href="index.html#-1498077086%2FFunctions%2F1360135971"><span class="token function">stop</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">reason<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

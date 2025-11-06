@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>NotificationManager</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+                    <a class="library-name--link" href="../../../index.html">
+                            worldwidewaves-shared
+                    </a>
+            </div>
+            <div class="library-version">
+            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":shared:dokkaHtml/commonMain">common</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="worldwidewaves-shared::com.worldwidewaves.shared.notifications/NotificationManager///PointingToDeclaration//-1127283753">
+  <div class="breadcrumbs"><a href="../../../index.html">worldwidewaves-shared</a><span class="delimiter">/</span><a href="../index.html">com.worldwidewaves.shared.notifications</a><span class="delimiter">/</span><span class="current">NotificationManager</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Notification</span><wbr></wbr><span><span>Manager</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">NotificationManager</a><span class="clearfix"><span class="floating-right">(<a href="https://github.com/mglcel/WorldWideWaves/tree/main/shared/src/commonMain/kotlin/com/worldwidewaves/shared/notifications/NotificationManager.kt#L72">source</a>)</span></span></div><p class="paragraph">Platform-agnostic interface for scheduling and delivering notifications.</p><h2 class="">Purpose</h2><p class="paragraph">Provides a unified API for notification management across Android and iOS:</p><ul><li><p class="paragraph">Schedule future notifications (time-based triggers)</p></li><li><p class="paragraph">Deliver immediate notifications (wave hit)</p></li><li><p class="paragraph">Cancel scheduled notifications</p></li></ul><h2 class="">Platform Implementations</h2><ul><li><p class="paragraph"><strong>Android</strong>: <code class="lang-kotlin">AndroidNotificationManager</code> using WorkManager for scheduled notifications</p></li><li><p class="paragraph"><strong>iOS</strong>: <code class="lang-kotlin">IOSNotificationManager</code> using UNUserNotificationCenter</p></li></ul><h2 class="">Notification Limits</h2><ul><li><p class="paragraph"><strong>iOS</strong>: 64 pending notifications max</p></li><li><p class="paragraph"><strong>Android</strong>: ~500 pending notifications (varies by OEM)</p></li><li><p class="paragraph"><strong>Mitigation</strong>: Favorites-only keeps volume low (~60 max per user)</p></li></ul><h2 class="">Thread Safety</h2><p class="paragraph">All methods are suspend functions and must be called from appropriate coroutine contexts. Platform implementations handle thread-safety internally.</p><h2 class="">Usage Example</h2><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">class EventNotificationScheduler(<br>    private val notificationManager: NotificationManager,<br>    private val contentProvider: NotificationContentProvider<br>) {<br>    suspend fun scheduleNotificationsForEvent(event: IWWWEvent) {<br>        val triggers = listOf(<br>            NotificationTrigger.EventStarting(1.hours),<br>            NotificationTrigger.EventStarting(30.minutes)<br>        )<br><br>        triggers.forEach { trigger -&gt;<br>            val delay = calculateDelay(event, trigger)<br>            val content = contentProvider.generateContent(event, trigger)<br>            notificationManager.scheduleNotification(event.id, trigger, delay, content)<br>        }<br>    }<br>}</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><h4 class="">See also</h4><div class="table"><div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><span>Android</span><wbr></wbr><span>Notification</span><wbr></wbr><span><span>Manager</span></span></div></span></div><div><div class="title"><p class="paragraph">for Android implementation</p></div></div></div></div><div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><span>IOSNotification</span><wbr></wbr><span><span>Manager</span></span></div></span></div><div><div class="title"><p class="paragraph">for iOS implementation</p></div></div></div></div></div><h4 class="">Inheritors</h4><div class="table"><div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><span data-unresolved-link="com.worldwidewaves.shared.notifications/AndroidNotificationManager///PointingToDeclaration/">AndroidNotificationManager</span></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><span data-unresolved-link="com.worldwidewaves.shared.notifications/IOSNotificationManager///PointingToDeclaration/">IOSNotificationManager</span></div></span></div><div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="1004798009%2FFunctions%2F-1127283753" anchor-label="cancelAllNotifications" id="1004798009%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="cancel-all-notifications.html"><span>cancel</span><wbr></wbr><span>All</span><wbr></wbr><span><span>Notifications</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1004798009%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="cancel-all-notifications.html"><span class="token function">cancelAllNotifications</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Cancels all notifications for an event.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2032265194%2FFunctions%2F-1127283753" anchor-label="cancelNotification" id="-2032265194%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="cancel-notification.html"><span>cancel</span><wbr></wbr><span><span>Notification</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2032265194%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="cancel-notification.html"><span class="token function">cancelNotification</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">trigger<span class="token operator">: </span><a href="../-notification-trigger/index.html">NotificationTrigger</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Cancels a specific notification for an event.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2106268454%2FFunctions%2F-1127283753" anchor-label="deliverNow" id="-2106268454%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="deliver-now.html"><span>deliver</span><wbr></wbr><span><span>Now</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2106268454%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="deliver-now.html"><span class="token function">deliverNow</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">trigger<span class="token operator">: </span><a href="../-notification-trigger/index.html">NotificationTrigger</a><span class="token punctuation">, </span></span><span class="parameter ">content<span class="token operator">: </span><a href="../-notification-content/index.html">NotificationContent</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Delivers a notification immediately.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-30489988%2FFunctions%2F-1127283753" anchor-label="scheduleNotification" id="-30489988%2FFunctions%2F-1127283753" data-filterable-set=":shared:dokkaHtml/commonMain"></a>
+          <div class="table-row" data-filterable-current=":shared:dokkaHtml/commonMain" data-filterable-set=":shared:dokkaHtml/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="schedule-notification.html"><span>schedule</span><wbr></wbr><span><span>Notification</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-30489988%2FFunctions%2F-1127283753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="schedule-notification.html"><span class="token function">scheduleNotification</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">trigger<span class="token operator">: </span><a href="../-notification-trigger/index.html">NotificationTrigger</a><span class="token punctuation">, </span></span><span class="parameter ">delay<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.time/-duration/index.html">Duration</a><span class="token punctuation">, </span></span><span class="parameter ">content<span class="token operator">: </span><a href="../-notification-content/index.html">NotificationContent</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Schedules a notification to be delivered after the specified delay.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
