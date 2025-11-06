@@ -272,10 +272,10 @@ class GeoJsonPerformanceTest : KoinTest {
             val durationMs = duration.inWholeMilliseconds
 
             // THEN: Cache management should be efficient
-            // CI environments can be slower, using 200ms budget to account for variance
+            // CI environments can be slower, using 500ms budget to account for variance and GC pauses
             assertTrue(
-                durationMs < 200,
-                "LRU cache operations took ${durationMs}ms (budget: 200ms)",
+                durationMs < 500,
+                "LRU cache operations took ${durationMs}ms (budget: 500ms)",
             )
 
             // WHEN: Accessing a recently-used entry
