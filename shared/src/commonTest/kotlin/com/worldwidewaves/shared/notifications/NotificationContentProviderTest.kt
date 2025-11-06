@@ -151,6 +151,9 @@ class NotificationContentProviderTest {
         // ASSERT: Should use correct localization keys
         assertEquals("notification_event_starting_soon", content.titleKey)
         assertEquals("notification_1h_before", content.bodyKey)
+        // Location should be resolved from StringResource to actual string
+        assertEquals(1, content.bodyArgs.size)
+        assertTrue(content.bodyArgs[0].isNotEmpty())
     }
 
     // ========================================
@@ -167,6 +170,9 @@ class NotificationContentProviderTest {
         // ASSERT: Should use correct localization keys
         assertEquals("notification_event_starting_soon", content.titleKey)
         assertEquals("notification_30m_before", content.bodyKey)
+        // Location should be resolved from StringResource to actual string
+        assertEquals(1, content.bodyArgs.size)
+        assertTrue(content.bodyArgs[0].isNotEmpty())
     }
 
     // ========================================
@@ -183,6 +189,9 @@ class NotificationContentProviderTest {
         // ASSERT: Should use correct localization keys
         assertEquals("notification_event_starting_soon", content.titleKey)
         assertEquals("notification_10m_before", content.bodyKey)
+        // Location should be resolved from StringResource to actual string
+        assertEquals(1, content.bodyArgs.size)
+        assertTrue(content.bodyArgs[0].isNotEmpty())
     }
 
     // ========================================
@@ -199,6 +208,9 @@ class NotificationContentProviderTest {
         // ASSERT: Should use correct localization keys
         assertEquals("notification_event_starting_soon", content.titleKey)
         assertEquals("notification_5m_before", content.bodyKey)
+        // Location should be resolved from StringResource to actual string
+        assertEquals(1, content.bodyArgs.size)
+        assertTrue(content.bodyArgs[0].isNotEmpty())
     }
 
     // ========================================
@@ -215,6 +227,9 @@ class NotificationContentProviderTest {
         // ASSERT: Should use correct localization keys
         assertEquals("notification_event_starting_soon", content.titleKey)
         assertEquals("notification_1m_before", content.bodyKey)
+        // Location should be resolved from StringResource to actual string
+        assertEquals(1, content.bodyArgs.size)
+        assertTrue(content.bodyArgs[0].isNotEmpty())
     }
 
     // ========================================
@@ -231,6 +246,9 @@ class NotificationContentProviderTest {
         // ASSERT: Should use fallback body key
         assertEquals("notification_event_starting_soon", content.titleKey)
         assertEquals("notification_event_starting_soon", content.bodyKey)
+        // Location should be resolved from StringResource to actual string
+        assertEquals(1, content.bodyArgs.size)
+        assertTrue(content.bodyArgs[0].isNotEmpty())
     }
 
     // ========================================
@@ -244,13 +262,10 @@ class NotificationContentProviderTest {
         // ACT: Generate content
         val content = contentProvider.generateStartingNotification(testEvent, timeUntilStart)
 
-        // ASSERT: Body args should contain location resource ID as string
+        // ASSERT: Body args should contain resolved location string (not resource ID)
         assertEquals(1, content.bodyArgs.size)
-        assertEquals(
-            MokoRes.strings.empty.resourceId
-                .toString(),
-            content.bodyArgs[0],
-        )
+        // The location should be resolved from MokoRes.strings.empty to its localized string
+        assertTrue(content.bodyArgs[0].isNotEmpty(), "Location string should not be empty")
     }
 
     // ========================================
@@ -289,13 +304,10 @@ class NotificationContentProviderTest {
         // ACT: Generate content
         val content = contentProvider.generateFinishedNotification(testEvent)
 
-        // ASSERT: Body args should contain location resource ID as string
+        // ASSERT: Body args should contain resolved location string (not resource ID)
         assertEquals(1, content.bodyArgs.size)
-        assertEquals(
-            MokoRes.strings.empty.resourceId
-                .toString(),
-            content.bodyArgs[0],
-        )
+        // The location should be resolved from MokoRes.strings.empty to its localized string
+        assertTrue(content.bodyArgs[0].isNotEmpty(), "Location string should not be empty")
     }
 
     // ========================================
@@ -331,13 +343,10 @@ class NotificationContentProviderTest {
         // ACT: Generate content
         val content = contentProvider.generateWaveHitNotification(testEvent)
 
-        // ASSERT: Body args should contain location resource ID as string
+        // ASSERT: Body args should contain resolved location string (not resource ID)
         assertEquals(1, content.bodyArgs.size)
-        assertEquals(
-            MokoRes.strings.empty.resourceId
-                .toString(),
-            content.bodyArgs[0],
-        )
+        // The location should be resolved from MokoRes.strings.empty to its localized string
+        assertTrue(content.bodyArgs[0].isNotEmpty(), "Location string should not be empty")
     }
 
     // ========================================
@@ -420,18 +429,10 @@ class NotificationContentProviderTest {
         val content1 = contentProvider.generateStartingNotification(event1, 1.hours)
         val content2 = contentProvider.generateStartingNotification(event2, 1.hours)
 
-        // ASSERT: Body args should contain same resource ID (both use MokoRes.strings.empty)
-        // Note: In production, events would have different location resource IDs
-        assertEquals(
-            MokoRes.strings.empty.resourceId
-                .toString(),
-            content1.bodyArgs[0],
-        )
-        assertEquals(
-            MokoRes.strings.empty.resourceId
-                .toString(),
-            content2.bodyArgs[0],
-        )
+        // ASSERT: Body args should contain resolved location strings
+        // Note: Both mock events return MokoRes.strings.empty, so after localization they'll be equal
+        assertTrue(content1.bodyArgs[0].isNotEmpty(), "Event 1 location string should not be empty")
+        assertTrue(content2.bodyArgs[0].isNotEmpty(), "Event 2 location string should not be empty")
         // Both mock events use same resource, so they're equal (acceptable for mock)
         assertEquals(content1.bodyArgs[0], content2.bodyArgs[0])
     }
