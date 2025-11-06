@@ -98,6 +98,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         UNUserNotificationCenter.current().delegate = self
         WWWLog.i("AppDelegate", "UNUserNotificationCenter delegate configured")
 
+        // Request notification permission on app launch (iOS equivalent of Android MainActivity)
+        NotificationPermissionBridge.requestNotificationPermission { granted in
+            WWWLog.i("AppDelegate", "Notification permission result: \(granted ? "GRANTED" : "DENIED")")
+            if !granted {
+                WWWLog.w("AppDelegate", "User denied notification permission - notifications will not appear")
+            }
+        }
+
         return true
     }
 
