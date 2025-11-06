@@ -21,12 +21,16 @@ package com.worldwidewaves.shared.notifications
  * limitations under the License.
  */
 
+import android.Manifest
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
@@ -91,6 +95,25 @@ class AndroidNotificationManager(
         content: NotificationContent,
     ) {
         try {
+            // Check notification permission (Android 13+)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val permissionGranted =
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS,
+                    ) == PackageManager.PERMISSION_GRANTED
+
+                Log.d(TAG, "POST_NOTIFICATIONS permission: ${if (permissionGranted) "GRANTED" else "DENIED"}")
+
+                if (!permissionGranted) {
+                    Log.w(
+                        TAG,
+                        "POST_NOTIFICATIONS permission DENIED - notification will not appear. User must grant permission in settings.",
+                    )
+                    return
+                }
+            }
+
             val workName = buildWorkName(eventId, trigger)
             val inputData = buildInputData(eventId, trigger, content)
 
