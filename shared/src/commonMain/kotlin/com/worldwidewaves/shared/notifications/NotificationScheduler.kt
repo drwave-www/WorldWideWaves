@@ -279,13 +279,23 @@ class DefaultNotificationScheduler(
                     "Scheduling ${interval.inWholeMinutes}m before notification for ${event.id} (delay: ${delay.inWholeMinutes}m)",
                 )
 
-                notificationManager.scheduleNotification(
-                    eventId = event.id,
-                    trigger = trigger,
-                    delay = delay,
-                    content = content,
-                )
-                scheduledCount++
+                com.worldwidewaves.shared.utils.Log
+                    .i(TAG, "NotificationManager type: ${notificationManager::class.simpleName}")
+
+                try {
+                    notificationManager.scheduleNotification(
+                        eventId = event.id,
+                        trigger = trigger,
+                        delay = delay,
+                        content = content,
+                    )
+                    com.worldwidewaves.shared.utils.Log
+                        .d(TAG, "scheduleNotification() completed for ${trigger.id}")
+                    scheduledCount++
+                } catch (e: Exception) {
+                    com.worldwidewaves.shared.utils.Log
+                        .e(TAG, "scheduleNotification() failed for ${trigger.id}", throwable = e)
+                }
             } else {
                 com.worldwidewaves.shared.utils.Log
                     .d(TAG, "Skipping ${interval.inWholeMinutes}m before notification (time already passed)")
@@ -302,13 +312,20 @@ class DefaultNotificationScheduler(
             com.worldwidewaves.shared.utils.Log
                 .d(TAG, "Scheduling event finished notification (delay: ${delay.inWholeMinutes}m)")
 
-            notificationManager.scheduleNotification(
-                eventId = event.id,
-                trigger = NotificationTrigger.EventFinished,
-                delay = delay,
-                content = content,
-            )
-            scheduledCount++
+            try {
+                notificationManager.scheduleNotification(
+                    eventId = event.id,
+                    trigger = NotificationTrigger.EventFinished,
+                    delay = delay,
+                    content = content,
+                )
+                com.worldwidewaves.shared.utils.Log
+                    .d(TAG, "scheduleNotification() completed for finished")
+                scheduledCount++
+            } catch (e: Exception) {
+                com.worldwidewaves.shared.utils.Log
+                    .e(TAG, "scheduleNotification() failed for finished", throwable = e)
+            }
         }
 
         com.worldwidewaves.shared.utils.Log
