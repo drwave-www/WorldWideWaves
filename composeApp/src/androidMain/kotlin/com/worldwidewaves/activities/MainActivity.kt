@@ -21,13 +21,17 @@ package com.worldwidewaves.activities
  * limitations under the License.
  */
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.WindowInsets
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.google.android.play.core.splitcompat.SplitCompat
@@ -57,6 +61,26 @@ open class MainActivity : AppCompatActivity() {
 
     /** EventsViewModel for refreshing events list when returning from EventActivity. */
     private val eventsViewModel: EventsViewModel by inject()
+
+    /**
+     * Permission launcher for POST_NOTIFICATIONS (Android 13+).
+     * Uses modern ActivityResultContracts API (no deprecated onRequestPermissionsResult).
+     */
+    private val notificationPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission(),
+        ) { isGranted ->
+            android.util.Log.i(
+                "MainActivity",
+                "POST_NOTIFICATIONS permission result: ${if (isGranted) "GRANTED" else "DENIED"}",
+            )
+            if (!isGranted) {
+                android.util.Log.w(
+                    "MainActivity",
+                    "User denied notification permission - notifications will not work until granted in settings",
+                )
+            }
+        }
 
     // ----------------------------
 
@@ -117,6 +141,45 @@ open class MainActivity : AppCompatActivity() {
             }
 
             mainActivityImpl!!.Draw()
+        }
+
+        // Request notification permission on Android 13+ (fresh install or app update)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestNotificationPermissionIfNeeded()
+        }
+    }
+
+    /**
+     * Requests POST_NOTIFICATIONS permission on Android 13+ if not already granted.
+     *
+     * ## Behavior
+     * - Only requests on Android 13+ (API 33+)
+     * - Only requests if permission not already granted
+     * - Requests on EVERY app launch (fresh install or app update)
+     * - Uses ActivityResultContracts for modern permission handling
+     * - Respects user's "Don't ask again" choice (Android won't show dialog)
+     *
+     * ## When Permission is Requested
+     * - Fresh app install
+     * - App update (if permission wasn't requested in previous version)
+     * - User revoked permission and app is relaunched
+     *
+     * ## When Dialog Won't Appear
+     * - Permission already granted (most common after first grant)
+     * - User selected "Don't ask again" (Android blocks the request)
+     * - Android version < 13 (permission not needed)
+     */
+    private fun requestNotificationPermissionIfNeeded() {
+        val permission = Manifest.permission.POST_NOTIFICATIONS
+
+        when (ContextCompat.checkSelfPermission(this, permission)) {
+            PackageManager.PERMISSION_GRANTED -> {
+                android.util.Log.d("MainActivity", "POST_NOTIFICATIONS permission already granted")
+            }
+            else -> {
+                android.util.Log.i("MainActivity", "Requesting POST_NOTIFICATIONS permission")
+                notificationPermissionLauncher.launch(permission)
+            }
         }
     }
 
