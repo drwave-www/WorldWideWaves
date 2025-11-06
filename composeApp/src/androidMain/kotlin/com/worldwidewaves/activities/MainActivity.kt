@@ -174,16 +174,24 @@ open class MainActivity : AppCompatActivity() {
                 newConfig.locale
             }
 
+        android.util.Log.d("MainActivity", "Configuration changed: locale=$newLocale, lastKnownLocale=$lastKnownLocale")
+
         if (newLocale != lastKnownLocale) {
+            android.util.Log.i("MainActivity", "=== Locale Changed ===")
+            android.util.Log.d("MainActivity", "Old locale: $lastKnownLocale")
+            android.util.Log.d("MainActivity", "New locale: $newLocale")
+
             lastKnownLocale = newLocale
 
             // Notify LocalizationManager of the locale change
             try {
+                android.util.Log.d("MainActivity", "Notifying LocalizationManager of locale change")
                 val localizationManager = KoinPlatform.getKoin().get<LocalizationManager>()
                 localizationManager.notifyLocaleChanged(newLocale.toLanguageTag())
+                android.util.Log.i("MainActivity", "Locale change notification sent successfully")
             } catch (e: Exception) {
                 // Log but don't crash - localization is not critical for app function
-                android.util.Log.w("MainActivity", "Failed to notify locale change: ${e.message}")
+                android.util.Log.w("MainActivity", "Failed to notify locale change: ${e.message}", e)
             }
         }
     }

@@ -102,17 +102,45 @@ class NotificationWorker(
 
     override suspend fun doWork(): Result {
         try {
+            Log.i(TAG, "=== NotificationWorker Executing ===")
+
             // Extract input data
-            val eventId = inputData.getString(AndroidNotificationManager.INPUT_EVENT_ID) ?: return Result.failure()
-            val triggerId = inputData.getString(AndroidNotificationManager.INPUT_TRIGGER_ID) ?: return Result.failure()
-            val titleKey = inputData.getString(AndroidNotificationManager.INPUT_TITLE_KEY) ?: return Result.failure()
-            val bodyKey = inputData.getString(AndroidNotificationManager.INPUT_BODY_KEY) ?: return Result.failure()
+            val eventId =
+                inputData.getString(AndroidNotificationManager.INPUT_EVENT_ID) ?: run {
+                    Log.e(TAG, "Missing required input: eventId")
+                    return Result.failure()
+                }
+            val triggerId =
+                inputData.getString(AndroidNotificationManager.INPUT_TRIGGER_ID) ?: run {
+                    Log.e(TAG, "Missing required input: triggerId")
+                    return Result.failure()
+                }
+            val titleKey =
+                inputData.getString(AndroidNotificationManager.INPUT_TITLE_KEY) ?: run {
+                    Log.e(TAG, "Missing required input: titleKey")
+                    return Result.failure()
+                }
+            val bodyKey =
+                inputData.getString(AndroidNotificationManager.INPUT_BODY_KEY) ?: run {
+                    Log.e(TAG, "Missing required input: bodyKey")
+                    return Result.failure()
+                }
             val bodyArgs = inputData.getStringArray(AndroidNotificationManager.INPUT_BODY_ARGS) ?: emptyArray()
-            val deepLink = inputData.getString(AndroidNotificationManager.INPUT_DEEP_LINK) ?: return Result.failure()
+            val deepLink =
+                inputData.getString(AndroidNotificationManager.INPUT_DEEP_LINK) ?: run {
+                    Log.e(TAG, "Missing required input: deepLink")
+                    return Result.failure()
+                }
+
+            Log.d(TAG, "Input data: eventId=$eventId, titleKey=$titleKey, bodyKey=$bodyKey, triggerId=$triggerId")
+            Log.d(TAG, "Body args count: ${bodyArgs.size}")
+            Log.d(TAG, "Deep link: $deepLink")
 
             // Resolve localization keys
             val title = resolveString(titleKey, emptyArray())
             val body = resolveString(bodyKey, bodyArgs)
+
+            Log.d(TAG, "Resolved strings: title='$title', body='$body'")
 
             // Create deep link intent
             val intent =
@@ -128,6 +156,8 @@ class NotificationWorker(
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
                 )
 
+            val notificationId = buildNotificationId(eventId, triggerId)
+
             // Build and show notification
             val notification =
                 NotificationCompat
@@ -140,11 +170,12 @@ class NotificationWorker(
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
                     .build()
 
+            Log.i(TAG, "Showing notification ID: $notificationId")
             NotificationManagerCompat
                 .from(applicationContext)
-                .notify(buildNotificationId(eventId, triggerId), notification)
+                .notify(notificationId, notification)
 
-            Log.d(TAG, "Delivered notification for event $eventId ($triggerId)")
+            Log.i(TAG, "Notification delivered successfully for event $eventId (trigger: $triggerId)")
             return Result.success()
         } catch (e: Exception) {
             Log.e(TAG, "Failed to deliver notification", e)

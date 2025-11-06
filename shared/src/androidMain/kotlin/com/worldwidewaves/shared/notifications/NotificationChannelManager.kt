@@ -91,7 +91,14 @@ object NotificationChannelManager {
      * @param context Android application context
      */
     fun createChannel(context: Context) {
+        Log.i(TAG, "=== Creating Notification Channel ===")
+        Log.d(TAG, "Channel ID: $CHANNEL_ID")
+        Log.d(TAG, "Channel Name: $CHANNEL_NAME")
+        Log.d(TAG, "Importance: HIGH")
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.d(TAG, "Android version: ${Build.VERSION.SDK_INT} (O+, channels supported)")
+
             val channel =
                 NotificationChannel(
                     CHANNEL_ID,
@@ -104,11 +111,14 @@ object NotificationChannelManager {
                     // No default sound - users can configure in settings
                 }
 
+            Log.d(TAG, "Channel configuration: vibration=enabled, badge=enabled, sound=user-configurable")
+
             val notificationManager = context.getSystemService(NotificationManager::class.java)
             notificationManager?.createNotificationChannel(channel)
 
-            Log.d(TAG, "Created notification channel: $CHANNEL_ID")
+            Log.i(TAG, "Notification channel created successfully: $CHANNEL_ID")
         } else {
+            Log.d(TAG, "Android version: ${Build.VERSION.SDK_INT} (Pre-O, channels not supported)")
             Log.d(TAG, "Notification channels not supported on API ${Build.VERSION.SDK_INT}")
         }
     }
@@ -126,10 +136,16 @@ object NotificationChannelManager {
      * @param context Android application context
      */
     fun deleteChannel(context: Context) {
+        Log.w(TAG, "=== Deleting Notification Channel ===")
+        Log.d(TAG, "Channel ID: $CHANNEL_ID")
+        Log.w(TAG, "WARNING: User notification preferences will be lost")
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager = context.getSystemService(NotificationManager::class.java)
             notificationManager?.deleteNotificationChannel(CHANNEL_ID)
             Log.w(TAG, "Deleted notification channel: $CHANNEL_ID (user preferences lost)")
+        } else {
+            Log.d(TAG, "Channel deletion not applicable on API ${Build.VERSION.SDK_INT} (Pre-O)")
         }
     }
 
@@ -147,9 +163,18 @@ object NotificationChannelManager {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager = context.getSystemService(NotificationManager::class.java)
             val channel = notificationManager?.getNotificationChannel(CHANNEL_ID)
-            return channel?.importance != NotificationManager.IMPORTANCE_NONE
+
+            if (channel == null) {
+                Log.d(TAG, "Channel not found: $CHANNEL_ID (not yet created)")
+                return false
+            }
+
+            val isEnabled = channel.importance != NotificationManager.IMPORTANCE_NONE
+            Log.d(TAG, "Channel $CHANNEL_ID enabled: $isEnabled (importance: ${channel.importance})")
+            return isEnabled
         }
         // Pre-O: No channels, assume enabled if permission granted
+        Log.d(TAG, "API ${Build.VERSION.SDK_INT} Pre-O: Channels not supported, assuming enabled")
         return true
     }
 }

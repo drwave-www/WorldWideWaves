@@ -95,8 +95,13 @@ class SyncNotificationsOnAppLaunch(
      * @param events All events to consider for sync
      */
     suspend operator fun invoke(events: List<IWWWEvent>) {
+        Log.i(TAG, "=== Syncing Notifications on App Launch ===")
+        Log.d(TAG, "Total events provided: ${events.size}")
+
         // Get favorited event IDs
         val favoritedIds = events.filter { it.favorite }.map { it.id }.toSet()
+        Log.d(TAG, "Favorited event IDs: $favoritedIds")
+        Log.d(TAG, "Favorited count: ${favoritedIds.size}")
 
         // Get downloaded event IDs
         val downloadedIds =
@@ -104,9 +109,12 @@ class SyncNotificationsOnAppLaunch(
                 .filter { mapAvailabilityChecker.isMapDownloaded(it.id) }
                 .map { it.id }
                 .toSet()
+        Log.d(TAG, "Downloaded event IDs: $downloadedIds")
+        Log.d(TAG, "Downloaded count: ${downloadedIds.size}")
 
         // Union (deduplicated)
         val eligibleIds = favoritedIds + downloadedIds
+        Log.d(TAG, "Union of favorited + downloaded (deduplicated): $eligibleIds")
 
         Log.i(
             TAG,
@@ -114,8 +122,10 @@ class SyncNotificationsOnAppLaunch(
                 "${downloadedIds.size} downloaded, ${eligibleIds.size} total (deduplicated)",
         )
 
+        Log.d(TAG, "Calling notificationScheduler.syncNotifications() with ${eligibleIds.size} events")
         // Always call syncNotifications, even with empty set
         // This ensures proper cleanup of stale notifications
         notificationScheduler.syncNotifications(eligibleIds, events)
+        Log.i(TAG, "Notification sync completed")
     }
 }

@@ -95,6 +95,12 @@ class AndroidNotificationManager(
         content: NotificationContent,
     ) {
         try {
+            Log.i(TAG, "=== Scheduling Notification ===")
+            Log.d(TAG, "Event ID: $eventId")
+            Log.d(TAG, "Trigger: ${trigger.id}")
+            Log.d(TAG, "Delay: ${delay.inWholeMinutes}m (${delay.inWholeSeconds}s)")
+            Log.d(TAG, "Content: title=${content.titleKey}, body=${content.bodyKey}, deepLink=${content.deepLink}")
+
             // Check notification permission (Android 13+)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 val permissionGranted =
@@ -130,7 +136,9 @@ class AndroidNotificationManager(
                 workRequest,
             )
 
-            Log.d(TAG, "Scheduled notification: $workName with delay ${delay.inWholeMinutes}m")
+            Log.i(TAG, "WorkManager job enqueued successfully: $workName")
+            Log.d(TAG, "WorkManager policy: REPLACE")
+            Log.d(TAG, "Work tag: ${WORK_TAG_PREFIX}$eventId")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to schedule notification for event $eventId", throwable = e)
         }
@@ -142,8 +150,15 @@ class AndroidNotificationManager(
         content: NotificationContent,
     ) {
         try {
+            Log.i(TAG, "=== Delivering Immediate Notification ===")
+            Log.d(TAG, "Event ID: $eventId")
+            Log.d(TAG, "Trigger: ${trigger.id}")
+            Log.d(TAG, "Content: title=${content.titleKey}, body=${content.bodyKey}")
+
             val title = resolveString(content.titleKey, emptyArray())
             val body = resolveString(content.bodyKey, content.bodyArgs.toTypedArray())
+
+            Log.d(TAG, "Resolved strings: title='$title', body='$body'")
 
             val intent =
                 Intent(Intent.ACTION_VIEW, Uri.parse(content.deepLink)).apply {
@@ -158,6 +173,7 @@ class AndroidNotificationManager(
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
                 )
 
+            val notificationId = buildNotificationId(eventId, trigger)
             val notification =
                 NotificationCompat
                     .Builder(context, NOTIFICATION_CHANNEL_ID)
@@ -169,11 +185,12 @@ class AndroidNotificationManager(
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
                     .build()
 
+            Log.i(TAG, "Showing notification ID: $notificationId")
             NotificationManagerCompat
                 .from(context)
-                .notify(buildNotificationId(eventId, trigger), notification)
+                .notify(notificationId, notification)
 
-            Log.d(TAG, "Delivered immediate notification for event $eventId (${trigger.id})")
+            Log.i(TAG, "Notification delivered successfully")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to deliver immediate notification for event $eventId", throwable = e)
         }
@@ -184,15 +201,22 @@ class AndroidNotificationManager(
         trigger: NotificationTrigger,
     ) {
         try {
+            Log.i(TAG, "=== Cancelling Notification ===")
             val workName = buildWorkName(eventId, trigger)
+            Log.d(TAG, "Work name: $workName")
+            Log.d(TAG, "Trigger: ${trigger.id}")
+
             workManager.cancelUniqueWork(workName)
+            Log.d(TAG, "WorkManager job cancelled")
 
             // Also cancel any delivered notification
+            val notificationId = buildNotificationId(eventId, trigger)
             NotificationManagerCompat
                 .from(context)
-                .cancel(buildNotificationId(eventId, trigger))
+                .cancel(notificationId)
+            Log.d(TAG, "Delivered notification cancelled (ID: $notificationId)")
 
-            Log.d(TAG, "Cancelled notification: $workName")
+            Log.i(TAG, "Notification cancellation completed")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to cancel notification for event $eventId", throwable = e)
         }
@@ -200,7 +224,12 @@ class AndroidNotificationManager(
 
     override suspend fun cancelAllNotifications(eventId: String) {
         try {
+            Log.i(TAG, "=== Cancelling ALL Notifications ===")
+            Log.d(TAG, "Event ID: $eventId")
+            Log.d(TAG, "Work tag: ${WORK_TAG_PREFIX}$eventId")
+
             workManager.cancelAllWorkByTag(WORK_TAG_PREFIX + eventId)
+            Log.d(TAG, "WorkManager jobs cancelled by tag")
 
             // Cancel all delivered notifications for this event
             NotificationTrigger.EventStarting(kotlin.time.Duration.ZERO).let { /* Dummy for exhaustive when */ }
@@ -210,21 +239,28 @@ class AndroidNotificationManager(
                     NotificationTrigger.WaveHit,
                 )
 
+            var cancelledCount = 0
             triggers.forEach { trigger ->
+                val notificationId = buildNotificationId(eventId, trigger)
                 NotificationManagerCompat
                     .from(context)
-                    .cancel(buildNotificationId(eventId, trigger))
+                    .cancel(notificationId)
+                Log.d(TAG, "Cancelled notification: ${trigger.id}")
+                cancelledCount++
             }
 
             // Cancel common EventStarting notifications
             listOf(60, 30, 10, 5, 1).forEach { minutes ->
                 val trigger = NotificationTrigger.EventStarting(kotlin.time.Duration.parse("${minutes}m"))
+                val notificationId = buildNotificationId(eventId, trigger)
                 NotificationManagerCompat
                     .from(context)
-                    .cancel(buildNotificationId(eventId, trigger))
+                    .cancel(notificationId)
+                Log.d(TAG, "Cancelled notification: ${trigger.id}")
+                cancelledCount++
             }
 
-            Log.d(TAG, "Cancelled all notifications for event $eventId")
+            Log.i(TAG, "Cancelled all notifications for event $eventId (total: $cancelledCount)")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to cancel all notifications for event $eventId", throwable = e)
         }
