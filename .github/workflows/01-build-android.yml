@@ -1,12 +1,11 @@
-name: 01 • Build Android [TESTING]
+name: 01 • Build Android
 
 on:
-  # Temporarily only workflow_dispatch for testing
   workflow_dispatch:
-  # push:
-  #   branches: [ main ]
-  # pull_request:
-  #   branches: [ main ]
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 concurrency:
   group: build-android-${{ github.ref }}
