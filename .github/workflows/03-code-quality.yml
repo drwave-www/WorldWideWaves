@@ -1,12 +1,11 @@
-name: 03 • Quality & Security Gates [TESTING]
+name: 03 • Quality & Security Gates
 
 on:
-  # Temporarily only workflow_dispatch for testing
   workflow_dispatch:
-  # push:
-  #   branches: [ main ]
-  # pull_request:
-  #   branches: [ main ]
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 concurrency:
   group: quality-security-${{ github.ref }}

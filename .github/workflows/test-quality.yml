@@ -2,15 +2,14 @@
 # Comprehensive test suite validation with performance monitoring,
 # anti-pattern detection, and quality gate enforcement
 
-name: Test Quality Validation [TESTING]
+name: Test Quality Validation
 
 on:
-  # Temporarily only workflow_dispatch for testing
   workflow_dispatch:
-  # push:
-  #   branches: [ main, develop ]
-  # pull_request:
-  #   branches: [ main ]
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   test-quality:

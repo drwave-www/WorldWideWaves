@@ -1,12 +1,11 @@
-name: 99 • Pipeline Status [TESTING]
+name: 99 • Pipeline Status
 
 on:
-  # Temporarily only workflow_dispatch for testing
   workflow_dispatch:
-  # push:
-  #   branches: [ main ]
-  # pull_request:
-  #   branches: [ main ]
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 permissions:
   checks: read
