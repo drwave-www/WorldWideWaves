@@ -35,12 +35,40 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Wait for running workflows
+        run: |
+          echo "Checking for still-running workflows..."
+
+          # Wait up to 45 minutes for workflows to complete
+          timeout=2700
+          interval=30
+          elapsed=0
+
+          while [ $elapsed -lt $timeout ]; do
+            running_count=$(gh run list --commit ${{ github.sha }} --json status --jq '[.[] | select(.status == "in_progress" or .status == "queued")] | length')
+
+            if [ "$running_count" -eq 0 ]; then
+              echo "✅ All workflows completed"
+              break
+            fi
+
+            echo "⏳ $running_count workflows still running, waiting..."
+            sleep $interval
+            elapsed=$((elapsed + interval))
+          done
+
+          if [ $elapsed -ge $timeout ]; then
+            echo "⚠️ Timeout reached, some workflows may still be running"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Get workflow runs
         id: workflow-status
         uses: actions/github-script@v7
         with:
           script: |
-            // Get all workflow runs for this commit (not just completed)
+            // Get all workflow runs for this commit AFTER waiting
             const { data: runs } = await github.rest.actions.listWorkflowRunsForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -67,8 +95,8 @@ jobs:
                     allPassed = false;
                   }
                 } else {
-                  workflowResults[workflow] = run.status; // 'in_progress', 'queued', etc.
-                  allPassed = false; // Not completed yet
+                  workflowResults[workflow] = run.status;
+                  allPassed = false;
                 }
               } else {
                 workflowResults[workflow] = 'not_found';
@@ -82,34 +110,6 @@ jobs:
             core.setOutput('all_passed', allPassed);
             core.setOutput('results', JSON.stringify(workflowResults));
             return workflowResults;
-
-      - name: Wait for running workflows
-        run: |
-          echo "Checking for still-running workflows..."
-
-          # Wait up to 45 minutes for workflows to complete (E2E tests can take long)
-          timeout=2700
-          interval=30
-          elapsed=0
-
-          while [ $elapsed -lt $timeout ]; do
-            running_count=$(gh run list --commit ${{ github.sha }} --json status --jq '[.[] | select(.status == "in_progress" or .status == "queued")] | length')
-
-            if [ "$running_count" -eq 0 ]; then
-              echo "✅ All workflows completed"
-              break
-            fi
-
-            echo "⏳ $running_count workflows still running, waiting..."
-            sleep $interval
-            elapsed=$((elapsed + interval))
-          done
-
-          if [ $elapsed -ge $timeout ]; then
-            echo "⚠️ Timeout reached, some workflows may still be running"
-          fi
-        env:
-          GH_TOKEN: ${{ github.token }}
 
       - name: Create status summary
         run: |
