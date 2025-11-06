@@ -26,6 +26,7 @@ package com.worldwidewaves.shared.notifications
  * limitations under the License.
  */
 
+import android.content.Context
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.WWWSimulation
@@ -39,7 +40,13 @@ import com.worldwidewaves.shared.events.WWWEventWaveWarming
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Position
 import dev.icerock.moko.resources.StringResource
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import org.koin.core.context.GlobalContext
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.dsl.module
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -254,9 +261,36 @@ class NotificationSchedulerTest {
     private lateinit var notificationManager: MockNotificationManager
     private lateinit var contentProvider: NotificationContentProvider
     private lateinit var scheduler: NotificationScheduler
+    private lateinit var mockContext: Context
 
     @BeforeTest
     fun setUp() {
+        // Stop any existing Koin instance
+        if (GlobalContext.getOrNull() != null) {
+            stopKoin()
+        }
+
+        // Create mock context for MokoRes string resolution
+        mockContext = mockk(relaxed = true)
+        val mockResources = mockk<android.content.res.Resources>(relaxed = true)
+
+        every { mockContext.resources } returns mockResources
+        // Return non-empty placeholder for any string resource
+        every { mockResources.getString(any()) } returns "Test Location"
+        every { mockResources.getString(any(), *anyVararg()) } returns "Test Location"
+        every { mockResources.getText(any()) } returns "Test Location"
+        every { mockContext.getString(any()) } returns "Test Location"
+        every { mockContext.getString(any(), *anyVararg()) } returns "Test Location"
+
+        // Start Koin with mock context
+        startKoin {
+            modules(
+                module {
+                    single { mockContext }
+                },
+            )
+        }
+
         clock = TestClock(Instant.fromEpochMilliseconds(1000000))
         platform = WWWPlatform(name = "TestPlatform")
         favoriteStore = TestFavoriteEventsStore()
@@ -283,6 +317,7 @@ class NotificationSchedulerTest {
     @AfterTest
     fun tearDown() {
         notificationManager.reset()
+        stopKoin()
     }
 
     // ========================================

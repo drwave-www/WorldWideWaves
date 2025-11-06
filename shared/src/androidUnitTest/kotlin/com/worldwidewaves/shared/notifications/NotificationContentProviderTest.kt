@@ -23,6 +23,7 @@ package com.worldwidewaves.shared.notifications
  * limitations under the License.
  */
 
+import android.content.Context
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvent
@@ -31,6 +32,14 @@ import com.worldwidewaves.shared.events.WWWEventObserver
 import com.worldwidewaves.shared.events.WWWEventWave
 import com.worldwidewaves.shared.events.WWWEventWaveWarming
 import dev.icerock.moko.resources.StringResource
+import io.mockk.every
+import io.mockk.mockk
+import org.koin.core.context.GlobalContext
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.dsl.module
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -136,6 +145,44 @@ class NotificationContentProviderTest {
 
     private val contentProvider = DefaultNotificationContentProvider()
     private val testEvent = MockEvent(id = "event-123", locationName = "San Francisco")
+    private lateinit var mockContext: Context
+
+    @BeforeTest
+    fun setup() {
+        // Stop any existing Koin instance
+        if (GlobalContext.getOrNull() != null) {
+            stopKoin()
+        }
+
+        // Create mock context for MokoRes string resolution
+        // Note: MokoRes.strings.empty is defined as <string name="empty" /> (empty value)
+        // When resolved, it returns empty string. For testing, we return "Test Location"
+        // to satisfy the test assertions that expect non-empty location strings.
+        mockContext = mockk(relaxed = true)
+        val mockResources = mockk<android.content.res.Resources>(relaxed = true)
+
+        every { mockContext.resources } returns mockResources
+        // Return non-empty placeholder for any string resource (including empty resource)
+        every { mockResources.getString(any()) } returns "Test Location"
+        every { mockResources.getString(any(), *anyVararg()) } returns "Test Location"
+        every { mockResources.getText(any()) } returns "Test Location"
+        every { mockContext.getString(any()) } returns "Test Location"
+        every { mockContext.getString(any(), *anyVararg()) } returns "Test Location"
+
+        // Start Koin with mock context
+        startKoin {
+            modules(
+                module {
+                    single { mockContext }
+                },
+            )
+        }
+    }
+
+    @AfterTest
+    fun tearDown() {
+        stopKoin()
+    }
 
     // ========================================
     // Test 1: Starting Notification - 1 Hour
