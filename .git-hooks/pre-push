@@ -77,6 +77,31 @@ else
 fi
 
 # ============================================================
+# UNIT TESTS EXECUTION
+# ============================================================
+# Run all unit tests to ensure code quality before push
+# This catches test failures that would fail in GitHub Actions
+# ============================================================
+
+echo "🧪 Running unit tests..."
+
+if ./gradlew testDebugUnitTest --no-daemon --quiet; then
+    echo "✅ All unit tests passed"
+else
+    echo "❌ Unit tests failed. Please fix the failing tests before pushing."
+    echo ""
+    echo "To see test results:"
+    echo "  ./gradlew testDebugUnitTest"
+    echo ""
+    echo "Test reports available at:"
+    echo "  shared/build/reports/tests/testDebugUnitTest/index.html"
+    echo "  composeApp/build/reports/tests/testDebugUnitTest/index.html"
+    echo ""
+    echo "To skip this check (not recommended), use: git push --no-verify"
+    exit 1
+fi
+
+# ============================================================
 # DOCUMENTATION UPDATE DETECTION (ADVISORY)
 # ============================================================
 # Detect if code changed without documentation updates
