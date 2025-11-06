@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.data.InitFavoriteEvent
+import com.worldwidewaves.shared.domain.usecases.SyncNotificationsOnAppLaunch
 import com.worldwidewaves.shared.events.config.EventsConfigurationProvider
 import com.worldwidewaves.shared.events.decoding.EventsDecoder
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
@@ -65,6 +66,7 @@ class WWWEvents : KoinComponent {
     private val loadingMutex = Mutex()
 
     private val initFavoriteEvent: InitFavoriteEvent by inject()
+    private val syncNotificationsOnAppLaunch: SyncNotificationsOnAppLaunch by inject()
     private val eventsConfigurationProvider: EventsConfigurationProvider by inject()
     private val coroutineScopeProvider: CoroutineScopeProvider by inject()
     private val eventsDecoder: EventsDecoder by inject()
@@ -198,6 +200,16 @@ class WWWEvents : KoinComponent {
                 } catch (e: Exception) {
                     Log.e("WWWEvents.loadEventsJob", "Error in onEventsLoaded(): ${e.message}")
                     throw e
+                }
+
+                // Sync notifications for favorited + downloaded events
+                Log.i("WWWEvents.loadEventsJob", "Syncing notifications for favorited + downloaded events")
+                try {
+                    syncNotificationsOnAppLaunch(validEvents)
+                    Log.i("WWWEvents.loadEventsJob", "Successfully synced notifications")
+                } catch (e: Exception) {
+                    Log.e("WWWEvents.loadEventsJob", "Error syncing notifications: ${e.message}", e)
+                    // Don't throw - notification sync failure shouldn't block app initialization
                 }
             } catch (e: Exception) {
                 Log.e(::WWWEvents.name, "Unexpected error loading events: ${e.message}", e)

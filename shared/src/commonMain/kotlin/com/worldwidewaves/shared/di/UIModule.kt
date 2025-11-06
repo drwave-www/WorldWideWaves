@@ -26,6 +26,7 @@ import com.worldwidewaves.shared.domain.repository.EventsRepositoryImpl
 import com.worldwidewaves.shared.domain.usecases.CheckEventFavoritesUseCase
 import com.worldwidewaves.shared.domain.usecases.FilterEventsUseCase
 import com.worldwidewaves.shared.domain.usecases.GetSortedEventsUseCase
+import com.worldwidewaves.shared.domain.usecases.SyncNotificationsOnAppLaunch
 import com.worldwidewaves.shared.ui.AboutTabScreen
 import com.worldwidewaves.shared.ui.ActionMessageScreen
 import com.worldwidewaves.shared.ui.EventsListScreen
@@ -262,4 +263,43 @@ val uiModule =
          * @see CheckEventFavoritesUseCase for favorite checking logic
          */
         single { CheckEventFavoritesUseCase() }
+
+        /**
+         * Provides [SyncNotificationsOnAppLaunch] for notification sync at app startup.
+         *
+         * **Scope**: Singleton - stateless business logic
+         * **Thread-safety**: Yes - uses suspend functions with thread-safe dependencies
+         * **Lifecycle**: Lives for entire app lifecycle
+         * **Dependencies**: NotificationScheduler, MapAvailabilityChecker
+         *
+         * SyncNotificationsOnAppLaunch encapsulates app initialization notification sync:
+         * - Identifies events eligible for notifications (favorited OR downloaded)
+         * - De-duplicates events in both categories (Set union)
+         * - Syncs with NotificationScheduler to ensure state is current
+         *
+         * Eligibility criteria:
+         * - Event is favorited (user starred the event) OR
+         * - Event map is downloaded (user downloaded for offline use)
+         *
+         * Singleton scope is safe because:
+         * - Use case is stateless (no mutable state)
+         * - Delegates to thread-safe dependencies
+         * - Lightweight operation (Set operations + scheduler call)
+         *
+         * Usage pattern:
+         * ```kotlin
+         * // Called automatically during event loading in WWWEvents
+         * val syncNotifications: SyncNotificationsOnAppLaunch = get()
+         * syncNotifications(allEvents)
+         * ```
+         *
+         * @see SyncNotificationsOnAppLaunch for sync logic
+         * @see NotificationScheduler.syncNotifications for notification state management
+         */
+        single {
+            SyncNotificationsOnAppLaunch(
+                notificationScheduler = get(),
+                mapAvailabilityChecker = get(),
+            )
+        }
     }

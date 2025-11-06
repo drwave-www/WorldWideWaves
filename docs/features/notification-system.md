@@ -192,26 +192,79 @@ Each favorited event generates up to 6 scheduled notifications:
 
 ## Eligibility Criteria
 
-### Favorites-Only Approach
+### Favorites OR Downloaded Approach
 
-Notifications are **only scheduled for events the user has favorited**. This:
+Notifications are scheduled for events that meet either criterion:
+- **Favorited**: User starred the event OR
+- **Downloaded**: User downloaded the map for offline use
+
+This approach:
 - Reduces notification volume (typically <60 per user)
 - Prevents overwhelming users with alerts
-- Aligns with user intent (favorited = interested)
+- Aligns with user intent (favorited = interested, downloaded = will participate)
 - Respects platform limits:
   - iOS: 64 pending notifications max
   - Android: ~500 pending notifications max
 
 ### Integration Points
 
+#### Notification Scheduling
+
 Notifications are scheduled when:
-1. User favorites an event (EventFavoriteHandler triggers scheduler)
-2. App launches and syncs favorite states (AppInitializer calls scheduler.syncNotifications)
+1. **User favorites an event** (SetEventFavorite triggers scheduler)
+   - Calls `NotificationScheduler.scheduleAllNotifications(event)`
+   - Immediate scheduling for newly favorited event
+2. **User downloads a map** (MapDownloadManager)
+   - Same behavior as favoriting
+   - Indicates user intent to participate offline
+3. **App launches** (WWWEvents.loadEventsJob)
+   - Calls `SyncNotificationsOnAppLaunch(allEvents)`
+   - Syncs notifications for favorited OR downloaded events
+   - De-duplicates events in both categories (Set union)
+
+#### Notification Cancellation
 
 Notifications are cancelled when:
 1. User unfavorites an event
 2. Event is cancelled in Firestore
 3. Event time changes (reschedule by cancel + re-add)
+
+### App Initialization Sync
+
+**Use Case**: `SyncNotificationsOnAppLaunch`
+**File**: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/usecases/SyncNotificationsOnAppLaunch.kt`
+
+On app launch, after events are loaded and favorites initialized:
+
+```kotlin
+// WWWEvents.loadEventsJob()
+val validEvents = /* load and validate events */
+validEvents.forEach { initFavoriteEvent.call(it) }  // Restore favorite status
+
+// Sync notifications for favorited + downloaded events
+syncNotificationsOnAppLaunch(validEvents)
+```
+
+**Eligibility Logic**:
+```kotlin
+val favoritedIds = events.filter { it.favorite }.map { it.id }.toSet()
+val downloadedIds = events.filter { mapAvailabilityChecker.isMapDownloaded(it.id) }.map { it.id }.toSet()
+val eligibleIds = favoritedIds + downloadedIds  // Set union (automatic de-duplication)
+
+if (eligibleIds.isNotEmpty()) {
+    notificationScheduler.syncNotifications(eligibleIds, events)
+}
+```
+
+**Logging Output**:
+```
+Syncing notifications: 3 favorited, 2 downloaded, 4 total (deduplicated)
+```
+
+**Expected Behavior**:
+- Events that are BOTH favorited AND downloaded are counted once (de-duplicated)
+- Empty set optimization: No scheduler call if no eligible events
+- Non-blocking: Errors in sync don't prevent app initialization
 
 ---
 
@@ -423,12 +476,30 @@ suspend fun onEventUnfavorited(eventId: String) {
     scheduler.cancelAllNotifications(eventId)
 }
 
-// On app launch
-class AppInitializer(private val scheduler: NotificationScheduler) {
-    suspend fun init() {
-        val favorites = favoriteStore.getAllFavoriteIds()
-        val events = eventRepository.getEvents(favorites)
-        scheduler.syncNotifications(favorites, events)
+// On app launch (automatic sync in WWWEvents)
+class WWWEvents {
+    private val syncNotifications: SyncNotificationsOnAppLaunch by inject()
+
+    private suspend fun loadEventsJob() {
+        // ... load and validate events ...
+        val validEvents = /* validated events list */
+
+        // Initialize favorites from persistent store
+        validEvents.forEach { initFavoriteEvent.call(it) }
+
+        // Sync notifications for favorited OR downloaded events
+        syncNotifications(validEvents)  // Automatic sync on app launch
+    }
+}
+
+// Manual sync (if needed)
+class AppInitializer(
+    private val syncNotifications: SyncNotificationsOnAppLaunch,
+    private val events: WWWEvents
+) {
+    suspend fun resyncNotifications() {
+        val allEvents = events.list()
+        syncNotifications(allEvents)  // Syncs favorited + downloaded
     }
 }
 ```
@@ -508,18 +579,28 @@ notificationManager.cancelAllNotifications("event123")
 
 ### Test Coverage
 
-**Unit Tests**: 77 tests (100% passing)
+**Unit Tests**: 84 tests (100% passing)
 
 ```
 ├── commonTest/ (27 tests)
 │   ├── NotificationTriggerTest
 │   ├── NotificationContentProviderTest
 │   └── NotificationSchedulerTest
-├── androidUnitTest/ (25 tests)
-│   └── AndroidNotificationManagerTest
+├── androidUnitTest/ (32 tests)
+│   ├── AndroidNotificationManagerTest
+│   └── SyncNotificationsOnAppLaunchTest (7 tests)
 └── iosTest/ (25 tests)
     └── IOSNotificationManagerTest
 ```
+
+**SyncNotificationsOnAppLaunchTest** (7 scenarios):
+1. Zero favorited, zero downloaded → sync with empty set
+2. Multiple favorited, zero downloaded → sync with favorited IDs
+3. Zero favorited, multiple downloaded → sync with downloaded IDs
+4. Same events favorited AND downloaded → sync with deduplicated IDs
+5. Different events favorited vs downloaded → sync with union
+6. Mixed: some favorited+downloaded, some only favorited, some only downloaded
+7. Verify no scheduler call when no eligible events
 
 ### Test Organization
 
@@ -612,6 +693,6 @@ Log.d("Notifications", "Should schedule: $shouldSchedule")
 
 ---
 
-**Last Updated**: November 5, 2025
-**Version**: 1.0 (Phase 7 - Documentation Complete)
+**Last Updated**: November 6, 2025
+**Version**: 1.1 (Added app initialization sync for favorited + downloaded events)
 **Status**: Production-Ready
