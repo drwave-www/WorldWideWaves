@@ -8,12 +8,15 @@ TODAY :
 
 - PDFs : polices
 
-ANDROID:
-- modifier l'image back windmill + islamic ? (invert)
-- verifier les traductions
+TODO
+- Test notifications
+- Uninstall map then restart
+- Textes sans separations / images => donne pas envie de lire
+- Mise a jour des evaluations de temps sur chaque event
+  - mettre un lien / bouton “Voir les événements sur lumo” dans les écrans event
+  - set event favorite when map is downloaded
+- GPS not 'in the area' on android in Paris (?)
 
-ALL:
-- event does not disappear from the list when favorite is unchecked
 
 - Full human code review
 - Packaging :
