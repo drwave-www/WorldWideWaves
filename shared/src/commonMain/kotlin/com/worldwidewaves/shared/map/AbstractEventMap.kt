@@ -294,16 +294,22 @@ abstract class AbstractEventMap<T>(
     // Camera targeting methods - shared logic for all platforms --------------
 
     /**
-     * Moves the camera to the wave front center position
-     * Falls back to user latitude + wave longitude if wave front center is unavailable
+     * Moves the camera to the wave front with dynamic zoom that maximizes detail while keeping
+     * both user and wave visible when user position is available.
+     * When user position is available, creates a bounding box containing both positions with
+     * padding, ensuring maximum zoom while both remain visible.
+     * When user position is unavailable, uses fixed zoom level centered on wave front.
+     * Falls back to user latitude + wave longitude if wave front center is unavailable.
      */
+    @Suppress("ComplexCondition") // Necessary validation: null + NaN checks prevent IllegalArgumentException
     suspend fun targetWave() {
+        val userPosition = positionManager.getCurrentPosition()
         var wavePosition = event.wave.getWaveFrontCenterPosition()
 
         // Fallback to previous implementation if new method fails
         if (wavePosition == null) {
             Log.w("AbstractEventMap", "Wave front center position not available, falling back to user position")
-            val currentLocation = positionManager.getCurrentPosition()
+            val currentLocation = userPosition
             val closestWaveLongitude = event.wave.userClosestWaveLongitude()
 
             if (currentLocation != null && closestWaveLongitude != null) {
@@ -314,8 +320,55 @@ abstract class AbstractEventMap<T>(
             }
         }
 
-        runCameraAnimation { cb ->
-            mapLibreAdapter.animateCamera(wavePosition, MapDisplay.TARGET_WAVE_ZOOM, cb)
+        // If user position is available, use dynamic zoom to fit both user and wave
+        if (userPosition != null &&
+            !userPosition.latitude.isNaN() &&
+            !userPosition.longitude.isNaN() &&
+            !wavePosition.latitude.isNaN() &&
+            !wavePosition.longitude.isNaN()
+        ) {
+            // Create the bounds containing user and wave positions
+            val bounds = BoundingBox.fromCorners(listOf(userPosition, wavePosition))
+            if (bounds == null) {
+                Log.e("AbstractEventMap", "Failed to create bounds from user+wave positions, using fixed zoom")
+                // Fallback to fixed zoom
+                runCameraAnimation { cb ->
+                    mapLibreAdapter.animateCamera(wavePosition, MapDisplay.TARGET_WAVE_ZOOM, cb)
+                }
+                return
+            }
+
+            // Get the area's bounding box for constraints
+            val areaBbox = event.area.bbox()
+            val eventLatSpan = areaBbox.ne.lat - areaBbox.sw.lat
+            val eventLngSpan = areaBbox.ne.lng - areaBbox.sw.lng
+
+            // Calculate padding as percentages of the event area dimensions
+            // Use smaller padding than targetUserAndWave to maximize zoom
+            val horizontalPadding = eventLngSpan * 0.15
+            val verticalPadding = eventLatSpan * 0.08
+
+            // Create padded bounds ensuring we stay within event area boundaries
+            val finalBounds =
+                BoundingBox.fromCorners(
+                    Position(
+                        maxOf(bounds.southLatitude - minOf(verticalPadding, bounds.southLatitude - areaBbox.sw.lat), areaBbox.sw.lat),
+                        maxOf(bounds.westLongitude - minOf(horizontalPadding, bounds.westLongitude - areaBbox.sw.lng), areaBbox.sw.lng),
+                    ),
+                    Position(
+                        minOf(bounds.northLatitude + minOf(verticalPadding, areaBbox.ne.lat - bounds.northLatitude), areaBbox.ne.lat),
+                        minOf(bounds.eastLongitude + minOf(horizontalPadding, areaBbox.ne.lng - bounds.eastLongitude), areaBbox.ne.lng),
+                    ),
+                )
+
+            runCameraAnimation { _ ->
+                mapLibreAdapter.animateCameraToBounds(finalBounds)
+            }
+        } else {
+            // No user position available, use fixed zoom centered on wave
+            runCameraAnimation { cb ->
+                mapLibreAdapter.animateCamera(wavePosition, MapDisplay.TARGET_WAVE_ZOOM, cb)
+            }
         }
     }
 
