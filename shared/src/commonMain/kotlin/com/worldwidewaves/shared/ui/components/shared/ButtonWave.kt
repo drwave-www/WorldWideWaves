@@ -62,6 +62,7 @@ fun ButtonWave(
     endDateTime: Instant?,
     isInArea: Boolean,
     isUserWarmingInProgress: Boolean,
+    userHasBeenHit: Boolean,
     onNavigateToWave: WaveNavigator,
     modifier: Modifier = Modifier,
     // iOS FIX: Clock dependency passed as parameter to prevent deadlock
@@ -77,7 +78,7 @@ fun ButtonWave(
             it > (now - 1.hours) && it <= now
         } ?: false
     val isEnabled = isInArea && (isRunning || isSoon || isUserWarmingInProgress || isEndDateTimeRecent)
-    val shouldBlink = isSoon || isUserWarmingInProgress
+    val shouldBlink = isEnabled && !userHasBeenHit
 
     // Blinking animation - faster during user warming (300ms), normal during SOON (800ms)
     val blinkDuration = if (isUserWarmingInProgress) 300 else 800

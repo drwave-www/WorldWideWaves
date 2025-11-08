@@ -49,6 +49,7 @@ data class EventState(
     val endDateTime: Instant?,
     val isSimulationModeEnabled: Boolean,
     val isUserWarmingInProgress: Boolean,
+    val userHasBeenHit: Boolean,
 )
 
 /**
@@ -83,6 +84,10 @@ fun rememberEventState(
         event.observer.isUserWarmingInProgress
     }.collectAsState()
 
+    val userHasBeenHit by remember(event.id) {
+        event.observer.userHasBeenHit
+    }.collectAsState()
+
     val endDateTime = remember(event.id) { mutableStateOf<Instant?>(null) }
 
     // Recompute end date-time each time progression changes (after polygons load, duration becomes accurate)
@@ -98,5 +103,6 @@ fun rememberEventState(
         endDateTime = endDateTime.value,
         isSimulationModeEnabled = isSimulationModeEnabled,
         isUserWarmingInProgress = isUserWarmingInProgress,
+        userHasBeenHit = userHasBeenHit,
     )
 }

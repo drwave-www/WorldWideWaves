@@ -52,6 +52,7 @@ fun FullMapScreen(
     }
     val isInArea by event.observer.userIsInArea.collectAsState()
     val isUserWarmingInProgress by event.observer.isUserWarmingInProgress.collectAsState()
+    val userHasBeenHit by event.observer.userHasBeenHit.collectAsState()
 
     // Track position availability for targetUser button state
     val positionManager = getIosSafePositionManager()
@@ -71,6 +72,7 @@ fun FullMapScreen(
             endDateTime,
             isInArea,
             isUserWarmingInProgress,
+            userHasBeenHit,
             onNavigateToWave = { eventId -> onNavigateToWave(eventId) },
             Modifier.align(Alignment.TopCenter).padding(top = 40.dp),
         )

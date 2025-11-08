@@ -75,6 +75,7 @@ class CommonComponentsTest {
                     endDateTime = null,
                     isInArea = true,
                     isUserWarmingInProgress = false,
+                    userHasBeenHit = false,
                     onNavigateToWave = navigator,
                     modifier = Modifier.testTag("real-button-wave"),
                 )
@@ -106,6 +107,7 @@ class CommonComponentsTest {
                     endDateTime = null,
                     isInArea = false, // User not in area
                     isUserWarmingInProgress = false,
+                    userHasBeenHit = false,
                     onNavigateToWave = navigator,
                     modifier = Modifier.testTag("button-wave-not-in-area"),
                 )
@@ -132,6 +134,7 @@ class CommonComponentsTest {
                     endDateTime = recentEndTime,
                     isInArea = true,
                     isUserWarmingInProgress = false,
+                    userHasBeenHit = false,
                     onNavigateToWave = navigator,
                     modifier = Modifier.testTag("button-wave-recent-ended"),
                 )
@@ -158,6 +161,7 @@ class CommonComponentsTest {
                     endDateTime = oldEndTime,
                     isInArea = true,
                     isUserWarmingInProgress = false,
+                    userHasBeenHit = false,
                     onNavigateToWave = navigator,
                     modifier = Modifier.testTag("button-wave-old-ended"),
                 )
