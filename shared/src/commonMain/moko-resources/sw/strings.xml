@@ -632,12 +632,12 @@
   <string name="action_message_phrase_5">Ondoa vikwazo vya mabadiliko.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">Sikiliza sauti za eneo, jiandae pamoja.</string>
-  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
-  <string name="action_message_section_1">Lazima tubadilishe kutoka kudhibiti madhara hadi utayari kwa mishtuko. Halijoto itazidi malengo, kwa hivyo jamii zinahitaji mwongozo ulio wazi, mazoezi ya dharura, na zana rahisi sasa.</string>
-  <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
-  <string name="action_message_section_2">Hili linaanza na uhalisia wa pamoja. Serikali, kampuni, na viongozi wa kiraia wanapaswa kutangaza ukweli kwa pamoja, kufungua data, na kuoanisha kalenda ili hatua ziratibiwe, zisivunjwevunje.\n\nIli kulinda uhai, tafuta kupunguza mvutano wa kijiopolitiki kwa amani na kuelekeza upya rasilimali kwenye uhai na uthabiti wa binadamu.\n\nItisheni kikao cha ngazi ya juu kabisa na nchi, biashara, na wawakilishi wa umma ili kuwasilisha mapendekezo, kuteua watekelezaji, na kuripoti maendeleo.\n\nOndoa vikwazo kwa kuidhinisha majaribio, kuoanisha viwango, na kufadhili kwanza uthabiti na upatikanaji.</string>
-  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
-  <string name="action_message_section_3">Sikiliza wadau wa eneo wanaokumbwa na athari, pima nao vitisho, na chapisha mipango kwa lugha rahisi ili umma ujulishwe na ualikwe kushiriki. Kutokutumia vurugu, ujumuishaji, uwazi, na sayansi ndizo zinazoongoza jitihada hii.\n\nAndaa pia mustakabali: fundisha stadi za vitendo, wekeza katika mifumo ya onyo la mapema, miundombinu inayostahimili, na suluhisho za asili, na jenga zana na data huria kwa mipango ya jamii.</string>
+  <!-- src_hash: 77a7d6e97c8772e6d59e20532c4023a657353c82 -->
+  <string name="action_message_section_1">Lazima tuhame kutoka kudhibiti madhara hadi utayari wa mishtuko. Viwango vya joto vitazidi malengo, hivyo jamii zinahitaji mwongozo wazi, mazoezi ya dharura, na zana rahisi hivi sasa.</string>
+  <!-- src_hash: 1f1833048cf2e9794325074f869077840746e0c8 -->
+  <string name="action_message_section_2">Hii inaanza na uhalisia wa pamoja. Serikali, kampuni na viongozi wa kiraia wanapaswa kutangaza ukweli kwa pamoja, kuweka data wazi, na kuoanisha ratiba ili hatua ziratibiwe, si ziwe vipande vipande.\n\nIli kulinda uhai, shughulikieni kwa amani na kupunguza makali ya mivutano ya kijiopolitiki, na elekezeni upya rasilimali kwenye kuendelea kuishi kwa binadamu na uthabiti.\n\nItisheni mikutano ya ngazi ya juu kabisa na nchi, makampuni, na wawakilishi wa umma ili kuwasilisha mapendekezo, kuteua wamiliki wa majukumu, na kuripoti maendeleo.\n\nOndoeni vizuizi kwa kuidhinisha miradi ya majaribio, kuoanisha viwango, na kufadhili kwanza uthabiti na upatikanaji.</string>
+  <!-- src_hash: b6541f811de98472d2055b8be014f414afb55d79 -->
+  <string name="action_message_section_3">Sikilizeni wadau wa eneo wanaokabili athari, wekeni kipaumbele kwa vitisho pamoja nao, na chapisheni mipango kwa lugha rahisi ili umma uhabarishwe na kualikwa kushiriki. Kutotumia vurugu, ujumuishaji, uwazi, na sayansi ndizo zinazoongoza jitihada hii.\n\nAndaa pia siku zijazo: fundisheni ujuzi wa vitendo, wekezeni katika mifumo ya onyo la mapema, miundombinu yenye ustahimilivu, na suluhisho zinazoegemea asili, na jengeni zana huria na data wazi kwa upangaji wa jamii.</string>
   <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
   <string name="notification_event_starting_soon">Wimbi linaanza hivi karibuni</string>
   <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->

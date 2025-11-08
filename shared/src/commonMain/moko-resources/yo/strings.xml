@@ -632,12 +632,12 @@
   <string name="action_message_phrase_5">Yọ ìdènà kúrò kí ìyípadà lè ṣẹlẹ̀.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">Feti sí ti agbègbè, mura pọ̀.</string>
-  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
-  <string name="action_message_section_1">A gbọ́dọ̀ yí padà kúrò ní ìṣàkóso ìpalára sí ìmúrẹ́lẹ̀ sí ìṣẹ̀lẹ̀ lójiji. Ìwọn ìgbóná ojú-ọjọ̀ yóò kọjá ibi-afẹ́de, nítorí náà, àwọn àwùjọ nílò ìtọ́nisọ́nà kedere, ẹ̀kọ́ ìmúlò ìmúrẹ́lẹ̀, àti irinṣẹ́ rọrùn ní báyìí.</string>
-  <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
-  <string name="action_message_section_2">Èyí bẹ̀rẹ̀ pẹ̀lú òtítọ́ tí a pín pọ̀. Ìjọba, ilé-iṣẹ́, àti àwọn olórí àwùjọ yẹ kí wọ́n jọ sọ òtítọ́, ṣí data sílẹ̀, kí wọ́n sì ṣọ̀kan àsìkò kí ìṣe lè rọ̀pọ̀, kì í ṣe kí ó ya sílẹ̀.\n\nLáti bó ìyè, jẹ́ kí a dín ìfarapa ìṣèlú-àyíká àgbáyé kù ní aláfọ̀ọ́kanbalẹ̀, kí a sì tún dojúkọ ohun-ìní sí ìyè ènìyàn àti ìdúróṣinṣin.\n\nPe ipàdé ní ipele gíga jù lọ pẹ̀lú àwọn ìpínlẹ̀, ilé-iṣẹ́, àti aṣojú aráàlú láti gbé àbá kalẹ̀, yàn ẹni tó ní ojúṣe, kí wọ́n sì máa jẹ́rìí ìlọsíwájú.\n\nYọ ìdènà kúrò nípa fí ọwọ́ sílẹ̀ fún àwọn ìdánwò kékeré, dọ̀gba àwọn ìlànà, àti kíkọ ináwó sí ìfaradà àti ìraye-sí kọ́kọ́.</string>
-  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
-  <string name="action_message_section_3">Gbọ́ ohùn àwọn olùkópa agbègbè tí ń koju ìpa, ṣe ìtòlẹ́sẹẹsẹ̀ àwọn eewu pọ̀ mọ́ wọn, kí o sì tẹ ètò ní èdè tó rọrùn jáde kí gbogbo ènìyàn lè mọ̀ tó àti kí a pe wọ́n sí kópa. Aìní-ìwa-ipa, ìfaramọ̀ gbogbo ènìyàn, ìfihàn gbangba, àti sáyẹ́ǹsì ni ń dari ìsapá yìí.\n\nṢètò òla pẹ̀lú: kọ́ ọgbọ́n ọwọ́ tó wúlò, ṣe idoko-owo sínú àwọn eto ìkìlọ̀ tete, amáyédẹrùn tí ó lè fara da ìpa, àti ojútùú tí ó dá lórí isedá; kí o sì dá irinṣẹ́ ṣiṣi àti dáta sílẹ̀ fún ìmòṣètò àwùjọ.</string>
+  <!-- src_hash: 77a7d6e97c8772e6d59e20532c4023a657353c82 -->
+  <string name="action_message_section_1">A gbọ́dọ̀ yí ìṣàkóso ibajẹ padà sí ìmúrí-jìnlẹ̀ fún ìpẹ̀yà. Ìwọn ooru yóò kọjá ibi-afẹ́, nítorí náà, àwọn àwùjọ nílò ìtọ́nisọ́nà kedere, ìdárayá ìmúrí, àti irinṣẹ́ rọrùn ní báyìí.</string>
+  <!-- src_hash: 1f1833048cf2e9794325074f869077840746e0c8 -->
+  <string name="action_message_section_2">Eyi bẹ̀rẹ̀ pẹ̀lú òtítọ́ tí a pín pọ̀. Àwọn ìjọba, ilé-iṣẹ́, àti olórí awujọ gbọ́dọ̀ sọ òtítọ́ pọ̀, ṣí dáta sílẹ̀, kí wọ́n sì darapọ̀ àsìkò kí ìṣe lè jẹ́ amúṣọkan, kì í ṣe pínyà.\n\nLáti dá ìyè bó, ṣe ìdínkù ìjà-òṣèlú agbaiyé ní ọ̀nà aláàfíà, kí a sì tún dari ohun ìní sí ìgbàlà ènìyàn àti ìdúróṣinṣin.\n\nPe ipàdé ní ipele gíga jùlọ pẹ̀lú àwọn orílẹ̀-èdè, ilé-iṣẹ́, àti aṣojú aráàlú láti gbé àbá kalẹ̀, yàn ẹni tó ní ojúṣe, kí a sì máa ròyìn ìtẹ̀síwájú.\n\nYọ àwọn ìdènà kúrò nípa fífi ìfọwọ́sí fún ìdánwò pílọ́tì, mún boṣewa pọ̀, kí a sì kọ́kọ́ na owó sí agbára ìfarada àti ìwọ̀lé rọrùn.</string>
+  <!-- src_hash: b6541f811de98472d2055b8be014f414afb55d79 -->
+  <string name="action_message_section_3">Tẹ́tí sí àwọn olùkópa ìbílẹ̀ tí ń koju ipa, kọ́ àwọn ewu sípò pẹ̀lú wọn, kí a sì tẹ̀ àwọn ètò ní èdè tó rọrùn kalẹ̀ kí gbogbo ènìyàn lè mọ̀, kí a sì pe wọn láti kópa. Aìwa-ipa, ìdápọ̀-gbogbo, ìfihàn gbangba, àti sáyẹ́ǹsì ni yóò dari ìsapá yìí.\n\nPèsè fún ọ̀la náà: kọ́ ọgbọ́n ìṣe, fi owó sí ètò ìkìlọ̀ tete, amáyédẹrùn tó lè farada, àti ojútùú tí isedá da lórí, kí a sì kọ àwọn irinṣẹ́ ṣiṣi àti dáta fún ìlànà àwùjọ.</string>
   <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
   <string name="notification_event_starting_soon">Ìgbi ń bẹ̀rẹ̀ laipẹ́</string>
   <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->

@@ -632,12 +632,12 @@
   <string name="action_message_phrase_5">Gỡ bỏ rào cản để thay đổi.</string>
   <!-- src_hash: ac550d8164b69a8fb6d8f39bb04a0ac9a8244b07 -->
   <string name="action_message_phrase_6">Lắng nghe địa phương, cùng chuẩn bị.</string>
-  <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
-  <string name="action_message_section_1">Chúng ta phải chuyển từ đối phó hậu quả sang sẵn sàng trước các cú sốc. Nhiệt độ sẽ vượt các mục tiêu đề ra, vì vậy cộng đồng cần hướng dẫn rõ ràng, diễn tập và các công cụ đơn giản ngay bây giờ.</string>
-  <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
-  <string name="action_message_section_2">Điều này bắt đầu từ một thực tại chung. Chính phủ, doanh nghiệp và các lãnh đạo xã hội dân sự cần cùng nhau nêu rõ sự thật, mở dữ liệu và đồng bộ mốc thời gian để hành động được phối hợp, không rời rạc.\n\nĐể bảo vệ sự sống, theo đuổi việc hạ nhiệt căng thẳng địa chính trị một cách hòa bình và tái tập trung nguồn lực cho sự sống còn và ổn định của con người.\n\nTriệu tập ở cấp cao nhất với các quốc gia, doanh nghiệp và đại diện công chúng để đưa ra đề xuất, phân công phụ trách và báo cáo tiến độ.\n\nGỡ bỏ rào cản bằng cách bật đèn xanh cho các dự án thí điểm, hài hòa tiêu chuẩn và ưu tiên tài trợ cho khả năng chống chịu và tính tiếp cận.</string>
-  <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
-  <string name="action_message_section_3">Lắng nghe các bên địa phương đang chịu tác động, cùng họ xếp hạng các mối đe dọa và công bố kế hoạch bằng ngôn ngữ dễ hiểu để công chúng được biết và được mời tham gia. Bất bạo lực, tính bao trùm, minh bạch và khoa học định hướng nỗ lực này.\n\nĐồng thời chuẩn bị cho tương lai: trang bị kỹ năng thực hành, đầu tư vào hệ thống cảnh báo sớm, hạ tầng có khả năng chống chịu và các giải pháp dựa vào thiên nhiên, đồng thời xây dựng công cụ và dữ liệu mở phục vụ lập kế hoạch cộng đồng.</string>
+  <!-- src_hash: 77a7d6e97c8772e6d59e20532c4023a657353c82 -->
+  <string name="action_message_section_1">Chúng ta phải chuyển từ kiểm soát thiệt hại sang sẵn sàng trước các cú sốc. Nhiệt độ sẽ vượt mục tiêu, nên các cộng đồng cần hướng dẫn rõ ràng, diễn tập và các công cụ đơn giản ngay bây giờ.</string>
+  <!-- src_hash: 1f1833048cf2e9794325074f869077840746e0c8 -->
+  <string name="action_message_section_2">Việc này bắt đầu từ một thực tại chung. Chính phủ, doanh nghiệp và các lãnh đạo xã hội dân sự nên cùng nêu rõ sự thật, mở dữ liệu và đồng bộ mốc thời gian để hành động được phối hợp, không manh mún.\n\nĐể bảo vệ sự sống, theo đuổi hạ nhiệt căng thẳng địa chính trị bằng biện pháp hòa bình và tái dồn nguồn lực cho sự sống còn và ổn định của con người.\n\nTriệu tập ở cấp cao nhất với các quốc gia, doanh nghiệp và đại diện công chúng để đưa ra đề xuất, phân công phụ trách và báo cáo tiến độ.\n\nGỡ rào cản bằng cách bật đèn xanh cho các dự án thí điểm, hài hòa tiêu chuẩn và ưu tiên cấp vốn cho khả năng chống chịu và khả năng tiếp cận trước.</string>
+  <!-- src_hash: b6541f811de98472d2055b8be014f414afb55d79 -->
+  <string name="action_message_section_3">Lắng nghe các chủ thể địa phương đang chịu tác động, cùng họ xếp hạng các mối đe dọa và công bố các kế hoạch bằng ngôn ngữ dễ hiểu để công chúng được thông tin và được mời tham gia. Bất bạo lực, tính bao trùm, minh bạch và khoa học là kim chỉ nam cho nỗ lực này.\n\nĐồng thời chuẩn bị cho tương lai: dạy kỹ năng thực hành, đầu tư vào hệ thống cảnh báo sớm, hạ tầng có khả năng chống chịu và các giải pháp dựa vào thiên nhiên, và xây dựng công cụ cùng dữ liệu mở phục vụ quy hoạch cộng đồng.</string>
   <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
   <string name="notification_event_starting_soon">Làn sóng sắp bắt đầu</string>
   <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
