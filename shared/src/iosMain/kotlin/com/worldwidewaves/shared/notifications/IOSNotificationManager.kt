@@ -21,9 +21,14 @@ package com.worldwidewaves.shared.notifications
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.utils.Log
+import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.desc.desc
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSNumber
+import platform.Foundation.NSString
+import platform.Foundation.stringWithFormat
 import platform.UserNotifications.UNMutableNotificationContent
 import platform.UserNotifications.UNNotificationRequest
 import platform.UserNotifications.UNNotificationSound
@@ -226,11 +231,96 @@ class IOSNotificationManager : NotificationManager {
     ): String = "event_${eventId}_${trigger.id}"
 
     /**
-     * Builds UNMutableNotificationContent with localization keys.
+     * Maps a localization key to a MokoRes StringResource.
+     *
+     * This function provides runtime lookup of MokoRes strings by their key name,
+     * similar to Android's `resources.getIdentifier()` but using compile-time safe mapping.
+     *
+     * @param key The localization key (e.g., "notification_event_starting_soon")
+     * @return The corresponding StringResource, or null if not found
+     */
+    private fun getStringResourceByKey(key: String): StringResource? =
+        when (key) {
+            // Notification titles
+            "notification_event_starting_soon" -> MokoRes.strings.notification_event_starting_soon
+            "notification_event_finished" -> MokoRes.strings.notification_event_finished
+            "notification_wave_hit" -> MokoRes.strings.notification_wave_hit
+
+            // Notification bodies
+            "notification_1h_before" -> MokoRes.strings.notification_1h_before
+            "notification_30m_before" -> MokoRes.strings.notification_30m_before
+            "notification_10m_before" -> MokoRes.strings.notification_10m_before
+            "notification_5m_before" -> MokoRes.strings.notification_5m_before
+            "notification_1m_before" -> MokoRes.strings.notification_1m_before
+            "notification_event_finished_body" -> MokoRes.strings.notification_event_finished_body
+            "notification_wave_hit_body" -> MokoRes.strings.notification_wave_hit_body
+
+            // Permission-related
+            "notification_permission_rationale" -> MokoRes.strings.notification_permission_rationale
+            "notification_permission_denied" -> MokoRes.strings.notification_permission_denied
+
+            else -> null
+        }
+
+    /**
+     * Resolves a localization key to a formatted string using MokoRes.
+     *
+     * This mirrors Android's `resolveString()` method but uses MokoRes instead of Android resources.
+     *
+     * ## Process
+     * 1. Map key name to MokoRes StringResource
+     * 2. Resolve StringResource to localized string
+     * 3. Format string with arguments if provided
+     *
+     * ## Example
+     * ```kotlin
+     * resolveString("notification_1h_before", listOf("New York"))
+     * // Returns: "New York wave starts in 1 hour" (in user's locale)
+     * ```
+     *
+     * @param key Localization key (e.g., "notification_event_starting_soon")
+     * @param args Arguments to interpolate into the string (%1$s, %2$s, etc.)
+     * @return Resolved and formatted string, or the key itself if not found
+     */
+    @Suppress("UNCHECKED_CAST")
+    private fun resolveString(
+        key: String,
+        args: List<String>,
+    ): String {
+        val stringResource = getStringResourceByKey(key)
+
+        if (stringResource == null) {
+            Log.w(TAG, "Localization key not found: $key (using key as fallback)")
+            return key
+        }
+
+        // Resolve to localized string using MokoRes
+        val localizedString = stringResource.desc().localized()
+
+        // If no arguments, return as-is
+        if (args.isEmpty()) {
+            return localizedString
+        }
+
+        // Format string with arguments using NSString.stringWithFormat
+        // NSString.stringWithFormat expects varargs, cast Kotlin Strings to NSString
+        return when (args.size) {
+            1 -> NSString.stringWithFormat(localizedString, args[0] as NSString)
+            2 -> NSString.stringWithFormat(localizedString, args[0] as NSString, args[1] as NSString)
+            3 -> NSString.stringWithFormat(localizedString, args[0] as NSString, args[1] as NSString, args[2] as NSString)
+            else -> {
+                Log.w(TAG, "Too many arguments for string formatting: ${args.size} (max 3 supported)")
+                localizedString
+            }
+        }
+    }
+
+    /**
+     * Builds UNMutableNotificationContent with localized strings.
      *
      * ## Localization
-     * Uses `titleLocalizationKey` and `bodyLocalizationKey` so iOS resolves strings
-     * at notification delivery time in the user's current locale.
+     * Resolves MokoRes string keys to localized strings before setting them on the notification.
+     * This ensures notifications display in the user's current locale.
      *
      * ## Deep Link
      * Stores deep link in `userInfo` dictionary for SceneDelegate to handle.
@@ -246,11 +336,12 @@ class IOSNotificationManager : NotificationManager {
     ): UNMutableNotificationContent {
         val notificationContent = UNMutableNotificationContent()
 
-        // For now, use resolved strings (localization keys)
-        // iOS will resolve them at notification delivery time if they match
-        // NSLocalizedString keys in the app's Localizable.strings
-        notificationContent.setTitle(content.titleKey)
-        notificationContent.setBody(content.bodyKey)
+        // Resolve localization keys to actual strings using MokoRes
+        val resolvedTitle = resolveString(content.titleKey, emptyList())
+        val resolvedBody = resolveString(content.bodyKey, content.bodyArgs)
+
+        notificationContent.setTitle(resolvedTitle)
+        notificationContent.setBody(resolvedBody)
 
         // Set sound
         notificationContent.setSound(UNNotificationSound.defaultSound())
