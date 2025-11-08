@@ -59,3 +59,7 @@ test_results/
 # Map data files (large binary files, not tracked in git)
 maps/*/src/main/assets/*.geojson
 maps/*/src/main/assets/*.mbtiles
+
+# AI session tracking files (archived, not needed in git)
+.ai-progress-notifications.md
+.backup/
