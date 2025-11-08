@@ -80,12 +80,21 @@ class MapBoundsEnforcer(
     private var constraintsApplied = false
     private var lastAppliedBounds: BoundingBox? = null // Track last applied bounds to prevent redundant updates
     private var skipNextRecalculation = false // Skip one recalculation after programmatic zoom
+    private var forceNextRecalculation = false // Force constraint update on next camera idle
 
     fun setVisibleRegionPadding(padding: VisibleRegionPadding) {
         visibleRegionPadding = padding
     }
 
     fun calculateConstraintBounds(): BoundingBox = calculatePaddedBounds(visibleRegionPadding)
+
+    /**
+     * Forces the next camera idle event to recalculate constraints, bypassing skip logic.
+     * Used after programmatic camera animations to ensure constraints are updated.
+     */
+    fun forceConstraintUpdate() {
+        forceNextRecalculation = true
+    }
 
     /**
      * Apply constraints to a MapLibre map
@@ -101,17 +110,26 @@ class MapBoundsEnforcer(
         // Updates constraint bounds dynamically when viewport changes due to manual zoom
         if (!constraintsApplied) {
             mapLibreAdapter.addOnCameraIdleListener {
-                // Skip recalculation if programmatic animation just completed
-                if (skipNextRecalculation) {
-                    skipNextRecalculation = false
-                    return@addOnCameraIdleListener
+                // Force update if requested (bypasses all skip logic)
+                val shouldForce = forceNextRecalculation
+                if (shouldForce) {
+                    forceNextRecalculation = false
                 }
 
-                // Prevent recalculation if animation/user interaction is in progress
-                if (isSuppressed()) {
-                    // Set flag to skip NEXT idle after suppression ends
-                    skipNextRecalculation = true
-                    return@addOnCameraIdleListener
+                // Skip logic only applies if not forcing update
+                if (!shouldForce) {
+                    // Skip recalculation if programmatic animation just completed
+                    if (skipNextRecalculation) {
+                        skipNextRecalculation = false
+                        return@addOnCameraIdleListener
+                    }
+
+                    // Prevent recalculation if animation/user interaction is in progress
+                    if (isSuppressed()) {
+                        // Set flag to skip NEXT idle after suppression ends
+                        skipNextRecalculation = true
+                        return@addOnCameraIdleListener
+                    }
                 }
 
                 val newPadding = calculateVisibleRegionPadding()
