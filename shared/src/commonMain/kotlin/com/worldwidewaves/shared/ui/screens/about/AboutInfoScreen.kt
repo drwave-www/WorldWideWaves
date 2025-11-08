@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -105,9 +104,7 @@ private fun MainInfo() {
             )
             // Add logo separator after infos_core_4 through infos_core_8 (index 3-7)
             if (index in 3..7) {
-                Spacer(modifier = Modifier.height((-6).dp))
                 LogoSeparator()
-                Spacer(modifier = Modifier.height((-6).dp))
             }
         }
     }

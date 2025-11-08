@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -109,35 +108,17 @@ private fun ActionMessageContent(modifier: Modifier = Modifier) {
                 }
 
                 item {
-                    TextSection(MokoRes.strings.action_message_section_1, dir)
+                    Column {
+                        TextSection(MokoRes.strings.action_message_section_1, dir)
+                        LogoSeparator()
+                    }
                 }
 
                 item {
-                    Spacer(modifier = Modifier.height((-8).dp))
-                }
-
-                item {
-                    LogoSeparator()
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height((-8).dp))
-                }
-
-                item {
-                    TextSection(MokoRes.strings.action_message_section_2, dir)
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height((-8).dp))
-                }
-
-                item {
-                    LogoSeparator()
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height((-8).dp))
+                    Column {
+                        TextSection(MokoRes.strings.action_message_section_2, dir)
+                        LogoSeparator()
+                    }
                 }
 
                 item {
