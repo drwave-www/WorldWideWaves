@@ -93,6 +93,11 @@ class AndroidLocationProvider :
             Looper.getMainLooper(),
         )
         Log.i(TAG, "GPS location updates requested successfully")
+
+        // Immediately fetch last known location to trigger initial callback
+        // This ensures PositionManager gets an immediate position update even in emulator
+        proxyLocationEngine?.getLastLocation(locationCallback!!)
+        Log.d(TAG, "Requested last known location for immediate callback")
     }
 
     override fun stopLocationUpdates() {

@@ -25,6 +25,7 @@ import android.content.Context
 import android.location.Location
 import android.location.LocationListener
 import android.os.Looper
+import android.util.Log
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.toLocation
 import kotlinx.coroutines.runBlocking
@@ -50,6 +51,10 @@ class SimulationLocationEngine(
     context: Context,
 ) : MapLibreFusedLocationEngineImpl(context),
     KoinComponent {
+    private companion object {
+        private const val TAG = "WWW.SimulationEngine"
+    }
+
     private val platform: WWWPlatform by KoinJavaComponent.inject(WWWPlatform::class.java)
 
     private fun getSimulatedLocation(): Location? =
@@ -62,16 +67,31 @@ class SimulationLocationEngine(
             null
         }
 
-    override fun getLastLocation(callback: LocationEngineCallback<LocationEngineResult>) =
-        getSimulatedLocation()?.let { location ->
-            callback.onSuccess(LocationEngineResult.create(location))
-        } ?: super.getLastLocation(callback)
+    override fun getLastLocation(callback: LocationEngineCallback<LocationEngineResult>) {
+        val simulatedLocation = getSimulatedLocation()
+        if (simulatedLocation != null) {
+            Log.d(TAG, "Providing simulated last location: ${simulatedLocation.latitude}, ${simulatedLocation.longitude}")
+            callback.onSuccess(LocationEngineResult.create(simulatedLocation))
+        } else {
+            Log.d(TAG, "Not simulating, delegating getLastLocation to real GPS")
+            super.getLastLocation(callback)
+        }
+    }
 
     override fun requestLocationUpdates(
         request: LocationEngineRequest,
         listener: LocationListener,
         looper: Looper?,
-    ) = getSimulatedLocation()?.let { location ->
-        listener.onLocationChanged(location)
-    } ?: super.requestLocationUpdates(request, listener, looper)
+    ) {
+        val simulatedLocation = getSimulatedLocation()
+        if (simulatedLocation != null) {
+            Log.i(TAG, "Simulation mode active, providing simulation location to LocationListener")
+            listener.onLocationChanged(simulatedLocation)
+            return
+        }
+
+        // Not simulating - delegate to real GPS (FusedLocationProvider)
+        Log.i(TAG, "Not simulating, delegating requestLocationUpdates to real GPS")
+        super.requestLocationUpdates(request, listener, looper)
+    }
 }
