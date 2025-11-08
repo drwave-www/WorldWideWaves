@@ -74,7 +74,7 @@ fun LogoSeparator() {
             modifier =
                 Modifier
                     .width(40.dp)
-                    .padding(top = 3.dp, bottom = 3.dp),
+                    .padding(top = 1.5.dp, bottom = 1.5.dp),
         )
     }
 }

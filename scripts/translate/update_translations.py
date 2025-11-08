@@ -169,6 +169,16 @@ def xml_text(node) -> str:
 def normalize_ws(s: str) -> str:
     return re.sub(r"\s+", " ", s or "").strip()
 
+def escape_newlines_for_xml(text: str) -> str:
+    """
+    Convert actual newline characters to \\n escape sequences for XML text content.
+    This preserves the newlines as text rather than XML formatting.
+    """
+    if text is None:
+        return text
+    # Replace actual newlines with \n escape sequences
+    return text.replace("\n", "\\n")
+
 def nearest_preceding_comment_text(siblings: list, idx: int) -> str:
     j = idx - 1
     while j >= 0:
@@ -331,7 +341,7 @@ def rebuild_target_tree(base_entries, existing_map, translations_map, lang_code:
         if it["do_not_translate"]:
             add_hash_comment(h)
             el = ET.SubElement(root, "string", name=name)
-            el.text = base_val
+            el.text = escape_newlines_for_xml(base_val)
             ex = existing_map.get(name)
             if ex and ex["value"] == base_val and ex["stored_hash"] == h:
                 changes["unchanged"].append(name)
@@ -354,7 +364,7 @@ def rebuild_target_tree(base_entries, existing_map, translations_map, lang_code:
 
         add_hash_comment(h)
         el = ET.SubElement(root, "string", name=name)
-        el.text = out_text
+        el.text = escape_newlines_for_xml(out_text)
 
         if not prev:
             changes["created"].append(name)
