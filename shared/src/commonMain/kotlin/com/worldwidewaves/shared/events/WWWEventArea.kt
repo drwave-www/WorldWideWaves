@@ -209,6 +209,9 @@ data class WWWEventArea(
             cachedCenter = null
             cachedPositionWithinResult = null
 
+            // Clear wave duration cache - it depends on bbox from polygons
+            event?.wave?.clearDurationCache()
+
             // Reset log flags - allow logging if issues persist after download
             loggedMissingPolygons.value = false
             loggedInvalidBbox.value = false
@@ -218,7 +221,7 @@ data class WWWEventArea(
 
             Log.i(
                 "WWWEventArea",
-                "clearPolygonCacheForDownload() called for ${event?.id} - cleared all caches to reload from downloaded file",
+                "clearPolygonCacheForDownload() called for ${event?.id} - cleared all caches including wave duration to reload from downloaded file",
             )
         }
     }

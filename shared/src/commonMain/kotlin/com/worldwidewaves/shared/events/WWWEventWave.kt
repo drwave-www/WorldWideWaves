@@ -130,6 +130,18 @@ abstract class WWWEventWave :
 
     abstract suspend fun userPositionToWaveRatio(): Double?
 
+    /**
+     * Clears cached duration-related values that depend on polygon/bbox data.
+     * Called when polygons are reloaded (e.g., after map download) to ensure
+     * calculations use fresh polygon data.
+     *
+     * Base implementation is a no-op. Subclasses with polygon-dependent caches
+     * should override this method.
+     */
+    open fun clearDurationCache() {
+        // Base: no-op (Deep and LinearSplit have no polygon-dependent caches)
+    }
+
     // ---------------------------
 
     protected val event: IWWWEvent

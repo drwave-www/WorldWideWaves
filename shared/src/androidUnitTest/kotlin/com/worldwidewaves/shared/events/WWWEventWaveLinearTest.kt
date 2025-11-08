@@ -1280,4 +1280,142 @@ class WWWEventWaveLinearTest : KoinTest {
             assertNotNull(result)
             assertEquals(0.0, result.latitude, 0.0001, "Center of tall rectangle")
         }
+
+    // ---------------------------
+    // Cache Invalidation Tests
+    // ---------------------------
+
+    @Test
+    fun `testClearDurationCache clears all polygon-dependent caches`() =
+        runBlocking {
+            // GIVEN: First call caches duration and hit time
+            val bbox =
+                BoundingBox.fromCorners(
+                    sw = Position(20.0, 10.0),
+                    ne = Position(40.0, 50.0),
+                )
+            coEvery { mockArea.bbox() } returns bbox
+            mockkObject(GeoUtils)
+            every { calculateDistance(any(), any(), any()) } returns 4000.0
+
+            val userPosition = Position(30.0, 25.0)
+            waveLinear.setPositionRequester { userPosition }
+            coEvery { mockArea.isPositionWithin(any()) } returns true
+
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns startTime + 10.minutes
+
+            // Calculate initial values to populate caches
+            val duration1 = waveLinear.getWaveDuration()
+            val hitTime1 = waveLinear.userHitDateTime()
+
+            // WHEN: bbox changes (simulating polygon reload after map download)
+            val newBbox =
+                BoundingBox.fromCorners(
+                    sw = Position(20.0, 10.0),
+                    ne = Position(40.0, 60.0), // Wider bbox
+                )
+            coEvery { mockArea.bbox() } returns newBbox
+            every { calculateDistance(any(), any(), any()) } returns 5000.0 // Different distance
+
+            // Without clearCache(), returns OLD cached values
+            val duration2 = waveLinear.getWaveDuration()
+            assertEquals(duration1, duration2, "Duration should still be cached")
+
+            // WHEN: clearDurationCache() called
+            waveLinear.clearDurationCache()
+
+            // THEN: Recalculates from new bbox
+            val duration3 = waveLinear.getWaveDuration()
+            val hitTime3 = waveLinear.userHitDateTime()
+
+            assertTrue(duration3 != duration1, "Duration should be recalculated after clearCache()")
+            assertTrue(hitTime3 != hitTime1, "Hit time should be recalculated after clearCache()")
+
+            unmockkObject(GeoUtils)
+        }
+
+    @Test
+    fun `testClearDurationCache does not clear position-dependent cache`() =
+        runBlocking {
+            // GIVEN: Position cache is populated
+            val bbox =
+                BoundingBox.fromCorners(
+                    sw = Position(20.0, 10.0),
+                    ne = Position(40.0, 50.0),
+                )
+            coEvery { mockArea.bbox() } returns bbox
+            mockkObject(GeoUtils)
+            every { calculateDistance(any(), any(), any()) } returns 4000.0
+
+            val userPosition = Position(30.0, 25.0)
+            waveLinear.setPositionRequester { userPosition }
+            coEvery { mockArea.isPositionWithin(any()) } returns true
+
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns startTime + 10.minutes
+
+            // Populate position cache
+            val hitTime1 = waveLinear.userHitDateTime()
+            assertNotNull(hitTime1)
+
+            // WHEN: clearDurationCache() called
+            waveLinear.clearDurationCache()
+
+            // Move user position slightly (within epsilon threshold)
+            val nearbyPosition = Position(30.0000001, 25.0000001)
+            waveLinear.setPositionRequester { nearbyPosition }
+
+            // THEN: Position cache should still work (returns cached value for nearby position)
+            val hitTime2 = waveLinear.userHitDateTime()
+            assertEquals(
+                hitTime1,
+                hitTime2,
+                "Position cache should still work after clearDurationCache()",
+            )
+
+            unmockkObject(GeoUtils)
+        }
+
+    @Test
+    fun `testDurationRecalculation after bbox change simulates map download`() =
+        runBlocking {
+            // GIVEN: Initial state with approximate duration (no polygons loaded)
+            val emptyBbox =
+                BoundingBox.fromCorners(
+                    sw = Position(0.0, 0.0),
+                    ne = Position(0.0, 0.0),
+                )
+            coEvery { mockEvent.area.bbox() } returns emptyBbox
+            every { mockEvent.wave.getApproxDuration() } returns 60.minutes
+
+            // WHEN: Get duration before map download (returns approx)
+            val durationBeforeDownload = waveLinear.getWaveDuration()
+            assertEquals(60.minutes, durationBeforeDownload, "Should return approx duration when bbox is empty")
+
+            // WHEN: Map download completes - polygons loaded, bbox available
+            val actualBbox =
+                BoundingBox.fromCorners(
+                    sw = Position(20.0, 10.0),
+                    ne = Position(40.0, 50.0),
+                )
+            coEvery { mockEvent.area.bbox() } returns actualBbox
+            mockkObject(GeoUtils)
+            every { calculateDistance(any(), any(), any()) } returns 4000.0
+
+            // Clear cache to simulate clearPolygonCacheForDownload()
+            waveLinear.clearDurationCache()
+
+            // THEN: Get duration after download (recalculates from real bbox)
+            val durationAfterDownload = waveLinear.getWaveDuration()
+            assertEquals(40.seconds, durationAfterDownload, "Should calculate from real bbox after map download")
+            assertTrue(
+                durationAfterDownload != durationBeforeDownload,
+                "Duration should change after map download",
+            )
+
+            unmockkObject(GeoUtils)
+        }
 }

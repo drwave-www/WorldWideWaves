@@ -69,6 +69,7 @@ fun EventNumbers(
     var endTimeText by remember { mutableStateOf<String?>(null) }
     val progression by event.observer.progression.collectAsState()
     val startWarmingInProgress by event.observer.isStartWarmingInProgress.collectAsState()
+    val polygonsLoaded by event.area.polygonsLoaded.collectAsState()
     val warmingText = stringResource(MokoRes.strings.wave_warming)
 
     // Initial load – compute static numbers & start time
@@ -79,7 +80,8 @@ fun EventNumbers(
     }
 
     // Recompute values that depend on polygons/duration
-    LaunchedEffect(event.id, progression) {
+    // Observes polygonsLoaded to update when map download completes
+    LaunchedEffect(event.id, progression, polygonsLoaded) {
         totalMinutes = event.getTotalTime().inWholeMinutes
         endTimeText = DateTimeFormats.timeShort(event.getEndDateTime(), event.getTZ())
     }

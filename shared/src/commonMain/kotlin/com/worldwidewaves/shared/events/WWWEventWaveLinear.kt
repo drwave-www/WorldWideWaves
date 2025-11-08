@@ -274,4 +274,21 @@ data class WWWEventWaveLinear(
 
         return errors.takeIf { it.isNotEmpty() }?.map { "${WWWEventWaveLinear::class.simpleName}: $it" }
     }
+
+    // ---------------------------
+
+    /**
+     * Clears polygon-dependent cached values.
+     *
+     * Called when polygons are reloaded (e.g., after map download) to ensure
+     * wave calculations use fresh bounding box data. Position-dependent cache
+     * (cachedHitPosition) is NOT cleared as it's invalidated separately when
+     * user position changes significantly.
+     */
+    override fun clearDurationCache() {
+        cachedWaveDuration = null
+        cachedHitDateTime = null
+        cachedLongitude = null
+        // DON'T clear cachedHitPosition - it's position-dependent, not polygon-dependent
+    }
 }
