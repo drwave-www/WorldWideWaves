@@ -340,21 +340,69 @@ abstract class AbstractEventMap<T>(
             val eventLatSpan = areaBbox.ne.lat - areaBbox.sw.lat
             val eventLngSpan = areaBbox.ne.lng - areaBbox.sw.lng
 
-            // Calculate padding as percentages of the event area dimensions
-            // Use smaller padding than targetUserAndWave to maximize zoom
-            val horizontalPadding = eventLngSpan * 0.15
-            val verticalPadding = eventLatSpan * 0.08
+            // Calculate current bounds span
+            val currentHorizontalSpan = bounds.eastLongitude - bounds.westLongitude
+            val currentVerticalSpan = bounds.northLatitude - bounds.southLatitude
+
+            // Define minimum spans to ensure we use available screen space (25% horizontal, 20% vertical)
+            val minHorizontalSpan = eventLngSpan * 0.25
+            val minVerticalSpan = eventLatSpan * 0.20
+
+            // Extend bounds to minimum span if too narrow (uses full available screen space)
+            val extendedBounds =
+                if (currentHorizontalSpan < minHorizontalSpan || currentVerticalSpan < minVerticalSpan) {
+                    // Calculate center of current bounds
+                    val boundsCenter =
+                        Position(
+                            (bounds.northLatitude + bounds.southLatitude) / 2,
+                            (bounds.eastLongitude + bounds.westLongitude) / 2,
+                        )
+
+                    // Use maximum of current span and minimum span
+                    val finalHorizontalSpan = maxOf(currentHorizontalSpan, minHorizontalSpan)
+                    val finalVerticalSpan = maxOf(currentVerticalSpan, minVerticalSpan)
+
+                    // Create extended bounds centered on original bounds center
+                    BoundingBox.fromCorners(
+                        Position(
+                            boundsCenter.lat - finalVerticalSpan / 2,
+                            boundsCenter.lng - finalHorizontalSpan / 2,
+                        ),
+                        Position(
+                            boundsCenter.lat + finalVerticalSpan / 2,
+                            boundsCenter.lng + finalHorizontalSpan / 2,
+                        ),
+                    ) ?: bounds // Fallback to original if extension fails
+                } else {
+                    bounds // Bounds already large enough
+                }
+
+            // Calculate smaller padding since we've already ensured minimum span
+            val horizontalPadding = eventLngSpan * 0.08
+            val verticalPadding = eventLatSpan * 0.05
 
             // Create padded bounds ensuring we stay within event area boundaries
             val finalBounds =
                 BoundingBox.fromCorners(
                     Position(
-                        maxOf(bounds.southLatitude - minOf(verticalPadding, bounds.southLatitude - areaBbox.sw.lat), areaBbox.sw.lat),
-                        maxOf(bounds.westLongitude - minOf(horizontalPadding, bounds.westLongitude - areaBbox.sw.lng), areaBbox.sw.lng),
+                        maxOf(
+                            extendedBounds.southLatitude - minOf(verticalPadding, extendedBounds.southLatitude - areaBbox.sw.lat),
+                            areaBbox.sw.lat,
+                        ),
+                        maxOf(
+                            extendedBounds.westLongitude - minOf(horizontalPadding, extendedBounds.westLongitude - areaBbox.sw.lng),
+                            areaBbox.sw.lng,
+                        ),
                     ),
                     Position(
-                        minOf(bounds.northLatitude + minOf(verticalPadding, areaBbox.ne.lat - bounds.northLatitude), areaBbox.ne.lat),
-                        minOf(bounds.eastLongitude + minOf(horizontalPadding, areaBbox.ne.lng - bounds.eastLongitude), areaBbox.ne.lng),
+                        minOf(
+                            extendedBounds.northLatitude + minOf(verticalPadding, areaBbox.ne.lat - extendedBounds.northLatitude),
+                            areaBbox.ne.lat,
+                        ),
+                        minOf(
+                            extendedBounds.eastLongitude + minOf(horizontalPadding, areaBbox.ne.lng - extendedBounds.eastLongitude),
+                            areaBbox.ne.lng,
+                        ),
                     ),
                 )
 
