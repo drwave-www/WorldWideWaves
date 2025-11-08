@@ -124,6 +124,56 @@ fi
 echo ""
 
 # ============================================================
+# MARKDOWN LINTING - PRE-PUSH HOOK
+# ============================================================
+# Check markdown formatting before push to prevent CI failures
+# Ensures consistent documentation style across the project
+# Bypass with: git push --no-verify (NOT recommended)
+# ============================================================
+
+echo "📝 Checking markdown formatting..."
+
+# Check if markdownlint-cli2 is available via npx
+if command -v npx >/dev/null 2>&1; then
+    echo "🔍 Running markdown lint on all .md files..."
+
+    # Run markdownlint-cli2 with same configuration as CI
+    if npx --yes markdownlint-cli2 \
+        "**/*.md" \
+        "!node_modules/**" \
+        "!build/**" \
+        "!SourcePackages/**" \
+        "!.gradle/**" \
+        "!iosApp/build/**" \
+        "!shared/build/**" \
+        "!composeApp/build/**" \
+        "!maps/**/node_modules/**" 2>&1; then
+        echo "✅ All markdown files pass linting"
+    else
+        echo ""
+        echo "❌ Markdown linting errors detected!"
+        echo ""
+        echo "Please fix the markdown formatting issues shown above before pushing."
+        echo "Common issues:"
+        echo "  - Headings should be surrounded by blank lines (MD022)"
+        echo "  - Lists should be surrounded by blank lines (MD032)"
+        echo "  - Code blocks should be surrounded by blank lines (MD031)"
+        echo ""
+        echo "You can:"
+        echo "  1. Fix the markdown formatting in the affected files"
+        echo "  2. Run: npx markdownlint-cli2-fix \"**/*.md\" to auto-fix some issues"
+        echo "  3. Bypass this check with --no-verify (not recommended)"
+        echo ""
+        exit 1
+    fi
+else
+    echo "⚠️  npx not found. Skipping markdown linting."
+    echo "   Markdown linting will still run in CI/CD pipeline."
+fi
+
+echo ""
+
+# ============================================================
 # DOCUMENTATION AUTOMATION - PRE-PUSH HOOK
 # ============================================================
 # This hook ensures documentation stays up-to-date before push
