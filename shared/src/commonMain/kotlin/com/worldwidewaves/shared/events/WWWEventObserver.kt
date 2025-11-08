@@ -405,6 +405,23 @@ class WWWEventObserver(
     }
 
     /**
+     * Forces immediate area detection update using current position.
+     * Used when position source changes (e.g., simulation stop → GPS) to ensure
+     * area detection reflects the new position without waiting for position emission.
+     */
+    fun forceAreaDetectionUpdate() {
+        if (!isObserving.value) {
+            Log.w("WWWEventObserver", "Cannot force area detection - observer not running for event ${event.id}")
+            return
+        }
+
+        coroutineScopeProvider.launchDefault {
+            Log.i("WWWEventObserver", "Forcing area detection update for event ${event.id}")
+            updateAreaDetection()
+        }
+    }
+
+    /**
      * Updates all state flows based on the current event state.
      * Delegates to WaveHitDetector for state calculation and EventProgressionState for updates.
      */

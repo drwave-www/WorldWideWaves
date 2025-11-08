@@ -380,5 +380,11 @@ private suspend fun stopSimulation(
     event.observer.stopObservation()
     delay(150.milliseconds) // Allow time for async cancellation to complete
     event.observer.startObservation()
+
+    // Force area detection update to use current GPS position
+    // Without this, area detection may use stale position if GPS hasn't emitted yet
+    delay(100.milliseconds) // Brief delay for observer initialization
+    event.observer.forceAreaDetectionUpdate()
+
     onSimulationStopped(simulationStoppedText)
 }
