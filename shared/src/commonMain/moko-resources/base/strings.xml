@@ -154,7 +154,7 @@
     <string name="www_hashtag">#worldwidewaves #wwwaves</string>
 
     <!-- Context: Guidelines, Size: Long -->
-    <string name="warn_rules_security_title">FAQ</string>
+    <string name="warn_rules_security_title">Rules &amp; Security</string>
     <string name="warn_rules_security_text">Welcome to WorldWideWaves! We are excited to have you join the global wave events. To ensure everyone has a safe and enjoyable experience, please follow these guidelines:</string>
 
     <string name="warn_general_title">General Rules :</string>
@@ -183,8 +183,7 @@
 
     <!-- Context: Guidelines, Size: Long, except titles : Medium -->
     <string name="faq">FAQ</string>
-    <string name="faq_access">Jump to Rules &amp; Security</string>
-    <string name="faq_rules_section_title">Rules &amp; Security</string>
+    <string name="faq_access">Access FAQ</string>
 
     <string name="faq_question_1">Why isn’t there an event in my city or country?</string>
     <string name="faq_answer_1">We selected several dozen of the world’s most populous cities to create a meaningful global wave. Technical and operational constraints currently prevent us from supporting an unlimited number of locations. We aimed for broad representation across continents, cultures, and languages, which can never be perfect. We hope to add more cities over time.</string>

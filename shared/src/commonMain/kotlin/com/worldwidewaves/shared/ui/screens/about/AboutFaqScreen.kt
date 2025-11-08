@@ -128,17 +128,34 @@ fun AboutFaqScreen(
         ) {
             AboutWWWLogo()
 
-            // Main FAQ text
+            // Main FAQ text - Rules & Security
             FAQTitle {
-                // Scroll to the Rules & Security section
+                // Scroll to the top of the FAQ section
                 coroutineScope.launch {
                     scrollState.animateScrollTo(scrollToFAQPosition.roundToInt())
                 }
             }
             AboutDividerLine()
 
-            // FAQ Items
+            // For each rules_hierarchy entry, display the title and the list of items
+            ShowRulesHierarchy()
+            AboutDividerLine()
+
+            // FAQ title
+            Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
+            Text(
+                modifier =
+                    Modifier
+                        .onGloballyPositioned { coordinates ->
+                            // Save the position of the FAQ section
+                            scrollToFAQPosition = coordinates.positionInRoot().y
+                        }.semantics { heading() },
+                text = stringResource(MokoRes.strings.faq),
+                style = sharedExtraBoldTextStyle(FAQ.TITLE_FONTSIZE),
+            )
             Spacer(modifier = Modifier.size(Dimensions.SPACER_BIG.dp))
+
+            // FAQ Items
             FAQDividerLine()
             faq_contents.forEachIndexed { index, (question, answer) ->
                 FAQItem(
@@ -153,26 +170,6 @@ fun AboutFaqScreen(
                 )
                 FAQDividerLine()
             }
-
-            AboutDividerLine()
-
-            // Rules & Security section title - anchor target
-            Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
-            Text(
-                modifier =
-                    Modifier
-                        .onGloballyPositioned { coordinates ->
-                            // Save the position of the Rules & Security section
-                            scrollToFAQPosition = coordinates.positionInRoot().y
-                        }.semantics { heading() },
-                text = stringResource(MokoRes.strings.faq_rules_section_title),
-                style = sharedExtraBoldTextStyle(FAQ.TITLE_FONTSIZE),
-                maxLines = 1,
-            )
-            Spacer(modifier = Modifier.size(Dimensions.SPACER_BIG.dp))
-
-            // For each rules_hierarchy entry, display the title and the list of items
-            ShowRulesHierarchy()
 
             Spacer(modifier = Modifier.size(Dimensions.SPACER_BIG.dp))
             AboutWWWSocialNetworks(onUrlOpen = onUrlOpen)

@@ -73,8 +73,8 @@ fun LogoSeparator() {
             contentDescription = null, // Decorative separator
             modifier =
                 Modifier
-                    .width(80.dp)
-                    .padding(top = 12.dp, bottom = 12.dp),
+                    .width(40.dp)
+                    .padding(top = 3.dp, bottom = 3.dp),
         )
     }
 }
