@@ -311,15 +311,23 @@ abstract class AbstractEventMap<T>(
 
         // If wave edge bounds are available, use dynamic zoom focusing on wave front
         if (waveEdgeBounds != null) {
+            // Get the area's bounding box for constraints
+            val areaBbox = event.area.bbox()
+
             // Extract wave front coordinates: (minLatitude, maxLatitude, leadingEdgeLongitude)
             val waveLongitude = waveEdgeBounds.third
+
+            // Constrain wave front coordinates to event area bounds to prevent camera going outside
+            val constrainedLongitude = waveLongitude.coerceIn(areaBbox.sw.lng, areaBbox.ne.lng)
+            val constrainedMinLat = waveEdgeBounds.first.coerceIn(areaBbox.sw.lat, areaBbox.ne.lat)
+            val constrainedMaxLat = waveEdgeBounds.second.coerceIn(areaBbox.sw.lat, areaBbox.ne.lat)
 
             // Create bounds that include full wave edge vertical extent
             // This ensures the wave front is visible with proper vertical extent
             val positions =
                 listOf(
-                    Position(waveEdgeBounds.first, waveLongitude), // Wave edge min latitude
-                    Position(waveEdgeBounds.second, waveLongitude), // Wave edge max latitude
+                    Position(constrainedMinLat, constrainedLongitude), // Wave edge min latitude
+                    Position(constrainedMaxLat, constrainedLongitude), // Wave edge max latitude
                 )
 
             val bounds = BoundingBox.fromCorners(positions)
@@ -329,9 +337,6 @@ abstract class AbstractEventMap<T>(
                 targetWaveFallback(userPosition)
                 return
             }
-
-            // Get the area's bounding box for constraints
-            val areaBbox = event.area.bbox()
             val eventLatSpan = areaBbox.ne.lat - areaBbox.sw.lat
             val eventLngSpan = areaBbox.ne.lng - areaBbox.sw.lng
 
