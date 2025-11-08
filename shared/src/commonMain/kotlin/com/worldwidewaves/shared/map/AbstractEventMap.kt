@@ -406,8 +406,23 @@ abstract class AbstractEventMap<T>(
                     ),
                 )
 
-            runCameraAnimation { _ ->
-                mapLibreAdapter.animateCameraToBounds(finalBounds)
+            runCameraAnimation { cb ->
+                mapLibreAdapter.animateCameraToBounds(
+                    finalBounds,
+                    callback =
+                        object : MapCameraCallback {
+                            override fun onFinish() {
+                                // Re-apply constraints to ensure map bounds are enforced after animation
+                                // This prevents users from panning outside event area after targetWave()
+                                constraintManager?.applyConstraints()
+                                cb.onFinish()
+                            }
+
+                            override fun onCancel() {
+                                cb.onCancel()
+                            }
+                        },
+                )
             }
         } else {
             // No user position or wave edge bounds available, use fallback
