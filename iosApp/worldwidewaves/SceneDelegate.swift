@@ -21,8 +21,6 @@
 import UIKit
 import Shared
 
-// swiftlint:disable file_length
-
 /// The primary scene coordinator for WorldWideWaves iOS app, responsible for managing
 /// the app's window lifecycle and routing.
 ///
@@ -499,5 +497,3 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
 }
-
-// swiftlint:enable file_length

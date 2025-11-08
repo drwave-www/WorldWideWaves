@@ -162,7 +162,10 @@ import UserNotifications
                                   settings.authorizationStatus == .provisional
 
                 #if DEBUG
-                WWWLog.d(tag, "Notification permission status: \(settings.authorizationStatus.rawValue) (authorized: \(isAuthorized))")
+                WWWLog.d(
+                    tag,
+                    "Permission status: \(settings.authorizationStatus.rawValue) (authorized: \(isAuthorized))"
+                )
                 #endif
 
                 completion(isAuthorized)
