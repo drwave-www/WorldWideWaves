@@ -135,23 +135,25 @@ abstract class AbstractEventMap<T>(
      */
     private suspend fun runCameraAnimation(block: (MapCameraCallback) -> Unit) {
         try {
-            suspendCancellableCoroutine<Unit> { continuation ->
-                suppressCorrections = true
+            suppressCorrections = true
 
+            suspendCancellableCoroutine<Unit> { continuation ->
                 block(
                     object : MapCameraCallback {
                         override fun onFinish() {
-                            suppressCorrections = false
+                            // Don't clear suppressCorrections here - camera idle needs to see it as true
                             continuation.resume(Unit)
                         }
 
                         override fun onCancel() {
-                            suppressCorrections = false
                             continuation.resume(Unit) // Resume normally on cancel (don't throw)
                         }
                     },
                 )
             }
+
+            // Clear suppressCorrections AFTER suspending (camera idle will have fired by now)
+            suppressCorrections = false
         } catch (e: Exception) {
             // Ensure suppressCorrections is always restored even if something goes wrong
             suppressCorrections = false
