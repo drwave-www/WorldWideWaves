@@ -413,8 +413,11 @@ abstract class AbstractEventMap<T>(
                         object : MapCameraCallback {
                             override fun onFinish() {
                                 // Re-apply constraints to ensure map bounds are enforced after animation
-                                // This prevents users from panning outside event area after targetWave()
-                                constraintManager?.applyConstraints()
+                                // Delay to ensure camera has fully settled to prevent stale viewport data
+                                kotlinx.coroutines.GlobalScope.launch {
+                                    kotlinx.coroutines.delay(100)
+                                    constraintManager?.applyConstraints()
+                                }
                                 cb.onFinish()
                             }
 
@@ -474,8 +477,11 @@ abstract class AbstractEventMap<T>(
                 object : MapCameraCallback {
                     override fun onFinish() {
                         // Re-apply constraints to ensure map bounds are enforced after animation
-                        // This prevents unexpected camera movement from stale constraint bounds
-                        constraintManager?.applyConstraints()
+                        // Delay to ensure camera has fully settled to prevent stale viewport data
+                        kotlinx.coroutines.GlobalScope.launch {
+                            kotlinx.coroutines.delay(100)
+                            constraintManager?.applyConstraints()
+                        }
                         cb.onFinish()
                     }
 
