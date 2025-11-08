@@ -76,7 +76,6 @@ import com.worldwidewaves.shared.resources.rules_hierarchy
 import com.worldwidewaves.shared.ui.components.about.AboutDividerLine
 import com.worldwidewaves.shared.ui.components.about.AboutWWWLogo
 import com.worldwidewaves.shared.ui.components.about.AboutWWWSocialNetworks
-import com.worldwidewaves.shared.ui.components.about.LogoSeparator
 import com.worldwidewaves.shared.ui.theme.sharedCommonBoldStyle
 import com.worldwidewaves.shared.ui.theme.sharedCommonJustifiedTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
@@ -219,12 +218,7 @@ private fun FAQTitle(scrollToFAQPosition: () -> Unit) {
 
 @Composable
 private fun ShowRulesHierarchy() {
-    rules_hierarchy.entries.forEachIndexed { sectionIndex, (title, items) ->
-        // Add logo separator before Safety, Emergency, and Legal sections (indices 1, 2, 3)
-        if (sectionIndex in 1..3) {
-            LogoSeparator()
-        }
-
+    rules_hierarchy.forEach { (title, items) ->
         Text(
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(title),

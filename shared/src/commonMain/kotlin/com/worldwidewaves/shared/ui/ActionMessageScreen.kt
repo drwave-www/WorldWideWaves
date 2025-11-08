@@ -108,21 +108,21 @@ private fun ActionMessageContent(modifier: Modifier = Modifier) {
                 }
 
                 item {
-                    Column {
-                        TextSection(MokoRes.strings.action_message_section_1, dir)
-                        LogoSeparator()
-                    }
+                    TextSection(MokoRes.strings.action_message_section_1, dir)
                 }
 
                 item {
                     Column {
+                        LogoSeparator()
                         TextSection(MokoRes.strings.action_message_section_2, dir)
-                        LogoSeparator()
                     }
                 }
 
                 item {
-                    TextSection(MokoRes.strings.action_message_section_3, dir)
+                    Column {
+                        LogoSeparator()
+                        TextSection(MokoRes.strings.action_message_section_3, dir)
+                    }
                 }
             }
         }
