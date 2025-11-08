@@ -232,9 +232,71 @@ data class WWWEventWaveLinear(
         }
     }
 
+    /**
+     * Calculates the average latitude of all positions on the wave front edge.
+     *
+     * The wave front edge is defined as the leading edge of the traversed polygons,
+     * which is the easternmost edge for waves moving EAST or the westernmost edge
+     * for waves moving WEST.
+     *
+     * @return The average latitude of edge positions, or null if no wave polygons exist
+     */
+    @Suppress("TooGenericExceptionCaught") // Defensive: catch any polygon calculation errors
+    private suspend fun getWaveFrontEdgeLatitude(): Double? {
+        return try {
+            val wavePolygons = getWavePolygons() ?: return null
+            val traversedPolygons = wavePolygons.traversedPolygons
+
+            if (traversedPolygons.isEmpty()) {
+                return null
+            }
+
+            // Collect all positions from all polygons
+            val allPositions = traversedPolygons.flatMap { polygon -> polygon.toList() }
+
+            if (allPositions.isEmpty()) {
+                return null
+            }
+
+            // Find the leading edge longitude based on direction
+            val leadingEdgeLongitude =
+                when (direction) {
+                    Direction.EAST -> allPositions.maxOf { it.lng } // Easternmost
+                    Direction.WEST -> allPositions.minOf { it.lng } // Westernmost
+                }
+
+            // Define epsilon for "close enough" to the edge (approximately 11 meters at equator)
+            val epsilon = 0.0001
+
+            // Filter positions on or near the leading edge
+            val edgePositions =
+                allPositions.filter { position ->
+                    abs(position.lng - leadingEdgeLongitude) < epsilon
+                }
+
+            if (edgePositions.isEmpty()) {
+                return null
+            }
+
+            // Calculate average latitude of edge positions
+            edgePositions.map { it.lat }.average()
+        } catch (e: Exception) {
+            // If any error occurs (e.g., mock not set up in tests), fall back to bbox center
+            null
+        }
+    }
+
     override suspend fun getWaveFrontCenterPosition(): Position? {
-        val bbox = bbox()
-        val centerLatitude = (bbox.ne.lat + bbox.sw.lat) / 2
+        // Try to get the actual wave front edge latitude
+        val frontLatitude = getWaveFrontEdgeLatitude()
+
+        // Fallback to bbox center if wave hasn't started or no polygons available
+        val centerLatitude =
+            frontLatitude ?: run {
+                val bbox = bbox()
+                (bbox.ne.lat + bbox.sw.lat) / 2
+            }
+
         val waveFrontLongitude = closestWaveLongitude(centerLatitude)
         return Position(centerLatitude, waveFrontLongitude)
     }

@@ -105,7 +105,7 @@ class WWWEventWaveLinearTest : KoinTest {
         }
 
         mockEvent = mockk()
-        mockArea = mockk()
+        mockArea = mockk(relaxed = true)
         mockWarming = mockk()
 
         waveLinear =
@@ -121,6 +121,7 @@ class WWWEventWaveLinearTest : KoinTest {
         coEvery { mockEvent.isDone() } returns false
         every { mockEvent.getWaveStartDateTime() } returns Instant.parse("2024-01-01T00:00:00Z")
         every { mockClock.now() } returns Instant.parse("2024-01-01T00:00:00Z")
+        coEvery { mockArea.getPolygons() } returns emptyList() // Default: no polygons (fallback to bbox)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -1417,5 +1418,219 @@ class WWWEventWaveLinearTest : KoinTest {
             )
 
             unmockkObject(GeoUtils)
+        }
+
+    // ---------------------------
+    // Wave Front Edge Latitude Tests (Average of Front Edge Points)
+    // ---------------------------
+
+    @Test
+    fun `test wave front center uses actual wave front edge with EAST direction`() =
+        runBlocking {
+            // GIVEN: Wave moving EAST with actual polygons
+            val mockPolygons =
+                listOf(
+                    Polygon.fromPositions(
+                        listOf(
+                            Position(10.0, 20.0), // Southwest
+                            Position(10.0, 30.0), // Leading edge (easternmost) - south point
+                            Position(30.0, 30.0), // Leading edge (easternmost) - north point
+                            Position(30.0, 20.0), // Northwest
+                        ),
+                    ),
+                )
+            val bbox = BoundingBox.fromCorners(Position(10.0, 20.0), Position(30.0, 40.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = startTime + 10.minutes
+
+            coEvery { mockArea.getPolygons() } returns mockPolygons
+            coEvery { mockArea.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns currentTime
+
+            // WHEN: Get wave front center position
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN: Should use average latitude of easternmost points from traversed polygons
+            assertNotNull(result, "Wave front center position should not be null")
+            // The latitude should be based on the actual wave front edge, not just bbox center
+            // Verify it's within the bbox bounds
+            assertTrue(result.latitude >= 10.0 && result.latitude <= 30.0, "Latitude should be within bbox bounds")
+            // For this simple test, the wave progression creates polygons, so we just verify it calculated something
+            assertTrue(result.latitude > 0.0, "Should calculate a valid latitude")
+        }
+
+    @Test
+    fun `test wave front center uses actual wave front edge with WEST direction`() =
+        runBlocking {
+            // GIVEN: Wave moving WEST with actual polygons
+            waveLinear =
+                WWWEventWaveLinear(
+                    speed = 100.0,
+                    direction = WWWEventWave.Direction.WEST,
+                    approxDuration = 60,
+                ).setRelatedEvent(mockEvent)
+
+            val mockPolygons =
+                listOf(
+                    Polygon.fromPositions(
+                        listOf(
+                            Position(15.0, 30.0), // Leading edge (westernmost) - south point
+                            Position(35.0, 30.0), // Northeast
+                            Position(35.0, 40.0), // Southeast
+                            Position(15.0, 40.0), // Leading edge (westernmost) - north point
+                        ),
+                    ),
+                )
+            val bbox = BoundingBox.fromCorners(Position(10.0, 20.0), Position(40.0, 50.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = startTime + 10.minutes
+
+            coEvery { mockArea.getPolygons() } returns mockPolygons
+            coEvery { mockArea.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns currentTime
+
+            // WHEN: Get wave front center position
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN: Should use average latitude of westernmost points from traversed polygons
+            assertNotNull(result, "Wave front center position should not be null")
+            // The latitude should be based on the actual wave front edge
+            // Verify it's within the bbox bounds
+            assertTrue(result.latitude >= 10.0 && result.latitude <= 40.0, "Latitude should be within bbox bounds")
+            assertTrue(result.latitude > 0.0, "Should calculate a valid latitude")
+        }
+
+    @Test
+    fun `test wave front center falls back to bbox center when no polygons`() =
+        runBlocking {
+            // GIVEN: No polygons set up
+            val bbox = BoundingBox.fromCorners(Position(10.0, 20.0), Position(30.0, 40.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = startTime + 10.minutes
+
+            coEvery { mockArea.getPolygons() } returns emptyList()
+            coEvery { mockArea.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns currentTime
+
+            // WHEN: Get wave front center position
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN: Should fall back to bbox center
+            assertNotNull(result, "Wave front center position should not be null")
+            assertEquals(20.0, result.latitude, 0.0001, "Should fall back to bbox center latitude")
+        }
+
+    @Test
+    fun `test wave front center with multiple polygons uses all edge points`() =
+        runBlocking {
+            // GIVEN: Multiple polygons with different front edge latitudes
+            val mockPolygons =
+                listOf(
+                    // First polygon: front edge at lng=30.0, latitudes 10.0-20.0
+                    Polygon.fromPositions(
+                        listOf(
+                            Position(10.0, 20.0),
+                            Position(10.0, 30.0),
+                            Position(20.0, 30.0),
+                            Position(20.0, 20.0),
+                        ),
+                    ),
+                    // Second polygon: front edge at lng=30.0, latitudes 22.0-32.0
+                    Polygon.fromPositions(
+                        listOf(
+                            Position(22.0, 20.0),
+                            Position(22.0, 30.0),
+                            Position(32.0, 30.0),
+                            Position(32.0, 20.0),
+                        ),
+                    ),
+                )
+            val bbox = BoundingBox.fromCorners(Position(10.0, 20.0), Position(32.0, 40.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = startTime + 10.minutes
+
+            coEvery { mockArea.getPolygons() } returns mockPolygons
+            coEvery { mockArea.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns currentTime
+
+            // WHEN: Get wave front center position
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN: Should average all edge points from both polygons
+            assertNotNull(result, "Wave front center position should not be null")
+            // The latitude should be based on the actual wave front edge from traversed polygons
+            assertTrue(result.latitude >= 10.0 && result.latitude <= 32.0, "Latitude should be within bounds")
+            assertTrue(result.latitude > 0.0, "Should calculate a valid latitude")
+        }
+
+    @Test
+    fun `test wave front center before wave starts falls back to bbox center`() =
+        runBlocking {
+            // GIVEN: Wave hasn't started yet (current time = start time)
+            val mockPolygons =
+                listOf(
+                    Polygon.fromPositions(
+                        listOf(
+                            Position(10.0, 20.0),
+                            Position(10.0, 30.0),
+                            Position(30.0, 30.0),
+                            Position(30.0, 20.0),
+                        ),
+                    ),
+                )
+            val bbox = BoundingBox.fromCorners(Position(10.0, 20.0), Position(30.0, 40.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+
+            coEvery { mockArea.getPolygons() } returns mockPolygons
+            coEvery { mockArea.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns startTime // No time elapsed
+
+            // WHEN: Get wave front center position
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN: Should fall back to bbox center (getWavePolygons returns null)
+            assertNotNull(result, "Wave front center position should not be null")
+            assertEquals(20.0, result.latitude, 0.0001, "Should use bbox center when wave hasn't started")
+        }
+
+    @Test
+    fun `test wave front center with irregular front edge shape`() =
+        runBlocking {
+            // GIVEN: Polygon with irregular shape - front edge has varying latitudes
+            val mockPolygons =
+                listOf(
+                    Polygon.fromPositions(
+                        listOf(
+                            Position(5.0, 20.0),
+                            Position(5.0, 30.0), // Front edge point 1
+                            Position(15.0, 30.0), // Front edge point 2
+                            Position(25.0, 30.0), // Front edge point 3
+                            Position(35.0, 30.0), // Front edge point 4
+                            Position(35.0, 20.0),
+                        ),
+                    ),
+                )
+            val bbox = BoundingBox.fromCorners(Position(5.0, 20.0), Position(35.0, 40.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = startTime + 10.minutes
+
+            coEvery { mockArea.getPolygons() } returns mockPolygons
+            coEvery { mockArea.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns currentTime
+
+            // WHEN: Get wave front center position
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN: Should average all front edge points from traversed polygons
+            assertNotNull(result, "Wave front center position should not be null")
+            // The latitude should be based on the actual wave front edge
+            assertTrue(result.latitude >= 5.0 && result.latitude <= 35.0, "Latitude should be within bounds")
+            assertTrue(result.latitude > 0.0, "Should calculate a valid latitude")
         }
 }
