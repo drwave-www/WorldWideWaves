@@ -43,6 +43,10 @@ import org.maplibre.android.location.engine.LocationEngineResult
 class AndroidLocationProvider :
     KoinComponent,
     LocationProvider {
+    private companion object {
+        private const val TAG = "WWW.GPS.Provider"
+    }
+
     val locationEngine: SimulationLocationEngine by KoinJavaComponent.inject(
         SimulationLocationEngine::class.java,
     )
@@ -55,7 +59,12 @@ class AndroidLocationProvider :
 
     @SuppressLint("MissingPermission")
     override fun startLocationUpdates(onLocationUpdate: (Position) -> Unit) {
-        if (proxyLocationEngine != null) return // Already started
+        if (proxyLocationEngine != null) {
+            Log.i(TAG, "Location updates already started (idempotent guard)")
+            return // Already started
+        }
+
+        Log.i(TAG, "Starting GPS location updates (interval=${Timing.GPS_UPDATE_INTERVAL})")
 
         // Create location engine
         proxyLocationEngine = LocationEngineProxy(locationEngine)
@@ -67,12 +76,13 @@ class AndroidLocationProvider :
                     result?.lastLocation?.let { location ->
                         val position = Position(location.latitude, location.longitude)
                         _currentLocation.value = position
+                        Log.d(TAG, "GPS position received: $position (accuracy=${location.accuracy}m)")
                         onLocationUpdate(position)
                     }
                 }
 
                 override fun onFailure(exception: Exception) {
-                    Log.e("EventMap", "Failed to get location: $exception")
+                    Log.e(TAG, "GPS location update failed", exception)
                 }
             }
 
@@ -82,14 +92,22 @@ class AndroidLocationProvider :
             locationCallback!!,
             Looper.getMainLooper(),
         )
+        Log.i(TAG, "GPS location updates requested successfully")
     }
 
     override fun stopLocationUpdates() {
+        if (proxyLocationEngine == null) {
+            Log.d(TAG, "Location updates already stopped")
+            return
+        }
+
+        Log.i(TAG, "Stopping GPS location updates")
         locationCallback?.let { callback ->
             proxyLocationEngine?.removeLocationUpdates(callback)
         }
         proxyLocationEngine = null
         locationCallback = null
+        Log.i(TAG, "GPS location updates stopped successfully")
     }
 
     private fun buildLocationEngineRequest(): LocationEngineRequest =

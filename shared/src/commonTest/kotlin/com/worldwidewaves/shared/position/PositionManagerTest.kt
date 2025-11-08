@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.position
  */
 
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
+import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,10 +34,27 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalTime::class)
 class PositionManagerTest {
+    private class TestClock(
+        private var currentTime: Instant = Instant.fromEpochMilliseconds(0),
+    ) : IClock {
+        override fun now(): Instant = currentTime
+
+        override suspend fun delay(duration: Duration) {
+            currentTime += duration
+        }
+
+        fun advance(duration: Duration) {
+            currentTime += duration
+        }
+    }
+
     private class TestCoroutineScopeProvider(
         private val testScope: TestScope,
     ) : CoroutineScopeProvider {
@@ -59,7 +77,8 @@ class PositionManagerTest {
     fun `should emit initial null position`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider)
+            val clock = TestClock()
+            val positionManager = PositionManager(coroutineScopeProvider, clock = clock)
 
             assertNull(positionManager.getCurrentPosition())
             assertNull(positionManager.getCurrentSource())
@@ -70,7 +89,7 @@ class PositionManagerTest {
     fun `should update position from GPS source`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val gpsPosition = Position(lat = 48.8566, lng = 2.3522)
 
             positionManager.updatePosition(PositionManager.PositionSource.GPS, gpsPosition)
@@ -87,7 +106,7 @@ class PositionManagerTest {
     fun `should prioritize simulation over GPS`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val gpsPosition = Position(lat = 48.8566, lng = 2.3522)
             val simulationPosition = Position(lat = 40.7128, lng = -74.0060)
 
@@ -107,7 +126,7 @@ class PositionManagerTest {
     fun `should reject lower priority position updates`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val simulationPosition = Position(lat = 48.8566, lng = 2.3522)
             val gpsPosition = Position(lat = 40.7128, lng = -74.0060)
 
@@ -127,7 +146,7 @@ class PositionManagerTest {
     fun `should deduplicate identical positions`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val position = Position(lat = 48.8566, lng = 2.3522)
             val almostSamePosition = Position(lat = 48.8566001, lng = 2.3522001) // Within epsilon
 
@@ -146,7 +165,7 @@ class PositionManagerTest {
     fun `should not deduplicate significantly different positions`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val position1 = Position(lat = 48.8566, lng = 2.3522)
             val position2 = Position(lat = 48.8600, lng = 2.3600) // Significantly different
 
@@ -163,7 +182,7 @@ class PositionManagerTest {
     fun `should debounce rapid position updates`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 100.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 100.milliseconds, clock = TestClock())
             val position1 = Position(lat = 48.8566, lng = 2.3522)
             val position2 = Position(lat = 48.8600, lng = 2.3600)
             val position3 = Position(lat = 48.8700, lng = 2.3700)
@@ -188,7 +207,7 @@ class PositionManagerTest {
     fun `should return pending position during debounce window`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 100.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 100.milliseconds, clock = TestClock())
             val gpsPosition = Position(lat = 48.8566, lng = 2.3522)
 
             // Update position
@@ -216,7 +235,7 @@ class PositionManagerTest {
     fun `should clear position from specific source`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val gpsPosition = Position(lat = 48.8566, lng = 2.3522)
 
             positionManager.updatePosition(PositionManager.PositionSource.GPS, gpsPosition)
@@ -233,7 +252,7 @@ class PositionManagerTest {
     fun `should clear all position data`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val position = Position(lat = 48.8566, lng = 2.3522)
 
             positionManager.updatePosition(PositionManager.PositionSource.SIMULATION, position)
@@ -250,7 +269,7 @@ class PositionManagerTest {
     fun `should handle concurrent position updates from different sources`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val gpsPosition = Position(lat = 48.8566, lng = 2.3522)
             val simulationPosition = Position(lat = 40.7128, lng = -74.0060)
 
@@ -268,7 +287,7 @@ class PositionManagerTest {
     fun `should handle null position updates`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val position = Position(lat = 48.8566, lng = 2.3522)
 
             // Set a position first
@@ -286,7 +305,7 @@ class PositionManagerTest {
     fun `cleanup should cancel pending operations`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 100.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 100.milliseconds, clock = TestClock())
             val position = Position(lat = 48.8566, lng = 2.3522)
 
             // Start a debounced update
@@ -307,7 +326,7 @@ class PositionManagerTest {
     fun `should store GPS position separately even when simulation is active`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val gpsPosition = Position(lat = 48.8566, lng = 2.3522)
             val simulationPosition = Position(lat = 40.7128, lng = -74.0060)
 
@@ -333,7 +352,7 @@ class PositionManagerTest {
     fun `should update GPS position even when simulation is active`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val initialGPS = Position(lat = 48.8566, lng = 2.3522)
             val updatedGPS = Position(lat = 48.8600, lng = 2.3600)
             val simulationPosition = Position(lat = 40.7128, lng = -74.0060)
@@ -366,7 +385,7 @@ class PositionManagerTest {
     fun `should clear GPS position when clearAll is called`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val gpsPosition = Position(lat = 48.8566, lng = 2.3522)
 
             // Set GPS position

@@ -86,6 +86,7 @@ import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.LocationProvider
 import com.worldwidewaves.shared.map.MapCameraPosition
 import com.worldwidewaves.shared.map.MapFeatureState
+import com.worldwidewaves.shared.position.PositionManager
 import com.worldwidewaves.shared.toMapLibrePolygon
 import com.worldwidewaves.shared.ui.components.DownloadProgressIndicator
 import com.worldwidewaves.shared.ui.components.LoadingIndicator
@@ -164,6 +165,9 @@ class AndroidEventMap(
 
     // Platform for observing simulation changes
     private val platform: WWWPlatform by inject(WWWPlatform::class.java)
+
+    // Position manager for GPS lifecycle
+    private val positionManager: PositionManager by inject(PositionManager::class.java)
 
     /**
      * Setup map state variables and return them as a data class
@@ -335,21 +339,40 @@ class AndroidEventMap(
         }
 
         DisposableEffect(Unit) {
+            var previousGPSState = false
             val receiver =
                 object : BroadcastReceiver() {
                     override fun onReceive(
                         c: Context?,
                         i: Intent?,
                     ) {
+                        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                        val isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
                         val granted = isLocationPermissionGranted(context)
+
+                        Log.i(TAG, "GPS state changed: GPS enabled=$isGPSEnabled, permission granted=$granted")
+
+                        // If GPS was re-enabled and permission is granted, restart location updates
+                        if (isGPSEnabled && granted && !previousGPSState) {
+                            Log.i(TAG, "GPS re-enabled, restarting location updates")
+                            // Use stop/start sequence to ensure fresh GPS acquisition
+                            locationProvider.stopLocationUpdates()
+                            locationProvider.startLocationUpdates { rawPosition ->
+                                positionManager.updatePosition(PositionManager.PositionSource.GPS, rawPosition)
+                            }
+                        }
+
+                        previousGPSState = isGPSEnabled
                         mapState.setHasLocationPermission(granted)
                         updateLocationComponent(context, granted)
                     }
                 }
             val filter = IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)
             context.registerReceiver(receiver, filter)
+            Log.d(TAG, "Registered GPS state change receiver for event ${event.id}")
             onDispose {
                 context.unregisterReceiver(receiver)
+                Log.d(TAG, "Unregistered GPS state change receiver for event ${event.id}")
             }
         }
 
@@ -819,6 +842,8 @@ class AndroidEventMap(
         context: Context,
         hasPermission: Boolean,
     ) {
+        Log.d(TAG, "updateLocationComponent called: hasPermission=$hasPermission")
+
         val map = currentMap
         if (map == null) {
             Log.w(TAG, "Cannot update location component - map is null")

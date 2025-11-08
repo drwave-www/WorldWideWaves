@@ -114,6 +114,9 @@ abstract class AbstractEventMap<T>(
     /** When true the MapBoundsEnforcer is not allowed to move the camera. */
     private var suppressCorrections = false
 
+    // GPS lifecycle tracking
+    private var locationUpdatesActive = false
+
     // Camera position methods - shared logic for all platforms ---------------
 
     /**
@@ -542,10 +545,7 @@ abstract class AbstractEventMap<T>(
             }
 
             // Start location updates and integrate with PositionManager
-            locationProvider?.startLocationUpdates { rawPosition ->
-                // Update PositionManager with GPS position
-                positionManager.updatePosition(PositionManager.PositionSource.GPS, rawPosition)
-            }
+            startLocationUpdatesInternal()
 
             // Subscribe to unified position updates from PositionManager
             positionManager.position
@@ -623,6 +623,55 @@ abstract class AbstractEventMap<T>(
      * Gets the current position source from PositionManager
      */
     fun getCurrentPositionSource(): PositionManager.PositionSource? = positionManager.getCurrentSource()
+
+    // ============================================================
+    // LIFECYCLE MANAGEMENT
+    // ============================================================
+
+    /**
+     * Internal method to start location updates.
+     * Marked as internal to allow testing and lifecycle management.
+     */
+    private fun startLocationUpdatesInternal() {
+        if (locationUpdatesActive) {
+            Log.d("AbstractEventMap", "Location updates already active")
+            return
+        }
+
+        locationProvider?.startLocationUpdates { rawPosition ->
+            // Update PositionManager with GPS position
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, rawPosition)
+        }
+        locationUpdatesActive = true
+        Log.i("AbstractEventMap", "Location updates started for event ${event.id}")
+    }
+
+    /**
+     * Called when the map/activity is paused (backgrounded).
+     * Stops location updates to save battery.
+     * IMPORTANT: Does NOT clear cached GPS position (needed for simulation mode).
+     */
+    fun onPause() {
+        if (!locationUpdatesActive) {
+            Log.d("AbstractEventMap", "Location updates already stopped")
+            return
+        }
+
+        Log.i("AbstractEventMap", "onPause: Stopping location updates for event ${event.id}")
+        locationProvider?.stopLocationUpdates()
+        locationUpdatesActive = false
+        // NOTE: Intentionally NOT clearing lastGPSPosition in PositionManager
+        // SimulationButton depends on cached GPS position
+    }
+
+    /**
+     * Called when the map/activity is resumed (foregrounded).
+     * Restarts location updates to get fresh position data.
+     */
+    fun onResume() {
+        Log.i("AbstractEventMap", "onResume: Restarting location updates for event ${event.id}")
+        startLocationUpdatesInternal()
+    }
 
     // ============================================================
     // ADAPTIVE CAMERA HELPER FUNCTIONS

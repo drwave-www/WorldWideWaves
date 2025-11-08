@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.position
  */
 
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
+import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,14 +33,31 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * Comprehensive error handling tests for PositionManager.
  * Tests GPS/Location error scenarios, invalid coordinates, null handling, and edge cases.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalTime::class)
 class PositionManagerErrorTest {
+    private class TestClock(
+        private var currentTime: Instant = Instant.fromEpochMilliseconds(0),
+    ) : IClock {
+        override fun now(): Instant = currentTime
+
+        override suspend fun delay(duration: Duration) {
+            currentTime += duration
+        }
+
+        fun advance(duration: Duration) {
+            currentTime += duration
+        }
+    }
+
     private class TestCoroutineScopeProvider(
         private val testScope: TestScope,
     ) : CoroutineScopeProvider {
@@ -66,7 +84,7 @@ class PositionManagerErrorTest {
     fun `should accept NaN coordinates as Position allows them`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val nanPosition = Position(lat = Double.NaN, lng = Double.NaN)
 
             positionManager.updatePosition(PositionManager.PositionSource.GPS, nanPosition)
@@ -80,7 +98,7 @@ class PositionManagerErrorTest {
     fun `should accept latitude above 90 degrees as Position allows it`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val invalidPosition = Position(lat = 95.0, lng = 0.0)
 
             positionManager.updatePosition(PositionManager.PositionSource.GPS, invalidPosition)
@@ -94,7 +112,7 @@ class PositionManagerErrorTest {
     fun `should accept latitude below -90 degrees as Position allows it`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val invalidPosition = Position(lat = -95.0, lng = 0.0)
 
             positionManager.updatePosition(PositionManager.PositionSource.GPS, invalidPosition)
@@ -107,7 +125,7 @@ class PositionManagerErrorTest {
     fun `should accept longitude above 180 degrees as Position allows it`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val invalidPosition = Position(lat = 0.0, lng = 185.0)
 
             positionManager.updatePosition(PositionManager.PositionSource.GPS, invalidPosition)
@@ -120,7 +138,7 @@ class PositionManagerErrorTest {
     fun `should accept longitude below -180 degrees as Position allows it`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val invalidPosition = Position(lat = 0.0, lng = -185.0)
 
             positionManager.updatePosition(PositionManager.PositionSource.GPS, invalidPosition)
@@ -133,7 +151,7 @@ class PositionManagerErrorTest {
     fun `should accept infinite coordinates as Position allows them`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val infinitePosition = Position(lat = Double.POSITIVE_INFINITY, lng = Double.NEGATIVE_INFINITY)
 
             positionManager.updatePosition(PositionManager.PositionSource.GPS, infinitePosition)
@@ -146,7 +164,7 @@ class PositionManagerErrorTest {
     fun `should accept extremely large coordinates`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val largePosition = Position(lat = 1000.0, lng = -1000.0)
 
             positionManager.updatePosition(PositionManager.PositionSource.GPS, largePosition)
@@ -163,7 +181,7 @@ class PositionManagerErrorTest {
     fun `should handle null position updates from GPS`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val position = Position(lat = 48.8566, lng = 2.3522)
 
             // Set a position first
@@ -181,7 +199,7 @@ class PositionManagerErrorTest {
     fun `should handle null position updates from simulation`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val position = Position(lat = 40.7128, lng = -74.0060)
 
             positionManager.updatePosition(PositionManager.PositionSource.SIMULATION, position)
@@ -197,7 +215,7 @@ class PositionManagerErrorTest {
     fun `should clear position when null is provided after multiple updates`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val position1 = Position(lat = 48.8566, lng = 2.3522)
             val position2 = Position(lat = 40.7128, lng = -74.0060)
 
@@ -219,7 +237,7 @@ class PositionManagerErrorTest {
     fun `should accept null as initial position`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
 
             // Null update when already null
             positionManager.updatePosition(PositionManager.PositionSource.GPS, null)
@@ -235,7 +253,7 @@ class PositionManagerErrorTest {
     fun `should handle position at exact coordinate boundaries`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
 
             // Test all four corners
             val northEast = Position(lat = 90.0, lng = 180.0)
@@ -268,7 +286,7 @@ class PositionManagerErrorTest {
     fun `should validate position at north pole`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val northPole = Position(lat = 90.0, lng = 0.0)
 
             positionManager.updatePosition(PositionManager.PositionSource.GPS, northPole)
@@ -282,7 +300,7 @@ class PositionManagerErrorTest {
     fun `should validate position at south pole`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val southPole = Position(lat = -90.0, lng = 0.0)
 
             positionManager.updatePosition(PositionManager.PositionSource.GPS, southPole)
@@ -296,7 +314,7 @@ class PositionManagerErrorTest {
     fun `should handle position at equator`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val equator = Position(lat = 0.0, lng = 0.0)
 
             positionManager.updatePosition(PositionManager.PositionSource.GPS, equator)
@@ -310,7 +328,7 @@ class PositionManagerErrorTest {
     fun `should handle position at prime meridian`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val primeMeridian = Position(lat = 51.4779, lng = 0.0)
 
             positionManager.updatePosition(PositionManager.PositionSource.GPS, primeMeridian)
@@ -324,7 +342,7 @@ class PositionManagerErrorTest {
     fun `should handle position at international date line`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val dateLine180 = Position(lat = 0.0, lng = 180.0)
             val dateLineNeg180 = Position(lat = 0.0, lng = -180.0)
 
@@ -345,7 +363,7 @@ class PositionManagerErrorTest {
     fun `should recover from invalid position by accepting valid one`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val invalidPosition = Position(lat = Double.NaN, lng = Double.NaN)
             val validPosition = Position(lat = 48.8566, lng = 2.3522)
 
@@ -364,7 +382,7 @@ class PositionManagerErrorTest {
     fun `should clear invalid position with null`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val invalidPosition = Position(lat = 1000.0, lng = -1000.0)
 
             positionManager.updatePosition(PositionManager.PositionSource.GPS, invalidPosition)
@@ -380,7 +398,7 @@ class PositionManagerErrorTest {
     fun `should handle alternating valid and invalid positions`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val validPosition = Position(lat = 48.8566, lng = 2.3522)
             val invalidPosition = Position(lat = Double.NaN, lng = Double.NaN)
 
@@ -406,7 +424,7 @@ class PositionManagerErrorTest {
     fun `should prioritize simulation over GPS even with invalid coordinates`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val validGPS = Position(lat = 48.8566, lng = 2.3522)
             val invalidSimulation = Position(lat = Double.NaN, lng = Double.NaN)
 
@@ -425,7 +443,7 @@ class PositionManagerErrorTest {
     fun `should reject lower priority GPS after invalid simulation position`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val invalidSimulation = Position(lat = 1000.0, lng = -1000.0)
             val validGPS = Position(lat = 48.8566, lng = 2.3522)
 
@@ -448,7 +466,7 @@ class PositionManagerErrorTest {
     fun `should handle clearAll after invalid position`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val invalidPosition = Position(lat = Double.NaN, lng = Double.NaN)
 
             positionManager.updatePosition(PositionManager.PositionSource.GPS, invalidPosition)
@@ -486,7 +504,7 @@ class PositionManagerErrorTest {
     fun `should not deduplicate NaN positions`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val nanPosition1 = Position(lat = Double.NaN, lng = Double.NaN)
             val nanPosition2 = Position(lat = Double.NaN, lng = Double.NaN)
 
@@ -505,7 +523,7 @@ class PositionManagerErrorTest {
     fun `should handle zero coordinates`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val zeroPosition = Position(lat = 0.0, lng = 0.0)
 
             positionManager.updatePosition(PositionManager.PositionSource.GPS, zeroPosition)
@@ -520,7 +538,7 @@ class PositionManagerErrorTest {
     fun `should handle negative zero coordinates`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val negZeroPosition = Position(lat = -0.0, lng = -0.0)
 
             positionManager.updatePosition(PositionManager.PositionSource.GPS, negZeroPosition)
@@ -533,7 +551,7 @@ class PositionManagerErrorTest {
     fun `should deduplicate positions at exact coordinate boundaries`() =
         runTest {
             val coroutineScopeProvider = TestCoroutineScopeProvider(this)
-            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
+            val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds, clock = TestClock())
             val northPole1 = Position(lat = 90.0, lng = 0.0)
             val northPole2 = Position(lat = 90.00000001, lng = 0.00000001) // Within epsilon
 

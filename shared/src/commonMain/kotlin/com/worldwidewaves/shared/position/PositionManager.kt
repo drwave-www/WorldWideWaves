@@ -23,7 +23,9 @@ package com.worldwidewaves.shared.position
 
 import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
+import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.events.utils.SystemClock
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -33,6 +35,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlin.math.abs
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * Centralized position management system that provides a single source of truth for user position.
@@ -44,13 +49,23 @@ import kotlin.time.Duration.Companion.milliseconds
  * - Position deduplication using epsilon comparison
  * - Thread-safe reactive position updates
  */
+@OptIn(ExperimentalTime::class)
 class PositionManager(
     private val coroutineScopeProvider: CoroutineScopeProvider,
     private val debounceDelay: Duration = 100.milliseconds,
     private val positionEpsilon: Double = 0.0001, // ~10 meters
+    clock: IClock? = null, // Injectable for testing, simulation-aware
 ) {
+    private val clock: IClock = clock ?: SystemClock()
+
     private companion object {
         private const val TAG = "WWW.Position.Manager"
+
+        /**
+         * Default staleness threshold for GPS positions.
+         * After this duration without updates, GPS position is considered stale.
+         */
+        val DEFAULT_GPS_STALENESS_THRESHOLD = 5.minutes
     }
 
     /**
@@ -77,6 +92,7 @@ class PositionManager(
     // GPS position storage - always keeps latest GPS position regardless of simulation priority
     private var lastGPSPosition: Position? = null
     private var pendingGPSPosition: Position? = null
+    private var lastGPSUpdateTime: Instant? = null
 
     // Public reactive API with performance optimization
     private val _position = MutableStateFlow<Position?>(null)
@@ -109,8 +125,10 @@ class PositionManager(
             pendingGPSPosition = newPosition
             // Immediately commit GPS position (no debouncing for GPS storage)
             lastGPSPosition = newPosition
+            // Update timestamp when GPS position is received (or cleared)
+            lastGPSUpdateTime = if (newPosition != null) clock.now() else null
             if (WWWGlobals.LogConfig.ENABLE_POSITION_TRACKING_LOGGING) {
-                Log.v(TAG, "[DEBUG] Stored GPS position: $newPosition")
+                Log.v(TAG, "[DEBUG] Stored GPS position: $newPosition (timestamp=$lastGPSUpdateTime)")
             }
         }
 
@@ -167,8 +185,62 @@ class PositionManager(
      * Gets the GPS position specifically, ignoring simulation priority.
      * This always returns the latest GPS position received, even when simulation is active.
      * Used by SimulationButton to check if user's actual GPS position is in event area.
+     *
+     * Note: Does NOT check staleness - use isGPSStale() separately if needed.
      */
     fun getGPSPosition(): Position? = pendingGPSPosition ?: lastGPSPosition
+
+    /**
+     * Gets the age of the last GPS position update.
+     *
+     * @return Duration since last GPS update, or null if no GPS position has been received
+     */
+    fun getGPSAge(): Duration? {
+        val timestamp = lastGPSUpdateTime ?: return null
+        return clock.now() - timestamp
+    }
+
+    /**
+     * Checks if the GPS position is stale (too old to be reliable).
+     *
+     * @param threshold The maximum age before GPS is considered stale (default: 5 minutes)
+     * @return true if GPS position exists but is older than threshold, false otherwise
+     */
+    fun isGPSStale(threshold: Duration = DEFAULT_GPS_STALENESS_THRESHOLD): Boolean {
+        val position = getGPSPosition()
+        if (position == null) {
+            // No GPS position - not "stale", just absent
+            return false
+        }
+
+        val age = getGPSAge() ?: return false
+        return age > threshold
+    }
+
+    /**
+     * Gets diagnostic information about GPS state.
+     * Useful for logging and debugging GPS issues.
+     */
+    fun getGPSInfo(): String {
+        val position = getGPSPosition()
+        val age = getGPSAge()
+        val isStale = isGPSStale()
+
+        return buildString {
+            append("GPS Position: ")
+            if (position != null) {
+                append("$position")
+                if (age != null) {
+                    append(", age=${age.inWholeSeconds}s")
+                }
+                if (isStale) {
+                    append(" (STALE)")
+                }
+            } else {
+                append("null")
+            }
+        }
+    }
 
     /**
      * Gets the current position source
@@ -190,6 +262,7 @@ class PositionManager(
         pendingUpdate = null
         pendingGPSPosition = null
         lastGPSPosition = null
+        lastGPSUpdateTime = null
         _currentState.value = PositionState(null, null)
         _position.value = null
         Log.v("PositionManager", "Cleared all position data")
@@ -249,6 +322,7 @@ class PositionManager(
         debounceJob = null
         pendingUpdate = null
         pendingGPSPosition = null
+        lastGPSUpdateTime = null
         Log.v("PositionManager", "Cleaned up resources")
     }
 }
