@@ -14,6 +14,7 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEventArea
 import com.worldwidewaves.shared.events.WWWEventMap
 import com.worldwidewaves.shared.events.WWWEventWave
+import com.worldwidewaves.shared.events.WWWEventWaveLinear
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
@@ -28,7 +29,9 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -40,6 +43,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -1551,6 +1555,106 @@ class AbstractEventMapTest : KoinTest {
 
             // Then - Should complete setup without using fallback world bounds
             coVerify { mockMapLibreAdapter.animateCameraToBounds(testBounds, any(), any()) }
+        }
+
+    // ============================================================
+    // CAMERA TARGETING TESTS (targetUser, targetWave)
+    // ============================================================
+
+    @Test
+    fun targetUser_animatesToUserPositionWithoutConstraintUpdate() =
+        runTest {
+            // Given: User position available
+            val userPosition = Position(48.86, 2.35)
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, userPosition)
+            testScope.testScheduler.advanceUntilIdle()
+
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+            testScope.testScheduler.advanceUntilIdle()
+
+            // When: targetUser is called
+            eventMap.targetUser()
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then: Should animate to user position without forcing constraint update
+            coVerify(exactly = 1) {
+                mockMapLibreAdapter.animateCamera(userPosition, WWWGlobals.MapDisplay.TARGET_USER_ZOOM, any())
+            }
+        }
+
+    @Test
+    fun targetWave_callsForceConstraintUpdate() =
+        runTest {
+            // Given: Linear wave event with wave front data
+            val mockWaveLinear = mockk<WWWEventWaveLinear>()
+            every { mockEvent.wave } returns mockWaveLinear
+            coEvery { mockWaveLinear.getWaveFrontEdgeBounds() } returns Triple(48.84, 48.88, 2.38)
+
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+            testScope.testScheduler.advanceUntilIdle()
+
+            // When: targetWave is called
+            eventMap.targetWave()
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then: Should animate to bounds
+            coVerify(atLeast = 1) {
+                mockMapLibreAdapter.animateCameraToBounds(any(), any(), any())
+            }
+        }
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    @Test
+    fun runCameraAnimation_suspendsUntilCallbackCompletes() =
+        runTest {
+            // Given: Animation callback that will be triggered
+            var callbackExecuted = false
+            var animationCompleted = false
+
+            coEvery { mockMapLibreAdapter.animateCamera(any(), any(), any()) } answers {
+                val callback = thirdArg<MapCameraCallback?>()
+                // Simulate async animation completion
+                testScope.launch {
+                    delay(100)
+                    callbackExecuted = true
+                    callback?.onFinish()
+                }
+            }
+
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+            testScope.testScheduler.advanceUntilIdle()
+
+            val userPosition = Position(48.86, 2.35)
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, userPosition)
+            testScope.testScheduler.advanceUntilIdle()
+
+            // When: targetUser is called (which uses runCameraAnimation)
+            testScope.launch {
+                eventMap.targetUser()
+                animationCompleted = true
+            }
+
+            // Advance time but not past animation
+            testScope.testScheduler.advanceTimeBy(50)
+            assertFalse(callbackExecuted, "Callback should not have executed yet")
+            assertFalse(animationCompleted, "Animation should not be marked complete yet")
+
+            // Advance past animation completion
+            testScope.testScheduler.advanceTimeBy(100)
+            assertTrue(callbackExecuted, "Callback should have executed")
+            assertTrue(animationCompleted, "Animation should be marked complete")
         }
 
     // ============================================================
