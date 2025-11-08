@@ -38,8 +38,10 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.coroutines.resume
 
 // ----------------------------------------------------------------------------
 
@@ -125,23 +127,36 @@ abstract class AbstractEventMap<T>(
      * reactive constraint corrections so that the ConstraintManager does not
      * fight against the animation.
      *
+     * Suspends until the animation completes, ensuring suppressCorrections
+     * remains true for the entire animation duration.
+     *
      * NOTE: Does NOT relax bounds - constraints remain enforced during animation
      * to prevent zooming out beyond event area (preventive clamping).
      */
-    private suspend inline fun runCameraAnimation(crossinline block: (MapCameraCallback) -> Unit) {
-        suppressCorrections = true
+    private suspend fun runCameraAnimation(block: (MapCameraCallback) -> Unit) {
+        try {
+            suspendCancellableCoroutine<Unit> { continuation ->
+                suppressCorrections = true
 
-        block(
-            object : MapCameraCallback {
-                override fun onFinish() {
-                    suppressCorrections = false
-                }
+                block(
+                    object : MapCameraCallback {
+                        override fun onFinish() {
+                            suppressCorrections = false
+                            continuation.resume(Unit)
+                        }
 
-                override fun onCancel() {
-                    suppressCorrections = false
-                }
-            },
-        )
+                        override fun onCancel() {
+                            suppressCorrections = false
+                            continuation.resume(Unit) // Resume normally on cancel (don't throw)
+                        }
+                    },
+                )
+            }
+        } catch (e: Exception) {
+            // Ensure suppressCorrections is always restored even if something goes wrong
+            suppressCorrections = false
+            throw e
+        }
     }
 
     /**
@@ -473,9 +488,10 @@ abstract class AbstractEventMap<T>(
         )
 
         runCameraAnimation { cb ->
-            Log.d("AbstractEventMap", "targetUser: Animation finished")
             mapLibreAdapter.animateCamera(userPosition, MapDisplay.TARGET_USER_ZOOM, cb)
         }
+
+        Log.d("AbstractEventMap", "targetUser: Animation completed successfully")
     }
 
     /**
