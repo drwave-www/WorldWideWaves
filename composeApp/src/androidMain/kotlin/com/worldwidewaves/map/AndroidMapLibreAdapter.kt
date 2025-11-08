@@ -284,7 +284,12 @@ class AndroidMapLibreAdapter(
         zoom: Double?,
         callback: MapCameraCallback?,
     ) {
-        val map = mapLibreMap ?: return
+        val map = mapLibreMap
+        if (map == null) {
+            Log.w("AndroidMapLibreAdapter", "animateCamera: Map not initialized, calling callback.onCancel()")
+            callback?.onCancel()
+            return
+        }
 
         val builder =
             CameraPosition
@@ -318,7 +323,12 @@ class AndroidMapLibreAdapter(
         padding: Int,
         callback: MapCameraCallback?,
     ) {
-        val map = mapLibreMap ?: return
+        val map = mapLibreMap
+        if (map == null) {
+            Log.w("AndroidMapLibreAdapter", "animateCameraToBounds: Map not initialized, calling callback.onCancel()")
+            callback?.onCancel()
+            return
+        }
 
         val latLngBounds =
             LatLngBounds
