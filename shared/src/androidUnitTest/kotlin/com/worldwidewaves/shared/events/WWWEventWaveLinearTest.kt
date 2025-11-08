@@ -1635,6 +1635,110 @@ class WWWEventWaveLinearTest : KoinTest {
         }
 
     // ---------------------------
+    // Wave Front Edge Bounds Tests
+    // ---------------------------
+
+    @Test
+    fun `test getWaveFrontEdgeBounds returns correct min and max latitudes`() =
+        runBlocking {
+            // GIVEN: Wave with polygons that have specific latitude range
+            val mockPolygons =
+                listOf(
+                    Polygon.fromPositions(
+                        listOf(
+                            Position(10.0, 20.0), // Min latitude: 10.0
+                            Position(10.0, 30.0),
+                            Position(30.0, 30.0), // Max latitude: 30.0
+                            Position(30.0, 20.0),
+                        ),
+                    ),
+                )
+            val bbox = BoundingBox.fromCorners(Position(10.0, 20.0), Position(30.0, 40.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = startTime + 10.minutes
+
+            coEvery { mockArea.getPolygons() } returns mockPolygons
+            coEvery { mockArea.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns currentTime
+
+            // WHEN: Get wave front edge bounds
+            val result = waveLinear.getWaveFrontEdgeBounds()
+
+            // THEN: Should return min and max latitudes of the wave edge
+            assertNotNull(result, "Wave front edge bounds should not be null")
+            assertTrue(
+                result.first >= 10.0 && result.first <= 30.0,
+                "Min latitude should be within polygon bounds",
+            )
+            assertTrue(
+                result.second >= 10.0 && result.second <= 30.0,
+                "Max latitude should be within polygon bounds",
+            )
+            assertTrue(result.first <= result.second, "Min should be less than or equal to max")
+        }
+
+    @Test
+    fun `test getWaveFrontEdgeBounds returns null when no polygons`() =
+        runBlocking {
+            // GIVEN: No polygons available
+            val bbox = BoundingBox.fromCorners(Position(10.0, 20.0), Position(30.0, 40.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+
+            coEvery { mockArea.getPolygons() } returns emptyList()
+            coEvery { mockArea.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns startTime
+
+            // WHEN: Get wave front edge bounds
+            val result = waveLinear.getWaveFrontEdgeBounds()
+
+            // THEN: Should return null
+            assertNull(result, "Wave front edge bounds should be null when no polygons")
+        }
+
+    @Test
+    fun `test getWaveFrontEdgeBounds with WEST direction`() =
+        runBlocking {
+            // GIVEN: Wave moving WEST
+            waveLinear =
+                WWWEventWaveLinear(
+                    speed = 100.0,
+                    direction = WWWEventWave.Direction.WEST,
+                    approxDuration = 60,
+                ).setRelatedEvent(mockEvent)
+
+            val mockPolygons =
+                listOf(
+                    Polygon.fromPositions(
+                        listOf(
+                            Position(15.0, 30.0),
+                            Position(35.0, 30.0),
+                            Position(35.0, 40.0),
+                            Position(15.0, 40.0),
+                        ),
+                    ),
+                )
+            val bbox = BoundingBox.fromCorners(Position(10.0, 20.0), Position(40.0, 50.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = startTime + 10.minutes
+
+            coEvery { mockArea.getPolygons() } returns mockPolygons
+            coEvery { mockArea.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns currentTime
+
+            // WHEN: Get wave front edge bounds
+            val result = waveLinear.getWaveFrontEdgeBounds()
+
+            // THEN: Should return bounds or null based on wave progression
+            // Note: Result depends on whether wave has progressed enough to create traversed polygons
+            if (result != null) {
+                assertTrue(result.first <= result.second, "Min should be less than or equal to max")
+            }
+        }
+
+    // ---------------------------
     // User Position Aware Wave Front Center Tests
     // ---------------------------
 

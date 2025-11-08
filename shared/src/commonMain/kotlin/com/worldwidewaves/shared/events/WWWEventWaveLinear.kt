@@ -331,6 +331,17 @@ data class WWWEventWaveLinear(
         return Position(centerLatitude, waveFrontLongitude)
     }
 
+    /**
+     * Gets the latitude bounds (min and max) of the wave front edge.
+     * Useful for creating bounding boxes that include the full vertical extent of the wave front.
+     *
+     * @return Pair of (minLatitude, maxLatitude) or null if no wave front edge exists
+     */
+    suspend fun getWaveFrontEdgeBounds(): Pair<Double, Double>? {
+        val waveFrontInfo = getWaveFrontEdgeInfo() ?: return null
+        return Pair(waveFrontInfo.minLatitude, waveFrontInfo.maxLatitude)
+    }
+
     @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     override suspend fun userPositionToWaveRatio(): Double? {
         val userPosition = getUserPosition()

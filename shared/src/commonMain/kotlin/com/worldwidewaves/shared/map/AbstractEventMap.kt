@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.worldwidewaves.shared.WWWGlobals.MapDisplay
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.WWWEventWaveLinear
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
@@ -294,47 +295,43 @@ abstract class AbstractEventMap<T>(
     // Camera targeting methods - shared logic for all platforms --------------
 
     /**
-     * Moves the camera to the wave front with dynamic zoom that maximizes detail while keeping
-     * both user and wave visible when user position is available.
-     * When user position is available, creates a bounding box containing both positions with
-     * padding, ensuring maximum zoom while both remain visible.
+     * Moves the camera to show the user with the wave edge visible, maximizing detail.
+     * When user position is available, creates a bounding box that spans from the user to
+     * the wave edge bounds (min/max latitude), ensuring the user is centered with the wave visible.
      * When user position is unavailable, uses fixed zoom level centered on wave front.
-     * Falls back to user latitude + wave longitude if wave front center is unavailable.
+     * Falls back to user latitude + wave longitude if wave front is unavailable.
      */
     @Suppress("ComplexCondition") // Necessary validation: null + NaN checks prevent IllegalArgumentException
     suspend fun targetWave() {
         val userPosition = positionManager.getCurrentPosition()
-        var wavePosition = event.wave.getWaveFrontCenterPosition()
 
-        // Fallback to previous implementation if new method fails
-        if (wavePosition == null) {
-            Log.w("AbstractEventMap", "Wave front center position not available, falling back to user position")
-            val currentLocation = userPosition
-            val closestWaveLongitude = event.wave.userClosestWaveLongitude()
+        // Get wave edge bounds for proper vertical extent
+        val waveEdgeBounds =
+            (event.wave as? WWWEventWaveLinear)?.getWaveFrontEdgeBounds()
 
-            if (currentLocation != null && closestWaveLongitude != null) {
-                wavePosition = Position(currentLocation.latitude, closestWaveLongitude)
-            } else {
-                Log.w("AbstractEventMap", "targetWave called but position not available")
-                return
-            }
-        }
-
-        // If user position is available, use dynamic zoom to fit both user and wave
+        // If user position is available, use dynamic zoom focusing on user with wave visible
         if (userPosition != null &&
             !userPosition.latitude.isNaN() &&
             !userPosition.longitude.isNaN() &&
-            !wavePosition.latitude.isNaN() &&
-            !wavePosition.longitude.isNaN()
+            waveEdgeBounds != null
         ) {
-            // Create the bounds containing user and wave positions
-            val bounds = BoundingBox.fromCorners(listOf(userPosition, wavePosition))
+            // Calculate wave longitude at user's latitude for horizontal positioning
+            val waveLongitude = event.wave.closestWaveLongitude(userPosition.latitude)
+
+            // Create bounds that include user + full wave edge vertical extent
+            // This ensures the user is visible and the wave edge is visible (even if not centered)
+            val positions =
+                listOf(
+                    userPosition, // User position
+                    Position(waveEdgeBounds.first, waveLongitude), // Wave edge min latitude
+                    Position(waveEdgeBounds.second, waveLongitude), // Wave edge max latitude
+                )
+
+            val bounds = BoundingBox.fromCorners(positions)
             if (bounds == null) {
-                Log.e("AbstractEventMap", "Failed to create bounds from user+wave positions, using fixed zoom")
-                // Fallback to fixed zoom
-                runCameraAnimation { cb ->
-                    mapLibreAdapter.animateCamera(wavePosition, MapDisplay.TARGET_WAVE_ZOOM, cb)
-                }
+                Log.e("AbstractEventMap", "Failed to create bounds from user+wave edge, using fallback")
+                // Fallback to old behavior
+                targetWaveFallback(userPosition)
                 return
             }
 
@@ -365,10 +362,35 @@ abstract class AbstractEventMap<T>(
                 mapLibreAdapter.animateCameraToBounds(finalBounds)
             }
         } else {
-            // No user position available, use fixed zoom centered on wave
-            runCameraAnimation { cb ->
-                mapLibreAdapter.animateCamera(wavePosition, MapDisplay.TARGET_WAVE_ZOOM, cb)
+            // No user position or wave edge bounds available, use fallback
+            targetWaveFallback(userPosition)
+        }
+    }
+
+    /**
+     * Fallback implementation for targetWave when edge bounds are not available.
+     * Uses wave front center position or fixed zoom.
+     */
+    private suspend fun targetWaveFallback(userPosition: Position?) {
+        var wavePosition = event.wave.getWaveFrontCenterPosition()
+
+        // Fallback to previous implementation if new method fails
+        if (wavePosition == null) {
+            Log.w("AbstractEventMap", "Wave front center position not available, falling back to user position")
+            val currentLocation = userPosition
+            val closestWaveLongitude = event.wave.userClosestWaveLongitude()
+
+            if (currentLocation != null && closestWaveLongitude != null) {
+                wavePosition = Position(currentLocation.latitude, closestWaveLongitude)
+            } else {
+                Log.w("AbstractEventMap", "targetWave called but position not available")
+                return
             }
+        }
+
+        // Use fixed zoom centered on wave
+        runCameraAnimation { cb ->
+            mapLibreAdapter.animateCamera(wavePosition, MapDisplay.TARGET_WAVE_ZOOM, cb)
         }
     }
 
