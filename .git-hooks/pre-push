@@ -72,6 +72,58 @@ fi
 echo ""
 
 # ============================================================
+# DOCUMENTATION LINK CHECK - PRE-PUSH HOOK
+# ============================================================
+# Check for broken documentation links before push
+# Prevents CI failures from broken links
+# Bypass with: git push --no-verify (NOT recommended)
+# ============================================================
+
+echo "🔗 Checking documentation links..."
+
+# Check if lychee is installed
+if command -v lychee >/dev/null 2>&1; then
+    echo "📋 Running link check on markdown files..."
+
+    # Run lychee with same configuration as CI
+    if lychee --verbose \
+        --no-progress \
+        --exclude-mail \
+        --exclude-link-local \
+        --exclude-loopback \
+        --exclude-private \
+        --timeout 30 \
+        --max-retries 3 \
+        --cache \
+        --max-cache-age 1d \
+        '**/*.md' 2>&1 | tee /tmp/lychee-prepush.log; then
+        echo "✅ All documentation links are valid"
+    else
+        echo ""
+        echo "❌ Broken documentation links detected!"
+        echo ""
+        echo "Please fix the broken links shown above before pushing."
+        echo "Common issues:"
+        echo "  - URLs have changed or been deprecated"
+        echo "  - Internal links point to files that don't exist"
+        echo "  - Typos in URLs"
+        echo ""
+        echo "You can:"
+        echo "  1. Fix the broken links in the affected files"
+        echo "  2. Add known-valid but temporarily unavailable URLs to .lycheeignore"
+        echo "  3. Bypass this check with --no-verify (not recommended)"
+        echo ""
+        exit 1
+    fi
+else
+    echo "⚠️  lychee not found. Skipping link check."
+    echo "   Install: brew install lychee (macOS) or cargo install lychee-link-checker"
+    echo "   Link checks will still run in CI/CD pipeline."
+fi
+
+echo ""
+
+# ============================================================
 # DOCUMENTATION AUTOMATION - PRE-PUSH HOOK
 # ============================================================
 # This hook ensures documentation stays up-to-date before push

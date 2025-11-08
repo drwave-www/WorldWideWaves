@@ -366,5 +366,5 @@ cd iosApp/build_ios/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics
 If you encounter issues:
 1. Check Xcode console logs
 2. Verify Firebase Console project settings
-3. Review [Firebase iOS troubleshooting guide](https://firebase.google.com/docs/ios/troubleshooting)
+3. Review [Firebase iOS troubleshooting guide](https://firebase.google.com/docs/ios/troubleshooting-faq)
 4. Open an issue in the repository with logs and error messages

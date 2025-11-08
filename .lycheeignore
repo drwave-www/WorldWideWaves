@@ -123,4 +123,5 @@ mailto:*
 https://github.com/*/actions/workflows/.*
 
 # Temporary exclusions (document reason and removal date):
-# (Example) https://temporary-url.com/.* - Waiting for service deployment (Remove after 2025-11-01)
+# Dokka documentation - Waiting for GitHub Pages setup (Remove after Pages is configured)
+https://mglcel.github.io/WorldWideWaves/dokka/.*
