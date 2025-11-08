@@ -468,7 +468,22 @@ abstract class AbstractEventMap<T>(
         }
 
         runCameraAnimation { cb ->
-            mapLibreAdapter.animateCamera(userPosition, MapDisplay.TARGET_USER_ZOOM, cb)
+            mapLibreAdapter.animateCamera(
+                userPosition,
+                MapDisplay.TARGET_USER_ZOOM,
+                object : MapCameraCallback {
+                    override fun onFinish() {
+                        // Re-apply constraints to ensure map bounds are enforced after animation
+                        // This prevents unexpected camera movement from stale constraint bounds
+                        constraintManager?.applyConstraints()
+                        cb.onFinish()
+                    }
+
+                    override fun onCancel() {
+                        cb.onCancel()
+                    }
+                },
+            )
         }
     }
 
