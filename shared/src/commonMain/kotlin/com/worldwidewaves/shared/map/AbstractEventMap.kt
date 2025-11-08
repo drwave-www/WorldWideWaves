@@ -570,8 +570,8 @@ abstract class AbstractEventMap<T>(
                 ),
             )
 
-        runCameraAnimation { _ ->
-            mapLibreAdapter.animateCameraToBounds(finalBounds)
+        runCameraAnimation { cb ->
+            mapLibreAdapter.animateCameraToBounds(finalBounds, callback = cb)
         }
     }
 
