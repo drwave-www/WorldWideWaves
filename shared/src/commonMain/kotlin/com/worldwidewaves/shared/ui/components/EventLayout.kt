@@ -123,6 +123,7 @@ fun EventLayout(
                     eventState.eventStatus,
                     eventState.endDateTime,
                     eventState.isInArea,
+                    eventState.isUserWarmingInProgress,
                     onNavigateToWave =
                         { eventId ->
                             onNavigateToWave(eventId)
