@@ -116,31 +116,34 @@ class MapBoundsEnforcer(
                     "Camera idle listener: forceNext=$forceNextRecalculation, skipNext=$skipNextRecalculation, suppressed=${isSuppressed()}",
                 )
 
-                // Force update if requested (bypasses all skip logic)
-                val shouldForce = forceNextRecalculation
-                if (shouldForce) {
-                    Log.d("MapBoundsEnforcer", "Camera idle: FORCE UPDATE - bypassing skip logic")
+                // Force update if requested - bypass ALL checks including padding change
+                if (forceNextRecalculation) {
+                    Log.d("MapBoundsEnforcer", "Camera idle: FORCE UPDATE - bypassing ALL checks, applying immediately")
                     forceNextRecalculation = false
+
+                    // Calculate and apply constraints immediately
+                    val newPadding = calculateVisibleRegionPadding()
+                    setVisibleRegionPadding(
+                        VisibleRegionPadding(newPadding.latPadding, newPadding.lngPadding),
+                    )
+                    applyConstraintsWithPadding()
+                    return@addOnCameraIdleListener
                 }
 
-                // Skip logic only applies if not forcing update
-                if (!shouldForce) {
-                    // Skip recalculation if programmatic animation just completed
-                    if (skipNextRecalculation) {
-                        Log.d("MapBoundsEnforcer", "Camera idle: Skipping (skipNextRecalculation=true)")
-                        skipNextRecalculation = false
-                        return@addOnCameraIdleListener
-                    }
-
-                    // Prevent recalculation if animation/user interaction is in progress
-                    if (isSuppressed()) {
-                        Log.d("MapBoundsEnforcer", "Camera idle: Skipping (suppressed=true), will skip next")
-                        // Set flag to skip NEXT idle after suppression ends
-                        skipNextRecalculation = true
-                        return@addOnCameraIdleListener
-                    }
+                // Normal flow: Check skip conditions
+                if (skipNextRecalculation) {
+                    Log.d("MapBoundsEnforcer", "Camera idle: Skipping (skipNextRecalculation=true)")
+                    skipNextRecalculation = false
+                    return@addOnCameraIdleListener
                 }
 
+                if (isSuppressed()) {
+                    Log.d("MapBoundsEnforcer", "Camera idle: Skipping (suppressed=true), will skip next")
+                    skipNextRecalculation = true
+                    return@addOnCameraIdleListener
+                }
+
+                // Normal flow: Check padding change
                 val newPadding = calculateVisibleRegionPadding()
 
                 if (
@@ -569,8 +572,19 @@ class MapBoundsEnforcer(
             abs(newPadding.lngPadding - visibleRegionPadding.lngPadding) /
                 visibleRegionPadding.lngPadding
 
-        return latChange > WWWGlobals.MapDisplay.CHANGE_THRESHOLD ||
-            lngChange > WWWGlobals.MapDisplay.CHANGE_THRESHOLD // 10% change threshold
+        val isSignificant =
+            latChange > WWWGlobals.MapDisplay.CHANGE_THRESHOLD ||
+                lngChange > WWWGlobals.MapDisplay.CHANGE_THRESHOLD // 10% change threshold
+
+        Log.d(
+            "MapBoundsEnforcer",
+            "hasSignificantPaddingChange: current=(${visibleRegionPadding.latPadding}, ${visibleRegionPadding.lngPadding}), " +
+                "new=(${newPadding.latPadding}, ${newPadding.lngPadding}), " +
+                "latChange=${String.format("%.4f", latChange * 100)}%, lngChange=${String.format("%.4f", lngChange * 100)}%, " +
+                "threshold=${WWWGlobals.MapDisplay.CHANGE_THRESHOLD * 100}%, result=$isSignificant",
+        )
+
+        return isSignificant
     }
 
     fun getNearestValidPoint(
