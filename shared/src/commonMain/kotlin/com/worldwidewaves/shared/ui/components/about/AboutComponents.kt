@@ -25,6 +25,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -60,21 +61,22 @@ fun AboutDividerLine() {
 
 /**
  * Shared logo separator component for visual separation between content sections.
- * Displays a small centered version of the WWW simple logo with vertical padding.
+ * Displays a small centered version of the WWW simple logo.
+ * Uses constrained height to reduce space before and after for tighter visual separation.
  */
 @Composable
 fun LogoSeparator() {
     Box(
-        modifier = Modifier.fillMaxWidth(),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(24.dp),
         contentAlignment = Alignment.Center,
     ) {
         Image(
             painter = painterResource(Res.drawable.www_simple_logo_transparent),
             contentDescription = null, // Decorative separator
-            modifier =
-                Modifier
-                    .width(40.dp)
-                    .padding(top = 1.5.dp, bottom = 1.5.dp),
+            modifier = Modifier.width(40.dp),
         )
     }
 }
