@@ -331,7 +331,10 @@ class AndroidMapAvailabilityChecker(
 
             // Try to open the asset (just check existence, don't read)
             splitContext.assets.open(assetName).use { true }
-        } catch (e: Exception) {
+        } catch (
+            @Suppress("SwallowedException") e: Exception,
+        ) {
+            // Asset doesn't exist - expected for undownloaded maps
             false
         }
     }
@@ -421,8 +424,10 @@ class AndroidMapAvailabilityChecker(
                         // Best-effort cache cleanup – do not fail uninstall on errors
                         try {
                             clearEventCache(eventId)
-                        } catch (_: IllegalStateException) {
-                            // ignore cache cleanup errors
+                        } catch (
+                            @Suppress("SwallowedException") _: IllegalStateException,
+                        ) {
+                            // Non-critical: cache cleanup failure doesn't block uninstall
                         }
 
                         Log.i(TAG, "Uninstall scheduled for map/event: $eventId")

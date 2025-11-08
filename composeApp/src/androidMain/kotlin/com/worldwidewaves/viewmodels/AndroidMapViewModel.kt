@@ -91,6 +91,7 @@ class AndroidMapViewModel(
     // Platform adapter for business logic
     private val platformAdapter =
         object : PlatformMapDownloadAdapter {
+            @Suppress("ReturnCount") // Guard clauses for clarity
             override suspend fun isMapInstalled(mapId: String): Boolean {
                 // Check forcedUnavailable FIRST (user intention overrides system state)
                 // This ensures maps marked for uninstall appear as unavailable even if files still exist
@@ -291,7 +292,10 @@ class AndroidMapViewModel(
 
             // Try to open the asset (just check existence, don't read)
             splitContext.assets.open(assetName).use { true }
-        } catch (e: Exception) {
+        } catch (
+            @Suppress("SwallowedException") e: Exception,
+        ) {
+            // Asset doesn't exist - expected for undownloaded maps
             false
         }
     }

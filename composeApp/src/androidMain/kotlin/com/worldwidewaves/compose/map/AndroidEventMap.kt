@@ -910,7 +910,7 @@ class AndroidEventMap(
             camera(
                 CameraPosition
                     .Builder()
-                    .zoom(11.0) // City-level zoom (final zoom set by constraints)
+                    .zoom(@Suppress("MagicNumber") 11.0) // City-level zoom (final zoom set by constraints)
                     .padding(0.0, 0.0, 0.0, 0.0)
                     .bearing(0.0)
                     .tilt(0.0)

@@ -169,7 +169,7 @@ class AndroidMapLibreAdapter(
                         pendingPolygons = null
                         false // Remove handler after execution
                     }
-                }, 150) // 150ms minimum delay (50% faster than original 300ms, but allows tile loading)
+                }, @Suppress("MagicNumber") 150) // 150ms minimum delay (50% faster than original 300ms, but allows tile loading)
             }
         }
     }
@@ -352,6 +352,8 @@ class AndroidMapLibreAdapter(
     private var minZoomLocked = false // Track if min zoom has been set (to prevent zoom-in spiral)
     private var lastValidCameraPosition: LatLng? = null
 
+    @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
+    // Complex camera bounds logic - candidate for future refactoring
     override fun setBoundsForCameraTarget(
         constraintBounds: BoundingBox,
         applyZoomSafetyMargin: Boolean,
@@ -391,6 +393,7 @@ class AndroidMapLibreAdapter(
                 val mapHeight = getHeight()
 
                 // Validate dimensions before calculation
+                @Suppress("ComplexCondition") // Comprehensive dimension validation
                 if (mapWidth <= 0 || mapHeight <= 0 || eventWidth <= 0 || eventHeight <= 0) {
                     Log.w(
                         "Camera",
@@ -529,6 +532,7 @@ class AndroidMapLibreAdapter(
                     )
 
                 // Only move if position actually changed (avoid infinite loop)
+                @Suppress("MagicNumber") // Epsilon for floating point comparison
                 if (kotlin.math.abs(clampedPosition.latitude - currentCamera.latitude) > 0.000001 ||
                     kotlin.math.abs(clampedPosition.longitude - currentCamera.longitude) > 0.000001
                 ) {
