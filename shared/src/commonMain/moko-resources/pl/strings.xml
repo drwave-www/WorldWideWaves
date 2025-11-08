@@ -637,9 +637,7 @@
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
   <string name="action_message_section_2">To zaczyna się od wspólnego obrazu rzeczywistości. Rządy, firmy i liderzy społeczni powinni wspólnie przedstawić fakty, otworzyć dane i zestrajać harmonogramy, aby działania były skoordynowane, a nie rozproszone.\n\nAby chronić życie, dążmy do pokojowej deeskalacji napięć geopolitycznych i przekierujmy zasoby na przetrwanie ludzi i stabilność.\n\nZwołajmy spotkanie na najwyższym szczeblu z państwami, przedsiębiorstwami i przedstawicielami społeczeństwa, aby przedstawić propozycje, przypisać odpowiedzialnych i raportować postępy.\n\nUsuńmy bariery, dając zielone światło pilotażom, ujednolicając standardy oraz w pierwszej kolejności finansując odporność i dostępność.</string>
   <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
-  <string name="action_message_section_3">Słuchaj lokalnych podmiotów dotkniętych skutkami, razem z nimi klasyfikuj zagrożenia i publikuj plany w prostym języku, aby społeczeństwo było poinformowane i zaproszone do udziału. Tym wysiłkiem kierują zasady: bez przemocy, włączenie, przejrzystość i nauka.
-
-Przygotuj też przyszłość: ucz praktycznych umiejętności, inwestuj w systemy wczesnego ostrzegania, odporną infrastrukturę i rozwiązania oparte na przyrodzie, a także twórz otwarte narzędzia i dane do planowania społecznościowego.</string>
+  <string name="action_message_section_3">Słuchaj lokalnych podmiotów dotkniętych skutkami, razem z nimi klasyfikuj zagrożenia i publikuj plany w prostym języku, aby społeczeństwo było poinformowane i zaproszone do udziału. Tym wysiłkiem kierują zasady: bez przemocy, włączenie, przejrzystość i nauka.\n\nPrzygotuj też przyszłość: ucz praktycznych umiejętności, inwestuj w systemy wczesnego ostrzegania, odporną infrastrukturę i rozwiązania oparte na przyrodzie, a także twórz otwarte narzędzia i dane do planowania społecznościowego.</string>
   <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
   <string name="notification_event_starting_soon">Wkrótce start fali</string>
   <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->

@@ -635,17 +635,9 @@
   <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
   <string name="action_message_section_1">Debemos pasar del control de daños a la preparación para impactos. Las temperaturas superarán los objetivos, por lo que las comunidades necesitan orientación clara, simulacros y herramientas sencillas ahora.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
-  <string name="action_message_section_2">Esto empieza con una realidad compartida. Gobiernos, empresas y liderazgos cívicos deberían declarar los hechos conjuntamente, abrir datos y alinear calendarios para que la acción sea coordinada, no fragmentada.
-
-Para proteger la vida, promover la desescalada pacífica de las tensiones geopolíticas y reenfocar recursos en la supervivencia humana y la estabilidad.
-
-Reunirse al más alto nivel con Estados, empresas y representantes públicos para presentar propuestas, asignar responsables e informar avances.
-
-Eliminar obstáculos dando luz verde a pilotos, armonizando estándares y financiando primero la resiliencia y la accesibilidad.</string>
+  <string name="action_message_section_2">Esto empieza con una realidad compartida. Gobiernos, empresas y liderazgos cívicos deberían declarar los hechos conjuntamente, abrir datos y alinear calendarios para que la acción sea coordinada, no fragmentada.\n\nPara proteger la vida, promover la desescalada pacífica de las tensiones geopolíticas y reenfocar recursos en la supervivencia humana y la estabilidad.\n\nReunirse al más alto nivel con Estados, empresas y representantes públicos para presentar propuestas, asignar responsables e informar avances.\n\nEliminar obstáculos dando luz verde a pilotos, armonizando estándares y financiando primero la resiliencia y la accesibilidad.</string>
   <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
-  <string name="action_message_section_3">Escucha a los actores locales que enfrentan impactos, prioriza las amenazas con ellos y publica planes en lenguaje claro para informar e invitar a la participación. La no violencia, la inclusión, la transparencia y la ciencia guían este esfuerzo.
-
-También prepara el futuro: enseña habilidades prácticas, invierte en sistemas de alerta temprana, infraestructura resiliente y soluciones basadas en la naturaleza, y crea herramientas y datos abiertos para la planificación comunitaria.</string>
+  <string name="action_message_section_3">Escucha a los actores locales que enfrentan impactos, prioriza las amenazas con ellos y publica planes en lenguaje claro para informar e invitar a la participación. La no violencia, la inclusión, la transparencia y la ciencia guían este esfuerzo.\n\nTambién prepara el futuro: enseña habilidades prácticas, invierte en sistemas de alerta temprana, infraestructura resiliente y soluciones basadas en la naturaleza, y crea herramientas y datos abiertos para la planificación comunitaria.</string>
   <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
   <string name="notification_event_starting_soon">La ola comienza pronto</string>
   <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->

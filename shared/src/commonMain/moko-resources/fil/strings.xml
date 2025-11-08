@@ -635,17 +635,9 @@
   <!-- src_hash: db8a52a6b878d74671909c7cc6ad41919c5b6da6 -->
   <string name="action_message_section_1">Dapat tayong lumipat mula sa pamamahala ng pinsala tungo sa kahandaan sa mga dagok. Lalagpas sa mga target ang temperatura, kaya kailangan na ngayon ng mga komunidad ang malinaw na gabay, mga drill, at simpleng kagamitan.</string>
   <!-- src_hash: 4e7d16a9d596bd857d737bd38780c1caee5d93b4 -->
-  <string name="action_message_section_2">Nagsisimula ito sa magkatuwang na pagharap sa realidad. Dapat sabay-sabay na magpahayag ng mga katotohanan ang mga pamahalaan, kumpanya, at mga pinunong sibiko, magbukas ng datos, at iayon ang mga iskedyul upang magkakaugnay ang pagkilos, hindi pira-piraso.
-
-Upang protektahan ang buhay, itaguyod ang mapayapang pagpapahupa sa mga tensiyong heopolitikal at ituon muli ang mga yaman sa kaligtasan at katatagan ng tao.
-
-Magpulong sa pinakamataas na antas kasama ang mga estado, negosyo, at mga kinatawan ng publiko upang ihain ang mga panukala, italaga ang mga may pananagutan, at iulat ang progreso.
-
-Alisin ang mga hadlang sa pamamagitan ng pag-apruba sa mga pilot project, pagharmonisa ng mga pamantayan, at pagpondo muna sa katatagan at accessibility.</string>
+  <string name="action_message_section_2">Nagsisimula ito sa magkatuwang na pagharap sa realidad. Dapat sabay-sabay na magpahayag ng mga katotohanan ang mga pamahalaan, kumpanya, at mga pinunong sibiko, magbukas ng datos, at iayon ang mga iskedyul upang magkakaugnay ang pagkilos, hindi pira-piraso.\n\nUpang protektahan ang buhay, itaguyod ang mapayapang pagpapahupa sa mga tensiyong heopolitikal at ituon muli ang mga yaman sa kaligtasan at katatagan ng tao.\n\nMagpulong sa pinakamataas na antas kasama ang mga estado, negosyo, at mga kinatawan ng publiko upang ihain ang mga panukala, italaga ang mga may pananagutan, at iulat ang progreso.\n\nAlisin ang mga hadlang sa pamamagitan ng pag-apruba sa mga pilot project, pagharmonisa ng mga pamantayan, at pagpondo muna sa katatagan at accessibility.</string>
   <!-- src_hash: d7459d77ec5d4eb7d1b74c97b7557598c822f922 -->
-  <string name="action_message_section_3">Makinig sa mga lokal na kumikilos na direktang apektado, tasahin kasama nila ang mga banta, at maglabas ng mga planong malinaw ang wika para maabisuhan ang publiko at maanyayahan silang makilahok. Di-karahasan, inklusyon, pagiging bukás, at agham ang gagabay sa gawaing ito.
-
-Maghanda rin para sa kinabukasan: ituro ang mga praktikal na kasanayan, mamuhunan sa mga sistema ng maagang babala, matatag na imprastruktura, at mga solusyong nakabatay sa kalikasan, at bumuo ng bukás na mga kasangkapan at datos para sa pagpaplanong pangkomunidad.</string>
+  <string name="action_message_section_3">Makinig sa mga lokal na kumikilos na direktang apektado, tasahin kasama nila ang mga banta, at maglabas ng mga planong malinaw ang wika para maabisuhan ang publiko at maanyayahan silang makilahok. Di-karahasan, inklusyon, pagiging bukás, at agham ang gagabay sa gawaing ito.\n\nMaghanda rin para sa kinabukasan: ituro ang mga praktikal na kasanayan, mamuhunan sa mga sistema ng maagang babala, matatag na imprastruktura, at mga solusyong nakabatay sa kalikasan, at bumuo ng bukás na mga kasangkapan at datos para sa pagpaplanong pangkomunidad.</string>
   <!-- src_hash: de86a22724da0d3b5fa0221d9cb7017c45e0d60e -->
   <string name="notification_event_starting_soon">Malapit nang magsimula ang alon</string>
   <!-- src_hash: 0a85d03ae744fd8000dcdc58addfc21938e8a8cc -->
