@@ -7,12 +7,14 @@ This document outlines the comprehensive plan to implement iOS On-Demand Resourc
 ## 📊 Current State Analysis
 
 ### ✅ **Existing iOS ODR Infrastructure**
+
 - **`IOSPlatformMapManager`**: Complete ODR download/progress management using `NSBundleResourceRequest`
 - **`IOSMapAvailabilityChecker`**: StateFlow-based availability tracking with reactive UI updates
 - **`IOSMapViewModel`**: iOS UI lifecycle integration with platform-specific error handling
 - **Comprehensive logging and error handling** throughout the stack
 
 ### ✅ **Android Play Features Reference Architecture**
+
 - **44 dynamic feature modules** in `maps/android/` (e.g., `paris_france`, `new_york_usa`)
 - **Two-file map data structure per city:**
   - `city_name.geojson` - Vector geometry data for wave calculations
@@ -21,6 +23,7 @@ This document outlines the comprehensive plan to implement iOS On-Demand Resourc
 - **Individual Gradle modules** with `android-dynamic-feature` plugin
 
 ### ❌ **Missing iOS Implementation Components**
+
 - No ODR resource tagging in Xcode project configuration
 - No iOS bundle configuration for map resources
 - Map data not packaged for iOS ODR delivery
@@ -31,6 +34,7 @@ This document outlines the comprehensive plan to implement iOS On-Demand Resourc
 ### **Phase 1: Bundle Configuration and Resource Setup**
 
 #### **1.1 iOS Bundle Structure**
+
 ```
 iosApp/worldwidewaves/Resources/Maps/
 ├── paris_france/
@@ -46,17 +50,21 @@ iosApp/worldwidewaves/Resources/Maps/
 ```
 
 #### **1.2 Xcode ODR Configuration**
+
 **Resource Tags in `project.pbxproj`:**
+
 - Each city folder tagged with event ID (e.g., "paris_france")
 - Resources marked as "On Demand" with appropriate categories
 - Download priorities: Essential cities = High, Others = Normal
 
 **Build Phases:**
+
 - Pre-build script to sync map data from `maps/android/`
 - Post-build validation of ODR tag integrity
 - Bundle size optimization for app store submission
 
 #### **1.3 Info.plist ODR Declaration**
+
 ```xml
 <key>NSBundleResourceRequestTags</key>
 <dict>
@@ -77,19 +85,23 @@ iosApp/worldwidewaves/Resources/Maps/
 ### **Phase 2: Build System Automation**
 
 #### **2.1 Enhanced `40-generate-modules.sh`**
+
 **Responsibilities:**
+
 - Copy both `.geojson` AND `.mbtiles` from Android modules to iOS bundle
 - Generate complete Info.plist ODR entries idempotently
 - Handle Xcode's "Generate Info.plist File = Yes" setting
 - Validate resource integrity and bundle consistency
 
 **Key Features:**
+
 - **Idempotent execution** - safe to run multiple times
 - **Two-file support** - handles both geojson and mbtiles
 - **Plist merging** - respects existing Xcode-generated entries
 - **Validation** - ensures all resources are properly tagged
 
 #### **2.2 Gradle Integration**
+
 ```kotlin
 task syncMapsToIOS {
     group = "iOS ODR"
@@ -112,6 +124,7 @@ tasks.named("embedAndSignAppleFrameworkForXcode") {
 ### **Phase 3: ODR Resource Management**
 
 #### **3.1 Resource Loading Strategy**
+
 ```kotlin
 // IOSPlatformMapManager enhanced functionality
 class IOSPlatformMapManager {
@@ -132,6 +145,7 @@ class IOSPlatformMapManager {
 ```
 
 #### **3.2 MapLibre Integration**
+
 - **Geojson**: Used for wave polygon calculations and area detection
 - **Mbtiles**: Used for MapLibre base map rendering and visual display
 - **Coordination**: Both resources must be available for full map functionality
@@ -139,6 +153,7 @@ class IOSPlatformMapManager {
 ### **Phase 4: Testing and Validation**
 
 #### **4.1 Unit Tests (Kotlin)**
+
 ```kotlin
 // IOSMapAvailabilityCheckerTest.kt
 @Test fun `ODR availability detection works correctly`()
@@ -157,6 +172,7 @@ class IOSPlatformMapManager {
 ```
 
 #### **4.2 Integration Tests (Swift)**
+
 ```swift
 // ODRIntegrationTests.swift
 func testMapResourceAvailability()
@@ -166,6 +182,7 @@ func testMultipleConcurrentDownloads()
 ```
 
 #### **4.3 End-to-End Tests**
+
 - **Wave Screen**: Map loads and displays wave progression
 - **Full Map Screen**: Complete map functionality with ODR resources
 - **Simulation**: Map availability blocks/enables simulation correctly
@@ -174,25 +191,30 @@ func testMultipleConcurrentDownloads()
 ## 🔧 Technical Considerations
 
 ### **Bundle Size Optimization**
+
 - **Initial Bundle**: Core cities only (~5-10 maps)
 - **ODR Delivery**: Remaining maps downloaded on-demand
 - **Compression**: Optimize geojson/mbtiles for smaller downloads
 - **Caching Strategy**: Intelligent retention based on usage patterns
 
 ### **Xcode "Generate Info.plist = Yes" Handling**
+
 **Challenge**: Xcode overwrites Info.plist on builds
 **Solution**:
+
 - Use Info-Additions.plist for ODR entries
 - Merge during build phase before ODR processing
 - Preserve Xcode-generated entries while adding ODR configuration
 
 ### **Error Handling and Fallbacks**
+
 - **Network failures**: Graceful degradation with cached data
 - **Storage constraints**: Intelligent resource cleanup
 - **ODR unavailable**: Fallback to essential maps or offline mode
 - **User communication**: Clear progress and error messaging
 
 ### **Performance Optimization**
+
 - **Concurrent downloads**: Max 3 simultaneous (iOS best practice)
 - **Progress throttling**: 50ms update intervals for smooth UI
 - **Memory efficiency**: Release unused resources proactively
@@ -201,24 +223,28 @@ func testMultipleConcurrentDownloads()
 ## 📋 Implementation Checklist
 
 ### **Phase 1: Foundation**
+
 - [ ] Verify current ODR implementation works
 - [ ] Analyze mbtiles support in existing code
 - [ ] Create test iOS ODR bundle with 5 cities
 - [ ] Configure basic Xcode ODR tags manually
 
 ### **Phase 2: Automation**
+
 - [ ] Enhance `40-generate-modules.sh` for two-file support
 - [ ] Implement Info.plist ODR entry generation
 - [ ] Add Gradle integration for automated sync
 - [ ] Handle Xcode "Generate Info.plist = Yes" scenario
 
 ### **Phase 3: Integration**
+
 - [ ] Test availability checker with real ODR resources
 - [ ] Verify MapLibre integration with both resource types
 - [ ] Test Wave/FullMap screens with ODR maps
 - [ ] Validate simulation button respects ODR availability
 
 ### **Phase 4: Production Ready**
+
 - [ ] Comprehensive test suite for all ODR components
 - [ ] Bundle size optimization and app store preparation
 - [ ] Performance testing and memory management
@@ -243,6 +269,7 @@ func testMultipleConcurrentDownloads()
 ## 🔄 Rollback Strategy
 
 If issues arise during implementation:
+
 1. **Graceful Degradation**: Fall back to bundled essential maps
 2. **Feature Flags**: Disable ODR temporarily while maintaining core functionality
 3. **Manual Override**: Allow manual map selection for testing

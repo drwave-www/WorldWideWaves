@@ -35,6 +35,7 @@ All methods use the same configuration sources and produce identical results.
 The script reads Firebase configuration from:
 
 1. **Environment variables** (highest priority):
+
    ```bash
    export FIREBASE_PROJECT_ID="your-project-id"
    export FIREBASE_PROJECT_NUMBER="your-project-number"
@@ -43,6 +44,7 @@ The script reads Firebase configuration from:
    ```
 
 2. **local.properties** (development):
+
    ```properties
    # Shared configuration (same Firebase project for both platforms)
    FIREBASE_PROJECT_ID=your-project-id
@@ -72,6 +74,7 @@ The script reads Firebase configuration from:
 ## Step 2: Add Firebase SDK via Swift Package Manager
 
 1. **Open Xcode project**:
+
    ```bash
    cd iosApp
    open worldwidewaves.xcodeproj
@@ -106,6 +109,7 @@ Crashlytics requires dSYM upload for crash symbolication:
    - Move it **after** "Compile Sources" phase
 
 2. **Add script**:
+
    ```bash
    # Upload dSYMs to Firebase Crashlytics
    "${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run"
@@ -113,17 +117,20 @@ Crashlytics requires dSYM upload for crash symbolication:
 
 3. **Configure inputs**:
    - Add input file:
+
      ```
      ${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${TARGET_NAME}
      ```
 
    - Add input file:
+
      ```
      $(SRCROOT)/worldwidewaves/GoogleService-Info.plist
      ```
 
 4. **Configure outputs**:
    - Add output file:
+
      ```
      $(DERIVED_FILE_DIR)/Crashlytics-uploaded-${CONFIGURATION}-${PLATFORM_NAME}
      ```
@@ -157,6 +164,7 @@ The following files have been updated:
 ### Build and Test
 
 1. **Generate Firebase config**:
+
    ```bash
    ./scripts/generate_ios_firebase_config.sh
    ```
@@ -170,6 +178,7 @@ The following files have been updated:
    - Click **Add**
 
 3. **Build the project**:
+
    ```bash
    cd iosApp
    xcodebuild -project worldwidewaves.xcodeproj \
@@ -183,6 +192,7 @@ The following files have been updated:
    - Check console for: `[AppDelegate] ✅ Firebase configured successfully`
 
 5. **Test crash reporting**:
+
    ```swift
    // Add this test code temporarily to verify Crashlytics
    import FirebaseCrashlytics
@@ -276,6 +286,7 @@ ls -la iosApp/worldwidewaves/GoogleService-Info.plist
 ### Firebase not initializing
 
 Check console logs for errors:
+
 ```bash
 xcrun simctl spawn booted log stream \
   --predicate 'process == "worldwidewaves"' \
@@ -297,6 +308,7 @@ error: no such module 'FirebaseCore'
 ```
 
 **Solution**: Ensure Firebase package is properly added via SPM:
+
 1. File → Packages → Resolve Package Versions
 2. Clean build folder (Cmd+Shift+K)
 3. Rebuild project (Cmd+B)
@@ -306,6 +318,7 @@ error: no such module 'FirebaseCore'
 If automatic uploads fail or you need to upload dSYMs manually (e.g., for App Store builds):
 
 **For local builds:**
+
 ```bash
 cd iosApp/build_ios/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics
 
@@ -323,9 +336,11 @@ cd iosApp/build_ios/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics
 ```
 
 **For App Store Connect downloads:**
+
 1. Download dSYMs from App Store Connect → Activity → Version → Download dSYM
 2. Unzip the downloaded file
 3. Upload all dSYMs:
+
 ```bash
 cd iosApp/build_ios/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics
 ./upload-symbols \
@@ -335,6 +350,7 @@ cd iosApp/build_ios/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics
 ```
 
 **Verify upload:**
+
 - Check for "Successfully uploaded Crashlytics symbols" message
 - UUIDs will be printed for each architecture uploaded
 - Wait 5-10 minutes, then check Firebase Console → Crashlytics → Settings → dSYMs
@@ -344,12 +360,14 @@ cd iosApp/build_ios/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics
 1. **Never commit** `GoogleService-Info.plist` to version control
 2. **Use different Firebase projects** for dev/staging/production
 3. **Enable debug logging** during development:
+
    ```swift
    // In AppDelegate.swift (development only)
    #if DEBUG
    FirebaseConfiguration.shared.setLoggerLevel(.debug)
    #endif
    ```
+
 4. **Test crash reporting** before releasing to production
 5. **Monitor crash-free rate** in Firebase Console regularly
 6. **Symbolicate crashes** by ensuring dSYMs are uploaded
@@ -364,6 +382,7 @@ cd iosApp/build_ios/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics
 ## Support
 
 If you encounter issues:
+
 1. Check Xcode console logs
 2. Verify Firebase Console project settings
 3. Review [Firebase iOS troubleshooting guide](https://firebase.google.com/docs/ios/troubleshooting-faq)

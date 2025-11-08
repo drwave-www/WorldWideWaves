@@ -24,6 +24,7 @@
 ## Overview
 
 WorldWideWaves uses a production-ready logging system that combines:
+
 - **Napier**: Cross-platform logging library for Kotlin Multiplatform
 - **Log Wrapper**: Custom wrapper (`com.worldwidewaves.shared.utils.Log`) that respects build configuration flags
 - **BuildKonfig**: Build-time feature flags to control logging in different environments
@@ -117,12 +118,14 @@ object LogConfig {
 **Performance Impact**: HIGH (use sparingly)
 
 **Use for**:
+
 - Step-by-step flow tracking
 - Detailed state dumps
 - High-frequency events (position updates, animation frames)
 - Internal component lifecycle
 
 **Example**:
+
 ```kotlin
 Log.v("EventObserver", "Starting unified observation for event ${event.id}")
 Log.v("EventObserver", "Simulation change detected for event ${event.id}")
@@ -130,6 +133,7 @@ Log.v("CameraController", "Gesture intercepted: viewport would exceed bounds, cl
 ```
 
 **AVOID**:
+
 - Production builds (automatically disabled)
 - Hot paths without performance flags
 - Logging every iteration of tight loops
@@ -143,6 +147,7 @@ Log.v("CameraController", "Gesture intercepted: viewport would exceed bounds, cl
 **Performance Impact**: MEDIUM
 
 **Use for**:
+
 - Function entry/exit points
 - Important state transitions
 - Parameter validation results
@@ -150,6 +155,7 @@ Log.v("CameraController", "Gesture intercepted: viewport would exceed bounds, cl
 - Configuration changes
 
 **Example**:
+
 ```kotlin
 Log.d("AudioTest", "Loading MIDI file: ${FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE}")
 Log.d("AudioTest", "Playing test note: A4 (440Hz)")
@@ -157,6 +163,7 @@ Log.d("MapViewModel", "Camera position changed: zoom=$zoom, center=$center")
 ```
 
 **AVOID**:
+
 - Sensitive data (credentials, tokens)
 - Precise user coordinates
 - High-frequency repeated messages
@@ -170,6 +177,7 @@ Log.d("MapViewModel", "Camera position changed: zoom=$zoom, center=$center")
 **Performance Impact**: LOW
 
 **Use for**:
+
 - User-initiated actions (button clicks, navigation)
 - Major state transitions (event started, wave completed)
 - Configuration updates
@@ -177,6 +185,7 @@ Log.d("MapViewModel", "Camera position changed: zoom=$zoom, center=$center")
 - Feature flag changes
 
 **Example**:
+
 ```kotlin
 Log.i("EventScreen", "User joined wave for event ${event.id}")
 Log.i("CameraController", "Setting up preventive gesture constraints (one-time setup)")
@@ -184,6 +193,7 @@ Log.i("MapDownload", "Map tiles downloaded successfully for city: ${city.name}")
 ```
 
 **AVOID**:
+
 - PII or location data
 - Internal implementation details
 - High-frequency events
@@ -197,6 +207,7 @@ Log.i("MapDownload", "Map tiles downloaded successfully for city: ${city.name}")
 **Performance Impact**: LOW
 
 **Use for**:
+
 - Recoverable errors (fallback used)
 - Deprecated API usage
 - Unusual but valid states
@@ -204,6 +215,7 @@ Log.i("MapDownload", "Map tiles downloaded successfully for city: ${city.name}")
 - Missing optional data
 
 **Example**:
+
 ```kotlin
 Log.w("AudioTest", "Failed to load MIDI file, creating demo track: ${e.message}")
 Log.w("CameraController", "Invalid dimensions: using fallback min zoom")
@@ -211,6 +223,7 @@ Log.w("EventObserver", "Platform not available for simulation observation")
 ```
 
 **Include throwable when available**:
+
 ```kotlin
 Log.w("DataSync", "Sync retry scheduled", throwable = e)
 ```
@@ -224,6 +237,7 @@ Log.w("DataSync", "Sync retry scheduled", throwable = e)
 **Performance Impact**: LOW
 
 **Use for**:
+
 - API failures
 - Data corruption
 - Unexpected exceptions
@@ -231,6 +245,7 @@ Log.w("DataSync", "Sync retry scheduled", throwable = e)
 - Critical resource failures
 
 **Example**:
+
 ```kotlin
 Log.e("EventObserver", "State error stopping unified observation: $e")
 Log.e("MapStore", "Failed to load map tiles", throwable = e)
@@ -238,6 +253,7 @@ Log.e("FirebaseSync", "Event upload failed for event ${event.id}", throwable = e
 ```
 
 **ALWAYS include throwable**:
+
 ```kotlin
 // ✅ CORRECT
 try {
@@ -261,12 +277,14 @@ catch (e: Exception) {
 **Performance Impact**: LOW
 
 **Use for**:
+
 - Impossible conditions (should never reach this code)
 - Critical invariant violations
 - Data corruption that breaks app functionality
 - Logic errors in production
 
 **Example**:
+
 ```kotlin
 Log.wtf("EventValidator", "Event has no waves after validation", throwable = e)
 Log.wtf("StateManager", "State machine reached invalid state: $currentState")
@@ -287,6 +305,7 @@ val waveDefinition = requireNotNull(linear ?: deep ?: linearSplit) {
 **Performance Impact**: VERY HIGH
 
 **Use for**:
+
 - Hot path measurements
 - Animation frame timings
 - Position update frequencies
@@ -294,6 +313,7 @@ val waveDefinition = requireNotNull(linear ?: deep ?: linearSplit) {
 - Cache performance
 
 **Example**:
+
 ```kotlin
 Log.performance("MapRender", "Frame rendered in ${duration.inWholeMilliseconds}ms")
 Log.performance("PositionUpdate", "GPS update latency: ${latency}ms")
@@ -301,6 +321,7 @@ Log.performance("WaveCalculation", "Polygon generation: ${polygons.size} polygon
 ```
 
 **CRITICAL**: Use feature flags to avoid overhead:
+
 ```kotlin
 if (WWWGlobals.LogConfig.ENABLE_PERFORMANCE_LOGGING) {
     val startTime = TimeSource.Monotonic.markNow()
@@ -322,6 +343,7 @@ WWW.Layer.Component.SubComponent
 ```
 
 **Examples**:
+
 ```kotlin
 "WWW.Data.EventRepository"
 "WWW.Domain.WaveObserver"
@@ -332,6 +354,7 @@ WWW.Layer.Component.SubComponent
 ### Standard Tag Patterns
 
 **Single-Class Tags** (most common):
+
 ```kotlin
 class EventObserver {
     companion object {
@@ -345,6 +368,7 @@ class EventObserver {
 ```
 
 **Layer-Specific Tags**:
+
 ```kotlin
 // Data Layer
 private const val TAG = "MapStore"          // Data storage
@@ -367,6 +391,7 @@ private const val TAG = "IOSMapLibre"       // iOS implementations
 ```
 
 **Test Tags**:
+
 ```kotlin
 private const val TAG = "Test.WaveObserver"
 private const val TAG = "Test.EventRepository"
@@ -396,6 +421,7 @@ private const val TAG = "Test.EventRepository"
 ### Application Lifecycle Events
 
 **ALWAYS LOG**:
+
 ```kotlin
 // App launch
 Log.i("App", "WorldWideWaves started - version ${BuildConfig.VERSION_NAME}")
@@ -411,6 +437,7 @@ Log.i("App", "App terminating gracefully")
 ### User Actions
 
 **LOG at INFO level**:
+
 ```kotlin
 // Button clicks
 Log.i("EventScreen", "User tapped 'Join Wave' button")
@@ -428,6 +455,7 @@ Log.i("Map", "User double-tapped map to zoom")
 ### State Transitions
 
 **LOG at DEBUG/INFO level**:
+
 ```kotlin
 // Event state changes
 Log.i("EventObserver", "Event ${event.id} transitioned: $oldState -> $newState")
@@ -442,18 +470,21 @@ Log.i("Firebase", "Connection state: CONNECTED")
 ### Data Operations
 
 **Successful operations** (INFO):
+
 ```kotlin
 Log.i("EventRepository", "Loaded ${events.size} events from cache")
 Log.i("MapDownload", "Downloaded map tiles for ${city.name}")
 ```
 
 **Failed operations** (ERROR):
+
 ```kotlin
 Log.e("EventRepository", "Failed to fetch events from Firebase", throwable = e)
 Log.e("MapDownload", "Map download failed for ${city.name}", throwable = e)
 ```
 
 **Retries** (WARNING):
+
 ```kotlin
 Log.w("NetworkRetry", "API call failed, retrying (attempt ${attempt}/${maxAttempts})")
 ```
@@ -461,6 +492,7 @@ Log.w("NetworkRetry", "API call failed, retrying (attempt ${attempt}/${maxAttemp
 ### Performance-Critical Paths
 
 **Use PERFORMANCE log level**:
+
 ```kotlin
 // Only when ENABLE_PERFORMANCE_LOGGING is true
 if (WWWGlobals.LogConfig.ENABLE_PERFORMANCE_LOGGING) {
@@ -473,18 +505,21 @@ if (WWWGlobals.LogConfig.ENABLE_PERFORMANCE_LOGGING) {
 ### Error Conditions
 
 **Recoverable errors** (WARNING):
+
 ```kotlin
 Log.w("AudioPlayer", "MIDI file not found, using silent mode")
 Log.w("GPS", "Location accuracy low (${accuracy}m), continuing with reduced precision")
 ```
 
 **Critical errors** (ERROR):
+
 ```kotlin
 Log.e("Database", "Corrupted event data detected", throwable = e)
 Log.e("Auth", "Authentication token expired", throwable = e)
 ```
 
 **Impossible conditions** (WTF):
+
 ```kotlin
 Log.wtf("Validator", "Event passed validation but has invalid coordinates")
 ```
@@ -496,6 +531,7 @@ Log.wtf("Validator", "Event passed validation but has invalid coordinates")
 ### Hot Paths and Logging Overhead
 
 **Hot paths** are code sections executed frequently (>10 times/second):
+
 - Position updates (GPS callbacks)
 - Animation frames
 - Map rendering
@@ -504,6 +540,7 @@ Log.wtf("Validator", "Event passed validation but has invalid coordinates")
 **Rules for Hot Paths**:
 
 1. **Use feature flags**:
+
 ```kotlin
 // ✅ CORRECT - zero overhead when disabled
 if (WWWGlobals.LogConfig.ENABLE_POSITION_TRACKING_LOGGING) {
@@ -516,6 +553,7 @@ Log.v(TAG, "Position updated: ${position.lat}, ${position.lng}")
 ```
 
 2. **Avoid string concatenation in hot paths**:
+
 ```kotlin
 // ✅ CORRECT - lazy evaluation
 if (WWWGlobals.LogConfig.ENABLE_VERBOSE_LOGGING) {
@@ -527,6 +565,7 @@ Log.v(TAG, "Complex calculation: ${expensiveOperation()}")
 ```
 
 3. **Use sampling for high-frequency events**:
+
 ```kotlin
 private var logCounter = 0
 
@@ -542,6 +581,7 @@ fun onPositionUpdate(position: Position) {
 ### Performance Logging Best Practices
 
 **Measure with minimal overhead**:
+
 ```kotlin
 // ✅ CORRECT - measurement inside flag check
 if (WWWGlobals.LogConfig.ENABLE_PERFORMANCE_LOGGING) {
@@ -558,6 +598,7 @@ Log.performance(TAG, "Took ${start.elapsedNow().inWholeMilliseconds}ms")
 ```
 
 **Batch performance logs**:
+
 ```kotlin
 // ✅ CORRECT - accumulate metrics, log once
 class MetricsCollector {
@@ -579,6 +620,7 @@ class MetricsCollector {
 ### Memory Considerations
 
 **Avoid large object logging**:
+
 ```kotlin
 // ❌ BAD - creates large string in memory
 Log.d(TAG, "All events: ${events.joinToString()}")
@@ -594,6 +636,7 @@ Log.d(TAG, "Loaded ${events.size} events (${events.count { it.isActive }} active
 ### NEVER Log These in Production
 
 **Personally Identifiable Information (PII)**:
+
 ```kotlin
 // ❌ FORBIDDEN
 Log.i(TAG, "User email: ${user.email}")
@@ -603,6 +646,7 @@ Log.i(TAG, "Device ID: ${deviceId}")
 ```
 
 **Precise Location Coordinates**:
+
 ```kotlin
 // ❌ FORBIDDEN in production (OK in debug)
 Log.i(TAG, "User position: ${position.lat}, ${position.lng}")
@@ -613,6 +657,7 @@ Log.i(TAG, "User ${if (inEventArea) "inside" else "outside"} event area")
 ```
 
 **Authentication Credentials**:
+
 ```kotlin
 // ❌ FORBIDDEN
 Log.d(TAG, "API token: $token")
@@ -623,6 +668,7 @@ Log.d(TAG, "Bearer: $bearerToken")
 ### Safe Logging Patterns
 
 **Use identifiers, not values**:
+
 ```kotlin
 // ✅ CORRECT - log ID, not content
 Log.i(TAG, "Event ${event.id} loaded")
@@ -633,6 +679,7 @@ Log.i(TAG, "Event loaded: $event")
 ```
 
 **Redact sensitive fields**:
+
 ```kotlin
 // ✅ CORRECT - redacted sensitive data
 data class User(
@@ -646,6 +693,7 @@ Log.i(TAG, "User logged in: $user")  // Prints "User(id=abc123, email=[REDACTED]
 ```
 
 **Coordinate obfuscation**:
+
 ```kotlin
 // ✅ ACCEPTABLE - reduced precision (city-level)
 fun Position.toSafeString(): String {
@@ -658,6 +706,7 @@ Log.i(TAG, "User near: ${position.toSafeString()}")
 ```
 
 **Use debug-only logging for sensitive data**:
+
 ```kotlin
 // ✅ CORRECT - detailed logs only in debug builds
 if (WWWGlobals.LogConfig.ENABLE_DEBUG_LOGGING) {
@@ -670,6 +719,7 @@ if (WWWGlobals.LogConfig.ENABLE_DEBUG_LOGGING) {
 ### Security Checklist
 
 Before committing code, verify:
+
 - [ ] No API keys, tokens, or secrets in log messages
 - [ ] No user email, name, or phone numbers
 - [ ] No precise coordinates in INFO/WARN/ERROR logs
@@ -684,6 +734,7 @@ Before committing code, verify:
 ### Android (Logcat)
 
 **Viewing Logs**:
+
 ```bash
 # All app logs
 adb logcat -s "WorldWideWaves"
@@ -704,6 +755,7 @@ adb logcat *:W  # Warnings and above
 **Log Buffer**: Limited to ~256KB (older logs are discarded)
 
 **Colors**: Logcat shows colors by priority:
+
 - VERBOSE: Gray
 - DEBUG: Blue
 - INFO: Green
@@ -711,6 +763,7 @@ adb logcat *:W  # Warnings and above
 - ERROR: Red
 
 **Example Output**:
+
 ```
 10-27 14:32:15.123  1234  5678 V EventObserver: Starting unified observation for event abc123
 10-27 14:32:15.456  1234  5678 I MapViewModel: Camera position changed
@@ -720,6 +773,7 @@ adb logcat *:W  # Warnings and above
 ### iOS (Unified Logging)
 
 **Viewing Logs**:
+
 ```bash
 # Simulator logs (real-time)
 xcrun simctl spawn booted log stream \
@@ -738,6 +792,7 @@ log show --predicate 'category == "EventObserver"' --last 1h
 **Console.app**: Open Console.app and filter by "WorldWideWaves"
 
 **Log Levels Mapping**:
+
 ```
 Log.v  →  os_log(.debug)      (Debug builds only)
 Log.d  →  os_log(.info)       (Debug/Beta builds)
@@ -748,6 +803,7 @@ Log.e  →  os_log(.fault)      (All builds)
 
 **Privacy Redaction**:
 iOS automatically redacts strings in logs unless marked public:
+
 ```swift
 // Swift side (if needed)
 os_log("User at %{public}@", position)  // Shows position
@@ -755,6 +811,7 @@ os_log("User at %@", position)           // Shows <private>
 ```
 
 **Example Output**:
+
 ```
 2025-10-27 14:32:15.123 WorldWideWaves[1234:5678] [EventObserver] Starting observation
 2025-10-27 14:32:15.456 WorldWideWaves[1234:5678] [MapViewModel] Camera updated
@@ -1180,12 +1237,14 @@ fun testStructuredLoggingFormat() {
 **Symptoms**: Log statements don't show in Logcat/Console
 
 **Causes**:
+
 1. Log level disabled by build configuration
 2. Tag filter too restrictive
 3. Buffer overflow (old logs discarded)
 4. Wrong process ID
 
 **Solutions**:
+
 ```bash
 # Android: Check all logs (remove filters)
 adb logcat -c  # Clear buffer
@@ -1205,6 +1264,7 @@ Log.d(TAG, "Debug logging enabled: ${WWWGlobals.LogConfig.ENABLE_DEBUG_LOGGING}"
 **Cause**: Hot path logging without feature flags
 
 **Solution**:
+
 ```kotlin
 // ❌ BEFORE (slow)
 fun onPositionUpdate(position: Position) {
@@ -1228,6 +1288,7 @@ fun onPositionUpdate(position: Position) {
 **Cause**: Logging large data structures
 
 **Solution**:
+
 ```kotlin
 // ❌ BEFORE (memory leak)
 Log.d(TAG, "All events: ${events.joinToString { it.toString() }}")
@@ -1413,17 +1474,20 @@ Log.performance(TAG, "[PERF] Measurement")
 ## Additional Resources
 
 ### Internal Documentation
+
 - [Development Guide](./development.md) - General development practices
 - [Architecture Guide](./architecture.md) - System architecture overview
 - [Testing Strategy](./testing-strategy.md) - Testing best practices
 
 ### External Resources
+
 - [Napier Documentation](https://github.com/AAkira/Napier) - Cross-platform logging library
 - [Android Logcat](https://developer.android.com/studio/debug/logcat) - Android logging reference
 - [iOS Unified Logging](https://developer.apple.com/documentation/os/logging) - iOS logging reference
 - [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) - Async logging patterns
 
 ### Code Examples
+
 - [Log.kt](../shared/src/commonMain/kotlin/com/worldwidewaves/shared/utils/Log.kt) - Log wrapper implementation
 - [WWWGlobals.kt](../shared/src/commonMain/kotlin/com/worldwidewaves/shared/WWWGlobals.kt) - Build configuration flags
 - [EventObserver.kt](../shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/observation/EventObserver.kt) - Real-world logging examples

@@ -7,6 +7,7 @@
 ## ✅ DO - Test Real Business Logic
 
 ### **Core Domain Logic**
+
 - Event validation and business rules
 - Geographic calculations and wave physics
 - Position management and prioritization
@@ -14,6 +15,7 @@
 - Time-sensitive coordination logic
 
 ### **Real Integration Points**
+
 - Firebase backend integration
 - MapLibre mapping integration
 - Real device coordination flows
@@ -21,6 +23,7 @@
 - Cross-platform functionality
 
 ### **Critical User Workflows**
+
 - End-to-end user journeys
 - Error handling and recovery
 - Performance under real conditions
@@ -29,22 +32,26 @@
 ## ❌ DON'T - Avoid These Anti-Patterns
 
 ### **Mock Testing Anti-Patterns**
+
 - Testing mock implementations instead of real code
 - Testing interfaces with mock objects
 - Creating test doubles for business logic
 
 ### **Framework Testing**
+
 - Testing dependency injection configuration
 - Testing logging, persistence, or resource frameworks
 - Testing platform libraries (Android DataStore, etc.)
 
 ### **Trivial Testing**
+
 - Testing getters, setters, and simple properties
 - Testing data class equals/hashCode/toString methods
 - Testing constructor parameters
 - Testing constants and configuration values
 
 ### **Utility Testing**
+
 - Testing simple mathematical calculations
 - Testing wrapper functions around standard libraries
 - Testing formatting and display utilities
@@ -52,6 +59,7 @@
 ## Testing Patterns by Component Type
 
 ### **🔧 Business Logic Classes**
+
 ```kotlin
 // ✅ GOOD - Test real business logic
 @Test
@@ -71,6 +79,7 @@ fun mockEvent_validate_callsValidationMethod() {
 ```
 
 ### **🎨 UI Components**
+
 ```kotlin
 // ✅ GOOD - Test real component with business logic
 @Test
@@ -94,6 +103,7 @@ fun testButtonWave_clickAction_triggersCallback() {
 ```
 
 ### **📡 Integration Points**
+
 ```kotlin
 // ✅ GOOD - Test real integration
 @Test
@@ -115,6 +125,7 @@ fun mockPositionProvider_updatePosition_callsCallback() {
 ## Test Organization
 
 ### **Current Test Structure (57 files)**
+
 ```
 📁 Core Business Logic (40+ files)
 ├── events/ - Event validation, wave physics, coordination
@@ -140,6 +151,7 @@ fun mockPositionProvider_updatePosition_callsCallback() {
 ## Quality Gates
 
 ### **Before Adding New Tests - Ask:**
+
 1. **Does this test validate real business logic?**
 2. **Would a user notice if this functionality broke?**
 3. **Does this test catch actual regressions?**
@@ -147,6 +159,7 @@ fun mockPositionProvider_updatePosition_callsCallback() {
 5. **Am I testing real implementations or mocks?**
 
 ### **Code Review Checklist**
+
 - ❌ **Reject tests that use `mockk` for business logic**
 - ❌ **Reject tests of interfaces without real implementations**
 - ❌ **Reject tests that only validate data structure operations**
@@ -157,29 +170,34 @@ fun mockPositionProvider_updatePosition_callsCallback() {
 ## Examples of Excellent Tests in Codebase
 
 ### **Real Business Logic**
+
 - `PositionManagerTest.kt` - Tests position prioritization and management algorithms
 - `WWWEventTest.kt` - Tests event validation, timezone handling, date parsing
 - `MidiParserTest.kt` - Tests MIDI file parsing and audio processing
 - `CrowdSoundChoreographySimulationTest.kt` - Tests sound choreography algorithms
 
 ### **Real Integration**
+
 - `RealFirebaseIntegrationTest.kt` - Tests actual Firebase backend integration
 - `RealWaveCoordinationTest.kt` - Tests multi-device coordination workflows
 - `MainActivityTest.kt` - Tests real app navigation and splash screen logic
 
 ### **Real UI Components**
+
 - `CommonComponentsTest.kt` - Tests real ButtonWave with time-based business logic
 - `AccessibilityTest.kt` - Tests WCAG compliance with real components
 
 ## Continuous Improvement
 
 ### **Regular Audits**
+
 - Review test suite quarterly for mock testing creep
 - Identify and remove tests that become trivial over time
 - Consolidate duplicate test coverage
 - Focus on tests that provide the highest business value
 
 ### **New Feature Testing**
+
 - Write tests for new business logic FIRST
 - Test integration points with real systems
 - Avoid creating mocks for your own business logic

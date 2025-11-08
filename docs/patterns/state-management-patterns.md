@@ -81,6 +81,7 @@ class EventsViewModel(...) : BaseViewModel() {
 ```
 
 **Key Points**:
+
 - Private `MutableStateFlow` with `_` prefix (e.g., `_isLoading`)
 - Public `StateFlow` without prefix (e.g., `isLoading`)
 - Use `.asStateFlow()` to expose read-only view
@@ -110,6 +111,7 @@ fun getDownloadState(mapId: String): StateFlow<DownloadState> =
 ```
 
 **Benefits**:
+
 - Single state object for related properties
 - Default values prevent null checks
 - Easier to update atomically via `.copy()`
@@ -149,11 +151,13 @@ sealed class MapFeatureState {
 ```
 
 **When to Use Sealed Classes**:
+
 - Mutually exclusive states (can't be loading AND failed)
 - State machines with clear transitions
 - States with different data requirements
 
 **When to Use Data Classes**:
+
 - Multiple boolean flags that can coexist
 - Simple property bags without logic
 - Performance-critical paths (fewer allocations)
@@ -184,6 +188,7 @@ private val _isLoading = MutableStateFlow(false)  // Start with false
 ```
 
 **Guidelines**:
+
 - Collections: Use `emptyList()`, `emptyMap()`, not `null`
 - Booleans: Use `false` unless "true" is the initial state
 - Numbers: Use `0`, `0.0`, or meaningful minimums
@@ -217,6 +222,7 @@ sealed class WaveStatus {
 ```
 
 **Decision Tree**:
+
 ```
 Does status need associated data?
 ├─ NO  → Use enum
@@ -246,6 +252,7 @@ class EventProgressionState {
 ```
 
 **Transition Validation**:
+
 ```kotlin
 // EventStateHolderBasicTest.kt:99-100
 @Test
@@ -284,16 +291,19 @@ companion object {
 ```
 
 **Performance Characteristics**:
+
 - Progression updates: ~20% of raw updates emitted (80% reduction)
 - Position updates: ~50% of raw updates emitted
 - Time updates: Adaptive based on proximity to hit
 
 **When to Use Throttling**:
+
 - High-frequency updates (GPS, timers, animations)
 - Continuous values (progression percentages, distances)
 - Performance-critical paths (main thread updates)
 
 **When NOT to Use Throttling**:
+
 - Boolean state changes (always significant)
 - User interactions (button clicks)
 - Error states (must propagate immediately)
@@ -328,6 +338,7 @@ private fun updateTimeBeforeHitIfSignificant(newTime: Duration) {
 ```
 
 **Use Cases**:
+
 - Wave timing: 50ms precision during hit phase, 1000ms normally
 - Map zoom: Fine-grained during user interaction, coarse during auto-zoom
 - Distance calculations: Precise when near event, approximate when far
@@ -381,6 +392,7 @@ fun updateFromEventState(state: EventState) {
 ```
 
 **Why This Matters**:
+
 - Prevents downstream recomposition/recollection
 - Reduces UI churn
 - Improves performance in high-frequency updates
@@ -436,11 +448,13 @@ try {
 ```
 
 **When to Use Direct Assignment**:
+
 - Single independent state variable
 - Boolean flags without related data
 - States updated in single coroutine context
 
 **When to Use Copy Pattern**:
+
 - Multiple related properties
 - Complex data structures
 - States shared across threads
@@ -468,11 +482,13 @@ object MapDownloadGate {
 ```
 
 **When to Use Mutex**:
+
 - Mutable collections accessed from multiple coroutines
 - Critical sections with multiple operations
 - State that must be updated atomically
 
 **When NOT to Use Mutex**:
+
 - StateFlow updates (already thread-safe)
 - Immutable data structures
 - Single-threaded contexts
@@ -545,6 +561,7 @@ UI reflects updated state
 ```
 
 **When to Use This Pattern**:
+
 - Platform-specific operations (ODR, Feature Delivery) that affect shared UI state
 - Multiple state holders exist for different concerns (download manager vs UI state)
 - Immediate UI updates required after async operations complete
@@ -591,6 +608,7 @@ fun `downloadMap calls refreshAvailability on success when checker provided`() =
 ```
 
 **Related Patterns**:
+
 - [StateFlow State Management](#11-data-class-structure) - Foundation for reactive state
 - [Thread-Safe Updates with Mutex](#35-thread-safe-updates-with-mutex) - Ensures atomic state updates
 - [Testing State](#5-testing-state) - How to test state synchronization
@@ -598,6 +616,7 @@ fun `downloadMap calls refreshAvailability on success when checker provided`() =
 **Anti-Patterns to Avoid**:
 
 ❌ **Polling for state changes**:
+
 ```kotlin
 // ❌ WRONG: Wasteful periodic refresh
 LaunchedEffect(Unit) {
@@ -609,6 +628,7 @@ LaunchedEffect(Unit) {
 ```
 
 ❌ **Manual state management in multiple places**:
+
 ```kotlin
 // ❌ WRONG: Duplicated state update logic
 onSuccess = {
@@ -621,6 +641,7 @@ onSuccess = {
 ```
 
 ✅ **CORRECT: Single refresh call at completion**:
+
 ```kotlin
 // ✅ CORRECT: Delegate to checker's refresh logic
 onSuccess = {
@@ -629,6 +650,7 @@ onSuccess = {
 ```
 
 **Platform Notes**:
+
 - **iOS**: Used for ODR downloads to coordinate IosPlatformMapManager and IosMapAvailabilityChecker
 - **Android**: Not currently needed - Google Play Feature Delivery uses unified state management
 
@@ -668,6 +690,7 @@ fun updatePosition(
 ```
 
 **Validation Checklist**:
+
 - ✅ Source priority (GPS vs Simulation)
 - ✅ Value ranges (0-100%, lat/lng bounds)
 - ✅ Duplicate detection (epsilon comparison)

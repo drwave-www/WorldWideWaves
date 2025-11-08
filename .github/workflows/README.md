@@ -22,6 +22,7 @@ This directory contains the GitHub Actions workflows for the WorldWideWaves proj
 Automated validation of documentation quality and link integrity:
 
 ### Features
+
 - **Link Validation**: Checks all internal and external links in markdown files
 - **Markdown Linting**: Enforces consistent markdown formatting standards
 - **Smart Caching**: Caches link check results to speed up subsequent runs
@@ -29,6 +30,7 @@ Automated validation of documentation quality and link integrity:
 - **Selective Triggers**: Only runs when markdown files are modified
 
 ### Link Check Capabilities
+
 - ✅ **Internal Links**: Validates relative paths to files and headings
 - ✅ **External URLs**: Verifies HTTP/HTTPS links are accessible
 - ✅ **Intelligent Exclusions**: Skips localhost, build directories, and known false positives
@@ -36,6 +38,7 @@ Automated validation of documentation quality and link integrity:
 - ✅ **Timeout Control**: 30-second timeout per link to prevent hanging
 
 ### Markdown Linting
+
 - Consistent heading styles (ATX format)
 - Proper list formatting and indentation
 - Code block language specification
@@ -43,10 +46,12 @@ Automated validation of documentation quality and link integrity:
 - File ending with newline
 
 ### Configuration Files
+
 - `.lycheeignore`: Patterns for links/paths to exclude from checking
 - `.markdownlint-cli2.jsonc`: Markdown linting rules and preferences
 
 ### Excluded Patterns
+
 - `node_modules`, `build`, `SourcePackages` directories
 - Firebase/Google service URLs (authentication required)
 - App Store/Play Store links (region-specific)
@@ -58,6 +63,7 @@ Automated validation of documentation quality and link integrity:
 The most significant addition to support the new UI testing implementation:
 
 ### Features
+
 - **Multi-API Testing**: Tests on Android API 29 & 33 for broader compatibility
 - **Emulator Caching**: AVD snapshots cached for faster subsequent runs
 - **Screenshot Artifacts**: Automatic collection of visual regression test screenshots
@@ -65,6 +71,7 @@ The most significant addition to support the new UI testing implementation:
 - **Comprehensive Coverage**: All new test categories (Edge Cases, Accessibility, Screenshots)
 
 ### Test Categories Covered
+
 - 🔄 **Edge Case Testing** (`EdgeCaseTest.kt`)
   - Device rotation and configuration changes
   - Memory constraints and resource cleanup
@@ -86,6 +93,7 @@ The most significant addition to support the new UI testing implementation:
   - Cross-device screenshot comparison
 
 ### Artifacts Generated
+
 - **Test Reports**: JUnit XML results with detailed pass/fail information
 - **Screenshots**: PNG files organized by test category and device
 - **Coverage Reports**: Code coverage analysis with Jacoco
@@ -96,6 +104,7 @@ The most significant addition to support the new UI testing implementation:
 Enhanced to include UI test compilation checks:
 
 ### New Checks Added
+
 - **UI Test Compilation**: Ensures all instrumented tests compile successfully
 - **Test Class Verification**: Confirms required test files exist
 - **Coverage Integration**: Jacoco test coverage reporting
@@ -106,6 +115,7 @@ Enhanced to include UI test compilation checks:
 Updated to provide comprehensive CI/CD status:
 
 ### Features
+
 - **Workflow Orchestration**: Waits for and aggregates all workflow results
 - **Intelligent Timeouts**: Monitors running workflows with configurable timeouts
 - **Rich Summaries**: Detailed status reports with test coverage breakdown
@@ -114,16 +124,19 @@ Updated to provide comprehensive CI/CD status:
 ## ⚡ Performance Optimizations
 
 ### Caching Strategy
+
 - **Gradle Dependencies**: Cached across workflow runs
 - **Android AVD**: Emulator snapshots cached for faster startup
 - **Build Artifacts**: Intermediate build outputs cached
 
 ### Parallel Execution
+
 - **Independent Workflows**: Quality gates, builds, and tests run in parallel
 - **Matrix Strategy**: Multiple Android API levels tested simultaneously
 - **Selective Triggers**: UI tests can be skipped for documentation-only changes
 
 ### Resource Management
+
 - **Concurrency Control**: Prevents multiple runs of same workflow
 - **Timeout Configuration**: Prevents hanging workflows from blocking CI
 - **Artifact Retention**: Configurable cleanup of old test artifacts
@@ -131,6 +144,7 @@ Updated to provide comprehensive CI/CD status:
 ## 🔧 Configuration
 
 ### Environment Variables
+
 ```yaml
 # Android Emulator Configuration
 API_LEVEL: [29, 33]  # Test on Android 10 and 13
@@ -145,6 +159,7 @@ TEST_REPORT_RETENTION: 30    # Days to keep test reports
 ```
 
 ### Triggers
+
 - **Push to main**: All workflows execute
 - **Pull Requests**: All workflows execute
 - **Daily Schedule**: UI tests run at 2 AM UTC to catch flaky tests
@@ -153,12 +168,14 @@ TEST_REPORT_RETENTION: 30    # Days to keep test reports
 ## 📈 Monitoring and Reporting
 
 ### Test Results
+
 - **JUnit Reports**: Structured XML test results
 - **HTML Reports**: Human-readable test summaries
 - **Coverage Reports**: Line and branch coverage analysis
 - **Performance Metrics**: Test execution timing data
 
 ### Artifacts Management
+
 - **Screenshot Gallery**: Visual test results organized by category
 - **Failure Analysis**: Detailed logs for failed tests
 - **Trend Analysis**: Historical test performance data
@@ -167,11 +184,13 @@ TEST_REPORT_RETENTION: 30    # Days to keep test reports
 ## 🚨 Failure Handling
 
 ### Retry Logic
+
 - **Emulator Startup**: Automatic retry for emulator boot failures
 - **Network Issues**: Retry for transient connectivity problems
 - **Test Flakiness**: Matrix strategy allows partial failures
 
 ### Notifications
+
 - **PR Comments**: Automatic test result summaries
 - **Failure Reports**: Detailed artifact upload for investigation
 - **Status Badges**: Repository README status indicators
@@ -179,12 +198,14 @@ TEST_REPORT_RETENTION: 30    # Days to keep test reports
 ## 📚 Best Practices
 
 ### For Developers
+
 1. **Local Testing**: Run `./gradlew connectedDebugAndroidTest` before pushing
 2. **Screenshot Baselines**: Update baselines when UI intentionally changes
 3. **Test Naming**: Follow naming convention for test categorization
 4. **Performance**: Be mindful of test execution time in CI
 
 ### For Maintainers
+
 1. **Workflow Updates**: Test changes in feature branches first
 2. **Artifact Cleanup**: Monitor storage usage and adjust retention
 3. **Performance Monitoring**: Watch for CI duration increases
@@ -193,12 +214,14 @@ TEST_REPORT_RETENTION: 30    # Days to keep test reports
 ## 🔄 Migration Notes
 
 ### From Previous CI Setup
+
 - **New Dependencies**: Android emulator actions added
 - **Increased Duration**: UI tests add 20-30 minutes to CI time
 - **Storage Requirements**: Screenshot artifacts require additional storage
 - **API Level Testing**: Now testing multiple Android versions
 
 ### Compatibility
+
 - **Existing Tests**: All previous unit tests continue to run
 - **Build Process**: No changes to existing build workflows
 - **Deployment**: No impact on release processes

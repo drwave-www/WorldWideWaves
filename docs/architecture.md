@@ -101,6 +101,7 @@ Cross-platform business logic written in Kotlin Multiplatform.
 Android-specific implementation with Compose UI.
 
 **Key Components:**
+
 - `MainActivity.kt` - App entry point
 - Compose UI screens (EventsList, EventDetails, FullMap)
 - Android instrumented tests (UI, integration, performance)
@@ -112,6 +113,7 @@ Android-specific implementation with Compose UI.
 iOS-specific implementation using Compose Multiplatform (100% shared UI with Android).
 
 **Key Components:**
+
 - `AppDelegate.swift` - App lifecycle, Firebase initialization
 - `SceneDelegate.swift` - UI lifecycle, platform initialization (Koin, Moko, SKIKO Metal)
 - `IOSPlatformEnabler.swift` - Swift-Kotlin bridge for native services (haptics, VoiceOver)
@@ -126,6 +128,7 @@ iOS-specific implementation using Compose Multiplatform (100% shared UI with And
 Self-contained offline map modules for 42 cities implemented as Android Dynamic Features.
 
 **Structure:**
+
 - `maps/paris_france/` - Example city module
 - Each module contains:
   - `.mbtiles` - MapLibre offline map data
@@ -204,6 +207,7 @@ graph LR
 ```
 
 **Design Principles:**
+
 - Single source of truth for position
 - Simulation overrides GPS (testing priority)
 - Debouncing prevents excessive updates (80% emission reduction)
@@ -228,6 +232,7 @@ graph LR
 ### State Management
 
 **StateFlow Pattern:**
+
 ```kotlin
 class EventsViewModel : ViewModel() {
     private val _eventsState = MutableStateFlow<EventState>(EventState.Loading)
@@ -236,6 +241,7 @@ class EventsViewModel : ViewModel() {
 ```
 
 **Flow Operators:**
+
 - `.stateIn()` for hot state flows
 - `.debounce()` for position updates (500ms)
 - `.distinctUntilChanged()` for deduplication
@@ -246,22 +252,26 @@ class EventsViewModel : ViewModel() {
 ### Geographic Calculations
 
 **LRU Caching:**
+
 - Distance calculations cached by coordinate pair
 - Polygon containment checks cached
 - Cache size: 100 entries per operation type
 
 **Spatial Indexing:**
+
 - Bounding box pre-filtering for polygon operations
 - R-tree indexing for event queries (future enhancement)
 
 ### Position Management
 
 **Smart Throttling:**
+
 - Debounce position updates (500ms)
 - Distinct emission (skip duplicates)
 - Adaptive observation intervals (5s warming → 1s pre-hit → 250ms active)
 
 **Performance Impact:**
+
 - 80% reduction in StateFlow emissions
 - 3x faster polygon operations with spatial indexing
 - Smooth 60 FPS during wave choreography
@@ -269,11 +279,13 @@ class EventsViewModel : ViewModel() {
 ### Map Performance
 
 **Lazy Loading:**
+
 - Dynamic Feature modules loaded on demand
 - Map tiles cached locally
 - Style JSON preloaded
 
 **Memory Management:**
+
 - MapView recycling
 - Bitmap pooling for markers
 - Offline tile database optimization
@@ -332,11 +344,13 @@ class CustomChoreography : ChoreographySequence {
 ### Data Protection
 
 **Location Privacy:**
+
 - No precise coordinate logging in production
 - Configurable precision levels
 - Respect user privacy settings
 
 **Secret Management:**
+
 - Secrets stored in `local.properties` (development)
 - Environment variables in CI/CD
 - Firebase config auto-generated
@@ -345,6 +359,7 @@ class CustomChoreography : ChoreographySequence {
 ### Network Security
 
 **HTTPS Enforcement:**
+
 - All network traffic over TLS 1.2+
 - Certificate pinning (future enhancement)
 - Request signing for API calls (future enhancement)
@@ -352,6 +367,7 @@ class CustomChoreography : ChoreographySequence {
 ### Build Security
 
 **Gradle Wrapper Validation:**
+
 - SHA-256 checksum verification in CI
 - Automated dependency vulnerability scanning
 
@@ -360,12 +376,14 @@ class CustomChoreography : ChoreographySequence {
 See [docs/development.md](development.md) for detailed testing workflows.
 
 **Test Pyramid:**
+
 - **Unit Tests (902+)**: Business logic, domain layer
 - **UI Tests**: Critical paths, accessibility, performance
 - **Integration Tests**: Firebase, MapLibre, device coordination
 - **Performance Tests**: App launch, runtime, battery
 
 **Key Principles:**
+
 - Test real code, not mocks
 - Focus on business logic and integration points
 - Avoid testing framework internals
@@ -376,12 +394,14 @@ See [docs/development.md](development.md) for detailed testing workflows.
 ### Why Kotlin Multiplatform?
 
 **Benefits:**
+
 - 70% code sharing between platforms
 - Type-safe cross-platform development
 - Native performance on both platforms
 - Shared testing infrastructure
 
 **Trade-offs:**
+
 - Build complexity (Gradle + Xcode)
 - Platform-specific UI required
 - Learning curve for iOS developers
@@ -389,12 +409,14 @@ See [docs/development.md](development.md) for detailed testing workflows.
 ### Why Clean Architecture?
 
 **Benefits:**
+
 - Clear separation of concerns
 - Testable business logic
 - Platform-independent domain layer
 - Easy to maintain and extend
 
 **Trade-offs:**
+
 - More boilerplate code
 - Steeper learning curve
 - Additional abstraction layers
@@ -402,12 +424,14 @@ See [docs/development.md](development.md) for detailed testing workflows.
 ### Why MapLibre?
 
 **Benefits:**
+
 - Open-source (no vendor lock-in)
 - Offline-first architecture
 - Custom style support
 - Active community
 
 **Trade-offs:**
+
 - Manual map data generation required
 - Larger APK size (mitigated by Dynamic Features)
 - Less polished than Google Maps

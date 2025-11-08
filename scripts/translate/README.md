@@ -5,6 +5,7 @@ Localization and translation management tools for WorldWideWaves multi-language 
 ## Purpose
 
 Manages app translations and localization:
+
 - **String extraction** from code and resources
 - **Translation management** across multiple languages
 - **Automated translation** using translation services
@@ -25,6 +26,7 @@ translate/
 ## Usage
 
 ### Extract Strings
+
 ```bash
 # Extract all translatable strings from code
 python extract_strings.py --source ../shared/src/commonMain/
@@ -34,6 +36,7 @@ python extract_strings.py --files MainActivity.kt EventsListScreen.kt
 ```
 
 ### Manage Translations
+
 ```bash
 # Initialize new language
 python manage_translations.py --add-language es
@@ -43,6 +46,7 @@ python manage_translations.py --update-language fr --source translations/en.json
 ```
 
 ### Validate Translations
+
 ```bash
 # Check translation completeness
 python validate_translations.py --language es
@@ -52,6 +56,7 @@ python validate_translations.py --all
 ```
 
 ### Auto-Translate
+
 ```bash
 # Auto-translate missing strings
 python auto_translate.py --from en --to es --service google
@@ -63,6 +68,7 @@ python auto_translate.py --batch --languages "es,fr,de,ja"
 ## Supported Languages
 
 ### Current Languages
+
 - **English (en)** - Primary language
 - **Spanish (es)** - Spanish
 - **French (fr)** - French  
@@ -74,6 +80,7 @@ python auto_translate.py --batch --languages "es,fr,de,ja"
 - **Russian (ru)** - Russian
 
 ### Adding New Languages
+
 ```bash
 # Add new language with auto-translation
 python manage_translations.py --add-language ko --auto-translate
@@ -87,6 +94,7 @@ python manage_translations.py --add-language ko --auto-translate
 ## Translation File Formats
 
 ### Master Format (JSON)
+
 ```json
 {
   "app_name": "WorldWideWaves",
@@ -104,6 +112,7 @@ python manage_translations.py --add-language ko --auto-translate
 ```
 
 ### Android Strings
+
 ```xml
 <!-- values-es/strings.xml -->
 <resources>
@@ -115,6 +124,7 @@ python manage_translations.py --add-language ko --auto-translate
 ```
 
 ### iOS Localizable
+
 ```swift
 // es.lproj/Localizable.strings
 "app_name" = "WorldWideWaves";
@@ -124,6 +134,7 @@ python manage_translations.py --add-language ko --auto-translate
 ```
 
 ### KMP Resources
+
 ```kotlin
 // shared/src/commonMain/composeResources/values-es/strings.xml
 <resources>
@@ -135,6 +146,7 @@ python manage_translations.py --add-language ko --auto-translate
 ## String Extraction
 
 ### From Kotlin/Java Code
+
 ```python
 # Patterns to extract
 STRING_PATTERNS = [
@@ -145,6 +157,7 @@ STRING_PATTERNS = [
 ```
 
 ### From Compose Resources
+
 ```kotlin
 // Mark strings for translation
 Text(
@@ -159,6 +172,7 @@ Text(
 ```
 
 ### Configuration Files
+
 ```json
 {
   "extraction": {
@@ -176,6 +190,7 @@ Text(
 ## Translation Workflow
 
 ### 1. String Extraction
+
 ```bash
 # Extract new/modified strings
 python extract_strings.py --incremental
@@ -185,6 +200,7 @@ python review_extractions.py --show-new
 ```
 
 ### 2. Translation Assignment
+
 ```python
 # Assign strings to translators
 assign_strings_to_translator(
@@ -195,6 +211,7 @@ assign_strings_to_translator(
 ```
 
 ### 3. Translation Validation
+
 ```bash
 # Check translation quality
 python validate_translations.py --language es --check-placeholders
@@ -204,6 +221,7 @@ python validate_translations.py --context-check --language es
 ```
 
 ### 4. Export to Platforms
+
 ```bash
 # Generate platform-specific files
 python export_formats.py --languages "es,fr,de" --platforms android,ios,kmp
@@ -212,6 +230,7 @@ python export_formats.py --languages "es,fr,de" --platforms android,ios,kmp
 ## Quality Control
 
 ### Validation Rules
+
 ```python
 VALIDATION_RULES = {
     'placeholder_consistency': True,    # Check {variable} placeholders
@@ -234,6 +253,7 @@ VALIDATION_RULES = {
 ```
 
 ### Automated Checks
+
 ```bash
 # Run comprehensive validation
 python validate_translations.py --comprehensive
@@ -247,6 +267,7 @@ python validate_translations.py --comprehensive
 ```
 
 ### Manual Review
+
 ```python
 # Generate review reports
 def generate_review_report(language):
@@ -262,6 +283,7 @@ def generate_review_report(language):
 ## Translation Services
 
 ### Google Translate API
+
 ```python
 from google.cloud import translate
 
@@ -276,6 +298,7 @@ def auto_translate_with_google(text, target_language):
 ```
 
 ### Azure Translator
+
 ```python
 import requests
 
@@ -299,6 +322,7 @@ def auto_translate_with_azure(text, target_language):
 ## RTL Language Support
 
 ### Arabic and Hebrew Support
+
 ```json
 {
   "rtl_languages": ["ar", "he", "fa"],
@@ -311,6 +335,7 @@ def auto_translate_with_azure(text, target_language):
 ```
 
 ### Platform Configuration
+
 ```kotlin
 // Android RTL support
 android {
@@ -336,6 +361,7 @@ func configureRTL() {
 ## Pluralization
 
 ### Plural Rules
+
 ```json
 {
   "wave_count": {
@@ -357,6 +383,7 @@ func configureRTL() {
 ```
 
 ### Platform Export
+
 ```xml
 <!-- Android plurals -->
 <plurals name="wave_count">
@@ -388,6 +415,7 @@ func configureRTL() {
 ## Build Integration
 
 ### Automated Translation
+
 ```yaml
 # GitHub Actions
 - name: Extract New Strings
@@ -401,6 +429,7 @@ func configureRTL() {
 ```
 
 ### Validation in CI
+
 ```bash
 # Pre-commit validation
 python scripts/translate/validate_translations.py --all --fail-on-missing
@@ -411,24 +440,28 @@ python scripts/translate/validate_translations.py --all --fail-on-missing
 ### Common Issues
 
 1. **Missing translations**
+
    ```bash
    # Find untranslated strings
    python validate_translations.py --language es --show-missing
    ```
 
 2. **Placeholder mismatches**
+
    ```bash
    # Fix placeholder issues
    python validate_translations.py --fix-placeholders --language es
    ```
 
 3. **Export format errors**
+
    ```bash
    # Debug platform export
    python export_formats.py --debug --platform android --language es
    ```
 
 ### Debug Tools
+
 ```bash
 # Test translation extraction
 python extract_strings.py --dry-run --verbose

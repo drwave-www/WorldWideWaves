@@ -7,6 +7,7 @@ Local development guide for WorldWideWaves, covering the run/test/debug cycle, c
 ### Android Development
 
 **Quick Start:**
+
 ```bash
 # Open in Android Studio
 open -a "Android Studio" /path/to/WorldWideWaves
@@ -19,11 +20,13 @@ open -a "Android Studio" /path/to/WorldWideWaves
 ```
 
 **Hot Reload:**
+
 - Compose UI supports hot reload in Android Studio
 - Code changes reflect instantly without full rebuild
 - Press Ctrl+Shift+F9 (Cmd+Shift+F9 on Mac) to apply changes
 
 **Debug Mode:**
+
 ```bash
 # Run with debugger attached
 ./gradlew :composeApp:installDebug
@@ -36,6 +39,7 @@ Run > Attach Debugger to Android Process
 ### iOS Development
 
 **Quick Start:**
+
 ```bash
 # Build iOS framework
 ./gradlew :shared:embedAndSignAppleFrameworkForXcode
@@ -49,6 +53,7 @@ open iosApp/worldwidewaves.xcodeproj
 
 **Framework Refresh:**
 When changing shared Kotlin code:
+
 ```bash
 # Clean and rebuild framework
 ./gradlew :shared:clean
@@ -59,6 +64,7 @@ When changing shared Kotlin code:
 ```
 
 **Debug Mode:**
+
 - Set breakpoints in Swift code (Xcode)
 - Use `print()` statements for Kotlin code debugging
 - View logs: Xcode > View > Debug Area > Show Debug Area
@@ -68,6 +74,7 @@ When changing shared Kotlin code:
 ### Unit Tests
 
 **Run all unit tests:**
+
 ```bash
 # Shared module tests (902+ tests)
 ./gradlew :shared:testDebugUnitTest
@@ -80,11 +87,13 @@ When changing shared Kotlin code:
 ```
 
 **Run specific test:**
+
 ```bash
 ./gradlew :shared:testDebugUnitTest --tests "com.worldwidewaves.shared.domain.observation.*"
 ```
 
 **Skip common tests (if needed):**
+
 ```bash
 ./gradlew :shared:testDebugUnitTest -PdisableCommonTest
 ```
@@ -92,17 +101,20 @@ When changing shared Kotlin code:
 ### UI Tests
 
 **Prerequisites:**
+
 1. Launch Android emulator or connect device
 2. Verify device with `adb devices`
 3. Ensure location permissions granted
 
 **Run all UI tests:**
+
 ```bash
 # Specify device serial if multiple devices connected
 ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest
 ```
 
 **Run specific test category:**
+
 ```bash
 # Critical path tests
 ./gradlew :composeApp:connectedDebugAndroidTest \
@@ -114,6 +126,7 @@ ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest
 ```
 
 **Test with screenshots:**
+
 ```bash
 # Run screenshot tests
 ./gradlew :composeApp:connectedDebugAndroidTest \
@@ -126,6 +139,7 @@ adb pull /sdcard/Pictures/Screenshots ./screenshots/
 ### Integration Tests
 
 **Real device integration tests:**
+
 ```bash
 # Enable mock locations in developer options
 adb shell settings put secure mock_location 1
@@ -141,6 +155,7 @@ adb shell pm grant com.worldwidewaves android.permission.ACCESS_COARSE_LOCATION
 ### Performance Tests
 
 **Run performance test suite:**
+
 ```bash
 # Fast unit tests (100ms budget)
 ./gradlew testFast
@@ -153,11 +168,13 @@ adb shell pm grant com.worldwidewaves android.permission.ACCESS_COARSE_LOCATION
 ### Sound Choreography Tests
 
 **Mathematical simulation:**
+
 ```bash
 ./gradlew crowdSoundSimulation
 ```
 
 **Real audio playback:**
+
 ```bash
 # Ensure device audio is enabled
 ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest \
@@ -165,6 +182,7 @@ ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest \
 ```
 
 **Interactive audio demo:**
+
 ```bash
 # Install app
 ./gradlew :composeApp:installDebug
@@ -176,11 +194,13 @@ adb shell am start -n com.worldwidewaves/.debug.AudioTestActivity
 ### Test Quality
 
 **Detect anti-patterns:**
+
 ```bash
 ./scripts/detect-test-antipatterns.sh
 ```
 
 **Run quality checks:**
+
 ```bash
 ./gradlew testQuality
 ```
@@ -190,6 +210,7 @@ adb shell am start -n com.worldwidewaves/.debug.AudioTestActivity
 ### Linting
 
 **Run ktlint:**
+
 ```bash
 # Check all modules
 ./gradlew ktlintCheck
@@ -199,6 +220,7 @@ adb shell am start -n com.worldwidewaves/.debug.AudioTestActivity
 ```
 
 **Run detekt:**
+
 ```bash
 # Static analysis
 ./gradlew detekt
@@ -210,6 +232,7 @@ open build/reports/detekt/detekt.html
 ### License Compliance
 
 **Generate license report:**
+
 ```bash
 ./gradlew generateLicenseReport
 
@@ -222,11 +245,13 @@ open build/reports/licenses/licenses-gradle.json
 ### Git Hooks Setup
 
 **One-time setup:**
+
 ```bash
 ./dev/setup-git-hooks.sh
 ```
 
 **Pre-Commit Hooks (automatic code quality):**
+
 - **Kotlin linting**: ktlint formatting + detekt static analysis
 - **Swift linting**: swiftlint with auto-fix
 - **Shell script validation**: shellcheck
@@ -235,6 +260,7 @@ open build/reports/licenses/licenses-gradle.json
 - **Markdown linting**: markdownlint-cli2 (if installed)
 
 **Pre-Push Hooks (documentation & testing):**
+
 - **Dokka API docs**: Automatic generation before push
 - **Documentation detection**: Warns if code changed without docs update (advisory)
 - **Translation updates**: Auto-update with OPENAI_API_KEY
@@ -242,6 +268,7 @@ open build/reports/licenses/licenses-gradle.json
 - **Automatic emulator**: Launches if not running
 
 **Bypass hooks (not recommended):**
+
 ```bash
 # Skip pre-commit checks
 git commit --no-verify
@@ -254,6 +281,7 @@ SKIP_INTEGRATION_TESTS=1 git push
 ```
 
 **Install optional tools:**
+
 ```bash
 # Markdown linting (recommended)
 npm install -g markdownlint-cli2
@@ -263,6 +291,7 @@ npm install -g markdownlint-cli2
 ```
 
 **Hook maintenance:**
+
 ```bash
 # Update to latest hooks after git pull
 ./dev/setup-git-hooks.sh
@@ -285,6 +314,7 @@ Follow Conventional Commits:
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -294,6 +324,7 @@ Follow Conventional Commits:
 - `perf`: Performance improvements
 
 **Examples:**
+
 ```
 feat(choreography): add crowd sound simulation
 
@@ -315,10 +346,12 @@ Fixes #456
 ### Branch Strategy
 
 **Main Branches:**
+
 - `main` - Production-ready code
 - `develop` - Integration branch (if used)
 
 **Feature Branches:**
+
 ```bash
 # Create feature branch
 git checkout -b feat/add-new-city-map
@@ -332,6 +365,7 @@ git push origin feat/add-new-city-map
 ```
 
 **Release Branches:**
+
 ```bash
 git checkout -b release/v0.23
 # Update version in build.gradle.kts
@@ -344,6 +378,7 @@ git push origin release/v0.23
 ### Android Debugging
 
 **Logcat filtering:**
+
 ```bash
 # View all app logs
 adb logcat -s WWW
@@ -357,11 +392,13 @@ adb logcat > logcat.txt
 
 **Verbose logging:**
 Enable in `composeApp/build.gradle.kts`:
+
 ```kotlin
 buildConfigField("boolean", "ENABLE_VERBOSE_LOGGING", "true")
 ```
 
 **Performance profiling:**
+
 - Android Studio > View > Tool Windows > Profiler
 - CPU, Memory, Network, Energy profiling available
 - Record traces for detailed analysis
@@ -369,15 +406,18 @@ buildConfigField("boolean", "ENABLE_VERBOSE_LOGGING", "true")
 ### iOS Debugging
 
 **Console logs:**
+
 - Xcode > View > Debug Area > Show Debug Area
 - Filter by "WWW" or component name
 
 **Breakpoints:**
+
 - Set breakpoints in Swift code
 - Use conditional breakpoints for specific scenarios
 - Symbolic breakpoints for Objective-C exceptions
 
 **Instruments:**
+
 ```bash
 # Launch Instruments for profiling
 open -a Instruments
@@ -388,12 +428,14 @@ open -a Instruments
 For testing event participation without waiting for real events, use **simulation mode**:
 
 **Benefits**:
+
 - **Time acceleration**: Speed up event progression with time multipliers
 - **Position simulation**: Simulate user movement during wave events
 - **Predictable conditions**: Consistent test results across runs
 - **Fast iteration**: Test complete wave lifecycles in seconds
 
 **Quick Start**:
+
 ```kotlin
 // Enable simulation in tests
 simulationController.enableSimulation(timeMultiplier = 10.0)
@@ -410,6 +452,7 @@ advanceTimeBy(30.seconds) // Simulates 5 minutes with 10x multiplier
 **Issue: Gradle build fails with "Out of Memory"**
 
 Solution:
+
 ```bash
 # Increase heap size in gradle.properties
 org.gradle.jvmargs=-Xmx8g
@@ -418,6 +461,7 @@ org.gradle.jvmargs=-Xmx8g
 **Issue: Android emulator won't start**
 
 Solutions:
+
 ```bash
 # Check available AVDs
 emulator -list-avds
@@ -432,6 +476,7 @@ sudo kvm-ok
 **Issue: iOS framework not found**
 
 Solution:
+
 ```bash
 # Clean and rebuild
 ./gradlew :shared:clean
@@ -444,6 +489,7 @@ ls -la shared/build/xcode-frameworks/Debug/iphonesimulator*/Shared.framework
 **Issue: MapLibre not loading maps**
 
 Solutions:
+
 1. Verify map module included in `settings.gradle.kts`
 2. Check Dynamic Feature configuration
 3. Ensure map `.mbtiles` file exists in assets
@@ -452,6 +498,7 @@ Solutions:
 **Issue: Position not updating**
 
 Solutions:
+
 1. Grant location permissions: Settings > Apps > WorldWideWaves > Permissions
 2. Enable mock locations in developer options
 3. Check GPS signal (try outdoors or use emulator location)
@@ -464,6 +511,7 @@ Solution: Use real implementations instead of mocks per testing strategy.
 **Issue: Firebase not connecting**
 
 Solutions:
+
 1. Verify `google-services.json` exists in `composeApp/`
 2. Check Firebase project configuration
 3. Ensure API keys in `local.properties`
@@ -474,6 +522,7 @@ Solutions:
 ### Build Performance
 
 **Enable Gradle daemon:**
+
 ```properties
 # gradle.properties
 org.gradle.daemon=true
@@ -482,11 +531,13 @@ org.gradle.caching=true
 ```
 
 **Increase workers:**
+
 ```properties
 org.gradle.workers.max=4
 ```
 
 **Use configuration cache:**
+
 ```bash
 ./gradlew build --configuration-cache
 ```
@@ -494,10 +545,12 @@ org.gradle.workers.max=4
 ### IDE Performance
 
 **Exclude build directories:**
+
 - Android Studio > Settings > Editor > File Types
 - Add to "Ignore files and folders": `*.iml;build;.gradle;node_modules;`
 
 **Increase IDE memory:**
+
 - Help > Edit Custom VM Options
 - Add: `-Xmx4g -XX:ReservedCodeCacheSize=512m`
 
@@ -505,6 +558,7 @@ org.gradle.workers.max=4
 
 **Enable R8 (release builds):**
 Already enabled in `composeApp/build.gradle.kts`:
+
 ```kotlin
 buildTypes {
     release {
@@ -515,6 +569,7 @@ buildTypes {
 ```
 
 **Monitor memory leaks:**
+
 - Use LeakCanary (add dependency for debug builds)
 - Profile with Android Studio Memory Profiler
 
@@ -552,12 +607,14 @@ buildTypes {
 ### Code Style
 
 **Kotlin conventions:**
+
 - 4-space indentation
 - 120 character line limit
 - No wildcard imports
 - Explicit return types for public APIs
 
 **Compose best practices:**
+
 - Use `remember` for expensive computations
 - Hoist state to appropriate level
 - Use `LaunchedEffect` for side effects
@@ -566,6 +623,7 @@ buildTypes {
 ### Dependency Injection
 
 **Koin usage:**
+
 ```kotlin
 // Define module
 val myModule = module {
@@ -583,6 +641,7 @@ fun MyScreen() {
 ### Coroutines
 
 **Use appropriate dispatcher:**
+
 ```kotlin
 // UI updates
 withContext(Dispatchers.Main) { updateUI() }
@@ -594,6 +653,7 @@ withContext(Dispatchers.Default) { calculateDistance() }
 ```
 
 **Structured concurrency:**
+
 ```kotlin
 viewModelScope.launch {
     try {
@@ -608,12 +668,14 @@ viewModelScope.launch {
 ### Testing Philosophy
 
 **Test real code, not mocks:**
+
 - Focus on business logic and integration points
 - Use real implementations where possible
 - Mock only external dependencies (network, device sensors)
 - Avoid testing framework internals
 
 **Test pyramid:**
+
 ```
        /\
       /E2E\       Few, critical user journeys

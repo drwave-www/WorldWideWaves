@@ -33,17 +33,20 @@ composeApp/
 ## Application Flow
 
 ### 1. SplashActivity (Implicit)
+
 - Shows app logo with minimum display time
 - Loads initial events in background
 - Transitions to MainActivity
 
 ### 2. MainActivity
+
 - **Tab-based navigation** with bottom navigation bar
 - **Tabs**: Events List, About, Settings (future)
 - **State management** with TabManager
 - **Persistent tab selection** across app restarts
 
 ### 3. Event Flow
+
 ```
 EventsListScreen → EventActivity → EventFullMapActivity
                                  ↘ WaveActivity (when wave starts)
@@ -54,6 +57,7 @@ EventsListScreen → EventActivity → EventFullMapActivity
 ### 🏠 Activities (`/activities`)
 
 #### MainActivity
+
 ```kotlin
 // Main entry point with tab navigation
 class MainActivity : AppCompatActivity() {
@@ -65,6 +69,7 @@ class MainActivity : AppCompatActivity() {
 ```
 
 #### EventActivity
+
 ```kotlin
 // Event details with countdown and preview
 class EventActivity : AbstractEventBackActivity() {
@@ -77,6 +82,7 @@ class EventActivity : AbstractEventBackActivity() {
 ```
 
 #### EventFullMapActivity
+
 ```kotlin
 // Full-screen offline map view
 class EventFullMapActivity : AbstractEventBackActivity() {
@@ -89,6 +95,7 @@ class EventFullMapActivity : AbstractEventBackActivity() {
 ```
 
 #### WaveActivity
+
 ```kotlin
 // Real-time wave choreography experience
 class WaveActivity : AbstractEventWaveActivity() {
@@ -103,6 +110,7 @@ class WaveActivity : AbstractEventWaveActivity() {
 ### 🎨 Compose UI (`/compose`)
 
 #### Tab Screens (`/tabs`)
+
 ```kotlin
 // EventsListScreen.kt - Main events listing
 @Composable
@@ -125,6 +133,7 @@ fun AboutScreen() {
 ```
 
 #### Common Components (`/common`)
+
 - `ButtonWave` - Animated wave-style button
 - `EventOverlays` - Event status indicators
 - `Indicators` - Loading and status components
@@ -132,6 +141,7 @@ fun AboutScreen() {
 - `TextUtils` - Text formatting utilities
 
 #### Choreography (`/choreographies`)
+
 ```kotlin
 // Choreography.kt - Wave animation rendering
 @Composable
@@ -144,6 +154,7 @@ fun ChoreographyView(
 ```
 
 #### Map Components (`/map`)
+
 ```kotlin
 // AndroidEventMap.kt - MapLibre integration
 @Composable
@@ -165,6 +176,7 @@ fun AndroidEventMap(
 ### 🧠 ViewModels (`/viewmodels`)
 
 #### EventsViewModel
+
 ```kotlin
 class EventsViewModel : ViewModel() {
     private val eventsFlow = MutableStateFlow<List<WWWEvent>>(emptyList())
@@ -180,6 +192,7 @@ class EventsViewModel : ViewModel() {
 ```
 
 #### MapViewModel
+
 ```kotlin
 class MapViewModel : ViewModel() {
     fun loadCityMap(cityName: String) {
@@ -190,11 +203,13 @@ class MapViewModel : ViewModel() {
 ```
 
 ### 🎯 Theme (`/theme`)
+
 - `Color.kt` - App color palette
 - `Type.kt` - Typography definitions
 - `Theme.kt` - Main theme configuration
 
 ### 🔧 Utils (`/utils`)
+
 - `LocationAccessHelpers` - Location permission handling
 - `MapAvailabilityChecker` - Dynamic feature availability
 - `CloseableCoroutineScope` - Coroutine utilities
@@ -203,6 +218,7 @@ class MapViewModel : ViewModel() {
 ## Configuration
 
 ### Build Setup (`build.gradle.kts`)
+
 ```kotlin
 android {
     namespace = "com.worldwidewaves"
@@ -242,6 +258,7 @@ dependencies {
 ```
 
 ### Key Dependencies
+
 - **Shared KMP module** - Business logic
 - **Compose Multiplatform** - UI framework
 - **MapLibre Android** - Offline mapping
@@ -252,6 +269,7 @@ dependencies {
 ## Development Patterns
 
 ### Consuming Shared Module
+
 ```kotlin
 class EventsViewModel : ViewModel() {
     private val eventObserver: WWWEventObserver by inject()
@@ -267,6 +285,7 @@ class EventsViewModel : ViewModel() {
 ```
 
 ### MapLibre Integration
+
 ```kotlin
 // Load offline map for city
 private fun setupOfflineMap(cityName: String) {
@@ -282,6 +301,7 @@ private fun setupOfflineMap(cityName: String) {
 ```
 
 ### Choreography Integration
+
 ```kotlin
 @Composable
 fun WaveScreen(event: WWWEvent) {
@@ -304,6 +324,7 @@ fun WaveScreen(event: WWWEvent) {
 ## Testing
 
 ### Android Unit Tests
+
 ```kotlin
 @Test
 fun testEventViewModel() {
@@ -316,6 +337,7 @@ fun testEventViewModel() {
 ```
 
 ### UI Tests (Future)
+
 ```kotlin
 @Test
 fun testEventNavigation() {
@@ -334,6 +356,7 @@ fun testEventNavigation() {
 ## Running the App
 
 ### Debug Build
+
 ```bash
 # Build and install debug APK
 ./gradlew :composeApp:assembleDebug
@@ -344,6 +367,7 @@ fun testEventNavigation() {
 ```
 
 ### Release Build
+
 ```bash
 # Build optimized release APK
 ./gradlew :composeApp:assembleRelease
@@ -355,6 +379,7 @@ fun testEventNavigation() {
 ## Dynamic Features
 
 ### City Map Loading
+
 ```kotlin
 class MapAvailabilityChecker {
     fun isAvailable(cityName: String): Boolean {
@@ -374,6 +399,7 @@ class MapAvailabilityChecker {
 ```
 
 ### On-Demand Loading
+
 - Maps are loaded when user requests specific city
 - Reduces initial app size significantly
 - Graceful fallback when map unavailable
@@ -382,18 +408,21 @@ class MapAvailabilityChecker {
 ## Adding New Features
 
 ### New Activity
+
 1. Create activity class extending appropriate base class
 2. Add to `AndroidManifest.xml`
 3. Update navigation logic
 4. Add corresponding Compose screens
 
 ### New Compose Screen
+
 1. Create `@Composable` function
 2. Add to appropriate package (`/tabs`, `/common`, etc.)
 3. Integrate with navigation
 4. Add preview functions for development
 
 ### New ViewModel
+
 1. Extend `ViewModel`
 2. Inject shared module dependencies
 3. Expose `StateFlow`/`LiveData` for UI
@@ -402,12 +431,14 @@ class MapAvailabilityChecker {
 ## Troubleshooting
 
 ### Common Issues
+
 1. **Dynamic feature not loading**: Check module is listed in `dynamicFeatures`
 2. **Compose preview issues**: Verify preview parameters
 3. **Map not rendering**: Check offline tiles path and availability
 4. **Navigation issues**: Verify activity declarations in manifest
 
 ### Debug Tips
+
 ```bash
 # Check APK dynamic features
 ./gradlew :composeApp:analyzeDebugBundle

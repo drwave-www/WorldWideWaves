@@ -14,14 +14,17 @@ This approach prevents invalid states rather than correcting them after-the-fact
 ## Architecture Overview
 
 ### Layer 1: MapBoundsEnforcer (Platform-Independent Logic)
+
 **File**: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapBoundsEnforcer.kt`
 
 **Responsibility**:
+
 - Calculate constraint bounds (padded or zero)
 - Manage viewport padding logic
 - Track constraint state transitions
 
 **Key Methods**:
+
 ```kotlin
 fun applyConstraints()                    // Entry point, handles both modes
 fun calculateConstraintBounds()           // Returns padded bounds based on mode
@@ -29,9 +32,11 @@ private fun calculateVisibleRegionPadding() // WINDOW vs BOUNDS mode logic
 ```
 
 ### Layer 2: MapLibreAdapter (Platform Interface)
+
 **File**: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapLibreAdapter.kt`
 
 **Defines Interface**:
+
 ```kotlin
 fun setBoundsForCameraTarget(
     constraintBounds: BoundingBox,
@@ -43,9 +48,11 @@ fun setMaxZoomPreference(maxZoom: Double)
 ```
 
 ### Layer 3: AndroidMapLibreAdapter (Android Implementation)
+
 **File**: `composeApp/src/androidMain/kotlin/com/worldwidewaves/map/AndroidMapLibreAdapter.kt`
 
 **Responsibilities**:
+
 - Calculate min zoom from MapLibre camera API
 - Set bounds and min zoom on native MapLibre
 - Setup preventive gesture clamping listeners
@@ -55,9 +62,11 @@ fun setMaxZoomPreference(maxZoom: Double)
 ## Mode-Specific Constraint Logic
 
 ### BOUNDS Mode (Event Detail Screen)
+
 **Configuration**: `MapCameraPosition.BOUNDS`, gestures disabled
 
 **Constraint Application**:
+
 1. **Zero Padding**: `calculateVisibleRegionPadding()` returns (0, 0)
 2. **Constraint Bounds** = Event bounds (unchanged)
 3. **Min Zoom Calculation**:
@@ -69,10 +78,13 @@ fun setMaxZoomPreference(maxZoom: Double)
 **Result**: Entire event area always visible, no panning allowed
 
 ### WINDOW Mode (Full Map Screen)
+
 **Configuration**: `MapCameraPosition.WINDOW`, gestures enabled
 
 **Constraint Application**:
+
 1. **Viewport-Based Padding**:
+
    ```kotlin
    // Calculate current viewport dimensions
    viewportHalfHeight = (viewportNE.lat - viewportSW.lat) / 2
@@ -80,6 +92,7 @@ fun setMaxZoomPreference(maxZoom: Double)
 
    // Result: padding shrinks bounds by viewport size
    ```
+
 2. **Constraint Bounds** = Event bounds shrunk by viewport half-size
 3. **Min Zoom Calculation**:
    - Compares event aspect ratio to screen aspect ratio
@@ -139,6 +152,7 @@ calculatedMinZoom = cameraPosition.zoom
 ### Why No Safety Margin?
 
 **Previous Code** (commented out):
+
 ```kotlin
 // ZOOM_SAFETY_MARGIN removed - base min zoom calculation already ensures event fits
 // The min(zoomForWidth, zoomForHeight) ensures BOTH dimensions fit in viewport
@@ -151,6 +165,7 @@ The min() logic already prevents pixels outside event area - additional margin w
 ## Preventing Gesture Overflow (WINDOW Mode Only)
 
 ### Setup: Called Once
+
 ```kotlin
 private fun setupPreventiveGestureConstraints() {
     // Track gesture type (user gesture vs programmatic animation)
@@ -175,6 +190,7 @@ private fun setupPreventiveGestureConstraints() {
 ```
 
 ### Viewport Validation
+
 ```kotlin
 private fun isViewportWithinBounds(viewport: BoundingBox, eventBounds: BoundingBox): Boolean {
     return viewport.southLatitude >= eventBounds.southwest.latitude &&
@@ -185,6 +201,7 @@ private fun isViewportWithinBounds(viewport: BoundingBox, eventBounds: BoundingB
 ```
 
 ### Camera Clamping
+
 ```kotlin
 private fun clampCameraToKeepViewportInside(
     currentCamera: Position,
@@ -216,6 +233,7 @@ private fun clampCameraToKeepViewportInside(
 ## Constraint State Transitions
 
 ### Initial Setup
+
 ```kotlin
 // In AbstractEventMap.moveToWindowBounds()
 constraintManager = MapBoundsEnforcer(
@@ -229,6 +247,7 @@ constraintManager?.applyConstraints()
 ```
 
 ### Dynamic Recalculation
+
 MapBoundsEnforcer registers a camera-idle listener that:
 
 1. **Detects significant viewport changes** (zoom changes, orientation)
@@ -251,6 +270,7 @@ mapLibreAdapter.addOnCameraIdleListener {
 ```
 
 ### Bounds Similarity Check
+
 ```kotlin
 private fun boundsAreSimilar(bounds1: BoundingBox, bounds2: BoundingBox): Boolean {
     val tolerance = 0.001 // 0.1% tolerance
@@ -307,11 +327,13 @@ suspend fun moveToWindowBounds() {
 ## Max Zoom Handling
 
 **Simple Rule**: Set from event configuration
+
 ```kotlin
 mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)  // Usually 16
 ```
 
 **Applied in**:
+
 - `moveToMapBounds()` after min zoom is set
 - `moveToWindowBounds()` after constraints applied
 - Initial `setupMap()` callback
@@ -323,6 +345,7 @@ mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)  // Usually 16
 ## Critical Implementation Details
 
 ### 1. Padding Clamping (iOS Compatibility)
+
 ```kotlin
 // Prevent bounds inversion when viewport > event
 val maxLatPadding = eventLatSpan * 0.49  // Use 49%, not 50%
@@ -335,6 +358,7 @@ val effectiveLngPadding = min(padding.lngPadding, maxLngPadding)
 If padding >= 50% of event size, bounds would have SW > NE (invalid).
 
 ### 2. Min Zoom Locking
+
 ```kotlin
 private var minZoomLocked = false
 
@@ -346,6 +370,7 @@ if (!minZoomLocked || originalEventBounds != null) {
 ```
 
 ### 3. Suppression During Animations
+
 ```kotlin
 // In AbstractEventMap
 private var suppressCorrections = false
@@ -366,6 +391,7 @@ if (isSuppressed()) {
 Prevents reactive corrections from fighting animations.
 
 ### 4. Gesture Distinction
+
 ```kotlin
 map.addOnCameraMoveStartedListener { reason ->
     isGestureInProgress = when (reason) {
@@ -384,15 +410,19 @@ Only clamps for user gestures, not programmatic animations.
 ## Test Coverage
 
 ### AspectRatioFittingTest.kt
+
 Tests min zoom calculation for various aspect ratio combinations:
+
 - Wide event (Paris 2.84:1) on tall screen → fits by HEIGHT
 - Tall event (Chile 0.25:1) on wide screen → fits by WIDTH
 - Extreme cases (100:1, 1:100) without overflow
 
 ### BoundsWindowModeTest.kt
+
 Tests viewport padding calculation for WINDOW mode
 
 ### RegressionPreventionTest.kt
+
 Tests edge cases and constraint state consistency
 
 ---
@@ -400,24 +430,28 @@ Tests edge cases and constraint state consistency
 ## Key Takeaways for iOS Implementation
 
 ### 1. Min Zoom Must Be Set Immediately
+
 ```
 Do NOT wait for constraint bounds to be set.
 Min zoom must be calculated and set BEFORE first gesture.
 ```
 
 ### 2. Aspect Ratio Fitting Is Critical
+
 ```
 eventAspect vs screenAspect determines which dimension constrains.
 Use min(zoomForWidth, zoomForHeight).
 ```
 
 ### 3. Padding Logic Differs by Mode
+
 ```
 BOUNDS: Zero padding, show entire event
 WINDOW: Viewport-based padding, prevent overflow
 ```
 
 ### 4. Prevent Infinite Loops
+
 ```
 Track "last applied bounds" with 0.1% tolerance.
 Skip redundant updates.
@@ -425,6 +459,7 @@ Lock min zoom after first calculation.
 ```
 
 ### 5. Gesture Clamping Is Optional But Valuable
+
 ```
 Android uses preventive gesture interception.
 iOS delegate might provide equivalent via shouldChangeFrom.

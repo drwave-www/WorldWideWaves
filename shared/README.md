@@ -29,9 +29,11 @@ shared/
 ## Core Packages
 
 ### 📅 Events (`/events`)
+
 Manages global wave events and their lifecycle.
 
 **Key Classes:**
+
 - `WWWEvents` - Central event repository (singleton-like)
 - `WWWEvent` - Core event data model (implements IWWWEvent)
 - `WWWEventWave` - Wave-specific event data
@@ -39,6 +41,7 @@ Manages global wave events and their lifecycle.
 - `WWWEventObserver` - Event state monitoring and updates
 
 **Usage:**
+
 ```kotlin
 // Load events with callbacks
 WWWEvents.loadEvents(
@@ -61,15 +64,18 @@ val nearbyEvents = currentEvents.filter {
 val event = WWWEvents.getEventById("paris_2025_09_15")
 ```
 
-### 🎭 Choreographies (`/choreographies`) 
+### 🎭 Choreographies (`/choreographies`)
+
 Frame-based animation system for synchronized waves.
 
 **Key Classes:**
+
 - `ChoreographyManager` - Central animation coordinator
 - `ChoreographyFrame` - Individual animation frame
 - `ChoreographySequence` - Sequence of frames over time
 
 **Usage:**
+
 ```kotlin
 // Get current warming sequence during event buildup
 val warmingSequence = choreographyManager.getCurrentWarmingSequence(event.startTime)
@@ -88,14 +94,17 @@ warmingSequence?.let { sequence ->
 ```
 
 ### 🗺️ Map (`/map`)
+
 Geographic calculations and map utilities.
 
 **Key Classes:**
+
 - `WWWLocationProvider` - Abstract location service
 - `MapCoordinates` - Coordinate utilities
 - `MapBounds` - Bounding box calculations
 
 **Usage:**
+
 ```kotlin
 // Calculate distance between points
 val distance = coordinates1.distanceTo(coordinates2)
@@ -110,32 +119,40 @@ locationProvider.getCurrentLocation { location ->
 ```
 
 ### 🔊 Sound (`/sound`)
+
 Audio coordination for wave experiences.
 
 **Key Classes:**
+
 - `SoundChoreographyManager` - Audio-visual synchronization
 - `WWWSoundPlayer` - Cross-platform audio interface
 
 ### 📊 Data (`/data`)
+
 Shared data models and serialization.
 
 **Key Classes:**
+
 - Core data structures used across platforms
 - JSON serialization configurations
 - Network response models
 
 ### 🔧 Utils (`/utils`)
+
 Common utilities and helpers.
 
 **Key Classes:**
+
 - `Helpers` - General utility functions
 - `ImageResolver` - Cross-platform image loading
 - `ByteArrayReader` - Data parsing utilities
 
 ### 🏗️ DI (`/di`)
+
 Dependency injection setup for shared components.
 
 **Modules:**
+
 - `CommonModule` - Core shared services
 - `DatastoreModule` - Settings and preferences
 - `HelpersModule` - Utility dependencies
@@ -143,6 +160,7 @@ Dependency injection setup for shared components.
 ## Platform-Specific Code
 
 ### Android (`androidMain`)
+
 ```kotlin
 // Example: Android-specific location provider
 actual class AndroidLocationProvider : WWWLocationProvider {
@@ -153,6 +171,7 @@ actual class AndroidLocationProvider : WWWLocationProvider {
 ```
 
 ### iOS (`iosMain`)
+
 ```swift
 // iOS consumes shared code through generated framework
 import Shared
@@ -166,6 +185,7 @@ eventObserver.loadEvents { events in
 ## Shared Resources (`composeResources`)
 
 ### Structure
+
 ```
 composeResources/
 ├── drawable/                # Images and icons
@@ -178,6 +198,7 @@ composeResources/
 ```
 
 ### Usage
+
 ```kotlin
 // Access shared resources
 val logo = Res.drawable.www_logo_transparent
@@ -193,6 +214,7 @@ Image(
 ## Configuration
 
 ### Build Setup (`build.gradle.kts`)
+
 ```kotlin
 kotlin {
     // Target platforms
@@ -210,6 +232,7 @@ kotlin {
 ```
 
 ### Key Dependencies
+
 - **kotlinx.serialization** - JSON handling
 - **kotlinx.coroutines** - Async programming
 - **kotlinx.datetime** - Date/time operations
@@ -221,6 +244,7 @@ kotlin {
 ## Development Patterns
 
 ### Expect/Actual Pattern
+
 ```kotlin
 // Common interface
 expect class PlatformLocationProvider : WWWLocationProvider
@@ -237,6 +261,7 @@ actual class PlatformLocationProvider : WWWLocationProvider {
 ```
 
 ### Resource Access
+
 ```kotlin
 // Load shared strings
 val welcomeText = getString(Res.string.welcome_message)
@@ -251,6 +276,7 @@ val styleJson = readFileAsString(Res.files.map_style)
 ## Testing
 
 ### Common Tests (`commonTest`)
+
 ```kotlin
 class EventTests {
     @Test
@@ -262,6 +288,7 @@ class EventTests {
 ```
 
 ### Android Tests (`androidUnitTest`)
+
 ```kotlin
 class AndroidLocationTests {
     @Test
@@ -272,6 +299,7 @@ class AndroidLocationTests {
 ```
 
 ### Running Tests
+
 ```bash
 # All shared tests
 ./gradlew :shared:testDebugUnitTest
@@ -286,6 +314,7 @@ class AndroidLocationTests {
 ## Adding New Features
 
 ### 1. Core Logic (commonMain)
+
 ```kotlin
 // Add to appropriate package
 class NewFeature {
@@ -296,6 +325,7 @@ class NewFeature {
 ```
 
 ### 2. Platform Interfaces (expect/actual)
+
 ```kotlin
 // commonMain - interface
 expect class PlatformSpecificService {
@@ -318,7 +348,9 @@ actual class PlatformSpecificService {
 ```
 
 ### 3. Add Dependencies
+
 Update `build.gradle.kts` commonMain dependencies:
+
 ```kotlin
 commonMain.dependencies {
     implementation("new.library:artifact:version")
@@ -326,11 +358,13 @@ commonMain.dependencies {
 ```
 
 ### 4. Add Tests
+
 Create tests in `commonTest/` for business logic and platform-specific tests as needed.
 
 ## iOS Integration
 
 ### Framework Generation
+
 The module generates an iOS framework (`Shared.framework`) that iOS code can import:
 
 ```swift
@@ -342,7 +376,9 @@ let choreographyManager = ChoreographyManager()
 ```
 
 ### Resource Access in iOS
+
 Shared resources are accessible through generated iOS bundle:
+
 ```swift
 // Access shared images
 let image = SharedRes.images().waves_icon.toUIImage()
@@ -354,12 +390,14 @@ let text = SharedRes.strings().welcome_message.localized()
 ## Troubleshooting
 
 ### Common Issues
+
 1. **Build failures**: Check all platforms have required dependencies
 2. **Resource not found**: Verify resource is in correct composeResources folder
 3. **iOS framework issues**: Clean and rebuild shared module
 4. **expect/actual mismatch**: Ensure all expect declarations have actual implementations
 
 ### Debug Tips
+
 ```bash
 # Clean shared module
 ./gradlew :shared:clean

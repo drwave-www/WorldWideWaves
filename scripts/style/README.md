@@ -5,6 +5,7 @@ Map style generation and customization tools for WorldWideWaves offline maps.
 ## Purpose
 
 Creates and manages custom MapLibre styles:
+
 - **Custom map styles** optimized for wave visualization
 - **Theme variations** (light, dark, high contrast)
 - **Style optimization** for mobile rendering
@@ -24,6 +25,7 @@ style/
 ## Usage
 
 ### Generate Base Style
+
 ```bash
 # Create main app style from template
 python generate_style.py --template base --output www_style.json
@@ -33,6 +35,7 @@ python generate_style.py --template base --tiles-url "mbtiles:///{city}.mbtiles"
 ```
 
 ### Create Theme Variants
+
 ```bash
 # Generate light and dark variants
 python theme_variants.py www_style.json
@@ -41,6 +44,7 @@ python theme_variants.py www_style.json
 ```
 
 ### Optimize for Mobile
+
 ```bash
 # Optimize style for mobile rendering performance
 python optimize_style.py www_style.json --target mobile
@@ -51,18 +55,21 @@ python optimize_style.py www_style.json --target mobile
 ## Style Features
 
 ### Wave-Optimized Design
+
 - **Subtle base map** that doesn't compete with wave overlays
 - **High contrast boundaries** for city limits
 - **Muted colors** for roads and buildings
 - **Clear water features** for coastal cities
 
 ### Performance Optimizations
+
 - **Minimal layer count** for faster rendering
 - **Optimized zoom ranges** for mobile viewports
 - **Simplified expressions** to reduce GPU load
 - **Efficient sprite usage**
 
 ### Accessibility
+
 - **High contrast mode** for visibility issues
 - **Colorblind-friendly palette**
 - **Large text sizes** for readability
@@ -71,6 +78,7 @@ python optimize_style.py www_style.json --target mobile
 ## Style Configuration
 
 ### Base Style Template
+
 ```json
 {
   "version": 8,
@@ -94,6 +102,7 @@ python optimize_style.py www_style.json --target mobile
 ```
 
 ### Wave Overlay Layers
+
 ```json
 {
   "id": "wave-radius",
@@ -109,6 +118,7 @@ python optimize_style.py www_style.json --target mobile
 ```
 
 ### City Boundary Layer
+
 ```json
 {
   "id": "city-boundary",
@@ -125,6 +135,7 @@ python optimize_style.py www_style.json --target mobile
 ## Theme Variants
 
 ### Light Theme
+
 ```json
 {
   "background_color": "#ffffff",
@@ -136,6 +147,7 @@ python optimize_style.py www_style.json --target mobile
 ```
 
 ### Dark Theme  
+
 ```json
 {
   "background_color": "#1a1a1a",
@@ -147,6 +159,7 @@ python optimize_style.py www_style.json --target mobile
 ```
 
 ### High Contrast Theme
+
 ```json
 {
   "background_color": "#000000",
@@ -160,6 +173,7 @@ python optimize_style.py www_style.json --target mobile
 ## Style Generation
 
 ### Template System
+
 ```python
 def generate_style(template_name, config):
     # Load base template
@@ -178,6 +192,7 @@ def generate_style(template_name, config):
 ```
 
 ### Dynamic Configuration
+
 ```python
 # Generate city-specific styles
 for city in cities:
@@ -195,6 +210,7 @@ for city in cities:
 ## Integration with Maps
 
 ### Android MapLibre
+
 ```kotlin
 // Load custom style in Android app
 fun loadCustomStyle(mapView: MapView, cityName: String) {
@@ -204,6 +220,7 @@ fun loadCustomStyle(mapView: MapView, cityName: String) {
 ```
 
 ### iOS MapLibre
+
 ```swift
 // Load custom style in iOS app
 func loadCustomStyle(mapView: MLNMapView, cityName: String) {
@@ -214,6 +231,7 @@ func loadCustomStyle(mapView: MLNMapView, cityName: String) {
 ```
 
 ### Dynamic Theme Switching
+
 ```kotlin
 // Switch between light/dark themes
 fun switchTheme(mapView: MapView, isDark: Boolean) {
@@ -226,6 +244,7 @@ fun switchTheme(mapView: MapView, isDark: Boolean) {
 ## Style Validation
 
 ### Schema Compliance
+
 ```python
 # Validate against MapLibre style spec
 def validate_style(style_json):
@@ -241,6 +260,7 @@ def validate_style(style_json):
 ```
 
 ### Performance Testing
+
 ```python
 # Test style performance metrics
 def analyze_style_performance(style):
@@ -256,6 +276,7 @@ def analyze_style_performance(style):
 ## Optimization Techniques
 
 ### Layer Optimization
+
 ```python
 # Remove unnecessary layers for mobile
 def optimize_layers(style):
@@ -270,6 +291,7 @@ def optimize_layers(style):
 ```
 
 ### Expression Simplification
+
 ```python
 # Simplify complex expressions
 def simplify_expressions(layer):
@@ -281,6 +303,7 @@ def simplify_expressions(layer):
 ```
 
 ### Resource Optimization
+
 ```python
 # Optimize sprite and glyph usage
 def optimize_resources(style):
@@ -298,6 +321,7 @@ def optimize_resources(style):
 ## Build Integration
 
 ### Automatic Style Generation
+
 ```bash
 # Generate all city styles
 ./generate_all_styles.sh
@@ -307,6 +331,7 @@ cp generated_styles/*.json ../shared/src/commonMain/composeResources/files/style
 ```
 
 ### CI/CD Integration
+
 ```yaml
 # GitHub Actions
 - name: Generate Map Styles
@@ -323,11 +348,13 @@ cp generated_styles/*.json ../shared/src/commonMain/composeResources/files/style
 ## Tools and Dependencies
 
 ### Required Packages
+
 ```bash
 pip install jsonschema requests pillow maplibre-gl-native
 ```
 
 ### MapLibre Tools
+
 ```bash
 # MapLibre style validation
 npm install -g @maplibre/maplibre-gl-style-spec
@@ -341,18 +368,21 @@ gl-style-validate style.json
 ### Common Issues
 
 1. **Invalid style schema**
+
    ```bash
    # Validate against official schema
    python validate_style.py --schema maplibre-gl-style.json
    ```
 
 2. **Missing resources**
+
    ```bash
    # Check for missing sprites/glyphs
    python check_resources.py style.json
    ```
 
 3. **Poor mobile performance**
+
    ```bash
    # Analyze and optimize
    python analyze_performance.py style.json
@@ -360,6 +390,7 @@ gl-style-validate style.json
    ```
 
 ### Debug Mode
+
 ```bash
 # Generate style with debug information
 DEBUG=1 python generate_style.py --template base --verbose
@@ -368,6 +399,7 @@ DEBUG=1 python generate_style.py --template base --verbose
 ## Style Customization
 
 ### Brand Colors
+
 ```python
 # Apply brand colors to style
 BRAND_COLORS = {
@@ -386,6 +418,7 @@ def apply_branding(style, colors):
 ```
 
 ### City-Specific Customization
+
 ```python
 # Customize style for specific cities
 CITY_CUSTOMIZATIONS = {

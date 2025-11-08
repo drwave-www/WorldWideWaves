@@ -36,17 +36,20 @@
 ## Key iOS Concepts
 
 ### Deadlock Prevention
+
 - Never use `object : KoinComponent` inside `@Composable` functions
 - Use `IOSSafeDI` singleton or parameter injection
 - No coroutine launches in `init{}` blocks
 - See [CLAUDE_iOS.md](../../CLAUDE_iOS.md) for full rules
 
 ### Map Integration
+
 - iOS uses MapLibre 6.8.0 via Swift wrappers
 - 95% feature parity with Android
 - SwiftNativeMapViewProvider bridges Kotlin↔Swift
 
 ### Testing
+
 - UI tests: `iosApp/worldwidewavesUITests/`
 - Unit tests: Shared with Android in `shared/src/commonTest/`
 - Run: `xcodebuild test` or via Xcode

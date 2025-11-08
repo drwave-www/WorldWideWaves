@@ -10,6 +10,7 @@
 ## 🚀 Quick Navigation
 
 ### For New Contributors ("Start Here!")
+
 1. **[README.md](../README.md)** - Project overview and quick start
 2. **[Environment Setup](environment-setup.md)** - Development environment setup
 3. **[Development Workflow](development.md)** - Daily development guide
@@ -17,6 +18,7 @@
 5. **[CLAUDE.md](../CLAUDE.md)** - AI assistant instructions and patterns
 
 ### For Daily Development
+
 | I want to... | Documentation |
 |--------------|--------------|
 | Build the app | [Development Workflow](development.md#build-commands) |
@@ -30,6 +32,7 @@
 | Deploy to production | [Operations Guide](operations.md) |
 
 ### For Architects & Technical Leads
+
 | Topic | Documentation |
 |-------|--------------|
 | System architecture | [Architecture](architecture.md) |
@@ -46,6 +49,7 @@
 ### 1. Getting Started
 
 #### Essential First Reads
+
 | Document | Description | Size | Priority |
 |----------|-------------|------|----------|
 | [README.md](../README.md) | Project overview, quick start, tech stack | 450 lines | **CRITICAL** |
@@ -56,6 +60,7 @@
 | [Contributing Guidelines](contributing.md) | Contribution process, PR requirements | 420 lines | High |
 
 #### Platform-Specific Setup
+
 | Document | Description |
 |----------|-------------|
 | [Linux Setup Guide](setup/linux-setup.md) | Ubuntu/Fedora/Arch setup, KVM acceleration |
@@ -71,6 +76,7 @@
 ### 2. Architecture & Design
 
 #### Core Architecture
+
 | Document | Description | Size | Focus |
 |----------|-------------|------|-------|
 | [Architecture](architecture.md) | System design, components, data flows | 880 lines | **CRITICAL** |
@@ -79,6 +85,7 @@
 | [Architecture README](architecture/README.md) | Architecture directory index | 120 lines | Index |
 
 #### Design Patterns
+
 | Document | Description | Focus |
 |----------|-------------|-------|
 | [iOS Safety Patterns](patterns/ios-safety-patterns.md) | iOS deadlock prevention, DI safety | iOS threading |
@@ -89,6 +96,7 @@
 | [Patterns README](patterns/README.md) | Patterns directory index | Index |
 
 #### Code Style
+
 | Document | Description |
 |----------|-------------|
 | [Class Organization](code-style/class-organization.md) | Class structure standards, companion objects |
@@ -100,6 +108,7 @@
 ### 3. Testing
 
 #### Testing Strategy & Guides
+
 | Document | Description | Size | Focus |
 |----------|-------------|------|-------|
 | [Testing Strategy](testing-strategy.md) | Overall testing approach, patterns | 520 lines | Strategy |
@@ -116,6 +125,7 @@
 ### 4. Platform-Specific Documentation
 
 #### iOS Documentation
+
 | Document | Description | Size | Priority |
 |----------|-------------|------|----------|
 | [CLAUDE_iOS.md](../CLAUDE_iOS.md) | Complete iOS development guide | 850 lines | **CRITICAL** |
@@ -129,11 +139,13 @@
 | [iOS README](ios/README.md) | iOS documentation index | 210 lines | Index |
 
 ### iOS Cinterop & Platform APIs
+
 - [Cinterop Memory Safety Patterns](ios/cinterop-memory-safety-patterns.md) - **CRITICAL** - usePinned, useContents, addressOf
 - [Swift-Kotlin Bridging Guide](ios/swift-kotlin-bridging-guide.md) - Type conversions, @objc, MapWrapperRegistry
 - [Platform API Usage Guide](ios/platform-api-usage-guide.md) - UIKit/Foundation/CoreLocation threading
 
 #### Android Documentation
+
 | Document | Description | Size |
 |----------|-------------|------|
 | [Android Development Guide](android/android-development-guide.md) | Complete Android development guide | 680 lines |
@@ -149,17 +161,20 @@
 ### 5. Features & Implementation
 
 #### Core Features
+
 | Document | Description | Size |
 |----------|-------------|------|
 | [Simulation Mode](features/simulation-mode.md) | Time acceleration and position simulation for testing | 730 lines |
 | [Choreography System](features/choreography-system.md) | Wave choreography and timing system | 1,020 lines |
 
 #### Accessibility
+
 | Document | Description | Size |
 |----------|-------------|------|
 | [Accessibility Guide](accessibility-guide.md) | WCAG 2.1 AA compliance patterns | 1,280 lines |
 
 #### Full Map Analysis
+
 | Document | Description |
 |----------|-------------|
 | [Full Map Analysis Index](full-map-analysis-index.md) | Index of all map-related documentation |
@@ -201,12 +216,14 @@
 ## 📚 Complete Alphabetical File List
 
 ### Root Documentation (/)
+
 - [CLAUDE.md](../CLAUDE.md) - AI assistant instructions (1,550 lines) ⭐
 - [CLAUDE_iOS.md](../CLAUDE_iOS.md) - iOS development guide (850 lines) ⭐
 - [CLAUDE_MD_REORGANIZATION_SUMMARY.md](../CLAUDE_MD_REORGANIZATION_SUMMARY.md) - Doc reorganization summary
 - [README.md](../README.md) - Project overview (450 lines) ⭐
 
 ### Core Documentation (docs/)
+
 - [A_PLUS_GRADE_ACTION_PLAN.md](A_PLUS_GRADE_ACTION_PLAN.md) - Production excellence checklist
 - [accessibility-guide.md](accessibility-guide.md) - WCAG 2.1 AA compliance (1,280 lines) ⭐
 - [architecture.md](architecture.md) - System architecture (880 lines) ⭐
@@ -231,6 +248,7 @@
 - [ui-testing-guide.md](ui-testing-guide.md) - UI testing (420 lines)
 
 ### Android Documentation (docs/android/)
+
 - [android-constraint-code-patterns.md](android/android-constraint-code-patterns.md) - Constraint patterns
 - [android-development-guide.md](android/android-development-guide.md) - Android guide (680 lines)
 - [android-map-constraint-analysis.md](android/android-map-constraint-analysis.md) - Map constraints
@@ -240,19 +258,23 @@
 - [README.md](android/README.md) - Android documentation index
 
 ### Architecture Documentation (docs/architecture/)
+
 - [map-architecture-analysis.md](architecture/map-architecture-analysis.md) - Map architecture (1,200 lines) ⭐
 - [map-architecture-analysis-verification-report.md](architecture/map-architecture-analysis-verification-report.md) - Verification
 - [README.md](architecture/README.md) - Architecture index
 
 ### Code Style Documentation (docs/code-style/)
+
 - [class-organization.md](code-style/class-organization.md) - Class structure standards
 
 ### Development Documentation (docs/development/)
+
 - [next-session-prompt.md](development/next-session-prompt.md) - Session template
 - [option-a-fallback-todo.md](development/option-a-fallback-todo.md) - Alternative approach
 - [README.md](development/README.md) - Development index
 
 ### iOS Documentation (docs/ios/)
+
 - [critical-fixes-completed.md](ios/critical-fixes-completed.md) - Production fixes (420 lines)
 - [ios-android-map-parity-gap-analysis.md](ios/ios-android-map-parity-gap-analysis.md) - Parity analysis (2,150 lines) ⭐
 - [ios-debugging-guide.md](ios/ios-debugging-guide.md) - Debugging guide (780 lines) ⭐
@@ -263,6 +285,7 @@
 - [README.md](ios/README.md) - iOS documentation index (210 lines)
 
 ### Patterns Documentation (docs/patterns/)
+
 - [di-patterns.md](patterns/di-patterns.md) - Dependency injection patterns
 - [ios-safety-patterns.md](patterns/ios-safety-patterns.md) - iOS safety patterns ⭐
 - [null-safety-patterns.md](patterns/null-safety-patterns.md) - Null safety patterns
@@ -271,6 +294,7 @@
 - [state-management-patterns.md](patterns/state-management-patterns.md) - State patterns
 
 ### Setup Documentation (docs/setup/)
+
 - [firebase-ios-auto-generation.md](setup/firebase-ios-auto-generation.md) - Auto config
 - [firebase-ios-setup.md](setup/firebase-ios-setup.md) - iOS Firebase setup
 - [firebase-setup.md](setup/firebase-setup.md) - Firebase configuration
@@ -280,6 +304,7 @@
 - [xcode-cleanup-guide.md](setup/xcode-cleanup-guide.md) - Xcode maintenance
 
 ### Testing Documentation (docs/testing/)
+
 - [README.md](testing/README.md) - Testing index
 - [test-patterns.md](testing/test-patterns.md) - Common test patterns
 
@@ -290,13 +315,16 @@
 Historical documentation (session summaries, refactoring reports, test results) is preserved in the archive:
 
 ### Archive Overview
+
 - **[Archive README](archive/README.md)** - Complete archive index and retrieval instructions
 - **[Archive Review 2025-10-27](archive/ARCHIVE_REVIEW_2025-10-27.md)** - Recent archive audit
 
 ### Archive Categories
 
 #### Session Summaries (archive/session-summaries/)
+
 17 files documenting development sessions, refactoring efforts, and testing phases:
+
 - AUTONOMOUS_SESSION_COMPLETE_SUMMARY.md
 - CLAUDE_EVALUATION.md
 - CLEANUP_AND_VALIDATION_SUMMARY.md
@@ -321,7 +349,9 @@ Historical documentation (session summaries, refactoring reports, test results) 
 - prompt_next_session.md
 
 #### iOS Map Refactor (archive/ios-map-refactor/)
+
 13 files documenting the iOS map refactoring effort:
+
 - ANDROID_VS_IOS_EVENTMAP_ANALYSIS.md
 - iOS_CAMERA_COMMAND_FLOW.md
 - iOS_CAMERA_COMMAND_QUEUE_FIX.md
@@ -336,7 +366,9 @@ Historical documentation (session summaries, refactoring reports, test results) 
 - SESSION_SUMMARY_iOS_MAP_REFACTOR.md
 
 #### iOS Gesture Fixes (archive/ios-gesture-fixes-2025-10-23/)
+
 9 files documenting iOS gesture constraint fixes:
+
 - iOS_EDGE_TOUCH_FIX_PLAN.md
 - iOS_FINAL_FIX_COMPLETE.md
 - iOS_FULLMAP_CORRECT_FIX.md
@@ -348,7 +380,9 @@ Historical documentation (session summaries, refactoring reports, test results) 
 - ZERO_PADDING_FIX_VERIFICATION.md
 
 #### Testing Reports (archive/testing-reports/)
+
 8 files documenting test results and verification:
+
 - E2E_TEST_RESULTS.md
 - FINAL_COMPLETION_REPORT.md
 - iOS_ANDROID_PARITY_VERIFICATION.md
@@ -359,7 +393,9 @@ Historical documentation (session summaries, refactoring reports, test results) 
 - TESTING_CHECKLIST.md
 
 #### Setup Guides (archive/setup-guides/)
+
 4 archived setup guides:
+
 - FIREBASE_TEST_LAB_GUIDE.md
 - iOS_FONT_SETUP_INSTRUCTIONS.md
 - PRE_PUSH_VERIFICATION.md
@@ -370,10 +406,12 @@ Historical documentation (session summaries, refactoring reports, test results) 
 ## 🗂️ Component READMEs
 
 ### Module Documentation
+
 - [composeApp README](../composeApp/README.md) - Main application module
 - [shared README](../shared/README.md) - Shared Kotlin Multiplatform code
 
 ### Scripts & Tools
+
 - [Scripts README](../scripts/README.md) - Scripts overview
 - [Maps Scripts README](../scripts/maps/README.md) - Map tile generation
 - [Polygons Scripts README](../scripts/polygons/README.md) - GeoJSON polygon tools
@@ -384,10 +422,12 @@ Historical documentation (session summaries, refactoring reports, test results) 
 - [Video Translate Scripts README](../scripts/video_translate/README.md) - Video translation
 
 ### iOS App
+
 - [iosApp/worldwidewaves/MapLibre README](../iosApp/worldwidewaves/MapLibre/README.md) - iOS MapLibre wrapper
 - [iosApp/worldwidewavesUITests README](../iosApp/worldwidewavesUITests/README.md) - iOS UI tests
 
 ### GitHub
+
 - [GitHub Workflows README](../.github/workflows/README.md) - CI/CD workflows
 - [Pull Request Template](../.github/pull_request_template.md) - PR template
 
@@ -396,6 +436,7 @@ Historical documentation (session summaries, refactoring reports, test results) 
 ## 📊 Documentation Statistics
 
 ### Overall Metrics
+
 - **Total Files**: 116 markdown files
 - **Total Lines**: 54,365+ lines of documentation
 - **Active Documentation**: 75 files
@@ -403,6 +444,7 @@ Historical documentation (session summaries, refactoring reports, test results) 
 - **Last Major Update**: October 27, 2025
 
 ### Documentation Coverage by Category
+
 | Category | Files | Approximate Size |
 |----------|-------|-----------------|
 | iOS-specific | 15 | 9,200 lines |
@@ -416,9 +458,11 @@ Historical documentation (session summaries, refactoring reports, test results) 
 | Other | 19 | 9,365 lines |
 
 ### Most Critical Documents
+
 Documents marked with ⭐ in the lists above are essential reading for their respective audiences.
 
 **Top 10 by Size**:
+
 1. iOS Android Map Parity Gap Analysis (2,150 lines)
 2. Comprehensive Test Specifications (1,850 lines)
 3. Future Work Plan (1,850 lines)
@@ -437,12 +481,14 @@ Documents marked with ⭐ in the lists above are essential reading for their res
 ### By Task
 
 #### "I want to set up my environment"
+
 1. [Environment Setup](environment-setup.md) - Start here
 2. [Linux Setup](setup/linux-setup.md) - If on Linux
 3. [Firebase Setup](setup/firebase-setup.md) - Backend configuration
 4. [Xcode Cleanup Guide](setup/xcode-cleanup-guide.md) - If using Xcode
 
 #### "I want to add a new feature"
+
 1. [Architecture](architecture.md) - Understand system design
 2. [Patterns](patterns/README.md) - Learn common patterns
 3. [Development Workflow](development.md) - Development process
@@ -450,22 +496,26 @@ Documents marked with ⭐ in the lists above are essential reading for their res
 5. [Contributing Guidelines](contributing.md) - Submit PR
 
 #### "I want to fix an iOS deadlock"
+
 1. [iOS Violation Tracker](ios/ios-violation-tracker.md) - Known violations and fixes
 2. [iOS Safety Patterns](patterns/ios-safety-patterns.md) - Prevention patterns
 3. [iOS Debugging Guide](ios/ios-debugging-guide.md) - Debugging techniques
 4. [CLAUDE_iOS.md](../CLAUDE_iOS.md) - Complete iOS guide
 
 #### "I want to improve map functionality"
+
 1. [Map Architecture Analysis](architecture/map-architecture-analysis.md) - Map design
 2. [iOS Android Map Parity](ios/ios-android-map-parity-gap-analysis.md) - Platform comparison
 3. [Android Map Constraint Analysis](android/android-map-constraint-analysis.md) - Android constraints
 4. [Full Map Analysis Index](full-map-analysis-index.md) - All map docs
 
 #### "I want to ensure accessibility compliance"
+
 1. [Accessibility Guide](accessibility-guide.md) - Complete WCAG 2.1 AA guide
 2. [iOS Map Accessibility](ios/ios-map-accessibility.md) - Map-specific accessibility
 
 #### "I want to understand the testing strategy"
+
 1. [Testing Strategy](testing-strategy.md) - Overall approach
 2. [Comprehensive Test Specifications](comprehensive-test-specifications.md) - Detailed specs
 3. [UI Testing Guide](ui-testing-guide.md) - UI testing
@@ -474,29 +524,37 @@ Documents marked with ⭐ in the lists above are essential reading for their res
 ### By Role
 
 #### New Contributor
+
 **Essential Reading (1-2 hours)**:
+
 1. [README.md](../README.md)
 2. [Environment Setup](environment-setup.md)
 3. [Development Workflow](development.md)
 4. [Contributing Guidelines](contributing.md)
 
 **Recommended Reading**:
+
 - [CLAUDE.md](../CLAUDE.md) - AI assistant patterns
 - [Architecture](architecture.md) - System overview
 
 #### Mobile Developer (Day-to-Day)
+
 **Daily Reference**:
+
 1. [Development Workflow](development.md)
 2. [Testing Strategy](testing-strategy.md)
 3. [Logging Guide](logging-guide.md)
 4. [Patterns](patterns/README.md)
 
 **Platform-Specific**:
+
 - **iOS**: [CLAUDE_iOS.md](../CLAUDE_iOS.md), [iOS README](ios/README.md)
 - **Android**: [Android README](android/README.md)
 
 #### iOS Specialist
+
 **Critical Reading**:
+
 1. [CLAUDE_iOS.md](../CLAUDE_iOS.md) - Complete iOS guide
 2. [iOS Violation Tracker](ios/ios-violation-tracker.md) - Deadlock prevention
 3. [iOS Safety Patterns](patterns/ios-safety-patterns.md) - Safety patterns
@@ -504,33 +562,42 @@ Documents marked with ⭐ in the lists above are essential reading for their res
 5. [iOS Debugging Guide](ios/ios-debugging-guide.md) - Debugging
 
 **Advanced Topics**:
+
 - [iOS Android Map Parity](ios/ios-android-map-parity-gap-analysis.md)
 - [iOS Map Accessibility](ios/ios-map-accessibility.md)
 
 #### Android Specialist
+
 **Core Reading**:
+
 1. [Android Development Guide](android/android-development-guide.md)
 2. [Android Map Constraint Analysis](android/android-map-constraint-analysis.md)
 3. [Android Patterns Quick Reference](android/android-patterns-quick-reference.md)
 
 #### Architect / Technical Lead
+
 **Architecture & Design**:
+
 1. [Architecture](architecture.md) - System design
 2. [Map Architecture Analysis](architecture/map-architecture-analysis.md) - Map subsystem
 3. [iOS Android Map Parity](ios/ios-android-map-parity-gap-analysis.md) - Platform parity
 4. [Patterns](patterns/README.md) - Design patterns
 
 **Planning**:
+
 - [Future Work Plan](future-work-plan.md) - Roadmap
 - [A+ Grade Action Plan](A_PLUS_GRADE_ACTION_PLAN.md) - Production excellence
 
 #### DevOps / SRE
+
 **Operations**:
+
 1. [CI/CD Guide](ci-cd.md) - CI/CD pipelines
 2. [Operations Guide](operations.md) - Deployment, monitoring
 3. [GitHub Workflows README](../.github/workflows/README.md) - Workflow details
 
 **Setup**:
+
 - [Firebase Setup](setup/firebase-setup.md) - Backend configuration
 - [Environment Setup](environment-setup.md) - Development setup
 
@@ -539,17 +606,20 @@ Documents marked with ⭐ in the lists above are essential reading for their res
 ## 🏷️ Documentation Tags
 
 ### By Maturity Level
+
 - **Production-Ready**: CLAUDE.md, Architecture, Testing Strategy, Accessibility Guide
 - **Stable**: iOS guides, Android guides, Development Workflow
 - **In Progress**: Future Work Plan, some pattern documents
 - **Historical**: Archive directory
 
 ### By Update Frequency
+
 - **Frequently Updated**: CLAUDE.md, Future Work Plan, iOS Violation Tracker
 - **Stable**: Architecture, Patterns, Testing Strategy
 - **Reference**: API docs, Historical archive
 
 ### By Priority
+
 - **Critical**: CLAUDE.md, README.md, Environment Setup, Development Workflow
 - **High**: Architecture, Testing Strategy, iOS guides
 - **Medium**: Patterns, Operations, CI/CD
@@ -560,21 +630,25 @@ Documents marked with ⭐ in the lists above are essential reading for their res
 ## 🔗 External Resources
 
 ### Kotlin Multiplatform
+
 - [Official KMP Docs](https://kotlinlang.org/docs/multiplatform.html)
 - [Compose Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/)
 - [expect/actual Declarations](https://kotlinlang.org/docs/multiplatform-connect-to-apis.html)
 
 ### Android Development
+
 - [Jetpack Compose](https://developer.android.com/jetpack/compose)
 - [Android Architecture Components](https://developer.android.com/topic/architecture)
 - [MapLibre Android](https://github.com/maplibre/maplibre-gl-native)
 
 ### iOS Development
+
 - [SwiftUI](https://developer.apple.com/xcode/swiftui/)
 - [Calling Kotlin from Swift](https://kotlinlang.org/docs/native-objc-interop.html)
 - [MapLibre iOS](https://github.com/maplibre/maplibre-gl-native)
 
 ### Tools & Frameworks
+
 - [Koin DI](https://insert-koin.io/)
 - [Firebase](https://firebase.google.com/docs)
 - [GitHub Actions](https://docs.github.com/en/actions)
@@ -585,12 +659,14 @@ Documents marked with ⭐ in the lists above are essential reading for their res
 ## 📝 Documentation Maintenance
 
 ### Update Guidelines
+
 - Update documentation when making architectural changes
 - Keep code examples in sync with implementation
 - Validate all links when updating documentation
 - Use Mermaid for diagrams (text-based, version-controllable)
 
 ### Documentation Standards
+
 - **Active voice**: "Use this pattern" not "This pattern should be used"
 - **Concise but complete**: Provide necessary context without verbosity
 - **Code examples**: Include examples for complex concepts
@@ -599,6 +675,7 @@ Documents marked with ⭐ in the lists above are essential reading for their res
 - **Lists**: Numbered for sequential steps, bulleted for unordered items
 
 ### Version Control
+
 - Document major changes in file headers
 - Use semantic versioning for documentation versions
 - Archive outdated documentation to archive/ directory
@@ -609,11 +686,13 @@ Documents marked with ⭐ in the lists above are essential reading for their res
 ## 🆘 Getting Help
 
 ### Documentation Issues
+
 - **Found a broken link?** Open an issue or submit a PR
 - **Documentation unclear?** Open a discussion or issue
 - **Missing documentation?** Check archive or request in issues
 
 ### Project Support
+
 - **Issues**: [GitHub Issues](https://github.com/mglcel/WorldWideWaves/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/mglcel/WorldWideWaves/discussions)
 - **Pull Requests**: See [Contributing Guidelines](contributing.md)

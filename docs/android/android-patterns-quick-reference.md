@@ -78,6 +78,7 @@ THEN:
 ## Padding Calculation
 
 ### BOUNDS Mode
+
 ```
 calculateVisibleRegionPadding() = (0.0, 0.0)
 constraintBounds = eventBounds  // Unchanged
@@ -85,6 +86,7 @@ Result: Entire event always visible
 ```
 
 ### WINDOW Mode
+
 ```
 viewport = getVisibleRegion()
 viewportLatSpan = viewport.ne.lat - viewport.sw.lat
@@ -137,6 +139,7 @@ On each camera move:
 ## State Transition Checklist
 
 ### BOUNDS Mode Setup
+
 - [ ] Create `MapBoundsEnforcer(isWindowMode = false)`
 - [ ] Call `constraintManager.applyConstraints()`
 - [ ] Get min zoom: `mapLibreAdapter.getMinZoomLevel()`
@@ -145,6 +148,7 @@ On each camera move:
 - [ ] Result: Entire event always visible
 
 ### WINDOW Mode Setup
+
 - [ ] Create `MapBoundsEnforcer(isWindowMode = true)`
 - [ ] Call `constraintManager.applyConstraints()`
 - [ ] Set max zoom: `mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)`
@@ -156,6 +160,7 @@ On each camera move:
 ## Critical Implementation Rules
 
 ### 1. Min Zoom Locking
+
 ```
 RULE: Min zoom calculated ONCE, never recalculated
 
@@ -176,6 +181,7 @@ if (shouldRecalculate) {
 ```
 
 ### 2. Bounds Similarity Check
+
 ```
 RULE: Skip redundant updates using 0.1% tolerance
 
@@ -189,6 +195,7 @@ Tolerance = 0.1% (0.001)
 ```
 
 ### 3. Padding Clamping (iOS Compatibility)
+
 ```
 RULE: Use 49%, not 50%, to prevent bounds inversion
 
@@ -202,6 +209,7 @@ Why: If padding ≥ 50%, bounds invert (SW > NE) = invalid on iOS
 ```
 
 ### 4. Suppression During Animations
+
 ```
 RULE: Don't fight animations with constraint corrections
 
@@ -218,6 +226,7 @@ if (isSuppressed()) {
 ```
 
 ### 5. Gesture Distinction
+
 ```
 RULE: Only clamp user gestures, not programmatic animations
 
@@ -237,26 +246,31 @@ map.addOnCameraMoveListener {
 ## Debugging Checklist
 
 - [ ] Min zoom set after `setBoundsForCameraTarget()`?
+
   ```
   Log: "🚨 SET MIN ZOOM: $calculatedMinZoom"
   ```
 
 - [ ] Constraints applied before first gesture?
+
   ```
   Log: "✅ Preventive gesture constraints active"
   ```
 
 - [ ] Gesture clamp logs appear during pan?
+
   ```
   Log: "Gesture intercepted: viewport would exceed bounds"
   ```
 
 - [ ] Bounds recalculation detected?
+
   ```
   Log: "Significant padding change detected, updating constraints"
   ```
 
 - [ ] No infinite loops?
+
   ```
   Check: "Bounds unchanged, skipping redundant constraint update"
   ```

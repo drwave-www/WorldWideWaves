@@ -125,24 +125,28 @@ WorldWideWaves/
 ## Tech Stack
 
 **Core:**
+
 - Kotlin 2.2.0
 - Kotlin Multiplatform
 - Compose Multiplatform 1.8.2
 - Gradle 8.14.3
 
 **Android:**
+
 - Target SDK 36
 - Jetpack Compose
 - MapLibre Android 11.13.0
 - Koin 4.1.0
 
 **iOS:**
+
 - Deployment target: iOS 14+
 - Compose Multiplatform via ComposeUIViewController
 - MapLibre iOS 6.8.0 (95% feature parity with Android)
 - Native Swift wrappers for platform services
 
 **Backend:**
+
 - Firebase Analytics & Crashlytics
 
 See [docs/architecture.md](docs/architecture.md) for detailed architecture.
@@ -335,18 +339,21 @@ See [docs/testing-strategy.md](docs/testing-strategy.md) for complete testing ap
 Comprehensive documentation is available in the `docs/` directory.
 
 ### Getting Started
+
 - **[CLAUDE.md](CLAUDE.md)** - Complete project development guide (start here for development)
 - **[CLAUDE_iOS.md](CLAUDE_iOS.md)** - iOS-specific development rules and deadlock prevention
 - **[API Documentation](https://mglcel.github.io/WorldWideWaves/dokka/)** - Complete API reference (Dokka-generated, auto-updated)
 - [Environment Setup](docs/environment-setup.md) - Development environment configuration (macOS, Linux, Windows)
 
 ### Development Guides
+
 - [Architecture](docs/architecture.md) - System design, component responsibilities, data flows
 - [Development Workflow](docs/development.md) - Local dev loop, testing, debugging
 - [Contributing](docs/contributing.md) - Contribution guidelines, code standards, review process
 - [CI/CD Pipeline](docs/ci-cd.md) - Workflow details, quality gates, release process
 
 ### Platform-Specific
+
 - [iOS Development](docs/ios/) - iOS-specific guides, debugging, and accessibility
   - [iOS Cinterop Memory Safety](docs/ios/cinterop-memory-safety-patterns.md) - Memory pinning & struct access
   - [Swift-Kotlin Bridging Guide](docs/ios/swift-kotlin-bridging-guide.md) - Type conversions & protocols
@@ -354,6 +361,7 @@ Comprehensive documentation is available in the `docs/` directory.
 - [Android Development](docs/android/) - Android MapLibre implementation reference
 
 ### Specialized Topics
+
 - [Testing Strategy](docs/TESTING_STRATEGY.md) - Test architecture and approach
 - [Accessibility Guide](docs/ACCESSIBILITY_GUIDE.md) - WCAG 2.1 Level AA compliance
 - [Firebase Setup](docs/setup/firebase-setup.md) - Firebase project configuration and security

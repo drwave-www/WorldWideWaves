@@ -17,7 +17,7 @@ Complete setup guide for WorldWideWaves development environment across macOS, Li
 
 | Tool | Minimum Version | Purpose |
 |------|----------------|---------|
-| Xcode | 15.0 | 16.0+ | iOS development |
+| Xcode | 15.0+ (16.0+ recommended) | iOS development |
 | CocoaPods | 1.11+ | iOS dependencies (if used) |
 
 ### Optional Tools
@@ -75,6 +75,7 @@ brew install --cask android-studio
 ```
 
 **First launch setup:**
+
 1. Choose "Standard" installation
 2. Accept license agreements
 3. Download Android SDK components
@@ -215,6 +216,7 @@ gcloud init
 Download and install from: https://adoptium.net/temurin/releases/?version=17
 
 **Set JAVA_HOME:**
+
 ```powershell
 # PowerShell (Admin)
 [System.Environment]::SetEnvironmentVariable("JAVA_HOME", "C:\Program Files\Eclipse Adoptium\jdk-17.x.x-hotspot", [System.EnvironmentVariableTarget]::Machine)
@@ -232,12 +234,14 @@ Run installer and follow wizard. Install to: `C:\Program Files\Android\Android S
 ### 3. Enable Hyper-V (Hardware Acceleration)
 
 **Windows 10/11 Pro:**
+
 ```powershell
 # PowerShell (Admin)
 Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
 ```
 
 **Windows 10/11 Home:**
+
 - Install HAXM: https://github.com/intel/haxm/releases
 - Or use Windows Hypervisor Platform (Settings > Apps > Optional Features)
 
@@ -256,10 +260,12 @@ Choose "Git Bash" option during installation.
 ### 6. Install Optional Tools
 
 **Docker Desktop:**
+
 - Download from: https://www.docker.com/products/docker-desktop/
 - Requires WSL 2
 
 **Google Cloud SDK:**
+
 - Download from: https://cloud.google.com/sdk/docs/install#windows
 
 ## Project Setup
@@ -318,6 +324,7 @@ FIREBASE_API_KEY=AIzaSyABCDEF1234567890abcdefGHIJKLMNOP
 ```
 
 Features:
+
 - Automatic emulator launch for integration testing
 - Translation updates (if `OPENAI_API_KEY` set)
 - Pre-push integration tests
@@ -327,6 +334,7 @@ Features:
 ### Create AVD (Android Virtual Device)
 
 **Via Android Studio:**
+
 1. Tools > Device Manager
 2. Create Device > Pixel 3a
 3. Select system image: API 30 (Android 11, arm64-v8a)
@@ -337,6 +345,7 @@ Features:
 5. Finish
 
 **Via Command Line:**
+
 ```bash
 # List available system images
 sdkmanager --list | grep system-images
@@ -374,18 +383,21 @@ hw.keyboard=yes
 ### Emulator Performance Tips
 
 **macOS:**
+
 ```bash
 # Use Apple Silicon native emulator
 emulator -avd Pixel_3a_API_30 -gpu host
 ```
 
 **Linux:**
+
 ```bash
 # Ensure KVM acceleration
 emulator -avd Pixel_3a_API_30 -qemu -enable-kvm -gpu host
 ```
 
 **Windows:**
+
 ```bash
 # Use Hyper-V acceleration
 emulator -avd Pixel_3a_API_30 -gpu host
@@ -424,6 +436,7 @@ open -a Simulator
 ### Simulator Configuration
 
 **Location simulation:**
+
 ```bash
 # Set location (San Francisco)
 xcrun simctl location "iPhone 15" set 37.7749,-122.4194
@@ -518,6 +531,7 @@ open iosApp/iosApp.xcodeproj
 ### macOS
 
 **Issue: Android Studio won't launch**
+
 ```bash
 # Increase VM heap
 # Edit: /Applications/Android Studio.app/Contents/bin/studio.vmoptions
@@ -525,6 +539,7 @@ open iosApp/iosApp.xcodeproj
 ```
 
 **Issue: Xcode command-line tools not found**
+
 ```bash
 sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
 sudo xcode-select --install
@@ -533,6 +548,7 @@ sudo xcode-select --install
 ### Linux
 
 **Issue: KVM permission denied**
+
 ```bash
 sudo chmod 666 /dev/kvm
 # Or add user to kvm group:
@@ -540,6 +556,7 @@ sudo usermod -aG kvm $USER
 ```
 
 **Issue: Emulator fails to start**
+
 ```bash
 # Install required libraries
 sudo apt install libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 libbz2-1.0:i386
@@ -548,10 +565,12 @@ sudo apt install libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 libbz2-1.0:
 ### Windows
 
 **Issue: Hyper-V not available**
+
 - Windows Home: Install HAXM instead
 - Windows Pro: Enable in "Turn Windows features on or off"
 
 **Issue: Android SDK not found**
+
 ```powershell
 # Set ANDROID_HOME
 [System.Environment]::SetEnvironmentVariable("ANDROID_HOME", "C:\Users\YOUR_USERNAME\AppData\Local\Android\Sdk", [System.EnvironmentVariableTarget]::Machine)
@@ -562,17 +581,20 @@ sudo apt install libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 libbz2-1.0:
 **Issue: Gradle build fails with "Out of Memory"**
 
 Edit `gradle.properties`:
+
 ```properties
 org.gradle.jvmargs=-Xmx8g -XX:MaxDirectMemorySize=8g
 ```
 
 **Issue: Firebase config missing**
+
 ```bash
 ./gradlew generateFirebaseConfig
 # Verify google-services.json created in composeApp/
 ```
 
 **Issue: Dependencies not resolving**
+
 ```bash
 ./gradlew --refresh-dependencies
 ```

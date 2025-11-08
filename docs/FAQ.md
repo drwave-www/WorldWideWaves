@@ -76,21 +76,25 @@ Yes, WorldWideWaves is licensed under **Apache License 2.0**. See [LICENSE](../L
 # All quality checks
 ./gradlew :shared:testDebugUnitTest ktlintCheck detekt
 ```
+
 See [Development Workflow - Testing](development.md#testing) for detailed test commands.
 
 ### How do I build for iOS?
 
 **From Xcode (recommended)**:
+
 ```bash
 cd iosApp && open worldwidewaves.xcodeproj
 # Select scheme, press Cmd+R
 ```
 
 **From command line**:
+
 ```bash
 ./gradlew :shared:embedAndSignAppleFrameworkForXcode
 cd iosApp && xcodebuild -project worldwidewaves.xcodeproj -scheme worldwidewaves build
 ```
+
 See [README.md - Run iOS](../README.md#5-run-ios-macos-only) and [CLAUDE_iOS.md](../CLAUDE_iOS.md) for complete iOS setup.
 
 ### What are the system requirements?
@@ -106,6 +110,7 @@ Yes, Firebase is required for analytics and crashlytics. Create `local.propertie
 ```bash
 ./dev/setup-git-hooks.sh
 ```
+
 This enables automatic emulator launch, translation updates (optional), and pre-push integration tests. Skip tests with `SKIP_INTEGRATION_TESTS=1 git push`.
 
 ---
@@ -115,9 +120,11 @@ This enables automatic emulator launch, translation updates (optional), and pre-
 ### Why does my iOS app crash on launch?
 
 **Most common cause**: Deadlock violations (coroutines in init blocks or objects inside @Composable functions). Run verification script:
+
 ```bash
 ./scripts/verify-ios-safety.sh
 ```
+
 See [CLAUDE_iOS.md - iOS Deadlock Prevention Rules](../CLAUDE_iOS.md#-ios-deadlock-prevention-rules-mandatory) for patterns to avoid.
 
 ### How do I fix iOS threading issues?
@@ -129,9 +136,11 @@ Use `IOSSafeDI` singleton for dependency injection instead of inline objects. Av
 **In Xcode**: View > Debug Area > Show Debug Area, filter by "WWW"
 
 **From command line**:
+
 ```bash
 xcrun simctl spawn booted log stream --predicate 'process == "WorldWideWaves"' --level debug
 ```
+
 See [iOS Debugging Guide](ios/ios-debugging-guide.md#-monitor-complete-initialization-flow) for log monitoring patterns.
 
 ### Why isn't my ViewModel working on iOS?
@@ -143,6 +152,7 @@ Likely using Android-only dependencies (androidx.lifecycle) in commonMain or acc
 ```bash
 ./scripts/verify-ios-safety.sh
 ```
+
 Expected: **ZERO violations** (no @Composable-scoped KoinComponent, no init{} coroutines, no init{} DI access). See [CLAUDE_iOS.md - Automated Verification](../CLAUDE_iOS.md#-automated-verification).
 
 ### Which iOS simulator should I use?
@@ -165,23 +175,28 @@ emulator -avd Pixel_3a_API_30 &
 # Install and run app
 ./gradlew :composeApp:installDebug
 ```
+
 See [Development Workflow - Android Development](development.md#android-development) for hot reload and debug instructions.
 
 ### Why is Gradle sync failing?
 
 Try refreshing dependencies and cleaning:
+
 ```bash
 ./gradlew --refresh-dependencies
 ./gradlew clean build
 ```
+
 If still failing, check JDK version (`java -version` should show 17), verify `local.properties` SDK path, and ensure Firebase config exists.
 
 ### How do I debug map tile loading?
 
 Check logcat for MapLibre errors:
+
 ```bash
 adb logcat | grep -E "MapLibre|Tile|MBTiles"
 ```
+
 Verify `.mbtiles` file exists in map module assets and Dynamic Feature module is included in `settings.gradle.kts`. See [Development Workflow - MapLibre not loading maps](development.md#common-issues).
 
 ### What are product flavors for?
@@ -201,6 +216,7 @@ ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest
 ./gradlew :composeApp:connectedDebugAndroidTest \
   -Pandroid.testInstrumentationRunnerArguments.annotation=com.worldwidewaves.test.Accessibility
 ```
+
 See [Development Workflow - UI Tests](development.md#ui-tests) for screenshot and integration test commands.
 
 ### How do I view Android logs?
@@ -215,6 +231,7 @@ adb logcat | grep "PositionManager"
 # Save to file
 adb logcat > logcat.txt
 ```
+
 See [Development Workflow - Android Debugging](development.md#android-debugging).
 
 ---
@@ -232,6 +249,7 @@ Unit tests: **~22 seconds** on modern hardware. Android instrumented tests: **~5
 ### Why did my test fail?
 
 Common causes:
+
 - **Flaky timing**: Use `runTest` with virtual time instead of delays
 - **Infinite flows not cancelled**: Call `stopObservation()` before `advanceUntilIdle()`
 - **Koin cleanup**: Ensure `stopKoin()` in `@AfterTest` to prevent interference
@@ -242,6 +260,7 @@ See [Testing Strategy](testing-strategy.md) for testing patterns.
 ### How do I write a new test?
 
 Follow **"Test Real Code, Not Mocks"** philosophy:
+
 ```kotlin
 @Test
 fun methodName_scenario_expectedResult() {
@@ -255,6 +274,7 @@ fun methodName_scenario_expectedResult() {
     assertEquals(expected, result)
 }
 ```
+
 Use real implementations, mock only external dependencies (network, sensors). See [Testing Strategy - Testing Patterns](testing-strategy.md#testing-patterns-by-component-type).
 
 ### What's the testing philosophy?
@@ -292,6 +312,7 @@ See [Contributing Guide](contributing.md) for complete process.
 ### What's the code review process?
 
 PRs require:
+
 1. **Automated checks passing**: Quality gates (lint, tests, build), all workflows green
 2. **At least 1 approval** from maintainers
 3. **All comments addressed**
@@ -302,6 +323,7 @@ See [Contributing - Review Process](contributing.md#review-process).
 ### How do I report bugs?
 
 Open a GitHub issue with:
+
 - Clear bug description and reproduction steps
 - Expected vs actual behavior
 - Environment (device, OS, app version)
@@ -312,6 +334,7 @@ See [Contributing - Bug Reports](contributing.md#bug-reports) for template.
 ### What's the commit message format?
 
 Use **Conventional Commits**:
+
 ```
 <type>(<scope>): <subject>
 
@@ -321,6 +344,7 @@ Use **Conventional Commits**:
 ```
 
 Examples:
+
 - `feat(maps): add Tokyo offline map module`
 - `fix(position): prevent duplicate emissions`
 - `docs: update environment setup guide`
@@ -340,6 +364,7 @@ refactor/choreography-engine
 docs/update-setup-guide
 test/add-accessibility-tests
 ```
+
 See [Contributing - Branch Naming](contributing.md#branch-naming).
 
 ### How do I add a new city map?
@@ -353,6 +378,7 @@ Create a new Dynamic Feature module in `maps/` directory with MapLibre `.mbtiles
 ### Why is my build failing?
 
 Common causes:
+
 - **Out of memory**: Increase heap in `gradle.properties`: `org.gradle.jvmargs=-Xmx8g`
 - **Missing Firebase config**: Run `./gradlew generateFirebaseConfig`
 - **Wrong JDK version**: Use JDK 17 (`java -version`)
@@ -377,6 +403,7 @@ See [Development Workflow - Troubleshooting Guide](development.md#troubleshootin
 ### What are the quality gates in CI/CD?
 
 Multi-stage pipeline:
+
 1. **Build verification**: Android and iOS compilation
 2. **Code quality**: ktlint, detekt, security scanning
 3. **Tests**: 902+ unit tests, instrumented UI tests
@@ -397,14 +424,17 @@ See [CI/CD Documentation](ci-cd.md) for complete pipeline details.
 # Static analysis
 ./gradlew detekt
 ```
+
 All linting must pass before commit. See [Development Workflow - Code Quality](development.md#code-quality).
 
 ### Can I skip tests when pushing?
 
 **Not recommended**, but git hooks can be skipped:
+
 ```bash
 SKIP_INTEGRATION_TESTS=1 git push
 ```
+
 However, CI pipeline will still enforce all tests. **Never commit code with failing tests**.
 
 ### How long does the CI pipeline take?
@@ -427,6 +457,7 @@ WorldWideWaves uses **MapLibre** with pre-generated **MBTiles** (vector tiles) s
 ### Why isn't my position updating?
 
 **Solutions**:
+
 1. Grant location permissions: Settings > Apps > WorldWideWaves > Permissions
 2. Enable GPS (test outdoors or use emulator location)
 3. Check `PositionManager` logs: `adb logcat | grep "PositionManager"`
@@ -437,6 +468,7 @@ See [Development Workflow - Position not updating](development.md#common-issues)
 ### How do I test with simulated locations?
 
 **Android**:
+
 ```bash
 # Enable mock locations
 adb shell settings put secure mock_location 1
@@ -446,6 +478,7 @@ adb shell pm grant com.worldwidewaves android.permission.ACCESS_FINE_LOCATION
 ```
 
 **iOS**:
+
 ```bash
 # Set custom location (San Francisco)
 xcrun simctl location "iPhone 15" set 37.7749,-122.4194
@@ -470,9 +503,11 @@ Uses high-accuracy location providers (~5-10m accuracy outdoors). Position updat
 ### Android Studio won't launch
 
 Increase VM heap size in `studio.vmoptions`:
+
 ```
 -Xmx4g
 ```
+
 Location: `/Applications/Android Studio.app/Contents/bin/studio.vmoptions` (macOS)
 
 ### Xcode command-line tools not found
@@ -492,6 +527,7 @@ sudo usermod -aG kvm $USER
 ### Emulator won't start (Linux)
 
 Install required 32-bit libraries:
+
 ```bash
 sudo apt install libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 libbz2-1.0:i386
 ```
@@ -530,6 +566,7 @@ Likely unsafe `!!` operator in production code. Search codebase for `!!` and rep
 ### Gradle build "Out of Memory"
 
 Edit `gradle.properties`:
+
 ```properties
 org.gradle.jvmargs=-Xmx8g -XX:MaxDirectMemorySize=8g
 ```
@@ -537,9 +574,11 @@ org.gradle.jvmargs=-Xmx8g -XX:MaxDirectMemorySize=8g
 ### Git hooks not working
 
 Re-run setup:
+
 ```bash
 ./dev/setup-git-hooks.sh
 ```
+
 Verify hooks installed: `ls -la .git/hooks/`
 
 ---

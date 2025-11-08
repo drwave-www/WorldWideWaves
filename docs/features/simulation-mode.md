@@ -149,12 +149,14 @@ sequenceDiagram
 4. A **Play button** (red play icon) appears on the right side of the screen
 
 **Visual Indicators**:
+
 - FAQ button visible: Simulation mode can be activated
 - Play button visible: Simulation mode is active, can start simulations
 
 ### Starting a Simulation
 
 **Prerequisites**:
+
 - Simulation mode is enabled (Play button visible)
 - Event map is available (downloaded for offline use)
 
@@ -243,6 +245,7 @@ fun now(): Instant {
 - **Speed Control**: `setSpeed()`, `pause()`, `resume()`, `reset()`
 
 **Example**: 10x speed simulation
+
 ```kotlin
 // Real elapsed time: 1 second
 // Simulated elapsed time: 10 seconds
@@ -423,6 +426,7 @@ override suspend fun delay(duration: Duration) {
 ```
 
 **Example**: 10x speed, requested delay 1000ms
+
 - Actual delay: `max(1000ms / 10, 50ms) = max(100ms, 50ms) = 100ms`
 
 ### PositionManager Integration
@@ -457,6 +461,7 @@ fun disableSimulation() {
 ```
 
 **Result**:
+
 - Components observing `positionManager.position` automatically receive simulated position
 - No component needs simulation-specific code
 - Automatic fallback to GPS when simulation stops
@@ -484,6 +489,7 @@ fun createUnifiedObservationFlow() = combine(
 **Automatic Recalculation**:
 
 When `simulationChanged` increments:
+
 1. `createSimulationFlow()` emits new value
 2. Combined flow triggers
 3. Observer recalculates progression with new time
@@ -805,6 +811,7 @@ Starting a new simulation automatically stops any existing simulation. This prev
 `EventObserver.stopObservation()` is asynchronous. It launches a coroutine to cancel observation jobs using `cancelAndJoin()`.
 
 Without the delay, `startObservation()` might start before the previous observation fully cancels, causing:
+
 - Duplicate observation flows
 - Race conditions in state updates
 - Memory leaks from uncanceled jobs
@@ -844,6 +851,7 @@ When simulation stops, `clearPosition(SIMULATION)` removes the simulation source
 ### Does simulation work with background app state?
 
 Yes. Simulation state persists across app backgrounding:
+
 - Time continues accelerating (system clock keeps ticking)
 - Position remains at simulated location
 - Observers continue running (if not explicitly paused)
@@ -871,6 +879,7 @@ Alternatively, use `simulation.pause()` to freeze at current simulated time.
 ### Can I simulate events that haven't been created yet?
 
 No. Simulation requires an actual event document loaded from Firestore. You need:
+
 - Valid event ID
 - Event area polygon (for position generation)
 - Event start/end times
@@ -887,6 +896,7 @@ The Play button checks map availability (`isMapAvailableForSimulation`) because:
 3. **Map rendering**: Simulated position displayed on map
 
 Without downloaded map:
+
 - Event area polygon not loaded
 - Position generation fails
 - Map rendering breaks

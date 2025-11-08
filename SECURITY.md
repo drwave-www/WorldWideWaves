@@ -40,11 +40,13 @@ Please include the following information in your report:
 WorldWideWaves implements multiple security measures to protect user data and ensure safe operation:
 
 ### Data Protection
+
 - **Location Privacy**: User location data is handled with appropriate privacy measures
 - **Ephemeral Events**: Events are designed to be temporary, minimizing long-term data storage
 - **No Credential Exposure**: API keys, tokens, and secrets are never logged or transmitted insecurely
 
 ### Input Validation
+
 - **Geographic Coordinates**: All latitude/longitude inputs validated (lat: -90 to 90, lon: -180 to 180)
 - **User Input Sanitization**: All user-provided text inputs are validated and sanitized
 - **Time/Duration Validation**: Reasonable range checks on all temporal inputs
@@ -52,11 +54,13 @@ WorldWideWaves implements multiple security measures to protect user data and en
 - **URL Validation**: SSRF attack prevention on network requests
 
 ### Network Security
+
 - **HTTPS Only**: All network communication uses HTTPS
 - **API Key Protection**: Secrets stored in secure configuration, never in code
 - **Certificate Pinning**: Considered for production deployment
 
 ### Application Security
+
 - **Secure Exception Handling**: Errors handled without exposing sensitive information
 - **Memory Safety**: Proper cleanup and disposal of sensitive data
 - **Thread Safety**: Explicit synchronization for shared mutable state (Mutex, coroutines)
@@ -65,16 +69,19 @@ WorldWideWaves implements multiple security measures to protect user data and en
 ### Platform-Specific Security
 
 **Android**:
+
 - Follows Android security best practices
 - ProGuard/R8 obfuscation enabled
 - Secure storage for sensitive data
 
 **iOS**:
+
 - Keychain integration for sensitive data
 - App Transport Security (ATS) compliance
 - Thread-safe Kotlin/Native implementation
 
 ### Testing & Verification
+
 - **902+ Unit Tests**: Comprehensive test coverage for security-critical code
 - **iOS Safety Verification**: Automated script prevents deadlock patterns
 - **Pre-commit Hooks**: Automated security checks before code commits
@@ -95,16 +102,19 @@ See [CLAUDE.md](CLAUDE.md#security-patterns) for detailed security development r
 ## Known Security Considerations
 
 ### Location Data
+
 - **Precision**: Location data precision is limited based on use case requirements
 - **Retention**: Ephemeral design minimizes data retention risks
 - **Permissions**: Users must explicitly grant location permissions
 
 ### Third-Party Dependencies
+
 - Regular dependency updates via Renovate/Dependabot
 - Security advisories monitored for all dependencies
 - Gradle version catalogs for centralized dependency management
 
 ### API Keys and Secrets
+
 - Never committed to version control
 - Stored in BuildConfig or secure configuration
 - Proper key rotation procedures implemented

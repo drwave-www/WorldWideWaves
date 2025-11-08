@@ -3,6 +3,7 @@
 ## Quick Start
 
 ### 1. Open Console.app
+
 ```bash
 # Spotlight search
 Cmd+Space → "Console" → Enter
@@ -12,10 +13,12 @@ Cmd+Space → "Console" → Enter
 ```
 
 ### 2. Connect Your iOS Device
+
 - Connect via USB cable OR
 - Enable WiFi debugging: Xcode → Window → Devices → Check "Connect via network"
 
 ### 3. Select Device in Console.app
+
 ```
 Console.app sidebar:
 ├── This Mac
@@ -24,6 +27,7 @@ Console.app sidebar:
 ```
 
 ### 4. Enable All Message Types
+
 ```
 Console.app → Action menu (top bar):
 ✓ Include Info Messages
@@ -32,22 +36,26 @@ Console.app → Action menu (top bar):
 
 ### 5. Filter Logs
 
-#### Filter by App Package:
+#### Filter by App Package
+
 ```
 Search field: process:com.worldwidewaves
 ```
 
-#### Filter by Log Category:
+#### Filter by Log Category
+
 ```
 category:WWW
 ```
 
-#### Filter by Subsystem:
+#### Filter by Subsystem
+
 ```
 subsystem:com.worldwidewaves.shared
 ```
 
-#### Combine Filters:
+#### Combine Filters
+
 ```
 process:com.worldwidewaves AND category:WWW
 ```
@@ -57,26 +65,31 @@ process:com.worldwidewaves AND category:WWW
 ## Common Filters for WorldWideWaves
 
 ### Show All App Logs
+
 ```
 process:com.worldwidewaves
 ```
 
 ### Show Only Errors
+
 ```
 process:com.worldwidewaves AND type:error
 ```
 
 ### Show Position/GPS Logs
+
 ```
 process:com.worldwidewaves AND (category:PositionManager OR category:LocationProvider)
 ```
 
 ### Show Event Observation Logs
+
 ```
 process:com.worldwidewaves AND category:EventObserver
 ```
 
 ### Show Crashlytics Logs
+
 ```
 process:com.worldwidewaves AND category:FirebaseCrashlytics
 ```
@@ -86,12 +99,14 @@ process:com.worldwidewaves AND category:FirebaseCrashlytics
 ## Advanced Usage
 
 ### Save Logs to File
+
 1. **Action → Save As...** or `Cmd+S`
 2. Choose location
 3. Select time range: "All Messages" or custom range
 4. Click **Save**
 
 ### Stream Logs to Terminal
+
 ```bash
 # Using log command (more powerful)
 log stream --predicate 'process == "com.worldwidewaves"' --level debug
@@ -102,6 +117,7 @@ log stream --predicate 'process == "com.worldwidewaves"' --level debug \
 ```
 
 ### Export System Diagnostics
+
 ```bash
 # Generate full system report (includes app logs)
 sysdiagnose
@@ -142,18 +158,21 @@ sysdiagnose
 ### "No Messages" or Empty Console
 
 **Solution 1: Enable Debug/Info Messages**
+
 ```
 Action menu → ✓ Include Info Messages
 Action menu → ✓ Include Debug Messages
 ```
 
 **Solution 2: Check Device Trust**
+
 ```bash
 # On Mac, accept trust prompt when device connects
 # On device: Settings → General → Device Management → Trust this computer
 ```
 
 **Solution 3: Verify Device Connection**
+
 ```bash
 # Check device is visible
 instruments -s devices
@@ -163,6 +182,7 @@ instruments -s devices
 ```
 
 **Solution 4: Clear Filter**
+
 ```
 Click "Clear" button in search field (×)
 Verify no other filters are active
@@ -171,6 +191,7 @@ Verify no other filters are active
 ### App Not Appearing in Process List
 
 **Solution: Restart App**
+
 ```
 1. Force quit app on device
 2. Launch app again
@@ -180,6 +201,7 @@ Verify no other filters are active
 ### Logs Cut Off or Truncated
 
 **Solution: Increase Buffer Size**
+
 ```bash
 # Using log command with unlimited buffer
 log stream --predicate 'process == "com.worldwidewaves"' \
@@ -193,12 +215,14 @@ log stream --predicate 'process == "com.worldwidewaves"' \
 ## Best Practices
 
 ### For Development
+
 1. **Keep Console.app open** while testing
 2. **Use specific filters** to reduce noise
 3. **Save logs before app restart** (logs are cleared)
 4. **Use timestamps** to correlate events
 
 ### For Bug Reports
+
 1. **Clear existing logs**: `Cmd+K`
 2. **Start streaming**: Click "Start"
 3. **Reproduce bug**
@@ -210,6 +234,7 @@ log stream --predicate 'process == "com.worldwidewaves"' \
    - App version
 
 ### For Performance Analysis
+
 ```bash
 # Record all activity with timestamps
 log stream --predicate 'process == "com.worldwidewaves"' \
@@ -224,6 +249,7 @@ log stream --predicate 'process == "com.worldwidewaves"' \
 ## Integration with Xcode
 
 ### Open Console from Xcode
+
 1. **Window → Devices and Simulators**
 2. Select your device
 3. Click **Open Console** button
@@ -245,6 +271,7 @@ log stream --predicate 'process == "com.worldwidewaves"' \
 ## Remote Debugging (Without Physical Access)
 
 ### Option 1: TestFlight with Feedback
+
 ```
 TestFlight builds automatically collect:
 - Crash logs
@@ -254,6 +281,7 @@ TestFlight builds automatically collect:
 ```
 
 ### Option 2: Firebase Crashlytics
+
 ```
 Automatic crash reporting with:
 - Stack traces
@@ -263,6 +291,7 @@ Automatic crash reporting with:
 ```
 
 ### Option 3: Network Debugging
+
 ```bash
 # If device on same network
 # Enable network debugging in Xcode
@@ -295,6 +324,7 @@ log show --predicate 'process == "com.worldwidewaves"' \
 ---
 
 ## Related Documentation
+
 - [iOS Logging Best Practices](https://developer.apple.com/documentation/os/logging)
 - [Firebase Crashlytics Setup](../README.md#firebase-setup)
 - [Runtime Log Configuration](../shared/src/commonMain/kotlin/com/worldwidewaves/shared/utils/RuntimeLogConfig.kt)

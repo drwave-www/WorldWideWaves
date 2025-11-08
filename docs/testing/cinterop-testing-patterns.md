@@ -27,6 +27,7 @@ shared/src/iosTest/kotlin/com/worldwidewaves/shared/cinterop/
 **Solution**: Test pinning lifecycle and pointer validity
 
 **Example** (from IosMemorySafetyTest.kt):
+
 ```kotlin
 @Test
 fun `usePinned should provide valid pointer to ByteArray data`() {
@@ -43,11 +44,13 @@ fun `usePinned should provide valid pointer to ByteArray data`() {
 ```
 
 **Key Points**:
+
 - Test pinning mechanism, not actual C operations
 - Validate pointer lifetime (valid within scope)
 - Test with NSData.create to verify production pattern
 
 **Production Usage**: PlatformCache.ios.kt uses this pattern to write ByteArray data to iOS filesystem:
+
 ```kotlin
 bytes.usePinned { pinned ->
     val nsData = NSData.create(
@@ -67,6 +70,7 @@ bytes.usePinned { pinned ->
 **Solution**: Create test delegate and validate implementation
 
 **Example** (from IosProtocolDelegationTest.kt):
+
 ```kotlin
 @OptIn(ExperimentalForeignApi::class)
 private class TestLocationDelegate(
@@ -93,6 +97,7 @@ fun `delegate should properly extend NSObject`() {
 ```
 
 **Key Points**:
+
 - Test NSObject inheritance (required for ObjC protocols)
 - Test protocol conformance (type checks)
 - Test callback invocation with mock data
@@ -109,6 +114,7 @@ fun `delegate should properly extend NSObject`() {
 **Solution**: Test data structure decomposition and accessibility
 
 **Example** (from IosSwiftBridgeTest.kt):
+
 ```kotlin
 @Test
 fun `Position should provide separate lat lng properties for Swift bridge`() {
@@ -124,12 +130,14 @@ fun `Position should provide separate lat lng properties for Swift bridge`() {
 ```
 
 **Key Points**:
+
 - Test Kotlin-side data access patterns
 - Validate type decomposition (complex → primitives)
 - Test collection conversions (List → NSArray)
 - Verify nullable handling (null → nil)
 
 **Production Usage**: IOSMapBridge.swift extracts Position properties to create CLLocationCoordinate2D for MapLibre:
+
 ```swift
 @objc func animateToPosition(position: Position, zoom: Double?) {
     let coordinate = CLLocationCoordinate2D(
@@ -149,6 +157,7 @@ fun `Position should provide separate lat lng properties for Swift bridge`() {
 **Solution**: Test dispatcher context switching patterns
 
 **Example** (from IosCinteropThreadingTest.kt):
+
 ```kotlin
 @Test
 fun `Dispatchers_Main should be available for UIKit operations`() = runTest {
@@ -160,12 +169,14 @@ fun `Dispatchers_Main should be available for UIKit operations`() = runTest {
 ```
 
 **Key Points**:
+
 - Test dispatcher availability (Main, IO)
 - Validate context preservation through suspend functions
 - Test withContext patterns for thread switching
 - Verify sequential execution on Main
 
 **Production Usage**: All iOS platform APIs requiring main thread use this pattern:
+
 ```kotlin
 suspend fun startLocationUpdates() {
     withContext(Dispatchers.Main) {
@@ -183,6 +194,7 @@ suspend fun startLocationUpdates() {
 **Solution**: Use mock objects and test registry mechanics
 
 **Example** (from IosSwiftBridgeTest.kt):
+
 ```kotlin
 @Test
 fun `MapWrapperRegistry should register and retrieve wrappers by eventId`() {
@@ -199,12 +211,14 @@ fun `MapWrapperRegistry should register and retrieve wrappers by eventId`() {
 ```
 
 **Key Points**:
+
 - Test registration/retrieval mechanics
 - Validate multiple independent wrappers (navigation stack)
 - Test command queueing (pending camera/polygon commands)
 - Verify cleanup (unregister removes all data)
 
 **Production Usage**: MapWrapperRegistry enables Compose code to control Swift MapLibre views:
+
 ```kotlin
 // From Compose (shared)
 MapWrapperRegistry.setPendingCameraCommand(
@@ -354,6 +368,7 @@ All cinterop APIs (usePinned, useContents, NSObject, CLLocationManager) are mark
 ### Example 1: GPS Location Updates
 
 **Production Code** (IosLocationProvider.kt):
+
 ```kotlin
 private class IosLocationDelegate(
     private val onLocationUpdate: (CLLocation) -> Unit
@@ -369,6 +384,7 @@ private class IosLocationDelegate(
 ```
 
 **Test Coverage**:
+
 - IosProtocolDelegationTest validates NSObject inheritance
 - IosProtocolDelegationTest validates callback invocation
 - IosCinteropThreadingTest validates thread safety
@@ -378,6 +394,7 @@ private class IosLocationDelegate(
 ### Example 2: Cache File Writing
 
 **Production Code** (PlatformCache.ios.kt):
+
 ```kotlin
 suspend fun writeFile(data: ByteArray, path: String) {
     withContext(Dispatchers.IO) {
@@ -393,6 +410,7 @@ suspend fun writeFile(data: ByteArray, path: String) {
 ```
 
 **Test Coverage**:
+
 - IosMemorySafetyTest validates usePinned pattern
 - IosMemorySafetyTest validates NSData creation
 - IosCinteropThreadingTest validates Dispatchers.IO usage
@@ -402,6 +420,7 @@ suspend fun writeFile(data: ByteArray, path: String) {
 ### Example 3: Map Camera Control
 
 **Production Code** (MapWrapperRegistry):
+
 ```kotlin
 // Kotlin side
 MapWrapperRegistry.setPendingCameraCommand(
@@ -426,6 +445,7 @@ MapWrapperRegistry.setPendingCameraCommand(
 ```
 
 **Test Coverage**:
+
 - IosSwiftBridgeTest validates Position decomposition
 - IosSwiftBridgeTest validates MapWrapperRegistry command storage
 - IosSwiftBridgeTest validates CameraCommand type preservation
@@ -447,6 +467,7 @@ fun `should update UILabel text`() {
 ```
 
 ✅ **Correct approach**: Test the pattern, not the platform API:
+
 ```kotlin
 @Test
 fun `should prepare text for UIKit display`() = runTest {
@@ -473,6 +494,7 @@ fun `should create NSData from ByteArray`() {
 ```
 
 ✅ **Correct approach**: Always use usePinned:
+
 ```kotlin
 @Test
 fun `should create NSData from pinned ByteArray`() {
@@ -498,6 +520,7 @@ class LocationDelegate : CLLocationManagerDelegateProtocol {
 ```
 
 ✅ **Correct approach**: Always extend NSObject:
+
 ```kotlin
 @OptIn(ExperimentalForeignApi::class)
 class LocationDelegate : NSObject(), CLLocationManagerDelegateProtocol {
@@ -520,6 +543,7 @@ fun `should start location updates`() = runTest {
 ```
 
 ✅ **Correct approach**: Use Dispatchers.Main:
+
 ```kotlin
 @Test
 fun `should start location updates on main thread`() = runTest {

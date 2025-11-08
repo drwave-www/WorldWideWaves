@@ -22,12 +22,14 @@ Comprehensive search of the WorldWideWaves codebase identified **59 files** cont
 **Lines with Log calls**: Multiple throughout file (approximately 60+ log statements)
 
 **Sample problematic logs:**
+
 - Line ~80: `Log.d(TAG, "Registering wrapper for event: $eventId (total wrappers: ${wrappers.size})")`
 - Line ~190: Multiple `Log.v()` calls for every getter/setter
 - Line ~250: `Log.v(TAG, "Map width updated: $width for event: $eventId")`
 - Line ~255: `Log.v(TAG, "Map height updated: $height for event: $eventId")`
 
 **Assessment**: These logs track internal state management (polygon registration, camera commands, callbacks). While useful for debugging, they will spam logs whenever:
+
 - Camera position changes
 - Map dimensions update
 - Callbacks register/unregister
@@ -44,6 +46,7 @@ Comprehensive search of the WorldWideWaves codebase identified **59 files** cont
 **Lines with Log calls**: ~50, 75, 150, 155, 175, 180, 220, 225, 230
 
 **Problematic logs:**
+
 ```kotlin
 Log.d(TAG, "Checking map availability for: $mapId")
 Log.d(TAG, "Found via pathForResource: $eventId.$extension in $sub")
@@ -65,6 +68,7 @@ Log.v(TAG, "Progress tick for $mapId: $p%")  // Updates every progress interval!
 **Lines with Log calls**: ~65, 75, 85, 95, 110, 115
 
 **Sample logs:**
+
 ```kotlin
 Log.d(TAG, "Checking availability for: $mapId")
 Log.v(TAG, "Download progress: $mapId -> $progress%")  // Called frequently
@@ -87,6 +91,7 @@ Log.v(TAG, "Removed completed download: ${entry.key}")
 **Lines**: 75-79
 
 **Code:**
+
 ```kotlin
 // Debug logging for iOS coordinate issues
 Log.d(
@@ -108,6 +113,7 @@ Log.d(
 **Lines**: ~50, ~55
 
 **Code:**
+
 ```kotlin
 Log.d(TAG, "finishIosApp: dismissed modal VC")
 Log.d(TAG, "finishIosApp: popped from navigation stack")
@@ -126,6 +132,7 @@ Log.d(TAG, "finishIosApp: popped from navigation stack")
 **Lines**: Multiple (audio session setup, engine setup, volume changes, playback)
 
 **Sample logs:**
+
 ```kotlin
 Log.v(TAG, "Audio session setup completed")
 Log.d(TAG, "Valid audio format detected: sampleRate=$sampleRate, channels=$channelCount")
@@ -153,6 +160,7 @@ Log.v(TAG, "iOS sound player released")
 **Lines**: 99, 104, 109, 114, 118
 
 **Code:**
+
 ```kotlin
 if (WWWGlobals.LogConfig.ENABLE_POSITION_TRACKING_LOGGING) {
     Log.v(TAG, "[DEBUG] Position update from $source: $newPosition")
@@ -165,6 +173,7 @@ Log.v(TAG, "[DEBUG] Applied debounced position: ${finalState.position} from ${fi
 ```
 
 **Assessment**: Position updates fire frequently (every GPS or simulation update). Guard is correct, but:
+
 1. Messages explicitly say `[DEBUG]` suggesting temporary logging
 2. Condition check is in place (good!)
 3. Unconditional logs also present:
@@ -172,6 +181,7 @@ Log.v(TAG, "[DEBUG] Applied debounced position: ${finalState.position} from ${fi
    - Line 139: `Log.v("PositionManager", "Cleaned up resources")` - not guarded!
 
 **Recommendation**:
+
 - Keep guarded logs - they're properly protected
 - Add guards to unguarded verbose logs
 - Change `[DEBUG]` prefix to remove if permanent
@@ -185,6 +195,7 @@ Log.v(TAG, "[DEBUG] Applied debounced position: ${finalState.position} from ${fi
 **Lines**: 71, 160
 
 **Code:**
+
 ```kotlin
 if (WWWGlobals.LogConfig.ENABLE_POSITION_TRACKING_LOGGING) {
     Log.v("DefaultPositionObserver", "Starting position observation for event ${event.id}")
@@ -196,6 +207,7 @@ if (WWWGlobals.LogConfig.ENABLE_POSITION_TRACKING_LOGGING) {
 ```
 
 **Assessment**:
+
 - Properly guarded with configuration check
 - Only logs on observation start/stop (low frequency)
 - This is correct pattern
@@ -213,6 +225,7 @@ if (WWWGlobals.LogConfig.ENABLE_POSITION_TRACKING_LOGGING) {
 **Lines**: Multiple commented lines
 
 **Examples:**
+
 ```kotlin
 //    Log.d("clearUnavailableGeoJsonCache", "Cleared cache for event $eventId")
 //        Log.d(::readGeoJson.name, "GeoJSON file not available for event $eventId")
@@ -238,24 +251,28 @@ These are properly implemented and should remain:
 #### ✅ `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotlin/com/worldwidewaves/shared/utils/PerformanceTracer.ios.kt`
 
 **Log:** `Log.d("WWW.Perf", "trace=$name duration_ms=$duration metrics=[$metricsStr]")`
+
 - Purpose: Performance measurement (appropriate for Log.d)
 - Frequency: Only at trace completion (low frequency)
 
 #### ✅ `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/androidMain/kotlin/com/worldwidewaves/shared/utils/PerformanceTracer.android.kt`
 
 **Log:** `Log.d("WWW.Perf", "trace=$name duration_ms=$duration metrics=[$metricsStr]")`
+
 - Purpose: Performance measurement (appropriate for Log.d)
 - Frequency: Only at trace completion (low frequency)
 
 #### ✅ `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/sound/SoundChoreographyCoordinator.kt`
 
 **Logs:**
+
 ```kotlin
 Log.d(TAG, "Starting global sound choreography observation for all events")
 Log.d(TAG, "Observing ${allEvents.size} events for area status")
 Log.d(TAG, "Area status changed - eventInArea: ${eventInArea?.id}")
 Log.d(TAG, "User entered event area: ${eventInArea.id}")
 ```
+
 - Purpose: User action tracking and event coordination
 - Frequency: Low (triggered by user entering/leaving areas)
 - Assessment: Appropriate usage
@@ -263,10 +280,12 @@ Log.d(TAG, "User entered event area: ${eventInArea.id}")
 #### ✅ `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/choreographies/SoundChoreographyPlayer.kt`
 
 **Logs:**
+
 ```kotlin
 Log.d("SoundChoreographyManager", "Attempting to preload MIDI file: $midiResourcePath")
 Log.d("SoundChoreographyManager", "Successfully preloaded MIDI file: $midiResourcePath")
 ```
+
 - Purpose: MIDI resource lifecycle
 - Frequency: Low (only during initialization)
 
@@ -275,17 +294,21 @@ Log.d("SoundChoreographyManager", "Successfully preloaded MIDI file: $midiResour
 ## Summary by Severity
 
 ### CRITICAL (Remove/Fix)
+
 - **0 items** - No critical debug logging found
 
 ### HIGH (Review & Reduce)
+
 1. BoundingBox.kt - Debug logging on every constructor call
 
 ### MEDIUM (Refactor)
+
 1. MapWrapperRegistry.kt - 50+ logs for state synchronization
 2. IosPlatformMapManager.kt - Progress ticker logs frequent updates
 3. PositionManager.kt - Some unguarded verbose logs
 
 ### LOW (Clean up / Document)
+
 1. Platform.android.kt - 11+ commented-out logs
 2. EventMapDownloadManager.kt - High-frequency progress logs
 3. Various low-frequency debug logs (acceptable)
@@ -297,10 +320,12 @@ Log.d("SoundChoreographyManager", "Successfully preloaded MIDI file: $midiResour
 ### 1. Immediate Actions (High Priority)
 
 **Remove commented-out logs (Platform.android.kt)**
+
 - Delete ~11 lines of commented debug logs
 - Improves code cleanliness with no functional impact
 
 **Add guard to unguarded PositionManager logs**
+
 ```kotlin
 // Line 132 - Add guard
 if (WWWGlobals.LogConfig.ENABLE_POSITION_TRACKING_LOGGING) {
@@ -314,6 +339,7 @@ if (WWWGlobals.LogConfig.ENABLE_POSITION_TRACKING_LOGGING) {
 ```
 
 **Remove or guard BoundingBox.kt debug log**
+
 ```kotlin
 // Option 1: Remove entirely
 // The coordinate transformation is already validated by tests
@@ -327,11 +353,13 @@ if (RuntimeLogConfig.shouldLog("BoundingBox", LogLevel.DEBUG)) {
 ### 2. Medium Priority (Review in next refactor)
 
 **MapWrapperRegistry.kt** - Consider reducing state logs:
+
 - Convert routine state logs to `Log.v()` with sampled logging
 - Keep state transition logs at `Log.d()` level
 - Use sampled logging: `Log.vSampled(TAG, message, sampleRate=100)`
 
 **IosPlatformMapManager.kt** - Sample progress ticker:
+
 ```kotlin
 // Instead of every percent:
 Log.v(TAG, "Progress tick for $mapId: $p%")
@@ -345,6 +373,7 @@ if (p % 10 == 0) {  // Log every 10%
 ### 3. Documentation (Low Priority)
 
 Document the following patterns in code style guide:
+
 - Position tracking logs should use `ENABLE_POSITION_TRACKING_LOGGING` guard
 - Progress tracking logs can use high frequency but should consider sampled logging
 - Audio operations can use verbose logging (low frequency)

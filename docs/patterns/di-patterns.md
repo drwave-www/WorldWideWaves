@@ -77,6 +77,7 @@ val sharedModule = listOf(
 ```
 
 **Why order matters**:
+
 - Each module depends on dependencies from previous modules
 - iOS Kotlin/Native requires deterministic initialization order
 - Wrong order = runtime crashes during DI resolution
@@ -111,6 +112,7 @@ val commonModule = module {
 | `SoundChoreographyCoordinator` | `single` | Coordinates timing across all events |
 
 **Eager initialization rationale**:
+
 - MIDI initialization can take 100-200ms on some devices
 - Eager creation prevents latency on first wave playback
 - User experience: instant sound when wave triggers
@@ -179,6 +181,7 @@ class MyComponent {
 ```
 
 **Why PositionManager is critical**:
+
 - **Single source of truth**: All position consumers see same data
 - **Priority handling**: Simulation positions override GPS (for testing)
 - **Debouncing**: Prevents excessive position updates
@@ -203,6 +206,7 @@ val datastoreModule = module {
 ### Why Factory Scope?
 
 These are **command objects** that:
+
 1. Execute a single operation
 2. Don't maintain long-lived state
 3. Should be garbage collected after operation completes
@@ -278,6 +282,7 @@ single { GetSortedEventsUseCase(get()) }
 ### When to Use `single` (Singleton)
 
 Use `single` when the dependency:
+
 - ✅ Maintains app-wide state (e.g., `WWWEvents`, `PositionManager`)
 - ✅ Is expensive to create (e.g., `SoundChoreographyPlayer`)
 - ✅ Requires single source of truth (e.g., `EventsRepository`)
@@ -294,6 +299,7 @@ single { GetSortedEventsUseCase(get()) }  // Stateless logic
 ### When to Use `factory`
 
 Use `factory` when the dependency:
+
 - ✅ Represents a transient operation (e.g., command objects)
 - ✅ Has per-request state
 - ✅ Should be garbage collected after use
@@ -328,6 +334,7 @@ viewModel {
 ### When to Use `createdAtStart = true` (Eager)
 
 Use eager initialization when:
+
 - ✅ Component requires time-consuming setup (MIDI, database)
 - ✅ Initialization must happen before user interaction
 - ✅ Lazy creation would cause noticeable latency
@@ -375,6 +382,7 @@ fun getIosSafeClock(): IClock = IosSafeDI.clock
 ```
 
 **Why this works**:
+
 - File-level object initializes during class loading (before composition)
 - Dependencies resolved once, cached forever
 - Safe to access from @Composable functions
@@ -462,6 +470,7 @@ class MyViewModel {
 ```
 
 This script checks for:
+
 - No `object : KoinComponent` inside @Composable functions
 - No coroutine launches in init{} blocks
 - No DI access in init{} blocks
@@ -731,6 +740,7 @@ fun tearDown() {
 ```
 
 **Why delay(500) is important**:
+
 - Coroutine cancellation is asynchronous
 - Jobs need time to complete cleanup
 - Prevents flaky tests due to race conditions
@@ -766,6 +776,7 @@ class MyClass : KoinComponent {
 ```
 
 **Benefits of parameter injection**:
+
 - Dependencies visible in constructor
 - Easy to mock in tests
 - No KoinComponent dependency
@@ -787,6 +798,7 @@ class MyViewModel(
 ```
 
 **Benefits**:
+
 - Easy to swap implementations
 - Testability (mock interfaces)
 - Loose coupling
@@ -839,6 +851,7 @@ single(createdAtStart = true) { SoundChoreographyPlayer() }
 ```
 
 **Why document**:
+
 - Future developers understand scope choices
 - Prevents accidental scope changes
 - Clarifies performance implications
@@ -869,6 +882,7 @@ single {
 ```
 
 **Prevents**:
+
 - Memory leaks
 - Unclosed resources
 - Background job leaks
@@ -1087,6 +1101,7 @@ single(createdAtStart = true) {
 ```
 
 **Measure impact**:
+
 ```kotlin
 val startTime = System.currentTimeMillis()
 startKoin { modules(sharedModule) }

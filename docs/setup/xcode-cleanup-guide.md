@@ -46,17 +46,20 @@ open iosApp/worldwidewaves.xcodeproj
 ## When to Run
 
 ✅ **Always Run Before**:
+
 - Opening Xcode after `git pull`, `git merge`, `git rebase`
 - Opening Xcode after Xcode crash
 - Important builds or releases
 
 ⚠️ **Run When Seeing**:
+
 - GUID conflict errors
 - "Could not compute dependency graph" errors
 - Swift Package resolution failures
 - Unexplained build failures
 
 🔄 **Run Regularly**:
+
 - Weekly during active development
 - After updating dependencies
 - After Swift Package Manager updates

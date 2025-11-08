@@ -5,8 +5,9 @@ License compliance and dependency management tools for WorldWideWaves project.
 ## Purpose
 
 Manages legal compliance and licensing:
+
 - **Dependency license tracking** across all modules
-- **License compatibility checking** 
+- **License compatibility checking**
 - **Legal documentation generation**
 - **Compliance reporting** for app store submissions
 
@@ -24,6 +25,7 @@ licenses/
 ## Usage
 
 ### Generate License Report
+
 ```bash
 # Generate comprehensive license report
 ./generate_report.sh
@@ -33,6 +35,7 @@ licenses/
 ```
 
 ### Check License Compliance  
+
 ```bash
 # Verify all licenses are compatible
 ./check_compliance.sh
@@ -42,6 +45,7 @@ licenses/
 ```
 
 ### Update App License Notices
+
 ```bash
 # Update in-app license attributions
 ./update_notices.sh
@@ -52,12 +56,14 @@ licenses/
 ## Generated Reports
 
 ### HTML Report (`reports/license_report.html`)
+
 - **Complete dependency list** with versions
 - **License texts** and requirements
 - **Compatibility matrix** showing conflicts
 - **Action items** for non-compliant dependencies
 
 ### JSON Export (`reports/licenses.json`)
+
 ```json
 {
   "dependencies": [
@@ -73,23 +79,27 @@ licenses/
 ```
 
 ### Mobile App Notices
+
 - **Android**: `app/src/main/assets/licenses.html`
 - **iOS**: `iosApp/Resources/licenses.plist`
 
 ## License Categories
 
 ### Compatible Licenses ✅
+
 - **Apache 2.0** - Most permissive
 - **MIT** - Simple and permissive  
 - **BSD (2-Clause, 3-Clause)** - Permissive with attribution
 - **CC0** - Public domain equivalent
 
 ### Restricted Licenses ⚠️
+
 - **LGPL 2.1/3.0** - Requires dynamic linking
 - **MPL 2.0** - File-level copyleft
 - **EPL 1.0/2.0** - Eclipse Public License
 
 ### Incompatible Licenses ❌
+
 - **GPL 2.0/3.0** - Strong copyleft (conflicts with app store)
 - **AGPL** - Network copyleft
 - **Custom restrictive licenses**
@@ -97,6 +107,7 @@ licenses/
 ## Configuration
 
 ### License Policy (`config/license_policy.json`)
+
 ```json
 {
   "allowed_licenses": [
@@ -114,7 +125,9 @@ licenses/
 ```
 
 ### Gradle Integration
+
 The license plugin automatically scans all Gradle modules:
+
 ```kotlin
 // In build.gradle.kts  
 plugins {
@@ -130,6 +143,7 @@ licenseReport {
 ## Dependency Scanning
 
 ### Multi-module Scanning
+
 ```bash
 # Scan all Gradle modules
 for module in shared composeApp; do
@@ -139,6 +153,7 @@ done
 ```
 
 ### Node.js Dependencies (maps module)
+
 ```bash
 # Scan Node.js dependencies in scripts/maps
 cd scripts/maps
@@ -146,6 +161,7 @@ npm list --json > ../../licenses/reports/npm_dependencies.json
 ```
 
 ### Manual Dependency Addition
+
 ```json
 // For dependencies not auto-detected
 {
@@ -163,6 +179,7 @@ npm list --json > ../../licenses/reports/npm_dependencies.json
 ## Compliance Checking
 
 ### Automated Checks
+
 ```bash
 #!/bin/bash
 # check_compliance.sh logic
@@ -181,6 +198,7 @@ fi
 ```
 
 ### Manual Review Process
+
 1. **Review new dependencies** before adding
 2. **Check license compatibility** with project goals
 3. **Update attribution** if required
@@ -189,16 +207,19 @@ fi
 ## App Store Compliance
 
 ### Google Play Store
+
 - **Required**: License attribution in app
 - **Location**: Settings → About → Licenses
 - **Format**: HTML with clickable links
 
 ### Apple App Store  
+
 - **Required**: Third-party license notices
 - **Location**: Settings → Legal → Third Party Licenses
 - **Format**: Plain text or bundled HTML
 
 ### Implementation
+
 ```kotlin
 // Android - show licenses activity
 class LicensesActivity : AppCompatActivity() {
@@ -223,6 +244,7 @@ struct LicensesView: View {
 ## Build Integration
 
 ### Pre-commit Hook
+
 ```bash
 #!/bin/sh
 # Check licenses before commit
@@ -236,6 +258,7 @@ fi
 ```
 
 ### CI/CD Pipeline
+
 ```yaml
 # GitHub Actions
 - name: Check License Compliance
@@ -253,17 +276,21 @@ fi
 ## Adding New Dependencies
 
 ### Workflow
+
 1. **Add dependency** to build file
 2. **Run license check**
+
    ```bash
    ./gradlew generateLicenseReport
    ./scripts/licenses/check_compliance.sh
    ```
+
 3. **Review license terms** if new license detected
 4. **Update attribution** if required
 5. **Commit changes** including license updates
 
 ### Documentation Requirements
+
 ```markdown
 # When adding new dependency
 ## Dependency: library-name v1.0
@@ -278,6 +305,7 @@ fi
 ### Common Issues
 
 1. **Gradle scan fails**
+
    ```bash
    # Clean and retry
    ./gradlew clean
@@ -285,18 +313,21 @@ fi
    ```
 
 2. **Missing license information**
+
    ```bash
    # Manually research and document
    grep -r "license" node_modules/package-name/
    ```
 
 3. **License conflicts**
+
    ```bash
    # Find alternative dependency or get approval
    ./find_alternatives.sh problematic-dependency
    ```
 
 ### Debug Mode
+
 ```bash
 # Verbose license scanning
 DEBUG=1 ./generate_report.sh
@@ -308,6 +339,7 @@ DEBUG=1 ./generate_report.sh
 ### Maintenance
 
 #### Quarterly Review
+
 ```bash
 # Update all license information
 ./update_all_licenses.sh
@@ -320,6 +352,7 @@ diff reports/previous_report.json reports/current_report.json
 ```
 
 #### Annual Audit
+
 - **Review license policy** for changes in legal landscape
 - **Check dependency updates** for license changes  
 - **Update app store notices** if required

@@ -3,7 +3,9 @@
 ## Platform-Specific Setup
 
 ### [Linux Setup Guide](linux-setup.md)
+
 Complete Linux development environment setup (Ubuntu, Fedora, Arch).
+
 - Distribution-specific prerequisites
 - Java JDK 17 installation
 - Android Studio setup
@@ -14,19 +16,25 @@ Complete Linux development environment setup (Ubuntu, Fedora, Arch).
 ## Firebase Configuration
 
 ### [Firebase Setup (General)](firebase-setup.md)
+
 Basic Firebase project configuration and security rules.
+
 - Firestore database setup
 - Storage bucket configuration
 - Security rules deployment
 
 ### [Firebase iOS Setup](firebase-ios-setup.md)
+
 iOS-specific Firebase configuration and integration.
+
 - GoogleService-Info.plist generation
 - iOS project configuration
 - CocoaPods dependencies
 
 ### [Firebase iOS Auto-Generation](firebase-ios-auto-generation.md)
+
 Automated Firebase configuration generation for iOS.
+
 - Script-based configuration
 - CI/CD integration
 - Multi-environment support
@@ -34,7 +42,9 @@ Automated Firebase configuration generation for iOS.
 ## iOS Resources
 
 ### [On-Demand Resources (ODR) Bundle](odr-bundle.md)
+
 iOS map data packaging and on-demand resource configuration.
+
 - Map data bundling for 40+ cities
 - ODR tags and priority configuration
 - Reducing initial app size

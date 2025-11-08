@@ -17,15 +17,19 @@ Analyzed 33,804 log lines with 1,854 gesture checks. Found **61.2% rejection rat
 ## ISSUE 1: Viewport Boundary Rejections Are Actually Correct ✅
 
 ### User Complaint
+
 "Cannot reach event edges - blocked BEFORE reaching boundary"
 
 ### Previous Assumption (WRONG)
+
 Thought viewport was exceeding bounds incorrectly
 
 ### ACTUAL PROBLEM
+
 **Viewport bounds validation is CORRECT, but constraint bounds may be too tight**
 
 **Evidence (Line 10108):**
+
 ```
 DEBUG MapLibreWrapper: ❌ Rejecting: Viewport exceeds bounds
   - newViewport SW(48.812521,2.347042) NE(48.821023,2.355089)
@@ -44,6 +48,7 @@ This means the viewport is **trying to go OUTSIDE** the event bounds (panning so
 ### Why User Feels Blocked "Before" Reaching Edge
 
 The user experiences blocks because:
+
 1. At zoom 13.77, viewport size is ~0.0085° x 0.0080° (very small)
 2. When panning south, their viewport's **visible north edge** is still well inside the event
 3. But their viewport's **invisible south edge** tries to extend beyond the event boundary
@@ -52,6 +57,7 @@ The user experiences blocks because:
 **The rejection is CORRECT** - the constraint system is preventing the viewport from extending outside event bounds. However, the constraint bounds might be slightly too strict, causing premature blocking.
 
 **Statistics:**
+
 - 167 viewport bound rejections out of 1,135 total rejections (14.7%)
 - Most occur when trying to pan south or west
 - This is **NOT a bug**, but could be improved with a small margin
@@ -61,44 +67,55 @@ The user experiences blocks because:
 ## ISSUE 2: Critical Zoom Desync After targetWave() ❌❌❌ [CRITICAL BUG]
 
 ### User Complaint
+
 "Pan blocked after targetWave, then unblocks after zoom attempts"
 
 ### ACTUAL PROBLEM (CRITICAL BUG)
+
 **MapLibre's gesture recognizer reports stale zoom level after programmatic camera animation**
 
 **Evidence (Lines 12870-13748):**
 
-#### Step 1 - Animation completes successfully:
+#### Step 1 - Animation completes successfully
+
 ```
 Line 12870: INFO IOSMapBridge: Animating to position: 48.8566, 2.4133..., zoom=13.0
 Line 12880: VERBOSE MapWrapperRegistry: Camera zoom updated: 13.354822504316669
 ```
+
 ✅ Camera reports zoom = 13.35 (correct, within bounds 13.35-16.0)
 
-#### Step 2 - User tries to pan (878 lines later, ~2-3 seconds):
+#### Step 2 - User tries to pan (878 lines later, ~2-3 seconds)
+
 ```
 Line 13748: DEBUG MapLibreWrapper: 🗺️ shouldChangeFrom: oldZoom=11.12 → newZoom=11.12, reason=4, minZoom=13.35 maxZoom=16.00
 Line 13750: DEBUG MapLibreWrapper: ❌ Rejecting: Zoom out of bounds (zoom=11.12, min=13.35, max=16.00)
 ```
+
 ❌ **Gesture recognizer thinks zoom = 11.12** (WRONG! Should be 13.35)
 
-#### Step 3 - User attempts zoom gestures (trying to "fix" broken pan):
+#### Step 3 - User attempts zoom gestures (trying to "fix" broken pan)
+
 ```
 Line 16430-16444: Multiple zoom attempts from 11.12 → 11.36 → 11.55 → 11.84
 All rejected: zoom < 13.35 minimum
 ```
 
-#### Step 4 - Eventually zoom "catches up":
+#### Step 4 - Eventually zoom "catches up"
+
 Around line 16556+, zoom gradually increases through pinch gestures until it crosses 13.35, then gestures work again.
 
 ### Root Cause
+
 **MapLibre's gesture recognizer (`shouldChangeFrom`) queries a stale/cached zoom level** that doesn't update immediately after programmatic `setCamera()` calls.
 
 The two zoom sources are out of sync:
+
 1. **Camera idle callback** → reports 13.35 ✅ (correct, from MLNMapView.zoomLevel)
 2. **Gesture recognizer** → reports 11.12 ❌ (stale, from gesture state cache)
 
 ### Impact
+
 - **615 rejections** with zoom=11.12 (most common rejection value!)
 - Happens immediately after **EVERY** targetWave() animation
 - Pan gestures completely blocked until user "wakes up" zoom via pinch gestures
@@ -106,6 +123,7 @@ The two zoom sources are out of sync:
 - **This is the PRIMARY user complaint** - gestures feel completely broken after targetWave()
 
 ### Statistics
+
 - **615 out of 968** zoom rejections (63.5%) are at the bogus zoom=11.12 value
 - Accounts for **54.2% of ALL rejections** (615 out of 1,135)
 - Occurs after all 4 targetWave() animations in the log
@@ -115,21 +133,26 @@ The two zoom sources are out of sync:
 ## ISSUE 3: Zoom Gestures at Zoom 16 Actually Work Fine ✅ [NOT AN ISSUE]
 
 ### User Complaint
+
 "Zoom gestures barely work at zoom 16"
 
 ### ACTUAL BEHAVIOR
+
 **No evidence of zoom gesture problems AT zoom 16.**
 
 **Evidence:**
+
 - Search for `oldZoom=16` → **ZERO results**
 - Search for `oldZoom=15` → **ZERO results**
 - All zoom rejections are at zoom < 13.35 (too zoomed out, not too zoomed in)
 - Camera zoom logs show smooth operation at zoom 16 (lines 29972+)
 
 ### Why User Thinks Zoom Doesn't Work
+
 When at actual zoom 16, the `maxZoom=16.0` constraint prevents zooming **IN** further, which is **correct behavior**. User can zoom OUT freely at zoom 16.
 
 The complaint likely stems from:
+
 1. **Issue 2 spillover**: Zoom desync makes ALL gestures feel broken, creating general frustration
 2. **Expected behavior**: Hitting maxZoom=16 constraint (working as designed)
 3. **Misdiagnosis**: User attributes pan problems to zoom problems
@@ -141,6 +164,7 @@ The complaint likely stems from:
 ## Diagnostic Statistics
 
 ### Overall Gesture Stats
+
 ```
 Total gesture checks:    1,854
 Total rejections:        1,135 (61.2%)
@@ -148,6 +172,7 @@ Total allowed:             719 (38.8%)
 ```
 
 ### Rejection Breakdown
+
 ```
 Zoom out of bounds:      968 (85.2% of rejections)
   ├─ zoom=11.12 (desync): 615 (63.5% of zoom rejections) ⚠️ CRITICAL BUG
@@ -160,6 +185,7 @@ Viewport exceeds:        167 (14.7% of rejections)
 ```
 
 ### Zoom Rejection Distribution
+
 ```
 Zoom Value | Count | Percentage | Notes
 -----------|-------|------------|------------------------
@@ -170,10 +196,12 @@ Zoom Value | Count | Percentage | Notes
 ```
 
 ### Gesture State Flags
+
 ```
 Line 4026:  allowsScrolling=false, allowsZooming=false  (before constraints)
 Line 6434:  allowsScrolling=true,  allowsZooming=true   (after constraints)
 ```
+
 ✅ Gesture flags are correct and consistent
 
 ---
@@ -196,6 +224,7 @@ Line 6434:  allowsScrolling=true,  allowsZooming=true   (after constraints)
 ## Root Causes Summary
 
 ### Issue 1: Viewport Bounds - MINOR 🟡
+
 - **Status**: Working as designed, possibly too strict
 - **Impact**: 14.7% of rejections (167 out of 1,135)
 - **Severity**: Low - Causes minor UX friction
@@ -204,6 +233,7 @@ Line 6434:  allowsScrolling=true,  allowsZooming=true   (after constraints)
 - **Recommended Fix**: Add 0.005° margin to constraint bounds (~550m buffer)
 
 ### Issue 2: Zoom Desync - CRITICAL 🔴
+
 - **Status**: MAJOR BUG in MapLibre gesture state management
 - **Impact**: 54.2% of ALL rejections (615 out of 1,135)
 - **Severity**: Critical - Breaks core functionality
@@ -212,6 +242,7 @@ Line 6434:  allowsScrolling=true,  allowsZooming=true   (after constraints)
 - **Root Cause**: `MLNMapViewDelegate.mapView(_:shouldChangeFrom:to:)` queries stale zoom from gesture recognizer cache, not from actual camera state
 
 ### Issue 3: Zoom at 16 - NOT A BUG ✅
+
 - **Status**: Working correctly, expected behavior
 - **Impact**: 0% (no evidence of actual problem)
 - **Severity**: None
@@ -227,6 +258,7 @@ Line 6434:  allowsScrolling=true,  allowsZooming=true   (after constraints)
 **Problem**: `shouldChangeFrom` receives stale zoom level after programmatic camera animations.
 
 **Solution A - Force Gesture State Refresh** (Recommended):
+
 ```swift
 // In MapLibreWrapper.swift
 func mapViewDidBecomeIdle(_ mapView: MLNMapView) {
@@ -254,6 +286,7 @@ func mapViewDidBecomeIdle(_ mapView: MLNMapView) {
 ```
 
 **Solution B - Use Correct Zoom in shouldChangeFrom**:
+
 ```swift
 // In mapView(_:shouldChangeFrom:to:) delegate method
 func mapView(_ mapView: MLNMapView, shouldChangeFrom oldCamera: MLNMapCamera, to newCamera: MLNMapCamera, reason: MLNCameraChangeReason) -> Bool {
@@ -271,6 +304,7 @@ func mapView(_ mapView: MLNMapView, shouldChangeFrom oldCamera: MLNMapCamera, to
 ```
 
 **Solution C - Delay Constraint Enforcement** (Temporary workaround):
+
 ```swift
 private var lastAnimationTime: Date?
 
@@ -293,6 +327,7 @@ func mapView(_:shouldChangeFrom:to:reason:) -> Bool {
 **Problem**: Users feel blocked "before" reaching visible edge due to zero-margin constraints.
 
 **Solution - Add Small Margin**:
+
 ```kotlin
 // In shared/src/iosMain/kotlin/com/worldwidewaves/map/ios/MapBoundsEnforcer.kt
 
@@ -322,6 +357,7 @@ fun updateConstraintBounds(eventBounds: BoundingBox) {
 **Problem**: Users don't understand why zoom-in stops at zoom 16.
 
 **Solution - Visual Feedback**:
+
 ```swift
 func mapView(_:shouldChangeFrom:to:reason:) -> Bool {
     let targetZoom = altitudeToZoom(newCamera.altitude)
@@ -343,6 +379,7 @@ func mapView(_:shouldChangeFrom:to:reason:) -> Bool {
 ## Log Line References
 
 ### Critical Sections
+
 - **Initial state**: Lines 4026-6434 (constraint setup)
 - **First targetWave**: Lines 12856-12880 (animation completes)
 - **Zoom desync starts**: Line 13748 (zoom=11.12 first rejection)
@@ -352,6 +389,7 @@ func mapView(_:shouldChangeFrom:to:reason:) -> Bool {
 - **Second targetWave desync**: Lines 23394+ (pattern repeats)
 
 ### Key Patterns
+
 ```
 Pattern 1: Successful gesture (38.8% of gestures)
   Line N:   shouldChangeFrom: oldZoom=13.77 → newZoom=13.77
@@ -433,6 +471,7 @@ sed -n '13748,13758p' /tmp/log-63 | grep "oldZoom="
 **Issue 2 (Zoom Desync) is the critical bug** causing 54.2% of all gesture rejections and the primary user complaint.
 
 After every `targetWave()` animation:
+
 1. MapLibre's camera updates to zoom 13.35 ✅
 2. MapLibre's gesture recognizer still thinks zoom is 11.12 ❌
 3. All pan and zoom gestures are rejected (zoom < minZoom=13.35)
@@ -440,6 +479,7 @@ After every `targetWave()` animation:
 5. Only then do gestures work again
 
 **The previous analysis completely missed this** because it:
+
 - Didn't examine the zoom level **discrepancy** between camera callback (13.35) and gesture delegate (11.12)
 - Focused on viewport bounds (which are actually working correctly)
 - Didn't track the zoom=11.12 pattern appearing 615 times

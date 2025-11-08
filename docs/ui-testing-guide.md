@@ -32,6 +32,7 @@ This guide covers the comprehensive UI testing framework implemented for WorldWi
 ### Critical User Workflows Covered
 
 #### 1. Wave Participation (WaveActivityTest) - HIGHEST PRIORITY
+
 - **Countdown Timer**: Accurate timing display until wave hit
 - **Choreography Phases**: Warming → Waiting → Hit → Done transitions
 - **Location Tracking**: User position and movement during wave
@@ -39,18 +40,21 @@ This guide covers the comprehensive UI testing framework implemented for WorldWi
 - **Error Handling**: Network, GPS, and timing edge cases
 
 #### 2. Events Discovery (EventsListScreenTest)
+
 - **List Display**: Event information and status
 - **Filtering**: All/Favorites/Downloaded tabs
 - **Interactions**: Event selection, favoriting, downloads
 - **Empty States**: No events, loading, error states
 
 #### 3. Core Navigation (MainActivityTest)
+
 - **Splash Screen**: Minimum duration and data loading
 - **Tab Navigation**: Events ↔ About screen switching
 - **Permissions**: Location access flow
 - **Error States**: Network and data loading issues
 
 #### 4. Common Components (CommonComponentsTest)
+
 - **Buttons and Controls**: Wave button, toggles, links
 - **Overlays**: Status indicators, favorite stars, download states
 - **Accessibility**: Content descriptions, semantic roles
@@ -59,6 +63,7 @@ This guide covers the comprehensive UI testing framework implemented for WorldWi
 ## Running Tests
 
 ### Full Test Suite
+
 ```bash
 # Run all UI tests
 ./gradlew composeApp:testDebugUnitTest
@@ -68,6 +73,7 @@ This guide covers the comprehensive UI testing framework implemented for WorldWi
 ```
 
 ### Individual Test Classes
+
 ```bash
 # Run critical wave functionality
 ./gradlew composeApp:testDebugUnitTest --tests "*WaveActivityTest*"
@@ -77,6 +83,7 @@ This guide covers the comprehensive UI testing framework implemented for WorldWi
 ```
 
 ### CI/CD Integration
+
 ```yaml
 # Example GitHub Actions configuration
 - name: Run Critical UI Tests
@@ -90,12 +97,14 @@ This guide covers the comprehensive UI testing framework implemented for WorldWi
 ## Test Configuration
 
 ### Environment Setup
+
 - **Target SDK**: Android API 34
 - **Test Device**: 1080x2340, 420 DPI
 - **Timeout**: 5 seconds for UI interactions
 - **Screenshots**: Captured on test failures
 
 ### Dependencies
+
 - Compose UI Test framework
 - JUnit 4 for test structure
 - MockK for dependency mocking
@@ -144,11 +153,13 @@ UITestAssertions.assertCountdownShowsTime(Duration.minutes(2))
 ## Metrics and Reporting
 
 ### Test Execution Reports
+
 - JUnit XML reports generated in `build/test-results/`
 - HTML reports in `build/reports/tests/`
 - Coverage reports integrated with jacoco
 
 ### Success Criteria
+
 - **Critical Tests**: Must pass 100% for release
 - **Feature Tests**: Must pass >95% for release
 - **Test Execution Time**: <5 minutes for full suite

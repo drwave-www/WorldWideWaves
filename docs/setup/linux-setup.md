@@ -236,12 +236,14 @@ yay -S android-studio
 Android Studio installs the SDK to `~/Android/Sdk` by default.
 
 **Verify SDK installation:**
+
 ```bash
 ls ~/Android/Sdk
 # Expected directories: build-tools, emulator, platform-tools, platforms, system-images
 ```
 
 **Add to PATH (add to ~/.bashrc or ~/.zshrc):**
+
 ```bash
 export ANDROID_HOME=$HOME/Android/Sdk
 export ANDROID_SDK_ROOT=$ANDROID_HOME
@@ -256,6 +258,7 @@ source ~/.bashrc
 ### Install Required SDK Components
 
 **Via Android Studio:**
+
 1. Tools → SDK Manager
 2. **SDK Platforms** tab:
    - Android 14.0 (API 36)
@@ -267,6 +270,7 @@ source ~/.bashrc
    - Intel/AMD x86 Emulator Accelerator (if not using KVM)
 
 **Via Command Line:**
+
 ```bash
 # Navigate to SDK tools
 cd ~/Android/Sdk/cmdline-tools/latest/bin
@@ -493,6 +497,7 @@ fastboot.forceFastBoot=yes
 ### Performance Tips
 
 **Improve startup time:**
+
 ```bash
 # Create initial snapshot
 emulator -avd Pixel_5_API_30 -gpu host -qemu -enable-kvm -no-boot-anim
@@ -503,6 +508,7 @@ emulator -avd Pixel_5_API_30 -gpu host -qemu -enable-kvm
 ```
 
 **Monitor emulator performance:**
+
 ```bash
 # Show extended controls
 emulator -avd Pixel_5_API_30 -show-kernel
@@ -518,21 +524,25 @@ emulator -avd Pixel_5_API_30 -verbose -qemu -enable-kvm
 **Required for iOS safety verification script** (`./scripts/verify-ios-safety.sh`).
 
 **Ubuntu/Debian:**
+
 ```bash
 sudo apt install ripgrep
 ```
 
 **Fedora:**
+
 ```bash
 sudo dnf install ripgrep
 ```
 
 **Arch Linux:**
+
 ```bash
 sudo pacman -S ripgrep
 ```
 
 **Verify installation:**
+
 ```bash
 rg --version
 # Expected: ripgrep 13.x or later
@@ -541,6 +551,7 @@ rg --version
 ### Install Node.js (for map generation)
 
 **Ubuntu/Debian (via NodeSource):**
+
 ```bash
 # Add NodeSource repository
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
@@ -554,6 +565,7 @@ npm --version   # Expected: 9.x
 ```
 
 **Fedora:**
+
 ```bash
 # Install Node.js
 sudo dnf install nodejs npm
@@ -564,6 +576,7 @@ sudo dnf install nodejs
 ```
 
 **Arch Linux:**
+
 ```bash
 # Install Node.js
 sudo pacman -S nodejs npm
@@ -572,6 +585,7 @@ sudo pacman -S nodejs npm
 ### Install Docker (Optional)
 
 **Ubuntu/Debian:**
+
 ```bash
 # Install Docker
 sudo apt install -y docker.io
@@ -586,6 +600,7 @@ sudo usermod -aG docker $USER
 ```
 
 **Fedora:**
+
 ```bash
 # Install Docker
 sudo dnf install docker
@@ -598,6 +613,7 @@ sudo usermod -aG docker $USER
 ```
 
 **Arch Linux:**
+
 ```bash
 # Install Docker
 sudo pacman -S docker
@@ -610,6 +626,7 @@ sudo usermod -aG docker $USER
 ```
 
 **Verify Docker installation:**
+
 ```bash
 docker --version
 docker run hello-world
@@ -618,6 +635,7 @@ docker run hello-world
 ### Install Git (if not already installed)
 
 **All distributions:**
+
 ```bash
 # Ubuntu/Debian
 sudo apt install git
@@ -630,6 +648,7 @@ sudo pacman -S git
 ```
 
 **Configure Git:**
+
 ```bash
 git config --global user.name "Your Name"
 git config --global user.email "your.email@example.com"
@@ -683,6 +702,7 @@ ls -la .git/hooks/
 ```
 
 **Features:**
+
 - Pre-commit: License header validation
 - Pre-push: Run unit tests before pushing
 - Post-checkout: Automatic dependency updates
@@ -756,11 +776,13 @@ adb shell pm grant com.worldwidewaves android.permission.ACCESS_COARSE_LOCATION
 ### 1. KVM Permission Denied
 
 **Symptom:**
+
 ```
 /dev/kvm: Permission denied
 ```
 
 **Solution:**
+
 ```bash
 # Add user to kvm group
 sudo usermod -aG kvm $USER
@@ -783,11 +805,13 @@ sudo udevadm trigger
 ### 2. Missing 32-bit Libraries
 
 **Symptom:**
+
 ```
 error while loading shared libraries: libstdc++.so.6: cannot open shared object file
 ```
 
 **Solution (Ubuntu/Debian):**
+
 ```bash
 sudo apt install -y \
   libc6:i386 \
@@ -798,6 +822,7 @@ sudo apt install -y \
 ```
 
 **Solution (Fedora):**
+
 ```bash
 sudo dnf install -y \
   glibc.i686 \
@@ -807,6 +832,7 @@ sudo dnf install -y \
 ```
 
 **Solution (Arch Linux):**
+
 ```bash
 # Enable multilib in /etc/pacman.conf
 sudo pacman -S \
@@ -818,11 +844,13 @@ sudo pacman -S \
 ### 3. Emulator Crashes on Launch
 
 **Symptom:**
+
 ```
 Emulator: ERROR: x86 emulation currently requires hardware acceleration!
 ```
 
 **Solution:**
+
 ```bash
 # Verify KVM is installed and enabled
 kvm-ok
@@ -841,11 +869,13 @@ emulator -avd Pixel_5_API_30_ARM
 ### 4. Android SDK Not Found
 
 **Symptom:**
+
 ```
 SDK location not found. Define location with sdk.dir in local.properties
 ```
 
 **Solution:**
+
 ```bash
 # Verify SDK directory exists
 ls ~/Android/Sdk
@@ -861,11 +891,13 @@ source ~/.bashrc
 ### 5. Gradle Build Out of Memory
 
 **Symptom:**
+
 ```
 Expiring Daemon because JVM heap space is exhausted
 ```
 
 **Solution:**
+
 ```bash
 # Edit gradle.properties in project root
 echo "org.gradle.jvmargs=-Xmx8g -XX:MaxDirectMemorySize=8g" >> gradle.properties
@@ -881,6 +913,7 @@ echo "org.gradle.jvmargs=-Xmx8g -XX:MaxDirectMemorySize=8g" >> gradle.properties
 Emulator takes >5 minutes to boot, app laggy.
 
 **Solution:**
+
 ```bash
 # Ensure KVM is enabled
 emulator -avd Pixel_5_API_30 -qemu -enable-kvm -gpu host
@@ -897,6 +930,7 @@ echo "hw.ramSize=4096" >> ~/.android/avd/Pixel_5_API_30.avd/config.ini
 ### 7. adb: device offline
 
 **Symptom:**
+
 ```
 adb devices
 List of devices attached
@@ -904,6 +938,7 @@ emulator-5554   offline
 ```
 
 **Solution:**
+
 ```bash
 # Restart ADB server
 adb kill-server
@@ -919,11 +954,13 @@ emulator -avd Pixel_5_API_30 -no-snapshot
 ### 8. Firebase Configuration Missing
 
 **Symptom:**
+
 ```
 File google-services.json is missing
 ```
 
 **Solution:**
+
 ```bash
 # Generate Firebase config from local.properties
 ./gradlew generateFirebaseConfig
@@ -943,11 +980,13 @@ EOF
 ### 9. Cannot Find avdmanager or sdkmanager
 
 **Symptom:**
+
 ```
 avdmanager: command not found
 ```
 
 **Solution:**
+
 ```bash
 # Add Android SDK tools to PATH
 echo 'export ANDROID_HOME=$HOME/Android/Sdk' >> ~/.bashrc
@@ -969,6 +1008,7 @@ which sdkmanager
 Black screen, corrupted UI, or graphics glitches in emulator.
 
 **Solution:**
+
 ```bash
 # Try different GPU modes
 emulator -avd Pixel_5_API_30 -gpu swiftshader_indirect  # Software rendering

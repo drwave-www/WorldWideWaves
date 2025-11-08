@@ -24,6 +24,7 @@ WorldWideWaves implements comprehensive accessibility features for Android and i
 ### ✅ Implemented Features
 
 #### Android
+
 - **Semantics**: All interactive elements have proper roles (Button, Tab, Checkbox)
 - **Content Descriptions**: All images and icons have meaningful descriptions
 - **Touch Targets**: Minimum 48dp on all interactive elements
@@ -34,6 +35,7 @@ WorldWideWaves implements comprehensive accessibility features for Android and i
 - **State Descriptions**: Toggle and selection states clearly announced
 
 #### iOS
+
 - **VoiceOver Integration**: Full wave coordination via audio announcements
 - **Dynamic Type**: 12 text size levels (0.8x - 3.0x scaling)
 - **Haptic Feedback**: Tactile cues for wave events
@@ -324,6 +326,7 @@ class MyAccessibilityTest : BaseAccessibilityTest() {
 #### Required Modifiers
 
 Every interactive element needs:
+
 ```kotlin
 Modifier.semantics {
     role = Role.Button  // or Tab, Checkbox
@@ -338,6 +341,7 @@ Modifier.semantics {
 #### Live Regions
 
 For dynamic content:
+
 ```kotlin
 Modifier.semantics {
     liveRegion = LiveRegionMode.Polite  // or Assertive for urgent
@@ -430,16 +434,19 @@ actual fun rememberDynamicTypeScale(): Float {
 ### Android Issues
 
 #### "TalkBack not announcing element"
+
 - ✅ Check element has `contentDescription` or semantic role
 - ✅ Verify element is `clickable` or `focusable`
 - ✅ Check parent isn't blocking accessibility
 
 #### "State changes not announced"
+
 - ✅ Add `stateDescription` to semantics
 - ✅ Use `toggleableState` for checkboxes
 - ✅ Mark tabs with `selected = true/false`
 
 #### "Touch target too small"
+
 - ✅ Wrap element in 48dp Box
 - ✅ Use `Modifier.size(48.dp)` on clickable parent
 - ✅ Visual size can be smaller (e.g., 24dp icon inside 48dp box)
@@ -447,21 +454,25 @@ actual fun rememberDynamicTypeScale(): Float {
 ### iOS Issues
 
 #### "VoiceOver not reading element"
+
 - ✅ Verify Compose semantics block is present
 - ✅ Check semantic bridging (contentDescription → accessibilityLabel)
 - ✅ Test on real device (simulator sometimes differs)
 
 #### "Text not scaling with Dynamic Type"
+
 - ✅ Ensure Typography uses `AppTypography()` function
 - ✅ Verify `rememberDynamicTypeScale()` is called
 - ✅ Check fontSize multiplied by scale factor
 
 #### "Map not accessible"
+
 - ✅ Verify `mapView.isAccessibilityElement = false`
 - ✅ Check `updateMapAccessibility()` is called on state changes
 - ✅ Ensure accessibility elements have proper frames
 
 #### "Haptics not working"
+
 - ✅ Test on real device (haptics don't work on simulator)
 - ✅ Check haptic generators are prepared in init
 - ✅ Verify device haptics are enabled in system settings
@@ -490,18 +501,21 @@ actual fun rememberDynamicTypeScale(): Float {
 ## Resources
 
 ### Internal Documentation
+
 - [iOS Map Accessibility](./ios/ios-map-accessibility.md)
 - [iOS Semantic Bridging](./archive/session-summaries/ios-semantic-bridging.md) - Compose → iOS accessibility mapping
 - [Testing Strategy](./testing-strategy.md)
 - [UI Testing Guide](./ui-testing-guide.md)
 
 ### External Standards
+
 - [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
 - [Android Accessibility](https://developer.android.com/guide/topics/ui/accessibility)
 - [iOS Accessibility](https://developer.apple.com/accessibility/)
 - [Compose Accessibility](https://developer.android.com/jetpack/compose/accessibility)
 
 ### Testing Tools
+
 - **Android**: TalkBack, Accessibility Scanner, Espresso AccessibilityChecks
 - **iOS**: VoiceOver, Accessibility Inspector
 - **Web**: WebAIM Contrast Checker

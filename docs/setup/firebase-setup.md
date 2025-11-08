@@ -29,6 +29,7 @@ The project includes unified scripts for generating Firebase configuration for b
 ### For Development
 
 1. **Update local.properties**:
+
    ```properties
    # Add these lines to local.properties (replace with actual values)
    FIREBASE_PROJECT_ID=your-project-id
@@ -38,6 +39,7 @@ The project includes unified scripts for generating Firebase configuration for b
    ```
 
 2. **Build the project**:
+
    ```bash
    ./gradlew build
    # Firebase config is automatically generated
@@ -78,6 +80,7 @@ FIREBASE_API_KEY=your-api-key
 
 **GitHub Actions Integration**:
 Add to your workflow file:
+
 ```yaml
 - name: Generate Firebase Config
   env:

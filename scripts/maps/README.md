@@ -13,6 +13,7 @@ This pipeline downloads OpenStreetMap data, generates offline MBTiles, extracts 
 ```
 
 ### Stage 1: Download OSM Data
+
 **Script**: `10-download_osm.sh`
 
 Downloads OpenStreetMap `.pbf` files for configured events/cities.
@@ -29,12 +30,14 @@ Downloads OpenStreetMap `.pbf` files for configured events/cities.
 ```
 
 **What it does**:
+
 - Reads event configuration from `shared/src/commonMain/composeResources/files/events.json`
 - Downloads OSM data using `openmaptiles-tools`
 - Extracts bounding box (BBOX) for each event area
 - Caches downloaded data in `data/` directory
 
 ### Stage 2: Generate MBTiles
+
 **Script**: `20-generate_mbtiles.sh`
 
 Generates offline map tiles in MBTiles format using OpenMapTiles + Docker.
@@ -48,17 +51,20 @@ Generates offline map tiles in MBTiles format using OpenMapTiles + Docker.
 ```
 
 **What it does**:
+
 - Uses `openmaptiles/openmaptiles` Docker container
 - Processes OSM data through PostgreSQL + PostGIS
 - Generates vector tiles at multiple zoom levels
 - Outputs `.mbtiles` files ready for MapLibre
 
 **Requirements**:
+
 - Docker & Docker Compose
 - 8GB+ RAM (PostgreSQL processing)
 - 512MB shared memory configured in docker-compose
 
 ### Stage 3: Extract GeoJSON Boundaries
+
 **Script**: `30-retrieve-geojson.sh`
 
 Extracts city administrative boundaries as GeoJSON polygons.
@@ -68,12 +74,14 @@ Extracts city administrative boundaries as GeoJSON polygons.
 ```
 
 **What it does**:
+
 - Queries OpenStreetMap Nominatim API
 - Retrieves administrative boundary polygons
 - Saves as `.geojson` files for map overlays
 - Used for event area visualization
 
 ### Stage 4: Generate Default Map Images
+
 **Script**: `35-generate-default-map-images.sh`
 
 Creates default map preview images for events.
@@ -85,6 +93,7 @@ Creates default map preview images for events.
 **Output**: PNG images used as map placeholders before tiles load.
 
 ### Stage 5: Create Android Modules
+
 **Script**: `40-generate-modules.sh`
 
 Generates Android Dynamic Feature Modules for on-demand map delivery.
@@ -94,6 +103,7 @@ Generates Android Dynamic Feature Modules for on-demand map delivery.
 ```
 
 **What it does**:
+
 - Creates separate module for each city
 - Packages MBTiles into Android assets
 - Generates module manifest and build files
@@ -104,6 +114,7 @@ Generates Android Dynamic Feature Modules for on-demand map delivery.
 ## Configuration
 
 ### Event Configuration File
+
 **Location**: `shared/src/commonMain/composeResources/files/events.json`
 
 ```json
@@ -124,11 +135,13 @@ Generates Android Dynamic Feature Modules for on-demand map delivery.
 ```
 
 **Key fields**:
+
 - `id`: Event/city identifier (used in filenames)
 - `osmAdminids`: OpenStreetMap administrative boundary IDs
 - `bbox`: Bounding box coordinates (optional, auto-calculated if missing)
 
 ### Library Functions
+
 **Location**: `libs/lib.inc.sh`
 
 Shared utilities used across all scripts:
@@ -151,6 +164,7 @@ exists <event_id>
 ## Dependencies
 
 ### Required Tools
+
 - **Docker**: OpenMapTiles container runtime
 - **Docker Compose**: Container orchestration
 - **jq**: JSON parsing (auto-downloaded to `bin/jq`)
@@ -159,11 +173,14 @@ exists <event_id>
 - **Node.js 16+**: Map processing scripts
 
 ### Optional Tools
+
 - **ImageMagick**: Image generation (stage 4)
 - **osmium**: OSM data manipulation
 
 ### Auto-installed
+
 The scripts auto-download these tools to `./bin/`:
+
 - `jq` (Linux/macOS)
 - `yq` (Linux/macOS)
 - `openmaptiles-tools` (pip install)
@@ -193,6 +210,7 @@ maps/
 ### Add New City
 
 1. **Add event to configuration**:
+
    ```bash
    # Edit shared/src/commonMain/composeResources/files/events.json
    {
@@ -204,6 +222,7 @@ maps/
    ```
 
 2. **Run full pipeline**:
+
    ```bash
    cd scripts/maps/
    ./10-download_osm.sh tokyo_japan
@@ -214,6 +233,7 @@ maps/
    ```
 
 3. **Verify output**:
+
    ```bash
    ls output/tokyo_japan.mbtiles
    ls ../../maps/tokyo_japan/
@@ -238,6 +258,7 @@ rm -rf openmaptiles/        # Force re-clone
 ## Performance & Optimization
 
 ### Parallel Processing
+
 The scripts support processing multiple cities concurrently:
 
 ```bash
@@ -249,12 +270,14 @@ wait
 ```
 
 ### Disk Space Requirements
+
 - **OSM .pbf files**: 50-500MB per city
 - **PostgreSQL data**: 1-5GB during processing
 - **Output .mbtiles**: 100-800MB per city
 - **Total workspace**: ~10GB for 40 cities
 
 ### Memory Requirements
+
 - **Minimum**: 8GB RAM
 - **Recommended**: 16GB RAM
 - **PostgreSQL**: 512MB shared memory (configured in docker-compose)
@@ -264,6 +287,7 @@ wait
 ### Docker Issues
 
 **Problem**: `Cannot connect to the Docker daemon`
+
 ```bash
 # Check Docker is running
 docker ps
@@ -271,6 +295,7 @@ docker-compose --version
 ```
 
 **Problem**: `PostgreSQL shared memory error`
+
 ```bash
 # Increase shm_size in openmaptiles/docker-compose.yml
 # (Script does this automatically)
@@ -280,6 +305,7 @@ shm_size: "512m"
 ### OSM Download Issues
 
 **Problem**: `Download fails for large cities`
+
 ```bash
 # Use --force to retry
 ./10-download_osm.sh large_city --force
@@ -291,6 +317,7 @@ df -h
 ### MBTiles Generation Fails
 
 **Problem**: `Out of memory during tile generation`
+
 ```bash
 # Check Docker memory limits
 docker stats
@@ -302,6 +329,7 @@ docker stats
 ### Missing Dependencies
 
 **Problem**: `jq: command not found`
+
 ```bash
 # Scripts auto-download to ./bin/
 # Ensure wget is available
@@ -315,19 +343,24 @@ which wget
 ## Integration with Project
 
 ### Gradle Integration
+
 ```bash
 # From project root
 ./gradlew :maps:generateAllMaps
 ```
 
 ### iOS ODR Integration
+
 Map data is synchronized to iOS On-Demand Resources:
+
 ```bash
 ../../scripts/sync-ios-odr-maps.gradle.kts
 ```
 
 ### Android Dynamic Features
+
 Generated modules in `maps/<city>/` are auto-included in build:
+
 ```groovy
 // settings.gradle.kts
 include(":maps:paris_france")
@@ -347,17 +380,22 @@ include(":maps:new_york_usa")
 ## Advanced Configuration
 
 ### Custom Zoom Levels
+
 Edit `data/<event>.yaml`:
+
 ```yaml
 minzoom: 0
 maxzoom: 14  # Lower = faster, larger tiles
 ```
 
 ### Custom Tile Layers
+
 Modify `openmaptiles/openmaptiles.yaml` to include/exclude layers.
 
 ### Parallel Docker Instances
+
 Run multiple `20-generate_mbtiles.sh` in parallel with different ports:
+
 ```bash
 POSTGRES_PORT=5433 ./20-generate_mbtiles.sh city1 &
 POSTGRES_PORT=5434 ./20-generate_mbtiles.sh city2 &
@@ -366,6 +404,7 @@ POSTGRES_PORT=5434 ./20-generate_mbtiles.sh city2 &
 ## Contributing
 
 When adding new map scripts:
+
 1. Follow the numbering convention (`<order>-<name>.sh`)
 2. Source `libs/lib.inc.sh` for shared utilities
 3. Support both single event and batch processing

@@ -3,12 +3,15 @@
 ## 🎯 Critical First Step: Identify the Correct App
 
 ### Problem
+
 Multiple iOS apps with different bundle IDs can exist in simulator:
+
 - `com.worldwidewaves.iosApp` (often broken/crashes)
 - `com.worldwidewaves.WorldWideWavesDrWaves` (may be working)
 - `com.worldwidewaves.shared.Shared` (framework test)
 
 ### Solution
+
 **ALWAYS verify which app you're testing**:
 
 ```bash
@@ -48,6 +51,7 @@ grep -E "BUNDLE_ID|bundleId" iosApp/project.yml
 ### Step 2: Monitor Complete Initialization Flow
 
 **Essential Logging Points:**
+
 ```swift
 // In ContentView.swift
 NSLog("📱 ContentView: makeUIViewController called")
@@ -60,6 +64,7 @@ NSLog("📱 ContentView: MainViewController created successfully")
 ```
 
 **Log Monitoring Command:**
+
 ```bash
 xcrun simctl spawn DEVICE_ID log show --style compact \
   --predicate 'process == "APP_NAME"' --info --debug \
@@ -70,16 +75,19 @@ xcrun simctl spawn DEVICE_ID log show --style compact \
 ### Step 3: Identify Crash Patterns
 
 **Pattern 1: Immediate Crash (return to home screen)**
+
 - **Symptom**: White screen → home screen immediately
 - **Logs**: Missing MainViewController or ComposeUIViewController logs
 - **Cause**: Usually coroutine deadlocks or Android-only dependencies
 
 **Pattern 2: Infrastructure Crash (SIGABRT)**
+
 - **Symptom**: App launches but crashes during initialization
 - **Logs**: Shows initialization but terminates with exception
 - **Debug**: Check crash reports in `~/Library/Logs/DiagnosticReports/`
 
 **Pattern 3: Stable But No UI (splash/loading)**
+
 - **Symptom**: App stays open but shows white/empty content
 - **Logs**: Complete initialization but no UI rendering
 - **Cause**: Resource loading issues or splash screen logic
@@ -117,6 +125,7 @@ configurations.configureEach {
 ### Phase 3: Fix Coroutine Deadlocks
 
 **Hunt for Blocking Operations:**
+
 ```bash
 # Search for blocking patterns
 find shared/src/commonMain -name "*.kt" -exec grep -Hn \
@@ -124,6 +133,7 @@ find shared/src/commonMain -name "*.kt" -exec grep -Hn \
 ```
 
 **Critical Fix Pattern:**
+
 ```kotlin
 // BAD (causes deadlock):
 private fun updateCache() {
@@ -144,11 +154,13 @@ private suspend fun updateCache() {
 ### Test Progression
 
 1. **Empty Compose Test**
+
 ```kotlin
 fun MainViewController(): UIViewController = ComposeUIViewController { }
 ```
 
 2. **Basic Text Test**
+
 ```kotlin
 fun MainViewController(): UIViewController = ComposeUIViewController {
     androidx.compose.material3.Text("Hello iOS!")
@@ -156,6 +168,7 @@ fun MainViewController(): UIViewController = ComposeUIViewController {
 ```
 
 3. **WWWMainActivity Integration**
+
 ```kotlin
 fun MainViewController(): UIViewController = ComposeUIViewController {
     WWWMainActivity(IOSPlatformEnabler(), showSplash = false).Draw()
@@ -203,12 +216,14 @@ grep -A 20 -B 5 "terminateWithUnhandledException\|BlockingCoroutine\|runBlocking
 ### Crash Signature Patterns
 
 **Coroutine Deadlock:**
+
 ```
 "symbol":"kfun:kotlinx.coroutines.BlockingCoroutine.joinBlocking#internal"
 "sourceFile":"Builders.kt","sourceLine":137
 ```
 
 **Android Dependency Conflict:**
+
 ```
 "symbol":"androidx.lifecycle.LifecycleOwner"
 "exception":"NoClassDefFoundError"
@@ -251,6 +266,7 @@ xcrun simctl spawn DEVICE_ID log show --style compact \
 ### Phase 1: Verify Basic Infrastructure
 
 1. **Test Simple MainViewController**
+
 ```kotlin
 fun MainViewController(): UIViewController = ComposeUIViewController {
     androidx.compose.material3.Text("iOS Working!")
@@ -258,12 +274,14 @@ fun MainViewController(): UIViewController = ComposeUIViewController {
 ```
 
 2. **Verify Logs Appear**
+
 ```bash
 # Should see in logs:
 # ContentView: MainViewController created successfully
 ```
 
 3. **Add Basic Koin Test**
+
 ```kotlin
 fun MainViewController(): UIViewController = ComposeUIViewController {
     val platform: WWWPlatform by inject()
@@ -274,6 +292,7 @@ fun MainViewController(): UIViewController = ComposeUIViewController {
 ### Phase 2: Add Events Loading
 
 1. **Test Events Loading Without UI**
+
 ```kotlin
 fun MainViewController(): UIViewController = ComposeUIViewController {
     val events: WWWEvents by inject()
@@ -290,6 +309,7 @@ fun MainViewController(): UIViewController = ComposeUIViewController {
 ```
 
 2. **Monitor Events Loading**
+
 ```bash
 # Should see in logs:
 # WWWEvents.loadEventsJob: === STARTING loadEventsJob() ===
@@ -300,6 +320,7 @@ fun MainViewController(): UIViewController = ComposeUIViewController {
 ### Phase 3: Full WWWMainActivity Integration
 
 1. **Test WWWMainActivity Creation**
+
 ```kotlin
 fun MainViewController(): UIViewController = ComposeUIViewController {
     val mainActivity = WWWMainActivity(IOSPlatformEnabler(), showSplash = false)
@@ -308,6 +329,7 @@ fun MainViewController(): UIViewController = ComposeUIViewController {
 ```
 
 2. **Monitor Full Initialization**
+
 ```bash
 # Expected complete sequence:
 # WWWMainActivity: === INITIALIZING WWWMainActivity ===
@@ -318,12 +340,14 @@ fun MainViewController(): UIViewController = ComposeUIViewController {
 ## 🏁 Success Criteria
 
 ### Working App Indicators
+
 - ✅ App launches and stays open (no return to home screen)
 - ✅ Navigation structure visible (back arrow + app title)
 - ✅ Events list appears with real event names
 - ✅ No crashes during interaction
 
 ### Final Verification
+
 ```bash
 # Take screenshot after 10 seconds to ensure stability
 sleep 10 && xcrun simctl io DEVICE_ID screenshot final_success.png

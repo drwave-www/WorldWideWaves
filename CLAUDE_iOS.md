@@ -23,6 +23,7 @@
 ## Quick Start
 
 ### Prerequisites
+
 - macOS 13.0+ (Ventura or later)
 - Xcode 16.0+
 - CocoaPods 1.12+
@@ -69,11 +70,13 @@ open worldwidewaves.xcodeproj
 ### Technology Stack
 
 **UI Framework**: Compose Multiplatform (NOT SwiftUI)
+
 - Shared Compose UI code between Android and iOS
 - ComposeUIViewController bridges Kotlin Compose to UIKit
 - 100% code reuse for UI components
 
 **Integration Pattern**: SceneDelegate + RootController
+
 - AppDelegate: URL routing and app lifecycle
 - SceneDelegate: Window management and platform initialization
 - RootController.kt: Kotlin ViewController factories
@@ -115,6 +118,7 @@ Business Logic (Kotlin) → Domain and data layers
 ### Why iOS Deadlocks Occur
 
 Kotlin/Native on iOS has strict threading requirements due to:
+
 1. **Main thread freeze prevention**: iOS main thread must remain responsive
 2. **Dispatcher initialization order**: `Dispatchers.Main` must be ready before use
 3. **Koin initialization timing**: DI must be initialized on correct thread
@@ -268,6 +272,7 @@ fun getIOSSafeEvents(): WWWEvents = IOSSafeDI.events
 ```
 
 **Why it's safe**:
+
 - File-level object (initialized once at app start)
 - Properties resolved lazily after Koin initialization
 - No composition-time dependency resolution
@@ -310,11 +315,13 @@ rg "^object.*: KoinComponent" shared/src/commonMain --type kotlin
 ```
 
 **Expected Results**:
+
 - Commands 1-3: **ZERO results**
 - Command 4: **ONE result** (IOSSafeDI.kt)
 - Command 5: **Few results** (intentional singletons)
 
 **Automated verification**:
+
 ```bash
 ./scripts/dev/verification/verify-ios-safety.sh
 # Exit code 0 = safe
@@ -334,11 +341,13 @@ iOS Kotlin/Native requires **strict memory management** for C interop (CoreLocat
 #### The 3 Memory Safety Rules
 
 **❌ NEVER**:
+
 1. Use `NSData.create()` without `usePinned { }`
 2. Access struct fields (`.coordinate.latitude`) without `useContents { }`
 3. Use `addressOf()` outside pinned scope
 
 **✅ ALWAYS**:
+
 1. Pin ByteArray with `usePinned { }` before passing to C APIs
 2. Use `useContents { }` for struct field access
 3. Keep pointers within pinned scope - never escape them
@@ -367,6 +376,7 @@ val lat = location.coordinate.latitude  // UNDEFINED BEHAVIOR!
 #### Verification
 
 **Before EVERY commit** touching iOS platform code:
+
 ```bash
 ./scripts/dev/verification/verify-ios-safety.sh
 ```
@@ -374,6 +384,7 @@ val lat = location.coordinate.latitude  // UNDEFINED BEHAVIOR!
 **Expected**: Zero violations in checks 8-11 (cinterop safety).
 
 **See**:
+
 - [Cinterop Memory Safety Patterns](docs/ios/cinterop-memory-safety-patterns.md) - Complete guide
 - [Platform API Usage Guide](docs/ios/platform-api-usage-guide.md) - Threading & safety
 - [Swift-Kotlin Bridging Guide](docs/ios/swift-kotlin-bridging-guide.md) - Type conversions
@@ -466,6 +477,7 @@ cd "$SRCROOT/.."
 ```
 
 This:
+
 1. Compiles Kotlin code
 2. Generates framework at `shared/build/xcode-frameworks/`
 3. Embeds framework in app bundle
@@ -564,12 +576,14 @@ xcrun simctl spawn booted log stream \
 
 1. Set breakpoints in Swift files
 2. When breakpoint hits, examine Kotlin stack:
+
    ```swift
    po exception  // View Kotlin exception details
    po Thread.callStackSymbols  // View full stack trace
    ```
 
 3. Log Kotlin state from Swift:
+
    ```swift
    NSLog("Event count: \(KotlinEvents.shared.count)")
    ```
@@ -577,6 +591,7 @@ xcrun simctl spawn booted log stream \
 ### Common Log Patterns
 
 **Platform initialization**:
+
 ```
 [SceneDelegate] 📦 Installing platform...
 [Platform_ios] 🔧 Initializing Koin...
@@ -585,6 +600,7 @@ xcrun simctl spawn booted log stream \
 ```
 
 **ViewController lifecycle**:
+
 ```
 [RootController] >>> ENTERING IOS MAIN VIEW CONTROLLER
 [WWWMainActivity] 🎬 Activity created
@@ -592,6 +608,7 @@ xcrun simctl spawn booted log stream \
 ```
 
 **Position updates**:
+
 ```
 [PositionManager] 📍 Position updated: (48.8566, 2.3522) accuracy: 10.0m
 [PositionObserver] 📏 Distance to event: 1234m
@@ -622,16 +639,19 @@ git diff HEAD~1 shared/src/commonMain
 ### Xcode Debugging Tools
 
 **Memory Graph**: Cmd+Shift+M
+
 - View object retention
 - Detect memory leaks
 - Inspect Kotlin/Native objects
 
 **View Hierarchy**: Cmd+Shift+V (when app running)
+
 - Inspect Compose UI structure
 - View layout bounds
 - Debug touch issues
 
 **Instruments** (Cmd+I):
+
 - Time Profiler: Find performance bottlenecks
 - Allocations: Track memory usage
 - Leaks: Detect memory leaks
@@ -686,12 +706,14 @@ xcodebuild test \
 ### Issue 0: Xcode GUID Conflict Error (RECURRING) ⚠️
 
 **Symptoms**:
+
 ```
 Could not compute dependency graph: unable to load transferred PIF:
 The workspace contains multiple references with the same GUID 'PACKAGE:...'
 ```
 
 **Causes**:
+
 - Swift Package Manager cache corruption
 - Xcode DerivedData corruption
 - Multiple concurrent Xcode operations
@@ -699,6 +721,7 @@ The workspace contains multiple references with the same GUID 'PACKAGE:...'
 - Xcode crashes during package resolution
 
 **Prevention** (Run regularly):
+
 ```bash
 # Clean Xcode state (recommended before important work)
 ./scripts/dev/build/clean_xcode.sh
@@ -711,6 +734,7 @@ rm -rf iosApp/worldwidewaves.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
 ```
 
 **When to Run Cleanup**:
+
 - ✅ **Before opening Xcode after git pull/merge**
 - ✅ **After Xcode crashes**
 - ✅ **When seeing GUID errors**
@@ -719,6 +743,7 @@ rm -rf iosApp/worldwidewaves.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
 - ⚠️ **After any Swift Package Manager updates**
 
 **Immediate Fix** (if error occurs):
+
 1. Close Xcode completely (Cmd+Q)
 2. Run `./scripts/dev/build/clean_xcode.sh`
 3. Open Xcode
@@ -726,6 +751,7 @@ rm -rf iosApp/worldwidewaves.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
 5. Build (Cmd+B)
 
 **Best Practices**:
+
 - Close Xcode before git operations (pull, merge, rebase)
 - Don't interrupt Swift Package Manager resolution
 - Run cleanup script weekly during active development
@@ -738,11 +764,13 @@ rm -rf iosApp/worldwidewaves.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
 **Symptoms**: White screen, unresponsive UI, no logs
 
 **Causes**:
+
 1. DI violation (object : KoinComponent in Composable)
 2. Coroutine launch in init{}
 3. runBlocking before ComposeUIViewController
 
 **Solutions**:
+
 ```bash
 # Run verification
 ./scripts/dev/verification/verify-ios-safety.sh
@@ -760,11 +788,13 @@ rg -B10 "object.*KoinComponent" shared/src/commonMain --type kotlin \
 **Symptoms**: `KoinApplicationNotStartedException` in logs
 
 **Causes**:
+
 - `doInitPlatform()` not called
 - Called on wrong thread
 - Failed silently (swallowed exception)
 
 **Solutions**:
+
 ```swift
 // SceneDelegate.swift - Add logging
 do {
@@ -781,11 +811,13 @@ do {
 **Symptoms**: Missing images, strings, or fonts
 
 **Causes**:
+
 - MokoRes bundle not initialized
 - Wrong resource path
 - Resource not included in build
 
 **Solutions**:
+
 ```bash
 # Verify resources included
 ls shared/src/commonMain/resources/
@@ -802,11 +834,13 @@ grep "MokoRes" iosApp/worldwidewaves/SceneDelegate.swift
 **Symptoms**: Blank map area, no tiles loading
 
 **Causes**:
+
 - Native map provider not registered
 - MapLibre initialization failed
 - Missing map style URL
 
 **Solutions**:
+
 ```swift
 // Verify provider registration in SceneDelegate
 NativeMapViewProviderRegistrationKt.registerNativeMapViewProvider(
@@ -823,11 +857,13 @@ xcrun simctl spawn booted log stream \
 **Symptoms**: Crash with "SKIKO" or "Metal" in stack trace
 
 **Causes**:
+
 - SKIKO_RENDER_API not set
 - Metal not available on device
 - Compose version incompatibility
 
 **Solutions**:
+
 ```swift
 // Verify SKIKO configuration in SceneDelegate
 setenv("SKIKO_RENDER_API", "METAL", 1)
@@ -843,11 +879,13 @@ setenv("SKIKO_RENDER_API", "METAL", 1)
 **Symptoms**: URL opens browser instead of app
 
 **Causes**:
+
 - URL scheme not registered in Info.plist
 - AppDelegate not handling URLs
 - Wrong URL format
 
 **Solutions**:
+
 ```xml
 <!-- Verify Info.plist -->
 <key>CFBundleURLTypes</key>
@@ -877,18 +915,21 @@ xcrun simctl spawn booted log stream \
 **Root Cause**: Using wrong MLNMapView property names that don't exist
 
 **Incorrect Names** (silently fail in Swift):
+
 - `allowsZooming` - doesn't exist
 - `allowsScrolling` - doesn't exist
 - `allowsRotating` - doesn't exist
 - `allowsTilting` - doesn't exist
 
 **Correct Names** (from MLNMapView.h):
+
 - `isZoomEnabled` - controls zoom gestures
 - `isScrollEnabled` - controls pan gestures
 - `isRotateEnabled` - controls rotation gestures
 - `isPitchEnabled` - controls tilt gestures
 
 **Solution**:
+
 ```swift
 // ✅ CORRECT - these properties actually exist
 mapView.isZoomEnabled = true
@@ -903,12 +944,14 @@ mapView.allowsScrolling = true  // Property doesn't exist!
 
 **Verification**:
 Check `shouldChangeFrom` delegate is receiving gesture events:
+
 - `reason=4` - MLNCameraChangeReasonGesturePan (pan gestures)
 - `reason=8` - MLNCameraChangeReasonGesturePinch (zoom gestures)
 
 If you only see `reason=1` (programmatic), gestures are not enabled.
 
 **Files to Check**:
+
 - `EventMapView.swift:66-97` - Gesture configuration
 - `MapLibreViewWrapper.swift` - setGesturesEnabled callback
 
@@ -920,6 +963,7 @@ If you only see `reason=1` (programmatic), gestures are not enabled.
 
 **Current Working Solution**:
 iOS uses camera center validation (not viewport bounds):
+
 ```swift
 public func mapView(_ mapView: MLNMapView, shouldChangeFrom oldCamera: MLNMapCamera,
                    to newCamera: MLNMapCamera, reason: MLNCameraChangeReason) -> Bool {
@@ -936,12 +980,14 @@ public func mapView(_ mapView: MLNMapView, shouldChangeFrom oldCamera: MLNMapCam
 ```
 
 **Why Camera Center (Not Viewport)**:
+
 - Replicates Android `setLatLngBoundsForCameraTarget()` behavior
 - MapLibre natively clamps viewport edges to tile boundaries
 - Simpler validation logic
 - Allows user to touch map edges without rejection
 
 **Files**:
+
 - `MapLibreViewWrapper.swift:1166-1287` - shouldChangeFrom delegate
 
 ### Issue 9: Min Zoom Too Restrictive
@@ -951,6 +997,7 @@ public func mapView(_ mapView: MLNMapView, shouldChangeFrom oldCamera: MLNMapCam
 **Cause**: Incorrect tile size in min zoom calculation
 
 **Current Implementation** (512px tiles):
+
 ```swift
 // iOS MapLibre uses 512px tiles (not 256px)
 let zoomForHeight = log2((screenHeight * 360.0) / (boundsHeight * 512.0))
@@ -959,6 +1006,7 @@ let minZoom = min(zoomForHeight, zoomForWidth)
 ```
 
 **Result**:
+
 - Min zoom slightly higher than theoretical (uses 512px assumption)
 - User can see ~90-95% of event height at minZoom
 - Acceptable per user decision (prevents over-zooming out)
@@ -966,6 +1014,7 @@ let minZoom = min(zoomForHeight, zoomForWidth)
 **Trade-off**: Prioritizes preventing excessive zoom-out over perfect height visibility
 
 **Files**:
+
 - `MapLibreViewWrapper.swift:519-571` - setBoundsForCameraTarget
 
 ---
@@ -1162,6 +1211,7 @@ WorldWideWaves uses different approaches for displaying user location markers on
 #### Android: Native LocationComponent
 
 **Implementation**: Uses MapLibre's built-in LocationComponent
+
 - **Integration**: LocationEngineProxy bridges PositionManager to native LocationComponent
 - **Updates**: Automatic (no manual coordinate updates needed)
 - **Rendering**: GPU-accelerated pulse animation
@@ -1169,11 +1219,13 @@ WorldWideWaves uses different approaches for displaying user location markers on
 - **Code**: `AndroidEventMap.kt:setupMapLocationComponent()`
 
 **Architecture**:
+
 ```
 PositionManager → LocationEngineProxy → LocationComponent → MapLibre Native Rendering
 ```
 
 **Configuration** (`AndroidMapLibreAdapter.kt`):
+
 ```kotlin
 locationComponent.apply {
     isLocationComponentEnabled = true
@@ -1188,6 +1240,7 @@ locationComponent.apply {
 #### iOS: Custom MLNPointAnnotation
 
 **Implementation**: Uses custom annotation with manual updates
+
 - **Integration**: Direct callback from PositionManager via MapWrapperRegistry
 - **Updates**: Manual (explicit `setUserPosition()` calls)
 - **Rendering**: CoreAnimation-based pulse (CPU)
@@ -1195,11 +1248,13 @@ locationComponent.apply {
 - **Code**: `MapLibreViewWrapper.swift:502-577`
 
 **Architecture**:
+
 ```
 PositionManager → IosMapLibreAdapter → MapWrapperRegistry → setUserPosition callback → MLNPointAnnotation
 ```
 
 **Configuration** (`MapLibreViewWrapper.swift:768-808`):
+
 ```swift
 // Red pulse circle (40x40pt)
 pulseView.backgroundColor = UIColor.systemRed.withAlphaComponent(0.3)
@@ -1222,10 +1277,12 @@ pulseAnimation.repeatCount = .infinity
 ### Why Different Architectures?
 
 **Android**: Native LocationComponent is tightly integrated with MapLibre's location engine
+
 - LocationEngineProxy allows custom position sources while maintaining native rendering
 - Best performance with minimal code
 
 **iOS**: Native location component expects CLLocationManager
+
 - MapLibre iOS doesn't provide equivalent LocationEngineProxy pattern
 - Custom annotation provides full control over position updates from PositionManager
 - More code but better integration with reactive position flow
@@ -1233,6 +1290,7 @@ pulseAnimation.repeatCount = .infinity
 ### Visual Appearance (Both Platforms)
 
 Both platforms render the same visual appearance:
+
 - **Pulse**: Red circle (40x40pt/dp), opacity 30%, scales 1.0→1.3 over 1.5s
 - **Center**: Black dot (10x10pt/dp) with 2pt/dp white border
 - **Effect**: Infinite pulsing animation to indicate live position
@@ -1240,6 +1298,7 @@ Both platforms render the same visual appearance:
 ### Position Update Flow
 
 **Android**:
+
 ```kotlin
 PositionManager.positionFlow
   → LocationEngineProxy.onLocationChanged()
@@ -1248,6 +1307,7 @@ PositionManager.positionFlow
 ```
 
 **iOS**:
+
 ```kotlin
 PositionManager.positionFlow
   → IosMapLibreAdapter.setUserPosition()
@@ -1271,6 +1331,7 @@ PositionManager.positionFlow
 ### Future Considerations
 
 **If iOS MapLibre adds LocationEngineProxy**:
+
 - Could migrate to native LocationComponent
 - Would reduce code by ~100 lines
 - Would improve performance slightly (GPU vs CPU animation)
@@ -1283,6 +1344,7 @@ PositionManager.positionFlow
 ## References
 
 ### Essential Documentation
+
 - [CLAUDE.md](./CLAUDE.md) - Main development guide
 - [docs/ios/ios-violation-tracker.md](docs/ios/ios-violation-tracker.md) - Historical violations
 - [docs/ios/ios-success-state.md](docs/ios/ios-success-state.md) - Success criteria
@@ -1293,6 +1355,7 @@ PositionManager.positionFlow
 - [docs/ios/platform-api-usage-guide.md](docs/ios/platform-api-usage-guide.md) - UIKit/Foundation/CoreLocation
 
 ### External Resources
+
 - [Kotlin Multiplatform Mobile](https://kotlinlang.org/docs/multiplatform-mobile-getting-started.html)
 - [Compose Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/)
 - [Kotlin/Native Memory Management](https://kotlinlang.org/docs/native-memory-manager.html)

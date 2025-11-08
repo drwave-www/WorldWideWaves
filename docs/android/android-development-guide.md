@@ -35,11 +35,13 @@ brew install --cask android-studio
 ### 2. Required Plugins
 
 **Pre-installed**:
+
 - ✅ Kotlin Multiplatform Mobile
 - ✅ Android Gradle Plugin
 - ✅ Jetpack Compose
 
 **Additional (Optional)**:
+
 - **Detekt**: Static analysis (already configured in build)
 - **Rainbow Brackets**: Visual aid for nested code
 - **GitToolBox**: Enhanced Git integration
@@ -61,6 +63,7 @@ SDK Platforms:
 ```
 
 **Install via command line**:
+
 ```bash
 sdkmanager "platforms;android-34" \
   "build-tools;34.0.0" \
@@ -82,6 +85,7 @@ sdkmanager "platforms;android-34" \
 | Graphics | Hardware - GLES 3.0 |
 
 **Create emulator via command line**:
+
 ```bash
 avdmanager create avd \
   -n "Pixel_6_Pro_API_34" \
@@ -91,6 +95,7 @@ avdmanager create avd \
 ```
 
 **Enable location services**:
+
 ```bash
 # Start emulator
 emulator -avd Pixel_6_Pro_API_34 &
@@ -117,6 +122,7 @@ open -a "Android Studio" .
 ```
 
 **First Build** (may take 5-10 minutes):
+
 ```bash
 ./gradlew :composeApp:assembleDebug
 ```
@@ -202,6 +208,7 @@ adb logcat -s "WWW*:V" > app_logs.txt
 ```
 
 **Log Levels**:
+
 - `Log.v()` - Verbose (development)
 - `Log.d()` - Debug (detailed info)
 - `Log.i()` - Info (general info)
@@ -227,6 +234,7 @@ adb logcat -s "WWW*:V" > app_logs.txt
 ```
 
 **Attach to Running Process**:
+
 ```bash
 # 1. Install debug APK
 ./gradlew :composeApp:installDebug
@@ -251,6 +259,7 @@ adb shell am start -D -n com.worldwidewaves/.activities.MainActivity
    - Network activity (HTTP requests)
 
 **Memory leak detection**:
+
 ```bash
 # Capture heap dump
 adb shell am dumpheap com.worldwidewaves /data/local/tmp/heap.hprof
@@ -265,6 +274,7 @@ adb pull /data/local/tmp/heap.hprof .
 ### 4. Network Inspection
 
 **OkHttp Logging Interceptor** (if added):
+
 ```kotlin
 // Add to build.gradle.kts dependencies
 implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
@@ -276,6 +286,7 @@ val interceptor = HttpLoggingInterceptor().apply {
 ```
 
 **Charles Proxy / Proxyman** (external tools):
+
 ```bash
 # Configure proxy on emulator
 adb shell settings put global http_proxy <host>:<port>
@@ -287,6 +298,7 @@ adb shell settings put global http_proxy :0
 ### 5. MapLibre Debugging
 
 **Enable MapLibre verbose logging**:
+
 ```kotlin
 // In MainActivity.onCreate()
 MapLibre.getInstance(this).apply {
@@ -295,6 +307,7 @@ MapLibre.getInstance(this).apply {
 ```
 
 **Logcat filter for MapLibre**:
+
 ```bash
 # MapLibre GL native logs
 adb logcat -s "Mbgl-*:V" "MLN*:V"
@@ -304,6 +317,7 @@ adb logcat -s "WWW*:V" "Mbgl-*:V" "EventMap:V"
 ```
 
 **Common MapLibre issues**:
+
 - Tiles not loading: Check `style.json` path in logcat
 - Camera bounds errors: Check `MapBoundsEnforcer` logs
 - Location dot not showing: Check `LocationComponent` activation logs
@@ -318,6 +332,7 @@ adb logcat -s "WWW*:V" "Mbgl-*:V" "EventMap:V"
 4. Check modifiers, semantics, bounds
 
 **Useful for**:
+
 - Debugging touch target sizes (48dp minimum)
 - Verifying accessibility contentDescription
 - Checking padding/spacing values
@@ -346,6 +361,7 @@ adb logcat -s "WWW*:V" "Mbgl-*:V" "EventMap:V"
 ```
 
 **Expected results**:
+
 - ✅ 722+ tests passing
 - ✅ ~22 seconds execution time
 - ✅ 0 failures, 0 skipped
@@ -355,6 +371,7 @@ adb logcat -s "WWW*:V" "Mbgl-*:V" "EventMap:V"
 **UI tests with Compose Testing + Espresso**
 
 **Prerequisites**:
+
 ```bash
 # 1. Start emulator
 emulator -avd Pixel_6_Pro_API_34 &
@@ -369,6 +386,7 @@ adb shell pm grant com.worldwidewaves android.permission.ACCESS_COARSE_LOCATION
 ```
 
 **Run tests**:
+
 ```bash
 # All instrumented tests
 ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest
@@ -382,6 +400,7 @@ ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest
 ```
 
 **Test categories**:
+
 - **Accessibility**: `AccessibilityTest.kt`, `AutomatedAccessibilityScanTest.kt`
 - **Map integration**: `MapIntegrationTest.kt`, `EventDetailScreenMapTest.kt`
 - **E2E flows**: `CompleteWaveParticipationE2ETest.kt`
@@ -390,15 +409,18 @@ ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest
 ### Testing from Android Studio
 
 **Run single test**:
+
 1. Open test file (e.g., `EventsListScreenTest.kt`)
 2. Click green arrow next to test function
 3. Select "Run 'testEventListLoads()'"
 
 **Run test class**:
+
 1. Right-click test file
 2. Select "Run 'EventsListScreenTest'"
 
 **Debug tests**:
+
 1. Set breakpoints in test or app code
 2. Right-click test
 3. Select "Debug 'testName'"
@@ -419,6 +441,7 @@ ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest
 | `EventFullMapActivity` | Full-screen map | Receives `eventId` via Intent |
 
 **Lifecycle flow**:
+
 ```
 MainActivity
     onCreate() → installSplashScreen() → setContent { MainScreen() }
@@ -461,6 +484,7 @@ fun requestLocationPermission(): Boolean {
 **File**: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/androidMain/kotlin/com/worldwidewaves/shared/ui/components/permissions/LocationPermissions.android.kt`
 
 **Declared in AndroidManifest.xml**:
+
 ```xml
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -526,6 +550,7 @@ class AndroidLocationProvider : LocationProvider {
 ```
 
 **Features**:
+
 - GPS update interval: `WWWGlobals.Timing.GPS_UPDATE_INTERVAL` (default 1s)
 - High accuracy mode
 - Reactive StateFlow updates
@@ -576,6 +601,7 @@ class SimulationLocationEngine(private val platform: WWWPlatform) {
 ```
 
 **Usage**:
+
 ```bash
 # Enable simulation mode
 # In MainApplication.onCreate():
@@ -607,6 +633,7 @@ val applicationModule = module {
 ```
 
 **Initialization** (MainApplication.kt):
+
 ```kotlin
 override fun onCreate() {
     startKoin {
@@ -618,6 +645,7 @@ override fun onCreate() {
 ```
 
 **Files**:
+
 - `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/androidMain/kotlin/com/worldwidewaves/shared/di/AndroidModule.kt`
 - `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/composeApp/src/androidMain/kotlin/com/worldwidewaves/di/ApplicationModule.kt`
 
@@ -630,6 +658,7 @@ override fun onCreate() {
 **Symptom**: "Could not resolve dependencies" or "Plugin not found"
 
 **Solutions**:
+
 ```bash
 # Clear Gradle cache
 ./gradlew clean
@@ -649,6 +678,7 @@ rm -rf ~/.gradle/caches/
 **Symptom**: Blank map or "Failed to load style" errors
 
 **Diagnosis**:
+
 ```bash
 # Check style.json exists
 adb logcat -s "EventMap:V" | grep "style"
@@ -661,6 +691,7 @@ adb logcat | grep "getStyleUri"
 ```
 
 **Solutions**:
+
 ```kotlin
 // Clear map cache (in debug screen or manually)
 val cacheDir = context.cacheDir
@@ -676,6 +707,7 @@ mapViewModel.downloadMap(eventId)
 **Symptom**: Location dot not showing on map, "Permission denied" logs
 
 **Check permissions**:
+
 ```bash
 # List granted permissions
 adb shell dumpsys package com.worldwidewaves | grep permission
@@ -686,6 +718,7 @@ adb shell pm grant com.worldwidewaves android.permission.ACCESS_COARSE_LOCATION
 ```
 
 **Runtime permission flow**:
+
 ```kotlin
 // Verify permissions granted
 val hasPermission = ContextCompat.checkSelfPermission(
@@ -706,6 +739,7 @@ ActivityCompat.requestPermissions(
 **Symptom**: UI not updating, blank screens, wrong state
 
 **Debug steps**:
+
 ```kotlin
 // Add logging to composables
 @Composable
@@ -722,6 +756,7 @@ fun MyScreen() {
 ```
 
 **Common fixes**:
+
 ```kotlin
 // Ensure mutableStateOf in remember
 var value by remember { mutableStateOf(initialValue) }
@@ -740,6 +775,7 @@ val state by viewModel.stateFlow.collectAsState()
 **Symptom**: `adb devices` shows no devices, emulator offline
 
 **Solutions**:
+
 ```bash
 # Restart ADB
 adb kill-server
@@ -762,6 +798,7 @@ avdmanager create avd -n Pixel_6_Pro_API_34 -k "system-images;android-34;google_
 **Symptom**: Builds fail with "duplicate class" or stale resources
 
 **Nuclear option**:
+
 ```bash
 # Clean everything
 ./gradlew clean
@@ -780,11 +817,13 @@ rm -rf .idea/
 **Symptom**: Native crash in `libmaplibre.so`
 
 **Common causes**:
+
 - Accessing map before style loaded
 - UI thread violations
 - Invalid camera bounds
 
 **Fix**:
+
 ```kotlin
 // Always check style loaded
 map.style?.let { style ->
@@ -841,6 +880,7 @@ override fun updateWavePolygons(wavePolygons: List<Polygon>, clearPolygons: Bool
 ### 3. Location Update Debouncing
 
 **Already implemented in PositionManager**:
+
 - Filters duplicate positions
 - Debounces rapid updates
 - Priority: SIMULATION > GPS
@@ -898,6 +938,7 @@ LaunchedEffect(countdown) {
 ```
 
 **Testing**:
+
 ```bash
 # Enable TalkBack on emulator
 adb shell settings put secure enabled_accessibility_services com.google.android.marvin.talkback/com.google.android.marvin.talkback.TalkBackService
@@ -915,17 +956,20 @@ adb shell settings put secure enabled_accessibility_services com.google.android.
 ## Related Documentation
 
 ### Android-Specific
+
 - **[Android Map Constraints](./android-map-constraint-index.md)** - Map constraint implementation
 - **[Android Patterns Quick Reference](./android-patterns-quick-reference.md)** - Common code patterns
 - **[Android Source File Reference](./android-source-file-reference.md)** - File locations
 
 ### General
+
 - **[Development Workflow](../development.md)** - Cross-platform development
 - **[Testing Guide](../testing/README.md)** - Comprehensive testing
 - **[CI/CD Pipeline](../ci-cd.md)** - GitHub Actions workflows
 - **[Accessibility Guide](../accessibility-guide.md)** - WCAG compliance
 
 ### iOS Comparison
+
 - **[iOS Development Guide](../ios/CLAUDE_iOS.md)** - iOS equivalent documentation
 - **[iOS/Android Parity](../ios/ios-android-map-parity-gap-analysis.md)** - Platform differences
 

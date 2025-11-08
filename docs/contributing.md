@@ -159,12 +159,15 @@ testing and maintenance. No functional changes.
 ### Before Opening PR
 
 1. **Setup git hooks (first time only):**
+
    ```bash
    ./dev/setup-git-hooks.sh
    ```
+
    This enables automatic code quality checks, documentation generation, and testing.
 
 2. **Sync with main:**
+
    ```bash
    git checkout main
    git pull origin main
@@ -173,6 +176,7 @@ testing and maintenance. No functional changes.
    ```
 
 3. **Run tests:**
+
    ```bash
    ./gradlew :shared:testDebugUnitTest
    ./gradlew ktlintCheck detekt
@@ -193,6 +197,7 @@ Git hooks run automatically on commit and push. They ensure code quality and doc
 **What hooks do automatically:**
 
 **On Commit (pre-commit):**
+
 - Kotlin formatting (ktlint) with auto-fix
 - Static analysis (detekt) with auto-fix where possible
 - Swift linting (swiftlint) with auto-fix
@@ -202,6 +207,7 @@ Git hooks run automatically on commit and push. They ensure code quality and doc
 - Markdown linting (if `markdownlint-cli2` installed)
 
 **On Push (pre-push):**
+
 - Dokka API documentation generation
 - Documentation update detection (warns if code changed without docs)
 - Translation updates (if `OPENAI_API_KEY` set)
@@ -209,12 +215,14 @@ Git hooks run automatically on commit and push. They ensure code quality and doc
 - Automatic emulator launch if needed
 
 **Bypass hooks (emergencies only):**
+
 ```bash
 git commit --no-verify   # Skip pre-commit
 git push --no-verify     # Skip pre-push
 ```
 
 **Install optional markdown linting:**
+
 ```bash
 npm install -g markdownlint-cli2
 ```
@@ -320,6 +328,7 @@ var mutable = mutableListOf()      // var only when necessary
 ```
 
 **Import order:**
+
 1. Android imports
 2. Third-party imports (alphabetical)
 3. Project imports (alphabetical)
@@ -492,6 +501,7 @@ val a = sin(dLat / 2).pow(2) +
 ### Markdown Documentation
 
 **Structure:**
+
 - H1 for title
 - H2 for main sections
 - H3 for subsections
@@ -526,6 +536,7 @@ Details about configuration.
 ### Android
 
 **Activity/Fragment:**
+
 ```kotlin
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -540,6 +551,7 @@ class MainActivity : ComponentActivity() {
 ```
 
 **Resources:**
+
 - Use vector drawables (XML) over PNG
 - Provide dark theme variants
 - Use string resources for all text
@@ -548,6 +560,7 @@ class MainActivity : ComponentActivity() {
 ### iOS
 
 **Swift integration:**
+
 ```swift
 // Call Kotlin from Swift
 import Shared
@@ -556,6 +569,7 @@ let events = try EventRepositoryKt.getEvents()
 ```
 
 **SwiftUI views:**
+
 ```swift
 struct EventsListView: View {
     @State private var events: [Event] = []
@@ -640,6 +654,7 @@ Any other context, mockups, or examples.
 ## Release Process
 
 1. **Create release branch:**
+
    ```bash
    git checkout -b release/v0.23 main
    ```
@@ -649,11 +664,13 @@ Any other context, mockups, or examples.
    - Update `CHANGELOG.md`
 
 3. **Test release build:**
+
    ```bash
    ./gradlew :composeApp:assembleRelease
    ```
 
 4. **Tag release:**
+
    ```bash
    git tag -a v0.23 -m "Release v0.23"
    git push origin v0.23

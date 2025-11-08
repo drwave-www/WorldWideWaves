@@ -11,17 +11,20 @@
 ## 📋 **VIOLATION TRACKING CHECKLIST**
 
 ### **CATEGORY 1: init{} Coroutine Launches** ✅ **COMPLETED**
+
 - [x] **EventsViewModel.kt:88** - ✅ FIXED - Removed `init{loadEvents()}`
 - [x] **SoundChoreographyManager.kt:82** - ✅ FIXED - Removed `init{launchIO{}}`
 - [x] **WWWAbstractEventBackActivity.kt:80** - ✅ FIXED - Removed `init{scope.launch{}}`
 - [x] **WWWMainActivity.kt:91** - ✅ FIXED - Removed `init{events.loadEvents}`
 
 ### **CATEGORY 2: init{} DI Access** ✅ **COMPLETED**
+
 - [x] **SystemClock.kt:87** - ✅ FIXED - Removed `init{platform = get()}`, added lazy resolution
 
 ### **CATEGORY 3: Composable DI Injection** ✅ **COMPLETED**
 
 #### **✅ VIOLATION 1: StandardEventLayout.kt**
+
 - **File**: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/components/StandardEventLayout.kt`
 - **Line**: 64 (comment at line 61)
 - **Original Code**: `object : KoinComponent { val platform: WWWPlatform by inject(); val clock: IClock by inject() }`
@@ -30,6 +33,7 @@
 - **Comment**: "iOS FIX: Removed dangerous object : KoinComponent pattern"
 
 #### **✅ VIOLATION 2: WaveChoreographies.kt (Instance 1)**
+
 - **File**: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/components/wave/choreographies/WaveChoreographies.kt`
 - **Line**: 91 (comment at line 90)
 - **Original Code**: `object : KoinComponent { val clock: IClock by inject() }`
@@ -39,6 +43,7 @@
 - **Comment**: "iOS FIX: Removed dangerous object : KoinComponent pattern"
 
 #### **✅ VIOLATION 3: WaveChoreographies.kt (Instance 2)**
+
 - **File**: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/components/wave/choreographies/WaveChoreographies.kt`
 - **Line**: 222 (comment at line 221)
 - **Original Code**: `object : KoinComponent { val clock: IClock by inject() }`
@@ -48,6 +53,7 @@
 - **Comment**: "iOS FIX: Removed dangerous object : KoinComponent pattern"
 
 #### **✅ VIOLATION 4: MapActions.kt**
+
 - **File**: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/components/shared/MapActions.kt`
 - **Line**: 72
 - **Original Code**: `object : KoinComponent { val clock: IClock by inject() }`
@@ -56,6 +62,7 @@
 - **Comment**: "iOS FIX: Removed dangerous object : KoinComponent pattern"
 
 #### **✅ VIOLATION 5: ButtonWave.kt**
+
 - **File**: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/components/shared/ButtonWave.kt`
 - **Line**: 62 (comment at line 61)
 - **Original Code**: `object : KoinComponent { val clock: IClock by inject() }`
@@ -64,6 +71,7 @@
 - **Comment**: "iOS FIX: Removed dangerous object : KoinComponent pattern"
 
 #### **✅ VIOLATION 6: SimulationButton.kt**
+
 - **File**: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/components/shared/SimulationButton.kt`
 - **Line**: 67 (comment at line 66)
 - **Original Code**: `object : KoinComponent { val platform: WWWPlatform by inject() }`
@@ -76,6 +84,7 @@
 ## 🔧 **FIX PATTERN FOR EACH VIOLATION**
 
 ### **Step 1: Identify Current Pattern**
+
 ```kotlin
 @Composable
 fun MyComponent() {
@@ -87,6 +96,7 @@ fun MyComponent() {
 ```
 
 ### **Step 2: Replace with Parameter Injection**
+
 ```kotlin
 @Composable
 fun MyComponent(
@@ -97,6 +107,7 @@ fun MyComponent(
 ```
 
 ### **Step 3: Update Call Sites**
+
 ```kotlin
 @Composable
 fun ParentComponent() {
@@ -110,6 +121,7 @@ fun ParentComponent() {
 ## 🧪 **VERIFICATION COMMANDS**
 
 ### **After Each Fix - Run These Commands:**
+
 ```bash
 # 1. Check for remaining object KoinComponent patterns
 rg -n "object.*KoinComponent" shared/src/commonMain --type kotlin
@@ -133,6 +145,7 @@ rg -n -A 5 "init\s*\{" shared/src/commonMain --type kotlin | rg "get\(\)|inject\
 ### **Overall Progress**: 11/11 Violations Fixed (100%) ✅ **COMPLETE!**
 
 #### **Completed**: 11 ✅
+
 - EventsViewModel init{} fix
 - SoundChoreographyManager init{} fix
 - WWWAbstractEventBackActivity init{} fix
@@ -145,6 +158,7 @@ rg -n -A 5 "init\s*\{" shared/src/commonMain --type kotlin | rg "get\(\)|inject\
 - SimulationButton Composable DI fix
 
 #### **Remaining**: 0 ✅
+
 **ALL iOS DEADLOCK VIOLATIONS ELIMINATED!**
 
 ---

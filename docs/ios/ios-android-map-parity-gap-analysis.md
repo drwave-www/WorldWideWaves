@@ -9,6 +9,7 @@
 ## Executive Summary
 
 **Recent Fixes (October 2025)**:
+
 1. ✅ **Gesture API Fixed** - Changed to correct property names (`isZoomEnabled/isScrollEnabled`)
 2. ✅ **Camera Validation Working** - Center-based validation prevents out-of-bounds panning
 3. ✅ **Min Zoom Optimized** - Uses 512px tile size for acceptable viewport coverage
@@ -16,6 +17,7 @@
 
 **Remaining Gap Analysis**:
 Of the 19 remaining properties (20% gap):
+
 - **17 properties (18%)**: Acceptable platform differences - different APIs achieving same functionality
 - **2 properties (2%)**: MapLibre iOS API limitations - features don't exist
 
@@ -30,6 +32,7 @@ Of the 19 remaining properties (20% gap):
 These properties use different platform APIs but achieve identical functionality:
 
 #### **1.1 Camera Configuration (3 properties)**
+
 | Property | Android | iOS | Why Different |
 |----------|---------|-----|---------------|
 | Camera padding | `(0,0,0,0)` explicit in `newLatLngBounds` | `UIEdgeInsets` in `cameraThatFitsCoordinateBounds` | Different API patterns, same default (0) |
@@ -41,6 +44,7 @@ These properties use different platform APIs but achieve identical functionality
 ---
 
 #### **1.2 Style Loading (3 properties)**
+
 | Property | Android | iOS | Why Different |
 |----------|---------|-----|---------------|
 | Style builder | `Style.Builder().fromUri()` | `mapView.styleURL = url` | Platform SDK design difference |
@@ -53,6 +57,7 @@ These properties use different platform APIs but achieve identical functionality
 ---
 
 #### **1.3 Zoom Configuration (2 properties)**
+
 | Property | Android | iOS | Why Different |
 |----------|---------|-----|---------------|
 | Min zoom setter | `setMinZoomPreference()` | `minimumZoomLevel =` | MapLibre SDK naming difference |
@@ -63,6 +68,7 @@ These properties use different platform APIs but achieve identical functionality
 ---
 
 #### **1.4 Camera APIs (4 properties)**
+
 | Property | Android | iOS | Why Different |
 |----------|---------|-----|---------------|
 | Animation to position | `animateCamera()` with `CameraUpdate` | `UIView.animate` with `setCenter` | MapLibre vs UIKit APIs |
@@ -76,6 +82,7 @@ These properties use different platform APIs but achieve identical functionality
 ---
 
 #### **1.5 Threading & Performance (3 properties)**
+
 | Property | Android | iOS | Why Different |
 |----------|---------|-----|--------|
 | UI thread enforcement | `context.runOnUiThread {}` | `dispatch_async(main_queue)` | Platform threading APIs |
@@ -115,11 +122,13 @@ These features don't exist in MapLibre iOS SDK:
 
 ## Recategorized Parity Status
 
-### Original Count (Misleading):
+### Original Count (Misleading)
+
 - ✅ Matching: 78 properties (80%)
 - ❌ Different: 19 properties (20%)
 
-### Actual Functional Parity (Accurate):
+### Actual Functional Parity (Accurate)
+
 - ✅ **Functionally Matching**: 95 properties (98%)
   - 78 identical implementations
   - 17 different APIs achieving same behavior
@@ -136,6 +145,7 @@ These features don't exist in MapLibre iOS SDK:
 The "20% gap" is misleading because it counts platform API differences as "missing features" when they actually provide equivalent functionality through different mechanisms.
 
 **Production Status**: ✅ **FULLY READY**
+
 - All critical and high-priority features: 100% complete
 - All functional requirements: 98% parity
 - Only 2% gap due to MapLibre iOS SDK limitations (not implementation issues)
@@ -144,19 +154,22 @@ The "20% gap" is misleading because it counts platform API differences as "missi
 
 ## Recommendations
 
-### For Future Work:
+### For Future Work
+
 1. **No action needed** for the 17 "different API" properties - they work correctly
 2. **Monitor MapLibre iOS releases** for compass fading and font family features
 3. **Consider Android improvements**:
    - Add error delegate like iOS (`mapViewDidFailLoadingMap`)
    - Add image load error handling like iOS
 
-### For Documentation:
+### For Documentation
+
 This analysis should replace the "80% parity" messaging with "98% functional parity (17 platform API differences, 2 SDK limitations)".
 
 ---
 
 **Key Insight**: When comparing cross-platform implementations, distinguish between:
+
 - **Functional gaps** (missing features) ← CRITICAL to fix
 - **API differences** (different code, same result) ← Document and accept
 - **SDK limitations** (feature doesn't exist in library) ← Not fixable without upstream changes
@@ -168,7 +181,9 @@ WorldWideWaves iOS/Android maps have **functional parity** despite API differenc
 ## Recent iOS Gesture Fixes (October 2025)
 
 ### Problem Statement
+
 Users reported three critical iOS map gesture issues:
+
 1. Cannot reach event edges during panning
 2. Zoom blocked after reaching zoom 16
 3. Panning blocked after targetWave animation
@@ -176,6 +191,7 @@ Users reported three critical iOS map gesture issues:
 ### Root Cause Analysis
 
 **Issue 1: Wrong Property Names**
+
 ```swift
 // ❌ WRONG - These properties don't exist in MLNMapView
 mapView.allowsZooming = true  // Silently fails!
@@ -185,6 +201,7 @@ mapView.allowsScrolling = true  // Silently fails!
 When Swift tries to set non-existent properties, it **silently fails**. Result: Gestures were never actually enabled/disabled.
 
 **Correct Property Names** (from MLNMapView.h):
+
 ```swift
 // ✅ CORRECT - These properties exist
 mapView.isZoomEnabled = true
@@ -195,12 +212,14 @@ mapView.isPitchEnabled = false
 
 **Issue 2: Viewport Bounds Rejection**
 Previous implementation validated all 4 viewport corners against constraint bounds. This caused:
+
 - Edge touches rejected (corner outside bounds by 1px)
 - Zoom rejected even when camera center was valid
 - Poor user experience (map felt "stuck")
 
 **Issue 3: Removed Zoom Rejection Logic**
 Explicit zoom rejection logic was removed because:
+
 - MapLibre already clamps natively to min/max zoom
 - No need to manually reject zoom gestures
 - Smoother user experience
@@ -208,6 +227,7 @@ Explicit zoom rejection logic was removed because:
 ### Solutions Implemented
 
 **Fix 1: Correct Property Names**
+
 ```swift
 // EventMapView.swift & MapLibreViewWrapper.swift
 mapView.isZoomEnabled = enableGestures
@@ -215,6 +235,7 @@ mapView.isScrollEnabled = enableGestures
 ```
 
 **Fix 2: Camera Center Validation**
+
 ```swift
 // Validate camera center only (not viewport corners)
 public func mapView(_ mapView: MLNMapView, shouldChangeFrom oldCamera: MLNMapCamera,
@@ -231,10 +252,12 @@ public func mapView(_ mapView: MLNMapView, shouldChangeFrom oldCamera: MLNMapCam
 ```
 
 **Fix 3: Removed Manual Zoom Rejection**
+
 - Let MapLibre handle zoom clamping natively
 - No explicit zoom rejection logic needed
 
 **Fix 4: 512px Tile Size in Min Zoom Calculation**
+
 ```swift
 // Calculate min zoom using 512px tiles (MapLibre iOS default)
 let zoomForHeight = log2((screenHeight * 360.0) / (boundsHeight * 512.0))
@@ -245,12 +268,14 @@ let minZoom = min(zoomForHeight, zoomForWidth)
 ### Results
 
 **Before Fixes**:
+
 - ❌ Gestures silently disabled (wrong property names)
 - ❌ Edge touches rejected (viewport validation)
 - ❌ Zoom blocked at zoom 16 (explicit rejection)
 - ❌ Panning blocked after targetWave (constraint application timing)
 
 **After Fixes**:
+
 - ✅ Gestures work correctly (correct property names)
 - ✅ Can touch map edges (camera center validation)
 - ✅ Smooth zoom (MapLibre native clamping)
@@ -264,6 +289,7 @@ let minZoom = min(zoomForHeight, zoomForWidth)
 **Rationale**: Prioritizes preventing excessive zoom-out over perfect height visibility. Acceptable per user decision.
 
 ### Commits
+
 - `92f1a5e1` - Fix gesture property names
 - `4a4fba64` - Fix gesture API mismatch
 - `df43401c` - Fix zoom desync

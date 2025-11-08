@@ -5,6 +5,7 @@ Geographic boundary processing and validation tools for city definitions in Worl
 ## Purpose
 
 Processes geographic data for city boundaries:
+
 - **Administrative boundary extraction** from OpenStreetMap
 - **Polygon validation and simplification**
 - **GeoJSON generation** for city overlays  
@@ -24,6 +25,7 @@ polygons/
 ## Usage
 
 ### Extract City Boundaries
+
 ```bash
 # Extract boundary for specific city from OSM relation ID
 python extract_boundaries.py --relation-id 71525 --output paris_france.geojson
@@ -33,6 +35,7 @@ python extract_boundaries.py --city "Paris, France" --country FR
 ```
 
 ### Validate Polygons
+
 ```bash
 # Check polygon validity and fix common issues
 python validate_polygons.py paris_france.geojson
@@ -42,6 +45,7 @@ python validate_polygons.py data/*.geojson --fix-errors
 ```
 
 ### Simplify GeoJSON
+
 ```bash
 # Reduce polygon complexity for mobile rendering
 python simplify_geojson.py paris_france.geojson --tolerance 0.001
@@ -51,6 +55,7 @@ python simplify_geojson.py paris_france.geojson --tolerance 0.001
 ```
 
 ### Visualize Boundaries
+
 ```bash
 # Generate preview image of city boundary
 python visualize_bounds.py paris_france.geojson --output previews/paris_preview.png
@@ -62,12 +67,15 @@ python visualize_bounds.py original.geojson simplified.geojson --compare
 ## Data Sources
 
 ### OpenStreetMap Relations
+
 Most city boundaries come from OSM administrative relations:
+
 - **Level 8** - City/Municipality boundaries
 - **Level 6** - County/District boundaries (for larger areas)
 - **Level 4** - State/Province boundaries (for special cases)
 
 ### Finding OSM Relation IDs
+
 ```bash
 # Using Overpass API
 curl -G "https://overpass-api.de/api/interpreter" \
@@ -80,6 +88,7 @@ curl "https://nominatim.openstreetmap.org/search?city=Paris&country=France&forma
 ## Data Processing Pipeline
 
 ### 1. Extraction
+
 ```python
 # extract_boundaries.py workflow
 def extract_city_boundary(relation_id):
@@ -96,6 +105,7 @@ def extract_city_boundary(relation_id):
 ```
 
 ### 2. Validation
+
 ```python
 # Common polygon issues and fixes
 def validate_polygon(geojson):
@@ -114,6 +124,7 @@ def validate_polygon(geojson):
 ```
 
 ### 3. Simplification  
+
 ```python
 # Reduce polygon complexity for mobile performance
 def simplify_polygon(geojson, tolerance=0.001):
@@ -129,6 +140,7 @@ def simplify_polygon(geojson, tolerance=0.001):
 ## Configuration
 
 ### Simplification Settings
+
 ```python
 # Balance between accuracy and performance
 SIMPLIFICATION_SETTINGS = {
@@ -139,6 +151,7 @@ SIMPLIFICATION_SETTINGS = {
 ```
 
 ### Validation Rules
+
 ```python
 VALIDATION_RULES = {
     'min_area_km2': 1.0,          # Minimum city area
@@ -151,6 +164,7 @@ VALIDATION_RULES = {
 ## GeoJSON Format
 
 ### Standard Structure
+
 ```json
 {
   "type": "FeatureCollection",
@@ -179,6 +193,7 @@ VALIDATION_RULES = {
 ```
 
 ### Multi-Polygon Support
+
 ```json
 {
   "geometry": {
@@ -194,6 +209,7 @@ VALIDATION_RULES = {
 ## Integration with Maps
 
 ### Using in Android App
+
 ```kotlin
 // Load city boundary in MapLibre
 fun loadCityBoundary(mapView: MapView, cityName: String) {
@@ -215,6 +231,7 @@ fun loadCityBoundary(mapView: MapView, cityName: String) {
 ```
 
 ### iOS Integration
+
 ```swift
 // Load boundary in MapLibre iOS
 func loadCityBoundary(mapView: MLNMapView, cityName: String) {
@@ -233,6 +250,7 @@ func loadCityBoundary(mapView: MLNMapView, cityName: String) {
 ## Quality Control
 
 ### Automated Checks
+
 ```bash
 # Run full validation suite
 ./validate_all_cities.sh
@@ -245,6 +263,7 @@ func loadCityBoundary(mapView: MLNMapView, cityName: String) {
 ```
 
 ### Visual Inspection
+
 ```python
 # Generate boundary overlays for manual review
 def create_inspection_map(geojson_file):
@@ -257,16 +276,19 @@ def create_inspection_map(geojson_file):
 ## Tools and Dependencies
 
 ### Required Packages
+
 ```bash
 pip install shapely geojson requests fiona geopandas matplotlib
 ```
 
 ### External Tools
+
 - **GDAL/OGR** - Geospatial data processing
 - **PostGIS** - Spatial database operations (optional)
 - **QGIS** - Manual boundary editing (when needed)
 
 ### Verification
+
 ```bash
 # Test installation
 python -c "import shapely, geojson, geopandas; print('All packages available')"
@@ -280,6 +302,7 @@ ogrinfo --version
 ### Common Issues
 
 1. **Invalid polygons after extraction**
+
    ```bash
    # Use buffer(0) to fix topology
    python -c "
@@ -290,18 +313,21 @@ ogrinfo --version
    ```
 
 2. **File too large for mobile**
+
    ```bash
    # Increase simplification tolerance
    python simplify_geojson.py city.geojson --tolerance 0.005
    ```
 
 3. **Missing OSM relation**
+
    ```bash
    # Search for alternative boundary sources
    python find_alternative_boundaries.py --city "City Name"
    ```
 
 ### Debug Mode
+
 ```bash
 # Verbose processing with intermediate files
 DEBUG=1 python extract_boundaries.py --relation-id 71525 --keep-temp
@@ -310,6 +336,7 @@ DEBUG=1 python extract_boundaries.py --relation-id 71525 --keep-temp
 ## Adding New Cities
 
 ### Workflow
+
 1. **Find OSM relation ID** for city boundary
 2. **Extract boundary** using relation ID
 3. **Validate polygon** for errors
@@ -318,12 +345,14 @@ DEBUG=1 python extract_boundaries.py --relation-id 71525 --keep-temp
 6. **Add to city registry** in shared module
 
 ### Documentation
+
 ```bash
 # Document new city addition
 echo "paris_france,71525,Paris,France,105.4,2165423" >> cities_registry.csv
 ```
 
 ### Integration  
+
 ```bash
 # Copy to app resources
 cp paris_france.geojson ../maps/android/paris_france/src/main/assets/

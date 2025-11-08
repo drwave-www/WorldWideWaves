@@ -26,6 +26,7 @@ UserDefaults.standard.set(5000, forKey: "locationUpdateInterval")
 ```
 
 **Location:**
+
 - Android: `/data/data/com.worldwidewaves/files/datastore/settings.preferences_pb`
 - iOS: `~/Library/Preferences/com.worldwidewaves.plist`
 
@@ -66,6 +67,7 @@ Output: `composeApp/google-services.json`
 **iOS:**
 
 Manual configuration:
+
 1. Download `GoogleService-Info.plist` from Firebase Console
 2. Add to Xcode project
 3. Initialize in `AppDelegate.swift`
@@ -470,10 +472,12 @@ gpg -c worldwidewaves-release.jks
 ### Communication Channels
 
 **Internal:**
+
 - Slack: #incidents channel
 - GitHub Issues: Create incident issue
 
 **External:**
+
 - Twitter/X: Status updates
 - In-app: Show error message with status link
 - Email: Notify affected users (if identifiable)

@@ -15,6 +15,7 @@ The iOS map implementation uses a **pure SwiftUI + Kotlin business logic** appro
 ## Two-Layer Architecture
 
 ### Layer 1: Swift UI (Interactive Map Display)
+
 **For Production Use** - Use this in your iOS app:
 
 ```swift
@@ -43,7 +44,9 @@ struct EventScreen: View {
 ```
 
 ### Layer 2: Kotlin Status UI (Fallback/Debug)
+
 **IOSEventMap** provides download management and status display but does NOT render an interactive map. It shows:
+
 - Download progress indicator
 - ODR status and errors
 - GPS coordinates (text)
@@ -51,6 +54,7 @@ struct EventScreen: View {
 - Download/retry/cancel buttons
 
 This layer is useful for:
+
 - Testing download logic without full map
 - Status monitoring during development
 - Fallback UI if map fails to load
@@ -103,10 +107,12 @@ struct EventScreen: View {
 ## MapLibreViewWrapper API
 
 ### Map Setup
+
 - `setMapView(_: MLNMapView)` - Bind wrapper to map view
 - `setStyle(styleURL:completion:)` - Set map style
 
 ### Camera
+
 - `getCameraCenterLatitude() -> Double`
 - `getCameraCenterLongitude() -> Double`
 - `getCameraZoom() -> Double`
@@ -114,10 +120,12 @@ struct EventScreen: View {
 - `animateCamera(latitude:longitude:zoom:callback:)` - Animated camera move
 
 ### Wave Polygons
+
 - `addWavePolygons(_:clearExisting:)` - Add wave visualization
 - `clearWavePolygons()` - Remove all waves
 
 ### Dimensions
+
 - `getWidth() -> Double`
 - `getHeight() -> Double`
 
@@ -146,6 +154,7 @@ Currently displays a status card. To integrate with the actual map:
 ## Testing
 
 Build the Xcode project:
+
 ```bash
 xcodebuild -project worldwidewaves.xcodeproj -scheme worldwidewaves -destination 'platform=iOS Simulator,name=iPhone 16'
 ```
@@ -159,10 +168,12 @@ xcodebuild -project worldwidewaves.xcodeproj -scheme worldwidewaves -destination
 ## Related Documentation
 
 ### iOS Development
+
 - [Swift-Kotlin Bridging Guide](../../../../docs/ios/swift-kotlin-bridging-guide.md) - Complete bridge patterns
 - [Platform API Usage Guide](../../../../docs/ios/platform-api-usage-guide.md) - UIKit/MapLibre threading
 - [Cinterop Memory Safety Patterns](../../../../docs/ios/cinterop-memory-safety-patterns.md) - Memory pinning & struct access
 
 ### Architecture
+
 - [Map Architecture](../../../../docs/architecture/map-architecture-analysis.md) - Platform comparison
 - [iOS Safety Patterns](../../../../docs/patterns/ios-safety-patterns.md) - iOS-specific patterns

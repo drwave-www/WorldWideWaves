@@ -15,6 +15,7 @@ This directory was intended for video translation and localization tools but is 
 ## Potential Future Use
 
 This directory could be used for:
+
 - Video content translation for social media
 - Automated subtitle generation
 - Video localization workflows

@@ -72,17 +72,20 @@ composeApp/src/
 **[testing-strategy.md](../testing-strategy.md)** - Core testing philosophy and principles
 
 **Key Principles**:
+
 - Test real business logic, not mocks
 - Avoid testing framework code or trivial logic
 - Focus on critical user workflows
 - Maintain 100% pass rate always
 
 **What to Test**:
+
 - ✅ Core domain logic (wave detection, scheduling, accuracy)
 - ✅ Real integration points (Firebase, MapLibre, device coordination)
 - ✅ Critical user workflows (wave participation, event discovery)
 
 **What NOT to Test**:
+
 - ❌ Mock implementations or interfaces
 - ❌ Framework configuration (DI, logging, persistence)
 - ❌ Trivial code (getters, setters, data classes)
@@ -94,6 +97,7 @@ composeApp/src/
 **Critical Patterns**:
 
 #### Testing Infinite Flows
+
 ```kotlin
 // ✅ CORRECT
 observer.startObservation()
@@ -104,6 +108,7 @@ testScheduler.advanceUntilIdle()  // Now safe
 ```
 
 #### Testing ViewModels with Async State
+
 ```kotlin
 // ✅ CORRECT
 viewModel.loadEvents()
@@ -112,6 +117,7 @@ waitForState(viewModel.isLoading, false)
 ```
 
 #### Test Isolation with Koin
+
 ```kotlin
 // ✅ CORRECT
 @AfterTest
@@ -129,12 +135,14 @@ fun tearDown() {
 **[ui-testing-guide.md](../ui-testing-guide.md)** - Android instrumented and iOS UI tests
 
 **Critical Path Tests**:
+
 - Wave participation workflow (countdown, choreography, sound coordination)
 - Event discovery and filtering
 - Core navigation and permissions
 - Accessibility (TalkBack, VoiceOver, Dynamic Type)
 
 **Test Categories**:
+
 - `@Category(TestCategories.CRITICAL)` - Must pass before release
 - `@Category(TestCategories.FEATURE)` - Feature coverage
 - `@Category(TestCategories.ACCESSIBILITY)` - Screen reader support
@@ -149,6 +157,7 @@ fun tearDown() {
 **[comprehensive-test-specifications.md](../comprehensive-test-specifications.md)** - Exhaustive test specs for map bounds enforcement
 
 **Covers**:
+
 1. Intelligent aspect ratio fitting (height-fit vs width-fit)
 2. Min zoom formula parity (iOS/Android)
 3. Min zoom locking mechanism
@@ -180,6 +189,7 @@ fun tearDown() {
    - Full gesture support with dynamic constraints
 
 **Feature Coverage**:
+
 - Camera behavior (10 tests per screen)
 - Gesture handling (8 tests per screen)
 - User position tracking (12 tests per screen)
@@ -194,18 +204,21 @@ fun tearDown() {
 **[test-coverage-final-report.md](../archive/testing-reports/test-coverage-final-report.md)** - Final coverage analysis (Phases 1-2)
 
 **Summary**:
+
 - 476 total tests (as of October 1, 2025)
 - 102 critical tests added in Phases 1-2
 - 100% pass rate in 5.47s
 - 1 critical production bug discovered and fixed
 
 **Phase 1: CRITICAL Tests** ✅
+
 - Wave progression observer (18 tests)
 - Observation scheduler (30 tests)
 - Wave hit accuracy (18 tests)
 - Event participation flow (12 instrumented tests)
 
 **Phase 2: Data Integrity** ✅
+
 - Event state manager integration (27 tests)
 - Favorite events store (24 tests)
 
@@ -216,11 +229,13 @@ fun tearDown() {
 **Current Status**: 734 tests (100% pass rate)
 
 **Critical Gaps Identified**:
+
 - 15 high-priority areas requiring tests
 - 8 categories of potentially weak tests
 - Recommendation: Add 50-75 critical tests before production
 
 **Focus Areas**:
+
 - WaveProgressionTracker (core business logic)
 - EventStateManager (state management)
 - Accessibility testing (WCAG 2.1 compliance)
@@ -230,11 +245,13 @@ fun tearDown() {
 **[map-testing-implementation-summary.md](../map-testing-implementation-summary.md)** - Map testing framework overview
 
 **Summary**:
+
 - 46 total map tests (20 unit + 26 integration)
 - Headless MapView testing approach
 - Integration tests prioritized over UI tests
 
 **Test Categories**:
+
 - BOUNDS Mode (3 tests)
 - WINDOW Mode (5 tests)
 - Bounds validation (3 tests)
@@ -243,6 +260,7 @@ fun tearDown() {
 - Padding detection (2 tests)
 
 **Integration Tests** (requires emulator):
+
 - MapLibre visible region (9 tests)
 - Screen-specific behavior (17 tests)
 
@@ -253,6 +271,7 @@ fun tearDown() {
 ### Android Testing
 
 #### Unit Tests
+
 ```bash
 # Run all Android unit tests
 ./gradlew :shared:testDebugUnitTest
@@ -266,6 +285,7 @@ fun tearDown() {
 ```
 
 #### Instrumented Tests (Requires Emulator)
+
 ```bash
 # Start emulator
 emulator -avd Pixel_4_API_34 -no-snapshot-load &
@@ -282,6 +302,7 @@ ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest \
 ```
 
 #### Test Categories
+
 ```bash
 # Run critical tests only
 ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest \
@@ -295,6 +316,7 @@ ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest \
 ### iOS Testing
 
 #### iOS Safety Verification (MANDATORY before commits)
+
 ```bash
 # Run automated iOS safety checks
 ./scripts/verify-ios-safety.sh
@@ -303,6 +325,7 @@ ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest \
 ```
 
 **Checks for**:
+
 - Composable-scoped KoinComponent (deadlock risk)
 - `init{}` blocks with coroutine launches
 - `init{}` blocks with DI access
@@ -310,6 +333,7 @@ ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest \
 - File-level KoinComponent objects
 
 #### iOS Unit Tests
+
 ```bash
 # Compile iOS Kotlin code
 ./gradlew :shared:compileKotlinIosSimulatorArm64
@@ -319,6 +343,7 @@ ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest \
 ```
 
 #### iOS UI Tests (Xcode)
+
 ```bash
 # Open Xcode project
 cd iosApp
@@ -333,6 +358,7 @@ open worldwidewaves.xcodeproj
 ```
 
 #### iOS Simulator Logs
+
 ```bash
 # View app logs in simulator
 xcrun simctl spawn booted log stream \
@@ -345,16 +371,19 @@ xcrun simctl spawn booted log stream \
 **[accessibility-guide.md](../accessibility-guide.md)** - WCAG 2.1 Level AA compliance
 
 **Test Script**:
+
 ```bash
 # Run accessibility test suite
 ./scripts/test_accessibility.sh
 ```
 
 **Manual Testing**:
+
 - **Android**: Enable TalkBack, navigate entire app
 - **iOS**: Enable VoiceOver, test with Dynamic Type at max size
 
 **Required Validations**:
+
 - [ ] All 27+ accessibility tests pass
 - [ ] TalkBack navigation works without manual mode
 - [ ] VoiceOver announces all critical events
@@ -435,6 +464,7 @@ open shared/build/reports/tests/testDebugUnitTest/index.html
 ### Test Requirements (from CLAUDE.md)
 
 **CRITICAL RULES**:
+
 - ✅ **ALWAYS run tests after commits** - Ensure no regressions
 - ✅ **NEVER disable tests without permission** - Fix issues, don't hide them
 - ✅ **NEVER disable tests to make them pass** - Tests validate business logic
@@ -444,6 +474,7 @@ open shared/build/reports/tests/testDebugUnitTest/index.html
 ### Test-First Philosophy
 
 **Tests must be logical and business-oriented**, not mirror current implementation:
+
 - If tests fail → either business logic issue in code OR business requirements changed
 - Tests validate business requirements, not implementation details
 - Test modifications require explanation and user approval
@@ -452,6 +483,7 @@ open shared/build/reports/tests/testDebugUnitTest/index.html
 ### Test Organization Standards
 
 **Test Class Structure**:
+
 ```kotlin
 class MyFeatureTest {
     // 1. COMPANION OBJECT (test data, constants)
@@ -487,17 +519,20 @@ class MyFeatureTest {
 ### Platform-Specific Test Requirements
 
 **CommonTest** (shared/src/commonTest):
+
 - ❌ NO MockK (not supported on iOS)
 - ❌ NO JVM-only APIs
 - ✅ Use Kotlin Test annotations
 - ✅ Platform-independent business logic only
 
 **AndroidUnitTest** (shared/src/androidUnitTest):
+
 - ✅ CAN use MockK
 - ✅ CAN use Android-specific APIs
 - ✅ Test Android implementations only
 
 **iOSTest** (shared/src/iosTest):
+
 - ❌ NO MockK (Kotlin/Native limitation)
 - ✅ Use expect/actual for platform-specific behavior
 - ✅ Test iOS implementations only
@@ -509,11 +544,13 @@ class MyFeatureTest {
 ### GitHub Actions Workflows
 
 **Test Execution**:
+
 - All tests run on every PR
 - Both Android and iOS platforms verified
 - Zero-tolerance for test failures
 
 **Workflow Files**:
+
 - `.github/workflows/android-tests.yml` - Android unit + instrumented tests
 - `.github/workflows/ios-tests.yml` - iOS compilation + unit tests
 - `.github/workflows/accessibility-tests.yml` - Accessibility compliance
@@ -521,6 +558,7 @@ class MyFeatureTest {
 ### Local Pre-Push Hook
 
 **`.git-hooks/pre-push`** (automatically runs before push):
+
 ```bash
 #!/bin/bash
 echo "Running tests before push..."
@@ -570,6 +608,7 @@ echo "✅ All checks passed. Proceeding with push."
 ### Common Test Issues
 
 #### Tests Hang Indefinitely
+
 ```kotlin
 // ❌ PROBLEM: advanceUntilIdle() on infinite flow
 testScheduler.advanceUntilIdle()
@@ -581,6 +620,7 @@ testScheduler.advanceUntilIdle()
 ```
 
 #### Test Isolation Failures
+
 ```kotlin
 // ❌ PROBLEM: Koin not stopped between tests
 @AfterTest
@@ -600,6 +640,7 @@ fun tearDown() {
 ```
 
 #### Flaky ViewModel Tests
+
 ```kotlin
 // ❌ PROBLEM: Not waiting for async state
 assertEquals(expected, viewModel.events.value)
@@ -612,6 +653,7 @@ waitForState(viewModel.isLoading, false)
 ### Instrumented Test Issues
 
 #### Emulator Not Found
+
 ```bash
 # List available emulators
 emulator -list-avds
@@ -624,6 +666,7 @@ adb devices
 ```
 
 #### Test APK Installation Fails
+
 ```bash
 # Clear app data
 adb shell pm clear com.worldwidewaves
@@ -642,18 +685,21 @@ adb uninstall com.worldwidewaves.test
 ### Planned Enhancements
 
 **Phase 5: Performance Testing** (Q1 2026)
+
 - [ ] Animation frame rate monitoring
 - [ ] Memory leak detection
 - [ ] Battery consumption tests
 - [ ] Network latency simulation
 
 **Phase 6: Chaos Engineering** (Q2 2026)
+
 - [ ] Simulate GPS dropout during wave
 - [ ] Network failures during event download
 - [ ] Low battery scenarios
 - [ ] Airplane mode transitions
 
 **Phase 7: iOS UI Tests** (Q2 2026)
+
 - [ ] Port Android instrumented tests to iOS
 - [ ] XCTest suite for critical workflows
 - [ ] Accessibility Inspector integration
@@ -661,6 +707,7 @@ adb uninstall com.worldwidewaves.test
 ### Known Test Gaps
 
 **From test-gap-analysis.md**:
+
 1. WaveProgressionTracker (142 lines, needs 15-20 tests)
 2. EventStateManager edge cases
 3. Complex user position scenarios
@@ -671,12 +718,14 @@ adb uninstall com.worldwidewaves.test
 ## Additional Resources
 
 ### Documentation
+
 - [Architecture Overview](../architecture.md) - System architecture and design
 - [iOS Development Guide](../CLAUDE_iOS.md) - Complete iOS setup and debugging
 - [CI/CD Pipeline](../ci-cd.md) - Continuous integration workflows
 - [Development Workflows](../development.md) - Development best practices
 
 ### External Resources
+
 - [Kotlin Test Documentation](https://kotlinlang.org/api/latest/kotlin.test/)
 - [Compose Testing](https://developer.android.com/jetpack/compose/testing)
 - [Turbine Documentation](https://github.com/cashapp/turbine) - Flow testing library
@@ -696,12 +745,14 @@ adb uninstall com.worldwidewaves.test
 ### Contributing Tests
 
 **Before adding new tests**:
+
 1. Review [testing-strategy.md](../testing-strategy.md) - Understand what to test
 2. Review [test-patterns.md](./test-patterns.md) - Use proven patterns
 3. Run existing tests - Ensure 100% pass rate
 4. Follow test organization standards - Consistent structure
 
 **After adding tests**:
+
 1. Verify 100% pass rate locally
 2. Update relevant documentation if needed
 3. Run pre-commit verification checklist

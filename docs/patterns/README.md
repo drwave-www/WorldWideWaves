@@ -16,6 +16,7 @@ This directory contains proven implementation patterns extracted from the WorldW
 - **Developer productivity**: Clear guidance reduces iteration cycles
 
 **What You'll Find**:
+
 - **Critical Patterns** (MUST READ): iOS safety, null safety - violations cause crashes
 - **Architecture Patterns**: Dependency injection, reactive programming - core system patterns
 - **When-to-Use Guidance**: Decision trees for pattern selection
@@ -32,24 +33,28 @@ These patterns prevent **production crashes and deadlocks**. All developers MUST
 **File**: [ios-safety-patterns.md](./ios-safety-patterns.md)
 
 **What It Covers**:
+
 - Preventing iOS Kotlin/Native deadlocks (main thread freezes)
 - Safe dependency injection on iOS
 - Coroutine initialization patterns
 - Kotlin-Swift exception handling
 
 **When to Read**:
+
 - ✅ **BEFORE** modifying any `shared/src/commonMain` code
 - ✅ **BEFORE** creating new `@Composable` functions
 - ✅ **BEFORE** adding new DI injections
 - ✅ **BEFORE** every commit to shared code
 
 **Key Rules**:
+
 - ❌ NEVER create `object : KoinComponent` inside `@Composable`
 - ❌ NEVER launch coroutines in `init{}` blocks
 - ✅ ALWAYS use `IOSSafeDI` singleton for DI access
 - ✅ ALWAYS use `@Throws(Throwable::class)` for iOS-exposed functions
 
 **Verification**:
+
 ```bash
 # Run before every commit
 ./scripts/verify-ios-safety.sh
@@ -62,23 +67,27 @@ These patterns prevent **production crashes and deadlocks**. All developers MUST
 **File**: [null-safety-patterns.md](./null-safety-patterns.md)
 
 **What It Covers**:
+
 - Eliminating force unwrap (`!!`) operators
 - Safe null handling with elvis operator
 - Early return patterns
 - Validation patterns with `requireNotNull()`
 
 **When to Read**:
+
 - ✅ **BEFORE** accessing nullable properties
 - ✅ **DURING** code review (check for `!!` operators)
 - ✅ **WHEN** fixing NullPointerException crashes
 
 **Key Rules**:
+
 - ❌ NEVER use `!!` in production code
 - ✅ ALWAYS use `?.` with `?:` fallback
 - ✅ ALWAYS use `requireNotNull()` with descriptive error message
 - ✅ ALWAYS validate inputs with early returns
 
 **Common Violations**:
+
 ```kotlin
 // ❌ UNSAFE - crashes on null
 val position = simulation!!.getUserPosition()
@@ -98,6 +107,7 @@ These patterns define the core architecture of WorldWideWaves.
 **File**: [di-patterns.md](./di-patterns.md)
 
 **What It Covers**:
+
 - Koin module organization (4 layers)
 - Scope decisions (single vs factory)
 - Platform-specific DI (Android vs iOS)
@@ -105,11 +115,13 @@ These patterns define the core architecture of WorldWideWaves.
 - iOS-safe DI patterns
 
 **When to Read**:
+
 - ✅ **BEFORE** creating new classes that need dependencies
 - ✅ **WHEN** adding new modules or features
 - ✅ **WHEN** writing tests that need mocked dependencies
 
 **Module Load Order** (CRITICAL):
+
 ```kotlin
 val sharedModule = listOf(
     commonModule,    // 1. Events, Sound
@@ -120,6 +132,7 @@ val sharedModule = listOf(
 ```
 
 **Scope Decision Tree**:
+
 ```
 Need shared state across app?
 ├─ YES → Use `single { }`
@@ -139,6 +152,7 @@ Need shared state across app?
 **File**: [reactive-patterns.md](./reactive-patterns.md)
 
 **What It Covers**:
+
 - StateFlow vs SharedFlow vs Flow (when to use each)
 - Flow operators (map, filter, combine, debounce)
 - ViewModel state management
@@ -148,12 +162,14 @@ Need shared state across app?
 - Testing reactive code
 
 **When to Read**:
+
 - ✅ **BEFORE** creating new ViewModels
 - ✅ **WHEN** implementing reactive UI components
 - ✅ **WHEN** integrating with position/event streams
 - ✅ **WHEN** writing tests for reactive code
 
 **Flow Type Decision Tree**:
+
 ```
 Need UI state (latest value always available)?
 ├─ YES → Use StateFlow<T>
@@ -169,6 +185,7 @@ Need UI state (latest value always available)?
 ```
 
 **Common Patterns**:
+
 ```kotlin
 // ViewModel state
 private val _events = MutableStateFlow<List<WWWEvent>>(emptyList())
@@ -217,6 +234,7 @@ Comprehensive reference table for all patterns:
 | **Test Flow Patterns** | [reactive-patterns.md](./reactive-patterns.md) | Testing | Testing reactive code | ⚠️ Recommended |
 
 **Legend**:
+
 - ✅ **Critical**: Violations cause crashes/deadlocks - MUST follow
 - ⚠️ **Recommended**: Core patterns - SHOULD follow for maintainability
 
@@ -334,11 +352,13 @@ Need reactive state/events?
 ### Scenario 1: Creating a New ViewModel
 
 **Steps**:
+
 1. Read [di-patterns.md](./di-patterns.md) → Scope Decisions
 2. Read [reactive-patterns.md](./reactive-patterns.md) → ViewModel State Management
 3. Read [ios-safety-patterns.md](./ios-safety-patterns.md) → Suspend Initialization
 
 **Pattern**:
+
 ```kotlin
 class EventsViewModel(
     private val repository: EventRepository  // Constructor injection
@@ -366,11 +386,13 @@ val uiModule = module {
 ### Scenario 2: Accessing Position in Composable
 
 **Steps**:
+
 1. Read [ios-safety-patterns.md](./ios-safety-patterns.md) → IOSSafeDI Singleton
 2. Read [reactive-patterns.md](./reactive-patterns.md) → Compose Integration
 3. Read [null-safety-patterns.md](./null-safety-patterns.md) → Safe Null Handling
 
 **Pattern**:
+
 ```kotlin
 @Composable
 fun MapScreen() {
@@ -393,10 +415,12 @@ fun MapScreen() {
 ### Scenario 3: Platform-Specific Implementation
 
 **Steps**:
+
 1. Read [di-patterns.md](./di-patterns.md) → Platform-Specific DI
 2. Read [ios-safety-patterns.md](./ios-safety-patterns.md) → Kotlin-Swift Exception Handling
 
 **Pattern**:
+
 ```kotlin
 // 1. Define interface (commonMain)
 interface HapticProvider {
@@ -473,19 +497,23 @@ Before committing code, verify pattern compliance:
 ## Related Documentation
 
 ### Core Documentation
+
 - [CLAUDE.md](../../CLAUDE.md) - Main project instructions
 - [CLAUDE_iOS.md](../../CLAUDE_iOS.md) - Complete iOS development guide
 
 ### iOS-Specific
+
 - [docs/ios/ios-violation-tracker.md](../ios/ios-violation-tracker.md) - Deadlock violation history
 - [docs/ios/ios-success-state.md](../ios/ios-success-state.md) - iOS success criteria
 - [docs/ios/ios-debugging-guide.md](../ios/ios-debugging-guide.md) - Advanced debugging
 
 ### Testing
+
 - [docs/comprehensive-test-specifications.md](../comprehensive-test-specifications.md) - Testing patterns
 - [docs/testing-strategy.md](../testing-strategy.md) - Testing approach
 
 ### Architecture
+
 - [docs/architecture.md](../architecture.md) - System architecture
 - [docs/architecture/map-architecture-analysis.md](../architecture/map-architecture-analysis.md) - Map subsystem
 
@@ -523,6 +551,7 @@ Before committing code, verify pattern compliance:
 ### When to Document a New Pattern
 
 Add a pattern when:
+
 - ✅ Pattern solves a **recurring problem** (>2 occurrences)
 - ✅ Pattern prevents **production crashes/deadlocks**
 - ✅ Pattern improves **code maintainability** significantly

@@ -308,11 +308,13 @@ Avoid in extremely high-frequency code paths:
 **Symptom**: Logs don't include correlation ID prefix
 
 **Causes**:
+
 1. Not using `withCorrelation` wrapper
 2. Logging from non-suspend function outside correlation scope
 3. Using plain `Napier.i()` instead of `Log.i()`
 
 **Solution**:
+
 ```kotlin
 // ❌ WRONG: Using Napier directly
 suspend fun myFunction() = withCorrelation("TEST") {
@@ -332,6 +334,7 @@ suspend fun myFunction() = withCorrelation("TEST") {
 **Cause**: Using `GlobalScope` or explicit `Dispatchers.Default` context
 
 **Solution**:
+
 ```kotlin
 // ❌ WRONG: GlobalScope doesn't inherit context
 withCorrelation("PARENT") {
@@ -355,6 +358,7 @@ withCorrelation("PARENT") {
 **Cause**: Using correlation context in very high-frequency operations
 
 **Solution**:
+
 1. Use `WWWGlobals.LogConfig.ENABLE_VERBOSE_LOGGING` to disable verbose logs in production
 2. Move correlation context to higher-level operation (not per-iteration)
 3. Use performance logging flag for high-frequency debug logs
@@ -421,6 +425,7 @@ Correlation context is inherently thread-safe:
 ### From Manual Request ID Passing
 
 **Before**:
+
 ```kotlin
 fun loadEvent(eventId: String, requestId: String) {
     Log.i("Loader", "[$requestId] Loading event")
@@ -429,6 +434,7 @@ fun loadEvent(eventId: String, requestId: String) {
 ```
 
 **After**:
+
 ```kotlin
 suspend fun loadEvent(eventId: String) = withCorrelation("EVENT-$eventId") {
     Log.i("Loader", "Loading event")  // Correlation ID added automatically
@@ -439,6 +445,7 @@ suspend fun loadEvent(eventId: String) = withCorrelation("EVENT-$eventId") {
 ### From Global Tracing Variables
 
 **Before**:
+
 ```kotlin
 object TracingContext {
     var currentRequestId: String? = null  // Thread-unsafe!
@@ -451,6 +458,7 @@ fun processRequest(id: String) {
 ```
 
 **After**:
+
 ```kotlin
 suspend fun processRequest(id: String) = withCorrelation(id) {
     Log.i("API", "Processing")  // Thread-safe, scoped correlation

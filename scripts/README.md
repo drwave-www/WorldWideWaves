@@ -13,6 +13,7 @@ Before using any scripts, verify your development environment:
 ```
 
 This checks:
+
 - Platform detection (macOS, Linux, Windows)
 - Required tools (Java 17+, Node.js 16+, Git, ripgrep)
 - Platform-specific tools (Xcode on macOS, KVM on Linux)
@@ -72,17 +73,20 @@ scripts/
 Comprehensive development environment verification script.
 
 **Purpose:**
+
 - Verify all required development tools
 - Check platform-specific requirements
 - Validate Android SDK configuration
 - Test Gradle build system
 
 **Usage:**
+
 ```bash
 ./scripts/verify-setup.sh
 ```
 
 **Checks Performed:**
+
 - ✅ Platform detection (macOS, Linux, Windows Git Bash)
 - ✅ Java JDK 17+, Node.js 16+, Git, ripgrep
 - ✅ Android SDK (ANDROID_HOME/ANDROID_SDK_ROOT)
@@ -92,10 +96,12 @@ Comprehensive development environment verification script.
 - ⚠️  Optional tools (Docker, gcloud, CocoaPods, SwiftLint)
 
 **Exit Codes:**
+
 - `0` - All required checks passed
 - `1` - One or more critical checks failed
 
 **Platform Compatibility:**
+
 - macOS (tested on macOS 15.6+)
 - Linux (Ubuntu, Debian, Fedora)
 - Windows (Git Bash/MSYS2/Cygwin)
@@ -107,16 +113,19 @@ Comprehensive development environment verification script.
 Validates iOS Kotlin/Native thread safety to prevent deadlocks.
 
 **Purpose:**
+
 - Detect iOS-specific threading violations
 - Prevent app deadlocks on launch
 - Enforce iOS safety patterns
 
 **Usage:**
+
 ```bash
 ./scripts/verify-ios-safety.sh
 ```
 
 **Checks:**
+
 - ❌ No `object : KoinComponent` in @Composable scopes
 - ❌ No `by inject()` during Compose composition
 - ❌ No `runBlocking` before ComposeUIViewController
@@ -125,6 +134,7 @@ Validates iOS Kotlin/Native thread safety to prevent deadlocks.
 - ❌ No `Dispatchers.Main` in property initialization
 
 **When to Run:**
+
 - **MANDATORY** before every commit touching shared code
 - Before creating pull requests
 - When adding new Compose UI components
@@ -139,23 +149,27 @@ Validates iOS Kotlin/Native thread safety to prevent deadlocks.
 Runs WCAG 2.1 Level AA compliance tests.
 
 **Purpose:**
+
 - Validate contentDescription on interactive elements
 - Check touch target sizes (48dp Android / 44pt iOS)
 - Verify screen reader compatibility
 - Test color contrast ratios
 
 **Usage:**
+
 ```bash
 ./scripts/test_accessibility.sh
 ```
 
 **Requirements:**
+
 - All UI components must have semantic labels
 - Minimum touch target sizes enforced
 - Text must scale with system font size
 - Color contrast must meet WCAG AA standards
 
 **When to Run:**
+
 - Before each pull request
 - When adding new UI components
 - When modifying existing UI
@@ -169,16 +183,19 @@ Runs WCAG 2.1 Level AA compliance tests.
 Runs all tests matching GitHub Actions workflows locally.
 
 **Purpose:**
+
 - Prevent CI failures by validating locally
 - Reduce GitHub Actions costs
 - Ensure code quality before push
 
 **Usage:**
+
 ```bash
 ./scripts/pre-push-verify.sh
 ```
 
 **Tests Run:**
+
 - Android build (assembleDebug)
 - iOS Kotlin compilation
 - Unit test suite (902+ tests)
@@ -186,6 +203,7 @@ Runs all tests matching GitHub Actions workflows locally.
 - Test anti-pattern detection
 
 **When to Run:**
+
 - Before `git push` to origin
 - Before creating pull requests
 - After making significant changes
@@ -199,6 +217,7 @@ Runs all tests matching GitHub Actions workflows locally.
 Detects testing anti-patterns and violations.
 
 **Checks:**
+
 - Thread.sleep() usage (flaky timing)
 - Missing @Test annotations
 - Long test methods (>50 lines)
@@ -206,6 +225,7 @@ Detects testing anti-patterns and violations.
 - Test isolation issues
 
 **Usage:**
+
 ```bash
 ./scripts/detect-test-antipatterns.sh
 ```
@@ -219,6 +239,7 @@ Detects testing anti-patterns and violations.
 Comprehensive test quality validation combining multiple checks.
 
 **Stages:**
+
 1. Unit test execution
 2. Anti-pattern detection
 3. Integration test validation
@@ -226,6 +247,7 @@ Comprehensive test quality validation combining multiple checks.
 5. Coverage analysis
 
 **Usage:**
+
 ```bash
 ./scripts/run-test-quality-validation.sh
 ```
@@ -239,6 +261,7 @@ Comprehensive test quality validation combining multiple checks.
 Validates E2E test configuration and infrastructure.
 
 **Checks:**
+
 - testTag implementation in UI components
 - Build configuration (ENABLE_SIMULATION_MODE)
 - Android/iOS test files
@@ -246,6 +269,7 @@ Validates E2E test configuration and infrastructure.
 - Test documentation
 
 **Usage:**
+
 ```bash
 ./scripts/validate_test_setup.sh
 ```
@@ -257,11 +281,13 @@ Validates E2E test configuration and infrastructure.
 Monitors test execution performance.
 
 **Features:**
+
 - Identifies slow tests
 - Validates performance budgets (100ms per unit test)
 - Generates performance reports
 
 **Usage:**
+
 ```bash
 ./scripts/test-performance-monitor.sh
 ```
@@ -273,11 +299,13 @@ Monitors test execution performance.
 Tests iOS On-Demand Resources (ODR) bundle generation.
 
 **Purpose:**
+
 - Validates Info.plist configuration
 - Ensures idempotent execution
 - Tests ODR asset tags
 
 **Usage:**
+
 ```bash
 ./scripts/test-odr-bundle-generation.sh
 ```
@@ -291,12 +319,14 @@ Tests iOS On-Demand Resources (ODR) bundle generation.
 Adds Apache 2.0 copyright headers to source files.
 
 **Supported Files:**
+
 - Kotlin (.kt)
 - Swift (.swift)
 - Shell scripts (.sh)
 - Python (.py)
 
 **Usage:**
+
 ```bash
 ./scripts/add-headers.sh
 ```
@@ -308,16 +338,19 @@ Adds Apache 2.0 copyright headers to source files.
 Cleans Xcode caches and derived data.
 
 **Purpose:**
+
 - Resolve build issues
 - Prevent GUID conflicts
 - Clear Swift Package Manager state
 
 **Usage:**
+
 ```bash
 ./scripts/clean_xcode.sh
 ```
 
 **When to Use:**
+
 - iOS builds failing unexpectedly
 - After Xcode updates
 - When seeing "DerivedData" errors
@@ -329,11 +362,13 @@ Cleans Xcode caches and derived data.
 Generates Firebase configuration for both platforms.
 
 **Usage:**
+
 ```bash
 ./scripts/generate_firebase_config.sh
 ```
 
 **Requires:**
+
 - `local.properties` with Firebase credentials
 - Environment variables or config files
 
@@ -344,11 +379,13 @@ Generates Firebase configuration for both platforms.
 Generates GoogleService-Info.plist for iOS.
 
 **Usage:**
+
 ```bash
 ./scripts/generate_ios_firebase_config.sh
 ```
 
 **Generates:**
+
 - `iosApp/GoogleService-Info.plist`
 
 ---
@@ -362,12 +399,14 @@ Located in `scripts/dashboards/`
 Generates comprehensive test analytics.
 
 **Features:**
+
 - Historical test tracking
 - Performance trending
 - Quality metrics evolution
 - Recommendations
 
 **Usage:**
+
 ```bash
 ./scripts/dashboards/test-analytics-reporter.sh
 ```
@@ -379,11 +418,13 @@ Generates comprehensive test analytics.
 Real-time test execution monitoring dashboard.
 
 **Features:**
+
 - Live test metrics
 - Quality indicators
 - Performance analytics
 
 **Usage:**
+
 ```bash
 ./scripts/dashboards/test-execution-dashboard.sh
 ```
@@ -395,11 +436,13 @@ Real-time test execution monitoring dashboard.
 Tracks test stability by running tests multiple times.
 
 **Features:**
+
 - Detects flaky tests
 - Analyzes performance consistency
 - Generates stability reports
 
 **Usage:**
+
 ```bash
 ./scripts/dashboards/test-stability-tracker.sh
 ```
@@ -411,11 +454,13 @@ Tracks test stability by running tests multiple times.
 Comprehensive test suite health dashboard.
 
 **Features:**
+
 - Test pyramid analysis
 - Quality metrics
 - Performance analysis
 
 **Usage:**
+
 ```bash
 ./scripts/dashboards/test-suite-health-check.sh
 ```
@@ -431,16 +476,19 @@ Located in `scripts/firebase/`
 Orchestrates both Android and iOS E2E tests on Firebase Test Lab.
 
 **Features:**
+
 - Runs Android and iOS tests
 - Reports results
 - Provides next steps
 
 **Usage:**
+
 ```bash
 ./scripts/firebase/run_all_firebase_tests.sh
 ```
 
 **Requires:**
+
 - `gcloud` CLI authenticated
 - Firebase project configured
 
@@ -451,6 +499,7 @@ Orchestrates both Android and iOS E2E tests on Firebase Test Lab.
 Builds and runs Android E2E tests on Firebase Test Lab.
 
 **Test Matrix:**
+
 - Pixel 3 (1080x2160, API 30)
 - Pixel 5 (1080x2340, API 31)
 - Samsung Galaxy S10 (1440x3040, API 29)
@@ -458,6 +507,7 @@ Builds and runs Android E2E tests on Firebase Test Lab.
 - Samsung Galaxy A51 (1080x2400, API 30)
 
 **Usage:**
+
 ```bash
 ./scripts/firebase/run_android_firebase_tests.sh
 ```
@@ -469,6 +519,7 @@ Builds and runs Android E2E tests on Firebase Test Lab.
 Builds and runs iOS UI tests on Firebase Test Lab.
 
 **Test Matrix:**
+
 - iPhone 15 Pro (iOS 17)
 - iPhone 14 (iOS 16)
 - iPhone 13 (iOS 15)
@@ -476,6 +527,7 @@ Builds and runs iOS UI tests on Firebase Test Lab.
 - iPad Pro 12.9 (iOS 16)
 
 **Usage:**
+
 ```bash
 ./scripts/firebase/run_ios_firebase_tests.sh
 ```
@@ -487,11 +539,13 @@ Builds and runs iOS UI tests on Firebase Test Lab.
 Downloads Firebase Test Lab screenshots from GCS bucket.
 
 **Usage:**
+
 ```bash
 ./scripts/firebase/collect_firebase_screenshots.sh
 ```
 
 **Output:**
+
 - `firebase-results/android/screenshots/`
 - `firebase-results/ios/screenshots/`
 
@@ -502,11 +556,13 @@ Downloads Firebase Test Lab screenshots from GCS bucket.
 Downloads Firebase Test Lab logs from GCS bucket.
 
 **Usage:**
+
 ```bash
 ./scripts/firebase/download_firebase_logs.sh
 ```
 
 **Output:**
+
 - `firebase-results/android/logs/`
 - `firebase-results/ios/logs/`
 
@@ -521,11 +577,13 @@ Located in `scripts/testing/`
 Launches real audio crowd simulation for testing sound choreography.
 
 **Features:**
+
 - Auto-detects Android SDK and emulators
 - Enables audio support
 - Launches activity with sound enabled
 
 **Usage:**
+
 ```bash
 ./scripts/testing/run_sound_choreography.sh              # Default (prompt)
 ./scripts/testing/run_sound_choreography.sh --play       # Run automated test
@@ -541,6 +599,7 @@ Located in `scripts/maps/`
 **📚 [Full Documentation](./maps/README.md)** - Comprehensive guide to the 5-stage pipeline
 
 **Key Scripts:**
+
 - `10-download_osm.sh` - Download OpenStreetMap data
 - `20-generate_mbtiles.sh` - Generate offline map tiles
 - `30-retrieve-geojson.sh` - Extract city boundaries
@@ -560,12 +619,14 @@ Located in `scripts/images/`
 Enhances iOS app icon with iOS-style effects.
 
 **Features:**
+
 - Squircle shape transformation
 - Rounded corners
 - Lighting effects
 - Contrast enhancement
 
 **Usage:**
+
 ```bash
 python3 scripts/images/enhance_ios_icon.py input.png output.png
 ```
@@ -579,6 +640,7 @@ python3 scripts/images/enhance_ios_icon.py input.png output.png
 Generates Android adaptive launcher icons.
 
 **Features:**
+
 - Generates all densities (mdpi through xxxhdpi)
 - Foreground layer
 - Background layer
@@ -586,6 +648,7 @@ Generates Android adaptive launcher icons.
 - Legacy icons
 
 **Usage:**
+
 ```bash
 python3 scripts/images/create_android_icon.py input.png output_dir/
 ```
@@ -601,6 +664,7 @@ python3 scripts/images/create_android_icon.py input.png output_dir/
 License compliance and dependency management.
 
 **Purpose:**
+
 - Generate license reports
 - Check dependency compliance
 - Maintain legal documentation
@@ -612,6 +676,7 @@ License compliance and dependency management.
 Geographic boundary processing and validation.
 
 **Purpose:**
+
 - Process city administrative boundaries
 - Validate geographic data
 - Generate boundary overlays
@@ -623,6 +688,7 @@ Geographic boundary processing and validation.
 Map style generation and customization.
 
 **Purpose:**
+
 - Generate custom MapLibre styles
 - Theme map appearances
 - Optimize styles for mobile rendering
@@ -634,6 +700,7 @@ Map style generation and customization.
 Localization and translation management.
 
 **Purpose:**
+
 - Manage app translations
 - Automate localization workflows
 - Validate translation completeness
@@ -753,6 +820,7 @@ open -a Docker
 2. Use `#!/usr/bin/env bash` shebang for portability
 
 3. Include comprehensive header comments:
+
    ```bash
    #!/usr/bin/env bash
 

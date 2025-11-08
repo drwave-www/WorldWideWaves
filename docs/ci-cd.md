@@ -46,15 +46,18 @@ graph LR
 **Purpose:** Fast compilation feedback for Android platform without full APK assembly.
 
 **Trigger:**
+
 - Push to `main`
 - Pull requests to `main`
 
 **Environment:**
+
 - Runner: `ubuntu-latest`
 - JDK: 17 (Temurin)
 - Timeout: 30 minutes
 
 **Steps:**
+
 1. Validate Gradle wrapper (security check)
 2. Setup JDK 17
 3. Restore Gradle cache
@@ -63,6 +66,7 @@ graph LR
 6. Store Gradle cache (main branch only)
 
 **Optimizations:**
+
 - Cache read-only for non-main branches
 - Parallel compilation
 - Skip APK assembly for faster feedback
@@ -74,10 +78,12 @@ graph LR
 **Purpose:** Verify iOS compilation and framework generation.
 
 **Trigger:**
+
 - Push to `main`
 - Pull requests to `main`
 
 **Environment:**
+
 - Runner: `macos-15`
 - Xcode: 16.0
 - JDK: 17 (Temurin)
@@ -86,18 +92,22 @@ graph LR
 **Jobs:**
 
 #### 1. Build Framework
+
 Compiles Kotlin Multiplatform iOS framework.
 
 **Steps:**
+
 - Setup JDK 17
 - Restore Gradle cache
 - `./gradlew :shared:linkDebugFrameworkIosSimulatorArm64` (Simulator)
 - `./gradlew :shared:linkDebugFrameworkIosArm64` (Device)
 
 #### 2. Build App
+
 Builds iOS app using Xcode.
 
 **Steps:**
+
 - Checkout code
 - Setup Xcode 16.0
 - Select iPhone 15 Simulator (iOS 18.0)
@@ -105,6 +115,7 @@ Builds iOS app using Xcode.
 - Upload build logs on failure
 
 **Output:**
+
 - iOS app binary (unsigned)
 - Framework for Simulator and Device
 
@@ -115,17 +126,21 @@ Builds iOS app using Xcode.
 **Purpose:** Enforce code quality, run tests, and check security vulnerabilities.
 
 **Trigger:**
+
 - Push to `main`
 - Pull requests to `main`
 
 **Jobs (5 parallel):**
 
 #### 1. Lint
+
 **Tools:**
+
 - ktlint (Kotlin linting)
 - detekt (static analysis)
 
 **Commands:**
+
 ```bash
 ./gradlew ktlintCheck
 ./gradlew detekt
@@ -134,34 +149,42 @@ Builds iOS app using Xcode.
 **Output:** Lint reports uploaded as artifacts
 
 #### 2. Test
+
 **Tests:**
+
 - Unit tests (`./gradlew :shared:testDebugUnitTest`)
 - Test results published with EnricoMi/publish-unit-test-result-action
 
 **Coverage:** 902+ tests
 
 #### 3. UI Test Compilation
+
 **Purpose:** Verify UI test classes compile without running emulator
 
 **Command:**
+
 ```bash
 ./gradlew :composeApp:compileDebugAndroidTestKotlin
 ```
 
 #### 4. Dependency Check
+
 **Purpose:** Scan for known vulnerabilities in dependencies
 
 **Tool:** OWASP Dependency-Check (main branch only)
 
 **Command:**
+
 ```bash
 ./gradlew dependencyCheckAnalyze
 ```
 
 #### 5. License Check
+
 **Purpose:** Ensure license compliance
 
 **Command:**
+
 ```bash
 ./gradlew generateLicenseReport
 ```
@@ -169,6 +192,7 @@ Builds iOS app using Xcode.
 **Output:** JSON report in `build/reports/licenses/`
 
 #### Quality Summary
+
 Aggregates results from all jobs and fails if critical issues found.
 
 ### 04 - UI Tests (Android)
@@ -178,16 +202,19 @@ Aggregates results from all jobs and fails if critical issues found.
 **Purpose:** Run comprehensive UI tests on Android emulator.
 
 **Trigger:**
+
 - Pull requests to `main`
 - Daily scheduled run (2 AM UTC)
 - Manual dispatch
 
 **Environment:**
+
 - Runner: `ubuntu-latest` with KVM acceleration
 - Android Emulator: API 30 (Android 11), Pixel 3a
 - Timeout: 45 minutes
 
 **Steps:**
+
 1. Setup JDK 17
 2. Restore Gradle cache
 3. Generate Firebase config
@@ -198,6 +225,7 @@ Aggregates results from all jobs and fails if critical issues found.
 8. Analyze performance (main branch only)
 
 **Test Categories:**
+
 - Critical path tests (splash → events → join wave)
 - Edge cases (rotation, memory pressure, multi-window)
 - Accessibility (screen readers, keyboard navigation, WCAG)
@@ -205,6 +233,7 @@ Aggregates results from all jobs and fails if critical issues found.
 - Integration tests (maps, real-time coordination)
 
 **Artifacts:**
+
 - Test reports (HTML)
 - Screenshots
 - Logcat output
@@ -216,6 +245,7 @@ Aggregates results from all jobs and fails if critical issues found.
 **Purpose:** Execute critical integration tests and multi-device testing.
 
 **Trigger:**
+
 - Push to `main`
 - Daily scheduled run (2 AM UTC)
 - Manual dispatch
@@ -225,28 +255,34 @@ Aggregates results from all jobs and fails if critical issues found.
 **Jobs:**
 
 #### 1. Real Integration Tests
+
 Run critical tests on Android emulator with real services.
 
 **Steps:**
+
 - Setup Android emulator (API 30)
 - Run integration test suite
 - Analyze performance regressions for PRs
 
 #### 2. Firebase Test Lab
+
 Multi-device testing on physical devices (main branch only).
 
 **Devices:**
+
 - Pixel 2 (API 28)
 - Pixel 4 (API 30)
 - Pixel 5 (API 33)
 
 **Steps:**
+
 - Build debug APK and test APK
 - Upload to Firebase Test Lab
 - Execute tests across device matrix
 - Download results from GCS bucket
 
 **Configuration:**
+
 ```bash
 gcloud firebase test android run \
   --type instrumentation \
@@ -260,7 +296,9 @@ gcloud firebase test android run \
 ```
 
 #### 3. Notify Results
+
 Send notifications on failure:
+
 - Slack webhook (if configured)
 - Create GitHub issue with failure details
 
@@ -271,6 +309,7 @@ Send notifications on failure:
 **Purpose:** Continuous security monitoring to prevent secrets and sensitive data from being committed.
 
 **Trigger:**
+
 - Push to `main` or `develop`
 - Pull requests to `main` or `develop`
 - Weekly scheduled run (Sunday 00:00 UTC)
@@ -279,17 +318,20 @@ Send notifications on failure:
 **Jobs (4 parallel):**
 
 #### 1. Gitleaks Secret Scanning
+
 **Tool:** [Gitleaks](https://github.com/gitleaks/gitleaks)
 
 **Purpose:** Scan entire git history for exposed secrets and API keys.
 
 **Features:**
+
 - Full repository history scan
 - Pattern matching for 100+ secret types
 - Automatic detection of entropy-based secrets
 - Upload report artifacts on failure
 
 **Coverage:**
+
 - API keys (Firebase, AWS, OpenAI, GitHub, Slack, Stripe)
 - OAuth tokens
 - Private keys
@@ -297,18 +339,22 @@ Send notifications on failure:
 - JWT secrets
 
 #### 2. Firebase Configuration Check
+
 **Purpose:** Ensure sensitive Firebase config files are not tracked in git.
 
 **Checks:**
+
 - Verifies `composeApp/google-services.json` is not tracked
 - Verifies `iosApp/**/GoogleService-Info.plist` is not tracked
 - Scans codebase for hardcoded Firebase API keys (excluding templates/docs)
 - Fails build if sensitive files found
 
 #### 3. API Key Pattern Scan
+
 **Purpose:** Detect common API key patterns in codebase.
 
 **Patterns Detected:**
+
 - OpenAI API keys (`sk-proj-...`)
 - GitHub Personal Access Tokens (`ghp_...`, `gho_...`, `ghs_...`)
 - Slack Bot Tokens (`xoxb-...`, `xoxp-...`)
@@ -316,22 +362,26 @@ Send notifications on failure:
 - AWS Access Keys (`AKIA...`)
 
 **Exclusions:**
+
 - Documentation files (`*.md`)
 - Template files (`*.template`)
 - Security tooling files (`.git-hooks/`, `.github/workflows/`)
 
 #### 4. TruffleHog Secret Scanning
+
 **Tool:** [TruffleHog](https://github.com/trufflesecurity/trufflehog)
 
 **Purpose:** Entropy-based secret detection for custom or unknown secret types.
 
 **Features:**
+
 - High-entropy string detection
 - Regex pattern matching
 - Historical commit scanning
 - Informational (doesn't block builds, but flags potential issues)
 
 #### Security Summary
+
 Aggregates results from all security jobs and fails build if critical secrets detected.
 
 **Local Pre-commit Protection:**
@@ -348,6 +398,7 @@ The repository includes pre-commit hooks that prevent accidental secret commits:
 ```
 
 **Best Practices:**
+
 - Never commit `google-services.json` or `GoogleService-Info.plist`
 - Use `*.template` files with placeholders for config examples
 - Store secrets in `local.properties` (gitignored) or GitHub Secrets
@@ -361,10 +412,12 @@ The repository includes pre-commit hooks that prevent accidental secret commits:
 **Purpose:** Measure app performance and detect regressions.
 
 **Trigger:**
+
 - Nightly scheduled run (3 AM UTC)
 - Manual dispatch
 
 **Test Suites:**
+
 1. **App Launch Performance**
    - Cold start time
    - Time to interactive
@@ -381,10 +434,12 @@ The repository includes pre-commit hooks that prevent accidental secret commits:
    - Background service impact
 
 **Configuration:**
+
 - Higher resources (4GB RAM, 1GB heap, 8GB disk)
 - Continue on error (informational only)
 
 **Output:**
+
 - Performance metrics JSON
 - Regression analysis
 - GitHub issue on significant regression
@@ -396,11 +451,13 @@ The repository includes pre-commit hooks that prevent accidental secret commits:
 **Purpose:** Aggregate status for single badge display.
 
 **Trigger:**
+
 - Push to any branch
 - Pull requests
 - Manual dispatch
 
 **Process:**
+
 1. Wait for workflows to complete (45 min timeout)
 2. Check status of:
    - Quality Gates (03)
@@ -412,6 +469,7 @@ The repository includes pre-commit hooks that prevent accidental secret commits:
 4. Return overall success/failure
 
 **Badge URL:**
+
 ```markdown
 [![Overall Status](https://github.com/mglcel/WorldWideWaves/actions/workflows/99-pipeline-status.yml/badge.svg)](https://github.com/mglcel/WorldWideWaves/actions/workflows/99-pipeline-status.yml)
 ```
@@ -423,14 +481,18 @@ The repository includes pre-commit hooks that prevent accidental secret commits:
 **Purpose:** Enforce test quality standards and detect anti-patterns.
 
 **Trigger:**
+
 - Push to `main` or `develop`
 - Pull requests to `main`
 
 **Checks:**
+
 1. **Anti-pattern Detection**
+
    ```bash
    ./scripts/detect-test-antipatterns.sh
    ```
+
    Detects:
    - Excessive mocking
    - Framework testing
@@ -438,9 +500,11 @@ The repository includes pre-commit hooks that prevent accidental secret commits:
    - Missing assertions
 
 2. **Performance Budget**
+
    ```bash
    ./gradlew testFast
    ```
+
    Enforces 100ms budget per test
 
 3. **Mutation Testing** (main branch only)
@@ -475,16 +539,19 @@ OPENAI_API_KEY=sk-...
 ## Environments
 
 ### Development
+
 - Branch: Any feature branch
 - Tests: Unit + UI compilation only
 - Caching: Read-only
 
 ### Staging
+
 - Branch: `develop` (if used)
 - Tests: Full test suite
 - Firebase: Separate staging project
 
 ### Production
+
 - Branch: `main`
 - Tests: All tests including performance
 - Firebase Test Lab: Multi-device testing
@@ -557,11 +624,13 @@ git push origin v0.23
 ### Manual Deployment
 
 Android release builds require:
+
 1. Signing configuration in `local.properties`
 2. Release build: `./gradlew :composeApp:assembleRelease`
 3. Upload to Play Console
 
 iOS release builds require:
+
 1. Xcode code signing configuration
 2. Archive in Xcode
 3. Upload to TestFlight/App Store Connect
@@ -569,6 +638,7 @@ iOS release builds require:
 ## Performance Benchmarks
 
 **CI Build Times (approx):**
+
 - Quality Gates: 8-12 minutes
 - Build Android: 5-8 minutes
 - Build iOS: 12-18 minutes
@@ -577,6 +647,7 @@ iOS release builds require:
 - Performance Tests: 30-45 minutes
 
 **Optimization Tips:**
+
 - Use Gradle cache (50% faster builds)
 - Run tests in parallel where possible
 - Skip unnecessary test suites for PR validation
@@ -587,12 +658,14 @@ iOS release builds require:
 ### Build Failures
 
 **Gradle dependency resolution errors:**
+
 ```bash
 ./gradlew --refresh-dependencies
 ```
 
 **Out of memory:**
 Increase heap in `gradle.properties`:
+
 ```properties
 org.gradle.jvmargs=-Xmx8g
 ```
@@ -600,11 +673,13 @@ org.gradle.jvmargs=-Xmx8g
 ### Test Failures
 
 **Emulator fails to start:**
+
 - Check KVM acceleration on Linux
 - Ensure sufficient disk space (8GB+)
 - Use AVD with lower API level (API 28-30)
 
 **Firebase Test Lab timeouts:**
+
 - Reduce test suite size
 - Increase timeout in workflow
 - Check Firebase quota limits
@@ -612,6 +687,7 @@ org.gradle.jvmargs=-Xmx8g
 ### iOS Build Failures
 
 **Framework linking errors:**
+
 ```bash
 # Clean build
 ./gradlew clean
@@ -622,6 +698,7 @@ rm -rf shared/build/
 ```
 
 **Xcode build errors:**
+
 - Verify Xcode version (16.0+)
 - Clean derived data: `rm -rf ~/Library/Developer/Xcode/DerivedData`
 - Ensure code signing is disabled for CI builds

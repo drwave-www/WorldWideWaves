@@ -97,6 +97,7 @@ graph TD
 ### StateFlow: Hot State with Current Value
 
 **When to use**:
+
 - Need to expose current UI state
 - Consumers need immediate value upon subscription
 - Single source of truth for state
@@ -114,6 +115,7 @@ val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 ```
 
 **Key characteristics**:
+
 - Always has a value (requires initial value)
 - New subscribers immediately get current value
 - Conflates rapid updates (only latest value matters)
@@ -122,6 +124,7 @@ val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 ### SharedFlow: Event Stream with Replay Buffer
 
 **When to use**:
+
 - Event broadcasts (no current state concept)
 - Need replay buffer for late subscribers
 - Multiple independent consumers
@@ -139,6 +142,7 @@ val navigationEvents: SharedFlow<NavigationEvent> = _navigationEvents.asSharedFl
 ```
 
 **Key characteristics**:
+
 - No initial value required
 - Can have replay buffer for late subscribers
 - Hot flow (broadcasts to all active collectors)
@@ -147,6 +151,7 @@ val navigationEvents: SharedFlow<NavigationEvent> = _navigationEvents.asSharedFl
 ### Flow: Cold Streams
 
 **When to use**:
+
 - Data transformations
 - Repository layer data streams
 - Each collector needs independent execution
@@ -192,6 +197,7 @@ override fun observePositionForEvent(event: IWWWEvent): Flow<PositionObservation
 ```
 
 **Key characteristics**:
+
 - Cold (executes on each collection)
 - No state between collectors
 - Perfect for transformations
@@ -243,6 +249,7 @@ fun createUnifiedObservationFlow(onAreaDetection: suspend () -> Unit) =
 ```
 
 **When to use**:
+
 - Need to react to changes from multiple sources
 - All sources must emit at least once
 - Latest values from all sources required
@@ -266,6 +273,7 @@ fun createUnifiedObservationFlow(onAreaDetection: suspend () -> Unit) =
 ```
 
 **When to use**:
+
 - Filter out duplicate emissions
 - Implement custom equality logic
 - Reduce downstream processing
@@ -290,6 +298,7 @@ private fun startPolygonsObservation(event: IWWWEvent, eventMap: AbstractEventMa
 ```
 
 **When to use**:
+
 - Limit UI update frequency (e.g., map polygon updates)
 - Reduce CPU/GPU load
 - Battery optimization
@@ -320,11 +329,13 @@ debounceJob = coroutineScopeProvider.launchDefault {
 ```
 
 **When to use**:
+
 - Move computation off main thread
 - Optimize heavy calculations
 - Required for CPU-bound operations in flows
 
 **Common patterns**:
+
 - `Dispatchers.Default`: CPU-bound work (calculations, parsing)
 - `Dispatchers.Main`: UI updates (rarely needed in flows)
 - `Dispatchers.IO`: File/network operations (KMM note: use `Dispatchers.Default` in shared code)
@@ -345,6 +356,7 @@ createUnifiedObservationFlow {
 ```
 
 **When to use**:
+
 - Graceful error handling in flow pipelines
 - Prevent flow termination on errors
 - Log errors without crashing
@@ -363,6 +375,7 @@ eventsRepository
 ```
 
 **When to use**:
+
 - Perform side effects without transforming values
 - Update separate state based on emissions
 - Logging, analytics
@@ -379,11 +392,13 @@ eventsRepository
 ```
 
 **When to use**:
+
 - Start collecting flow in specific coroutine scope
 - Lifecycle-aware collection
 - Automatic cancellation when scope is canceled
 
 **vs `.collect { }`**:
+
 - `launchIn(scope)`: Fire-and-forget, returns Job
 - `scope.launch { flow.collect {} }`: Same result, more verbose
 
@@ -422,6 +437,7 @@ class EventsViewModel(
 ```
 
 **Benefits**:
+
 - **Encapsulation**: External code cannot modify state directly
 - **Single source of truth**: Only ViewModel can update state
 - **Type safety**: Public API guarantees read-only access
@@ -551,6 +567,7 @@ override fun Screen(platformEnabler: PlatformEnabler, modifier: Modifier) {
 ```
 
 **Benefits**:
+
 - Automatic lifecycle management
 - Proper initial value handling
 - Recomposition on value changes
@@ -599,6 +616,7 @@ private fun monitorSimulatedSpeed(event: IWWWEvent) {
 ```
 
 **Key rules**:
+
 - `LaunchedEffect(Unit)`: Runs once on initial composition
 - `LaunchedEffect(key)`: Re-runs when key changes
 - Automatically canceled when composable leaves composition
@@ -659,6 +677,7 @@ class PositionManager(
 ```
 
 **Benefits**:
+
 - Precise control over delay
 - Can implement custom logic (priority, deduplication)
 - Prevents rapid GPS updates from overwhelming observers
@@ -683,6 +702,7 @@ private fun startPolygonsObservation(event: IWWWEvent) {
 ```
 
 **Benefits**:
+
 - Fixed-rate emissions regardless of upstream frequency
 - Predictable performance
 - Good for UI updates (animations, maps)
@@ -708,6 +728,7 @@ private fun isPositionDuplicate(current: Position?, new: Position?): Boolean {
 ```
 
 **Benefits**:
+
 - Domain-specific logic (GPS noise filtering)
 - Reduces unnecessary updates
 - Improves performance and battery life
@@ -742,6 +763,7 @@ override suspend fun calculateObservationInterval(event: IWWWEvent): Duration {
 ```
 
 **Benefits**:
+
 - Battery optimization (reduce CPU wake-ups)
 - Precision when needed (sound sync)
 - Scales with system load
@@ -823,6 +845,7 @@ private fun createPeriodicObservationFlow() =
 ```
 
 **When to use**:
+
 - `callbackFlow` error handling
 - Specific exception types need different handling
 - Want to continue flow despite errors
@@ -854,6 +877,7 @@ private suspend fun calculateProgressionSafely(event: IWWWEvent): Double =
 ```
 
 **Benefits**:
+
 - Isolates error handling
 - Provides safe defaults
 - Clear error logging
@@ -950,6 +974,7 @@ class WWWEventsTest : KoinTest {
 ```
 
 **Key components**:
+
 - `StandardTestDispatcher`: Virtual time dispatcher
 - `Dispatchers.setMain(dispatcher)`: Replace main dispatcher for tests
 - `runTest`: Test coroutine scope with virtual time
@@ -1031,6 +1056,7 @@ fun `test flow emissions with Turbine`() = runTest {
 ```
 
 **Benefits**:
+
 - Explicit assertion of each emission
 - Clear error messages
 - Timeout handling
@@ -1064,6 +1090,7 @@ fun `test debounce behavior`() = runTest {
 ```
 
 **Key functions**:
+
 - `advanceTimeBy(millis)`: Move virtual time forward
 - `runCurrent()`: Run currently scheduled tasks
 - `advanceUntilIdle()`: Run all tasks (dangerous with infinite flows)
@@ -1390,6 +1417,7 @@ private fun shouldAcceptUpdate(current: PositionState, new: PositionState): Bool
 ```
 
 **When to use**:
+
 - Multiple position sources (GPS, simulation, network)
 - Priority-based state updates
 - Conflict resolution
@@ -1423,6 +1451,7 @@ class DefaultWaveProgressionTracker {
 ```
 
 **When to use**:
+
 - Historical tracking with bounded memory
 - Performance analysis
 - Trend detection
@@ -1513,16 +1542,19 @@ When refactoring code to use reactive patterns:
 ## Further Reading
 
 ### Official Documentation
+
 - [Kotlin Flow Documentation](https://kotlinlang.org/docs/flow.html)
 - [StateFlow and SharedFlow](https://kotlinlang.org/docs/shared-mutable-state-and-concurrency.html#shared-mutable-state-and-concurrency)
 - [Coroutines Guide](https://kotlinlang.org/docs/coroutines-guide.html)
 
 ### WorldWideWaves Architecture
+
 - [CLAUDE.md](../../CLAUDE.md) - Project overview and iOS safety rules
 - [CLAUDE_iOS.md](../../CLAUDE_iOS.md) - iOS-specific patterns and deadlock prevention
 - [docs/architecture/architecture.md](../architecture/architecture.md) - System architecture
 
 ### Testing Resources
+
 - [Testing Kotlin Flows](https://developer.android.com/kotlin/flow/test)
 - [Turbine Testing Library](https://github.com/cashapp/turbine)
 

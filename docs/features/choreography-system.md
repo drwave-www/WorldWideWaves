@@ -35,6 +35,7 @@ Wave choreography coordinates three types of experiences as a wave propagates:
 Each participant plays **one random note** from the active chord at their hit moment. With hundreds of participants hit within milliseconds, the collective sound recreates the original MIDI composition through emergent crowd behavior.
 
 **Example**: Symphony No. 40 by Mozart
+
 - **MIDI file**: `/shared/src/commonMain/composeResources/files/symfony.mid`
 - **50 people** playing simultaneously at 100ms intervals
 - **Result**: 80%+ track coverage, recognizable melody through crowd-sourced harmony
@@ -227,6 +228,7 @@ private suspend fun ensureChoreographyLoaded() {
 ```
 
 **Performance Optimization**:
+
 - **Lazy loading**: Resources loaded only when first needed (improves app startup time)
 - **Image caching**: Resolved images cached by `path_width_height` key (avoids re-resolution)
 - **Preloading API**: `preloadForWaveSync()` for timing-critical scenarios
@@ -337,6 +339,7 @@ fun startObservingAllEvents() {
 ```
 
 **Features**:
+
 - **Background playback**: Continues when app is backgrounded (allows wave participation without screen)
 - **Automatic detection**: Switches between events as user moves between areas
 - **Hit-only playback**: Sound plays only on transition from `not hit` → `hit` (prevents replay on screen re-entry)
@@ -396,6 +399,7 @@ suspend fun parseMidiFile(midiResourcePath: String): MidiTrack? {
 ```
 
 **Global Caching**:
+
 - **Lifetime**: Application-wide (survives across events and manager instances)
 - **Performance**: MIDI files loaded once, reused forever
 - **Memory**: Cached null results prevent repeated load failures
@@ -439,6 +443,7 @@ MidiParser (orchestrator)
 ```
 
 **File References**:
+
 - `/shared/src/commonMain/kotlin/com/worldwidewaves/shared/sound/midi/MidiHeaderValidator.kt`
 - `/shared/src/commonMain/kotlin/com/worldwidewaves/shared/sound/midi/MidiTrackParser.kt`
 - `/shared/src/commonMain/kotlin/com/worldwidewaves/shared/sound/midi/MidiEventProcessor.kt`
@@ -467,6 +472,7 @@ fun midiVelocityToAmplitude(velocity: Int): Double =
 ```
 
 **MIDI Standard**:
+
 - **A4 (MIDI 69)** = 440 Hz (concert pitch)
 - **Pitch formula**: `frequency = 440 * 2^((pitch - 69) / 12)`
 - **Velocity range**: 0-127 → Amplitude 0.0-1.0
@@ -554,6 +560,7 @@ override suspend fun playTone(
 ```
 
 **iOS Architecture**:
+
 - **Audio Session**: `AVAudioSessionCategoryPlayback` with `MixWithOthers` (allows background playback)
 - **Engine Graph**: `playerNode → mixerNode → outputNode`
 - **Threading**: `Mutex` for playback synchronization
@@ -638,6 +645,7 @@ private suspend fun playBuffer(buffer: AudioBuffer, duration: Duration) =
 ```
 
 **Android Architecture**:
+
 - **Audio Manager**: Direct system volume control via `AudioManager.setStreamVolume()`
 - **AudioTrack**: Static mode for low-latency playback
 - **Audio Attributes**: `USAGE_NOTIFICATION_EVENT` + `CONTENT_TYPE_SONIFICATION`
@@ -690,6 +698,7 @@ fun generateWaveform(
 ```
 
 **Shared Benefits**:
+
 - **Consistent sound**: Identical waveforms across platforms
 - **Testability**: Pure Kotlin function, easy to unit test
 - **Performance**: Optimized algorithms (square wave doesn't use `sin()`)
@@ -714,6 +723,7 @@ suspend fun playCurrentSoundChoreographyTone(): Int? {
 ```
 
 **Wave Start Time**: `event.getStartDateTime()` is the **single source of truth**
+
 - **Fetched from**: Firestore event document (`startDateTime` field)
 - **Precision**: Millisecond-level (Kotlin `Instant`)
 - **Synchronization**: All devices use same start time → calculate same `elapsedTime` → select from same active notes
@@ -745,11 +755,13 @@ suspend fun calculateProgression(event: IWWWEvent): Double {
 ### Network Coordination
 
 **No Direct Network Sync**: Choreography system is **fully client-side**:
+
 - **MIDI files**: Bundled in app resources, identical across all devices
 - **Event start time**: Fetched once from Firestore, cached locally
 - **Note selection**: Client-side random selection from active notes
 
 **Latency Handling**:
+
 - **GPS latency**: Position updates debounced (reduces jitter)
 - **Network latency**: Event data cached, no real-time sync required
 - **Audio latency**: Compensated by 50ms buffer delays in platform players
@@ -757,6 +769,7 @@ suspend fun calculateProgression(event: IWWWEvent): Double {
 ### Drift Tolerance
 
 **Test Results** (from `CrowdSoundChoreographySimulationTest`):
+
 - **50 people** playing at 100ms intervals
 - **Track coverage**: 80%+ (50%+ required for recognizability)
 - **Temporal distribution**: Even across 10 time segments
@@ -817,6 +830,7 @@ suspend fun calculateProgression(event: IWWWEvent): Double {
 ```
 
 **Features**:
+
 - Auto-detects Android SDK and emulators
 - Launches `AudioTestActivity` with real device audio
 - Runs real-world sound choreography with timing analysis
@@ -873,6 +887,7 @@ Button(onClick = {
 **3. Crowd Simulation Testing**:
 
 Run `CrowdSoundChoreographySimulationTest` to verify:
+
 - ✅ 50 people playing simultaneously
 - ✅ 80%+ track coverage
 - ✅ Even temporal distribution
@@ -1049,6 +1064,7 @@ suspend fun parseMidiFile(midiResourcePath: String): MidiTrack? {
 ```
 
 **Benefits**:
+
 - **Single parse**: MIDI file parsed once for entire app lifecycle
 - **Fast lookup**: Hash map access O(1)
 - **Null caching**: Failed loads cached to prevent repeated errors
@@ -1104,6 +1120,7 @@ private suspend fun ensureChoreographyLoaded() {
 ```
 
 **Benefits**:
+
 - **Faster app startup**: Resources loaded only when needed
 - **Memory efficient**: Unused choreographies never loaded
 - **Thread-safe**: `isLoading` flag prevents duplicate loading

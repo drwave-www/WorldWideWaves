@@ -217,6 +217,7 @@ val unsafePointer = bytes.usePinned { it.addressOf(0) }
 ```
 
 **Related Documentation**:
+
 - [Cinterop Memory Safety Patterns](../ios/cinterop-memory-safety-patterns.md) - Complete guide
 - [Platform API Usage Guide](../ios/platform-api-usage-guide.md) - Threading requirements
 

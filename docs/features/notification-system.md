@@ -45,6 +45,7 @@ The WorldWideWaves push notification system delivers timely alerts about wave ev
 ### Core Components
 
 #### 1. NotificationTrigger (sealed class)
+
 **File**: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/notifications/NotificationTrigger.kt`
 
 Defines three notification trigger types:
@@ -65,12 +66,14 @@ sealed class NotificationTrigger {
 ```
 
 **Unique Identifiers**:
+
 - `EventStarting(1.hours)` → `"start_60m"`
 - `EventStarting(30.minutes)` → `"start_30m"`
 - `EventFinished` → `"finished"`
 - `WaveHit` → `"wave_hit"`
 
 #### 2. NotificationContent
+
 **File**: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/notifications/NotificationContent.kt`
 
 Platform-agnostic payload containing localization keys and deep links:
@@ -85,11 +88,13 @@ data class NotificationContent(
 ```
 
 **Key Design**:
+
 - Contains localization KEYS, not final strings
 - Platform workers resolve strings in their context (Android resource system, iOS locale)
 - Body arguments support sprintf-style formatting (`%1$s`, `%2$s`)
 
 #### 3. NotificationManager (interface)
+
 **File**: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/notifications/NotificationManager.kt`
 
 Platform-agnostic interface with expect/actual implementations:
@@ -118,6 +123,7 @@ expect fun createPlatformNotificationManager(): NotificationManager
 ```
 
 #### 4. NotificationScheduler (interface)
+
 **File**: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/notifications/NotificationScheduler.kt`
 
 Coordinates when notifications should be scheduled:
@@ -144,11 +150,13 @@ class DefaultNotificationScheduler(...) : NotificationScheduler {
 ```
 
 **Eligibility Checks**:
+
 1. Event is favorited by user
 2. Simulation mode is off OR speed == 1 (realistic mode)
 3. Event hasn't started yet
 
 #### 5. NotificationContentProvider
+
 **File**: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/notifications/NotificationContentProvider.kt`
 
 Generates platform-agnostic notification content with localization keys:
@@ -195,10 +203,12 @@ Each favorited event generates up to 6 scheduled notifications:
 ### Favorites OR Downloaded Approach
 
 Notifications are scheduled for events that meet either criterion:
+
 - **Favorited**: User starred the event OR
 - **Downloaded**: User downloaded the map for offline use
 
 This approach:
+
 - Reduces notification volume (typically <60 per user)
 - Prevents overwhelming users with alerts
 - Aligns with user intent (favorited = interested, downloaded = will participate)
@@ -211,6 +221,7 @@ This approach:
 #### Notification Scheduling
 
 Notifications are scheduled when:
+
 1. **User favorites an event** (SetEventFavorite triggers scheduler)
    - Calls `NotificationScheduler.scheduleAllNotifications(event)`
    - Immediate scheduling for newly favorited event
@@ -225,6 +236,7 @@ Notifications are scheduled when:
 #### Notification Cancellation
 
 Notifications are cancelled when:
+
 1. User unfavorites an event
 2. Event is cancelled in Firestore
 3. Event time changes (reschedule by cancel + re-add)
@@ -246,6 +258,7 @@ syncNotificationsOnAppLaunch(validEvents)
 ```
 
 **Eligibility Logic**:
+
 ```kotlin
 val favoritedIds = events.filter { it.favorite }.map { it.id }.toSet()
 val downloadedIds = events.filter { mapAvailabilityChecker.isMapDownloaded(it.id) }.map { it.id }.toSet()
@@ -257,11 +270,13 @@ if (eligibleIds.isNotEmpty()) {
 ```
 
 **Logging Output**:
+
 ```
 Syncing notifications: 3 favorited, 2 downloaded, 4 total (deduplicated)
 ```
 
 **Expected Behavior**:
+
 - Events that are BOTH favorited AND downloaded are counted once (de-duplicated)
 - Empty set optimization: No scheduler call if no eligible events
 - Non-blocking: Errors in sync don't prevent app initialization
@@ -297,6 +312,7 @@ if (simulation != null && simulation.speed != 1) {
 Notifications use **localization keys** that are resolved by each platform:
 
 **Shared Code** (NotificationContentProvider):
+
 ```kotlin
 // Creates content with keys, not strings
 NotificationContent(
@@ -308,6 +324,7 @@ NotificationContent(
 ```
 
 **Android** (NotificationWorker):
+
 ```kotlin
 // Resolves keys using Android resources
 val title = context.getString(R.string.notification_event_starting)
@@ -315,6 +332,7 @@ val body = context.getString(R.string.notification_1h_before, location)
 ```
 
 **iOS** (IOSNotificationManager):
+
 ```kotlin
 // Uses iOS native localization at delivery time
 content.titleLocKey = "notification_event_starting"
@@ -333,6 +351,7 @@ content.bodyLocArgs = listOf(location)  // iOS resolves with user's current loca
 ### String Resources
 
 All notification strings defined in:
+
 - `shared/src/commonMain/moko-resources/base/strings.xml` (base/English)
 - Automatically translated to all 32 languages by translation pipeline
 
@@ -347,12 +366,14 @@ All notification strings defined in:
 **File**: `shared/src/androidMain/kotlin/com/worldwidewaves/shared/notifications/AndroidNotificationManager.kt`
 
 **Architecture**:
+
 - **Scheduled**: WorkManager OneTimeWorkRequest with initial delay
 - **Immediate**: NotificationCompat.Builder + NotificationManagerCompat
 - **Persistence**: WorkManager handles rescheduling across app restarts
 - **Threading**: WorkManager executes in background thread pool
 
 **Work Naming**:
+
 ```kotlin
 // Format: notification_${eventId}_${trigger.id}
 "notification_abc123_start_60m"    // 1h before
@@ -362,6 +383,7 @@ All notification strings defined in:
 ```
 
 **Update Policy**: `ExistingWorkPolicy.REPLACE`
+
 - If notification already scheduled, new request replaces old one
 - Enables update when event details change
 
@@ -385,18 +407,21 @@ All notification strings defined in:
 **File**: `shared/src/iosMain/kotlin/com/worldwidewaves/shared/notifications/IOSNotificationManager.kt`
 
 **Architecture**:
+
 - **Scheduled**: UNNotificationRequest with UNTimeIntervalNotificationTrigger
 - **Immediate**: 0.1 second delay trigger (closest to instant on iOS)
 - **Persistence**: UNUserNotificationCenter handles across app restarts
 - **Threading**: All operations dispatched to main queue
 
 **iOS Safety [CRITICAL]**:
+
 - ✅ CLASS-based (not object singleton)
 - ✅ Lazy initialization for UNUserNotificationCenter
 - ✅ NO `init{}` blocks with DI calls
 - ✅ NO `object : KoinComponent` pattern
 
 **Notification Identifiers**:
+
 ```kotlin
 // Format: event_${eventId}_${trigger.id}
 "event_abc123_start_60m"    // 1h before
@@ -406,11 +431,13 @@ All notification strings defined in:
 ```
 
 **Localization**:
+
 - Uses `titleLocKey` and `bodyLocKey` on UNMutableNotificationContent
 - iOS resolves keys at delivery time using user's locale
 - No need to resolve strings in Kotlin layer
 
 **Deep Links**:
+
 - Stored in notification's `userInfo` dictionary
 - SceneDelegate intercepts tap and routes to appropriate view
 
@@ -440,7 +467,9 @@ worldwidewaves://event?id=EVENT_ID
 ```
 
 ### Android Routing
+
 Handled by manifest intent filter:
+
 ```xml
 <intent-filter>
     <action android:name="android.intent.action.VIEW" />
@@ -451,7 +480,9 @@ Handled by manifest intent filter:
 ```
 
 ### iOS Routing
+
 Handled by SceneDelegate deep link handler:
+
 - Intercepted in `scene(_:openURLContexts:)`
 - Routes to EventDetailsScreen with event ID parameter
 
@@ -594,6 +625,7 @@ notificationManager.cancelAllNotifications("event123")
 ```
 
 **SyncNotificationsOnAppLaunchTest** (7 scenarios):
+
 1. Zero favorited, zero downloaded → sync with empty set
 2. Multiple favorited, zero downloaded → sync with favorited IDs
 3. Zero favorited, multiple downloaded → sync with downloaded IDs
@@ -605,18 +637,21 @@ notificationManager.cancelAllNotifications("event123")
 ### Test Organization
 
 **Platform-Independent** (commonTest/):
+
 - Trigger type validation
 - Content provider string key generation
 - Scheduler eligibility logic
 - Simulation mode compatibility
 
 **Android-Specific** (androidUnitTest/):
+
 - WorkManager job enqueueing
 - Unique work name format
 - Notification cancellation
 - Exception handling
 
 **iOS-Specific** (iosTest/):
+
 - UNNotificationCenter operations
 - Identifier format validation
 - Content structure verification
@@ -642,12 +677,14 @@ notificationManager.cancelAllNotifications("event123")
 ### Notifications Not Appearing
 
 **Checklist**:
+
 1. Is event favorited? (Check FavoriteEventsStore)
 2. Is simulation mode compatible? (Check WWWPlatform.getSimulation()?.speed)
 3. Are notification permissions granted? (User → Settings → Notifications)
 4. Is app in foreground/background? (Wave hit requires active app)
 
 **Debug**:
+
 ```kotlin
 val shouldSchedule = scheduler.shouldScheduleNotifications(event)
 Log.d("Notifications", "Should schedule: $shouldSchedule")
@@ -656,6 +693,7 @@ Log.d("Notifications", "Should schedule: $shouldSchedule")
 ### Permissions Issues
 
 **Android**:
+
 ```xml
 <!-- Verify AndroidManifest.xml has -->
 <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -663,6 +701,7 @@ Log.d("Notifications", "Should schedule: $shouldSchedule")
 ```
 
 **iOS**:
+
 ```swift
 // Verify Info.plist has
 <key>NSUserNotificationsUsageDescription</key>
@@ -672,11 +711,13 @@ Log.d("Notifications", "Should schedule: $shouldSchedule")
 ### Deep Link Not Working
 
 **Android**:
+
 1. Verify intent filter in AndroidManifest.xml
 2. Check deep link format: `worldwidewaves://event?id=EVENT_ID`
 3. Verify EventDetailsScreen accepts `id` parameter
 
 **iOS**:
+
 1. Verify SceneDelegate `scene(_:openURLContexts:)` implementation
 2. Check URL scheme registered in Info.plist
 3. Verify deep link URL construction

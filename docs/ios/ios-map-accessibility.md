@@ -32,24 +32,28 @@ This document describes the VoiceOver accessibility implementation for the MapLi
 The implementation creates the following accessible elements in VoiceOver:
 
 ### 1. Map Summary Element (Always First)
+
 - **Label**: "Map showing [event name] event area. You are [distance] meters from event center. [N] wave progression circles visible"
 - **Traits**: `.staticText`
 - **Position**: Top of map view (44pt height)
 - **Updates**: When any map state changes
 
 ### 2. User Position Marker (If Available)
+
 - **Label**: "Your current position"
 - **Traits**: `.updatesFrequently`
 - **Position**: Centered on user's GPS coordinate (44x44pt touch target)
 - **Updates**: When user position changes or map pans
 
 ### 3. Event Area Boundary (If Available)
+
 - **Label**: "Event area boundary for [event name], radius [X.X] kilometers"
 - **Traits**: `.staticText`
 - **Position**: Centered on event center coordinate (44x44pt touch target)
 - **Updates**: When event info changes or map pans
 
 ### 4. Wave Progression Circles (If Available)
+
 - **Label**: "Wave progression circle [N] of [total]"
 - **Traits**: `.updatesFrequently`
 - **Position**: Centered on each polygon's calculated center (44x44pt touch target)
@@ -84,6 +88,7 @@ VoiceOver receives new element tree
 ### Update Triggers
 
 Accessibility elements are updated when:
+
 - User position changes (via `setUserPosition()`)
 - Event info loads (via `setEventInfo()`)
 - Wave polygons are added (via `addWavePolygons()`)
@@ -95,12 +100,15 @@ Accessibility elements are updated when:
 ### MapLibreViewWrapper
 
 #### `setUserPosition(latitude:longitude:)`
+
 ```swift
 @objc public func setUserPosition(latitude: Double, longitude: Double)
 ```
+
 Updates user position for accessibility. Call when GPS location changes.
 
 #### `setEventInfo(centerLatitude:centerLongitude:radius:eventName:)`
+
 ```swift
 @objc public func setEventInfo(
     centerLatitude: Double,
@@ -109,11 +117,13 @@ Updates user position for accessibility. Call when GPS location changes.
     eventName: String?
 )
 ```
+
 Updates event metadata for accessibility. Call when event data loads.
 
 ### IOSMapBridge (Kotlin-Callable)
 
 #### `setUserPosition(eventId:latitude:longitude:)`
+
 ```swift
 @objc public static func setUserPosition(
     eventId: String,
@@ -121,9 +131,11 @@ Updates event metadata for accessibility. Call when event data loads.
     longitude: Double
 )
 ```
+
 Updates user position via Kotlin bridge. Thread-safe (main thread dispatched).
 
 #### `setEventInfo(eventId:centerLatitude:centerLongitude:radius:eventName:)`
+
 ```swift
 @objc public static func setEventInfo(
     eventId: String,
@@ -133,6 +145,7 @@ Updates user position via Kotlin bridge. Thread-safe (main thread dispatched).
     eventName: String?
 )
 ```
+
 Updates event info via Kotlin bridge. Thread-safe (main thread dispatched).
 
 ## Kotlin Integration Example
@@ -192,17 +205,23 @@ fun updateEventInfoForAccessibility(event: IWWWEvent) {
 ## Accessibility Helper Functions
 
 ### `calculateFrameForCoordinate(_:in:)`
+
 Converts geographic coordinates to screen frames for accessibility elements.
+
 - Returns 44x44pt frame (iOS standard touch target size)
 - Centered on the coordinate's screen position
 
 ### `calculateDistance(from:to:)`
+
 Calculates great-circle distance between two coordinates using CoreLocation.
+
 - Returns distance in meters
 - Used for "You are X meters from event center" announcements
 
 ### `calculatePolygonCenter(_:)`
+
 Calculates the centroid of a polygon from its coordinates.
+
 - Used to position accessibility elements for wave circles
 - Simple arithmetic mean of all coordinate points
 
@@ -247,6 +266,7 @@ xcrun simctl spawn booted defaults write com.apple.Accessibility VoiceOverTouchE
 ## Performance Considerations
 
 ### Update Frequency
+
 - Accessibility elements are regenerated on every update
 - This is acceptable because:
   - Element count is low (typically 1-5 elements)
@@ -254,11 +274,13 @@ xcrun simctl spawn booted defaults write com.apple.Accessibility VoiceOverTouchE
   - VoiceOver caches element data efficiently
 
 ### Memory Usage
+
 - Minimal memory overhead
 - Accessibility elements are lightweight wrappers
 - Strong references to mapView (already retained)
 
 ### Threading
+
 - All accessibility operations occur on main thread (UIKit requirement)
 - Kotlin callers must dispatch to main thread before calling bridge methods
 
@@ -308,6 +330,7 @@ xcrun simctl spawn booted defaults write com.apple.Accessibility VoiceOverTouchE
 ## Build & Test
 
 ### Build iOS App
+
 ```bash
 cd iosApp
 xcodebuild -project worldwidewaves.xcodeproj \
@@ -317,6 +340,7 @@ xcodebuild -project worldwidewaves.xcodeproj \
 ```
 
 ### Expected Result
+
 - Build succeeds
 - No accessibility-related warnings or errors
 - App runs on simulator
@@ -324,6 +348,7 @@ xcodebuild -project worldwidewaves.xcodeproj \
 ## Changelog
 
 ### October 5, 2025 - Initial Implementation
+
 - ✅ Added accessibility state tracking to MapLibreViewWrapper
 - ✅ Implemented map container configuration for VoiceOver
 - ✅ Created accessibility element generation functions

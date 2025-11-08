@@ -7,6 +7,7 @@
 iOS cinterop in Kotlin/Native requires explicit memory management when crossing the Kotlin-C boundary. Unlike JVM, Kotlin/Native does not have garbage collection for native objects, and incorrect memory handling causes **immediate crashes** or **undefined behavior**.
 
 Memory safety violations in cinterop code manifest as:
+
 - **Segmentation faults** (accessing freed memory)
 - **Data corruption** (unpinned memory moved during GC)
 - **Crashes on app launch** (pointer escapes pinned scope)
@@ -102,12 +103,14 @@ bytes.usePinned { pinned ->
 ```
 
 **Key Points**:
+
 - `usePinned` guarantees memory stability during the block
 - `addressOf(0)` gets pointer to first element
 - NSData creation and file write complete before scope exit
 - No pointer escapes the pinned scope
 
 **Common Pitfalls**:
+
 - ❌ Creating NSData outside pinned scope
 - ❌ Storing `addressOf(0)` result in external variable
 - ❌ Using unpinned array with C APIs
@@ -136,12 +139,14 @@ location.coordinate.useContents {
 ```
 
 **Key Points**:
+
 - `useContents { }` provides safe scope for struct field access
 - Fields accessed by name directly (no `this.latitude`, just `latitude`)
 - Values extracted and used immediately within scope
 - No struct references escape the block
 
 **Common Pitfalls**:
+
 - ❌ Accessing struct fields without `useContents`
 - ❌ Storing struct references outside the scope
 - ❌ Assuming struct values remain stable after scope exit
@@ -163,12 +168,14 @@ buffer.usePinned { pinned ->
 ```
 
 **Key Points**:
+
 - `addressOf(index)` gets pointer to specific array element
 - Commonly used with index 0 for array start
 - Pointer only valid within pinned scope
 - Data copied into ByteArray, which outlives the scope
 
 **Common Pitfalls**:
+
 - ❌ Using `addressOf` without `usePinned`
 - ❌ Storing pointer for later use
 - ❌ Passing pointer to async operations
@@ -216,12 +223,14 @@ fclose(file)
 ```
 
 **Key Points**:
+
 - Use try-finally for C resource cleanup (file handles, malloc, etc.)
 - Complete all pinning operations before returning
 - Never return pointers - return copied data
 - Clean up in reverse allocation order
 
 **Common Pitfalls**:
+
 - ❌ Forgetting fclose/free on error paths
 - ❌ Returning pointers instead of data
 - ❌ Nested pinning without understanding scope
@@ -253,12 +262,14 @@ private class IosLocationDelegate(
 ```
 
 **Key Points**:
+
 - Delegate classes MUST extend `NSObject()`
 - Use `@OptIn(ExperimentalForeignApi::class)` for protocol conformance
 - Protocol methods receive Objective-C types (managed automatically)
 - Safe to store delegates as properties (GC-managed)
 
 **Common Pitfalls**:
+
 - ❌ Forgetting to extend NSObject (compiler error)
 - ❌ Not using @OptIn annotation
 - ❌ Assuming Java-style interface implementation
@@ -288,6 +299,7 @@ fun updateUI(data: ByteArray) {  // Called from background thread
 ```
 
 **Thread safety rules**:
+
 - UIKit/AppKit APIs: **Main thread only**
 - Core Location: **Main thread recommended**
 - File I/O (POSIX): **Any thread safe**
@@ -305,6 +317,7 @@ fun updateUI(data: ByteArray) {  // Called from background thread
 ```
 
 **Runtime verification**:
+
 - Run iOS app in simulator with Xcode debugger attached
 - Check for memory warnings in Debug Navigator
 - Use Instruments → Leaks to verify no pointer leaks

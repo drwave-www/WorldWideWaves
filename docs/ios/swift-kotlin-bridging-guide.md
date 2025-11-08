@@ -7,6 +7,7 @@
 WorldWideWaves uses a Swift-Kotlin bridge to enable Kotlin shared module code to control the native iOS MapLibre SDK. This architecture solves the fundamental challenge that MapLibre is a Swift-only framework while wave rendering and business logic reside in the Kotlin multiplatform shared module.
 
 **Why the bridge exists:**
+
 - **MapLibre SDK**: Pure Swift/iOS framework, cannot be accessed from Kotlin/Native
 - **Business Logic**: Lives in Kotlin shared module (wave detection, progression, timing)
 - **Visualization**: Wave polygons must be rendered on native MapLibre maps
@@ -103,6 +104,7 @@ The bridge uses Objective-C interoperability as the common layer between Swift a
 | `Int?` | `Int?` | ✅ Automatic optional bridging |
 
 **Example:**
+
 ```kotlin
 // Kotlin
 IOSMapBridge.animateCamera(
@@ -132,6 +134,7 @@ Complex Kotlin types **do not** automatically bridge. Use **decomposition** to p
 | `data class` | Decompose to primitive properties | Individual primitive parameters |
 
 **Example - Position Decomposition:**
+
 ```kotlin
 // Kotlin - data class doesn't bridge
 data class Position(val lat: Double, val lng: Double)
@@ -160,6 +163,7 @@ IOSMapBridge.setUserPosition(
 ```
 
 **Example - BoundingBox Decomposition:**
+
 ```kotlin
 // Kotlin
 data class BoundingBox(
@@ -189,6 +193,7 @@ wrapper.setBoundsForCameraTarget(
 | `Map<K, V>` | `NSDictionary` | ⚠️ Avoid - use separate parameters |
 
 **Example - List Bridging:**
+
 ```kotlin
 // Kotlin
 val polygons: List<List<Pair<Double, Double>>> = listOf(
@@ -229,6 +234,7 @@ let coordinateArrays: [[CLLocationCoordinate2D]] = polygonData.coordinates.map {
 | `platform.darwin.dispatch_async` | GCD dispatch | `DispatchQueue.async` |
 
 **Example - Using Platform APIs in Kotlin:**
+
 ```kotlin
 // Kotlin/Native can use iOS platform APIs directly
 import platform.CoreLocation.CLLocationCoordinate2D
@@ -248,6 +254,7 @@ dispatch_async(dispatch_get_main_queue()) {
 **Purpose:** Expose Swift functionality to Kotlin
 
 **Swift Side:**
+
 ```swift
 @objc public class IOSMapBridge: NSObject {
     /// Render wave polygons on the map
@@ -273,6 +280,7 @@ dispatch_async(dispatch_get_main_queue()) {
 ```
 
 **Kotlin Side:**
+
 ```kotlin
 // Automatic import of Swift @objc class
 import cocoapods.worldwidewaves.IOSMapBridge
@@ -286,6 +294,7 @@ IOSMapBridge.renderWavePolygons(
 ```
 
 **Key Points:**
+
 - Must inherit from `NSObject`
 - Must use `@objc` annotation on class and methods
 - Use `public static` for stateless operations (Kotlin sees them as top-level functions)
@@ -297,6 +306,7 @@ IOSMapBridge.renderWavePolygons(
 **Purpose:** Manage weak references to Swift objects and queue async commands
 
 **Kotlin Registry (Singleton):**
+
 ```kotlin
 @OptIn(ExperimentalNativeApi::class)
 object MapWrapperRegistry {
@@ -361,6 +371,7 @@ object MapWrapperRegistry {
 ```
 
 **Swift Wrapper Registration:**
+
 ```swift
 @objc public class MapLibreViewWrapper: NSObject {
     private var eventId: String?
@@ -390,6 +401,7 @@ object MapWrapperRegistry {
 ```
 
 **Key Points:**
+
 - **Strong references**: Wrappers survive entire screen session
 - **Explicit cleanup**: Must call `unregisterWrapper()` on screen exit
 - **Command queuing**: Configuration commands queued (all execute), animations single-slot (latest wins)
@@ -400,6 +412,7 @@ object MapWrapperRegistry {
 **Purpose:** Implement Swift protocols (delegates) from Kotlin/Native
 
 **Swift Protocol:**
+
 ```swift
 @objc public protocol CLLocationManagerDelegate {
     @objc optional func locationManager(
@@ -415,6 +428,7 @@ object MapWrapperRegistry {
 ```
 
 **Kotlin Implementation:**
+
 ```kotlin
 @OptIn(ExperimentalForeignApi::class)
 private class IosLocationDelegate(
@@ -445,6 +459,7 @@ private class IosLocationDelegate(
 ```
 
 **Usage:**
+
 ```kotlin
 class IosLocationProvider : LocationProvider {
     private val locationManager = CLLocationManager()
@@ -460,6 +475,7 @@ class IosLocationProvider : LocationProvider {
 ```
 
 **Key Points:**
+
 - **Must extend NSObject**: All protocol implementations require NSObject base
 - **Protocol suffix**: Kotlin sees Swift protocols with "Protocol" suffix
 - **Exact signatures**: Method signatures must match exactly (parameter names matter)
@@ -471,6 +487,7 @@ class IosLocationProvider : LocationProvider {
 **Purpose:** Convert Kotlin data classes to Swift primitive parameters
 
 **Kotlin Data Class:**
+
 ```kotlin
 data class Position(val lat: Double, val lng: Double)
 
@@ -483,6 +500,7 @@ data class BoundingBox(
 ```
 
 **Bridge Call (Decomposition):**
+
 ```kotlin
 // IosMapLibreAdapter.kt
 override fun animateToPosition(
@@ -516,6 +534,7 @@ override fun setBoundsForCameraTarget(bbox: BoundingBox) {
 ```
 
 **Swift Receives Primitives:**
+
 ```swift
 @objc public static func animateToPosition(
     eventId: String,
@@ -541,6 +560,7 @@ override fun setBoundsForCameraTarget(bbox: BoundingBox) {
 ```
 
 **Why Decomposition:**
+
 - Kotlin data classes don't bridge automatically to Swift
 - Kotlin generics don't bridge to Swift generics
 - Complex types require serialization/deserialization overhead
@@ -564,6 +584,7 @@ override fun setBoundsForCameraTarget(bbox: BoundingBox) {
 **Threading:** Main thread only
 
 **Example:**
+
 ```kotlin
 IOSMapBridge.renderWavePolygons(
     eventId = eventId,
@@ -584,6 +605,7 @@ IOSMapBridge.renderWavePolygons(
 **Returns:** `true` if polygons were rendered, `false` if none pending
 
 **Flow:**
+
 1. Kotlin calculates polygons → stores in registry as "pending"
 2. Swift map loads → calls `renderPendingPolygons()` periodically
 3. Polygons retrieved, converted, rendered on map
@@ -599,6 +621,7 @@ IOSMapBridge.renderWavePolygons(
 **Purpose:** Remove all rendered wave visualization layers and sources
 
 **Use Cases:**
+
 - Wave animation ends
 - Screen transition
 - Error recovery
@@ -613,6 +636,7 @@ IOSMapBridge.renderWavePolygons(
 **Purpose:** Execute queued camera commands using command pattern
 
 **Execution Strategy:**
+
 - **Configuration commands**: Execute ALL in queue until empty (SetMinZoom, SetMaxZoom, SetConstraintBounds)
 - **Animation commands**: Execute ONE per call (AnimateToPosition, AnimateToBounds, MoveToBounds)
 
@@ -726,6 +750,7 @@ platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
 ### Pattern: Callback from Swift to Kotlin
 
 **Kotlin - Register Callback:**
+
 ```kotlin
 // Store callback in registry
 MapWrapperRegistry.setCameraCallback(eventId = eventId) {
@@ -736,6 +761,7 @@ MapWrapperRegistry.setCameraCallback(eventId = eventId) {
 ```
 
 **Swift - Invoke Callback:**
+
 ```swift
 // Retrieve and invoke Kotlin callback
 Shared.MapWrapperRegistry.shared.invokeMapReadyCallbacks(eventId: eventId)
@@ -745,6 +771,7 @@ Shared.MapWrapperRegistry.shared.invokeCameraIdleListener(eventId: eventId)
 ```
 
 **Common Callback Types:**
+
 - `setCameraCallback`: Request camera command execution
 - `setRenderCallback`: Request polygon rendering
 - `setMapClickCallback`: Map tap events
@@ -753,6 +780,7 @@ Shared.MapWrapperRegistry.shared.invokeCameraIdleListener(eventId: eventId)
 ### Pattern: Error Handling Across Bridge
 
 **Swift Side:**
+
 ```swift
 @objc public static func renderWavePolygons(
     eventId: String,
@@ -779,6 +807,7 @@ Shared.MapWrapperRegistry.shared.invokeCameraIdleListener(eventId: eventId)
 ```
 
 **Kotlin Side:**
+
 ```kotlin
 // Always check if operation succeeded via callback or return value
 val success = IOSMapBridge.renderPendingPolygons(eventId = eventId)
@@ -797,6 +826,7 @@ try {
 ```
 
 **Error Handling Strategy:**
+
 - **Swift**: Fail gracefully with logging, no exceptions across bridge
 - **Kotlin**: Use try-catch for platform APIs, check return values
 - **No exceptions across bridge**: Return Bool/Optional to signal success/failure
@@ -809,10 +839,12 @@ try {
 **Problem:** Swift methods without `@objc` are not visible to Kotlin/Native
 
 **Symptoms:**
+
 - Compile error: "Unresolved reference: methodName"
 - Method exists in Swift but not accessible from Kotlin
 
 **Solution:**
+
 ```swift
 // ❌ WRONG - Not visible to Kotlin
 public static func renderPolygons(eventId: String) { }
@@ -836,10 +868,12 @@ public class MapBridge: NSObject { }
 **Problem:** Kotlin data classes don't automatically bridge to Swift
 
 **Symptoms:**
+
 - Compile error: "Type 'Position' is not convertible to 'NSObject'"
 - Cannot pass Kotlin data class as parameter
 
 **Solution:**
+
 ```kotlin
 // ❌ WRONG - Complex type doesn't bridge
 data class Position(val lat: Double, val lng: Double)
@@ -875,11 +909,13 @@ IOSMapBridge.setPosition(
 **Problem:** Strong references between Swift ↔ Kotlin cause memory leaks
 
 **Symptoms:**
+
 - MapLibreViewWrapper never deallocated
 - Memory usage grows on repeated screen navigation
 - `deinit` never called
 
 **Solution - Use Strong References with Explicit Cleanup:**
+
 ```kotlin
 // ✅ CORRECT - Strong reference with explicit lifecycle
 object MapWrapperRegistry {
@@ -907,6 +943,7 @@ DisposableEffect(eventId) {
 ```
 
 **Swift - Use [weak self] in Closures:**
+
 ```swift
 MapWrapperRegistry.shared.setCameraCallback(eventId: id) { [weak self] in
     self?.executePendingCameraCommands()  // Weak capture prevents retain cycle
@@ -920,11 +957,13 @@ MapWrapperRegistry.shared.setCameraCallback(eventId: id) { [weak self] in
 **Problem:** Swift UIKit/MapLibre requires main thread, Kotlin may call from any thread
 
 **Symptoms:**
+
 - "UIView updates must be on main thread" crash
 - Map rendering glitches
 - Random crashes in UIKit code
 
 **Solution:**
+
 ```kotlin
 // ✅ CORRECT - Always dispatch to main thread for UI operations
 import platform.darwin.dispatch_async
@@ -957,10 +996,12 @@ MapWrapperRegistry.requestImmediateRender(eventId)  // Already dispatches to mai
 **Problem:** Kotlin `Pair<T, T>` bridges as `KotlinPair` requiring unwrapping in Swift
 
 **Symptoms:**
+
 - Cannot access `.first` and `.second` directly
 - Type mismatch errors with coordinate pairs
 
 **Solution:**
+
 ```kotlin
 // Kotlin - Store coordinate pairs
 val polygons: List<List<Pair<Double, Double>>> = calculatePolygons()
@@ -990,6 +1031,7 @@ let coordinateArrays: [[CLLocationCoordinate2D]] = polygonData.coordinates.map {
 All UIKit and MapLibre operations **must** occur on the main thread. This is enforced by iOS and violation causes crashes.
 
 **Kotlin/Native - Dispatch to Main:**
+
 ```kotlin
 import platform.darwin.dispatch_async
 import platform.darwin.dispatch_get_main_queue
@@ -1001,6 +1043,7 @@ dispatch_async(dispatch_get_main_queue()) {
 ```
 
 **Swift - Verify Main Thread:**
+
 ```swift
 @objc public static func renderWavePolygons(...) {
     // Defensive check (crashes in debug, helps catch bugs)
@@ -1023,6 +1066,7 @@ dispatch_async(dispatch_get_main_queue()) {
 Computation-heavy work should occur on background threads, then dispatch results to main thread.
 
 **Pattern:**
+
 ```kotlin
 // Heavy computation on background
 GlobalScope.launch(Dispatchers.Default) {
@@ -1046,11 +1090,13 @@ GlobalScope.launch(Dispatchers.Default) {
 MapWrapperRegistry uses **strong references** to prevent premature garbage collection during screen sessions.
 
 **Rationale:**
+
 - Wrappers must survive entire screen session for dynamic updates
 - Weak references were causing premature GC before screen exit
 - Explicit lifecycle management more predictable than weak reference cleanup
 
 **Implementation:**
+
 ```kotlin
 object MapWrapperRegistry {
     // Strong references - kept alive until explicit cleanup
@@ -1072,6 +1118,7 @@ object MapWrapperRegistry {
 ```
 
 **Cleanup Pattern in Compose:**
+
 ```kotlin
 @Composable
 fun IosEventMap(eventId: String) {
@@ -1090,6 +1137,7 @@ fun IosEventMap(eventId: String) {
 ### Closure Capture Rules
 
 **Swift Closures:**
+
 ```swift
 // ❌ WRONG - Creates retain cycle
 MapWrapperRegistry.shared.setCameraCallback(eventId: id) {
@@ -1108,6 +1156,7 @@ MapWrapperRegistry.shared.setCameraCallback(eventId: id) { [unowned self] in
 ```
 
 **Kotlin Lambdas:**
+
 ```kotlin
 // Lambdas don't create cycles with object references
 val callback = {
@@ -1146,6 +1195,7 @@ xcodebuild -project worldwidewaves.xcodeproj \
 ```
 
 **Expected Results:**
+
 - ✅ Zero violations in iOS safety checks
 - ✅ All tests passing
 - ✅ Zero compilation warnings (Swift + Kotlin)

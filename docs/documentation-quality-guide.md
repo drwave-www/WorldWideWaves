@@ -43,12 +43,14 @@ The documentation check workflow (`07-docs-check.yml`) runs automatically when:
 ### 1. Link Validation (Lychee)
 
 **What it checks**:
+
 - ✅ Internal links (relative paths to files/headings)
 - ✅ External URLs (HTTP/HTTPS accessibility)
 - ✅ Anchor links (heading references)
 - ✅ Image references
 
 **What it excludes**:
+
 - ❌ `node_modules`, `build`, `SourcePackages` directories
 - ❌ Localhost/127.0.0.1 URLs (development examples)
 - ❌ Firebase/Google authenticated URLs
@@ -61,6 +63,7 @@ The documentation check workflow (`07-docs-check.yml`) runs automatically when:
 ### 2. Markdown Formatting (Markdownlint)
 
 **What it checks**:
+
 - ✅ Consistent heading styles (ATX: `#` format)
 - ✅ Proper list indentation
 - ✅ Code blocks with language tags
@@ -69,6 +72,7 @@ The documentation check workflow (`07-docs-check.yml`) runs automatically when:
 - ✅ Consistent emphasis/strong markers
 
 **What it allows**:
+
 - ⚪ HTML in markdown (for complex tables)
 - ⚪ Long lines (technical documentation needs flexibility)
 - ⚪ Duplicate headings (common in multi-section docs)
@@ -97,6 +101,7 @@ If dependencies are missing:
 ```
 
 **Requirements**:
+
 - **macOS**: Homebrew (for lychee) + npm (for markdownlint)
 - **Linux**: Cargo (Rust) or Homebrew + npm
 
@@ -110,6 +115,7 @@ If dependencies are missing:
 ### Manual Installation
 
 **Lychee (Link Checker)**:
+
 ```bash
 # macOS (Homebrew)
 brew install lychee
@@ -122,6 +128,7 @@ lychee --version
 ```
 
 **Markdownlint CLI2**:
+
 ```bash
 # npm (all platforms)
 npm install -g markdownlint-cli2
@@ -150,6 +157,7 @@ http://localhost:*
 ```
 
 **Pattern Syntax**:
+
 - `*` matches any character except `/`
 - `**` matches any character including `/`
 - Lines starting with `#` are comments
@@ -174,6 +182,7 @@ Configure markdown formatting rules:
 ```
 
 **Common Rules**:
+
 - `MD001`: Heading levels increment by one
 - `MD003`: Heading style (ATX: `#`)
 - `MD013`: Line length (disabled)
@@ -190,16 +199,19 @@ See [markdownlint rules](https://github.com/DavidAnson/markdownlint/blob/main/do
 ### Issue 1: Broken Internal Links
 
 **Symptom**:
+
 ```
 ❌ [404] docs/missing-file.md → File not found
 ```
 
 **Causes**:
+
 - File was moved/renamed without updating links
 - Typo in relative path
 - Case sensitivity (`Readme.md` vs `README.md`)
 
 **Solutions**:
+
 ```bash
 # Fix the link
 - [Guide](docs/missing-file.md)
@@ -213,11 +225,13 @@ See [markdownlint rules](https://github.com/DavidAnson/markdownlint/blob/main/do
 ### Issue 2: Broken External Links
 
 **Symptom**:
+
 ```
 ❌ [404] https://example.com/broken-page → Not found
 ```
 
 **Solutions**:
+
 1. **Update URL**: Find the correct/updated URL
 2. **Remove link**: If resource no longer exists
 3. **Exclude link**: Add to `.lycheeignore` if temporarily unavailable
@@ -230,15 +244,18 @@ https://temporarily-down.com/**
 ### Issue 3: Broken Anchor Links
 
 **Symptom**:
+
 ```
 ❌ docs/guide.md#missing-heading → Anchor not found
 ```
 
 **Causes**:
+
 - Heading was renamed/removed
 - Anchor syntax incorrect (use lowercase, replace spaces with `-`)
 
 **Solutions**:
+
 ```bash
 # Incorrect anchor (heading: "iOS Requirements")
 - [Guide](docs/guide.md#iOS_Requirements)
@@ -248,6 +265,7 @@ https://temporarily-down.com/**
 ```
 
 **Anchor Rules**:
+
 - Convert to lowercase
 - Replace spaces with `-`
 - Remove special characters
@@ -256,16 +274,19 @@ https://temporarily-down.com/**
 ### Issue 4: Markdown Formatting Errors
 
 **Symptom**:
+
 ```
 MD022/blanks-around-headings: Headings should be surrounded by blank lines
 ```
 
 **Solution (Auto-fix)**:
+
 ```bash
 ./scripts/check-docs-links.sh --fix
 ```
 
 **Solution (Manual)**:
+
 ```markdown
 <!-- ❌ WRONG: No blank lines -->
 Some text
@@ -283,21 +304,26 @@ More text
 ### Issue 5: Missing Code Block Language
 
 **Symptom**:
+
 ```
 MD040/fenced-code-language: Code blocks should specify a language
 ```
 
 **Solution**:
+
 ```markdown
 <!-- ❌ WRONG: No language specified -->
 ```
+
 code here
+
 ```
 
 <!-- ✅ CORRECT: Language specified -->
 ```bash
 code here
 ```
+
 ```
 
 ---
@@ -313,13 +339,16 @@ code here
    ```
 
 2. **Specify Language for Code Blocks**
+
    ```markdown
    ```kotlin
    fun example() { }
    ```
+
    ```
 
 3. **Add Blank Lines Around Headings**
+
    ```markdown
    Paragraph text.
 
@@ -329,6 +358,7 @@ code here
    ```
 
 4. **Use Consistent List Formatting**
+
    ```markdown
    - Item 1
    - Item 2
@@ -342,11 +372,13 @@ code here
 ### Maintaining Links
 
 1. **Check Links Before Committing**
+
    ```bash
    ./scripts/check-docs-links.sh
    ```
 
 2. **Update Links When Moving Files**
+
    ```bash
    # Use git mv to track renames
    git mv old-path.md new-path.md
@@ -356,6 +388,7 @@ code here
    ```
 
 3. **Use Anchors for Section Links**
+
    ```markdown
    [Jump to installation](#installation)
 
@@ -369,6 +402,7 @@ code here
 ### Excluding Links
 
 1. **Exclude Temporarily Down URLs**
+
    ```bash
    # Add to .lycheeignore with explanation
    # Temporarily down, expected back 2025-11-01
@@ -376,12 +410,14 @@ code here
    ```
 
 2. **Exclude Authentication-Required URLs**
+
    ```bash
    # Firebase console requires login
    https://console.firebase.google.com/**
    ```
 
 3. **Exclude Development URLs**
+
    ```bash
    # Localhost examples
    http://localhost:*
@@ -448,6 +484,7 @@ Run workflow manually from GitHub Actions UI:
 ### "lychee not found" Error
 
 **Solution**:
+
 ```bash
 # Install lychee
 brew install lychee  # macOS
@@ -457,6 +494,7 @@ cargo install lychee  # Linux/macOS with Rust
 ### "markdownlint-cli2 not found" Error
 
 **Solution**:
+
 ```bash
 # Install via npm
 npm install -g markdownlint-cli2
@@ -467,6 +505,7 @@ npm install -g markdownlint-cli2
 **Cause**: External URL rate limiting
 
 **Solutions**:
+
 1. Add URL to `.lycheeignore` temporarily
 2. Wait for cache expiration (1 day)
 3. Re-run workflow after some time
@@ -476,11 +515,13 @@ npm install -g markdownlint-cli2
 **Investigation Steps**:
 
 1. **Verify link manually**:
+
    ```bash
    curl -I https://example.com/page
    ```
 
 2. **Check DNS/network**:
+
    ```bash
    ping example.com
    ```
@@ -505,17 +546,15 @@ touch docs/new-feature.md
 
 # 2. Write content with proper formatting
 cat > docs/new-feature.md << 'EOF'
-# New Feature Guide
+## New Feature Guide
 
 This guide explains the new feature.
 
-## Installation
+### Installation
 
-```bash
-npm install new-feature
-```
+Install the feature using npm.
 
-## Usage
+### Usage
 
 See [main documentation](../README.md) for details.
 EOF

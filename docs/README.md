@@ -69,17 +69,20 @@ For deployment and production:
 ### By Role
 
 **New Contributors:**
+
 1. [FAQ](FAQ.md)
 2. [Environment Setup](environment-setup.md)
 3. [Development Workflow](development.md)
 4. [Contributing Guidelines](contributing.md)
 
 **Architects & Lead Developers:**
+
 1. [Architecture](architecture.md)
 2. [Map Architecture Analysis](architecture/map-architecture-analysis.md)
 3. [CI/CD Pipeline](ci-cd.md)
 
 **DevOps & SRE:**
+
 1. [CI/CD Pipeline](ci-cd.md)
 2. [Operations Guide](operations.md)
 3. [Firebase Setup](setup/firebase-setup.md)

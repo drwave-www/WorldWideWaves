@@ -89,6 +89,7 @@ data class Result(val value: String)
 ### When to Split Files
 
 Split when:
+
 - File exceeds 600 lines
 - Class has multiple unrelated responsibilities
 - Testing becomes difficult due to complexity

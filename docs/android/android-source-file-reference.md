@@ -5,6 +5,7 @@
 ### Shared Platform-Independent Layer
 
 **MapBoundsEnforcer.kt** (Core constraint logic)
+
 - Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapBoundsEnforcer.kt`
 - Key Methods:
   - `applyConstraints()` - Entry point (lines 73-117)
@@ -13,6 +14,7 @@
   - `boundsAreSimilar()` - 0.1% tolerance check (lines 177-197)
 
 **MapLibreAdapter.kt** (Platform interface definition)
+
 - Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapLibreAdapter.kt`
 - Key Methods:
   - `setBoundsForCameraTarget()` - Interface definition (lines 64-68)
@@ -20,6 +22,7 @@
   - `setMaxZoomPreference()` (line 74)
 
 **AbstractEventMap.kt** (Cross-platform map logic)
+
 - Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/AbstractEventMap.kt`
 - Key Methods:
   - `moveToMapBounds()` - BOUNDS mode setup (lines 124-175)
@@ -32,6 +35,7 @@
 ### Android-Specific Implementation Layer
 
 **AndroidMapLibreAdapter.kt** (Android native implementation)
+
 - Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/composeApp/src/androidMain/kotlin/com/worldwidewaves/map/AndroidMapLibreAdapter.kt`
 - Key Methods:
   - `setBoundsForCameraTarget()` - Min zoom calculation & gesture setup (lines 367-514)
@@ -43,6 +47,7 @@
   - `getMinZoomLevel()` - Get calculated min zoom (lines 242-247)
 
 **AndroidEventMap.kt** (Android UI integration)
+
 - Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/composeApp/src/androidMain/kotlin/com/worldwidewaves/compose/map/AndroidEventMap.kt`
 - Key Methods:
   - `Draw()` - Main Compose UI (lines 244-260)
@@ -55,6 +60,7 @@
 ### Test Files
 
 **AspectRatioFittingTest.kt** (Min zoom calculation tests)
+
 - Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/androidUnitTest/kotlin/com/worldwidewaves/shared/map/AspectRatioFittingTest.kt`
 - Tests:
   - `wide event on tall screen fits by HEIGHT` (lines 53-84)
@@ -64,15 +70,19 @@
   - `extreme tall event fits by WIDTH without overflow` (lines 194-221)
 
 **BoundsWindowModeTest.kt** (WINDOW mode constraints)
+
 - Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/androidUnitTest/kotlin/com/worldwidewaves/shared/map/BoundsWindowModeTest.kt`
 
 **AbstractEventMapTest.kt** (Integration tests)
+
 - Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/androidUnitTest/kotlin/com/worldwidewaves/shared/map/AbstractEventMapTest.kt`
 
 **RegressionPreventionTest.kt** (Edge case tests)
+
 - Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/androidUnitTest/kotlin/com/worldwidewaves/shared/map/RegressionPreventionTest.kt`
 
 **MapBoundsEnforcerTest.kt** (Enforcer-specific tests)
+
 - Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonTest/kotlin/com/worldwidewaves/shared/map/MapBoundsEnforcerTest.kt`
 
 ---
@@ -80,6 +90,7 @@
 ## Key Code Locations by Feature
 
 ### Min Zoom Calculation
+
 - **Logic**: `AndroidMapLibreAdapter.kt` lines 400-464
 - **Decision Tree**: If `applyZoomSafetyMargin` (WINDOW vs BOUNDS)
 - **Aspect Ratio**: `eventAspect > screenAspect` determines constraint dimension
@@ -88,12 +99,14 @@
 - **Tests**: `AspectRatioFittingTest.kt` all tests
 
 ### Viewport Padding (BOUNDS vs WINDOW)
+
 - **BOUNDS Mode**: `MapBoundsEnforcer.kt` lines 397-403 returns `(0, 0)`
 - **WINDOW Mode**: `MapBoundsEnforcer.kt` lines 406-434 calculates viewport half-size
 - **Clamping**: `MapBoundsEnforcer.kt` lines 450-456 uses 49% limit
 - **Tests**: `BoundsWindowModeTest.kt`
 
 ### Preventive Gesture Clamping
+
 - **Setup**: `AndroidMapLibreAdapter.kt` lines 516-591
 - **Gesture Detection**: `AndroidMapLibreAdapter.kt` lines 527-541
 - **Viewport Check**: `AndroidMapLibreAdapter.kt` lines 544-578
@@ -101,11 +114,13 @@
 - **Validation**: `AndroidMapLibreAdapter.kt` lines 596-603
 
 ### Constraint State Transitions
+
 - **BOUNDS Mode**: `AbstractEventMap.kt` lines 124-175
 - **WINDOW Mode**: `AbstractEventMap.kt` lines 186-228
 - **Animation Suppression**: `AbstractEventMap.kt` lines 105-119
 
 ### Bounds Similarity Check
+
 - **Implementation**: `MapBoundsEnforcer.kt` lines 177-197
 - **Tolerance**: 0.1% (`val tolerance = 0.001`)
 - **Usage**: `MapBoundsEnforcer.kt` lines 141-144
@@ -169,15 +184,18 @@ MapBoundsEnforcer (Concrete)
 ## Data Classes Used
 
 ### BoundingBox
+
 - Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/events/utils/`
 - Properties: `sw` (southwest), `ne` (northeast), both Position objects
 - Methods: `height`, `width`, `contains()`, `toLatLngBounds()`
 
 ### Position
+
 - Properties: `latitude`, `longitude`
 - Used for camera target and viewport bounds
 
 ### VisibleRegionPadding (nested in MapBoundsEnforcer)
+
 - Properties: `latPadding`, `lngPadding`
 - Used for viewport-based constraint calculation
 
@@ -186,6 +204,7 @@ MapBoundsEnforcer (Concrete)
 ## Integration Points
 
 ### From AbstractEventMap to MapBoundsEnforcer
+
 ```
 AbstractEventMap.moveToWindowBounds()
   → MapBoundsEnforcer(eventBbox, mapLibreAdapter, isWindowMode=true)
@@ -193,6 +212,7 @@ AbstractEventMap.moveToWindowBounds()
 ```
 
 ### From MapBoundsEnforcer to MapLibreAdapter
+
 ```
 MapBoundsEnforcer.applyConstraintsWithPadding()
   → mapLibreAdapter.setBoundsForCameraTarget(
@@ -203,6 +223,7 @@ MapBoundsEnforcer.applyConstraintsWithPadding()
 ```
 
 ### From MapLibreAdapter to Native MapLibre
+
 ```
 AndroidMapLibreAdapter.setBoundsForCameraTarget()
   → mapLibreMap.setMinZoomPreference(calculatedMinZoom)

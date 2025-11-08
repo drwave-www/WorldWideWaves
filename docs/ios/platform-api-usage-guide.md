@@ -27,6 +27,7 @@ Quick reference table of frameworks:
 ### When to Use
 
 UIKit APIs are required for:
+
 - Accessing iOS accessibility features (Dynamic Type, content size categories)
 - Observing application lifecycle events (foreground, background, active, inactive)
 - Reading system UI configuration (preferred content size, interface idiom)
@@ -147,6 +148,7 @@ From: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotl
 ### When to Use
 
 Foundation APIs provide core system services:
+
 - File system operations (reading, writing, directory management)
 - Date and time formatting (locale-aware, timezone-aware)
 - String manipulation and encoding (NSUTF8StringEncoding)
@@ -355,6 +357,7 @@ NSString.create(string = versionStamp)
 ### When to Use
 
 CoreLocation APIs provide location services:
+
 - GPS position tracking with configurable accuracy
 - Location authorization management
 - Coordinate validation and accuracy filtering
@@ -483,6 +486,7 @@ private class IosLocationDelegate(
 From: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotlin/com/worldwidewaves/shared/map/IosLocationProvider.kt`
 
 **Key Points:**
+
 - Use `useContents {}` for accessing `CLLocationCoordinate2D` struct properties
 - Delegate must extend `NSObject()` for Objective-C protocol conformance
 - Authorization status constants use `kCL*` naming convention
@@ -502,6 +506,7 @@ From: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotl
 ### When to Use
 
 AVFoundation provides audio capabilities:
+
 - Audio playback with precise control
 - Audio session configuration (mixing, categories)
 - Procedural sound generation
@@ -510,6 +515,7 @@ AVFoundation provides audio capabilities:
 ### Threading Requirements
 
 **Mixed**: Most operations are thread-safe, but:
+
 - Audio session configuration should be on main thread
 - Buffer operations can be on any thread
 - Callbacks may arrive on audio rendering thread
@@ -634,6 +640,7 @@ class IosSoundPlayer : SoundPlayer {
 From: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotlin/com/worldwidewaves/shared/sound/IosSoundPlayer.kt`
 
 **Key Points:**
+
 - Validate audio format before using (simulators may have invalid sample rates)
 - Use array indexing (`channel0[index]`) for buffer manipulation
 - Audio session category determines mixing behavior
@@ -654,6 +661,7 @@ From: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotl
 ### When to Use
 
 POSIX APIs provide low-level C standard library functions:
+
 - Direct file I/O (for performance-critical operations)
 - Environment variable access
 - Low-level memory operations
@@ -758,6 +766,7 @@ Comprehensive threading requirements for all platform APIs:
 | posix | Any thread | Any thread | N/A | C standard library thread-safe |
 
 **Critical Rules:**
+
 1. **UIKit**: Always use `withContext(Dispatchers.Main)` or ensure Composable context
 2. **Foundation**: Safe from any thread, no special handling needed
 3. **CoreLocation**: Use `useContents {}` for struct access, delegates arrive on main
@@ -766,21 +775,21 @@ Comprehensive threading requirements for all platform APIs:
 
 ## When to Use Platform APIs vs Abstractions
 
-### Use Platform APIs Directly When:
+### Use Platform APIs Directly When
 
 1. **No existing abstraction exists** - New platform-specific feature
 2. **Platform-specific behavior required** - iOS Dynamic Type, app lifecycle
 3. **Performance-critical operations** - Direct file I/O with posix
 4. **Implementing platform-specific features** - Audio session configuration
 
-### Use Abstractions (expect/actual) When:
+### Use Abstractions (expect/actual) When
 
 1. **Feature needs to work on Android too** - Cross-platform requirement
 2. **Complex platform differences exist** - Different APIs on iOS/Android
 3. **Testing needs to be cross-platform** - Shared test logic
 4. **Business logic should be platform-agnostic** - Domain layer
 
-### Examples:
+### Examples
 
 **Direct Platform API Usage** (iOS-specific, no Android equivalent):
 
@@ -846,6 +855,7 @@ actual class AndroidSoundPlayer : SoundPlayer {
 ```
 
 **Decision Flowchart:**
+
 ```
 Is feature needed on both platforms?
 ├─ YES → Use expect/actual abstraction
@@ -892,6 +902,7 @@ val lat = location.coordinate.latitude  // ❌ May cause crashes or incorrect va
 ```
 
 **Why useContents?**
+
 - Structs are stored in temporary memory
 - `useContents {}` pins the struct during access
 - Prevents memory from being freed during property access
@@ -919,6 +930,7 @@ NSData.create(bytes = bytes, length = bytes.size.toULong())  // ❌ May crash
 ```
 
 **Why usePinned?**
+
 - Kotlin arrays can be relocated by GC during C function execution
 - `usePinned {}` prevents GC from moving array during pinned scope
 - Provides stable C pointer via `addressOf()`
@@ -1070,6 +1082,7 @@ if (sampleRate <= 0.0 || channelCount == 0u) {
 ```
 
 **Common simulator/device differences:**
+
 - Audio I/O: Simulators may report invalid sample rates
 - Sensors: GPS, accelerometer, compass not available on simulator
 - Camera: Not available on simulator
@@ -1091,6 +1104,7 @@ if (sampleRate <= 0.0 || channelCount == 0u) {
 ```
 
 **Expected results:**
+
 - Zero violations in iOS safety script
 - Clean compilation with zero warnings
 - All tests passing

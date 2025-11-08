@@ -9,13 +9,17 @@ This documentation suite provides comprehensive coverage of Android's map constr
 ## Documents
 
 ### [Index](android-map-constraint-index.md)
+
 **Navigation hub** - Overview and links to all constraint documentation.
+
 - Quick concept summary
 - Document relationship map
 - Related files index
 
 ### [Analysis](android-map-constraint-analysis.md)
+
 **Deep dive** - Detailed architectural analysis.
+
 - 3-layer architecture breakdown
 - Min zoom calculation formulas
 - BOUNDS vs WINDOW mode comparison
@@ -23,21 +27,27 @@ This documentation suite provides comprehensive coverage of Android's map constr
 - Implementation recommendations
 
 ### [Code Patterns](android-constraint-code-patterns.md)
+
 **Implementation guide** - Working code examples.
+
 - 7 complete code patterns
 - Actual implementations with line numbers
 - Testing approaches
 - Edge case handling
 
 ### [Quick Reference](android-patterns-quick-reference.md)
+
 **Developer cheat sheet** - One-page reference.
+
 - Decision trees
 - Formula summaries
 - 5 critical implementation rules
 - Common pitfalls
 
 ### [Source File Reference](android-source-file-reference.md)
+
 **Navigation aid** - File locations and class hierarchy.
+
 - Absolute file paths
 - Line number references
 - Class relationships

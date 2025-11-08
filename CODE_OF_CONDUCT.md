@@ -17,23 +17,23 @@ diverse, inclusive, and healthy community.
 Examples of behavior that contributes to a positive environment for our
 community include:
 
-* Demonstrating empathy and kindness toward other people
-* Being respectful of differing opinions, viewpoints, and experiences
-* Giving and gracefully accepting constructive feedback
-* Accepting responsibility and apologizing to those affected by our mistakes,
+- Demonstrating empathy and kindness toward other people
+- Being respectful of differing opinions, viewpoints, and experiences
+- Giving and gracefully accepting constructive feedback
+- Accepting responsibility and apologizing to those affected by our mistakes,
   and learning from the experience
-* Focusing on what is best not just for us as individuals, but for the overall
+- Focusing on what is best not just for us as individuals, but for the overall
   community
 
 Examples of unacceptable behavior include:
 
-* The use of sexualized language or imagery, and sexual attention or advances of
+- The use of sexualized language or imagery, and sexual attention or advances of
   any kind
-* Trolling, insulting or derogatory comments, and personal or political attacks
-* Public or private harassment
-* Publishing others' private information, such as a physical or email address,
+- Trolling, insulting or derogatory comments, and personal or political attacks
+- Public or private harassment
+- Publishing others' private information, such as a physical or email address,
   without their explicit permission
-* Other conduct which could reasonably be considered inappropriate in a
+- Other conduct which could reasonably be considered inappropriate in a
   professional setting
 
 ## Enforcement Responsibilities
@@ -119,46 +119,46 @@ community.
 
 WorldWideWaves is a technical project focused on creating synchronized human wave events. When collaborating:
 
-* **Be constructive**: Code reviews should focus on code quality, not personal criticism
-* **Be patient**: Contributors have varying levels of experience with Kotlin Multiplatform
-* **Be clear**: Communication should be direct but respectful
-* **Be thorough**: Security and accessibility are not negotiable - expect rigorous review
+- **Be constructive**: Code reviews should focus on code quality, not personal criticism
+- **Be patient**: Contributors have varying levels of experience with Kotlin Multiplatform
+- **Be clear**: Communication should be direct but respectful
+- **Be thorough**: Security and accessibility are not negotiable - expect rigorous review
 
 ### Accessibility Commitment
 
 This project is committed to WCAG 2.1 Level AA accessibility compliance. All contributors must:
 
-* Ensure UI components meet accessibility standards
-* Test with screen readers (TalkBack/VoiceOver)
-* Maintain proper touch target sizes and color contrast
-* Accept that accessibility requirements are mandatory, not optional
+- Ensure UI components meet accessibility standards
+- Test with screen readers (TalkBack/VoiceOver)
+- Maintain proper touch target sizes and color contrast
+- Accept that accessibility requirements are mandatory, not optional
 
 ### Cross-Platform Development
 
 As a Kotlin Multiplatform project supporting both Android and iOS:
 
-* Respect platform-specific constraints and best practices
-* Test changes on both platforms when possible
-* Document platform differences clearly
-* Collaborate constructively on cross-platform challenges
+- Respect platform-specific constraints and best practices
+- Test changes on both platforms when possible
+- Document platform differences clearly
+- Collaborate constructively on cross-platform challenges
 
 ### Testing Standards
 
 All contributions must maintain our testing standards:
 
-* 100% pass rate on existing test suite (902+ tests)
-* New functionality requires corresponding tests
-* Tests validate business logic, not implementation details
-* Never disable tests to make them pass
+- 100% pass rate on existing test suite (902+ tests)
+- New functionality requires corresponding tests
+- Tests validate business logic, not implementation details
+- Never disable tests to make them pass
 
 ## Diversity and Inclusion
 
 WorldWideWaves aims to create synchronized human waves that transcend physical and cultural boundaries. Our community should reflect this vision:
 
-* We welcome contributors from all backgrounds and experience levels
-* We value diverse perspectives on design, architecture, and user experience
-* We recognize that accessibility benefits everyone, not just users with disabilities
-* We celebrate the global nature of our project and community
+- We welcome contributors from all backgrounds and experience levels
+- We value diverse perspectives on design, architecture, and user experience
+- We recognize that accessibility benefits everyone, not just users with disabilities
+- We celebrate the global nature of our project and community
 
 ## Attribution
 

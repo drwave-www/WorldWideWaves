@@ -6,10 +6,12 @@
 > **Major iOS implementation occurred October 20-24, 2025** (3 weeks after this document).
 >
 > **For current state, see**:
+>
 > - [iOS/Android Map Parity Gap Analysis](../ios/ios-android-map-parity-gap-analysis.md) - Updated October 23, 2025
 > - [iOS Gesture Fixes](../archive/ios-gesture-fixes-2025-10-23/) - Complete implementation details
 >
 > **What changed since October 1**:
+>
 > - iOS maps fully implemented (was "mostly stubs" on Oct 1)
 > - MapLibre iOS 6.8.0 integration complete (95% feature parity)
 > - Major iOS gesture fixes (camera validation, bounds enforcement)
@@ -27,6 +29,7 @@
 WorldWideWaves implements a well-structured map architecture leveraging Kotlin Multiplatform to maximize code sharing between Android and iOS while respecting platform-specific requirements. The architecture achieves approximately **37-44% code sharing** with clean separation of concerns.
 
 **Key Strengths:**
+
 - Excellent business logic sharing (AbstractEventMap, MapBoundsEnforcer)
 - Clean interface boundaries (MapLibreAdapter, LocationProvider, PlatformMapManager)
 - Proper expect/actual pattern usage
@@ -34,6 +37,7 @@ WorldWideWaves implements a well-structured map architecture leveraging Kotlin M
 - **iOS maps fully functional** (as of October 24, 2025)
 
 **Historical Note - iOS Implementation**:
+
 - **October 1, 2025**: iOS maps were incomplete stub implementations
 - **October 20-24, 2025**: Complete iOS implementation in 4-day sprint
 - **Current state**: iOS has 95% feature parity with Android (78/97 points match)
@@ -45,11 +49,13 @@ WorldWideWaves implements a well-structured map architecture leveraging Kotlin M
 ### 1.1 Core Interfaces & Abstractions
 
 #### MapLibreAdapter<T> Interface
+
 **Location:** `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapLibreAdapter.kt`
 
 **Purpose:** Platform-agnostic interface for MapLibre SDK operations
 
 **Key Methods:**
+
 ```kotlin
 interface MapLibreAdapter<T> {
     // Map lifecycle
@@ -80,11 +86,13 @@ interface MapLibreAdapter<T> {
 ---
 
 #### AbstractEventMap<T>
+
 **Location:** `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/AbstractEventMap.kt`
 
 **Purpose:** Shared business logic for event maps across platforms
 
 **Responsibilities:**
+
 1. **Camera Management** (435 lines, ~60% of class)
    - Initial positioning (WINDOW/BOUNDS/DEFAULT_CENTER)
    - Animation orchestration with constraint suppression
@@ -103,6 +111,7 @@ interface MapLibreAdapter<T> {
    - Suppression during animations
 
 **Shared Logic Examples:**
+
 ```kotlin
 suspend fun moveToWindowBounds(onComplete: () -> Unit = {}) {
     constraintManager = MapConstraintManager(event.area.bbox(), mapLibreAdapter) { suppressCorrections }
@@ -132,6 +141,7 @@ private fun handlePositionUpdate(scope: CoroutineScope, position: Position?) {
 ```
 
 **Abstract Properties:**
+
 ```kotlin
 abstract val mapLibreAdapter: MapLibreAdapter<T>
 abstract val locationProvider: WWWLocationProvider?
@@ -144,6 +154,7 @@ abstract fun updateWavePolygons(wavePolygons: List<Polygon>, clearPolygons: Bool
 ---
 
 #### WWWLocationProvider Interface
+
 **Location:** `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/WWWLocationProvider.kt`
 
 **Purpose:** Platform-agnostic GPS location interface
@@ -157,12 +168,14 @@ interface WWWLocationProvider {
 ```
 
 **Implementation Notes:**
+
 - Android: `AndroidWWWLocationProvider` uses `FusedLocationProviderClient`
 - iOS: `IOSWWWLocationProvider` uses `CLLocationManager` via Kotlin/Native interop
 
 ---
 
 #### PlatformMapManager Interface
+
 **Location:** `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapStateManager.kt`
 
 **Purpose:** Platform-agnostic map download/availability interface
@@ -183,6 +196,7 @@ interface PlatformMapManager {
 ```
 
 **Implementations:**
+
 - Android: Uses Google Play Feature Delivery (dynamic modules)
 - iOS: `IOSPlatformMapManager` uses On-Demand Resources (ODR)
 
@@ -191,11 +205,13 @@ interface PlatformMapManager {
 ### 1.2 Shared Business Logic Components
 
 #### MapDownloadCoordinator
+
 **Location:** `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapDownloadCoordinator.kt`
 
 **Purpose:** Unified download state management across platforms
 
 **Key Features:**
+
 ```kotlin
 class MapDownloadCoordinator(private val platformMapManager: PlatformMapManager) {
     data class DownloadState(
@@ -219,17 +235,20 @@ class MapDownloadCoordinator(private val platformMapManager: PlatformMapManager)
 ---
 
 #### MapConstraintManager
+
 **Location:** `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapConstraintManager.kt`
 
 **Purpose:** Platform-independent map bounds constraint enforcement
 
 **Features:**
+
 - Calculates padded constraint bounds based on visible region
 - Enforces camera stays within event area boundaries
 - Handles suppression during animations
 - Dynamic padding adjustments based on zoom level
 
 **Key Logic:**
+
 ```kotlin
 fun constrainCamera() {
     if (isSuppressed()) return
@@ -247,11 +266,13 @@ fun constrainCamera() {
 ---
 
 #### CityMapRegistry
+
 **Location:** `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/CityMapRegistry.kt`
 
 **Purpose:** Registry for 40+ city maps with lazy loading
 
 **Features:**
+
 - Thread-safe map loading with Mutex
 - Memory footprint tracking
 - Cache management
@@ -262,6 +283,7 @@ fun constrainCamera() {
 ---
 
 #### MapStateManager
+
 **Location:** `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapStateManager.kt`
 
 **Purpose:** High-level map state coordination (older implementation)
@@ -273,6 +295,7 @@ fun constrainCamera() {
 ### 1.3 Expect/Actual Declarations
 
 #### createNativeMapViewController()
+
 **Location:** `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapViewFactory.kt`
 
 ```kotlin
@@ -283,12 +306,14 @@ expect fun createNativeMapViewController(
 ```
 
 **Android Implementation:**
+
 ```kotlin
 actual fun createNativeMapViewController(...): Any =
     throw UnsupportedOperationException("Android uses AndroidEventMap with MapView directly")
 ```
 
 **iOS Implementation:**
+
 ```kotlin
 actual fun createNativeMapViewController(event: IWWWEvent, styleURL: String): Any {
     val provider = KoinPlatform.getKoin().getOrNull<NativeMapViewProvider>()
@@ -308,9 +333,11 @@ actual fun createNativeMapViewController(event: IWWWEvent, styleURL: String): An
 #### Location: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/composeApp/src/androidMain/`
 
 #### AndroidEventMap
+
 **Location:** `kotlin/com/worldwidewaves/compose/map/AndroidEventMap.kt` (983 lines)
 
 **Responsibilities:**
+
 1. **MapLibre Android SDK Integration**
    - MapView lifecycle management
    - Style resolution with retry logic
@@ -328,6 +355,7 @@ actual fun createNativeMapViewController(event: IWWWEvent, styleURL: String): An
    - Permission-aware enable/disable
 
 **Key Architecture:**
+
 ```kotlin
 class AndroidEventMap(
     event: IWWWEvent,
@@ -339,6 +367,7 @@ class AndroidEventMap(
 ```
 
 **Platform-Specific Code:**
+
 - Play Store dynamic feature integration (80 lines)
 - Android permissions (50 lines)
 - MapView lifecycle observers (30 lines)
@@ -349,9 +378,11 @@ class AndroidEventMap(
 ---
 
 #### AndroidMapLibreAdapter
+
 **Location:** `kotlin/com/worldwidewaves/map/AndroidMapLibreAdapter.kt` (446 lines)
 
 **Responsibilities:**
+
 1. **MapLibreMap Wrapper**
    - Direct Android MapLibre SDK calls
    - Camera operations
@@ -367,6 +398,7 @@ class AndroidEventMap(
    - Zoom level monitoring
 
 **Key Implementation:**
+
 ```kotlin
 override fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean) {
     map.getStyle { style ->
@@ -399,9 +431,11 @@ override fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean) {
 ---
 
 #### AndroidMapViewModel
+
 **Location:** `kotlin/com/worldwidewaves/viewmodels/AndroidMapViewModel.kt`
 
 **Responsibilities:**
+
 1. **Play Core Integration**
    - SplitInstallManager operations
    - Session state monitoring
@@ -421,9 +455,11 @@ override fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean) {
 #### Location: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/`
 
 #### IOSEventMap
+
 **Location:** `kotlin/com/worldwidewaves/shared/map/IOSEventMap.kt` (490 lines)
 
 **Responsibilities:**
+
 1. **Native UIViewController Integration**
    - UIKitViewController via Compose interop
    - NativeMapViewProvider via Koin DI
@@ -440,6 +476,7 @@ override fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean) {
    - Error handling UI
 
 **Key Architecture:**
+
 ```kotlin
 class IOSEventMap(
     event: IWWWEvent,
@@ -480,11 +517,13 @@ class IOSEventMap(
 ---
 
 #### IOSMapLibreAdapter
+
 **Location:** `kotlin/com/worldwidewaves/shared/map/IOSMapLibreAdapter.kt` (235 lines)
 
 **Status:** ⚠️ **MOSTLY STUBS** - Incomplete implementation
 
 **Current State:**
+
 ```kotlin
 override fun animateCamera(position: Position, zoom: Double?, callback: MapCameraCallback?) {
     if (wrapper != null) {
@@ -505,6 +544,7 @@ override fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean) {
 ```
 
 **Missing Functionality:**
+
 - Camera operations (animate, move)
 - Polygon rendering
 - Click listeners
@@ -518,9 +558,11 @@ override fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean) {
 ---
 
 #### IOSWWWLocationProvider
+
 **Location:** `kotlin/com/worldwidewaves/shared/map/IOSWWWLocationProvider.kt` (267 lines)
 
 **Responsibilities:**
+
 1. **Core Location Integration**
    - CLLocationManager setup
    - Permission handling
@@ -532,6 +574,7 @@ override fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean) {
    - Accuracy filtering
 
 **Key Implementation:**
+
 ```kotlin
 @OptIn(ExperimentalForeignApi::class)
 class IOSWWWLocationProvider : WWWLocationProvider {
@@ -560,9 +603,11 @@ class IOSWWWLocationProvider : WWWLocationProvider {
 ---
 
 #### IOSPlatformMapManager
+
 **Location:** `kotlin/com/worldwidewaves/shared/map/IOSPlatformMapManager.kt` (232 lines)
 
 **Responsibilities:**
+
 1. **On-Demand Resources (ODR)**
    - NSBundleResourceRequest management
    - Progress simulation (0-90% during download)
@@ -574,6 +619,7 @@ class IOSWWWLocationProvider : WWWLocationProvider {
    - MapDownloadGate coordination
 
 **Key Logic:**
+
 ```kotlin
 override fun isMapAvailable(mapId: String): Boolean {
     // Check cache first
@@ -611,11 +657,13 @@ override suspend fun downloadMap(...) {
 ---
 
 #### MapWrapperRegistry
+
 **Location:** `kotlin/com/worldwidewaves/shared/map/MapWrapperRegistry.kt` (122 lines)
 
 **Purpose:** Bridge between Kotlin and Swift for map coordination
 
 **Architecture:**
+
 ```kotlin
 object MapWrapperRegistry {
     private val wrappers = mutableMapOf<String, Any>() // Swift MapLibreViewWrapper instances
@@ -676,11 +724,13 @@ object MapWrapperRegistry {
 **Recommendation:** Migrate Android to use shared `MapDownloadCoordinator`
 
 **Benefits:**
+
 - Eliminate 150+ lines of duplicated logic
 - Consistent behavior across platforms
 - Single source of truth for download state
 
 **Implementation Plan:**
+
 ```kotlin
 // Android should use MapDownloadCoordinator like iOS:
 class AndroidMapViewModel(application: Application) : AndroidViewModel(application) {
@@ -706,6 +756,7 @@ class AndroidMapViewModel(application: Application) : AndroidViewModel(applicati
 **Recommendation:** Either fully adopt MapStateManager or remove in favor of MapDownloadCoordinator
 
 **Analysis:**
+
 - MapDownloadCoordinator is more focused and better designed
 - MapStateManager has broader scope but overlaps functionality
 - Decision: Deprecate MapStateManager, standardize on MapDownloadCoordinator
@@ -715,12 +766,14 @@ class AndroidMapViewModel(application: Application) : AndroidViewModel(applicati
 ### 4.3 Map Availability Checking
 
 **Current State:**
+
 - Android: `AndroidMapAvailabilityChecker` (custom implementation)
 - iOS: Built into `IOSPlatformMapManager`
 
 **Recommendation:** Extract common availability checking to shared domain layer
 
 **Example:**
+
 ```kotlin
 // shared/src/commonMain
 interface MapAvailabilityChecker {
@@ -862,11 +915,13 @@ private fun handlePositionUpdate(scope: CoroutineScope, position: Position?) {
 ### 7.1 IOSMapLibreAdapter Incompleteness
 
 **Current State:**
+
 - 15+ methods are stubs with "NOTE: Will be implemented via cinterop" comments
 - Uses MapWrapperRegistry as workaround for polygon rendering
 - Camera operations don't actually work
 
 **Impact:**
+
 - iOS maps cannot render wave polygons correctly
 - Camera targeting doesn't function
 - Position indicators may not display
@@ -874,6 +929,7 @@ private fun handlePositionUpdate(scope: CoroutineScope, position: Position?) {
 **Root Cause:** Swift MapLibre SDK requires Objective-C interop bindings
 
 **Solution Path:**
+
 1. Complete Kotlin/Native cinterop definitions for MapLibre iOS SDK
 2. Implement Swift wrapper with @objc methods callable from Kotlin
 3. Wire up IOSMapLibreAdapter to call Swift wrapper
@@ -888,6 +944,7 @@ private fun handlePositionUpdate(scope: CoroutineScope, position: Position?) {
 **Problem:** AndroidMapViewModel reimplements logic that exists in MapDownloadCoordinator
 
 **Evidence:**
+
 ```kotlin
 // AndroidMapViewModel.kt (Android-specific):
 private fun handleRetryWithExponentialBackoff(mapId: String, onMapDownloaded: (() -> Unit)?) {
@@ -910,6 +967,7 @@ suspend fun downloadMap(mapId: String) {
 ```
 
 **Impact:**
+
 - ~150 lines of duplicated logic
 - Risk of behavior divergence between platforms
 - More test surface area
@@ -926,6 +984,7 @@ suspend fun downloadMap(mapId: String) {
 **Problem:** Different architectures for the same functionality
 
 **Impact:**
+
 - Higher maintenance burden
 - Harder to reason about cross-platform behavior
 - Different bugs on different platforms
@@ -939,12 +998,14 @@ suspend fun downloadMap(mapId: String) {
 **Purpose:** Bridge Kotlin → Swift for polygon rendering
 
 **Why It's Problematic:**
+
 1. **Polling-Based:** Swift must poll for pending polygons
 2. **Global Mutable State:** Thread safety concerns
 3. **Tight Coupling:** IOSEventMap and Swift code must stay synchronized
 4. **Temporary Workaround:** Should be eliminated when IOSMapLibreAdapter is complete
 
 **Better Architecture:**
+
 ```kotlin
 // IOSMapLibreAdapter should directly call Swift wrapper:
 override fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean) {
@@ -963,11 +1024,13 @@ override fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean) {
 ### 8.1 Short-Term (1-2 Sprints)
 
 #### 1. Complete IOSMapLibreAdapter
+
 **Priority:** HIGH
 **Effort:** 3 weeks
 **Impact:** Enable full map functionality on iOS
 
 **Tasks:**
+
 - [ ] Define Kotlin/Native cinterop for MapLibre iOS
 - [ ] Create Swift MapLibreWrapper with @objc methods
 - [ ] Implement camera operations (animate, move, bounds)
@@ -978,11 +1041,13 @@ override fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean) {
 ---
 
 #### 2. Migrate Android to MapDownloadCoordinator
+
 **Priority:** MEDIUM
 **Effort:** 1 week
 **Impact:** Eliminate 150 lines of duplicated logic
 
 **Tasks:**
+
 - [ ] Create AndroidPlatformMapManager implementing PlatformMapManager
 - [ ] Wrap SplitInstallManager operations
 - [ ] Update AndroidEventMap to use MapDownloadCoordinator
@@ -990,6 +1055,7 @@ override fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean) {
 - [ ] Update tests
 
 **Example Implementation:**
+
 ```kotlin
 class AndroidPlatformMapManager(
     private val splitInstallManager: SplitInstallManager
@@ -1031,11 +1097,13 @@ class AndroidPlatformMapManager(
 ---
 
 #### 3. Deprecate MapStateManager
+
 **Priority:** LOW
 **Effort:** 2 days
 **Impact:** Reduce confusion, simplify codebase
 
 **Tasks:**
+
 - [ ] Add @Deprecated annotation
 - [ ] Update documentation to reference MapDownloadCoordinator
 - [ ] Create migration guide
@@ -1046,11 +1114,13 @@ class AndroidPlatformMapManager(
 ### 8.2 Medium-Term (2-4 Sprints)
 
 #### 4. Extract Shared MapAvailabilityChecker
+
 **Priority:** MEDIUM
 **Effort:** 1 week
 **Impact:** Eliminate Android-specific domain logic
 
 **Tasks:**
+
 - [ ] Define shared interface in common code
 - [ ] Move business logic from AndroidMapAvailabilityChecker to shared
 - [ ] Create platform-specific implementations
@@ -1059,11 +1129,13 @@ class AndroidPlatformMapManager(
 ---
 
 #### 5. Improve Error Handling Consistency
+
 **Priority:** MEDIUM
 **Effort:** 3 days
 **Impact:** Better user experience, easier debugging
 
 **Tasks:**
+
 - [ ] Define shared error types
 - [ ] Standardize error reporting in PlatformMapManager
 - [ ] Create error recovery strategies in MapDownloadCoordinator
@@ -1074,14 +1146,18 @@ class AndroidPlatformMapManager(
 ### 8.3 Long-Term (4+ Sprints)
 
 #### 6. Performance Optimization
+
 **Areas:**
+
 - Map tile caching strategies
 - Memory management for large GeoJSON files
 - Lazy loading for city map registry
 - Polygon simplification for performance
 
 #### 7. Testing Infrastructure
+
 **Needs:**
+
 - Platform-agnostic map interaction tests
 - Mock implementations of PlatformMapManager
 - UI screenshot tests for both platforms
@@ -1094,18 +1170,21 @@ class AndroidPlatformMapManager(
 ### Overall Architecture Grade: B+ (85%)
 
 **Strengths:**
+
 - ✅ Excellent abstraction boundaries (MapLibreAdapter, PlatformMapManager)
 - ✅ High-quality shared business logic (AbstractEventMap, MapConstraintManager)
 - ✅ Proper expect/actual usage
 - ✅ Clean position system integration
 
 **Weaknesses:**
+
 - ⚠️ iOS map rendering incomplete (IOSMapLibreAdapter stubs)
 - ⚠️ Duplicated download logic (Android vs iOS)
 - ⚠️ Inconsistent state management patterns
 - ⚠️ Temporary workarounds (MapWrapperRegistry)
 
 **Path Forward:**
+
 1. Complete iOS implementation (IOSMapLibreAdapter) - HIGHEST PRIORITY
 2. Standardize on MapDownloadCoordinator across platforms
 3. Extract common availability checking
@@ -1119,6 +1198,7 @@ class AndroidPlatformMapManager(
 ## Appendix A: File Inventory
 
 ### Common Code (shared/src/commonMain)
+
 ```
 kotlin/com/worldwidewaves/shared/map/
 ├── AbstractEventMap.kt (435 lines) ✅ Excellent
@@ -1133,6 +1213,7 @@ kotlin/com/worldwidewaves/shared/map/
 ```
 
 ### Android Implementation
+
 ```
 composeApp/src/androidMain/kotlin/
 ├── com/worldwidewaves/compose/map/
@@ -1146,6 +1227,7 @@ composeApp/src/androidMain/kotlin/
 ```
 
 ### iOS Implementation
+
 ```
 shared/src/iosMain/kotlin/com/worldwidewaves/shared/map/
 ├── IOSEventMap.kt (490 lines) ✅ Good shared logic usage

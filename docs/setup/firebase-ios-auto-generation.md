@@ -5,10 +5,12 @@ This guide shows how to configure Xcode to automatically generate `GoogleService
 ## Why Auto-Generation?
 
 **Current Behavior**:
+
 - **Android**: ✅ Automatic - `google-services.json` generated during every build
 - **iOS**: ❌ Manual - Requires running `./scripts/generate_firebase_config.sh ios`
 
 **After Setup**:
+
 - **iOS**: ✅ Automatic - `GoogleService-Info.plist` generated during every build
 
 ## Setup Instructions
@@ -75,6 +77,7 @@ fi
 ### 3. Verify Setup
 
 Build the project:
+
 ```bash
 # From command line
 cd iosApp
@@ -87,6 +90,7 @@ xcodebuild -project worldwidewaves.xcodeproj \
 ```
 
 Check the build log for:
+
 ```
 🔥 Auto-generating Firebase configuration...
 ✅ Firebase configuration generated successfully
@@ -114,6 +118,7 @@ Build Complete
 ### Cache Optimization
 
 With Input/Output files configured, Xcode will:
+
 - ✅ **Skip generation** if `local.properties` hasn't changed
 - ✅ **Re-run automatically** if `local.properties` is modified
 - ✅ **Faster incremental builds**
@@ -136,6 +141,7 @@ error: Firebase config generation script not found
 ```
 
 **Solution**: Ensure the path is correct relative to Xcode project:
+
 - Xcode project: `iosApp/worldwidewaves.xcodeproj`
 - Script location: `scripts/generate_ios_firebase_config.sh`
 - Relative path: `../scripts/generate_ios_firebase_config.sh`
@@ -147,12 +153,14 @@ error: Firebase configuration generation failed
 ```
 
 **Solution**: Check that `local.properties` has required fields:
+
 ```bash
 # Verify configuration
 cat local.properties | grep FIREBASE
 ```
 
 Required fields:
+
 - `FIREBASE_PROJECT_ID`
 - `FIREBASE_PROJECT_NUMBER`
 - `FIREBASE_IOS_APP_ID` (or `FIREBASE_MOBILE_SDK_APP_ID`)
@@ -163,6 +171,7 @@ Required fields:
 **Symptom**: Build fails with "GoogleService-Info.plist not found"
 
 **Solution**:
+
 1. Verify Run Script Phase is **before** "Compile Sources"
 2. Run once manually to bootstrap: `./scripts/generate_ios_firebase_config.sh`
 3. Clean build folder: Product → Clean Build Folder (Cmd+Shift+K)
@@ -173,6 +182,7 @@ Required fields:
 The Run Script Phase works automatically in CI/CD as long as:
 
 1. **Environment variables are set** (recommended for CI):
+
    ```yaml
    - name: Build iOS
      env:
@@ -188,6 +198,7 @@ The Run Script Phase works automatically in CI/CD as long as:
    ```
 
 2. **OR local.properties is generated first**:
+
    ```yaml
    - name: Generate local.properties
      run: |
@@ -215,6 +226,7 @@ You can still generate manually if needed:
 ```
 
 Manual generation is useful for:
+
 - Validating configuration before building
 - Generating configs without building
 - Debugging configuration issues

@@ -11,9 +11,11 @@ This documentation provides a comprehensive analysis of the Android map constrai
 ## Documentation Files (4 Documents, 1,594 lines)
 
 ### 1. android-map-constraint-analysis.md (452 lines)
+
 **Purpose**: Executive overview and architectural deep-dive
 
 **Contents**:
+
 - Architecture overview (3 layers: Enforcer, Adapter, Native)
 - Mode-specific constraint logic (BOUNDS vs WINDOW)
 - Min zoom calculation theory and implementation
@@ -24,6 +26,7 @@ This documentation provides a comprehensive analysis of the Android map constrai
 - iOS implementation takeaways
 
 **Start here if you want to understand**:
+
 - How the system works end-to-end
 - Why certain design choices were made
 - What differs between BOUNDS and WINDOW modes
@@ -31,9 +34,11 @@ This documentation provides a comprehensive analysis of the Android map constrai
 ---
 
 ### 2. android-constraint-code-patterns.md (611 lines)
+
 **Purpose**: Working code snippets showing exact implementation
 
 **Contains**:
+
 1. Min Zoom Calculation Pattern (WINDOW Mode) - 64 lines
 2. Preventive Gesture Clamping Pattern - 75 lines
 3. Viewport Padding Calculation Pattern - 100 lines
@@ -43,11 +48,13 @@ This documentation provides a comprehensive analysis of the Android map constrai
 7. Animation Suppression Pattern - 35 lines
 
 **Start here if you want to**:
+
 - Copy working code patterns
 - See exact implementation details
 - Understand specific algorithms
 
 **Key Methods Shown**:
+
 - `AndroidMapLibreAdapter.setBoundsForCameraTarget()` lines 400-464
 - `AndroidMapLibreAdapter.setupPreventiveGestureConstraints()` lines 516-591
 - `MapBoundsEnforcer.calculateVisibleRegionPadding()` lines 383-435
@@ -56,9 +63,11 @@ This documentation provides a comprehensive analysis of the Android map constrai
 ---
 
 ### 3. android-patterns-quick-reference.md (290 lines)
+
 **Purpose**: One-page reference for developers
 
 **Contains**:
+
 - Architecture at a glance (visual diagram)
 - Min zoom calculation decision tree (flowchart)
 - Padding calculation formulas (BOUNDS vs WINDOW)
@@ -70,6 +79,7 @@ This documentation provides a comprehensive analysis of the Android map constrai
 - One-page summary
 
 **Start here if you want to**:
+
 - Quickly understand a specific concept
 - Debug issues using the checklist
 - Find relevant files by feature
@@ -78,9 +88,11 @@ This documentation provides a comprehensive analysis of the Android map constrai
 ---
 
 ### 4. android-source-file-reference.md (241 lines)
+
 **Purpose**: Detailed file paths and code locations
 
 **Contains**:
+
 - Complete absolute file paths for all source files
 - Shared layer files with line ranges
 - Android-specific implementation files with line ranges
@@ -93,6 +105,7 @@ This documentation provides a comprehensive analysis of the Android map constrai
 - Configuration constants
 
 **Start here if you want to**:
+
 - Find exact file locations
 - Navigate between files
 - Understand class relationships
@@ -103,6 +116,7 @@ This documentation provides a comprehensive analysis of the Android map constrai
 ## How to Use This Documentation
 
 ### For Understanding the Overall Design
+
 1. Read **android-map-constraint-analysis.md** sections:
    - Architecture Overview
    - Mode-Specific Constraint Logic
@@ -113,6 +127,7 @@ This documentation provides a comprehensive analysis of the Android map constrai
    - One-page summary
 
 ### For Implementation
+
 1. Start with **android-patterns-quick-reference.md**:
    - Min Zoom Calculation Decision Tree
    - Critical Implementation Rules
@@ -128,6 +143,7 @@ This documentation provides a comprehensive analysis of the Android map constrai
    - Understand integrations
 
 ### For Debugging
+
 1. Use **android-patterns-quick-reference.md**:
    - Debugging Checklist
    - Look for specific log messages
@@ -137,6 +153,7 @@ This documentation provides a comprehensive analysis of the Android map constrai
    - Review test patterns
 
 ### For iOS Implementation
+
 1. Read **android-map-constraint-analysis.md** section:
    - Key Takeaways for iOS Implementation
 
@@ -152,6 +169,7 @@ This documentation provides a comprehensive analysis of the Android map constrai
 ## Key Concepts Summary
 
 ### 1. Min Zoom Calculation
+
 - **WINDOW Mode**: Aspect ratio fitting - fit by constraining dimension
   - Event wider than screen: fit by HEIGHT
   - Event taller than screen: fit by WIDTH
@@ -160,24 +178,28 @@ This documentation provides a comprehensive analysis of the Android map constrai
 - **Test**: `AspectRatioFittingTest.kt` validates all combinations
 
 ### 2. Viewport Padding
+
 - **BOUNDS Mode**: Zero padding (0, 0) - show entire event
 - **WINDOW Mode**: Viewport half-size - prevent edge overflow
 - **Limit**: Use 49% max to prevent bounds inversion
 - **Recalculation**: Only if > 10% change, check similarity
 
 ### 3. Gesture Clamping (WINDOW Mode Only)
+
 - **Preventive**: Intercept gestures before invalid state occurs
 - **Validation**: Check viewport inside bounds in real-time
 - **Clamping**: Calculate valid camera center range and clamp
 - **Distinction**: Only apply to user gestures, not programmatic
 
 ### 4. State Management
+
 - **Locking**: Min zoom locked after first calculation
 - **Suppression**: Disable constraint updates during animations
 - **Tolerance**: 0.1% for bounds similarity check
 - **Skip Logic**: Remember to skip after suppression
 
 ### 5. Animation Coordination
+
 - **Suppression Flag**: `suppressCorrections` in AbstractEventMap
 - **Callback Pattern**: Disable before, enable after
 - **Listener Skip**: Set `skipNextRecalculation` flag
@@ -293,6 +315,7 @@ map.addOnCameraMoveStartedListener { reason ->
 | `MapBoundsEnforcerTest.kt` | Enforcer logic | Padding, similarity checks |
 
 ### Key Test Insights
+
 - Wide event (Paris 2.84:1) on tall screen → fits by HEIGHT
 - Tall event (0.25:1) on wide screen → fits by WIDTH
 - Bounds similarity with 0.1% tolerance prevents loops
@@ -414,6 +437,7 @@ INDEX (You are here)
 ## Contact & Support
 
 For questions about implementation:
+
 1. Review the relevant documentation section above
 2. Check code snippets in ANDROID_CONSTRAINT_CODE_PATTERNS.md
 3. Reference test cases in test files

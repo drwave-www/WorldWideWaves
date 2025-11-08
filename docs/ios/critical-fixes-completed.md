@@ -23,11 +23,13 @@ Successfully resolved **8 out of 10 CRITICAL iOS-blocking issues** identified in
 **Status**: ✅ **ALREADY FIXED** (found in previous commit)
 
 **Solution**:
+
 - Changed from `Thread.sleep(RETRY_DELAY_MS)` to `delay(RETRY_DELAY_MS.milliseconds)`
 - Function signature changed to `suspend fun platformTryCopyInitialTagToCache`
 - All callers already in coroutine context
 
 **Tests**: 14/14 passing in MapStoreTest
+
 - Verifies proper delay() usage
 - Confirms virtual time advancement
 - Validates non-blocking behavior
@@ -43,16 +45,19 @@ Successfully resolved **8 out of 10 CRITICAL iOS-blocking issues** identified in
 **Status**: ✅ **FIXED**
 
 **Solution**:
+
 - Implemented LRU cache with MAX_CACHED_WRAPPERS = 3
 - Used `WeakReference<Any>` for GC support
 - Manual LRU eviction using timestamps (NSDate for iOS compatibility)
 - Added `pruneStaleReferences()` method
 
 **Impact**:
+
 - Before: Unlimited accumulation (500MB+ for 10 events)
 - After: Max 3 wrappers (~150MB max), rest GC'd
 
 **Tests**: 10/10 passing in MapWrapperRegistryTest
+
 - LRU eviction verified
 - Access-order behavior confirmed
 - WeakReference GC support validated
@@ -68,16 +73,19 @@ Successfully resolved **8 out of 10 CRITICAL iOS-blocking issues** identified in
 **Status**: ✅ **FIXED**
 
 **Solution**:
+
 - Added `activeScopes` tracking set
 - Implemented `cleanup()` method to cancel all scopes
 - Added `finalize()` hook for GC cleanup
 - `onDispose` callback removes scope from tracking
 
 **Impact**:
+
 - Before: Each view creates leaked scope if dispose() not called
 - After: Automatic cleanup via multiple mechanisms
 
 **Tests**: 17/17 passing in IOSReactiveLifecycleTest
+
 - Subscription lifecycle validated
 - Leak prevention over 100 cycles verified
 - Multiple subscriptions isolated
@@ -93,6 +101,7 @@ Successfully resolved **8 out of 10 CRITICAL iOS-blocking issues** identified in
 **Status**: ✅ **FIXED**
 
 **Solution**:
+
 - Implemented manual LRU with MAX_CACHE_SIZE = 10
 - Used `cacheAccessOrder` list to track access order
 - `evictLRUIfNeeded()` removes least-recently-used entries
@@ -100,10 +109,12 @@ Successfully resolved **8 out of 10 CRITICAL iOS-blocking issues** identified in
 - Metadata cleanup integrated
 
 **Impact**:
+
 - Before: 50 events = 25-250MB unbounded growth
 - After: Max 10 entries (~25MB max)
 
 **Tests**: 6/6 passing in GeoJsonDataProviderLRUTest
+
 - Cache limit enforced
 - LRU eviction order validated
 - Metadata cleanup verified
@@ -121,6 +132,7 @@ Successfully resolved **8 out of 10 CRITICAL iOS-blocking issues** identified in
 **Status**: ✅ **FIXED**
 
 **Solution**:
+
 ```kotlin
 if (BuildKonfig.DEBUG) {
     t.printStackTrace()
@@ -128,6 +140,7 @@ if (BuildKonfig.DEBUG) {
 ```
 
 **Impact**:
+
 - Before: Stack traces visible to all users (security risk)
 - After: Only in DEBUG builds
 
@@ -144,12 +157,14 @@ if (BuildKonfig.DEBUG) {
 **Status**: ✅ **VERIFIED COMPLETE**
 
 **Current State**:
+
 - 24 @Throws annotations across 8 files
 - All UIViewController factories annotated
 - Platform.doInitPlatform() annotated
 - All Log methods annotated (13 methods)
 
 **Key Functions Covered**:
+
 - `makeMainViewController()`
 - `makeEventViewController()`
 - `makeWaveViewController()`
@@ -168,6 +183,7 @@ if (BuildKonfig.DEBUG) {
 **Status**: ✅ **ALREADY FIXED**
 
 **Current Code**:
+
 ```swift
 do {
     try Platform_iosKt.doInitPlatform()
@@ -180,6 +196,7 @@ do {
 ```
 
 **Impact**:
+
 - Before: Silent failure with try?
 - After: Proper error logging and fatal error
 
@@ -192,6 +209,7 @@ do {
 **Status**: ✅ **ADDRESSED** (debug-only feature, acceptable risk)
 
 **Assessment**:
+
 - Used for performance monitoring in debug builds
 - Not a production concern
 - Can be addressed if needed, but not blocking
@@ -203,6 +221,7 @@ do {
 ### 9. Missing @Throws Annotations
 
 **Status**: ✅ **ALREADY COMPLETE**
+
 - 24 annotations across critical functions
 - All Swift-callable functions properly annotated
 - SceneDelegate uses proper do-catch everywhere
@@ -210,6 +229,7 @@ do {
 ### 10. try? Silent Failure
 
 **Status**: ✅ **ALREADY COMPLETE**
+
 - SceneDelegate.swift uses proper do-catch with fatalError
 - No silent try? suppression found
 
@@ -217,13 +237,15 @@ do {
 
 ## Test Results Summary
 
-### Tests Passing (Our Fixes):
+### Tests Passing (Our Fixes)
+
 - ✅ **MapStoreTest**: 14/14 tests passing (Thread.sleep fix)
 - ✅ **GeoJsonDataProviderLRUTest**: 6/6 tests passing (Cache LRU fix)
 - ✅ **MapWrapperRegistryTest**: 10/10 tests passing (iOS wrapper LRU)
 - ✅ **IOSReactiveLifecycleTest**: 17/17 tests passing (Subscription leak fix)
 
-### Total Test Results:
+### Total Test Results
+
 - **Total**: 425 tests
 - **Passing**: 410 tests (96.5%)
 - **Failing**: 15 tests (all in WaveProgressionObserverTest - pre-existing)
@@ -234,13 +256,15 @@ do {
 
 ## Memory Impact Analysis
 
-### Before Fixes:
+### Before Fixes
+
 - MapWrapperRegistry: Unlimited (~500MB for 10 events)
 - IOSReactivePattern: Leaked scopes (varies)
 - GeoJSON cache: Unlimited (25-250MB for 50 events)
 - **Total estimated leak**: 200-500MB over 30-minute session
 
-### After Fixes:
+### After Fixes
+
 - MapWrapperRegistry: Max 3 wrappers (~150MB max)
 - IOSReactivePattern: Auto-cleanup (minimal)
 - GeoJSON cache: Max 10 entries (~25MB max)
@@ -255,6 +279,7 @@ do {
 ### iOS Status: ✅ BETA READY
 
 **Blocking Issues Resolved**:
+
 1. ✅ Thread.sleep blocking
 2. ✅ MapWrapperRegistry memory leak
 3. ✅ IOSReactivePattern subscription leak
@@ -264,6 +289,7 @@ do {
 7. ✅ SceneDelegate error handling
 
 **Remaining for iOS Production**:
+
 - Feature parity with Android (map implementation)
 - Memory leak investigation (Xcode Instruments profiling recommended)
 - Accessibility support
@@ -277,7 +303,8 @@ All critical issues resolved, 410/425 tests passing (15 failures are in WaveProg
 
 ## Files Modified
 
-### Implementation Files (6 files):
+### Implementation Files (6 files)
+
 1. `shared/src/androidMain/kotlin/com/worldwidewaves/shared/data/MapStore.android.kt` - Thread.sleep → delay
 2. `shared/src/iosMain/kotlin/com/worldwidewaves/shared/map/MapWrapperRegistry.kt` - LRU cache
 3. `shared/src/iosMain/kotlin/com/worldwidewaves/shared/ui/IOSReactivePattern.ios.kt` - Subscription tracking
@@ -285,13 +312,15 @@ All critical issues resolved, 410/425 tests passing (15 failures are in WaveProg
 5. `shared/src/iosMain/kotlin/com/worldwidewaves/shared/KnHook.kt` - DEBUG check
 6. `shared/src/iosMain/kotlin/com/worldwidewaves/shared/RootController.kt` - @Throws (already had them)
 
-### Test Files (4 new/enhanced):
+### Test Files (4 new/enhanced)
+
 1. `shared/src/androidUnitTest/kotlin/com/worldwidewaves/shared/data/MapStoreTest.kt` - Enhanced (14 tests)
 2. `shared/src/commonTest/kotlin/com/worldwidewaves/shared/events/utils/GeoJsonDataProviderLRUTest.kt` - New (6 tests)
 3. `shared/src/iosTest/kotlin/com/worldwidewaves/shared/map/MapWrapperRegistryTest.kt` - New (10 tests)
 4. `shared/src/iosTest/kotlin/com/worldwidewaves/shared/ui/IOSReactiveLifecycleTest.kt` - New (17 tests)
 
-### Documentation Files (3 files):
+### Documentation Files (3 files)
+
 1. `docs/CLAUDE_EVALUATION.md` - Deep technical analysis added
 2. `IOS_MAP_IMPLEMENTATION_STATUS.md` - Critical threats section added
 3. `./remaining-threats-after-ios-fixes.md` - New analysis document
@@ -310,17 +339,20 @@ All critical issues resolved, 410/425 tests passing (15 failures are in WaveProg
 
 ## Next Steps
 
-### Immediate (Remaining HIGH Priority):
+### Immediate (Remaining HIGH Priority)
+
 1. Fix 15 failing WaveProgressionObserverTest tests (pre-existing issue)
 2. Xcode Instruments profiling for iOS memory leak investigation
 3. Complete iOS map feature parity (AbstractEventMap integration)
 
-### Short-term:
+### Short-term
+
 4. Add comprehensive accessibility support
 5. Implement remaining performance optimizations
 6. Physical iOS device testing
 
-### Medium-term:
+### Medium-term
+
 7. Address remaining MEDIUM/LOW severity issues (45 total)
 8. Performance optimization implementation
 9. Security improvements (Firebase API key, manifest)
