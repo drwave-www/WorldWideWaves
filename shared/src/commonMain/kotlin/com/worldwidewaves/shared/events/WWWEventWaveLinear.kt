@@ -243,6 +243,7 @@ data class WWWEventWaveLinear(
         val averageLatitude: Double,
         val minLatitude: Double,
         val maxLatitude: Double,
+        val leadingEdgeLongitude: Double,
     )
 
     /**
@@ -297,6 +298,7 @@ data class WWWEventWaveLinear(
                 averageLatitude = latitudes.average(),
                 minLatitude = latitudes.minOrNull() ?: return null,
                 maxLatitude = latitudes.maxOrNull() ?: return null,
+                leadingEdgeLongitude = leadingEdgeLongitude,
             )
         } catch (e: Exception) {
             // If any error occurs (e.g., mock not set up in tests), fall back to bbox center
@@ -332,14 +334,14 @@ data class WWWEventWaveLinear(
     }
 
     /**
-     * Gets the latitude bounds (min and max) of the wave front edge.
+     * Gets the latitude bounds (min and max) and longitude of the wave front edge.
      * Useful for creating bounding boxes that include the full vertical extent of the wave front.
      *
-     * @return Pair of (minLatitude, maxLatitude) or null if no wave front edge exists
+     * @return Triple of (minLatitude, maxLatitude, leadingEdgeLongitude) or null if no wave front edge exists
      */
-    suspend fun getWaveFrontEdgeBounds(): Pair<Double, Double>? {
+    suspend fun getWaveFrontEdgeBounds(): Triple<Double, Double, Double>? {
         val waveFrontInfo = getWaveFrontEdgeInfo() ?: return null
-        return Pair(waveFrontInfo.minLatitude, waveFrontInfo.maxLatitude)
+        return Triple(waveFrontInfo.minLatitude, waveFrontInfo.maxLatitude, waveFrontInfo.leadingEdgeLongitude)
     }
 
     @Suppress("ReturnCount") // Early returns for guard clauses improve readability

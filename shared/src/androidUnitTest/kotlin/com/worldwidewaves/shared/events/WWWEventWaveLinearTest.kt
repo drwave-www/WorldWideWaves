@@ -1665,7 +1665,7 @@ class WWWEventWaveLinearTest : KoinTest {
             // WHEN: Get wave front edge bounds
             val result = waveLinear.getWaveFrontEdgeBounds()
 
-            // THEN: Should return min and max latitudes of the wave edge
+            // THEN: Should return min and max latitudes and leading edge longitude of the wave edge
             assertNotNull(result, "Wave front edge bounds should not be null")
             assertTrue(
                 result.first >= 10.0 && result.first <= 30.0,
@@ -1676,6 +1676,10 @@ class WWWEventWaveLinearTest : KoinTest {
                 "Max latitude should be within polygon bounds",
             )
             assertTrue(result.first <= result.second, "Min should be less than or equal to max")
+            assertTrue(
+                result.third >= 20.0 && result.third <= 40.0,
+                "Leading edge longitude should be within polygon bounds",
+            )
         }
 
     @Test
@@ -1735,6 +1739,10 @@ class WWWEventWaveLinearTest : KoinTest {
             // Note: Result depends on whether wave has progressed enough to create traversed polygons
             if (result != null) {
                 assertTrue(result.first <= result.second, "Min should be less than or equal to max")
+                assertTrue(
+                    result.third >= 20.0 && result.third <= 50.0,
+                    "Leading edge longitude should be within polygon bounds",
+                )
             }
         }
 

@@ -295,10 +295,10 @@ abstract class AbstractEventMap<T>(
     // Camera targeting methods - shared logic for all platforms --------------
 
     /**
-     * Moves the camera to show the user with the wave edge visible, maximizing detail.
-     * When user position is available, creates a bounding box that spans from the user to
-     * the wave edge bounds (min/max latitude), ensuring the user is centered with the wave visible.
-     * When user position is unavailable, uses fixed zoom level centered on wave front.
+     * Moves the camera to show the wave front edge, maximizing detail.
+     * Creates a bounding box that spans the full vertical extent of the wave front edge
+     * (min/max latitude) at the actual wave front longitude, focusing the camera on the wave.
+     * When wave edge bounds are unavailable, uses fixed zoom level centered on wave front.
      * Falls back to user latitude + wave longitude if wave front is unavailable.
      */
     @Suppress("ComplexCondition") // Necessary validation: null + NaN checks prevent IllegalArgumentException
@@ -309,27 +309,22 @@ abstract class AbstractEventMap<T>(
         val waveEdgeBounds =
             (event.wave as? WWWEventWaveLinear)?.getWaveFrontEdgeBounds()
 
-        // If user position is available, use dynamic zoom focusing on user with wave visible
-        if (userPosition != null &&
-            !userPosition.latitude.isNaN() &&
-            !userPosition.longitude.isNaN() &&
-            waveEdgeBounds != null
-        ) {
-            // Calculate wave longitude at user's latitude for horizontal positioning
-            val waveLongitude = event.wave.closestWaveLongitude(userPosition.latitude)
+        // If wave edge bounds are available, use dynamic zoom focusing on wave front
+        if (waveEdgeBounds != null) {
+            // Extract wave front coordinates: (minLatitude, maxLatitude, leadingEdgeLongitude)
+            val waveLongitude = waveEdgeBounds.third
 
-            // Create bounds that include user + full wave edge vertical extent
-            // This ensures the user is visible and the wave edge is visible (even if not centered)
+            // Create bounds that include full wave edge vertical extent
+            // This ensures the wave front is visible with proper vertical extent
             val positions =
                 listOf(
-                    userPosition, // User position
                     Position(waveEdgeBounds.first, waveLongitude), // Wave edge min latitude
                     Position(waveEdgeBounds.second, waveLongitude), // Wave edge max latitude
                 )
 
             val bounds = BoundingBox.fromCorners(positions)
             if (bounds == null) {
-                Log.e("AbstractEventMap", "Failed to create bounds from user+wave edge, using fallback")
+                Log.e("AbstractEventMap", "Failed to create bounds from wave edge, using fallback")
                 // Fallback to old behavior
                 targetWaveFallback(userPosition)
                 return
