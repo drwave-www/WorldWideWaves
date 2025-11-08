@@ -55,3 +55,7 @@ iosApp/worldwidewaves/Resources/Maps/
 iosApp/worldwidewaves/Maps/
 
 test_results/
+
+# Map data files (large binary files, not tracked in git)
+maps/*/src/main/assets/*.geojson
+maps/*/src/main/assets/*.mbtiles
