@@ -1,3 +1,22 @@
+/* * Copyright 2025 DrWave
+ *
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. */
+
 const fs = require('fs-extra');
 const path = require('path');
 const { PNG } = require('pngjs');
@@ -84,29 +103,29 @@ async function renderMap(options) {
                 : 10; // sensible default for fallback
             if (DEBUG) console.log(`Debug: Calculated zoom level: ${effectiveZoom}`);
         }
-        
+
         // Read the style file
         if (DEBUG) console.log(`Debug: Reading style from ${stylePath}`);
         const styleData = await fs.readJson(stylePath);
-        
+
         // Make paths in the style absolute
         const styleDir = path.dirname(stylePath);
         if (DEBUG) console.log(`Debug: Style directory is ${styleDir}`);
-        
+
         // Fix sprite paths
         if (styleData.sprite) {
             const originalSprite = styleData.sprite;
             styleData.sprite = `file://${path.resolve(styleDir, 'sprites/osm-liberty')}`;
             if (DEBUG) console.log(`Debug: Changed sprite from ${originalSprite} to ${styleData.sprite}`);
         }
-        
+
         // Fix glyphs paths
         if (styleData.glyphs) {
             const originalGlyphs = styleData.glyphs;
             styleData.glyphs = `file://${path.resolve(styleDir, 'glyphs/{fontstack}/{range}.pbf')}`;
             if (DEBUG) console.log(`Debug: Changed glyphs from ${originalGlyphs} to ${styleData.glyphs}`);
         }
-        
+
         // Fix source paths
         if (styleData.sources) {
             Object.keys(styleData.sources).forEach(sourceId => {
@@ -140,9 +159,9 @@ async function renderMap(options) {
 
         fs.writeFileSync('/tmp/tmp-mapstyle.json', JSON.stringify(styleData, null, 2));
         if (DEBUG) console.log('Debug: Dumped modified style data to /tmp/debug-mapstyle.json');
-        
+
         if (DEBUG) console.log('Debug: Creating map instance');
-        
+
         // Create the map
         const map = new maplibre.Map({
             request: function(req, callback) {
@@ -179,20 +198,38 @@ async function renderMap(options) {
                 callback(err);
             },
         });
-        
+
         // Load the style using the proper callback-based approach
         console.log('Debug: Loading map style...');
-        
+
         // Wrap the map.load() callback in a Promise for async/await compatibility
         map.load(styleData)
 
         console.log('Debug: Starting map rendering');
 
+        // Calculate overrender dimensions (1.5x to guarantee coverage at all latitudes)
+        // This prevents white stripes caused by Mercator projection distortion
+        const OVERRENDER_FACTOR = 1.5;
+        const renderWidth = Math.round(width * OVERRENDER_FACTOR);
+        const renderHeight = Math.round(height * OVERRENDER_FACTOR);
+
+        // Increase zoom level to compensate for overrendering AND fill the frame
+        // We add log2(OVERRENDER_FACTOR) to compensate for larger render size
+        // Plus an additional boost to ensure the map content fills the entire 16:9 frame
+        // The bash script adjusts bbox to 16:9 which adds padding, so we zoom in more
+        // to eliminate empty borders and maximize map content in the final crop
+        const zoomCompensation = Math.log2(OVERRENDER_FACTOR);
+        const zoomBoost = 0.7; // Additional zoom to fill frame with map content (accounts for bash bbox padding)
+        const adjustedZoom = effectiveZoom + zoomCompensation + zoomBoost;
+
+        if (DEBUG) console.log(`Debug: Overrendering at ${renderWidth}x${renderHeight}, will crop to ${width}x${height}`);
+        if (DEBUG) console.log(`Debug: Adjusted zoom from ${effectiveZoom} to ${adjustedZoom} (+${(zoomCompensation + zoomBoost).toFixed(3)})`);
+
         return new Promise((resolve, reject) => {
           map.render({
-            zoom: effectiveZoom,
-            width: width,
-            height: height,
+            zoom: adjustedZoom,
+            width: renderWidth,
+            height: renderHeight,
             center: effectiveCenter,
             ratio: 1
           }, function(err, buffer) {
@@ -208,26 +245,31 @@ async function renderMap(options) {
 
                 var image = sharp(buffer, {
                     raw: {
-                        width: width,
-                        height: height,
+                        width: renderWidth,
+                        height: renderHeight,
                         channels: 4
                     }
                 });
 
-                // Convert raw image buffer to PNG
-                image.toFile(outputPath, function(err) {
-                    if (err) {
-                        console.log(`Error writing file: ${err}`);
-                        reject(err);
-                        return;
-                    }
-                    console.log(`Map rendered successfully: ${outputPath}`);
-                    resolve(true);
-                });
+                // Crop to exact 16:9 center region to eliminate white stripes
+                image
+                    .resize(width, height, {
+                        fit: 'cover',
+                        position: 'center'
+                    })
+                    .toFile(outputPath, function(err) {
+                        if (err) {
+                            console.log(`Error writing file: ${err}`);
+                            reject(err);
+                            return;
+                        }
+                        console.log(`Map rendered successfully: ${outputPath}`);
+                        resolve(true);
+                    });
             } catch (error) {
                 console.error(`Processing error: ${error.message}`);
                 reject(error);
-            }            
+            }
           });
         });
 
@@ -235,14 +277,14 @@ async function renderMap(options) {
         // More detailed error handling
         console.error(`Error rendering map: ${error.message}`);
         console.error(error.stack);
-        
+
         // Try to inspect the style file
         try {
             const styleData = await fs.readJson(stylePath);
             console.log(`Style version: ${styleData.version}`);
             console.log(`Style has ${Object.keys(styleData.sources || {}).length} sources`);
             console.log(`Style has ${(styleData.layers || []).length} layers`);
-            
+
             // Check critical paths
             const styleDir = path.dirname(stylePath);
             const absoluteStylePath = path.resolve(styleDir);
@@ -250,7 +292,7 @@ async function renderMap(options) {
         } catch (e) {
             console.error(`Error analyzing style file: ${e.message}`);
         }
-        
+
         return false;
     }
 }
