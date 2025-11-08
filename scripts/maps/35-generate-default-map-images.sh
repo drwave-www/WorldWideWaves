@@ -71,6 +71,13 @@ NC='\033[0m' # No Color
 
 # ---------- Check dependencies ----------------------------------------------
 
+# Setup Node.js version (use v18 for better compatibility with native modules)
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+    . "$HOME/.nvm/nvm.sh"
+    # Try to use Node 18 if available, otherwise use whatever is current
+    nvm use 18 &>/dev/null || true
+fi
+
 # Check if Node.js is installed
 if ! command -v node &> /dev/null; then
     echo -e "${RED}Node.js is not installed. Please install Node.js to continue.${NC}"
@@ -93,6 +100,43 @@ if [ ! -d "node_modules" ]; then
         exit 1
     fi
 fi
+
+# Check if @maplibre/maplibre-gl-native can load with current environment
+# Try to use custom libpng if it exists (for systems with libpng version mismatch)
+if [ -f "$HOME/local/lib/libpng16.so.16.37.0" ]; then
+    export LD_LIBRARY_PATH="$HOME/local/lib:$LD_LIBRARY_PATH"
+    echo -e "${GREEN}✓ Using custom libpng from $HOME/local/lib${NC}"
+fi
+
+if ! node -e "require('@maplibre/maplibre-gl-native')" 2>/dev/null; then
+    echo "=========================================================================="
+    echo -e "${RED}ERROR: Cannot load @maplibre/maplibre-gl-native module${NC}"
+    echo "=========================================================================="
+    echo ""
+    echo "This is usually caused by a native dependency version mismatch."
+    echo ""
+    echo "Common solutions:"
+    echo "  1. Build libpng 1.6.37 locally:"
+    echo "     mkdir -p ~/local/src && cd ~/local/src"
+    echo "     curl -L https://sourceforge.net/projects/libpng/files/libpng16/1.6.37/libpng-1.6.37.tar.xz/download -o libpng-1.6.37.tar.xz"
+    echo "     tar -xf libpng-1.6.37.tar.xz && cd libpng-1.6.37"
+    echo "     ./configure --prefix=\$HOME/local && make -j4"
+    echo "     mkdir -p \$HOME/local/lib"
+    echo "     cp .libs/libpng16.so.16.37.0 \$HOME/local/lib/"
+    echo "     cd \$HOME/local/lib && ln -sf libpng16.so.16.37.0 libpng16.so.16"
+    echo ""
+    echo "  2. Then run this script with:"
+    echo "     LD_LIBRARY_PATH=\$HOME/local/lib:\$LD_LIBRARY_PATH ./35-generate-default-map-images.sh"
+    echo ""
+    echo "  3. Or use Docker (if available):"
+    echo "     See docs/maplibre-rendering.md for Docker instructions"
+    echo ""
+    echo "=========================================================================="
+    exit 1
+fi
+
+echo -e "${GREEN}✓ MapLibre native module loaded successfully${NC}"
+echo ""
 
 # ---------- Process maps ---------------------------------------------------
 
