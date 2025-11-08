@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.di
  */
 
 import com.worldwidewaves.shared.data.InitFavoriteEvent
+import com.worldwidewaves.shared.data.MarkDownloadedEventAsFavorite
 import com.worldwidewaves.shared.data.SetEventFavorite
 import org.koin.dsl.module
 
@@ -30,7 +31,7 @@ import org.koin.dsl.module
  *
  * ## Module Purpose
  * Provides data layer dependencies for persistent storage operations:
- * - Event favorites management
+ * - Event favorites management (initialization, updates, auto-favoriting)
  * - User preferences persistence
  * - Local data caching (future)
  *
@@ -44,6 +45,7 @@ import org.koin.dsl.module
  * - **Factories**: All dependencies are factories to support per-request operations
  *   - InitFavoriteEvent: Initializes favorites state (created per initialization)
  *   - SetEventFavorite: Updates favorites (created per update operation)
+ *   - MarkDownloadedEventAsFavorite: Auto-favorites after map download (created per download completion)
  *
  * Factory scope is used because these are command/action objects that:
  * 1. Execute a single operation
@@ -62,6 +64,7 @@ import org.koin.dsl.module
  *
  * @see InitFavoriteEvent for favorites initialization
  * @see SetEventFavorite for favorites updates
+ * @see MarkDownloadedEventAsFavorite for auto-favoriting downloaded maps
  */
 val datastoreModule =
     module {
@@ -131,6 +134,46 @@ val datastoreModule =
             SetEventFavorite(
                 favoriteEventsStore = get(),
                 notificationScheduler = getOrNull(),
+            )
+        }
+
+        /**
+         * Provides [MarkDownloadedEventAsFavorite] as factory for auto-favoriting downloaded maps.
+         *
+         * **Scope**: Factory - created per map download completion
+         * **Thread-safety**: Yes - delegates to SetEventFavorite which handles thread-safety
+         * **Lifecycle**: Created on-demand, disposed after favoriting completes
+         * **Dependencies**:
+         * - WWWEvents (to retrieve event by ID)
+         * - SetEventFavorite (to mark as favorite with notification scheduling)
+         *
+         * MarkDownloadedEventAsFavorite implements the business rule:
+         * "When a map is downloaded, the corresponding event should be automatically favorited."
+         *
+         * This creates a natural connection where downloading a map implies user intent to
+         * participate in that event, and thus should have it favorited for:
+         * - Easy access in favorites filter
+         * - Automatic notification scheduling
+         * - Better user experience (no manual favoriting needed)
+         *
+         * Factory scope ensures:
+         * - Fresh instance for each download completion
+         * - No shared state between downloads
+         * - Clean memory footprint
+         *
+         * Usage pattern:
+         * ```kotlin
+         * val markAsFavorite: MarkDownloadedEventAsFavorite = get()
+         * markAsFavorite.call(eventId = "paris_wave_2025")
+         * ```
+         *
+         * @see MarkDownloadedEventAsFavorite for auto-favorite logic
+         * @see SetEventFavorite for favorite update and notification scheduling
+         */
+        factory {
+            MarkDownloadedEventAsFavorite(
+                wwwEvents = get(),
+                setEventFavorite = get(),
             )
         }
     }

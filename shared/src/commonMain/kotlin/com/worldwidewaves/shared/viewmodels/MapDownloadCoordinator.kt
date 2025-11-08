@@ -21,12 +21,15 @@ package com.worldwidewaves.shared.viewmodels
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.data.MarkDownloadedEventAsFavorite
 import com.worldwidewaves.shared.data.clearUnavailableGeoJsonCache
 import com.worldwidewaves.shared.events.data.GeoJsonDataProvider
 import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.utils.Log
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 /**
  * Coordinates map download operations across platforms.
@@ -45,6 +48,8 @@ import kotlinx.coroutines.flow.StateFlow
  * DEPENDENCIES:
  * • PlatformMapDownloadAdapter (for platform-specific operations)
  * • GeoJsonDataProvider (optional, for cache invalidation)
+ * • MarkDownloadedEventAsFavorite (optional, for auto-favoriting downloaded maps)
+ * • CoroutineScope (optional, for launching auto-favorite coroutines)
  *
  * USED BY:
  * • AndroidMapViewModel (composition)
@@ -53,6 +58,8 @@ import kotlinx.coroutines.flow.StateFlow
 class MapDownloadCoordinator(
     private val platformAdapter: PlatformMapDownloadAdapter,
     private val geoJsonDataProvider: GeoJsonDataProvider? = null,
+    private val markDownloadedEventAsFavorite: MarkDownloadedEventAsFavorite? = null,
+    private val coroutineScope: CoroutineScope? = null,
 ) : IMapDownloadManager {
     private val _featureState = MutableStateFlow<MapFeatureState>(MapFeatureState.NotChecked)
     override val featureState: StateFlow<MapFeatureState> = _featureState
@@ -165,6 +172,14 @@ class MapDownloadCoordinator(
         currentMapId?.let { mapId ->
             clearUnavailableGeoJsonCache(mapId)
             Log.d(TAG, "Cleared all caches for $mapId after successful download")
+
+            // Auto-favorite the event after successful map download
+            // Launch in provided scope (or skip if scope not available, e.g., in tests)
+            if (markDownloadedEventAsFavorite != null && coroutineScope != null) {
+                coroutineScope.launch {
+                    markDownloadedEventAsFavorite.call(mapId)
+                }
+            }
         }
     }
 

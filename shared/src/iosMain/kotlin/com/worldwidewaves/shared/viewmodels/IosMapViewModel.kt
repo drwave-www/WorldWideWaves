@@ -49,6 +49,7 @@ class IosMapViewModel(
     MapViewModel,
     KoinComponent {
     private val geoJsonDataProvider: GeoJsonDataProvider by inject()
+    private val markDownloadedEventAsFavorite: com.worldwidewaves.shared.data.MarkDownloadedEventAsFavorite by inject()
 
     // Platform adapter for business logic
     private val platformAdapter =
@@ -118,7 +119,13 @@ class IosMapViewModel(
         }
 
     // Pure business logic (no UI lifecycle concerns)
-    private val downloadManager: MapDownloadCoordinator = MapDownloadCoordinator(platformAdapter, geoJsonDataProvider)
+    private val downloadManager: MapDownloadCoordinator =
+        MapDownloadCoordinator(
+            platformAdapter = platformAdapter,
+            geoJsonDataProvider = geoJsonDataProvider,
+            markDownloadedEventAsFavorite = markDownloadedEventAsFavorite,
+            coroutineScope = scope,
+        )
 
     // Delegate public interface to business logic (same pattern as AndroidMapViewModel)
     override val featureState = downloadManager.featureState

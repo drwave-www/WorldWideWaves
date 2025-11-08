@@ -65,6 +65,7 @@ class AndroidMapViewModel(
     MapViewModel,
     KoinComponent {
     private val geoJsonDataProvider: GeoJsonDataProvider by inject()
+    private val markDownloadedEventAsFavorite: com.worldwidewaves.shared.data.MarkDownloadedEventAsFavorite by inject()
 
     private companion object {
         private const val TAG = "WWW.ViewModel.MapAndroid"
@@ -224,7 +225,13 @@ class AndroidMapViewModel(
         }
 
     // Pure business logic (no UI lifecycle concerns)
-    private val downloadManager: MapDownloadCoordinator = MapDownloadCoordinator(platformAdapter, geoJsonDataProvider)
+    private val downloadManager: MapDownloadCoordinator =
+        MapDownloadCoordinator(
+            platformAdapter = platformAdapter,
+            geoJsonDataProvider = geoJsonDataProvider,
+            markDownloadedEventAsFavorite = markDownloadedEventAsFavorite,
+            coroutineScope = viewModelScope,
+        )
 
     // Delegate public interface to business logic
     override val featureState = downloadManager.featureState
