@@ -5,22 +5,22 @@ command -v git-lfs >/dev/null 2>&1 || { printf >&2 "\n%s\n\n" "This repository i
 git lfs pre-push "$@"
 
 # ============================================================
-# PNG TO WEBP CONVERSION - PRE-PUSH HOOK
+# PNG/JPG TO WEBP CONVERSION - PRE-PUSH HOOK
 # ============================================================
-# Automatically convert any PNG images to WebP before push
+# Automatically convert any PNG/JPG images to WebP before push
 # Ensures repository uses efficient WebP format consistently
 # Bypass with: git push --no-verify (NOT recommended)
 # ============================================================
 
-echo "🖼️  Checking for PNG images to convert to WebP..."
+echo "🖼️  Checking for PNG/JPG images to convert to WebP..."
 
-# Check for any PNG files in drawable directory
+# Check for any PNG/JPG files in drawable directory
 DRAWABLE_DIR="shared/src/commonMain/composeResources/drawable"
-PNG_FILES=$(find "$DRAWABLE_DIR" -type f -name "*.png" 2>/dev/null)
+IMAGE_FILES=$(find "$DRAWABLE_DIR" -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" \) 2>/dev/null)
 
-if [ -n "$PNG_FILES" ]; then
-    echo "📦 Found PNG files that need conversion to WebP:"
-    echo "$PNG_FILES" | while read file; do
+if [ -n "$IMAGE_FILES" ]; then
+    echo "📦 Found PNG/JPG files that need conversion to WebP:"
+    echo "$IMAGE_FILES" | while read file; do
         echo "   - $file"
     done
     echo ""
@@ -33,23 +33,23 @@ if [ -n "$PNG_FILES" ]; then
         exit 1
     fi
 
-    echo "🔄 Running automatic PNG to WebP conversion..."
+    echo "🔄 Running automatic PNG/JPG to WebP conversion..."
 
     # Run the conversion script
     if bash scripts/images/convert_webp.sh; then
-        echo "✅ PNG to WebP conversion completed successfully"
+        echo "✅ PNG/JPG to WebP conversion completed successfully"
 
         # Check if conversion created any changes
         if ! git diff --quiet "$DRAWABLE_DIR"; then
             echo "📝 Staging and committing converted WebP files..."
 
-            # Stage all changes in drawable directory (WebP updates and PNG deletions)
+            # Stage all changes in drawable directory (WebP updates and PNG/JPG deletions)
             git add "$DRAWABLE_DIR"
 
             # Commit the changes
-            git commit -m "chore(images): auto-convert PNG to WebP via pre-push hook
+            git commit -m "chore(images): auto-convert PNG/JPG to WebP via pre-push hook
 
-Automatic conversion from PNG to WebP format.
+Automatic conversion from PNG/JPG to WebP format.
 Ensures consistent use of WebP for all map images.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
@@ -61,12 +61,12 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
             echo "✅ No changes after conversion (files already in WebP format)"
         fi
     else
-        echo "❌ PNG to WebP conversion failed. Please check the script."
+        echo "❌ PNG/JPG to WebP conversion failed. Please check the script."
         echo "   You can fix issues and try again, or bypass with --no-verify (not recommended)"
         exit 1
     fi
 else
-    echo "✅ No PNG files found - all images already in WebP format"
+    echo "✅ No PNG/JPG files found - all images already in WebP format"
 fi
 
 echo ""
