@@ -514,8 +514,15 @@ abstract class AbstractEventMap<T>(
      */
     @Suppress("ComplexCondition") // Necessary validation: null + NaN checks prevent IllegalArgumentException
     suspend fun targetUserAndWave() {
+        Log.d("AbstractEventMap", "targetUserAndWave: Entry")
+
         val userPosition = positionManager.getCurrentPosition()
         var wavePosition = event.wave.getWaveFrontCenterPosition()
+
+        Log.d(
+            "AbstractEventMap",
+            "targetUserAndWave: userPosition=$userPosition, wavePosition=$wavePosition",
+        )
 
         // Fallback to previous implementation if new method fails
         if (wavePosition == null && userPosition != null) {
@@ -536,7 +543,7 @@ abstract class AbstractEventMap<T>(
         ) {
             Log.w(
                 "AbstractEventMap",
-                "WARNING: targetUserAndWave: missing or invalid data (userPos=$userPosition, wavePos=$wavePosition)",
+                "targetUserAndWave: Early return - missing or invalid data (userPos=$userPosition, wavePos=$wavePosition)",
             )
             return
         }
@@ -544,9 +551,14 @@ abstract class AbstractEventMap<T>(
         // Create the bounds containing user and wave positions
         val bounds = BoundingBox.fromCorners(listOf(userPosition, wavePosition))
         if (bounds == null) {
-            Log.e("AbstractEventMap", "Failed to create bounds from user+wave positions")
+            Log.e("AbstractEventMap", "targetUserAndWave: Early return - failed to create bounds from user+wave positions")
             return
         }
+
+        Log.d(
+            "AbstractEventMap",
+            "targetUserAndWave: Calculated bounds SW(${ bounds.southwest.latitude},${ bounds.southwest.longitude}) NE(${ bounds.northeast.latitude},${ bounds.northeast.longitude})",
+        )
 
         // Get the area's bounding box for constraints
         val areaBbox = event.area.bbox()
@@ -570,9 +582,16 @@ abstract class AbstractEventMap<T>(
                 ),
             )
 
+        Log.d(
+            "AbstractEventMap",
+            "targetUserAndWave: Starting camera animation to final bounds SW(${finalBounds?.southwest?.latitude},${finalBounds?.southwest?.longitude}) NE(${finalBounds?.northeast?.latitude},${finalBounds?.northeast?.longitude})",
+        )
+
         runCameraAnimation { cb ->
             mapLibreAdapter.animateCameraToBounds(finalBounds, callback = cb)
         }
+
+        Log.d("AbstractEventMap", "targetUserAndWave: Animation completed successfully")
     }
 
     // ------------------------------------------------------------------------

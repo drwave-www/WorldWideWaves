@@ -48,16 +48,28 @@ fun MapZoomAndLocationUpdate(
     // Time-based throttling: Dynamic interval based on event status (real time, not simulated)
     // 1s when running (wave moving), 5s when done (wave stationary, only track user position)
     LaunchedEffect(isInArea) {
-        if (!isInArea || eventMap == null) return@LaunchedEffect
+        if (!isInArea || eventMap == null) {
+            Log.d("MapZoomAndLocationUpdate", "LaunchedEffect: isInArea=$isInArea, eventMap=$eventMap - not starting loop")
+            return@LaunchedEffect
+        }
+
+        Log.d("MapZoomAndLocationUpdate", "LaunchedEffect: Starting for event ${event.id}")
 
         // Initial update when entering area
         Log.d(
             "MapZoomAndLocationUpdate",
             "Initial targetUserAndWave() for event: ${event.id} (entered area)",
         )
-        eventMap.targetUserAndWave()
+
+        try {
+            eventMap.targetUserAndWave()
+            Log.d("MapZoomAndLocationUpdate", "Initial targetUserAndWave() completed")
+        } catch (e: Exception) {
+            Log.e("MapZoomAndLocationUpdate", "Initial targetUserAndWave() failed", e)
+        }
 
         // Continuous updates with dynamic throttle based on event status
+        Log.d("MapZoomAndLocationUpdate", "Starting continuous loop for event ${event.id}")
         while (isInArea) {
             val isDone = event.isDone()
             val intervalMs =
@@ -73,8 +85,16 @@ fun MapZoomAndLocationUpdate(
                 "MapZoomAndLocationUpdate",
                 "Periodic targetUserAndWave() for event: ${event.id} (${intervalSeconds}s throttle, done=$isDone)",
             )
-            eventMap.targetUserAndWave()
+
+            try {
+                eventMap.targetUserAndWave()
+                Log.v("MapZoomAndLocationUpdate", "Periodic targetUserAndWave() completed")
+            } catch (e: Exception) {
+                Log.e("MapZoomAndLocationUpdate", "Periodic targetUserAndWave() failed", e)
+            }
         }
+
+        Log.d("MapZoomAndLocationUpdate", "Loop exited for event ${event.id} (isInArea=$isInArea)")
     }
 }
 
