@@ -114,7 +114,7 @@ private fun ActionMessageContent(modifier: Modifier = Modifier) {
                 item {
                     Column {
                         LogoSeparator()
-                        Spacer(modifier = Modifier.size(6.dp))
+                        Spacer(modifier = Modifier.size(12.dp))
                         TextSection(MokoRes.strings.action_message_section_2, dir)
                     }
                 }
@@ -122,7 +122,7 @@ private fun ActionMessageContent(modifier: Modifier = Modifier) {
                 item {
                     Column {
                         LogoSeparator()
-                        Spacer(modifier = Modifier.size(6.dp))
+                        Spacer(modifier = Modifier.size(12.dp))
                         TextSection(MokoRes.strings.action_message_section_3, dir)
                     }
                 }
