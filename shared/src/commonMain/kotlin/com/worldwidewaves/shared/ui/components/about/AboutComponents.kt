@@ -22,18 +22,22 @@ package com.worldwidewaves.shared.ui.components.about
  */
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.www_logo_transparent
+import com.worldwidewaves.shared.generated.resources.www_simple_logo_transparent
 import com.worldwidewaves.shared.ui.components.WWWSocialNetworks
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
@@ -52,6 +56,27 @@ fun AboutDividerLine() {
         thickness = 2.dp,
     )
     Spacer(modifier = Modifier.size(30.dp))
+}
+
+/**
+ * Shared logo separator component for visual separation between content sections.
+ * Displays a small centered version of the WWW simple logo with vertical padding.
+ */
+@Composable
+fun LogoSeparator() {
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Image(
+            painter = painterResource(Res.drawable.www_simple_logo_transparent),
+            contentDescription = null, // Decorative separator
+            modifier =
+                Modifier
+                    .width(80.dp)
+                    .padding(top = 12.dp, bottom = 12.dp),
+        )
+    }
 }
 
 /**

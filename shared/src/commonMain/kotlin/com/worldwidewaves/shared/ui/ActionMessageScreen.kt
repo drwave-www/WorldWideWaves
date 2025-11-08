@@ -36,6 +36,8 @@ import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.Info
+import com.worldwidewaves.shared.ui.components.about.AboutWWWLogo
+import com.worldwidewaves.shared.ui.components.about.LogoSeparator
 import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
 import dev.icerock.moko.resources.compose.stringResource
@@ -69,9 +71,13 @@ private fun ActionMessageContent(modifier: Modifier = Modifier) {
             LazyColumn(
                 state = state,
                 modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.Start,
+                horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
+                item {
+                    AboutWWWLogo()
+                }
+
                 item {
                     Text(
                         text = stringResource(MokoRes.strings.action_message_title),
@@ -102,37 +108,44 @@ private fun ActionMessageContent(modifier: Modifier = Modifier) {
                 }
 
                 item {
-                    Text(
-                        text = stringResource(MokoRes.strings.action_message_section_1),
-                        style =
-                            sharedCommonTextStyle(Info.TEXT_FONTSIZE).copy(
-                                textAlign = if (dir == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify,
-                            ),
-                    )
+                    TextSection(MokoRes.strings.action_message_section_1, dir)
                 }
 
                 item {
-                    Text(
-                        text = stringResource(MokoRes.strings.action_message_section_2),
-                        style =
-                            sharedCommonTextStyle(Info.TEXT_FONTSIZE).copy(
-                                textAlign = if (dir == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify,
-                            ),
-                    )
+                    LogoSeparator()
                 }
 
                 item {
-                    Text(
-                        text = stringResource(MokoRes.strings.action_message_section_3),
-                        style =
-                            sharedCommonTextStyle(Info.TEXT_FONTSIZE).copy(
-                                textAlign = if (dir == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify,
-                            ),
-                    )
+                    TextSection(MokoRes.strings.action_message_section_2, dir)
+                }
+
+                item {
+                    LogoSeparator()
+                }
+
+                item {
+                    TextSection(MokoRes.strings.action_message_section_3, dir)
                 }
             }
         }
     }
+}
+
+/**
+ * Displays a text section with proper text alignment based on layout direction.
+ */
+@Composable
+private fun TextSection(
+    stringRes: dev.icerock.moko.resources.StringResource,
+    layoutDirection: LayoutDirection,
+) {
+    Text(
+        text = stringResource(stringRes),
+        style =
+            sharedCommonTextStyle(Info.TEXT_FONTSIZE).copy(
+                textAlign = if (layoutDirection == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify,
+            ),
+    )
 }
 
 /**

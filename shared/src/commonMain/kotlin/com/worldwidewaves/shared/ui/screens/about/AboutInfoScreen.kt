@@ -44,6 +44,7 @@ import com.worldwidewaves.shared.resources.infos_core
 import com.worldwidewaves.shared.ui.components.about.AboutDividerLine
 import com.worldwidewaves.shared.ui.components.about.AboutWWWLogo
 import com.worldwidewaves.shared.ui.components.about.AboutWWWSocialNetworks
+import com.worldwidewaves.shared.ui.components.about.LogoSeparator
 import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
 import com.worldwidewaves.shared.utils.Log
@@ -84,6 +85,7 @@ fun AboutInfoScreen(
 /**
  * Iterates over a fixed list of localized string resources and renders each
  * paragraph with justified alignment (or start-aligned for RTL locales).
+ * Adds logo separators between paragraphs 4-9.
  */
 @Composable
 private fun MainInfo() {
@@ -92,7 +94,7 @@ private fun MainInfo() {
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp), // space between items
     ) {
-        infos_core.forEach { res ->
+        infos_core.forEachIndexed { index, res ->
             Text(
                 text = stringResource(res),
                 style =
@@ -100,6 +102,10 @@ private fun MainInfo() {
                         textAlign = if (dir == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify,
                     ),
             )
+            // Add logo separator after infos_core_4 through infos_core_8 (index 3-7)
+            if (index in 3..7) {
+                LogoSeparator()
+            }
         }
     }
 }

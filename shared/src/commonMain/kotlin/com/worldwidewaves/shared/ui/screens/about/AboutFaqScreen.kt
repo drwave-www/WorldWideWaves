@@ -76,6 +76,7 @@ import com.worldwidewaves.shared.resources.rules_hierarchy
 import com.worldwidewaves.shared.ui.components.about.AboutDividerLine
 import com.worldwidewaves.shared.ui.components.about.AboutWWWLogo
 import com.worldwidewaves.shared.ui.components.about.AboutWWWSocialNetworks
+import com.worldwidewaves.shared.ui.components.about.LogoSeparator
 import com.worldwidewaves.shared.ui.theme.sharedCommonBoldStyle
 import com.worldwidewaves.shared.ui.theme.sharedCommonJustifiedTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
@@ -127,34 +128,17 @@ fun AboutFaqScreen(
         ) {
             AboutWWWLogo()
 
-            // Main FAQ text - Rules & Security
+            // Main FAQ text
             FAQTitle {
-                // Scroll to the top of the FAQ section
+                // Scroll to the Rules & Security section
                 coroutineScope.launch {
                     scrollState.animateScrollTo(scrollToFAQPosition.roundToInt())
                 }
             }
             AboutDividerLine()
 
-            // For each rules_hierarchy entry, display the title and the list of items
-            ShowRulesHierarchy()
-            AboutDividerLine()
-
-            // FAQ title
-            Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
-            Text(
-                modifier =
-                    Modifier
-                        .onGloballyPositioned { coordinates ->
-                            // Save the position of the FAQ section
-                            scrollToFAQPosition = coordinates.positionInRoot().y
-                        }.semantics { heading() },
-                text = stringResource(MokoRes.strings.faq),
-                style = sharedExtraBoldTextStyle(FAQ.TITLE_FONTSIZE),
-            )
-            Spacer(modifier = Modifier.size(Dimensions.SPACER_BIG.dp))
-
             // FAQ Items
+            Spacer(modifier = Modifier.size(Dimensions.SPACER_BIG.dp))
             FAQDividerLine()
             faq_contents.forEachIndexed { index, (question, answer) ->
                 FAQItem(
@@ -169,6 +153,26 @@ fun AboutFaqScreen(
                 )
                 FAQDividerLine()
             }
+
+            AboutDividerLine()
+
+            // Rules & Security section title - anchor target
+            Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
+            Text(
+                modifier =
+                    Modifier
+                        .onGloballyPositioned { coordinates ->
+                            // Save the position of the Rules & Security section
+                            scrollToFAQPosition = coordinates.positionInRoot().y
+                        }.semantics { heading() },
+                text = stringResource(MokoRes.strings.faq_rules_section_title),
+                style = sharedExtraBoldTextStyle(FAQ.TITLE_FONTSIZE),
+                maxLines = 1,
+            )
+            Spacer(modifier = Modifier.size(Dimensions.SPACER_BIG.dp))
+
+            // For each rules_hierarchy entry, display the title and the list of items
+            ShowRulesHierarchy()
 
             Spacer(modifier = Modifier.size(Dimensions.SPACER_BIG.dp))
             AboutWWWSocialNetworks(onUrlOpen = onUrlOpen)
@@ -218,7 +222,12 @@ private fun FAQTitle(scrollToFAQPosition: () -> Unit) {
 
 @Composable
 private fun ShowRulesHierarchy() {
-    rules_hierarchy.forEach { (title, items) ->
+    rules_hierarchy.entries.forEachIndexed { sectionIndex, (title, items) ->
+        // Add logo separator before Safety, Emergency, and Legal sections (indices 1, 2, 3)
+        if (sectionIndex in 1..3) {
+            LogoSeparator()
+        }
+
         Text(
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(title),
