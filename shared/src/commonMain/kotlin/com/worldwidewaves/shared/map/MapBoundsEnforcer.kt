@@ -93,6 +93,7 @@ class MapBoundsEnforcer(
      * Used after programmatic camera animations to ensure constraints are updated.
      */
     fun forceConstraintUpdate() {
+        Log.d("MapBoundsEnforcer", "forceConstraintUpdate: Setting forceNextRecalculation = true")
         forceNextRecalculation = true
     }
 
@@ -110,9 +111,15 @@ class MapBoundsEnforcer(
         // Updates constraint bounds dynamically when viewport changes due to manual zoom
         if (!constraintsApplied) {
             mapLibreAdapter.addOnCameraIdleListener {
+                Log.d(
+                    "MapBoundsEnforcer",
+                    "Camera idle listener: forceNext=$forceNextRecalculation, skipNext=$skipNextRecalculation, suppressed=${isSuppressed()}",
+                )
+
                 // Force update if requested (bypasses all skip logic)
                 val shouldForce = forceNextRecalculation
                 if (shouldForce) {
+                    Log.d("MapBoundsEnforcer", "Camera idle: FORCE UPDATE - bypassing skip logic")
                     forceNextRecalculation = false
                 }
 
@@ -120,12 +127,14 @@ class MapBoundsEnforcer(
                 if (!shouldForce) {
                     // Skip recalculation if programmatic animation just completed
                     if (skipNextRecalculation) {
+                        Log.d("MapBoundsEnforcer", "Camera idle: Skipping (skipNextRecalculation=true)")
                         skipNextRecalculation = false
                         return@addOnCameraIdleListener
                     }
 
                     // Prevent recalculation if animation/user interaction is in progress
                     if (isSuppressed()) {
+                        Log.d("MapBoundsEnforcer", "Camera idle: Skipping (suppressed=true), will skip next")
                         // Set flag to skip NEXT idle after suppression ends
                         skipNextRecalculation = true
                         return@addOnCameraIdleListener
@@ -139,10 +148,13 @@ class MapBoundsEnforcer(
                         VisibleRegionPadding(newPadding.latPadding, newPadding.lngPadding),
                     )
                 ) {
+                    Log.d("MapBoundsEnforcer", "Camera idle: Significant padding change detected, updating constraints")
                     setVisibleRegionPadding(
                         VisibleRegionPadding(newPadding.latPadding, newPadding.lngPadding),
                     )
                     applyConstraintsWithPadding()
+                } else {
+                    Log.d("MapBoundsEnforcer", "Camera idle: No significant padding change, skipping constraint update")
                 }
             }
             constraintsApplied = true
@@ -158,6 +170,11 @@ class MapBoundsEnforcer(
             val paddedBounds = calculateConstraintBounds()
             constraintBounds = paddedBounds
 
+            Log.d(
+                "MapBoundsEnforcer",
+                "applyConstraintsWithPadding: Calculated bounds=SW(${paddedBounds.southwest.latitude},${paddedBounds.southwest.longitude}) NE(${paddedBounds.northeast.latitude},${paddedBounds.northeast.longitude})",
+            )
+
             // Validate bounds are reasonable (not inverted or too small)
             if (paddedBounds.northeast.latitude <= paddedBounds.southwest.latitude ||
                 paddedBounds.northeast.longitude <= paddedBounds.southwest.longitude
@@ -172,6 +189,7 @@ class MapBoundsEnforcer(
 
             // Prevent infinite loop: skip if bounds haven't changed significantly (iOS triggers camera idle on every setBounds)
             if (lastAppliedBounds != null && boundsAreSimilar(lastAppliedBounds!!, paddedBounds)) {
+                Log.d("MapBoundsEnforcer", "applyConstraintsWithPadding: Skipping - bounds similar to last applied")
                 return
             }
 

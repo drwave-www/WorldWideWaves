@@ -467,12 +467,18 @@ abstract class AbstractEventMap<T>(
             return
         }
 
+        Log.d(
+            "AbstractEventMap",
+            "targetUser: Starting animation to user position (${userPosition.latitude}, ${userPosition.longitude}) with zoom ${MapDisplay.TARGET_USER_ZOOM}",
+        )
+
         runCameraAnimation { cb ->
             mapLibreAdapter.animateCamera(
                 userPosition,
                 MapDisplay.TARGET_USER_ZOOM,
                 object : MapCameraCallback {
                     override fun onFinish() {
+                        Log.d("AbstractEventMap", "targetUser: Animation finished, calling forceConstraintUpdate()")
                         // Force constraint update on next camera idle to ensure bounds are enforced
                         // This bypasses skip logic and ensures constraints update after animation settles
                         constraintManager?.forceConstraintUpdate()
@@ -480,6 +486,7 @@ abstract class AbstractEventMap<T>(
                     }
 
                     override fun onCancel() {
+                        Log.d("AbstractEventMap", "targetUser: Animation cancelled")
                         cb.onCancel()
                     }
                 },
