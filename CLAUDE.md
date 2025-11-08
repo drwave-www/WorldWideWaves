@@ -38,6 +38,7 @@ iOS Kotlin/Native has **strict threading requirements**. Violations cause **imme
 #### The 6 Absolute Rules
 
 **❌ NEVER**:
+
 1. `object : KoinComponent` inside @Composable scopes
 2. `by inject()` during Compose composition
 3. `runBlocking` before ComposeUIViewController
@@ -46,6 +47,7 @@ iOS Kotlin/Native has **strict threading requirements**. Violations cause **imme
 6. `Dispatchers.Main` in property initialization
 
 **✅ ALWAYS**:
+
 1. Use IOSSafeDI singleton for Composable DI access
 2. Use parameter injection or LocalKoin.current.get<T>()
 3. Use suspend functions with LaunchedEffect
@@ -73,6 +75,7 @@ fun Screen() {
 #### Verification
 
 **Before EVERY commit** touching shared code:
+
 ```bash
 ./scripts/dev/verification/verify-ios-safety.sh
 ```
@@ -129,6 +132,7 @@ Button(
 ### Language Support
 
 WorldWideWaves supports **32 languages** with complete translation coverage:
+
 - **Americas**: en, es, pt, fr (Canada)
 - **Europe**: de, fr, it, nl, pl, ro, ru, tr, uk
 - **Middle East**: ar, fa, he, ur
@@ -161,6 +165,7 @@ Users can change language **without app restart**:
 **iOS**: Settings → General → Language & Region → [App] → Language
 
 **Implementation**:
+
 - LocalizationManager observes system locale changes
 - Emits via StateFlow to trigger Compose recomposition
 - UI updates automatically with new localized strings
@@ -168,11 +173,13 @@ Users can change language **without app restart**:
 ### Translation Validation
 
 **Before every commit with new strings**:
+
 ```bash
 ./gradlew :shared:lintDebug  # Validates all 32 languages have all strings
 ```
 
 **Add new strings**:
+
 1. Add to `shared/src/commonMain/moko-resources/base/strings.xml`
 2. Run `python3 scripts/translate/update_translations.py`
 3. Verify lint passes
@@ -181,6 +188,7 @@ Users can change language **without app restart**:
 ### Testing Requirements
 
 **i18n tests must cover**:
+
 - String resource accessibility (LocalizationTest.kt)
 - Date/time formatting (DateTimeFormatsTest.kt)
 - Platform-specific locale behavior (platform-specific tests)
@@ -384,12 +392,14 @@ fun convert(location: AndroidLocation) {
 ```
 
 **Common Aliases**:
+
 - `import android.location.Location as AndroidLocation`
 - `import platform.CoreLocation.CLLocation as IOSLocation`
 - `import kotlinx.datetime.Instant as KotlinInstant`
 - `import java.time.Instant as JavaInstant`
 
 **Enforcement**:
+
 - Use `./gradlew detekt` to catch qualified names
 - Code reviews must reject qualified names
 - No exceptions - refactor if needed
@@ -427,6 +437,74 @@ object SharedState {
 - **File size**: Target <300 lines, warning >500, must split >600
 
 **See**: [docs/code-style/class-organization.md](docs/code-style/class-organization.md)
+
+### Markdown Documentation Standards [MANDATORY]
+
+**Rule**: All markdown files MUST pass markdownlint-cli2 validation before commit.
+
+**Why**: Consistent documentation formatting ensures readability, prevents CI failures, and maintains professional quality across all project documentation.
+
+**Configuration**: `.markdownlint-cli2.jsonc` (project root)
+
+**Key Requirements**:
+
+- Headings surrounded by blank lines (MD022)
+- Lists surrounded by blank lines (MD032)
+- Code blocks surrounded by blank lines (MD031)
+- Files end with single newline (MD047)
+- Space after `#` in headings (MD018)
+
+**Pre-Commit Validation**:
+
+```bash
+# Check markdown formatting
+npx markdownlint-cli2 "**/*.md" "!node_modules/**" "!build/**" "!SourcePackages/**" "!.gradle/**" "!iosApp/build/**" "!shared/build/**" "!composeApp/build/**" "!maps/**/node_modules/**"
+
+# Auto-fix formatting issues
+npx markdownlint-cli2 --fix "**/*.md" [same exclusions as above]
+```
+
+**Pre-Push Enforcement**:
+
+The pre-push git hook automatically runs markdown linting. Push will be blocked if errors are detected.
+
+**Common Fixes**:
+
+```markdown
+<!-- ❌ WRONG - No blank lines around heading -->
+Some text here.
+## Heading
+More text.
+
+<!-- ✅ CORRECT - Blank lines around heading -->
+Some text here.
+
+## Heading
+
+More text.
+```
+
+```markdown
+<!-- ❌ WRONG - No blank lines around list -->
+Text before list.
+- Item 1
+- Item 2
+Text after list.
+
+<!-- ✅ CORRECT - Blank lines around list -->
+Text before list.
+
+- Item 1
+- Item 2
+
+Text after list.
+```
+
+**Enforcement**:
+
+- Pre-push hook blocks commits with markdown errors
+- GitHub Actions workflow fails on markdown violations
+- Use auto-fix for most issues: `npx markdownlint-cli2 --fix "**/*.md" ...`
 
 ---
 
@@ -483,6 +561,7 @@ fun performOperation() {
 The notification system delivers time-based and immediate alerts for wave events to favorited events only.
 
 **Key Files**:
+
 - **Shared Core** (expect/actual pattern):
   - `shared/src/commonMain/kotlin/com/worldwidewaves/shared/notifications/NotificationTrigger.kt` - 3 trigger types (EventStarting, EventFinished, WaveHit)
   - `shared/src/commonMain/kotlin/com/worldwidewaves/shared/notifications/NotificationManager.kt` - Interface for scheduling/delivery
@@ -506,6 +585,7 @@ The notification system delivers time-based and immediate alerts for wave events
 **Limits**: iOS 64 pending max (typical <60 with favorites-only), Android ~500 (typical <60)
 
 **Development**:
+
 1. When event favorited: Call `notificationScheduler.scheduleAllNotifications(event)`
 2. When event unfavorited: Call `notificationScheduler.cancelAllNotifications(eventId)`
 3. On app launch: Call `notificationScheduler.syncNotifications(favorites, events)`
@@ -570,21 +650,25 @@ rm -rf ~/Library/Developer/Xcode/DerivedData/worldwidewaves-*
 iOS builds automatically clean up temporary files older than 2 days from `/var/folders/` to prevent disk space accumulation.
 
 **What gets cleaned:**
+
 - Kotlin/Native compiler artifacts (`kotlin-daemon.*.log`)
 - Kotlin compiler temp directories (`org.jetbrains.kotlin/*`)
 
 **Cleanup behavior:**
+
 - Runs automatically after `embedAndSignAppleFrameworkForXcode`
 - Skips files newer than 2 days (safety threshold)
 - Skips in CI environments (GitHub Actions)
 - Logs cleanup summary (files deleted, space freed)
 
 **Opt-out:**
+
 ```bash
 ./gradlew :shared:embedAndSignAppleFrameworkForXcode -PskipTempCleanup=true
 ```
 
 **Manual cleanup:**
+
 ```bash
 ./gradlew cleanupIOSTempFiles
 ```
@@ -649,10 +733,12 @@ Thoroughness: very thorough
 #### Step 3: Check for Dual Implementations
 
 **Common pattern in this codebase:**
+
 - `EventMapDownloadManager` (UI-focused, per-map state)
 - `MapViewModel/MapDownloadCoordinator` (business logic, global state)
 
 When debugging, check if multiple systems exist:
+
 ```bash
 grep -r "class.*Manager\|interface.*Manager" shared/src/ | grep -i "download\|state"
 ```
@@ -660,12 +746,14 @@ grep -r "class.*Manager\|interface.*Manager" shared/src/ | grep -i "download\|st
 #### What to Do
 
 ✅ **DO**:
+
 - Spend 5-10 minutes mapping data flow FIRST
 - Use Explore agent for complex multi-component issues
 - Look for architectural issues (dual systems, missing connections)
 - Verify hypothesis with logs AFTER understanding flow
 
 ❌ **DON'T**:
+
 - Add logging before understanding architecture
 - Assume race conditions without evidence
 - Fix symptoms without understanding root cause
@@ -702,6 +790,7 @@ grep -r "class.*Manager\|interface.*Manager" shared/src/ | grep -i "download\|st
 **Issue**: "Download works, simulation fails with 'map required' dialog"
 
 **Correct approach (5 minutes)**:
+
 1. Grep: `SimulationButton.*mapFeatureState` → sees it reads `MapViewModel`
 2. Grep: `downloadMap.*EventMapDownloadManager` → download button uses `EventMapDownloadManager`
 3. Question: "Does EventMapDownloadManager update MapViewModel?"
@@ -732,12 +821,14 @@ grep -r "class.*Manager\|interface.*Manager" shared/src/ | grep -i "download\|st
 **NEVER use qualified class names in code - ALWAYS add proper imports.**
 
 When adding function calls/classes:
+
 1. Check if required import exists
 2. Add missing imports in same change (NEVER use `com.foo.Bar` directly in code)
 3. Use type aliases (`as`) if name conflicts occur
 4. Verify compilation before commit
 
 **Common imports**:
+
 - Coroutines: `kotlinx.coroutines.runBlocking`, `withContext`, etc.
 - Compose: `androidx.compose.runtime.key`, `LaunchedEffect`, etc.
 - Platform: `platform.UIKit.*`, `platform.Foundation.*` (iOS)
@@ -752,6 +843,7 @@ When adding function calls/classes:
 **COMMIT AUTOMATICALLY after completing and testing each feature/fix.**
 
 Workflow:
+
 1. Complete the feature/fix
 2. Run all tests and ensure they pass
 3. Stage and commit the changes
@@ -853,6 +945,7 @@ WorldWideWaves/
 ## Related Documentation
 
 ### iOS Development
+
 - **[CLAUDE_iOS.md](./CLAUDE_iOS.md)** - Complete iOS development guide
 - **[docs/ios/](docs/ios/)** - iOS-specific documentation hub
 - **[docs/patterns/ios-safety-patterns.md](docs/patterns/ios-safety-patterns.md)** - All iOS safety patterns
@@ -861,20 +954,24 @@ WorldWideWaves/
 - **[Platform API Usage Guide](docs/ios/platform-api-usage-guide.md)** - UIKit/Foundation/CoreLocation
 
 ### Android Development
+
 - **[docs/android/android-development-guide.md](docs/android/android-development-guide.md)** - Complete Android development guide
 - **[docs/android/](docs/android/)** - Android-specific documentation hub
 
 ### Testing
+
 - **[docs/testing/test-patterns.md](docs/testing/test-patterns.md)** - Comprehensive test patterns
 - **[docs/testing-strategy.md](docs/testing-strategy.md)** - Testing approach
 
 ### Patterns & Architecture
+
 - **[docs/patterns/null-safety-patterns.md](docs/patterns/null-safety-patterns.md)** - Null handling patterns
 - **[docs/code-style/class-organization.md](docs/code-style/class-organization.md)** - Class structure standards
 - **[docs/architecture.md](docs/architecture.md)** - System architecture
 - **[docs/accessibility-guide.md](docs/accessibility-guide.md)** - Complete accessibility patterns
 
 ### CI/CD & Operations
+
 - **[docs/ci-cd.md](docs/ci-cd.md)** - CI/CD pipeline
 - **[docs/development.md](docs/development.md)** - Development workflows
 
