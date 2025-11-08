@@ -34,6 +34,7 @@ import com.worldwidewaves.shared.di.initializeSimulationMode
 import com.worldwidewaves.shared.di.sharedModule
 import com.worldwidewaves.shared.notifications.NotificationChannelManager
 import com.worldwidewaves.shared.utils.CloseableCoroutineScope
+import com.worldwidewaves.shared.utils.CrashlyticsLogger
 import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.utils.RuntimeLogConfig
 import com.worldwidewaves.shared.utils.initNapier
@@ -76,6 +77,18 @@ open class MainApplication :
 
         // Initialize Napier logging for Android
         initNapier()
+
+        // -------------------------------------------------------------------- //
+        //  Setup global exception handlers to capture all uncaught crashes
+        //  This ensures both coroutine and thread crashes are reported
+        // -------------------------------------------------------------------- //
+        setupCrashReporting()
+
+        // -------------------------------------------------------------------- //
+        //  Enable Crashlytics test reporting in DEBUG builds if needed
+        //  Uncomment the line below to test Crashlytics in DEBUG builds
+        // -------------------------------------------------------------------- //
+        // CrashlyticsLogger.enableTestReporting()
 
         // Ensure split compat is installed
         SplitCompat.install(this)
@@ -137,6 +150,38 @@ open class MainApplication :
                     e,
                 )
             }
+        }
+    }
+
+    /**
+     * Setup global exception handlers to capture all uncaught crashes.
+     * This ensures both coroutine and thread crashes are reported to Crashlytics.
+     */
+    private fun setupCrashReporting() {
+        try {
+            // Add build context to all crash reports
+            CrashlyticsLogger.setCustomKey("build_variant", BuildConfig.BUILD_TYPE)
+            CrashlyticsLogger.setCustomKey("version_code", BuildConfig.VERSION_CODE.toString())
+            CrashlyticsLogger.setCustomKey("version_name", BuildConfig.VERSION_NAME)
+            CrashlyticsLogger.setCustomKey("simulation_enabled", BuildConfig.ENABLE_SIMULATION_MODE.toString())
+
+            // Setup global uncaught exception handler for thread crashes
+            val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+            Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+                Log.e("CrashReporting", "Uncaught thread exception in ${thread.name}", throwable)
+                CrashlyticsLogger.log("Uncaught exception in thread: ${thread.name}")
+                CrashlyticsLogger.recordException(
+                    throwable,
+                    "UncaughtThreadException",
+                    "Thread: ${thread.name}",
+                )
+                // Call original handler to ensure normal crash behavior
+                defaultHandler?.uncaughtException(thread, throwable)
+            }
+
+            Log.i("MainApplication", "Global exception handlers configured")
+        } catch (e: Exception) {
+            Log.e("MainApplication", "Failed to setup crash reporting", e)
         }
     }
 

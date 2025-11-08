@@ -35,20 +35,51 @@ import com.worldwidewaves.shared.BuildKonfig
  *
  * ## Implementation Details
  * - Uses Firebase Crashlytics KTX extension for modern Kotlin API
- * - Only reports in production (BuildKonfig.DEBUG = false)
+ * - Reports in production (BuildKonfig.DEBUG = false) or when forceEnableCrashReporting = true
  * - Silent fallback prevents crashes if Crashlytics fails to initialize
  * - Tag included in log breadcrumbs for better context
+ *
+ * ## Testing Support
+ * Use [enableTestReporting] to force crash reporting in DEBUG builds for testing purposes.
  *
  * ## Production Safety
  * All methods wrapped in try-catch to prevent Crashlytics failures from affecting app functionality.
  */
 actual object CrashlyticsLogger {
+    /**
+     * Force enable crash reporting even in DEBUG builds.
+     * Useful for testing Crashlytics integration without building release APK.
+     */
+    private var forceEnableCrashReporting = false
+
+    /**
+     * Enable crash reporting in DEBUG builds for testing purposes.
+     * This allows verification of Crashlytics integration without building release APK.
+     */
+    fun enableTestReporting() {
+        forceEnableCrashReporting = true
+        Log.i("CrashlyticsLogger", "Test reporting enabled - crashes will be reported in DEBUG builds")
+    }
+
+    /**
+     * Disable test reporting to return to normal behavior (production-only reporting).
+     */
+    fun disableTestReporting() {
+        forceEnableCrashReporting = false
+        Log.i("CrashlyticsLogger", "Test reporting disabled - returning to production-only reporting")
+    }
+
+    /**
+     * Check if crash reporting is currently enabled.
+     */
+    private fun isReportingEnabled(): Boolean = !BuildKonfig.DEBUG || forceEnableCrashReporting
+
     actual fun recordException(
         throwable: Throwable,
         tag: String,
         message: String,
     ) {
-        if (!BuildKonfig.DEBUG) {
+        if (isReportingEnabled()) {
             try {
                 Firebase.crashlytics.log("[$tag] $message")
                 Firebase.crashlytics.recordException(throwable)
@@ -59,7 +90,7 @@ actual object CrashlyticsLogger {
     }
 
     actual fun log(message: String) {
-        if (!BuildKonfig.DEBUG) {
+        if (isReportingEnabled()) {
             try {
                 Firebase.crashlytics.log(message)
             } catch (e: Exception) {
@@ -72,7 +103,7 @@ actual object CrashlyticsLogger {
         key: String,
         value: String,
     ) {
-        if (!BuildKonfig.DEBUG) {
+        if (isReportingEnabled()) {
             try {
                 Firebase.crashlytics.setCustomKey(key, value)
             } catch (e: Exception) {
