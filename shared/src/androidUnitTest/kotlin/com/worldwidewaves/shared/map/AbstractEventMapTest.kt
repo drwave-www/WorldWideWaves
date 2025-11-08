@@ -28,10 +28,14 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -44,6 +48,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class AbstractEventMapTest : KoinTest {
     private lateinit var mockEvent: IWWWEvent
     private lateinit var mockMapLibreAdapter: MapLibreAdapter<String>
@@ -65,6 +70,7 @@ class AbstractEventMapTest : KoinTest {
     @BeforeTest
     fun setup() {
         val testDispatcher = StandardTestDispatcher()
+        Dispatchers.setMain(testDispatcher)
         testScope = TestScope(testDispatcher)
         testScopeProvider =
             DefaultCoroutineScopeProvider(
@@ -156,6 +162,7 @@ class AbstractEventMapTest : KoinTest {
 
     @AfterTest
     fun tearDown() {
+        Dispatchers.resetMain()
         stopKoin()
     }
 

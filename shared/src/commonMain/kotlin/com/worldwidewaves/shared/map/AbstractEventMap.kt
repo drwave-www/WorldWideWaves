@@ -34,6 +34,7 @@ import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.utils.PerformanceTracer
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -104,6 +105,7 @@ abstract class AbstractEventMap<T>(
     private val positionManager: PositionManager by inject()
 
     // Class variables
+    private var mapScope: CoroutineScope? = null // Coroutine scope for map operations
     private var constraintManager: MapBoundsEnforcer? = null // Map bounds enforcer
     private var screenHeight: Double = 800.0
     private var screenWidth: Double = 600.0
@@ -414,7 +416,7 @@ abstract class AbstractEventMap<T>(
                             override fun onFinish() {
                                 // Re-apply constraints to ensure map bounds are enforced after animation
                                 // Delay to ensure camera has fully settled to prevent stale viewport data
-                                kotlinx.coroutines.GlobalScope.launch {
+                                mapScope?.launch(Dispatchers.Main) {
                                     kotlinx.coroutines.delay(100)
                                     constraintManager?.applyConstraints()
                                 }
@@ -478,7 +480,7 @@ abstract class AbstractEventMap<T>(
                     override fun onFinish() {
                         // Re-apply constraints to ensure map bounds are enforced after animation
                         // Delay to ensure camera has fully settled to prevent stale viewport data
-                        kotlinx.coroutines.GlobalScope.launch {
+                        mapScope?.launch(kotlinx.coroutines.Dispatchers.Main) {
                             kotlinx.coroutines.delay(100)
                             constraintManager?.applyConstraints()
                         }
@@ -587,6 +589,9 @@ abstract class AbstractEventMap<T>(
         val trace = PerformanceTracer.startTrace("map_rendering")
         // Pass the map to the adapter
         mapLibreAdapter.setMap(map)
+
+        // Store scope for map operations
+        this.mapScope = scope
 
         // Set screen dimensions
         this.screenWidth = mapLibreAdapter.getWidth()
