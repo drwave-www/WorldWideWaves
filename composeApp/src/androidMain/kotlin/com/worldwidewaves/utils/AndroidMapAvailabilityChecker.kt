@@ -47,6 +47,8 @@ class AndroidMapAvailabilityChecker(
     /** Log tag used throughout this helper for easy filtering. */
     private companion object Companion {
         private const val TAG = "WWW.Utils.MapAvail"
+        private const val PREFS_NAME = "map_availability"
+        private const val PREFS_KEY_FORCED_UNAVAILABLE = "forced_unavailable"
     }
 
     private val splitInstallManager: SplitInstallManager = SplitInstallManagerFactory.create(context)
@@ -65,9 +67,12 @@ class AndroidMapAvailabilityChecker(
      * keep them physically present until the next app update.  Populated when
      * the user requests an uninstall and cleared automatically when Play
      * notifies a fresh install of the same split.
+     *
+     * Persisted to SharedPreferences to survive app restarts.
      */
-    private val forcedUnavailable =
-        java.util.Collections.synchronizedSet(mutableSetOf<String>())
+    private val forcedUnavailable: MutableSet<String> by lazy {
+        java.util.Collections.synchronizedSet(loadForcedUnavailable())
+    }
 
     // Listener for module installation events
     private val installStateListener: SplitInstallStateUpdatedListener
@@ -86,11 +91,22 @@ class AndroidMapAvailabilityChecker(
                         // If this module had previously been "forced" unavailable
                         // (deferred uninstall), drop the override so it becomes
                         // visible again without requiring an app restart.
+                        var forcedUnavailableModified = false
                         state.moduleNames().forEach { id ->
-                            forcedUnavailable.remove(id)
+                            val wasInForcedUnavailable = forcedUnavailable.remove(id)
+                            if (wasInForcedUnavailable) {
+                                forcedUnavailableModified = true
+                                Log.i(TAG, "Removed $id from forcedUnavailable (re-downloaded)")
+                            }
                             // Clear the session cache for newly installed maps
                             clearUnavailableGeoJsonCache(id)
                         }
+
+                        // Persist the updated forcedUnavailable set
+                        if (forcedUnavailableModified) {
+                            saveForcedUnavailable()
+                        }
+
                         refreshAvailability()
                     }
                     SplitInstallSessionStatus.FAILED -> {
@@ -128,6 +144,58 @@ class AndroidMapAvailabilityChecker(
     }
 
     /**
+     * Loads the forced unavailable set from SharedPreferences.
+     * Handles corruption gracefully by returning an empty set on error.
+     *
+     * @return The set of map IDs that should be treated as unavailable
+     */
+    private fun loadForcedUnavailable(): MutableSet<String> =
+        try {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val stored = prefs.getStringSet(PREFS_KEY_FORCED_UNAVAILABLE, null)
+
+            if (stored == null) {
+                Log.d(TAG, "No persisted forcedUnavailable data (first run or old version)")
+                mutableSetOf()
+            } else {
+                Log.i(TAG, "Loaded ${stored.size} forcedUnavailable entries from persistence: $stored")
+                stored.toMutableSet()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to load forcedUnavailable from persistence, starting fresh", e)
+            // Clear corrupted data
+            try {
+                context
+                    .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                    .edit()
+                    .remove(PREFS_KEY_FORCED_UNAVAILABLE)
+                    .apply()
+            } catch (clearError: Exception) {
+                Log.e(TAG, "Failed to clear corrupted persistence data", clearError)
+            }
+            mutableSetOf()
+        }
+
+    /**
+     * Saves the forced unavailable set to SharedPreferences.
+     * Uses apply() for async write to avoid blocking the main thread.
+     */
+    private fun saveForcedUnavailable() {
+        try {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            // Create immutable copy for thread-safety
+            val snapshot = synchronized(forcedUnavailable) { forcedUnavailable.toSet() }
+            prefs
+                .edit()
+                .putStringSet(PREFS_KEY_FORCED_UNAVAILABLE, snapshot)
+                .apply()
+            Log.d(TAG, "Saved ${snapshot.size} forcedUnavailable entries to persistence")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to save forcedUnavailable to persistence", e)
+        }
+    }
+
+    /**
      * Refreshes the availability state of all tracked maps.
      * Call this when returning to a list to ensure fresh data.
      */
@@ -135,6 +203,20 @@ class AndroidMapAvailabilityChecker(
         val installedModules = splitInstallManager.installedModules
         Log.d(TAG, "Refreshing availability. Installed modules: $installedModules")
         Log.d(TAG, "queried=$queriedMaps forcedUnavailable=$forcedUnavailable")
+
+        // Edge case validation: Clear stale forcedUnavailable entries
+        // Handles cases like manual Play Store installs or modules that were actually deleted
+        val staleEntries =
+            forcedUnavailable.filter { mapId ->
+                // If module is installed AND files are accessible, it shouldn't be in forcedUnavailable
+                mapId in installedModules && areMapFilesAccessible(mapId)
+            }
+
+        if (staleEntries.isNotEmpty()) {
+            Log.i(TAG, "Clearing stale forcedUnavailable entries (manual installs?): $staleEntries")
+            forcedUnavailable.removeAll(staleEntries.toSet())
+            saveForcedUnavailable()
+        }
 
         // Build updated state map
         val updatedStates = HashMap<String, Boolean>()
@@ -279,6 +361,22 @@ class AndroidMapAvailabilityChecker(
         }
 
     /**
+     * Clears the forced unavailable flag for a specific map.
+     * Used when re-downloading a previously uninstalled map to ensure PlayCore can proceed.
+     *
+     * @param eventId The event/map ID to clear
+     * @return true if the map was in forcedUnavailable and was removed, false otherwise
+     */
+    fun clearForcedUnavailable(eventId: String): Boolean {
+        val wasPresent = forcedUnavailable.remove(eventId)
+        if (wasPresent) {
+            Log.i(TAG, "Cleared forcedUnavailable for $eventId (re-download)")
+            saveForcedUnavailable()
+        }
+        return wasPresent
+    }
+
+    /**
      * Request uninstall of the dynamic-feature module corresponding to [eventId].
      * Implements the MapAvailabilityChecker interface method.
      *
@@ -306,10 +404,13 @@ class AndroidMapAvailabilityChecker(
                 splitInstallManager
                     .deferredUninstall(listOf(eventId))
                     .addOnSuccessListener {
-                        // Mark this module as “virtually” unavailable for the
+                        // Mark this module as "virtually" unavailable for the
                         // remainder of the session – Play Core keeps it around
                         // until next update but UI must reflect immediate removal.
                         forcedUnavailable.add(eventId)
+
+                        // Persist the updated forcedUnavailable set
+                        saveForcedUnavailable()
 
                         // Update reactive state immediately
                         _mapStates.value =

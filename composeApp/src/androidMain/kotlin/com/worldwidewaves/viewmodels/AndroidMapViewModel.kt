@@ -41,6 +41,7 @@ import com.worldwidewaves.shared.viewmodels.MapDownloadCoordinator
 import com.worldwidewaves.shared.viewmodels.MapDownloadUtils
 import com.worldwidewaves.shared.viewmodels.MapViewModel
 import com.worldwidewaves.shared.viewmodels.PlatformMapDownloadAdapter
+import com.worldwidewaves.utils.AndroidMapAvailabilityChecker
 import dev.icerock.moko.resources.desc.Resource
 import dev.icerock.moko.resources.desc.ResourceFormatted
 import dev.icerock.moko.resources.desc.StringDesc
@@ -66,6 +67,7 @@ class AndroidMapViewModel(
     KoinComponent {
     private val geoJsonDataProvider: GeoJsonDataProvider by inject()
     private val markDownloadedEventAsFavorite: com.worldwidewaves.shared.data.MarkDownloadedEventAsFavorite by inject()
+    private val mapAvailabilityChecker: com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker by inject()
 
     private companion object {
         private const val TAG = "WWW.ViewModel.MapAndroid"
@@ -90,6 +92,19 @@ class AndroidMapViewModel(
     private val platformAdapter =
         object : PlatformMapDownloadAdapter {
             override suspend fun isMapInstalled(mapId: String): Boolean {
+                // Check forcedUnavailable FIRST (user intention overrides system state)
+                // This ensures maps marked for uninstall appear as unavailable even if files still exist
+                val androidChecker = mapAvailabilityChecker as? AndroidMapAvailabilityChecker
+                if (androidChecker != null) {
+                    // Use the reactive state from the availability checker which respects forcedUnavailable
+                    val checkerState = androidChecker.mapStates.value[mapId]
+                    if (checkerState != null) {
+                        // Availability checker has definitive answer
+                        return checkerState
+                    }
+                }
+
+                // Fallback to file-based check if not tracked by availability checker
                 val moduleInstalled = splitInstallManager.installedModules.contains(mapId)
                 if (!moduleInstalled) {
                     return false
@@ -135,6 +150,16 @@ class AndroidMapViewModel(
                 mapId: String,
                 onMapDownloaded: (() -> Unit)?,
             ) {
+                // Re-download safeguard: Clear forcedUnavailable if present
+                // This handles the case where user uninstalled a map and now wants to re-download it
+                val androidChecker = mapAvailabilityChecker as? AndroidMapAvailabilityChecker
+                if (androidChecker != null) {
+                    val wasInForcedUnavailable = androidChecker.clearForcedUnavailable(mapId)
+                    if (wasInForcedUnavailable) {
+                        Log.i(TAG, "Cleared forcedUnavailable for $mapId before re-download")
+                    }
+                }
+
                 val request = SplitInstallRequest.newBuilder().addModule(mapId).build()
 
                 splitInstallManager
