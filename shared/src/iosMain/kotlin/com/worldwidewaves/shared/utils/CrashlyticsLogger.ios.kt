@@ -2,9 +2,30 @@
 
 package com.worldwidewaves.shared.utils
 
-import com.worldwidewaves.crashlytics.CrashlyticsBridge
+/* * Copyright 2025 DrWave
+ *
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. */
+
+
+// TODO: Re-enable once CrashlyticsBridge Swift file is properly linked
+// import com.worldwidewaves.crashlytics.CrashlyticsBridge
 import com.worldwidewaves.shared.BuildKonfig
-import kotlinx.cinterop.ExperimentalForeignApi
+// import kotlinx.cinterop.ExperimentalForeignApi
 
 /*
  * Copyright 2025 DrWave
@@ -30,42 +51,24 @@ import kotlinx.cinterop.ExperimentalForeignApi
 /**
  * iOS implementation of Crashlytics integration.
  *
- * ## Current Status: FULLY INTEGRATED ✅
+ * ## Current Status: TEMPORARILY DISABLED ⚠️
  *
- * This implementation sends all exceptions, breadcrumbs, and custom keys to Firebase Crashlytics
- * via the Swift bridge (CrashlyticsBridge.swift).
+ * Crashlytics integration is temporarily disabled due to linking issues with CrashlyticsBridge.swift.
+ * The Swift bridge file exists but is not being compiled into the iOS app binary, causing runtime crashes.
  *
- * ## Implementation Details
- * - Reports in production (BuildKonfig.DEBUG = false) or when forceEnableCrashReporting = true
- * - Uses cinterop to call Swift bridge which forwards to Firebase iOS SDK
- * - Also logs locally for debugging purposes
+ * ## TODO: Re-enable Crashlytics
+ * 1. Ensure CrashlyticsBridge.swift is added to Xcode project target
+ * 2. Verify Swift file is being compiled (check build logs)
+ * 3. Re-enable cinterop in shared/build.gradle.kts
+ * 4. Uncomment import statements above
+ * 5. Restore original implementation from git history
  *
- * ## Testing Support
- * Use [enableTestReporting] to force crash reporting in DEBUG builds for testing purposes.
- * This matches the Android implementation for consistent cross-platform behavior.
- *
- * ## Architecture
- * ```
- * Kotlin Shared Code → CrashlyticsLogger.ios.kt
- *                   ↓ (via cinterop)
- *         CrashlyticsBridge.swift → Firebase iOS SDK
- * ```
- *
- * ## What Works Now
- * - Fatal crashes: ✅ Automatically captured by Firebase
- * - Non-fatal exceptions from Kotlin: ✅ Sent to Firebase via bridge
- * - Breadcrumbs: ✅ Sent to Firebase via bridge
- * - Custom keys: ✅ Sent to Firebase via bridge
- * - DEBUG mode control: ✅ Matches Android behavior
- * - dSYM upload: ✅ Enabled for all configurations
- * - Crashlytics initialization: ✅ Explicit init in AppDelegate
- *
- * ## Production Safety
- * - No force unwraps or unsafe operations
- * - Logs locally in addition to Firebase reporting for debugging
- * - No crashes from Crashlytics integration itself
+ * ## Temporary Behavior
+ * - All methods are no-ops (log locally only)
+ * - No crash reporting to Firebase
+ * - App will not crash due to missing CrashlyticsBridge symbol
  */
-@OptIn(ExperimentalForeignApi::class)
+// @OptIn(ExperimentalForeignApi::class)
 actual object CrashlyticsLogger {
     private const val TAG = "CrashlyticsLogger.iOS"
 
@@ -116,19 +119,11 @@ actual object CrashlyticsLogger {
         tag: String,
         message: String,
     ) {
-        if (isReportingEnabled()) {
-            // Get stack trace as string
-            val stackTrace = throwable.stackTraceToString()
-
-            // Build full error message
-            val fullMessage = "$message: ${throwable.message ?: "Unknown error"}"
-
-            // Send exception to Firebase via Swift bridge
-            CrashlyticsBridge.recordExceptionWithMessage(fullMessage, tag, stackTrace)
-
-            // Also log locally for debugging
-            Log.e(TAG, "[$tag] $fullMessage\n$stackTrace")
-        }
+        // TODO: Re-enable Firebase reporting once CrashlyticsBridge is properly linked
+        // For now, just log locally
+        val stackTrace = throwable.stackTraceToString()
+        val fullMessage = "$message: ${throwable.message ?: "Unknown error"}"
+        Log.e(TAG, "[$tag] $fullMessage\n$stackTrace")
     }
 
     /**
@@ -140,22 +135,9 @@ actual object CrashlyticsLogger {
      * @param message The breadcrumb message
      */
     actual fun log(message: String) {
-        if (isReportingEnabled()) {
-            // Extract tag from message if present (format: "[Tag] Message")
-            val (tag, cleanMessage) =
-                if (message.startsWith("[") && message.contains("]")) {
-                    val endIndex = message.indexOf("]")
-                    message.substring(1, endIndex) to message.substring(endIndex + 2)
-                } else {
-                    "App" to message
-                }
-
-            // Send breadcrumb to Firebase via Swift bridge
-            CrashlyticsBridge.logWithMessage(cleanMessage, tag)
-
-            // Also log locally for debugging
-            Log.d(TAG, "Breadcrumb: [$tag] $cleanMessage")
-        }
+        // TODO: Re-enable Firebase reporting once CrashlyticsBridge is properly linked
+        // For now, just log locally
+        Log.d(TAG, "Breadcrumb: $message")
     }
 
     /**
@@ -171,12 +153,8 @@ actual object CrashlyticsLogger {
         key: String,
         value: String,
     ) {
-        if (isReportingEnabled()) {
-            // Send custom key to Firebase via Swift bridge
-            CrashlyticsBridge.setCustomKeyWithKey(key, value)
-
-            // Also log locally for debugging
-            Log.d(TAG, "Custom key: $key = $value")
-        }
+        // TODO: Re-enable Firebase reporting once CrashlyticsBridge is properly linked
+        // For now, just log locally
+        Log.d(TAG, "Custom key: $key = $value")
     }
 }
