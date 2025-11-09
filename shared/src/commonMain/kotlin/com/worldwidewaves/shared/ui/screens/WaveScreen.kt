@@ -104,9 +104,8 @@ fun WaveScreen(
 
             WaveProgressionBar(event)
 
-            // Fixed spacing above countdown to keep it close to progression bar
-            // Combined with column spacing (30.dp), total gap is ~54dp
-            Spacer(modifier = Modifier.height(24.dp))
+            // Flexible spacing above countdown to center it vertically
+            Spacer(modifier = Modifier.weight(1f))
             WaveHitCounter(
                 event = event,
                 modifier =
@@ -114,7 +113,7 @@ fun WaveScreen(
                         countdownHeightPx = size.height
                     },
             )
-            // Flexible spacing below countdown to keep it away from bottom tabs
+            // Flexible spacing below countdown to center it vertically
             Spacer(modifier = Modifier.weight(1f))
             // Add safe area padding for devices with notches/home indicators
             Spacer(modifier = Modifier.height(safeAreaBottomPadding))

@@ -32,6 +32,9 @@ class WaveParticipationScreen(
     platformEnabler: PlatformEnabler,
     showSplash: Boolean = false,
 ) : BaseWaveActivityScreen(eventId, platformEnabler, showSplash) {
+    // Disable scrolling for wave participation screen - content should fit without scrolling
+    override val isScrollable: Boolean = false
+
     @Composable
     override fun Event(
         event: IWWWEvent,
