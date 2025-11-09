@@ -40,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -75,6 +76,7 @@ fun WaveScreen(
 
     // Track countdown height for dynamic choreography positioning
     val density = LocalDensity.current
+    val windowInfo = LocalWindowInfo.current
     var countdownHeightPx by remember { mutableStateOf(0) }
     val countdownHeight = with(density) { countdownHeightPx.toDp() }
 
@@ -85,6 +87,16 @@ fun WaveScreen(
     // This should account for: countdown height + space below it (will be dynamic based on remaining space)
     // For now, we use a reasonable estimate that will be refined after layout
     val choreographyBottomPadding: Dp = countdownHeight + safeAreaBottomPadding + 60.dp
+
+    // Calculate safe max height for choreographies to prevent clipping on small devices
+    // Use 40% of screen height as max, ensuring choreographies fit on even smallest devices
+    val maxChoreographyHeight: Dp =
+        with(density) {
+            val screenHeightDp = windowInfo.containerSize.height.toDp()
+            val maxHeight = screenHeightDp * 0.4f
+            // Clamp between 200dp min and 600dp max (default)
+            maxHeight.coerceIn(200.dp, 600.dp)
+        }
 
     Box(modifier = modifier.fillMaxSize()) {
         Column(
@@ -119,10 +131,11 @@ fun WaveScreen(
             Spacer(modifier = Modifier.height(safeAreaBottomPadding))
         }
 
-        // Working choreographies with proper z-index and dynamic bottom padding
+        // Working choreographies with proper z-index, dynamic bottom padding, and safe height constraints
         WaveChoreographies(
             event = event,
             bottomPadding = choreographyBottomPadding,
+            maxHeight = maxChoreographyHeight,
             modifier = Modifier.zIndex(10f),
         )
     }

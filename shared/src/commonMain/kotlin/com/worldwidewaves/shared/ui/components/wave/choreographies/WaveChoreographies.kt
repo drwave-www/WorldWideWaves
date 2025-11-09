@@ -87,6 +87,7 @@ fun WaveChoreographies(
     event: IWWWEvent,
     modifier: Modifier = Modifier,
     bottomPadding: Dp = 120.dp,
+    maxHeight: Dp? = null,
     // iOS FIX: Clock dependency passed as parameter to prevent deadlock
     clock: IClock = getIosSafeClock(),
 ) {
@@ -159,6 +160,7 @@ fun WaveChoreographies(
                         modifier
                             .fillMaxWidth()
                             .padding(bottom = bottomPadding),
+                    maxHeight = maxHeight,
                     onSequenceComplete = { warmingKey++ },
                 )
             }
@@ -171,6 +173,7 @@ fun WaveChoreographies(
                 modifier
                     .fillMaxWidth()
                     .padding(bottom = bottomPadding),
+                maxHeight = maxHeight,
             )
         }
 
@@ -181,6 +184,7 @@ fun WaveChoreographies(
                 modifier
                     .fillMaxWidth()
                     .padding(bottom = bottomPadding),
+                maxHeight = maxHeight,
             )
         }
     }
@@ -194,11 +198,12 @@ fun WaveChoreographies(
 fun TimedSequenceDisplay(
     sequence: DisplayableSequence<DrawableResource>?,
     modifier: Modifier = Modifier,
+    maxHeight: Dp? = null,
     onSequenceComplete: () -> Unit,
 ) {
     if (sequence == null) return
 
-    ChoreographyDisplay(sequence, modifier)
+    ChoreographyDisplay(sequence, modifier, maxHeight = maxHeight)
 
     LaunchedEffect(sequence) {
         delay(sequence.remainingDuration ?: sequence.duration)
@@ -216,6 +221,7 @@ fun TimedSequenceDisplay(
 fun ChoreographyDisplay(
     sequence: DisplayableSequence<DrawableResource>?,
     modifier: Modifier = Modifier,
+    maxHeight: Dp? = null,
     // iOS FIX: Clock dependency passed as parameter to prevent deadlock
     clock: IClock = getIosSafeClock(),
 ) {
@@ -270,7 +276,7 @@ fun ChoreographyDisplay(
             modifier =
                 Modifier
                     .widthIn(max = 400.dp)
-                    .heightIn(max = 600.dp)
+                    .heightIn(max = maxHeight ?: 600.dp)
                     .padding(WorkingChoreographyConstants.CHOREOGRAPHY_PADDING.dp)
                     .shadow(8.dp)
                     .background(Color.Black.copy(alpha = 0.7f))
