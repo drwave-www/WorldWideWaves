@@ -21,6 +21,7 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.ui.BaseViewModel
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -81,6 +82,10 @@ class EventsViewModel(
     // Simulation speed management for multi-event coordination
     private var globalBackupSpeed: Int? = null
     private val warmingEventsCount = MutableStateFlow(0)
+
+    // Observer lifecycle tracking for cleanup
+    private val observerJobs = mutableListOf<Job>()
+    private val activeEvents = mutableListOf<IWWWEvent>()
 
     // ---------------------------
 
@@ -159,10 +164,16 @@ class EventsViewModel(
             )
         }
 
+        // Clear previous observer jobs and events before starting new ones
+        stopAllObservers()
+
         // Start observing all events - multiple events can be active simultaneously
         // The user has a single position that needs to be checked against all event areas
         sortedEvents.forEach { event ->
             Log.d("EventsViewModel", "Starting observation for event ${event.id}")
+
+            // Track this event for cleanup
+            activeEvents.add(event)
 
             // Setup simulation speed listeners BEFORE starting observation
             monitorSimulatedSpeed(event)
@@ -170,6 +181,45 @@ class EventsViewModel(
             // Start event observation for all events
             event.observer.startObservation()
         }
+    }
+
+    /**
+     * Stop all active event observers and cancel all monitoring jobs.
+     * Called automatically before starting new observations, or manually when screen is dismissed.
+     * This prevents memory leaks from accumulating observers in the singleton ViewModel.
+     */
+    fun stopAllObservers() {
+        Log.d("EventsViewModel", "Stopping ${activeEvents.size} event observers and ${observerJobs.size} jobs")
+
+        // Stop all event observers
+        activeEvents.forEach { event ->
+            event.observer.stopObservation()
+        }
+        activeEvents.clear()
+
+        // Cancel all monitoring jobs
+        observerJobs.forEach { job ->
+            job.cancel()
+        }
+        observerJobs.clear()
+
+        // Reset warming counter
+        warmingEventsCount.value = 0
+
+        Log.d("EventsViewModel", "All observers stopped and jobs cancelled")
+    }
+
+    /**
+     * Cleanup when ViewModel is cleared.
+     * Stops all observers and cleans up repository resources.
+     */
+    override fun onCleared() {
+        Log.d("EventsViewModel", "EventsViewModel.onCleared() called - cleaning up observers and repository")
+        stopAllObservers()
+        scope.launch {
+            eventsRepository.cleanup()
+        }
+        super.onCleared()
     }
 
     /**
@@ -190,73 +240,77 @@ class EventsViewModel(
      */
     private fun monitorSimulatedSpeed(event: IWWWEvent) {
         // Track when this event enters/exits warming phase
-        scope.launch {
-            var wasWarming = false
-            event.observer.isUserWarmingInProgress.collect { isWarming ->
-                if (isWarming && !wasWarming) {
-                    // Event entered warming - increment counter atomically
-                    warmingEventsCount.update { it + 1 }
-                    val count = warmingEventsCount.value
-                    Log.d(
-                        "EventsViewModel",
-                        "Event ${event.id} entered warming. Total warming events: $count",
-                    )
-
-                    // Only set speed to 1 when FIRST event enters warming
-                    if (count == 1) {
-                        platform.getSimulation()?.setSpeed(1)
-                        Log.d("EventsViewModel", "Simulation speed set to 1 (warming started)")
-                    }
-                    wasWarming = true
-                } else if (!isWarming && wasWarming) {
-                    // Event exited warming - decrement counter atomically
-                    warmingEventsCount.update { maxOf(0, it - 1) }
-                    val count = warmingEventsCount.value
-                    Log.d(
-                        "EventsViewModel",
-                        "Event ${event.id} exited warming. Total warming events: $count",
-                    )
-
-                    // Only restore speed when ALL events exit warming AND user has been hit
-                    if (count == 0 && event.observer.userHasBeenHit.value) {
-                        val speedToRestore = globalBackupSpeed ?: 1
-                        platform.getSimulation()?.setSpeed(speedToRestore)
+        val job1 =
+            scope.launch {
+                var wasWarming = false
+                event.observer.isUserWarmingInProgress.collect { isWarming ->
+                    if (isWarming && !wasWarming) {
+                        // Event entered warming - increment counter atomically
+                        warmingEventsCount.update { it + 1 }
+                        val count = warmingEventsCount.value
                         Log.d(
                             "EventsViewModel",
-                            "All events exited warming after hit. Speed restored to $speedToRestore",
+                            "Event ${event.id} entered warming. Total warming events: $count",
                         )
-                    }
-                    wasWarming = false
-                }
-            }
-        }
 
-        // Handle user has been hit - restore speed after hit sequence
-        scope.launch {
-            var alreadyHit = false
-            event.observer.userHasBeenHit.collect { hasBeenHit ->
-                if (hasBeenHit && !alreadyHit) {
-                    alreadyHit = true
-                    Log.d("EventsViewModel", "Event ${event.id}: user has been hit")
+                        // Only set speed to 1 when FIRST event enters warming
+                        if (count == 1) {
+                            platform.getSimulation()?.setSpeed(1)
+                            Log.d("EventsViewModel", "Simulation speed set to 1 (warming started)")
+                        }
+                        wasWarming = true
+                    } else if (!isWarming && wasWarming) {
+                        // Event exited warming - decrement counter atomically
+                        warmingEventsCount.update { maxOf(0, it - 1) }
+                        val count = warmingEventsCount.value
+                        Log.d(
+                            "EventsViewModel",
+                            "Event ${event.id} exited warming. Total warming events: $count",
+                        )
 
-                    // Restore simulation speed after showing the hit sequence
-                    // Use scope.launch to ensure coroutine is cancelled when ViewModel is cleared
-                    scope.launch {
-                        delay(WaveTiming.SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * MILLIS_PER_SECOND)
-
-                        // Restore to user's preferred speed ONLY when simulation is active
-                        platform.getSimulation()?.let { simulation ->
-                            val speedToRestore = platform.preferredSimulationSpeed.value
-                            simulation.setSpeed(speedToRestore)
+                        // Only restore speed when ALL events exit warming AND user has been hit
+                        if (count == 0 && event.observer.userHasBeenHit.value) {
+                            val speedToRestore = globalBackupSpeed ?: 1
+                            platform.getSimulation()?.setSpeed(speedToRestore)
                             Log.d(
                                 "EventsViewModel",
-                                "Event ${event.id}: hit sequence complete. Speed restored to $speedToRestore",
+                                "All events exited warming after hit. Speed restored to $speedToRestore",
                             )
+                        }
+                        wasWarming = false
+                    }
+                }
+            }
+        observerJobs.add(job1)
+
+        // Handle user has been hit - restore speed after hit sequence
+        val job2 =
+            scope.launch {
+                var alreadyHit = false
+                event.observer.userHasBeenHit.collect { hasBeenHit ->
+                    if (hasBeenHit && !alreadyHit) {
+                        alreadyHit = true
+                        Log.d("EventsViewModel", "Event ${event.id}: user has been hit")
+
+                        // Restore simulation speed after showing the hit sequence
+                        // Use scope.launch to ensure coroutine is cancelled when ViewModel is cleared
+                        scope.launch {
+                            delay(WaveTiming.SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * MILLIS_PER_SECOND)
+
+                            // Restore to user's preferred speed ONLY when simulation is active
+                            platform.getSimulation()?.let { simulation ->
+                                val speedToRestore = platform.preferredSimulationSpeed.value
+                                simulation.setSpeed(speedToRestore)
+                                Log.d(
+                                    "EventsViewModel",
+                                    "Event ${event.id}: hit sequence complete. Speed restored to $speedToRestore",
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
+        observerJobs.add(job2)
     }
 
     // ---------------------------

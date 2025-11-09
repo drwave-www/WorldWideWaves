@@ -75,6 +75,13 @@ interface EventsRepository {
     suspend fun clearCache()
 
     /**
+     * Cleanup repository resources to prevent memory leaks.
+     * Cancels background coroutine scope and clears cache.
+     * Should be called when the repository is no longer needed.
+     */
+    suspend fun cleanup()
+
+    /**
      * Checks if events are currently being loaded.
      *
      * @return Flow indicating loading state

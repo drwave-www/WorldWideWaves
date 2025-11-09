@@ -33,6 +33,7 @@ import com.worldwidewaves.shared.ui.activities.WaveParticipationScreen
 import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.utils.bindIosLifecycle
 import com.worldwidewaves.shared.utils.finishIosApp
+import com.worldwidewaves.shared.viewmodels.EventsViewModel
 import com.worldwidewaves.shared.viewmodels.MapViewModel
 import org.koin.mp.KoinPlatform
 import platform.UIKit.UIViewController
@@ -361,3 +362,55 @@ fun makeFullMapViewController(eventId: String): UIViewController =
             onFinish = finish,
         )
     }
+
+// ---------- Lifecycle Management ----------
+
+/**
+ * Stops all event observers when the app goes to background or screen is dismissed.
+ * Call this from Swift UIViewController lifecycle methods (viewWillDisappear, sceneDidEnterBackground).
+ *
+ * ## Swift Usage
+ * ```swift
+ * // In SceneDelegate.swift
+ * func sceneDidEnterBackground(_ scene: UIScene) {
+ *     RootControllerKt.stopEventObservers()
+ * }
+ * ```
+ *
+ * This prevents memory accumulation in the singleton EventsViewModel when screens are not active.
+ */
+@Throws(Throwable::class)
+fun stopEventObservers() {
+    try {
+        val eventsViewModel = KoinPlatform.getKoin().get<EventsViewModel>()
+        eventsViewModel.stopAllObservers()
+        Log.d(TAG, "Event observers stopped from iOS lifecycle")
+    } catch (e: Exception) {
+        Log.e(TAG, "Failed to stop event observers", throwable = e)
+    }
+}
+
+/**
+ * Restarts event observers when the app returns to foreground.
+ * Call this from Swift UIViewController lifecycle methods (viewWillAppear, sceneWillEnterForeground).
+ *
+ * ## Swift Usage
+ * ```swift
+ * // In SceneDelegate.swift
+ * func sceneWillEnterForeground(_ scene: UIScene) {
+ *     // Observers will be restarted automatically when EventsListScreen reloads events
+ *     // No explicit call needed - observers start via LaunchedEffect in EventsListScreen
+ * }
+ * ```
+ *
+ * Note: This is informational. Observers are restarted automatically via EventsListScreen's
+ * LaunchedEffect when the screen reloads events.
+ */
+@Suppress("unused")
+@Throws(Throwable::class)
+fun ensureEventObserversRunning() {
+    // This is a no-op. Observers will restart automatically when EventsListScreen
+    // calls loadEvents() via LaunchedEffect. This function exists for documentation
+    // and symmetry with stopEventObservers().
+    Log.d(TAG, "Event observers will restart automatically on screen reload")
+}

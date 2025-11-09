@@ -72,11 +72,18 @@ sealed class CameraCommand {
  * - Wrappers survive entire screen session for dynamic updates
  * - CRITICAL: Must call unregisterWrapper() on screen exit to prevent leaks
  * - DisposableEffect in IosEventMap handles cleanup automatically
- * - No LRU eviction - explicit lifecycle management only
+ * - LRU eviction (MAX_WRAPPERS=10): Prevents unbounded growth if cleanup fails
  */
 @OptIn(ExperimentalNativeApi::class)
 object MapWrapperRegistry {
     private const val TAG = "MapWrapperRegistry"
+
+    /**
+     * Maximum number of wrappers to keep in memory simultaneously.
+     * When exceeded, least recently used wrappers are evicted.
+     * This prevents unbounded memory growth if DisposableEffect cleanup doesn't execute.
+     */
+    private const val MAX_WRAPPERS = 10
 
     /**
      * Strong references to wrappers.
@@ -85,8 +92,16 @@ object MapWrapperRegistry {
      *
      * Changed from WeakReference to strong references to prevent premature GC.
      * The wrapper MUST survive the entire screen session to handle dynamic updates.
+     *
+     * LRU eviction policy: When MAX_WRAPPERS is exceeded, oldest wrapper is evicted.
      */
     private val wrappers = mutableMapOf<String, Any>()
+
+    /**
+     * Track wrapper access order for LRU eviction.
+     * Most recently accessed wrapper is at the end of the list.
+     */
+    private val wrapperAccessOrder = mutableListOf<String>()
 
     // Store pending polygon data that Swift will render
     private val pendingPolygons = mutableMapOf<String, PendingPolygonData>()
@@ -106,9 +121,6 @@ object MapWrapperRegistry {
     // Store render callbacks that Swift wrappers can register for immediate notifications
     private val renderCallbacks = mutableMapOf<String, () -> Unit>()
 
-    // REMOVED: LRU eviction - no longer needed with explicit cleanup
-    // Wrappers are now managed explicitly via registerWrapper/unregisterWrapper
-
     data class PendingPolygonData(
         val coordinates: List<List<Pair<Double, Double>>>, // List of polygons, each containing lat/lng pairs
         val clearExisting: Boolean,
@@ -119,6 +131,8 @@ object MapWrapperRegistry {
      * Called from Swift after wrapper creation.
      * Uses STRONG reference - wrapper survives entire screen session.
      * MUST call unregisterWrapper() on screen exit to prevent memory leaks.
+     *
+     * LRU Eviction: If MAX_WRAPPERS is exceeded, evicts least recently used wrapper.
      */
     fun registerWrapper(
         eventId: String,
@@ -126,10 +140,25 @@ object MapWrapperRegistry {
     ) {
         Log.d(TAG, "Registering wrapper for event: $eventId (total wrappers: ${wrappers.size})")
 
+        // Check if we need to evict LRU wrapper
+        if (wrappers.size >= MAX_WRAPPERS && !wrappers.containsKey(eventId)) {
+            val lruEventId = wrapperAccessOrder.firstOrNull()
+            if (lruEventId != null) {
+                Log.w(TAG, "MAX_WRAPPERS ($MAX_WRAPPERS) exceeded, evicting LRU wrapper: $lruEventId")
+                unregisterWrapper(lruEventId)
+            }
+        }
+
+        // Remove from access order if already exists (will re-add at end)
+        wrapperAccessOrder.remove(eventId)
+
         // Store strong reference
         wrappers[eventId] = wrapper
 
-        Log.i(TAG, "Wrapper registered with STRONG reference for: $eventId")
+        // Add to end of access order (most recent)
+        wrapperAccessOrder.add(eventId)
+
+        Log.i(TAG, "Wrapper registered with STRONG reference for: $eventId (LRU position: ${wrapperAccessOrder.size})")
 
         // If there are pending polygons, notify that they should be rendered
         if (pendingPolygons.containsKey(eventId)) {
@@ -141,6 +170,8 @@ object MapWrapperRegistry {
      * Get the registered wrapper for an event.
      * Returns null if not yet registered.
      * With strong references, wrapper is guaranteed to exist until unregisterWrapper() is called.
+     *
+     * Updates LRU access order (moves wrapper to end of list as most recently used).
      */
     fun getWrapper(eventId: String): Any? {
         val wrapper = wrappers[eventId]
@@ -148,6 +179,10 @@ object MapWrapperRegistry {
             Log.w(TAG, "No wrapper registered for event: $eventId")
             return null
         }
+
+        // Update LRU access order (move to end = most recently used)
+        wrapperAccessOrder.remove(eventId)
+        wrapperAccessOrder.add(eventId)
 
         Log.v(TAG, "Retrieved wrapper for event: $eventId")
         return wrapper
@@ -203,6 +238,9 @@ object MapWrapperRegistry {
 
         // Remove wrapper (releases strong reference)
         wrappers.remove(eventId)
+
+        // Remove from LRU access order
+        wrapperAccessOrder.remove(eventId)
 
         // Clean up all associated data and callbacks
         pendingPolygons.remove(eventId)
@@ -1067,6 +1105,7 @@ object MapWrapperRegistry {
     fun clear() {
         Log.d(TAG, "Clearing all registered wrappers, pending data, and callbacks")
         wrappers.clear()
+        wrapperAccessOrder.clear()
         pendingPolygons.clear()
         pendingConfigCommands.clear()
         pendingAnimationCommands.clear()

@@ -178,7 +178,7 @@ class EventsRepositoryImpl(
      * Cleanup method to prevent memory leaks in long-lived components.
      * Cancels the background coroutine scope and clears the cache.
      */
-    suspend fun cleanup() {
+    override suspend fun cleanup() {
         backgroundScope.cancel()
         clearCache()
     }

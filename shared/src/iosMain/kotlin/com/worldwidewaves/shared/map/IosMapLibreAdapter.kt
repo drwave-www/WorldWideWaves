@@ -237,4 +237,16 @@ class IosMapLibreAdapter(
     override fun setGesturesEnabled(enabled: Boolean) {
         MapWrapperRegistry.setGesturesEnabledOnWrapper(eventId, enabled)
     }
+
+    /**
+     * Cleanup adapter resources.
+     * Resets StateFlows to ensure no lingering subscriptions.
+     * Called from IosEventMap.onDispose.
+     */
+    fun cleanup() {
+        Log.d(TAG, "Cleaning up adapter for event: $eventId")
+        _currentPosition.value = null
+        _currentZoom.value = 10.0
+        wrapper = null
+    }
 }

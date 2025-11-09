@@ -61,6 +61,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
@@ -141,6 +142,9 @@ class IosEventMap(
 
         DisposableEffect(mapRegistryKey) {
             onDispose {
+                Log.d("IosEventMap", "Disposing map for event: $mapRegistryKey, cancelling mapScope and adapter")
+                mapScope.cancel()
+                (mapLibreAdapter as? IosMapLibreAdapter)?.cleanup()
                 MapWrapperRegistry.unregisterWrapper(mapRegistryKey)
             }
         }

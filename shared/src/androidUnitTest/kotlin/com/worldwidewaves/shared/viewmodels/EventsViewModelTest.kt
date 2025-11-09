@@ -363,6 +363,8 @@ class EventsViewModelTest : KoinTest {
 
         override suspend fun clearCache() {}
 
+        override suspend fun cleanup() {}
+
         override fun isLoading(): kotlinx.coroutines.flow.Flow<Boolean> = _isLoading
 
         override fun getLastError(): kotlinx.coroutines.flow.Flow<Exception?> = _lastError
