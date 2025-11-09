@@ -396,6 +396,128 @@ This is the most complex scenario, especially on Android after app restart.
 
 ---
 
+## ViewModel State Persistence Issue (Critical)
+
+### The Problem
+
+**AndroidMapViewModel** is scoped and survives navigation within the same Activity. After uninstall, if user navigates away and back to the same event, the ViewModel's `featureState` may still show `Installed` or `Available` (stale state from before uninstall).
+
+**Impact Without Defense**:
+
+```kotlin
+// After uninstall:
+AndroidMapAvailabilityChecker.mapStates[eventId] = false  ✅ (updated)
+AndroidMapViewModel.featureState = Installed              ❌ (stale)
+
+// When user returns to event screen:
+HandleMapAvailability sees featureState = Installed
+  → Sets isMapAvailable = true  ❌
+  → Map loads instead of showing download button  ❌❌❌
+```
+
+### The Defense-in-Depth Solution (Commit 2fea8a8e)
+
+**Philosophy**: `forcedUnavailable` is the **authoritative source of truth** for user's uninstall intent. ALL UI decisions must check it, even if ViewModel shows Installed/Available.
+
+**Implementation**: Added `isForcedUnavailable(eventId)` checks at TWO critical decision points:
+
+#### 1. HandleMapAvailability Guard
+
+**Location**: `AndroidEventMap.kt` lines 286-295
+
+**Purpose**: Prevent stale ViewModel state from setting `isMapAvailable = true`
+
+```kotlin
+is MapFeatureState.Installed -> {
+    val isForcedUnavailable = androidChecker?.isForcedUnavailable(event.id) ?: false
+    if (!isForcedUnavailable) {
+        mapState.setIsMapAvailable(true)  // Only if NOT uninstalled
+    } else {
+        // Keep isMapAvailable = false despite ViewModel showing Installed
+        Log.w(TAG, "Map in forcedUnavailable, ignoring stale featureState")
+    }
+}
+```
+
+**Result**: After uninstall, `isMapAvailable` stays `false` → download button shows ✅
+
+#### 2. Map Loading Guard
+
+**Location**: `AndroidEventMap.kt` lines 594-607
+
+**Purpose**: Prevent map from loading when user uninstalled it
+
+```kotlin
+val mapFilesReady =
+    when (mapState.mapFeatureState) {
+        is MapFeatureState.Installed,
+        is MapFeatureState.Available -> {
+            val isForcedUnavailable = androidChecker?.isForcedUnavailable(event.id) ?: false
+            !isForcedUnavailable  // Only ready if NOT forcedUnavailable
+        }
+        else -> false
+    }
+
+if (mapFilesReady) loadMap()  // Won't load if forcedUnavailable
+```
+
+**Result**: After uninstall, `mapFilesReady = false` → map doesn't load ✅
+
+#### 3. Helper Method
+
+**Location**: `AndroidMapAvailabilityChecker.kt` lines 407-418
+
+```kotlin
+/**
+ * Checks if a map is in the forcedUnavailable set.
+ * Used by UI components to verify user's uninstall intent.
+ */
+fun isForcedUnavailable(eventId: String): Boolean {
+    return forcedUnavailable.contains(eventId)
+}
+```
+
+### Why Defense-in-Depth is Needed
+
+**Alternative approaches considered**:
+
+1. **Reset ViewModel state on uninstall** - ❌ Complex lifecycle management, tight coupling
+2. **Make ViewModel stateless** - ❌ Would break download progress tracking
+3. **Use reactive state derivation only** - ❌ Tried in f2d69b13, broke map detection
+
+**Defense-in-depth advantages**:
+
+- ✅ Simple: Just check forcedUnavailable before critical operations
+- ✅ Safe: Works even if ViewModel state is stale
+- ✅ Explicit: Clear intention at each decision point
+- ✅ Maintainable: Future developers see the guard and understand why
+
+### Testing the Defense
+
+**Scenario**: Download → Uninstall → Navigate Away → Return
+
+**Without defense**:
+```
+1. Uninstall → forcedUnavailable.add()
+2. Navigate away → ViewModel survives (Installed state)
+3. Navigate back → HandleMapAvailability sees Installed
+4. Sets isMapAvailable = true  ❌
+5. Map loads  ❌❌❌
+```
+
+**With defense**:
+```
+1. Uninstall → forcedUnavailable.add()
+2. Navigate away → ViewModel survives (Installed state)
+3. Navigate back → HandleMapAvailability sees Installed
+4. Checks isForcedUnavailable() → true
+5. Keeps isMapAvailable = false  ✅
+6. Download button shows  ✅
+7. Map doesn't load  ✅
+```
+
+---
+
 ## State Management
 
 ### MapFeatureState Enum

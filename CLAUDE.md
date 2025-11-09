@@ -257,9 +257,22 @@ Users can change language **without app restart**:
 - ✅ Persisted to SharedPreferences to survive app restarts
 - ✅ **MUST be cleared BEFORE availability checks in download flow**
 - ✅ Cleared in `MapDownloadCoordinator.downloadMap()` before `isMapInstalled()` check
+- ✅ **MUST be checked before UI operations** (defense-in-depth against stale ViewModel state)
 - ❌ iOS doesn't need this - ODR deletes files immediately
 
-**Key Rule**: When modifying download/uninstall flows, ensure `clearForcedUnavailableIfNeeded()` is called BEFORE any availability checks to prevent state desynchronization.
+**Critical Rules**:
+
+1. **Download flow**: Call `clearForcedUnavailableIfNeeded()` BEFORE any availability checks
+2. **UI operations**: Check `isForcedUnavailable()` before setting map available or loading map
+3. **ViewModel state**: Don't trust ViewModel.featureState alone - it may be stale after uninstall
+
+**Defense-in-Depth** (commit 2fea8a8e):
+
+AndroidEventMap checks `isForcedUnavailable()` at two points:
+- Before setting `isMapAvailable = true` (prevents incorrect UI state)
+- Before loading map (prevents uninstalled maps from rendering)
+
+This handles AndroidMapViewModel state persistence across navigation.
 
 **See**:
 
