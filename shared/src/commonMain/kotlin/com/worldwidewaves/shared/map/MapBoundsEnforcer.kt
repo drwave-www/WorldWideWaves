@@ -576,11 +576,13 @@ class MapBoundsEnforcer(
             latChange > WWWGlobals.MapDisplay.CHANGE_THRESHOLD ||
                 lngChange > WWWGlobals.MapDisplay.CHANGE_THRESHOLD // 10% change threshold
 
+        val latChangePct = (latChange * 100 * 10000).toInt() / 10000.0
+        val lngChangePct = (lngChange * 100 * 10000).toInt() / 10000.0
         Log.d(
             "MapBoundsEnforcer",
             "hasSignificantPaddingChange: current=(${visibleRegionPadding.latPadding}, ${visibleRegionPadding.lngPadding}), " +
                 "new=(${newPadding.latPadding}, ${newPadding.lngPadding}), " +
-                "latChange=${String.format("%.4f", latChange * 100)}%, lngChange=${String.format("%.4f", lngChange * 100)}%, " +
+                "latChange=$latChangePct%, lngChange=$lngChangePct%, " +
                 "threshold=${WWWGlobals.MapDisplay.CHANGE_THRESHOLD * 100}%, result=$isSignificant",
         )
 
