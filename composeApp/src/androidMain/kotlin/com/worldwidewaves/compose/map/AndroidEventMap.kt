@@ -179,7 +179,10 @@ class AndroidEventMap(
         var mapError by remember { mutableStateOf(false) }
         // Initialize with actual permission state instead of false
         var hasLocationPermission by remember { mutableStateOf(isLocationPermissionGranted(context)) }
-        var isMapAvailable by remember { mutableStateOf(false) }
+        // Derive map availability from AndroidMapAvailabilityChecker - single source of truth
+        // This eliminates stale state issues after uninstall/re-download
+        val mapStatesMap by mapAvailabilityChecker.mapStates.collectAsState()
+        val isMapAvailable = mapStatesMap[event.id] ?: false
         var isMapDownloading by remember { mutableStateOf(false) }
         // Guard to avoid auto-re-download after the user explicitly cancels
         var userCanceled by remember { mutableStateOf(false) }
@@ -212,7 +215,6 @@ class AndroidEventMap(
             setIsMapLoaded = { isMapLoaded = it },
             setMapError = { mapError = it },
             setHasLocationPermission = { hasLocationPermission = it },
-            setIsMapAvailable = { isMapAvailable = it },
             setIsMapDownloading = { isMapDownloading = it },
             setUserCanceled = { userCanceled = it },
             setInitStarted = { initStarted = it },
@@ -222,6 +224,7 @@ class AndroidEventMap(
 
     /**
      * Data class to hold map state variables and their setters
+     * Note: isMapAvailable is derived from mapAvailabilityChecker.mapStates (no setter needed)
      */
     private data class MapState(
         val scope: CoroutineScope,
@@ -239,7 +242,6 @@ class AndroidEventMap(
         val setIsMapLoaded: (Boolean) -> Unit,
         val setMapError: (Boolean) -> Unit,
         val setHasLocationPermission: (Boolean) -> Unit,
-        val setIsMapAvailable: (Boolean) -> Unit,
         val setIsMapDownloading: (Boolean) -> Unit,
         val setUserCanceled: (Boolean) -> Unit,
         val setInitStarted: (Boolean) -> Unit,
@@ -283,7 +285,7 @@ class AndroidEventMap(
                 is MapFeatureState.Installed -> {
                     Log.i(TAG, "Map installed: ${event.id}")
                     mapState.setIsMapDownloading(false)
-                    mapState.setIsMapAvailable(true)
+                    // isMapAvailable is now derived from mapAvailabilityChecker.mapStates
                     mapState.setMapError(false)
                     mapState.setInitStarted(false)
                 }
@@ -377,11 +379,11 @@ class AndroidEventMap(
         }
 
         // Map availability check and auto-download logic
+        // isMapAvailable is now reactively derived from mapAvailabilityChecker.mapStates
         LaunchedEffect(event.id, mapState.isMapAvailable, autoMapDownload, mapState.userCanceled) {
-            // Initial availability check
+            // Initial availability check - triggers MapViewModel to update its state
             if (!mapState.isMapAvailable) {
                 mapState.mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
-                mapState.setIsMapAvailable(mapAvailabilityChecker.isMapDownloaded(event.id))
             }
 
             // Auto-download if needed
@@ -393,7 +395,6 @@ class AndroidEventMap(
                         // Ensures map availability is rechecked after successful download
                         launch {
                             mapState.mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
-                            mapState.setIsMapAvailable(mapAvailabilityChecker.isMapDownloaded(event.id))
                         }
                     },
                 )

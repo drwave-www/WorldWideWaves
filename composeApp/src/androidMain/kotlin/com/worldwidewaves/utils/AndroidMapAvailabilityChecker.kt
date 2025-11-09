@@ -381,6 +381,9 @@ class AndroidMapAvailabilityChecker(
         if (wasPresent) {
             Log.i(TAG, "Cleared forcedUnavailable for $eventId (re-download)")
             saveForcedUnavailable()
+            // Update reactive state immediately to prevent race conditions
+            // Ensures mapStates flow reflects the cleared state without waiting for listener
+            refreshAvailability()
         }
         return wasPresent
     }
