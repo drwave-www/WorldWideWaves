@@ -31,7 +31,6 @@ import com.worldwidewaves.shared.data.currentTimeMillis
 import com.worldwidewaves.shared.data.getCacheDir
 import com.worldwidewaves.shared.data.getMapFileAbsolutePath
 import com.worldwidewaves.shared.data.isCachedFileStale
-import com.worldwidewaves.shared.data.platformFileExists
 import com.worldwidewaves.shared.data.updateCacheMetadata
 import com.worldwidewaves.shared.events.data.MapDataProvider
 import com.worldwidewaves.shared.events.utils.DataValidator
@@ -122,39 +121,20 @@ class WWWEventMap(
 
         val styleFilename = "style-${event.id}.json"
 
-        // Check in-memory cache first, but validate sprite version and file existence
+        // Check in-memory cache first - trust if sprite version valid (avoid blocking I/O)
         _cachedStyleUri?.let { cached ->
             // CRITICAL: Check sprite cache version BEFORE using cached style
             // Style files contain embedded sprite/glyph URIs that change when sprite system updates
-            if (!spriteCache.preferences.isCacheVersionValid()) {
-                Log.d("WWWEventMap", "getStyleUri: Sprite version changed, clearing in-memory style cache")
-                _cachedStyleUri = null
-                return@let // Skip to disk cache check (which will also fail version check)
-            }
-
-            // Verify cached style JSON file still exists on disk
-            if (cachedFileExists(styleFilename)) {
-                // CRITICAL: Also verify mbtiles file exists before returning cached style
-                // Style JSON references mbtiles file - if mbtiles is missing (still copying
-                // asynchronously), MapLibre will show gray screen
-                val mbtilesPath = getMbtilesFilePath()
-                if (mbtilesPath != null) {
-                    val mbtilesExists = platformFileExists(mbtilesPath)
-                    if (mbtilesExists) {
-                        val duration = currentTimeMillis() - startTime
-                        Log.d("WWWEventMap", "getStyleUri: Using validated cached style (mbtiles ready): $cached")
-                        Log.i("WWWEventMap", "[TELEMETRY] getStyleUri() END: In-memory cache HIT duration=${duration}ms event=${event.id}")
-                        return cached
-                    } else {
-                        Log.w("WWWEventMap", "getStyleUri: Mbtiles file missing (async copy in progress), invalidating style cache")
-                        _cachedStyleUri = null
-                    }
-                } else {
-                    Log.w("WWWEventMap", "getStyleUri: Cannot get mbtiles path, invalidating style cache")
-                    _cachedStyleUri = null
-                }
+            if (spriteCache.preferences.isCacheVersionValid()) {
+                // Return immediately - no file validation to avoid Dispatchers.IO blocking
+                // If mbtiles disappeared after caching, MapLibre will handle gracefully with gray screen
+                // This optimization eliminates 11-second delays from IO dispatcher saturation
+                val duration = currentTimeMillis() - startTime
+                Log.d("WWWEventMap", "getStyleUri: Using cached style from memory (version valid)")
+                Log.i("WWWEventMap", "[TELEMETRY] getStyleUri() END: In-memory cache HIT duration=${duration}ms event=${event.id}")
+                return cached
             } else {
-                Log.w("WWWEventMap", "getStyleUri: Style JSON missing, clearing in-memory cache")
+                Log.d("WWWEventMap", "getStyleUri: Sprite version changed, clearing in-memory style cache")
                 _cachedStyleUri = null
             }
         }
