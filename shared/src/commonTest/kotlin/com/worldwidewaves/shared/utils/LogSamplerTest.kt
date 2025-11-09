@@ -194,4 +194,76 @@ class LogSamplerTest {
         // Should sample exactly 10 times (counts: 1000, 2000, ..., 10000)
         assertEquals(10, sampledCount, "Should handle large counts correctly")
     }
+
+    // ============================================================
+    // LRU EVICTION TESTS (Memory Leak Prevention)
+    // ============================================================
+
+    @Test
+    fun testLRUEviction_ExceedingMaxCounters() {
+        // Create exactly 1000 unique log keys (MAX_COUNTERS)
+        repeat(1000) { i ->
+            LogSampler.shouldSample("test.key.$i", sampleRate = 100)
+        }
+
+        // All 1000 should exist
+        repeat(1000) { i ->
+            assertTrue(LogSampler.getCount("test.key.$i") > 0, "Counter $i should exist")
+        }
+
+        // Add 1001st key - should evict LRU (test.key.0)
+        LogSampler.shouldSample("test.key.1000", sampleRate = 100)
+
+        // test.key.0 should be evicted
+        assertEquals(0, LogSampler.getCount("test.key.0"), "test.key.0 should be evicted (LRU)")
+
+        // test.key.1 through test.key.1000 should exist
+        repeat(1000) { i ->
+            assertTrue(LogSampler.getCount("test.key.${i + 1}") > 0, "Counter ${i + 1} should exist")
+        }
+    }
+
+    @Test
+    fun testLRUEviction_AccessOrderPreservesRecentlyUsed() {
+        // Create 1000 counters
+        repeat(1000) { i ->
+            LogSampler.shouldSample("test.key.$i", sampleRate = 100)
+        }
+
+        // Access test.key.0 again to make it most recently used
+        LogSampler.shouldSample("test.key.0", sampleRate = 100)
+
+        // Add 1001st key - should evict test.key.1 (now LRU), not test.key.0
+        LogSampler.shouldSample("test.key.1000", sampleRate = 100)
+
+        // test.key.0 should still exist (accessed recently)
+        assertTrue(LogSampler.getCount("test.key.0") > 0, "test.key.0 should exist (accessed recently)")
+
+        // test.key.1 should be evicted (LRU)
+        assertEquals(0, LogSampler.getCount("test.key.1"), "test.key.1 should be evicted (LRU)")
+    }
+
+    @Test
+    fun testLRUEviction_BothMethodsUseSameEviction() {
+        // Mix shouldSample and shouldSampleAfterFirst
+        repeat(500) { i ->
+            LogSampler.shouldSample("sample.$i", sampleRate = 100)
+        }
+        repeat(500) { i ->
+            LogSampler.shouldSampleAfterFirst("afterFirst.$i", firstN = 5, sampleRate = 100)
+        }
+
+        // Total: 1000 unique keys
+        // All should exist
+        repeat(500) { i ->
+            assertTrue(LogSampler.getCount("sample.$i") > 0, "sample.$i should exist")
+            assertTrue(LogSampler.getCount("afterFirst.$i") > 0, "afterFirst.$i should exist")
+        }
+
+        // Add 1001st key - should evict oldest
+        LogSampler.shouldSample("new.key", sampleRate = 100)
+
+        // sample.0 should be evicted (oldest)
+        assertEquals(0, LogSampler.getCount("sample.0"), "sample.0 should be evicted (LRU)")
+    }
 }

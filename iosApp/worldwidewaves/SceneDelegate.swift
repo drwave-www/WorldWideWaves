@@ -68,6 +68,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var nav: UINavigationController?
     let tag = "SceneDelegate"
     private var localeObserver: NSObjectProtocol?
+    private var memoryPressureObserver: NSObjectProtocol?
 
     /// Routes deep link URLs to the appropriate view controller.
     ///
@@ -376,6 +377,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
         WWWLog.i(tag, "Locale change observer installed")
 
+        // Observe memory warnings for leak detection and monitoring
+        memoryPressureObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.didReceiveMemoryWarningNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.onMemoryWarning()
+        }
+        WWWLog.i(tag, "Memory pressure observer installed")
+
         if let ctx = connectionOptions.urlContexts.first {
             #if DEBUG
             WWWLog.d(tag, "deep link detected")
@@ -486,13 +497,73 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
     }
 
+    /// Scene will enter foreground - restart observers.
+    ///
+    /// Called when the app transitions from background to foreground.
+    /// Observers are restarted automatically via EventsListScreen's LaunchedEffect.
+    func sceneWillEnterForeground(_ scene: UIScene) {
+        WWWLog.d(tag, "Scene will enter foreground")
+        // Observers restart automatically when EventsListScreen reloads events
+    }
+
+    /// Scene did enter background - stop observers to save memory.
+    ///
+    /// Called when the app transitions to background.
+    /// Stops event observers in singleton EventsViewModel to prevent memory accumulation.
+    func sceneDidEnterBackground(_ scene: UIScene) {
+        WWWLog.d(tag, "Scene did enter background - stopping event observers")
+        RootControllerKt.stopEventObservers()
+    }
+
+    /// Handle memory warnings by logging current state.
+    ///
+    /// Called when iOS detects memory pressure. Logs diagnostic information
+    /// to help identify memory leaks and excessive allocations.
+    private func onMemoryWarning() {
+        let memoryUsed = reportMemoryUsage()
+        WWWLog.w(tag, "[MEMORY WARNING] iOS memory pressure detected!")
+        WWWLog.w(tag, "[MEMORY] Current usage: \(memoryUsed)MB")
+        WWWLog.w(tag, "[MEMORY] Check Xcode Memory Graph Debugger for retain cycles")
+        WWWLog.w(tag, "[MEMORY] Run Instruments → Leaks/Allocations for detailed analysis")
+
+        #if DEBUG
+        // In debug builds, also log active map wrappers
+        let wrapperCount = Shared.MapWrapperRegistry.shared.wrappers.count
+        WWWLog.w(tag, "[MEMORY] Active map wrappers: \(wrapperCount) (max: 10)")
+        #endif
+    }
+
+    /// Report current memory usage in megabytes.
+    ///
+    /// Returns the app's current memory footprint for diagnostic logging.
+    private func reportMemoryUsage() -> Double {
+        var info = mach_task_basic_info()
+        var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size) / 4
+
+        let result = withUnsafeMutablePointer(to: &info) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: 1) {
+                task_info(mach_task_self_, task_flavor_t(MACH_TASK_BASIC_INFO), $0, &count)
+            }
+        }
+
+        if result == KERN_SUCCESS {
+            let usedMB = Double(info.resident_size) / 1024.0 / 1024.0
+            return usedMB
+        }
+        return 0.0
+    }
+
     /// Cleanup when SceneDelegate is deallocated.
     ///
-    /// Removes the locale change observer to prevent memory leaks and dangling notifications.
+    /// Removes observers to prevent memory leaks and dangling notifications.
     deinit {
         if let observer = localeObserver {
             NotificationCenter.default.removeObserver(observer)
             WWWLog.d(tag, "Locale observer removed")
+        }
+        if let observer = memoryPressureObserver {
+            NotificationCenter.default.removeObserver(observer)
+            WWWLog.d(tag, "Memory pressure observer removed")
         }
     }
 

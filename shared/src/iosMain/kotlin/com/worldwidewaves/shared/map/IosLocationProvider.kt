@@ -91,6 +91,11 @@ class IosLocationProvider : LocationProvider {
         this.onLocationUpdate = onLocationUpdate
         isUpdating = true
 
+        // Restore delegate if it was cleared (happens after stopLocationUpdates)
+        if (locationManager.delegate == null) {
+            locationManager.delegate = locationDelegate
+        }
+
         Log.d(TAG, "Starting iOS location updates...")
 
         try {
@@ -154,11 +159,13 @@ class IosLocationProvider : LocationProvider {
 
         try {
             locationManager.stopUpdatingLocation()
+            // Clear delegate to prevent CLLocationManager from retaining it
+            locationManager.delegate = null
             isUpdating = false
             onLocationUpdate = null
             _currentLocation.value = null
 
-            Log.d(TAG, "Stopped location updates")
+            Log.d(TAG, "Stopped location updates and cleared delegate")
         } catch (e: Exception) {
             Log.e(TAG, "Error stopping location updates", e)
         }

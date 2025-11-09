@@ -84,7 +84,28 @@ import Shared
     }
 
     deinit {
-        WWWLog.w(Self.tag, "[WARNING] Deinitializing MapLibreViewWrapper for event: \(eventId ?? "unknown")")
+        WWWLog.w(Self.tag, "[MEMORY] Deinitializing MapLibreViewWrapper for event: \(eventId ?? "unknown"), cleaning up resources")
+
+        // Clean up to prevent memory leaks
+        if let mapView = mapView {
+            // Remove all gesture recognizers
+            if let gestureRecognizers = mapView.gestureRecognizers {
+                for gesture in gestureRecognizers {
+                    mapView.removeGestureRecognizer(gesture)
+                }
+            }
+
+            // Remove user location annotation if present
+            if let annotation = userLocationAnnotation {
+                mapView.removeAnnotation(annotation)
+                userLocationAnnotation = nil
+            }
+
+            // Clear delegate to prevent retention cycle
+            mapView.delegate = nil
+        }
+
+        WWWLog.d(Self.tag, "[MEMORY] MapLibreViewWrapper cleanup complete for event: \(eventId ?? "unknown")")
     }
 
     // MARK: - Map Setup

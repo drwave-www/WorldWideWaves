@@ -61,11 +61,41 @@ import kotlinx.atomicfu.locks.withLock
  */
 object LogSampler {
     /**
+     * Maximum number of unique log locations to track.
+     * When exceeded, least recently used counters are evicted.
+     */
+    private const val MAX_COUNTERS = 1000
+
+    /**
      * Counter storage for each unique log location.
      * Thread-safe via atomic operations. Map access protected by lock.
+     * LRU eviction prevents unbounded memory growth.
      */
     private val counters = mutableMapOf<String, kotlinx.atomicfu.AtomicInt>()
+    private val accessOrder = mutableListOf<String>()
     private val lock = reentrantLock()
+
+    /**
+     * Gets or creates a counter with LRU eviction.
+     * Must be called within lock.withLock.
+     */
+    private fun getOrCreateCounter(key: String): kotlinx.atomicfu.AtomicInt {
+        // Check if we need to evict LRU counter
+        if (counters.size >= MAX_COUNTERS && !counters.containsKey(key)) {
+            val lruKey = accessOrder.firstOrNull()
+            if (lruKey != null) {
+                counters.remove(lruKey)
+                accessOrder.removeAt(0)
+            }
+        }
+
+        // Update access order
+        accessOrder.remove(key)
+        accessOrder.add(key)
+
+        // Get or create counter
+        return counters.getOrPut(key) { atomic(0) }
+    }
 
     /**
      * Check if this log should be sampled (emitted).
@@ -89,7 +119,7 @@ object LogSampler {
 
         val counter =
             lock.withLock {
-                counters.getOrPut(key) { atomic(0) }
+                getOrCreateCounter(key)
             }
         val count = counter.incrementAndGet()
 
@@ -119,7 +149,7 @@ object LogSampler {
 
         val counter =
             lock.withLock {
-                counters.getOrPut(key) { atomic(0) }
+                getOrCreateCounter(key)
             }
         val count = counter.incrementAndGet()
 
@@ -139,6 +169,7 @@ object LogSampler {
     fun reset() {
         lock.withLock {
             counters.clear()
+            accessOrder.clear()
         }
     }
 

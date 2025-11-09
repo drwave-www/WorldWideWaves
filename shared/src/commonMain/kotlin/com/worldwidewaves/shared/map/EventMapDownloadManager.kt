@@ -35,6 +35,12 @@ class EventMapDownloadManager(
 ) {
     private companion object {
         private const val TAG = "EventMapDownloadManager"
+
+        /**
+         * Maximum number of download states to track simultaneously.
+         * When exceeded, least recently used completed downloads are evicted.
+         */
+        private const val MAX_DOWNLOAD_STATES = 50
     }
 
     /**
@@ -48,15 +54,52 @@ class EventMapDownloadManager(
     )
 
     private val _downloadStates = mutableMapOf<String, MutableStateFlow<DownloadState>>()
+    private val accessOrder = mutableListOf<String>()
 
     /**
-     * Get download state flow for a specific map
+     * Get download state flow for a specific map.
+     * Implements LRU eviction to prevent unbounded memory growth.
      */
-    fun getDownloadState(mapId: String): StateFlow<DownloadState> =
-        _downloadStates
+    fun getDownloadState(mapId: String): StateFlow<DownloadState> {
+        // Evict LRU completed downloads if we've hit the limit
+        if (_downloadStates.size >= MAX_DOWNLOAD_STATES && !_downloadStates.containsKey(mapId)) {
+            evictLRUCompletedDownload()
+        }
+
+        // Update access order
+        accessOrder.remove(mapId)
+        accessOrder.add(mapId)
+
+        return _downloadStates
             .getOrPut(mapId) {
                 MutableStateFlow(DownloadState())
             }.asStateFlow()
+    }
+
+    /**
+     * Evict the least recently used completed download to free memory.
+     * Only evicts downloads that are completed and available (not active or failed).
+     */
+    private fun evictLRUCompletedDownload() {
+        // Find LRU completed download
+        for (mapId in accessOrder) {
+            val state = _downloadStates[mapId]?.value
+            if (state != null && !state.isDownloading && state.error == null && state.isAvailable) {
+                Log.d(TAG, "Evicting LRU completed download: $mapId (limit=$MAX_DOWNLOAD_STATES)")
+                _downloadStates.remove(mapId)
+                accessOrder.remove(mapId)
+                return
+            }
+        }
+
+        // If no completed downloads found, evict oldest entry regardless
+        val lruMapId = accessOrder.firstOrNull()
+        if (lruMapId != null) {
+            Log.w(TAG, "No completed downloads to evict, removing oldest: $lruMapId")
+            _downloadStates.remove(lruMapId)
+            accessOrder.removeAt(0)
+        }
+    }
 
     /**
      * Check if map is available and update state
@@ -158,22 +201,23 @@ class EventMapDownloadManager(
      */
     fun clearCompletedDownloads() {
         Log.d(TAG, "Clearing completed downloads from cache")
-        val iterator = _downloadStates.iterator()
-        var clearedCount = 0
+        val toRemove = mutableListOf<String>()
 
-        while (iterator.hasNext()) {
-            val entry = iterator.next()
-            val state = entry.value.value
-
+        _downloadStates.forEach { (mapId, stateFlow) ->
+            val state = stateFlow.value
             // Remove only completed successful downloads (not downloading, no error)
             if (!state.isDownloading && state.error == null && state.isAvailable) {
-                iterator.remove()
-                clearedCount++
-                Log.v(TAG, "Removed completed download: ${entry.key}")
+                toRemove.add(mapId)
             }
         }
 
-        Log.i(TAG, "Cleared $clearedCount completed downloads from cache")
+        toRemove.forEach { mapId ->
+            _downloadStates.remove(mapId)
+            accessOrder.remove(mapId)
+            Log.v(TAG, "Removed completed download: $mapId")
+        }
+
+        Log.i(TAG, "Cleared ${toRemove.size} completed downloads from cache")
     }
 
     /**
@@ -186,6 +230,15 @@ class EventMapDownloadManager(
         mapId: String,
         update: (DownloadState) -> DownloadState,
     ) {
+        // Evict LRU completed downloads if we've hit the limit
+        if (_downloadStates.size >= MAX_DOWNLOAD_STATES && !_downloadStates.containsKey(mapId)) {
+            evictLRUCompletedDownload()
+        }
+
+        // Update access order (move to end = most recently used)
+        accessOrder.remove(mapId)
+        accessOrder.add(mapId)
+
         val flow = _downloadStates.getOrPut(mapId) { MutableStateFlow(DownloadState()) }
         val oldState = flow.value
         val newState = update(oldState)

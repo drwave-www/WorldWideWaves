@@ -477,4 +477,126 @@ class MapWrapperRegistryTest {
         // Cleanup
         MapWrapperRegistry.unregisterWrapper(eventId)
     }
+
+    // ============================================================
+    // LRU EVICTION TESTS (Memory Leak Prevention)
+    // ============================================================
+
+    @Test
+    fun testLRUEviction_ExceedingMaxWrappers() {
+        // Register exactly MAX_WRAPPERS (10) wrappers
+        repeat(10) { i ->
+            MapWrapperRegistry.registerWrapper("event-$i", "Wrapper$i")
+        }
+
+        // All 10 should be present
+        repeat(10) { i ->
+            assertNotNull(MapWrapperRegistry.getWrapper("event-$i"), "Wrapper $i should exist")
+        }
+
+        // Register 11th wrapper - should evict LRU (event-0)
+        MapWrapperRegistry.registerWrapper("event-10", "Wrapper10")
+
+        // event-0 should be evicted (LRU)
+        assertNull(MapWrapperRegistry.getWrapper("event-0"), "event-0 should be evicted (LRU)")
+
+        // event-1 through event-10 should still exist
+        repeat(10) { i ->
+            assertNotNull(MapWrapperRegistry.getWrapper("event-${i + 1}"), "Wrapper ${i + 1} should exist")
+        }
+
+        // Cleanup
+        repeat(10) { i ->
+            MapWrapperRegistry.unregisterWrapper("event-${i + 1}")
+        }
+    }
+
+    @Test
+    fun testLRUEviction_AccessOrderUpdates() {
+        // Register 10 wrappers
+        repeat(10) { i ->
+            MapWrapperRegistry.registerWrapper("event-$i", "Wrapper$i")
+        }
+
+        // Access event-0 to make it most recently used
+        MapWrapperRegistry.getWrapper("event-0")
+
+        // Register 11th wrapper - should evict event-1 (now LRU), not event-0
+        MapWrapperRegistry.registerWrapper("event-10", "Wrapper10")
+
+        // event-1 should be evicted (LRU after event-0 was accessed)
+        assertNull(MapWrapperRegistry.getWrapper("event-1"), "event-1 should be evicted (LRU)")
+
+        // event-0 should still exist (was accessed recently)
+        assertNotNull(MapWrapperRegistry.getWrapper("event-0"), "event-0 should exist (accessed recently)")
+
+        // Cleanup
+        MapWrapperRegistry.clear()
+    }
+
+    @Test
+    fun testLRUEviction_ReRegisterMoveToEnd() {
+        // Register 10 wrappers
+        repeat(10) { i ->
+            MapWrapperRegistry.registerWrapper("event-$i", "Wrapper$i")
+        }
+
+        // Re-register event-0 (moves to end of access order)
+        MapWrapperRegistry.registerWrapper("event-0", "Wrapper0-Updated")
+
+        // Register 11th wrapper - should evict event-1 (now LRU)
+        MapWrapperRegistry.registerWrapper("event-10", "Wrapper10")
+
+        // event-1 should be evicted
+        assertNull(MapWrapperRegistry.getWrapper("event-1"), "event-1 should be evicted (LRU)")
+
+        // event-0 should exist with updated value
+        assertEquals("Wrapper0-Updated", MapWrapperRegistry.getWrapper("event-0"))
+
+        // Cleanup
+        MapWrapperRegistry.clear()
+    }
+
+    @Test
+    fun testLRUEviction_DoesNotEvictExistingKeys() {
+        // Register 10 wrappers
+        repeat(10) { i ->
+            MapWrapperRegistry.registerWrapper("event-$i", "Wrapper$i")
+        }
+
+        // Re-register existing wrapper (should NOT trigger eviction)
+        MapWrapperRegistry.registerWrapper("event-5", "Wrapper5-Updated")
+
+        // All 10 should still exist
+        repeat(10) { i ->
+            assertNotNull(MapWrapperRegistry.getWrapper("event-$i"), "Wrapper $i should exist")
+        }
+
+        // event-5 should have updated value
+        assertEquals("Wrapper5-Updated", MapWrapperRegistry.getWrapper("event-5"))
+
+        // Cleanup
+        MapWrapperRegistry.clear()
+    }
+
+    @Test
+    fun testLRUEviction_CleansUpAssociatedData() {
+        // Register 10 wrappers with associated data
+        repeat(10) { i ->
+            MapWrapperRegistry.registerWrapper("event-$i", "Wrapper$i")
+            MapWrapperRegistry.setPendingPolygons("event-$i", listOf(listOf(Pair(0.0, 0.0))), true)
+            MapWrapperRegistry.setPendingCameraCommand("event-$i", CameraCommand.AnimateToPosition(Position(0.0, 0.0), 10.0))
+        }
+
+        // Register 11th wrapper - should evict event-0 and its data
+        MapWrapperRegistry.registerWrapper("event-10", "Wrapper10")
+
+        // event-0 wrapper and data should be evicted
+        assertNull(MapWrapperRegistry.getWrapper("event-0"))
+        assertFalse(MapWrapperRegistry.hasPendingPolygons("event-0"), "Polygons should be cleared on eviction")
+        assertFalse(MapWrapperRegistry.hasPendingCameraCommand("event-0"), "Camera commands should be cleared on eviction")
+
+        // Cleanup
+        MapWrapperRegistry.clear()
+    }
 }

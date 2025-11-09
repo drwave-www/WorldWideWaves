@@ -154,6 +154,12 @@ private inline fun makeComposeVC(
         }
 
     box.vc = vc
+
+    // Track view controller for memory leak detection (DEBUG builds only)
+    // Note: This is a Swift call via Objective-C bridge
+    // MemoryLeakDetector.shared().track(vc, name = logLabel)
+    // Uncomment above when MemoryLeakDetector is added to Xcode project
+
     return vc
 }
 

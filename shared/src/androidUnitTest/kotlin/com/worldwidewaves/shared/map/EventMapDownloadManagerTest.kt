@@ -19,6 +19,11 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class EventMapDownloadManagerTest {
+    private companion object {
+        // Must match EventMapDownloadManager.MAX_DOWNLOAD_STATES
+        private const val MAX_DOWNLOAD_STATES = 50
+    }
+
     private lateinit var mockPlatformManager: MockPlatformMapManager
     private lateinit var coordinator: EventMapDownloadManager
 
@@ -216,4 +221,45 @@ class EventMapDownloadManagerTest {
             cancelledMaps.add(mapId)
         }
     }
+
+    // ============================================================
+    // LRU EVICTION TESTS (Memory Leak Prevention)
+    // ============================================================
+
+    @Test
+    fun testLRUEviction_PreventsUnboundedGrowth() =
+        runTest {
+            // Track many downloads (more than MAX_DOWNLOAD_STATES)
+            // Mark all as completed so they can be evicted
+            repeat(60) { i ->
+                val mapId = "map-$i"
+                mockPlatformManager.availableMaps.add(mapId)
+                coordinator.checkAvailability(mapId)
+            }
+
+            // Count should not significantly exceed MAX
+            assertTrue(
+                coordinator.getTrackedDownloadCount() <= MAX_DOWNLOAD_STATES + 5,
+                "Count should be near max (${coordinator.getTrackedDownloadCount()}), not unbounded",
+            )
+        }
+
+    @Test
+    fun testClearCompletedDownloads_RemovesOnlyCompleted() =
+        runTest {
+            // Setup: completed downloads
+            mockPlatformManager.availableMaps.add("completed-1")
+            mockPlatformManager.availableMaps.add("completed-2")
+            coordinator.checkAvailability("completed-1")
+            coordinator.checkAvailability("completed-2")
+
+            val beforeCount = coordinator.getTrackedDownloadCount()
+
+            // Clear completed
+            coordinator.clearCompletedDownloads()
+
+            // All completed should be cleared
+            val afterCount = coordinator.getTrackedDownloadCount()
+            assertTrue(afterCount < beforeCount, "Should have fewer tracked states after clear")
+        }
 }
