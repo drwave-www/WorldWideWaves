@@ -405,6 +405,17 @@ class AndroidMapAvailabilityChecker(
     }
 
     /**
+     * Checks if a map is in the forcedUnavailable set.
+     *
+     * Used by UI components to verify user's uninstall intent before allowing map loading.
+     * Prevents stale ViewModel state from loading uninstalled maps.
+     *
+     * @param eventId The event/map ID to check
+     * @return true if user explicitly uninstalled this map, false otherwise
+     */
+    fun isForcedUnavailable(eventId: String): Boolean = forcedUnavailable.contains(eventId)
+
+    /**
      * Request uninstall of the dynamic-feature module corresponding to [eventId].
      * Implements the MapAvailabilityChecker interface method.
      *

@@ -283,7 +283,16 @@ class AndroidEventMap(
                 is MapFeatureState.Installed -> {
                     Log.i(TAG, "Map installed: ${event.id}")
                     mapState.setIsMapDownloading(false)
-                    mapState.setIsMapAvailable(true)
+                    // CRITICAL: Respect forcedUnavailable flag before setting available
+                    // Prevents stale ViewModel state from loading uninstalled maps
+                    // After uninstall, forcedUnavailable is set but ViewModel may still show Installed
+                    val androidChecker = mapAvailabilityChecker as? AndroidMapAvailabilityChecker
+                    val isForcedUnavailable = androidChecker?.isForcedUnavailable(event.id) ?: false
+                    if (!isForcedUnavailable) {
+                        mapState.setIsMapAvailable(true)
+                    } else {
+                        Log.w(TAG, "Map ${event.id} in forcedUnavailable, keeping isMapAvailable=false despite featureState=Installed")
+                    }
                     mapState.setMapError(false)
                     mapState.setInitStarted(false)
                 }
@@ -586,13 +595,21 @@ class AndroidEventMap(
                         when (mapState.mapFeatureState) {
                             is MapFeatureState.Installed, // Just completed download
                             is MapFeatureState.Available, // Already cached from previous session
-                            -> true
+                            -> {
+                                // CRITICAL: Respect forcedUnavailable even if ViewModel shows Installed/Available
+                                // After uninstall, ViewModel may have stale state from previous session
+                                // forcedUnavailable is the source of truth for user's uninstall intent
+                                val androidChecker = mapAvailabilityChecker as? AndroidMapAvailabilityChecker
+                                val isForcedUnavailable = androidChecker?.isForcedUnavailable(event.id) ?: false
+                                !isForcedUnavailable // Only ready if NOT forcedUnavailable
+                            }
                             else -> false // Downloading, NotAvailable, Failed, etc.
                         }
 
                     // Only attempt to initialize map when tiles are actually available (downloaded)
                     // Attempting to load before download completes causes gray screen (no tiles)
                     // and wrong camera position (moves to bounds before tiles exist)
+                    // ALSO respects forcedUnavailable (prevents loading uninstalled maps)
                     if (!mapState.isMapLoaded && !mapState.initStarted && mapFilesReady) {
                         mapState.setInitStarted(true)
                         loadMap(
