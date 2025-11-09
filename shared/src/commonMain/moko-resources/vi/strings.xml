@@ -660,6 +660,8 @@
   <string name="notification_wave_hit_body">Làn sóng ở %1$s vừa tới chỗ bạn!</string>
   <!-- src_hash: c771b7ea17490dffedd973a684b3cac26030c296 -->
   <string name="notification_permission_rationale">Nhận thông báo khi các làn sóng bạn yêu thích bắt đầu</string>
-  <!-- src_hash: c685868070c0875387031ecfb82bdc7ab8ff32ca -->
-  <string name="notification_permission_denied">Thông báo đã bị tắt. Bật trong Cài đặt</string>
+  <!-- src_hash: 5748c26a23b697f50c263d0d9664b0aa8abed126 -->
+  <string name="notification_permission_denied">Thông báo đã tắt. Bật trong Cài đặt</string>
+  <!-- src_hash: 6064cae6e1238f86d2a780177772a0d1455c7d2b -->
+  <string name="search_for_places_in_event">Tìm địa điểm trong sự kiện này</string>
 </resources>
