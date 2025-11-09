@@ -101,7 +101,7 @@ android {
             isMinifyEnabled = false
         }
     }
-    
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -188,7 +188,7 @@ if (isModuleAvailable("paris_france")) {
     // Load map tiles
     val mapView = MapLibreMap()
     mapView.setOfflineSource("file:///android_asset/paris_france.mbtiles")
-    
+
     // Load city boundaries
     val geoJson = loadAssetString("paris_france.geojson")
 }
@@ -207,6 +207,73 @@ splitInstallManager.startInstall(
 // Check installation status
 splitInstallManager.installedModules.contains("paris_france")
 ```
+
+## Uninstall and Re-download
+
+### Android Behavior (Play Core Dynamic Features)
+
+**Uninstall Process**:
+
+- Uses **deferred uninstall** - files remain in cache after uninstall
+- Files only deleted on next app update (Play Core behavior)
+- `forcedUnavailable` flag set to respect user's uninstall intent
+- Flag persisted to SharedPreferences (survives app restart)
+- Map appears unavailable immediately despite files existing
+
+**Re-download Process**:
+
+- `forcedUnavailable` flag cleared BEFORE availability checks
+- If files still exist (deferred uninstall) → Skip download, mark Installed
+- If files deleted → Proceed with download
+- Works correctly even after app restart
+
+**Code**:
+
+```kotlin
+// Uninstall
+mapAvailabilityChecker.requestMapUninstall("paris_france")
+// → forcedUnavailable.add("paris_france")
+// → Persisted to SharedPreferences
+// → clearEventCache() deletes files from cache
+
+// Re-download
+mapViewModel.downloadMap("paris_france")
+// → clearForcedUnavailableIfNeeded() called FIRST
+// → forcedUnavailable.remove("paris_france")
+// → Persisted to SharedPreferences
+// → isMapInstalled() check now accurate
+```
+
+### iOS Behavior (On-Demand Resources)
+
+**Uninstall Process**:
+
+- Uses **immediate uninstall** - files deleted immediately
+- No deferred uninstall concept
+- No `forcedUnavailable` flag needed
+- Resources released via `endAccessingResources()`
+
+**Re-download Process**:
+
+- Normal download flow (no special handling needed)
+- `beginAccessingResources()` downloads from App Store
+- Resources pinned automatically
+
+**Code**:
+
+```kotlin
+// Uninstall
+mapAvailabilityChecker.requestMapUninstall("paris_france")
+// → endAccessingResources() releases resources
+// → iOS deletes files immediately
+
+// Re-download
+mapViewModel.downloadMap("paris_france")
+// → beginAccessingResources() downloads from App Store
+// → No forcedUnavailable clearing needed
+```
+
+**See**: [Map Download System Architecture](../docs/architecture/map-download-system.md) for complete uninstall/re-download flows and edge cases.
 
 ## Map Data Sources
 

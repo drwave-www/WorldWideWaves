@@ -247,6 +247,25 @@ Users can change language **without app restart**:
 - ✅ All network requests must use HTTPS
 - ✅ Handle location data with appropriate privacy measures
 
+### Map Download System
+
+**Critical Understanding**: Android Play Core uses **deferred uninstall** - map files remain after uninstall until app update.
+
+**forcedUnavailable Flag** (Android only):
+
+- ✅ Set on uninstall to respect user intent despite file persistence
+- ✅ Persisted to SharedPreferences to survive app restarts
+- ✅ **MUST be cleared BEFORE availability checks in download flow**
+- ✅ Cleared in `MapDownloadCoordinator.downloadMap()` before `isMapInstalled()` check
+- ❌ iOS doesn't need this - ODR deletes files immediately
+
+**Key Rule**: When modifying download/uninstall flows, ensure `clearForcedUnavailableIfNeeded()` is called BEFORE any availability checks to prevent state desynchronization.
+
+**See**:
+
+- [Map Download System Architecture](docs/architecture/map-download-system.md) - Complete system documentation
+- [Map Cache Management](docs/architecture/map-cache-management.md) - Cache lifecycle and invalidation
+
 ---
 
 ## Testing Requirements

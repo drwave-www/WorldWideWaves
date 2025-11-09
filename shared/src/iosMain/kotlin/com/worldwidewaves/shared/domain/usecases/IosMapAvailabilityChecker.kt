@@ -33,9 +33,48 @@ import platform.Foundation.NSOperationQueue
 import kotlin.coroutines.resume
 
 /**
- * iOS ODR availability checker.
- * No downloads occur unless requestMapDownload(...) is called,
- * or assets are present as Initial Install Tags.
+ * iOS ODR (On-Demand Resources) availability checker.
+ *
+ * PLATFORM DIFFERENCES FROM ANDROID:
+ *
+ * iOS uses NSBundleResourceRequest for map management:
+ * • **Immediate uninstall**: Resources deleted immediately on endAccessingResources()
+ * • **No deferred uninstall**: Files gone as soon as released (vs Android where files remain)
+ * • **No forcedUnavailable flag needed**: File state = availability state (no override needed)
+ * • **No persistence required**: Resources re-checked on app launch
+ * • **Resource pinning**: Must keep NSBundleResourceRequest alive to prevent OS purge
+ *
+ * Android vs iOS comparison:
+ * • Android: Play Core deferred uninstall → forcedUnavailable flag + SharedPreferences
+ * • iOS: ODR immediate delete → No flag, no persistence
+ *
+ * • Android: Files remain after uninstall until app update → Need override mechanism
+ * • iOS: Files deleted on uninstall → File existence = truth
+ *
+ * • Android: SplitInstallManager tracks module state
+ * • iOS: NSBundleResourceRequest tracks resource availability
+ *
+ * • Android: Must handle app restart with persisted uninstall intent
+ * • iOS: Re-check on launch (no persisted state needed)
+ *
+ * DOWNLOAD FLOW:
+ * 1. requestMapDownload() → beginAccessingResources()
+ * 2. Resources downloaded from App Store
+ * 3. Request stored in pinnedRequests (prevents GC + OS purge)
+ * 4. mapStates updated → UI reflects availability
+ *
+ * UNINSTALL FLOW:
+ * 1. requestMapUninstall() → clearMapWrapper() (dispose MapLibre FIRST)
+ * 2. endAccessingResources() → iOS deletes files immediately
+ * 3. Remove from pinnedRequests
+ * 4. mapStates updated → UI reflects unavailability
+ *
+ * RE-DOWNLOAD FLOW:
+ * • No special handling needed (normal download flow)
+ * • No forcedUnavailable to clear (doesn't exist on iOS)
+ * • clearForcedUnavailableIfNeeded() is no-op (default interface implementation)
+ *
+ * See: docs/architecture/map-download-system.md for complete platform comparison
  */
 class IosMapAvailabilityChecker : MapAvailabilityChecker {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
