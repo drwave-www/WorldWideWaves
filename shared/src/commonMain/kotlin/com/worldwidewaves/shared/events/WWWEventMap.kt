@@ -122,8 +122,16 @@ class WWWEventMap(
 
         val styleFilename = "style-${event.id}.json"
 
-        // Check in-memory cache first, but validate both style JSON and mbtiles file exist
+        // Check in-memory cache first, but validate sprite version and file existence
         _cachedStyleUri?.let { cached ->
+            // CRITICAL: Check sprite cache version BEFORE using cached style
+            // Style files contain embedded sprite/glyph URIs that change when sprite system updates
+            if (!spriteCache.preferences.isCacheVersionValid()) {
+                Log.d("WWWEventMap", "getStyleUri: Sprite version changed, clearing in-memory style cache")
+                _cachedStyleUri = null
+                return@let // Skip to disk cache check (which will also fail version check)
+            }
+
             // Verify cached style JSON file still exists on disk
             if (cachedFileExists(styleFilename)) {
                 // CRITICAL: Also verify mbtiles file exists before returning cached style
