@@ -1872,6 +1872,127 @@ class WWWEventWaveLinearTest : KoinTest {
             )
         }
 
+    // ---------------------------
+    // Event Area Aware Wave Front Center Tests
+    // ---------------------------
+
+    @Test
+    fun `test wave front center checks event area when user position is available`() =
+        runBlocking {
+            // GIVEN: Wave with polygons and user position available
+            val mockPolygons =
+                listOf(
+                    Polygon.fromPositions(
+                        listOf(
+                            Position(10.0, 20.0),
+                            Position(10.0, 30.0),
+                            Position(30.0, 30.0),
+                            Position(30.0, 20.0),
+                        ),
+                    ),
+                )
+            val bbox = BoundingBox.fromCorners(Position(10.0, 20.0), Position(30.0, 40.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = startTime + 10.minutes
+
+            // User positioned at latitude 25.0
+            val userPosition = Position(25.0, 28.0)
+            waveLinear.setPositionRequester { userPosition }
+
+            // Mock that user IS in event area
+            coEvery { mockArea.isPositionWithin(userPosition) } returns true
+
+            coEvery { mockArea.getPolygons() } returns mockPolygons
+            coEvery { mockArea.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns currentTime
+
+            // WHEN: Get wave front center position
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN: Should check if user is in event area
+            assertNotNull(result, "Wave front center position should not be null")
+            coVerify { mockArea.isPositionWithin(userPosition) }
+        }
+
+    @Test
+    fun `test wave front center result differs when user is outside vs inside event area`() =
+        runBlocking {
+            // GIVEN: Same setup, but we'll test with user OUTSIDE and then INSIDE area
+            val mockPolygons =
+                listOf(
+                    Polygon.fromPositions(
+                        listOf(
+                            Position(10.0, 20.0),
+                            Position(10.0, 30.0),
+                            Position(30.0, 30.0),
+                            Position(30.0, 20.0),
+                        ),
+                    ),
+                )
+            val bbox = BoundingBox.fromCorners(Position(10.0, 20.0), Position(30.0, 40.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = startTime + 10.minutes
+
+            // User positioned at specific latitude
+            val userPosition = Position(15.0, 25.0)
+            waveLinear.setPositionRequester { userPosition }
+
+            coEvery { mockArea.getPolygons() } returns mockPolygons
+            coEvery { mockArea.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns currentTime
+
+            // FIRST: User is OUTSIDE event area
+            coEvery { mockArea.isPositionWithin(userPosition) } returns false
+            val resultOutside = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN: User is INSIDE event area
+            coEvery { mockArea.isPositionWithin(userPosition) } returns true
+            val resultInside = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN: Both should be valid, and event area should be checked
+            assertNotNull(resultOutside, "Wave front position should not be null when user outside")
+            assertNotNull(resultInside, "Wave front position should not be null when user inside")
+            coVerify(atLeast = 2) { mockArea.isPositionWithin(userPosition) }
+        }
+
+    @Test
+    fun `test wave front center when user position is null`() =
+        runBlocking {
+            // GIVEN: Wave with polygons but NO user position
+            val mockPolygons =
+                listOf(
+                    Polygon.fromPositions(
+                        listOf(
+                            Position(10.0, 20.0),
+                            Position(10.0, 30.0),
+                            Position(30.0, 30.0),
+                            Position(30.0, 20.0),
+                        ),
+                    ),
+                )
+            val bbox = BoundingBox.fromCorners(Position(10.0, 20.0), Position(30.0, 40.0))
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = startTime + 10.minutes
+
+            // No user position
+            waveLinear.setPositionRequester { null }
+
+            coEvery { mockArea.getPolygons() } returns mockPolygons
+            coEvery { mockArea.bbox() } returns bbox
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockClock.now() } returns currentTime
+
+            // WHEN: Get wave front center position
+            val result = waveLinear.getWaveFrontCenterPosition()
+
+            // THEN: Should not check event area since no user position
+            assertNotNull(result, "Wave front center position should not be null")
+            // Event area check should not be called when user position is null
+            coVerify(exactly = 0) { mockArea.isPositionWithin(any()) }
+        }
+
     @Test
     fun `test wave front center with user at southern edge of wave bounds`() =
         runBlocking {

@@ -311,9 +311,12 @@ data class WWWEventWaveLinear(
         val waveFrontInfo = getWaveFrontEdgeInfo()
         val userPosition = getUserPosition()
 
+        // Check if user is in event area - only use user position if they are inside
+        val isUserInArea = userPosition?.let { event.area.isPositionWithin(it) } ?: false
+
         // Determine which latitude to use based on user position and wave edge bounds
         val centerLatitude =
-            if (userPosition != null && waveFrontInfo != null) {
+            if (userPosition != null && waveFrontInfo != null && isUserInArea) {
                 // If user is vertically within the wave edge bounds, use user's latitude
                 if (userPosition.lat >= waveFrontInfo.minLatitude && userPosition.lat <= waveFrontInfo.maxLatitude) {
                     userPosition.lat
@@ -322,7 +325,7 @@ data class WWWEventWaveLinear(
                     waveFrontInfo.averageLatitude
                 }
             } else {
-                // No user position or no wave front info, use wave front average or bbox center
+                // No user position, no wave front info, or user not in area - use wave front average or bbox center
                 waveFrontInfo?.averageLatitude ?: run {
                     val bbox = bbox()
                     (bbox.ne.lat + bbox.sw.lat) / 2
