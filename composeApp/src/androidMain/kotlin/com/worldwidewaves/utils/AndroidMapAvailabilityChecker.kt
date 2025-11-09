@@ -205,7 +205,12 @@ class AndroidMapAvailabilityChecker(
         Log.d(TAG, "queried=$queriedMaps forcedUnavailable=$forcedUnavailable")
 
         // Edge case validation: Clear stale forcedUnavailable entries
-        // Handles cases like manual Play Store installs or modules that were actually deleted
+        // NOTE: Disabled to fix bug where uninstalled maps immediately reappear in downloaded list.
+        // The previous logic would clear forcedUnavailable entries if files still existed, but this
+        // is wrong because Play Core uses deferred uninstall (files remain until next app update).
+        // User intent to uninstall should be preserved even if files temporarily remain.
+        // TODO: Re-enable with better logic that only clears on actual fresh install events
+        /*
         val staleEntries =
             forcedUnavailable.filter { mapId ->
                 // If module is installed AND files are accessible, it shouldn't be in forcedUnavailable
@@ -217,6 +222,7 @@ class AndroidMapAvailabilityChecker(
             forcedUnavailable.removeAll(staleEntries.toSet())
             saveForcedUnavailable()
         }
+         */
 
         // Build updated state map
         val updatedStates = HashMap<String, Boolean>()
