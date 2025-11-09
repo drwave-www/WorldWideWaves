@@ -497,6 +497,7 @@ fun isForcedUnavailable(eventId: String): Boolean {
 **Scenario**: Download → Uninstall → Navigate Away → Return
 
 **Without defense**:
+
 ```
 1. Uninstall → forcedUnavailable.add()
 2. Navigate away → ViewModel survives (Installed state)
@@ -506,6 +507,7 @@ fun isForcedUnavailable(eventId: String): Boolean {
 ```
 
 **With defense**:
+
 ```
 1. Uninstall → forcedUnavailable.add()
 2. Navigate away → ViewModel survives (Installed state)

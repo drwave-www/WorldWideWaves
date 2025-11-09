@@ -269,6 +269,7 @@ Users can change language **without app restart**:
 **Defense-in-Depth** (commit 2fea8a8e):
 
 AndroidEventMap checks `isForcedUnavailable()` at two points:
+
 - Before setting `isMapAvailable = true` (prevents incorrect UI state)
 - Before loading map (prevents uninstalled maps from rendering)
 
