@@ -91,23 +91,13 @@ fun WaveScreen(
     // For now, we use a reasonable estimate that will be refined after layout
     val choreographyBottomPadding: Dp = countdownHeight + safeAreaBottomPadding + 60.dp
 
-    // Calculate max height for choreographies to extend to bottom of countdown
-    // Available space = from top to countdown bottom, with buffer to prevent overlap
+    // Calculate max height for choreographies as 2/3 of screen size
     val maxChoreographyHeight: Dp =
         with(density) {
             val screenHeightDp = windowInfo.containerSize.height.toDp()
-            val countdownTopDp = countdownTopPx.toDp()
-            val countdownBottomDp = countdownTopDp + countdownHeight
-
-            // Available height from top to countdown bottom, minus buffer
-            val availableHeight = countdownBottomDp - 16.dp
-
-            // Use larger percentage (70%) as fallback if countdown not positioned yet
-            val fallbackHeight = screenHeightDp * 0.7f
-
-            // Use the smaller of available or fallback, clamped between 300dp-600dp
-            val calculatedHeight = if (countdownTopPx > 0) availableHeight else fallbackHeight
-            calculatedHeight.coerceIn(300.dp, 600.dp)
+            val twoThirdsHeight = screenHeightDp * (2f / 3f)
+            // Clamp between 300dp min and 600dp max
+            twoThirdsHeight.coerceIn(300.dp, 600.dp)
         }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -146,10 +136,10 @@ fun WaveScreen(
             Spacer(modifier = Modifier.height(safeAreaBottomPadding))
         }
 
-        // Working choreographies with proper z-index, dynamic bottom padding, and safe height constraints
+        // Choreographies centered on screen with 2/3 screen height
         WaveChoreographies(
             event = event,
-            bottomPadding = choreographyBottomPadding,
+            bottomPadding = 0.dp,
             maxHeight = maxChoreographyHeight,
             modifier = Modifier.zIndex(10f),
         )
