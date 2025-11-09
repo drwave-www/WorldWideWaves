@@ -302,12 +302,25 @@ class IOSNotificationManager : NotificationManager {
             return localizedString
         }
 
-        // Format string with arguments using NSString.stringWithFormat
-        // NSString.stringWithFormat expects varargs, cast Kotlin Strings to NSString
+        // Format string with arguments
+        // IMPORTANT: Store NSString references in variables to prevent premature deallocation
+        // Direct casting in varargs (args[0] as NSString) causes EXC_BAD_ACCESS on iOS
         return when (args.size) {
-            1 -> NSString.stringWithFormat(localizedString, args[0] as NSString)
-            2 -> NSString.stringWithFormat(localizedString, args[0] as NSString, args[1] as NSString)
-            3 -> NSString.stringWithFormat(localizedString, args[0] as NSString, args[1] as NSString, args[2] as NSString)
+            1 -> {
+                val arg0: NSString = args[0] as NSString
+                NSString.stringWithFormat(localizedString, arg0) as String
+            }
+            2 -> {
+                val arg0: NSString = args[0] as NSString
+                val arg1: NSString = args[1] as NSString
+                NSString.stringWithFormat(localizedString, arg0, arg1) as String
+            }
+            3 -> {
+                val arg0: NSString = args[0] as NSString
+                val arg1: NSString = args[1] as NSString
+                val arg2: NSString = args[2] as NSString
+                NSString.stringWithFormat(localizedString, arg0, arg1, arg2) as String
+            }
             else -> {
                 Log.w(TAG, "Too many arguments for string formatting: ${args.size} (max 3 supported)")
                 localizedString
