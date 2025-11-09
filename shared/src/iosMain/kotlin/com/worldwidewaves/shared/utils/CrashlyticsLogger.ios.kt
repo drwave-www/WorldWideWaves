@@ -2,6 +2,7 @@
 
 package com.worldwidewaves.shared.utils
 
+import com.worldwidewaves.crashlytics.CrashlyticsBridge
 import com.worldwidewaves.shared.BuildKonfig
 import kotlinx.cinterop.ExperimentalForeignApi
 
@@ -29,15 +30,15 @@ import kotlinx.cinterop.ExperimentalForeignApi
 /**
  * iOS implementation of Crashlytics integration.
  *
- * ## Current Status: LOGGING ONLY (Bridge Ready for Integration)
+ * ## Current Status: FULLY INTEGRATED ✅
  *
- * This implementation currently logs exceptions locally while the Swift bridge
- * (CrashlyticsBridge.swift) is integrated into the Xcode project.
+ * This implementation sends all exceptions, breadcrumbs, and custom keys to Firebase Crashlytics
+ * via the Swift bridge (CrashlyticsBridge.swift).
  *
  * ## Implementation Details
  * - Reports in production (BuildKonfig.DEBUG = false) or when forceEnableCrashReporting = true
- * - Currently logs locally (bridge integration pending)
- * - Graceful fallback prevents crashes if bridge is not available
+ * - Uses cinterop to call Swift bridge which forwards to Firebase iOS SDK
+ * - Also logs locally for debugging purposes
  *
  * ## Testing Support
  * Use [enableTestReporting] to force crash reporting in DEBUG builds for testing purposes.
@@ -45,26 +46,23 @@ import kotlinx.cinterop.ExperimentalForeignApi
  *
  * ## Architecture
  * ```
- * Kotlin Shared Code → CrashlyticsLogger.ios.kt (logs locally)
- *                   ↓
- *            (Future: CrashlyticsBridge.swift → Firebase iOS SDK)
+ * Kotlin Shared Code → CrashlyticsLogger.ios.kt
+ *                   ↓ (via cinterop)
+ *         CrashlyticsBridge.swift → Firebase iOS SDK
  * ```
  *
  * ## What Works Now
  * - Fatal crashes: ✅ Automatically captured by Firebase
- * - Non-fatal exceptions from Kotlin: ⚠️ Logged locally (not sent to Firebase)
+ * - Non-fatal exceptions from Kotlin: ✅ Sent to Firebase via bridge
+ * - Breadcrumbs: ✅ Sent to Firebase via bridge
+ * - Custom keys: ✅ Sent to Firebase via bridge
  * - DEBUG mode control: ✅ Matches Android behavior
  * - dSYM upload: ✅ Enabled for all configurations
  * - Crashlytics initialization: ✅ Explicit init in AppDelegate
  *
- * ## What Needs Manual Integration
- * - Swift bridge needs cinterop definition file for Kotlin/Native access
- * - After integration, uncomment bridge calls in methods
- * - Then non-fatal exceptions will be sent to Firebase
- *
  * ## Production Safety
  * - No force unwraps or unsafe operations
- * - Graceful fallback (logs locally)
+ * - Logs locally in addition to Firebase reporting for debugging
  * - No crashes from Crashlytics integration itself
  */
 @OptIn(ExperimentalForeignApi::class)
@@ -106,8 +104,8 @@ actual object CrashlyticsLogger {
     /**
      * Record a non-fatal exception from Kotlin code.
      *
-     * CURRENT: Logs exception locally for debugging (respects DEBUG mode)
-     * FUTURE: Will send to Firebase once bridge is integrated
+     * Sends exception to Firebase Crashlytics via Swift bridge and logs locally for debugging.
+     * Respects DEBUG mode - only reports in production unless test reporting is enabled.
      *
      * @param throwable The exception that occurred
      * @param tag The component/module where the exception occurred
@@ -125,20 +123,19 @@ actual object CrashlyticsLogger {
             // Build full error message
             val fullMessage = "$message: ${throwable.message ?: "Unknown error"}"
 
-            // TODO: Once CrashlyticsBridge.swift is added to Xcode project, uncomment:
-            // CrashlyticsBridge.recordException(message: fullMessage, tag: tag, stackTrace: stackTrace)
+            // Send exception to Firebase via Swift bridge
+            CrashlyticsBridge.recordExceptionWithMessage(fullMessage, tag, stackTrace)
 
-            // For now, log locally
+            // Also log locally for debugging
             Log.e(TAG, "[$tag] $fullMessage\n$stackTrace")
-            Log.i(TAG, "Note: Exception logged locally. Add CrashlyticsBridge.swift to Xcode to send to Firebase.")
         }
     }
 
     /**
      * Log a message that will appear as breadcrumb in crash reports.
      *
-     * CURRENT: Logs locally for debugging (respects DEBUG mode)
-     * FUTURE: Will appear in Firebase crash reports once bridge is integrated
+     * Sends breadcrumb to Firebase Crashlytics via Swift bridge and logs locally for debugging.
+     * Respects DEBUG mode - only reports in production unless test reporting is enabled.
      *
      * @param message The breadcrumb message
      */
@@ -153,10 +150,10 @@ actual object CrashlyticsLogger {
                     "App" to message
                 }
 
-            // TODO: Once CrashlyticsBridge.swift is added to Xcode project, uncomment:
-            // CrashlyticsBridge.log(message: cleanMessage, tag: tag)
+            // Send breadcrumb to Firebase via Swift bridge
+            CrashlyticsBridge.logWithMessage(cleanMessage, tag)
 
-            // For now, log locally
+            // Also log locally for debugging
             Log.d(TAG, "Breadcrumb: [$tag] $cleanMessage")
         }
     }
@@ -164,8 +161,8 @@ actual object CrashlyticsLogger {
     /**
      * Set a custom key-value pair that will appear in crash reports.
      *
-     * CURRENT: Logs locally for debugging (respects DEBUG mode)
-     * FUTURE: Will appear in Firebase crash reports once bridge is integrated
+     * Sends custom key to Firebase Crashlytics via Swift bridge and logs locally for debugging.
+     * Respects DEBUG mode - only reports in production unless test reporting is enabled.
      *
      * @param key The key name
      * @param value The value (will be converted to string)
@@ -175,10 +172,10 @@ actual object CrashlyticsLogger {
         value: String,
     ) {
         if (isReportingEnabled()) {
-            // TODO: Once CrashlyticsBridge.swift is added to Xcode project, uncomment:
-            // CrashlyticsBridge.setCustomKey(key: key, value: value)
+            // Send custom key to Firebase via Swift bridge
+            CrashlyticsBridge.setCustomKeyWithKey(key, value)
 
-            // For now, log locally
+            // Also log locally for debugging
             Log.d(TAG, "Custom key: $key = $value")
         }
     }

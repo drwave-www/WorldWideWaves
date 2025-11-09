@@ -1,0 +1,4 @@
+language = Objective-C
+headers = CrashlyticsBridge.h
+headerFilter = CrashlyticsBridge.h
+compilerOpts = -I${PROJECT_DIR}/../iosApp/worldwidewaves/Utils

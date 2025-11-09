@@ -54,6 +54,17 @@ kotlin {
             baseName = "Shared"
             isStatic = false // Dynamic framework for iOS compatibility
             linkerOpts("-ObjC")
+            // Weak link CrashlyticsBridge - symbols provided by iOS app at runtime
+            linkerOpts("-Wl,-U,_OBJC_CLASS_\$_CrashlyticsBridge")
+        }
+
+        // Configure cinterop for Crashlytics Swift bridge
+        iosTarget.compilations.getByName("main") {
+            cinterops.create("CrashlyticsBridge") {
+                definitionFile.set(project.file("src/nativeInterop/cinterop/CrashlyticsBridge.def"))
+                packageName = "com.worldwidewaves.crashlytics"
+                includeDirs("$projectDir/../iosApp/worldwidewaves/Utils")
+            }
         }
     }
 
