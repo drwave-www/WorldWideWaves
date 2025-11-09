@@ -5,7 +5,6 @@
 
 package com.worldwidewaves.shared.data
 
-import kotlinx.coroutines.runBlocking
 import platform.Foundation.NSUserDefaults
 
 /**
@@ -23,14 +22,14 @@ actual class SpriteCachePreferences {
      *
      * @return true if cache complete and app version matches cached version
      */
-    actual fun isCacheComplete(): Boolean = defaults.boolForKey(KEY_CACHE_COMPLETE) && isCacheVersionValid()
+    actual suspend fun isCacheComplete(): Boolean = defaults.boolForKey(KEY_CACHE_COMPLETE) && isCacheVersionValid()
 
     /**
      * Check if cached version matches current app version.
      *
      * @return true if versions match (cache still valid)
      */
-    actual fun isCacheVersionValid(): Boolean {
+    actual suspend fun isCacheVersionValid(): Boolean {
         val cachedVersion = getCachedVersion()
         val currentVersion = getCurrentVersion()
         return cachedVersion == currentVersion
@@ -41,7 +40,7 @@ actual class SpriteCachePreferences {
      *
      * Should be called after successful cache completion and integrity verification.
      */
-    actual fun markCacheComplete() {
+    actual suspend fun markCacheComplete() {
         defaults.setBool(true, forKey = KEY_CACHE_COMPLETE)
         defaults.setObject(getCurrentVersion(), forKey = KEY_CACHE_VERSION)
         defaults.setDouble(
@@ -77,10 +76,7 @@ actual class SpriteCachePreferences {
      *
      * @return Version string (e.g., "1.0.0+42")
      */
-    private fun getCurrentVersion(): String =
-        runBlocking {
-            platformAppVersionStamp()
-        }
+    private suspend fun getCurrentVersion(): String = platformAppVersionStamp()
 
     companion object {
         private const val KEY_CACHE_COMPLETE = "sprite_cache_complete"

@@ -20,21 +20,21 @@ expect class SpriteCachePreferences {
      *
      * @return true if cache complete and app version matches cached version
      */
-    fun isCacheComplete(): Boolean
+    suspend fun isCacheComplete(): Boolean
 
     /**
      * Check if cached version matches current app version.
      *
      * @return true if versions match (cache still valid)
      */
-    fun isCacheVersionValid(): Boolean
+    suspend fun isCacheVersionValid(): Boolean
 
     /**
      * Mark sprite cache as complete and save current app version.
      *
      * Should be called after successful cache completion and integrity verification.
      */
-    fun markCacheComplete()
+    suspend fun markCacheComplete()
 
     /**
      * Get the cached app version string.
