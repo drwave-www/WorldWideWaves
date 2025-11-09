@@ -250,6 +250,7 @@ xcodebuild test -scheme worldwidewaves \
 ### "Still seeing memory warnings"
 
 **Check:**
+
 1. Run all tests: `./gradlew :shared:testDebugUnitTest`
 2. Verify Phase 1-4 fixes applied: `git log --oneline | head -3`
 3. Check SceneDelegate calls stopEventObservers(): `grep stopEventObservers iosApp/worldwidewaves/SceneDelegate.swift`
@@ -258,6 +259,7 @@ xcodebuild test -scheme worldwidewaves \
 ### "MemoryLeakDetector shows false positives"
 
 **Adjust timeout:**
+
 ```swift
 // In MemoryLeakDetector.swift, increase delay for long-lived VCs
 private let deallocCheckDelay: TimeInterval = 5.0  // Was: 3.0
@@ -266,6 +268,7 @@ private let deallocCheckDelay: TimeInterval = 5.0  // Was: 3.0
 ### "Memory Graph shows cycles but I can't fix them"
 
 **Common fixes:**
+
 1. Use `[weak self]` in closures
 2. Break delegate cycles (set delegate = nil in deinit)
 3. Cancel coroutines/jobs in cleanup methods

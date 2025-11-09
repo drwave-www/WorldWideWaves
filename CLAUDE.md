@@ -296,6 +296,7 @@ xcodebuild -project iosApp/worldwidewaves.xcodeproj \
 ```
 
 **Why**: Android unit tests (`:shared:testDebugUnitTest`) only compile Android code and miss iOS-specific compilation errors like:
+
 - Missing imports in iOS source sets
 - JVM-only APIs used in commonMain (String.format, etc.)
 - Platform-specific type mismatches
