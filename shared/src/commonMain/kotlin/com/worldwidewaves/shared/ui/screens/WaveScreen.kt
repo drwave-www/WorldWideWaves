@@ -38,7 +38,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
@@ -74,10 +76,11 @@ fun WaveScreen(
     // Calculate height based on aspect ratio and available width (matches Event Detail screen)
     val calculatedHeight = calculateEventMapHeight()
 
-    // Track countdown height for dynamic choreography positioning
+    // Track countdown position and height for dynamic choreography positioning
     val density = LocalDensity.current
     val windowInfo = LocalWindowInfo.current
     var countdownHeightPx by remember { mutableStateOf(0) }
+    var countdownTopPx by remember { mutableStateOf(0f) }
     val countdownHeight = with(density) { countdownHeightPx.toDp() }
 
     // Calculate safe area bottom padding
@@ -88,14 +91,23 @@ fun WaveScreen(
     // For now, we use a reasonable estimate that will be refined after layout
     val choreographyBottomPadding: Dp = countdownHeight + safeAreaBottomPadding + 60.dp
 
-    // Calculate safe max height for choreographies to prevent clipping on small devices
-    // Use 40% of screen height as max, ensuring choreographies fit on even smallest devices
+    // Calculate max height for choreographies to extend to middle of countdown
+    // Available space = from top to countdown middle, with buffer to prevent overlap
     val maxChoreographyHeight: Dp =
         with(density) {
             val screenHeightDp = windowInfo.containerSize.height.toDp()
-            val maxHeight = screenHeightDp * 0.4f
-            // Clamp between 200dp min and 600dp max (default)
-            maxHeight.coerceIn(200.dp, 600.dp)
+            val countdownTopDp = countdownTopPx.toDp()
+            val countdownMiddleDp = countdownTopDp + (countdownHeight / 2f)
+
+            // Available height from top to countdown middle, minus buffer
+            val availableHeight = countdownMiddleDp - 16.dp
+
+            // Use larger percentage (70%) as fallback if countdown not positioned yet
+            val fallbackHeight = screenHeightDp * 0.7f
+
+            // Use the smaller of available or fallback, clamped between 300dp-600dp
+            val calculatedHeight = if (countdownTopPx > 0) availableHeight else fallbackHeight
+            calculatedHeight.coerceIn(300.dp, 600.dp)
         }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -121,9 +133,12 @@ fun WaveScreen(
             WaveHitCounter(
                 event = event,
                 modifier =
-                    Modifier.onSizeChanged { size ->
-                        countdownHeightPx = size.height
-                    },
+                    Modifier
+                        .onSizeChanged { size ->
+                            countdownHeightPx = size.height
+                        }.onGloballyPositioned { coordinates ->
+                            countdownTopPx = coordinates.positionInRoot().y
+                        },
             )
             // Flexible spacing below countdown to center it vertically
             Spacer(modifier = Modifier.weight(1f))
