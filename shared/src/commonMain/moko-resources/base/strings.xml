@@ -459,4 +459,7 @@
     <string name="notification_permission_rationale">Get notified when your favorite waves are starting</string>
     <string name="notification_permission_denied">Notifications disabled. Enable in Settings</string>
 
+    <!-- Context: Link to search for places in event (wave screen), Size: Short -->
+    <string name="search_for_places_in_event">Search for places in this event</string>
+
 </resources>

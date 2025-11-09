@@ -12,18 +12,28 @@ package com.worldwidewaves.shared.ui.components
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.worldwidewaves.shared.MokoRes
+import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.map.MapFeatureState
@@ -34,7 +44,11 @@ import com.worldwidewaves.shared.ui.components.event.WWWEventSocialNetworks
 import com.worldwidewaves.shared.ui.components.shared.ButtonWave
 import com.worldwidewaves.shared.ui.components.shared.SimulationButton
 import com.worldwidewaves.shared.ui.formatters.rememberEventState
+import com.worldwidewaves.shared.ui.theme.sharedCommonBoldStyle
+import com.worldwidewaves.shared.ui.utils.focusIndicator
 import com.worldwidewaves.shared.ui.utils.getIosSafePlatform
+import com.worldwidewaves.shared.utils.Log
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
 
 /**
@@ -141,6 +155,38 @@ fun EventLayout(
             // Standard event footer components
             NotifyAreaUserPosition(event)
             EventNumbers(event)
+
+            // Link to search for places in event
+            val linkText = stringResource(MokoRes.strings.search_for_places_in_event)
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .focusIndicator()
+                        .clickable(onClick = {
+                            try {
+                                onUrlOpen(WWWGlobals.Common.LUMA_URL)
+                            } catch (e: Exception) {
+                                Log.e("EventLayout", "Error opening Luma URL", throwable = e)
+                            }
+                        })
+                        .semantics {
+                            role = Role.Button
+                            contentDescription = linkText
+                        },
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = linkText,
+                    style =
+                        sharedCommonBoldStyle(WWWGlobals.Dimensions.FONTSIZE_DEFAULT).copy(
+                            color = Color.White,
+                            textDecoration = TextDecoration.Underline,
+                        ),
+                )
+            }
+
             WWWEventSocialNetworks(event, onUrlOpen = onUrlOpen)
 
             // Optional additional content

@@ -437,6 +437,9 @@ object WWWGlobals {
         const val SOCIALNETWORKS_INSTAGRAM_LOGO_WIDTH = 90
         const val SOCIALNETWORKS_ACCOUNT_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
         const val SOCIALNETWORKS_HASHTAG_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+
+        // External Links
+        const val LUMA_URL = "https://luma.com/worldwidewaves"
     }
 
     /**
