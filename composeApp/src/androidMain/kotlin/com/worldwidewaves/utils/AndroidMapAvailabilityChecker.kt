@@ -371,7 +371,23 @@ class AndroidMapAvailabilityChecker(
 
     /**
      * Clears the forced unavailable flag for a specific map.
-     * Used when re-downloading a previously uninstalled map to ensure PlayCore can proceed.
+     *
+     * CRITICAL FOR RE-DOWNLOAD AFTER UNINSTALL:
+     * Called from MapDownloadCoordinator.downloadMap() BEFORE any availability checks.
+     * This ensures the download flow sees accurate map availability state.
+     *
+     * CONTEXT:
+     * Play Core uses deferred uninstall - map files remain after uninstall until next app update.
+     * To respect user's uninstall intent, we set forcedUnavailable flag which:
+     * 1. Persisted to SharedPreferences (survives app restart)
+     * 2. Loaded on app init
+     * 3. Overrides file-based availability checks
+     *
+     * When user re-downloads:
+     * 1. This method removes from forcedUnavailable set
+     * 2. Persists removal to SharedPreferences
+     * 3. Calls refreshAvailability() to update reactive mapStates flow
+     * 4. Now isMapInstalled() and other checks return accurate state
      *
      * @param eventId The event/map ID to clear
      * @return true if the map was in forcedUnavailable and was removed, false otherwise

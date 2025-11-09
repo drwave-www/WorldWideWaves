@@ -118,7 +118,17 @@ class MapDownloadCoordinator(
             return
         }
 
+        // CRITICAL: Clear forcedUnavailable flag BEFORE any availability checks
+        // Handles re-download after uninstall scenario where:
+        // 1. User uninstalled map → forcedUnavailable set + persisted
+        // 2. User re-downloads → must clear flag FIRST
+        // 3. Then isMapInstalled() check sees correct state
+        // Without this, isMapInstalled() would see forcedUnavailable=true and return false
+        // even if files exist, causing unnecessary re-download or state inconsistency.
+        platformAdapter.clearForcedUnavailableIfNeeded(mapId)
+
         // Early-exit if map is already fully installed with valid files
+        // NOTE: This check now happens AFTER clearing forcedUnavailable, ensuring accuracy
         if (platformAdapter.isMapInstalled(mapId)) {
             Log.i(TAG, "downloadMap skipped – map already installed: $mapId")
             _featureState.value = MapFeatureState.Installed
@@ -265,4 +275,25 @@ interface PlatformMapDownloadAdapter {
     fun getLocalizedErrorMessage(errorCode: Int): String
 
     fun clearCacheForInstalledMaps(mapIds: List<String>)
+
+    /**
+     * Clears platform-specific "forced unavailable" state if needed.
+     *
+     * CRITICAL for re-download after uninstall:
+     * On Android, Play Core uses deferred uninstall (files remain after uninstall).
+     * A "forcedUnavailable" flag is set to respect user's uninstall intent.
+     * When re-downloading, this flag MUST be cleared BEFORE any availability checks.
+     *
+     * This method is called at the START of downloadMap() to ensure all subsequent
+     * checks (isMapInstalled, state updates) see the correct availability state.
+     *
+     * DEFAULT: No-op (iOS doesn't have this concept, downloads are immediate)
+     * ANDROID: Clears forcedUnavailable flag and refreshes availability state
+     *
+     * @param mapId The map/event ID to clear forced unavailable state for
+     */
+    suspend fun clearForcedUnavailableIfNeeded(mapId: String) {
+        // Default implementation: no-op
+        // iOS doesn't need this - downloads are immediate, no deferred uninstall
+    }
 }

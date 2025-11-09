@@ -151,15 +151,9 @@ class AndroidMapViewModel(
                 mapId: String,
                 onMapDownloaded: (() -> Unit)?,
             ) {
-                // Re-download safeguard: Clear forcedUnavailable if present
-                // This handles the case where user uninstalled a map and now wants to re-download it
-                val androidChecker = mapAvailabilityChecker as? AndroidMapAvailabilityChecker
-                if (androidChecker != null) {
-                    val wasInForcedUnavailable = androidChecker.clearForcedUnavailable(mapId)
-                    if (wasInForcedUnavailable) {
-                        Log.i(TAG, "Cleared forcedUnavailable for $mapId before re-download")
-                    }
-                }
+                // NOTE: forcedUnavailable clearing now happens in MapDownloadCoordinator.downloadMap()
+                // BEFORE this method is called, ensuring all availability checks see correct state.
+                // This is defense-in-depth - the primary clear happens earlier in the download flow.
 
                 val request = SplitInstallRequest.newBuilder().addModule(mapId).build()
 
@@ -221,6 +215,17 @@ class AndroidMapViewModel(
                         clearEventCache(id)
                     } catch (_: Exception) {
                         // Non-critical cache cleanup failure
+                    }
+                }
+            }
+
+            override suspend fun clearForcedUnavailableIfNeeded(mapId: String) {
+                // Android-specific implementation to handle Play Core deferred uninstall
+                val androidChecker = mapAvailabilityChecker as? AndroidMapAvailabilityChecker
+                if (androidChecker != null) {
+                    val wasCleared = androidChecker.clearForcedUnavailable(mapId)
+                    if (wasCleared) {
+                        Log.i(TAG, "Cleared forcedUnavailable for $mapId before availability check (re-download scenario)")
                     }
                 }
             }

@@ -180,8 +180,6 @@ class AndroidEventMap(
         // Initialize with actual permission state instead of false
         var hasLocationPermission by remember { mutableStateOf(isLocationPermissionGranted(context)) }
         var isMapAvailable by remember { mutableStateOf(false) }
-        // Observe global map states for reactivity to uninstall/reinstall events
-        val mapStatesMap by mapAvailabilityChecker.mapStates.collectAsState()
         var isMapDownloading by remember { mutableStateOf(false) }
         // Guard to avoid auto-re-download after the user explicitly cancels
         var userCanceled by remember { mutableStateOf(false) }
@@ -211,7 +209,6 @@ class AndroidEventMap(
             mapLibreView = mapLibreView,
             mapViewModel = mapViewModel,
             mapFeatureState = mapFeatureState,
-            mapStatesMap = mapStatesMap,
             setIsMapLoaded = { isMapLoaded = it },
             setMapError = { mapError = it },
             setHasLocationPermission = { hasLocationPermission = it },
@@ -239,7 +236,6 @@ class AndroidEventMap(
         val mapLibreView: MapView,
         val mapViewModel: AndroidMapViewModel,
         val mapFeatureState: MapFeatureState,
-        val mapStatesMap: Map<String, Boolean>,
         val setIsMapLoaded: (Boolean) -> Unit,
         val setMapError: (Boolean) -> Unit,
         val setHasLocationPermission: (Boolean) -> Unit,
@@ -381,18 +377,11 @@ class AndroidEventMap(
         }
 
         // Map availability check and auto-download logic
-        // Add mapStatesMap as dependency to react to uninstall/reinstall events
-        LaunchedEffect(event.id, mapState.isMapAvailable, autoMapDownload, mapState.userCanceled, mapState.mapStatesMap[event.id]) {
+        LaunchedEffect(event.id, mapState.isMapAvailable, autoMapDownload, mapState.userCanceled) {
             // Initial availability check
             if (!mapState.isMapAvailable) {
                 mapState.mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
                 mapState.setIsMapAvailable(mapAvailabilityChecker.isMapDownloaded(event.id))
-            }
-
-            // Sync with global mapStates when it changes (handles uninstall events)
-            val globalState = mapState.mapStatesMap[event.id] ?: false
-            if (globalState != mapState.isMapAvailable) {
-                mapState.setIsMapAvailable(globalState)
             }
 
             // Auto-download if needed
