@@ -43,6 +43,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -267,10 +268,10 @@ fun ChoreographyDisplay(
         }
     }
 
-    // Position the choreography in the center without taking full screen space
+    // Position the choreography with top at halfway point between center-top and screen-top
     Box(
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
+        contentAlignment = BiasAlignment(horizontalBias = 0f, verticalBias = -0.5f),
     ) {
         Box(
             modifier =
