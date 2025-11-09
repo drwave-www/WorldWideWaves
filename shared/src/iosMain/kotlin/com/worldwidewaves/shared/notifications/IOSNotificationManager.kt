@@ -27,8 +27,6 @@ import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.desc.desc
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSNumber
-import platform.Foundation.NSString
-import platform.Foundation.stringWithFormat
 import platform.UserNotifications.UNMutableNotificationContent
 import platform.UserNotifications.UNNotificationRequest
 import platform.UserNotifications.UNNotificationSound
@@ -302,30 +300,19 @@ class IOSNotificationManager : NotificationManager {
             return localizedString
         }
 
-        // Format string with arguments
-        // IMPORTANT: Store NSString references in variables to prevent premature deallocation
-        // Direct casting in varargs (args[0] as NSString) causes EXC_BAD_ACCESS on iOS
-        return when (args.size) {
-            1 -> {
-                val arg0: NSString = args[0] as NSString
-                NSString.stringWithFormat(localizedString, arg0) as String
-            }
-            2 -> {
-                val arg0: NSString = args[0] as NSString
-                val arg1: NSString = args[1] as NSString
-                NSString.stringWithFormat(localizedString, arg0, arg1) as String
-            }
-            3 -> {
-                val arg0: NSString = args[0] as NSString
-                val arg1: NSString = args[1] as NSString
-                val arg2: NSString = args[2] as NSString
-                NSString.stringWithFormat(localizedString, arg0, arg1, arg2) as String
-            }
-            else -> {
-                Log.w(TAG, "Too many arguments for string formatting: ${args.size} (max 3 supported)")
-                localizedString
-            }
+        // Format string with arguments using Kotlin string replacement
+        // IMPORTANT: NSString.stringWithFormat with varargs is unsafe in Kotlin/Native
+        // and causes EXC_BAD_ACCESS due to temporary object deallocation.
+        // Using Kotlin's native string replacement instead.
+        var result = localizedString
+
+        // Replace %1$s, %2$s, %3$s placeholders with actual values
+        args.forEachIndexed { index, arg ->
+            val placeholder = "%${index + 1}\$s"
+            result = result.replace(placeholder, arg)
         }
+
+        return result
     }
 
     /**
