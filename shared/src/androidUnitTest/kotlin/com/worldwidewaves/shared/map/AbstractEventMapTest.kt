@@ -1040,9 +1040,17 @@ class AbstractEventMapTest : KoinTest {
             positionManager.updatePosition(PositionManager.PositionSource.GPS, outsidePosition)
             testScope.testScheduler.advanceUntilIdle()
 
-            // Then: Marker should NOT be updated (prevents camera snap to SF on iOS)
-            coVerify(exactly = 0) {
+            // Then: Marker should be updated (user can see their position)
+            // but camera should NOT auto-target (prevents camera snap to position outside tiles on iOS)
+            coVerify(exactly = 1) {
                 mockMapLibreAdapter.setUserPosition(outsidePosition)
+            }
+            coVerify(exactly = 0) {
+                mockMapLibreAdapter.animateCamera(
+                    outsidePosition,
+                    WWWGlobals.MapDisplay.TARGET_USER_ZOOM,
+                    any(),
+                )
             }
         }
 

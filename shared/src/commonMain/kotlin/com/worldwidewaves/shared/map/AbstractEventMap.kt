@@ -753,27 +753,29 @@ abstract class AbstractEventMap<T>(
 
         // Auto-target the user the first time (optional) if no interaction yet
         // BUT ONLY if user is within the event area - don't move camera to positions outside tile coverage
-        // Also handle marker updates to prevent camera interference on iOS
+        // Always show marker regardless of auto-targeting to ensure user position is visible
         if (mapConfig.autoTargetUserOnFirstLocation &&
             !userHasBeenLocated &&
             !userInteracted &&
             mapConfig.initialCameraPosition == MapCameraPosition.WINDOW
         ) {
             scope.launch {
+                // Always update marker first, regardless of whether we auto-target the camera
+                // This ensures the user position marker appears even when outside event area
+                if (lastKnownPosition == null || lastKnownPosition != position) {
+                    mapLibreAdapter.setUserPosition(position)
+                }
+
                 val isUserInEventArea = event.area.isPositionWithin(position)
                 if (isUserInEventArea) {
                     targetUser()
                     Log.i("AbstractEventMap", "User in event area, auto-targeted user position")
-                    // Also update marker when user is inside area
-                    if (lastKnownPosition == null || lastKnownPosition != position) {
-                        mapLibreAdapter.setUserPosition(position)
-                    }
                 } else {
-                    // User outside event area - don't target to prevent showing position without tiles
-                    // Also skip marker update to prevent camera interference on iOS
+                    // User outside event area - don't target camera to prevent showing position without tiles
+                    // Marker is still shown (updated above) so user knows their location
                     Log.i(
                         "AbstractEventMap",
-                        "User outside event area (${position.latitude}, ${position.longitude}), keeping camera on event bounds, skipping marker",
+                        "User outside event area (${position.latitude}, ${position.longitude}), keeping camera on event bounds, marker still visible",
                     )
                 }
                 // Always mark as located to prevent retrying on every position update
