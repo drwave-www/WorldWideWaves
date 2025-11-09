@@ -189,15 +189,12 @@ class EventsViewModel(
      * This prevents memory leaks from accumulating observers in the singleton ViewModel.
      */
     fun stopAllObservers() {
-        Log.d("EventsViewModel", "Stopping ${activeEvents.size} event observers and ${observerJobs.size} jobs")
-
         // Stop all event observers
         activeEvents.forEach { event ->
             try {
                 event.observer.stopObservation()
             } catch (e: Exception) {
                 // Ignore exceptions during cleanup (likely CancellationException)
-                Log.v("EventsViewModel", "Exception stopping observer for ${event.id}: ${e.message}")
             }
         }
         activeEvents.clear()
@@ -208,15 +205,12 @@ class EventsViewModel(
                 job.cancel()
             } catch (e: Exception) {
                 // Ignore exceptions during job cancellation
-                Log.v("EventsViewModel", "Exception cancelling job: ${e.message}")
             }
         }
         observerJobs.clear()
 
         // Reset warming counter
         warmingEventsCount.value = 0
-
-        Log.d("EventsViewModel", "All observers stopped and jobs cancelled")
     }
 
     /**
@@ -224,9 +218,7 @@ class EventsViewModel(
      * Stops all observers to prevent memory accumulation in singleton ViewModel.
      */
     override fun onCleared() {
-        Log.d("EventsViewModel", "EventsViewModel.onCleared() called - cleaning up observers")
         stopAllObservers()
-        // Note: Repository is also a singleton, so no cleanup needed here
         super.onCleared()
     }
 

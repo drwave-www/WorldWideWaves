@@ -385,7 +385,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         ) { [weak self] _ in
             self?.onMemoryWarning()
         }
-        WWWLog.i(tag, "Memory pressure observer installed")
 
         if let ctx = connectionOptions.urlContexts.first {
             #if DEBUG
@@ -502,7 +501,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     /// Called when the app transitions from background to foreground.
     /// Observers are restarted automatically via EventsListScreen's LaunchedEffect.
     func sceneWillEnterForeground(_ scene: UIScene) {
-        WWWLog.d(tag, "Scene will enter foreground")
         // Observers restart automatically when EventsListScreen reloads events
     }
 
@@ -511,7 +509,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     /// Called when the app transitions to background.
     /// Stops event observers in singleton EventsViewModel to prevent memory accumulation.
     func sceneDidEnterBackground(_ scene: UIScene) {
-        WWWLog.d(tag, "Scene did enter background - stopping event observers")
         do {
             try RootControllerKt.stopEventObservers()
         } catch {
@@ -564,7 +561,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
         if let observer = memoryPressureObserver {
             NotificationCenter.default.removeObserver(observer)
-            WWWLog.d(tag, "Memory pressure observer removed")
         }
     }
 

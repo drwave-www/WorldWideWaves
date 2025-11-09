@@ -84,7 +84,7 @@ import Shared
     }
 
     deinit {
-        WWWLog.w(Self.tag, "[MEMORY] Deinitializing MapLibreViewWrapper for event: \(eventId ?? "unknown"), cleaning up resources")
+        WWWLog.w(Self.tag, "[MEMORY] Deinitializing MapLibreViewWrapper for event: \(eventId ?? "unknown")")
 
         // Clean up to prevent memory leaks
         if let mapView = mapView {
@@ -104,8 +104,6 @@ import Shared
             // Clear delegate to prevent retention cycle
             mapView.delegate = nil
         }
-
-        WWWLog.d(Self.tag, "[MEMORY] MapLibreViewWrapper cleanup complete for event: \(eventId ?? "unknown")")
     }
 
     // MARK: - Map Setup

@@ -56,7 +56,6 @@ import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.EventMapDownloadManager
 import com.worldwidewaves.shared.ui.components.DownloadProgressIndicator
 import com.worldwidewaves.shared.ui.components.LoadingIndicator
-import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CoroutineScope
@@ -143,7 +142,6 @@ class IosEventMap(
 
         DisposableEffect(mapRegistryKey) {
             onDispose {
-                Log.d("IosEventMap", "Disposing map for event: $mapRegistryKey, cancelling mapScope and adapter")
                 mapScope.cancel()
                 (mapLibreAdapter as? IosMapLibreAdapter)?.cleanup()
                 MapWrapperRegistry.unregisterWrapper(mapRegistryKey)

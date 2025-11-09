@@ -390,7 +390,6 @@ fun stopEventObservers() {
     try {
         val eventsViewModel = KoinPlatform.getKoin().get<EventsViewModel>()
         eventsViewModel.stopAllObservers()
-        Log.d(TAG, "Event observers stopped from iOS lifecycle")
     } catch (e: Exception) {
         Log.e(TAG, "Failed to stop event observers", throwable = e)
     }
@@ -415,8 +414,6 @@ fun stopEventObservers() {
 @Suppress("unused")
 @Throws(Throwable::class)
 fun ensureEventObserversRunning() {
-    // This is a no-op. Observers will restart automatically when EventsListScreen
-    // calls loadEvents() via LaunchedEffect. This function exists for documentation
-    // and symmetry with stopEventObservers().
-    Log.d(TAG, "Event observers will restart automatically on screen reload")
+    // No-op. Observers restart automatically when EventsListScreen
+    // calls loadEvents() via LaunchedEffect.
 }

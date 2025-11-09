@@ -158,7 +158,7 @@ object MapWrapperRegistry {
         // Add to end of access order (most recent)
         wrapperAccessOrder.add(eventId)
 
-        Log.i(TAG, "Wrapper registered with STRONG reference for: $eventId (LRU position: ${wrapperAccessOrder.size})")
+        Log.i(TAG, "Wrapper registered with STRONG reference for: $eventId")
 
         // If there are pending polygons, notify that they should be rendered
         if (pendingPolygons.containsKey(eventId)) {
