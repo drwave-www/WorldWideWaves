@@ -108,11 +108,17 @@ open class MainApplication :
         }
         MapLibre.getInstance(this)
 
+        Log.i("MainApplication", "[TELEMETRY] Starting Koin initialization")
+        val koinStartTime = System.currentTimeMillis()
+
         startKoin {
             androidContext(this@MainApplication)
             androidLogger()
             modules(sharedModule + androidModule + applicationModule)
         }
+
+        val koinDuration = System.currentTimeMillis() - koinStartTime
+        Log.i("MainApplication", "[TELEMETRY] Koin initialized in ${koinDuration}ms")
 
         // -------------------------------------------------------------------- //
         //  Simulation mode initialization for Firebase Test Lab UI testing

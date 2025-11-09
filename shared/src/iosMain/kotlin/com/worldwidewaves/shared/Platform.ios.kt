@@ -7,6 +7,7 @@ package com.worldwidewaves.shared
  * https://www.apache.org/licenses/LICENSE-2.0
  */
 
+import com.worldwidewaves.shared.data.currentTimeMillis
 import com.worldwidewaves.shared.di.initializeSimulationMode
 import com.worldwidewaves.shared.localization.getPlatformLocaleKey
 import com.worldwidewaves.shared.utils.Log
@@ -60,11 +61,17 @@ fun doInitPlatform() {
     }
 
     try {
+        Log.i(TAG, "[TELEMETRY] Starting Koin initialization")
+        val koinStartTime = currentTimeMillis()
+
         koinApp =
             startKoin {
                 logger(PrintLogger(if (BuildKonfig.DEBUG) Level.INFO else Level.ERROR))
                 modules(com.worldwidewaves.shared.di.sharedModule + com.worldwidewaves.shared.di.IosModule)
             }
+
+        val koinDuration = currentTimeMillis() - koinStartTime
+        Log.i(TAG, "[TELEMETRY] Koin initialized in ${koinDuration}ms")
 
         // NOTE: Simulation initialization moved to initializeDebugSimulation()
         // Must be called AFTER PlatformEnabler registration (see SceneDelegate.swift)

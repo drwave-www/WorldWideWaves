@@ -27,6 +27,7 @@ import com.worldwidewaves.shared.data.cacheDeepFile
 import com.worldwidewaves.shared.data.cacheStringToFile
 import com.worldwidewaves.shared.data.cachedFileExists
 import com.worldwidewaves.shared.data.cachedFilePath
+import com.worldwidewaves.shared.data.currentTimeMillis
 import com.worldwidewaves.shared.data.getCacheDir
 import com.worldwidewaves.shared.data.getMapFileAbsolutePath
 import com.worldwidewaves.shared.data.isCachedFileStale
@@ -116,7 +117,8 @@ class WWWEventMap(
      */
     @Suppress("ReturnCount") // Early returns for guard clauses improve readability
     suspend fun getStyleUri(): String? {
-        Log.d("WWWEventMap", "getStyleUri() called for event: ${event.id}")
+        val startTime = currentTimeMillis()
+        Log.d("WWWEventMap", "[TELEMETRY] getStyleUri() START for event: ${event.id}")
 
         val styleFilename = "style-${event.id}.json"
 
@@ -131,7 +133,9 @@ class WWWEventMap(
                 if (mbtilesPath != null) {
                     val mbtilesExists = platformFileExists(mbtilesPath)
                     if (mbtilesExists) {
+                        val duration = currentTimeMillis() - startTime
                         Log.d("WWWEventMap", "getStyleUri: Using validated cached style (mbtiles ready): $cached")
+                        Log.i("WWWEventMap", "[TELEMETRY] getStyleUri() END: In-memory cache HIT duration=${duration}ms event=${event.id}")
                         return cached
                     } else {
                         Log.w("WWWEventMap", "getStyleUri: Mbtiles file missing (async copy in progress), invalidating style cache")
@@ -147,16 +151,24 @@ class WWWEventMap(
             }
         }
 
-        // Check disk cache validity: file must exist AND not be stale
+        // Check disk cache validity: file must exist AND not be stale AND sprite cache version valid
+        // Style files contain embedded sprite/glyph URIs, so they must be regenerated when app version changes
         val fileExists = cachedFileExists(styleFilename)
-        val isStale = if (fileExists) isCachedFileStale(styleFilename) else true
+        val isFileStale = if (fileExists) isCachedFileStale(styleFilename) else true
+        val isSpriteVersionValid = spriteCache.preferences.isCacheVersionValid()
+        val isStale = isFileStale || !isSpriteVersionValid
         val isCacheValid = fileExists && !isStale
 
-        Log.d("WWWEventMap", "getStyleUri: Cache check - exists=$fileExists, stale=$isStale, valid=$isCacheValid")
+        Log.d(
+            "WWWEventMap",
+            "getStyleUri: Cache check - exists=$fileExists, fileStale=$isFileStale, spriteVersionValid=$isSpriteVersionValid, valid=$isCacheValid",
+        )
 
         if (isCacheValid) {
             val cachedPath = cachedFilePath(styleFilename)
-            Log.i("WWWEventMap", "getStyleUri: Using cached style file: $cachedPath")
+            val duration = currentTimeMillis() - startTime
+            Log.d("WWWEventMap", "getStyleUri: Using cached style file: $cachedPath")
+            Log.i("WWWEventMap", "[TELEMETRY] getStyleUri() END: Disk cache HIT duration=${duration}ms event=${event.id}")
             // Store in memory cache for subsequent calls
             _cachedStyleUri = cachedPath
             return cachedPath
@@ -215,18 +227,20 @@ class WWWEventMap(
         val spriteAndGlyphsPath = result.third
 
         if (mbtilesFilePath == null) {
-            Log.i(
+            val duration = currentTimeMillis() - startTime
+            Log.d(
                 "WWWEventMap",
                 "getStyleUri: MBTiles not downloaded for event ${event.id}",
             )
-            Log.d("WWWEventMap", "getStyleUri: Cannot generate style URI without MBTiles - returning null")
+            Log.i("WWWEventMap", "[TELEMETRY] getStyleUri() END: MBTiles MISSING duration=${duration}ms event=${event.id}")
             return null
         }
         Log.i("WWWEventMap", "getStyleUri: MBTiles path = $mbtilesFilePath")
 
         if (geojsonFilePath == null) {
-            Log.i("WWWEventMap", "getStyleUri: GeoJSON not downloaded for event ${event.id}")
-            Log.d("WWWEventMap", "getStyleUri: Cannot generate style URI without GeoJSON - returning null")
+            val duration = currentTimeMillis() - startTime
+            Log.d("WWWEventMap", "getStyleUri: GeoJSON not downloaded for event ${event.id}")
+            Log.i("WWWEventMap", "[TELEMETRY] getStyleUri() END: GeoJSON MISSING duration=${duration}ms event=${event.id}")
             return null
         }
         Log.i("WWWEventMap", "getStyleUri: GeoJSON path = $geojsonFilePath")
@@ -261,13 +275,16 @@ class WWWEventMap(
         val cachedPath = cacheStringToFile(styleFilename, newFileStr)
         if (cachedPath != null) {
             updateCacheMetadata(styleFilename)
+            val duration = currentTimeMillis() - startTime
             Log.d("WWWEventMap", "getStyleUri: Style file cached at: $cachedPath")
-            Log.i("WWWEventMap", "getStyleUri: Returning style path: $cachedPath")
+            Log.i("WWWEventMap", "[TELEMETRY] getStyleUri() END: Total duration=${duration}ms event=${event.id}")
             // Store in memory cache for subsequent calls
             _cachedStyleUri = cachedPath
             return cachedPath
         } else {
+            val duration = currentTimeMillis() - startTime
             Log.e("WWWEventMap", "getStyleUri: Failed to cache style file")
+            Log.i("WWWEventMap", "[TELEMETRY] getStyleUri() END: FAILED duration=${duration}ms event=${event.id}")
             return null
         }
     }

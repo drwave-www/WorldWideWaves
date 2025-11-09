@@ -41,7 +41,7 @@ import kotlinx.coroutines.sync.withLock
  * not from init{}, to avoid iOS Kotlin/Native deadlocks.
  */
 class SpriteCache(
-    private val preferences: SpriteCachePreferences,
+    val preferences: SpriteCachePreferences,
     private val scope: CoroutineScope,
 ) {
     /**
@@ -122,6 +122,7 @@ class SpriteCache(
      * - If cache failed or not started: Starts new cache job
      */
     fun startBackgroundCache() {
+        Log.d(TAG, "[TELEMETRY] startBackgroundCache() called")
         scope.launch {
             cacheMutex.withLock {
                 // Skip if already complete
