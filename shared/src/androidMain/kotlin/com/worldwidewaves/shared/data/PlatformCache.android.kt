@@ -20,11 +20,13 @@ package com.worldwidewaves.shared.data
  * limitations under the License. */
 
 import android.content.Context
-import android.os.Build
 import com.worldwidewaves.shared.events.data.GeoJsonDataProvider
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.java.KoinJavaComponent.inject
@@ -40,26 +42,14 @@ private var cachedAppUpdateTime: Long? = null
  * Checks if a cached file exists in the application's cache directory.
  *
  * This function determines whether a file with the specified name exists in the cache directory.
- * It also considers whether the application is running in development mode, in which case it always
- * returns `false` to simulate the absence of cached files.
+ *
+ * **Development Mode**: Previously disabled caching in emulators, but this caused 10-20 second
+ * delays on every map load due to sprite re-caching. Now all caching is enabled, with SpriteCache
+ * managing background sprite caching to eliminate delays in both production and development.
  */
 actual suspend fun cachedFileExists(fileName: String): Boolean {
     val context: Context by inject(Context::class.java)
-    val isDevelopmentMode = Build.HARDWARE == "ranchu" || Build.HARDWARE == "goldfish"
-
-    return if (isDevelopmentMode) {
-        // Allow caching for generated style files to prevent performance issues
-        if (fileName.startsWith("style-") && fileName.endsWith(".json")) {
-            val fileExists = File(context.cacheDir, fileName).exists()
-            Log.i(::cachedFileExists.name, "Development mode (allowing style cache): $fileName -> $fileExists")
-            fileExists
-        } else {
-            Log.i(::cachedFileExists.name, "Development mode (not cached): $fileName")
-            false
-        }
-    } else {
-        File(context.cacheDir, fileName).exists()
-    }
+    return File(context.cacheDir, fileName).exists()
 }
 
 /**
@@ -283,3 +273,103 @@ private fun deleteNonMbtilesFile(
         Log.e(::clearEventCache.name, "Failed to delete cached file $fileName")
     }
 }
+
+/**
+ * Cache all sprite and glyph files from resources.
+ *
+ * This function is extracted from WWWEventMap and made reusable for SpriteCache.
+ * It reads 775 files from the style listing and caches them in parallel.
+ */
+@OptIn(ExperimentalResourceApi::class)
+actual suspend fun cacheSpriteAndGlyphs(): String =
+    withContext(NonCancellable) {
+        try {
+            val files =
+                Res
+                    .readBytes(com.worldwidewaves.shared.WWWGlobals.FileSystem.STYLE_LISTING)
+                    .decodeToString()
+                    .lines()
+                    .filter { it.isNotBlank() }
+
+            // Use parallel processing for file caching
+            coroutineScope {
+                files
+                    .map { file ->
+                        async(Dispatchers.Default) {
+                            cacheDeepFile("${com.worldwidewaves.shared.WWWGlobals.FileSystem.STYLE_FOLDER}/$file")
+                        }
+                    }.forEach { it.await() }
+            }
+
+            getCacheDir()
+        } catch (e: Exception) {
+            Log.e("cacheSpriteAndGlyphs", "Error caching sprite and glyphs", e)
+            throw e
+        }
+    }
+
+/**
+ * Clear all cached sprite and glyph files.
+ */
+actual suspend fun clearSpriteCache() {
+    withContext(Dispatchers.IO) {
+        try {
+            val context: Context by inject(Context::class.java)
+            val styleDir = File(context.cacheDir, "files/style")
+            if (styleDir.exists()) {
+                val deleted = styleDir.deleteRecursively()
+                if (deleted) {
+                    Log.i("clearSpriteCache", "Cleared sprite cache: ${styleDir.absolutePath}")
+                } else {
+                    Log.w("clearSpriteCache", "Failed to delete sprite cache directory")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("clearSpriteCache", "Error clearing sprite cache", throwable = e)
+            throw e
+        }
+    }
+}
+
+/**
+ * Count the number of cached sprite/glyph files.
+ */
+actual suspend fun countCachedSpriteFiles(): Int {
+    return withContext(Dispatchers.IO) {
+        try {
+            val context: Context by inject(Context::class.java)
+            val styleDir = File(context.cacheDir, "files/style")
+            if (!styleDir.exists()) return@withContext 0
+
+            styleDir.walkTopDown().count { it.isFile }
+        } catch (e: Exception) {
+            Log.e("countCachedSpriteFiles", "Error counting cached sprite files", throwable = e)
+            0
+        }
+    }
+}
+
+/**
+ * Get available disk space in bytes.
+ */
+actual suspend fun getAvailableSpace(): Long =
+    withContext(Dispatchers.IO) {
+        try {
+            val context: Context by inject(Context::class.java)
+            val file = File(context.cacheDir.absolutePath)
+            file.usableSpace
+        } catch (e: Exception) {
+            Log.e("getAvailableSpace", "Error getting available space", throwable = e)
+            0L
+        }
+    }
+
+/**
+ * Create a platform-specific SpriteCachePreferences instance.
+ */
+actual fun createSpriteCachePreferences(): SpriteCachePreferences = SpriteCachePreferences()
+
+/**
+ * Get current time in milliseconds.
+ */
+actual fun currentTimeMillis(): Long = System.currentTimeMillis()

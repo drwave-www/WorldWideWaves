@@ -23,13 +23,17 @@ package com.worldwidewaves.shared.data
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.generated.resources.Res
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import platform.Foundation.NSCachesDirectory
 import platform.Foundation.NSData
+import platform.Foundation.NSDate
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSString
 import platform.Foundation.NSTemporaryDirectory
@@ -40,6 +44,7 @@ import platform.Foundation.create
 import platform.Foundation.stringByAppendingPathComponent
 import platform.Foundation.stringByDeletingLastPathComponent
 import platform.Foundation.stringWithContentsOfFile
+import platform.Foundation.timeIntervalSince1970
 import platform.Foundation.writeToFile
 
 private fun cacheRoot(): String {
@@ -191,3 +196,140 @@ fun clearEventCache(eventId: String): Boolean {
 
     return deletedAny
 }
+
+/**
+ * Cache all sprite and glyph files from resources.
+ *
+ * This function is extracted from WWWEventMap and made reusable for SpriteCache.
+ * It reads 775 files from the style listing and caches them in parallel.
+ */
+@OptIn(ExperimentalResourceApi::class)
+actual suspend fun cacheSpriteAndGlyphs(): String =
+    kotlinx.coroutines.withContext(kotlinx.coroutines.NonCancellable) {
+        try {
+            val files =
+                Res
+                    .readBytes(com.worldwidewaves.shared.WWWGlobals.FileSystem.STYLE_LISTING)
+                    .decodeToString()
+                    .lines()
+                    .filter { it.isNotBlank() }
+
+            // Use parallel processing for file caching
+            coroutineScope {
+                files
+                    .map { file ->
+                        async(kotlinx.coroutines.Dispatchers.Default) {
+                            cacheDeepFile("${com.worldwidewaves.shared.WWWGlobals.FileSystem.STYLE_FOLDER}/$file")
+                        }
+                    }.forEach { it.await() }
+            }
+
+            getCacheDir()
+        } catch (e: Exception) {
+            com.worldwidewaves.shared.utils.Log
+                .e("cacheSpriteAndGlyphs", "Error caching sprite and glyphs", throwable = e)
+            throw e
+        }
+    }
+
+/**
+ * Clear all cached sprite and glyph files.
+ */
+actual suspend fun clearSpriteCache() {
+    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+        try {
+            val cacheDir = cacheRoot()
+            val styleDir = "$cacheDir/files/style"
+            val fileManager = NSFileManager.defaultManager
+
+            if (fileManager.fileExistsAtPath(styleDir)) {
+                val success = fileManager.removeItemAtPath(styleDir, error = null)
+                if (success) {
+                    com.worldwidewaves.shared.utils.Log
+                        .i("clearSpriteCache", "Cleared sprite cache: $styleDir")
+                } else {
+                    com.worldwidewaves.shared.utils.Log
+                        .w("clearSpriteCache", "Failed to delete sprite cache directory")
+                }
+            }
+        } catch (e: Exception) {
+            com.worldwidewaves.shared.utils.Log
+                .e("clearSpriteCache", "Error clearing sprite cache", throwable = e)
+            throw e
+        }
+    }
+}
+
+/**
+ * Count the number of cached sprite/glyph files.
+ */
+actual suspend fun countCachedSpriteFiles(): Int {
+    return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+        try {
+            val cacheDir = cacheRoot()
+            val styleDir = "$cacheDir/files/style"
+            val fileManager = NSFileManager.defaultManager
+
+            if (!fileManager.fileExistsAtPath(styleDir)) return@withContext 0
+
+            // Get all items recursively
+            val url = platform.Foundation.NSURL.fileURLWithPath(styleDir)
+            val resourceKeys = listOf(platform.Foundation.NSURLIsRegularFileKey)
+            val enumerator =
+                fileManager.enumeratorAtURL(
+                    url,
+                    includingPropertiesForKeys = resourceKeys,
+                    options = 0u,
+                    errorHandler = null,
+                )
+
+            var count = 0
+            while (true) {
+                val fileUrl = enumerator?.nextObject() as? platform.Foundation.NSURL ?: break
+
+                // Check if it's a regular file (not directory)
+                val values = fileUrl.resourceValuesForKeys(resourceKeys, error = null)
+                val isRegularFile = (values?.get(platform.Foundation.NSURLIsRegularFileKey) as? platform.Foundation.NSNumber)?.boolValue
+
+                if (isRegularFile == true) {
+                    count++
+                }
+            }
+
+            count
+        } catch (e: Exception) {
+            com.worldwidewaves.shared.utils.Log
+                .e("countCachedSpriteFiles", "Error counting cached sprite files", throwable = e)
+            0
+        }
+    }
+}
+
+/**
+ * Get available disk space in bytes.
+ */
+actual suspend fun getAvailableSpace(): Long =
+    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+        try {
+            val fileManager = NSFileManager.defaultManager
+            val cachePath = cacheRoot()
+            val attributes = fileManager.attributesOfFileSystemForPath(cachePath, error = null)
+
+            val availableSpace = attributes?.get(platform.Foundation.NSFileSystemFreeSize) as? platform.Foundation.NSNumber
+            availableSpace?.longValue ?: 0L
+        } catch (e: Exception) {
+            com.worldwidewaves.shared.utils.Log
+                .e("getAvailableSpace", "Error getting available space", throwable = e)
+            0L
+        }
+    }
+
+/**
+ * Create a platform-specific SpriteCachePreferences instance.
+ */
+actual fun createSpriteCachePreferences(): SpriteCachePreferences = SpriteCachePreferences()
+
+/**
+ * Get current time in milliseconds.
+ */
+actual fun currentTimeMillis(): Long = (platform.Foundation.NSDate().timeIntervalSince1970() * 1000).toLong()

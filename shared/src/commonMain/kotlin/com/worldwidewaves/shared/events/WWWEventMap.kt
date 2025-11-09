@@ -36,6 +36,7 @@ import com.worldwidewaves.shared.events.data.MapDataProvider
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.Res
+import com.worldwidewaves.shared.map.SpriteCache
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -87,6 +88,7 @@ class WWWEventMap(
     // ---------------------------
 
     private val mapDataProvider: MapDataProvider by inject()
+    private val spriteCache: SpriteCache by inject()
 
     // Cache the resolved style URI to avoid repeated file I/O
     private var _cachedStyleUri: String? = null
@@ -166,7 +168,41 @@ class WWWEventMap(
             coroutineScope {
                 val mbtilesDeferred = async { getMbtilesFilePath() }
                 val geojsonDeferred = async { event.area.getGeoJsonFilePath() }
-                val spritesDeferred = async { cacheSpriteAndGlyphs() }
+                val spritesDeferred =
+                    async {
+                        // Use background sprite cache with StateFlow listener pattern
+                        when (val state = spriteCache.cacheStateFlow.value) {
+                            is SpriteCache.CacheState.Complete -> {
+                                Log.d("WWWEventMap", "Sprite cache already complete, using cached sprites")
+                                getCacheDir()
+                            }
+                            is SpriteCache.CacheState.Loading -> {
+                                Log.d("WWWEventMap", "Sprite cache in progress, awaiting completion...")
+                                when (val result = spriteCache.awaitCompletion()) {
+                                    is SpriteCache.CacheState.Complete -> {
+                                        Log.i("WWWEventMap", "Sprite cache completed (${result.fileCount} files, ${result.durationMs}ms)")
+                                        getCacheDir()
+                                    }
+                                    is SpriteCache.CacheState.Failed -> {
+                                        Log.w("WWWEventMap", "Sprite cache failed: ${result.message}, falling back to direct caching")
+                                        cacheSpriteAndGlyphs()
+                                    }
+                                    else -> {
+                                        Log.w("WWWEventMap", "Unexpected sprite cache state after await, falling back to direct caching")
+                                        cacheSpriteAndGlyphs()
+                                    }
+                                }
+                            }
+                            is SpriteCache.CacheState.Failed -> {
+                                Log.w("WWWEventMap", "Sprite cache failed: ${state.message}, falling back to direct caching")
+                                cacheSpriteAndGlyphs()
+                            }
+                            is SpriteCache.CacheState.NotStarted -> {
+                                Log.w("WWWEventMap", "Sprite cache not started, falling back to direct caching")
+                                cacheSpriteAndGlyphs()
+                            }
+                        }
+                    }
 
                 Triple(
                     mbtilesDeferred.await(),

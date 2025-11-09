@@ -73,3 +73,52 @@ expect suspend fun isCachedFileStale(fileName: String): Boolean
  * @param fileName The name of the file whose metadata should be updated
  */
 expect suspend fun updateCacheMetadata(fileName: String)
+
+/**
+ * Cache all sprite and glyph files from resources.
+ *
+ * Reads the sprite/glyph file listing (775 files) and caches them in parallel.
+ * This is the core operation that SpriteCache wraps for background execution.
+ *
+ * @return Cache directory path where files were stored
+ * @throws Exception if caching fails
+ */
+expect suspend fun cacheSpriteAndGlyphs(): String
+
+/**
+ * Clear all cached sprite and glyph files.
+ *
+ * Deletes the style folder from cache directory.
+ */
+expect suspend fun clearSpriteCache()
+
+/**
+ * Count the number of cached sprite/glyph files.
+ *
+ * @return Number of files in the style cache directory
+ */
+expect suspend fun countCachedSpriteFiles(): Int
+
+/**
+ * Get available disk space in bytes.
+ *
+ * @return Available space in cache directory (in bytes)
+ */
+expect suspend fun getAvailableSpace(): Long
+
+/**
+ * Create a platform-specific SpriteCachePreferences instance.
+ *
+ * Factory function for creating the actual platform implementation of SpriteCachePreferences.
+ * This is needed because expect classes cannot be instantiated directly in Koin.
+ *
+ * @return Platform-specific SpriteCachePreferences instance
+ */
+expect fun createSpriteCachePreferences(): SpriteCachePreferences
+
+/**
+ * Get current time in milliseconds.
+ *
+ * @return Current time in milliseconds since epoch
+ */
+expect fun currentTimeMillis(): Long
