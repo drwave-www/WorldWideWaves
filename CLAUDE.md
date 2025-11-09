@@ -256,12 +256,24 @@ Users can change language **without app restart**:
 **BEFORE EVERY COMMIT touching shared/ code**, verify compilation on **BOTH platforms**:
 
 ```bash
-# This is the MINIMUM required check before commit:
+# MINIMUM required check before commit (Kotlin only):
 ./gradlew clean :shared:testDebugUnitTest \
   :shared:compileDebugKotlinAndroid \
   :shared:compileKotlinIosSimulatorArm64
 
 # Expected: ALL tasks successful, 100% test pass rate
+```
+
+**BEFORE EVERY COMMIT touching iosApp/ Swift code**, also verify Swift compilation:
+
+```bash
+# iOS Swift compilation check:
+xcodebuild -project iosApp/worldwidewaves.xcodeproj \
+  -scheme worldwidewaves \
+  -sdk iphonesimulator \
+  build
+
+# Expected: ** BUILD SUCCEEDED **
 ```
 
 **Why**: Android unit tests (`:shared:testDebugUnitTest`) only compile Android code and miss iOS-specific compilation errors like:
