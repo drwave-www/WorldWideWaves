@@ -142,6 +142,10 @@ class IosEventMap(
 
         DisposableEffect(mapRegistryKey) {
             onDispose {
+                // CRITICAL: Cleanup order matters for preventing SQLite errors
+                // 1. Cancel coroutines (stops position updates, wave progression)
+                // 2. Cleanup adapter (removes listeners, clears references)
+                // 3. Unregister wrapper (closes MapLibre view, releases SQLite connections)
                 mapScope.cancel()
                 (mapLibreAdapter as? IosMapLibreAdapter)?.cleanup()
                 MapWrapperRegistry.unregisterWrapper(mapRegistryKey)

@@ -158,9 +158,27 @@ actual suspend fun updateCacheMetadata(fileName: String) {
  * Delete all cached artefacts (data + metadata files) that belong to a given map/event.
  * iOS implementation matching Android behavior.
  *
+ * SAFETY: Checks for active map wrapper before deleting .mbtiles files to prevent
+ * SQLite "vnode unlinked while in use" errors. If wrapper exists, deletion is skipped
+ * and warning is logged.
+ *
  * @return true if at least one file was deleted, false otherwise
  */
 fun clearEventCache(eventId: String): Boolean {
+    // SAFETY CHECK: Verify no active map wrapper exists
+    // This prevents deleting .mbtiles files while MapLibre has them open
+    val hasWrapper =
+        com.worldwidewaves.shared.map.MapWrapperRegistry
+            .getWrapper(eventId) != null
+    if (hasWrapper) {
+        com.worldwidewaves.shared.utils.Log.w(
+            "PlatformCache",
+            "SAFETY: Active map wrapper exists for $eventId - skipping file deletion. " +
+                "Unregister wrapper first to prevent SQLite errors.",
+        )
+        return false
+    }
+
     val root = getAppSupportMapsDirectory()
     val fileManager = NSFileManager.defaultManager
     var deletedAny = false

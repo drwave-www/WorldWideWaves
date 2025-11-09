@@ -182,6 +182,9 @@ class IosMapAvailabilityChecker : MapAvailabilityChecker {
      * Request uninstall/release of a downloaded map.
      * Implements the MapAvailabilityChecker interface method.
      * Releases ODR resources and updates state immediately.
+     *
+     * CRITICAL: Ensures map wrapper is cleaned up BEFORE deleting .mbtiles files
+     * to prevent SQLite "vnode unlinked while in use" errors.
      */
     override suspend fun requestMapUninstall(eventId: String): Boolean =
         kotlinx.coroutines.suspendCancellableCoroutine { cont ->
@@ -189,11 +192,39 @@ class IosMapAvailabilityChecker : MapAvailabilityChecker {
             var odrReleased = false
 
             scope.launch {
-                // Background: Clear cache and disallow downloads FIRST
+                // STEP 1: Cleanup map wrapper FIRST (before deleting files)
+                // This ensures MapLibre closes the SQLite database connection
+                com.worldwidewaves.shared.utils.Log.i(
+                    "IosMapAvailabilityChecker",
+                    "Checking for active map wrapper for $eventId before uninstall",
+                )
+
+                val hasWrapper =
+                    com.worldwidewaves.shared.map.MapWrapperRegistry
+                        .getWrapper(eventId) != null
+                if (hasWrapper) {
+                    com.worldwidewaves.shared.utils.Log.i(
+                        "IosMapAvailabilityChecker",
+                        "Active map wrapper found for $eventId, cleaning up before file deletion",
+                    )
+                    // Unregister wrapper on main thread (UIKit requirement)
+                    onMain {
+                        com.worldwidewaves.shared.map.MapWrapperRegistry
+                            .unregisterWrapper(eventId)
+                    }
+                    // Wait for MLNMapView deallocation (allows SQLite to close database)
+                    kotlinx.coroutines.delay(500)
+                    com.worldwidewaves.shared.utils.Log.i(
+                        "IosMapAvailabilityChecker",
+                        "Map wrapper cleanup complete for $eventId",
+                    )
+                }
+
+                // STEP 2: Disallow downloads
                 com.worldwidewaves.shared.data.MapDownloadGate
                     .disallow(eventId)
 
-                // Clear cache files to ensure isMapAvailable returns false
+                // STEP 3: Clear cache files (now safe - database is closed)
                 // Matches Android behavior in AndroidMapAvailabilityChecker
                 try {
                     cacheCleared =
@@ -213,7 +244,7 @@ class IosMapAvailabilityChecker : MapAvailabilityChecker {
                     )
                 }
 
-                // Main thread: ODR release + state update (after cache cleared)
+                // STEP 4: Main thread: ODR release + state update (after cache cleared)
                 onMain {
                     val request = pinnedRequests.remove(eventId)
                     odrReleased = request != null
