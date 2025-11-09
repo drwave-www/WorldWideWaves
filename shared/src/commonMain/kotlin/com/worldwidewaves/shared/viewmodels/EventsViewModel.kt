@@ -193,13 +193,23 @@ class EventsViewModel(
 
         // Stop all event observers
         activeEvents.forEach { event ->
-            event.observer.stopObservation()
+            try {
+                event.observer.stopObservation()
+            } catch (e: Exception) {
+                // Ignore exceptions during cleanup (likely CancellationException)
+                Log.v("EventsViewModel", "Exception stopping observer for ${event.id}: ${e.message}")
+            }
         }
         activeEvents.clear()
 
-        // Cancel all monitoring jobs
+        // Cancel all monitoring jobs (CancellationException is expected and safe to ignore)
         observerJobs.forEach { job ->
-            job.cancel()
+            try {
+                job.cancel()
+            } catch (e: Exception) {
+                // Ignore exceptions during job cancellation
+                Log.v("EventsViewModel", "Exception cancelling job: ${e.message}")
+            }
         }
         observerJobs.clear()
 
@@ -211,14 +221,12 @@ class EventsViewModel(
 
     /**
      * Cleanup when ViewModel is cleared.
-     * Stops all observers and cleans up repository resources.
+     * Stops all observers to prevent memory accumulation in singleton ViewModel.
      */
     override fun onCleared() {
-        Log.d("EventsViewModel", "EventsViewModel.onCleared() called - cleaning up observers and repository")
+        Log.d("EventsViewModel", "EventsViewModel.onCleared() called - cleaning up observers")
         stopAllObservers()
-        scope.launch {
-            eventsRepository.cleanup()
-        }
+        // Note: Repository is also a singleton, so no cleanup needed here
         super.onCleared()
     }
 
