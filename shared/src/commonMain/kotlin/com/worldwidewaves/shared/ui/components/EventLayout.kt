@@ -166,7 +166,8 @@ fun EventLayout(
                         .focusIndicator()
                         .clickable(onClick = {
                             try {
-                                onUrlOpen(WWWGlobals.Common.LUMA_URL)
+                                val lumaUrlWithTag = "${WWWGlobals.Common.LUMA_URL}?tag=%23${event.instagramHashtag.removePrefix("#")}"
+                                onUrlOpen(lumaUrlWithTag)
                             } catch (e: Exception) {
                                 Log.e("EventLayout", "Error opening Luma URL", throwable = e)
                             }
