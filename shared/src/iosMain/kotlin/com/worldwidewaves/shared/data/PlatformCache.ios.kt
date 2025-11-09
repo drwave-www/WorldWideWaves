@@ -23,6 +23,7 @@ package com.worldwidewaves.shared.data
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.generated.resources.Res
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -209,7 +210,7 @@ actual suspend fun cacheSpriteAndGlyphs(): String =
         try {
             val files =
                 Res
-                    .readBytes(com.worldwidewaves.shared.WWWGlobals.FileSystem.STYLE_LISTING)
+                    .readBytes(WWWGlobals.FileSystem.STYLE_LISTING)
                     .decodeToString()
                     .lines()
                     .filter { it.isNotBlank() }
@@ -219,7 +220,7 @@ actual suspend fun cacheSpriteAndGlyphs(): String =
                 files
                     .map { file ->
                         async(kotlinx.coroutines.Dispatchers.Default) {
-                            cacheDeepFile("${com.worldwidewaves.shared.WWWGlobals.FileSystem.STYLE_FOLDER}/$file")
+                            cacheDeepFile("${WWWGlobals.FileSystem.STYLE_FOLDER}/$file")
                         }
                     }.forEach { it.await() }
             }

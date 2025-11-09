@@ -237,11 +237,11 @@ class WWWEventMap(
         val templateData = mapDataProvider.geoMapStyleData()
         Log.i("WWWEventMap", "getStyleUri: Template loaded, length=${templateData.length}")
 
-        // Format URIs - mbtiles uses /// format, file uses // format
+        // Format URIs - all absolute paths use /// format (protocol + // + /)
         val mbtilesUri = "mbtiles:///$mbtilesFilePath"
-        val geojsonUri = "file://" + geojsonFilePath.removePrefix("/")
-        val glyphsUri = "file://" + spriteAndGlyphsPath.removePrefix("/") + "/files/style/glyphs"
-        val spriteUri = "file://" + spriteAndGlyphsPath.removePrefix("/") + "/files/style/sprites"
+        val geojsonUri = "file:///$geojsonFilePath"
+        val glyphsUri = "file:///$spriteAndGlyphsPath/files/style/glyphs"
+        val spriteUri = "file:///$spriteAndGlyphsPath/files/style/sprites"
 
         val newFileStr =
             templateData
