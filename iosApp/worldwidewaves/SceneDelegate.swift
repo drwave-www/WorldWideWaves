@@ -512,7 +512,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     /// Stops event observers in singleton EventsViewModel to prevent memory accumulation.
     func sceneDidEnterBackground(_ scene: UIScene) {
         WWWLog.d(tag, "Scene did enter background - stopping event observers")
-        RootControllerKt.stopEventObservers()
+        do {
+            try RootControllerKt.stopEventObservers()
+        } catch {
+            WWWLog.e(tag, "Failed to stop event observers", error: error)
+        }
     }
 
     /// Handle memory warnings by logging current state.
@@ -526,11 +530,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         WWWLog.w(tag, "[MEMORY] Check Xcode Memory Graph Debugger for retain cycles")
         WWWLog.w(tag, "[MEMORY] Run Instruments → Leaks/Allocations for detailed analysis")
 
-        #if DEBUG
-        // In debug builds, also log active map wrappers
-        let wrapperCount = Shared.MapWrapperRegistry.shared.wrappers.count
-        WWWLog.w(tag, "[MEMORY] Active map wrappers: \(wrapperCount) (max: 10)")
-        #endif
+        // Note: MapWrapperRegistry.wrappers is private - cannot access from Swift
+        // Wrapper count monitoring would require adding a public method to MapWrapperRegistry
     }
 
     /// Report current memory usage in megabytes.

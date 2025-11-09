@@ -153,8 +153,8 @@ private class DismissalObserver {
 
 // MARK: - Associated Object Keys
 
-private struct AssociatedKeys {
-    static var dismissalObserver = "MemoryLeakDetector.DismissalObserver"
+private enum AssociatedKeys {
+    static var dismissalObserver: UInt8 = 0
 }
 
 #else
