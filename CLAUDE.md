@@ -111,7 +111,7 @@ Review test strategy for user profile caching:
 ```
 Identify documentation updates for user profile caching:
 1. CLAUDE.md: Add to "Architecture Patterns" section
-2. docs/architecture/caching-strategy.md: Create or update
+2. Architecture docs: Create or update relevant caching documentation
 3. KDoc: CacheManager, UserRepository
 4. README.md: Update features list if user-facing
 ```

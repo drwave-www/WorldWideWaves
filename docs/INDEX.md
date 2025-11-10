@@ -39,7 +39,6 @@
 | iOS/Android parity | [iOS Android Map Parity](ios/ios-android-map-parity-gap-analysis.md) |
 | Code patterns | [Patterns Directory](patterns/README.md) |
 | CI/CD pipelines | [CI/CD Guide](ci-cd.md) |
-| Future work | [Future Work Plan](future-work-plan.md) |
 
 ---
 
@@ -111,12 +110,9 @@
 | Document | Description | Focus |
 |----------|-------------|-------|
 | [Testing Strategy](testing-strategy.md) | Overall testing approach, patterns | Strategy |
-| [Comprehensive Test Specifications](comprehensive-test-specifications.md) | Detailed test specs by layer | Specs |
 | [UI Testing Guide](ui-testing-guide.md) | Compose UI testing patterns | UI |
-| [Test Gap Analysis](test-gap-analysis.md) | Coverage gaps and priorities | Analysis |
-| [Map Testing Implementation Summary](map-testing-implementation-summary.md) | Map-specific test results | Maps |
-| [Map Screens Test Specification](map-screens-test-specification.md) | Map screen testing specs | Maps |
 | [Test Patterns](testing/test-patterns.md) | Common testing patterns | Patterns |
+| [Cinterop Testing Patterns](testing/cinterop-testing-patterns.md) | iOS/Native testing patterns | iOS |
 | [Testing README](testing/README.md) | Testing directory index | Index |
 
 ---
@@ -172,12 +168,6 @@
 |----------|-------------|
 | [Accessibility Guide](accessibility-guide.md) | WCAG 2.1 AA compliance patterns |
 
-#### Full Map Analysis
-
-| Document | Description |
-|----------|-------------|
-| [Full Map Analysis Index](full-map-analysis-index.md) | Index of all map-related documentation |
-
 ---
 
 ### 6. Operations & CI/CD
@@ -190,13 +180,10 @@
 
 ---
 
-### 7. Planning & Future Work
+### 7. Planning & Documentation Reviews
 
 | Document | Description |
 |----------|-------------|
-| [Future Work Plan](future-work-plan.md) | Roadmap, optional improvements |
-| [FUTURE_WORK_PLAN.md](FUTURE_WORK_PLAN.md) | Alternative future work document |
-| [A+ Grade Action Plan](A_PLUS_GRADE_ACTION_PLAN.md) | Production excellence checklist |
 | [Documentation Review](DOCUMENTATION_REVIEW_2025-10-27.md) | Recent documentation audit |
 | [Documentation Improvements Summary](DOCUMENTATION_IMPROVEMENTS_SUMMARY.md) | Documentation enhancements |
 
@@ -218,31 +205,28 @@
 
 - [CLAUDE.md](../CLAUDE.md) - AI assistant instructions ⭐
 - [CLAUDE_iOS.md](../CLAUDE_iOS.md) - iOS development guide ⭐
-- [CLAUDE_MD_REORGANIZATION_SUMMARY.md](../CLAUDE_MD_REORGANIZATION_SUMMARY.md) - Doc reorganization summary
 - [README.md](../README.md) - Project overview ⭐
+- [CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) - Community guidelines
+- [SECURITY.md](../SECURITY.md) - Security policy
 
 ### Core Documentation (docs/)
 
-- [A_PLUS_GRADE_ACTION_PLAN.md](A_PLUS_GRADE_ACTION_PLAN.md) - Production excellence checklist
 - [accessibility-guide.md](accessibility-guide.md) - WCAG 2.1 AA compliance ⭐
+- [api-documentation-guide.md](api-documentation-guide.md) - API documentation guide
 - [architecture.md](architecture.md) - System architecture ⭐
 - [ci-cd.md](ci-cd.md) - CI/CD pipelines
-- [comprehensive-test-specifications.md](comprehensive-test-specifications.md) - Test specs ⭐
+- [console-app-guide.md](console-app-guide.md) - Console app documentation
 - [contributing.md](contributing.md) - Contribution guidelines ⭐
 - [correlation-tracing.md](correlation-tracing.md) - Request tracing
 - [development.md](development.md) - Development workflow ⭐
+- [documentation-quality-guide.md](documentation-quality-guide.md) - Documentation standards
 - [DOCUMENTATION_IMPROVEMENTS_SUMMARY.md](DOCUMENTATION_IMPROVEMENTS_SUMMARY.md) - Doc improvements
 - [DOCUMENTATION_REVIEW_2025-10-27.md](DOCUMENTATION_REVIEW_2025-10-27.md) - Recent audit
 - [environment-setup.md](environment-setup.md) - Environment setup ⭐
-- [full-map-analysis-index.md](full-map-analysis-index.md) - Map documentation index
-- [future-work-plan.md](future-work-plan.md) - Future roadmap ⭐
-- [FUTURE_WORK_PLAN.md](FUTURE_WORK_PLAN.md) - Alternative roadmap
+- [FAQ.md](FAQ.md) - Frequently asked questions
 - [logging-guide.md](logging-guide.md) - Logging patterns
-- [map-screens-test-specification.md](map-screens-test-specification.md) - Map screen tests
-- [map-testing-implementation-summary.md](map-testing-implementation-summary.md) - Map test results
 - [operations.md](operations.md) - Operations guide
 - [README.md](README.md) - Documentation index ⭐
-- [test-gap-analysis.md](test-gap-analysis.md) - Coverage analysis
 - [testing-strategy.md](testing-strategy.md) - Testing strategy ⭐
 - [ui-testing-guide.md](ui-testing-guide.md) - UI testing
 
@@ -259,7 +243,8 @@
 ### Architecture Documentation (docs/architecture/)
 
 - [map-architecture-analysis.md](architecture/map-architecture-analysis.md) - Map architecture ⭐
-- [map-architecture-analysis-verification-report.md](architecture/map-architecture-analysis-verification-report.md) - Verification
+- [map-cache-management.md](architecture/map-cache-management.md) - Map cache lifecycle
+- [map-download-system.md](architecture/map-download-system.md) - Map download system
 - [README.md](architecture/README.md) - Architecture index
 
 ### Code Style Documentation (docs/code-style/)
@@ -274,6 +259,7 @@
 
 ### iOS Documentation (docs/ios/)
 
+- [cinterop-memory-safety-patterns.md](ios/cinterop-memory-safety-patterns.md) - Memory safety patterns ⭐
 - [critical-fixes-completed.md](ios/critical-fixes-completed.md) - Production fixes
 - [ios-android-map-parity-gap-analysis.md](ios/ios-android-map-parity-gap-analysis.md) - Parity analysis ⭐
 - [ios-debugging-guide.md](ios/ios-debugging-guide.md) - Debugging guide ⭐
@@ -281,6 +267,9 @@
 - [ios-map-accessibility.md](ios/ios-map-accessibility.md) - Map accessibility
 - [ios-success-state.md](ios/ios-success-state.md) - Success state verification ⭐
 - [ios-violation-tracker.md](ios/ios-violation-tracker.md) - Deadlock violations ⭐
+- [memory-leak-detection.md](ios/memory-leak-detection.md) - Memory leak prevention
+- [platform-api-usage-guide.md](ios/platform-api-usage-guide.md) - Platform API usage ⭐
+- [swift-kotlin-bridging-guide.md](ios/swift-kotlin-bridging-guide.md) - Swift-Kotlin bridge ⭐
 - [README.md](ios/README.md) - iOS documentation index
 
 ### Patterns Documentation (docs/patterns/)
@@ -304,6 +293,7 @@
 
 ### Testing Documentation (docs/testing/)
 
+- [cinterop-testing-patterns.md](testing/cinterop-testing-patterns.md) - iOS/Native testing patterns ⭐
 - [README.md](testing/README.md) - Testing index
 - [test-patterns.md](testing/test-patterns.md) - Common test patterns
 
@@ -461,9 +451,10 @@ Historical documentation (session summaries, refactoring reports, test results) 
 #### "I want to improve map functionality"
 
 1. [Map Architecture Analysis](architecture/map-architecture-analysis.md) - Map design
-2. [iOS Android Map Parity](ios/ios-android-map-parity-gap-analysis.md) - Platform comparison
-3. [Android Map Constraint Analysis](android/android-map-constraint-analysis.md) - Android constraints
-4. [Full Map Analysis Index](full-map-analysis-index.md) - All map docs
+2. [Map Download System](architecture/map-download-system.md) - Download implementation
+3. [Map Cache Management](architecture/map-cache-management.md) - Cache lifecycle
+4. [iOS Android Map Parity](ios/ios-android-map-parity-gap-analysis.md) - Platform comparison
+5. [Android Map Constraint Analysis](android/android-map-constraint-analysis.md) - Android constraints
 
 #### "I want to ensure accessibility compliance"
 
@@ -473,9 +464,9 @@ Historical documentation (session summaries, refactoring reports, test results) 
 #### "I want to understand the testing strategy"
 
 1. [Testing Strategy](testing-strategy.md) - Overall approach
-2. [Comprehensive Test Specifications](comprehensive-test-specifications.md) - Detailed specs
-3. [UI Testing Guide](ui-testing-guide.md) - UI testing
-4. [Test Gap Analysis](test-gap-analysis.md) - Coverage gaps
+2. [Test Patterns](testing/test-patterns.md) - Common test patterns
+3. [Cinterop Testing Patterns](testing/cinterop-testing-patterns.md) - iOS/Native testing
+4. [UI Testing Guide](ui-testing-guide.md) - UI testing
 
 ### By Role
 
@@ -536,13 +527,9 @@ Historical documentation (session summaries, refactoring reports, test results) 
 
 1. [Architecture](architecture.md) - System design
 2. [Map Architecture Analysis](architecture/map-architecture-analysis.md) - Map subsystem
-3. [iOS Android Map Parity](ios/ios-android-map-parity-gap-analysis.md) - Platform parity
-4. [Patterns](patterns/README.md) - Design patterns
-
-**Planning**:
-
-- [Future Work Plan](future-work-plan.md) - Roadmap
-- [A+ Grade Action Plan](A_PLUS_GRADE_ACTION_PLAN.md) - Production excellence
+3. [Map Download System](architecture/map-download-system.md) - Download architecture
+4. [iOS Android Map Parity](ios/ios-android-map-parity-gap-analysis.md) - Platform parity
+5. [Patterns](patterns/README.md) - Design patterns
 
 #### DevOps / SRE
 
