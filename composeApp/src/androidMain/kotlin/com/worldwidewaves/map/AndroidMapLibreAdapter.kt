@@ -102,16 +102,6 @@ class AndroidMapLibreAdapter(
 
     private val cameraBoundsCache = mutableMapOf<BoundsCacheKey, Double>()
 
-    override fun getWidth(): Double {
-        require(mapLibreMap != null)
-        return mapLibreMap!!.width.toDouble()
-    }
-
-    override fun getHeight(): Double {
-        require(mapLibreMap != null)
-        return mapLibreMap!!.height.toDouble()
-    }
-
     // -- Private properties
 
     private var currentMapClickListener: MapLibreMap.OnMapClickListener? = null
@@ -125,6 +115,16 @@ class AndroidMapLibreAdapter(
     private val waveSourceIds = mutableListOf<String>()
 
     private var onMapSetCallbacks = mutableListOf<(AndroidMapLibreAdapter) -> Unit>()
+
+    override fun getWidth(): Double {
+        require(mapLibreMap != null)
+        return mapLibreMap!!.width.toDouble()
+    }
+
+    override fun getHeight(): Double {
+        require(mapLibreMap != null)
+        return mapLibreMap!!.height.toDouble()
+    }
 
     override fun setMap(map: MapLibreMap) {
         mapLibreMap = map

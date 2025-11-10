@@ -286,8 +286,8 @@ class AndroidEventMap(
                     // CRITICAL: Respect forcedUnavailable flag before setting available
                     // Prevents stale ViewModel state from loading uninstalled maps
                     // After uninstall, forcedUnavailable is set but ViewModel may still show Installed
-                    val androidChecker = mapAvailabilityChecker as? AndroidMapAvailabilityChecker
-                    val isForcedUnavailable = androidChecker?.isForcedUnavailable(event.id) ?: false
+                    val androidChecker = mapAvailabilityChecker
+                    val isForcedUnavailable = androidChecker.isForcedUnavailable(event.id)
                     if (!isForcedUnavailable) {
                         mapState.setIsMapAvailable(true)
                     } else {
@@ -592,19 +592,11 @@ class AndroidEventMap(
                     // This eliminates race condition with async isMapAvailable state updates
                     // Reading mapFeatureState creates Compose dependency for recomposition
                     val mapFilesReady =
-                        when (mapState.mapFeatureState) {
-                            is MapFeatureState.Installed, // Just completed download
-                            is MapFeatureState.Available, // Already cached from previous session
-                            -> {
-                                // CRITICAL: Respect forcedUnavailable even if ViewModel shows Installed/Available
-                                // After uninstall, ViewModel may have stale state from previous session
-                                // forcedUnavailable is the source of truth for user's uninstall intent
-                                val androidChecker = mapAvailabilityChecker as? AndroidMapAvailabilityChecker
-                                val isForcedUnavailable = androidChecker?.isForcedUnavailable(event.id) ?: false
-                                !isForcedUnavailable // Only ready if NOT forcedUnavailable
-                            }
-                            else -> false // Downloading, NotAvailable, Failed, etc.
-                        }
+                        (
+                            mapState.mapFeatureState is MapFeatureState.Installed ||
+                                mapState.mapFeatureState is MapFeatureState.Available
+                        ) &&
+                            !mapAvailabilityChecker.isForcedUnavailable(event.id)
 
                     // Only attempt to initialize map when tiles are actually available (downloaded)
                     // Attempting to load before download completes causes gray screen (no tiles)
@@ -704,6 +696,7 @@ class AndroidEventMap(
                 mapLibreView.getMapAsync { map ->
                     // Save reference so we can refresh location component later
                     currentMap = map
+
                     // Setup Map
                     this@AndroidEventMap.setupMap(
                         map,
@@ -842,6 +835,7 @@ class AndroidEventMap(
                 context,
                 Manifest.permission.ACCESS_FINE_LOCATION,
             ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
         val coarse =
             ContextCompat.checkSelfPermission(
                 context,

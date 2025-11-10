@@ -24,6 +24,8 @@ package com.worldwidewaves
 import android.app.Application
 import android.content.Context
 import android.os.Build
+import android.util.Log.DEBUG
+import android.util.Log.ERROR
 import androidx.work.Configuration
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.di.applicationModule
@@ -68,7 +70,7 @@ open class MainApplication :
             Configuration
                 .Builder()
                 .setMinimumLoggingLevel(
-                    if (BuildConfig.DEBUG) android.util.Log.DEBUG else android.util.Log.ERROR,
+                    if (BuildConfig.DEBUG) DEBUG else ERROR,
                 ).build()
 
     @OptIn(ExperimentalTime::class)
@@ -98,12 +100,11 @@ open class MainApplication :
         //  MapLibre's FileSource spawns background AsyncTasks that access
         //  SharedPreferences. Early initialization with application context
         //  prevents NullPointerException crashes if tasks run before lazy init.
-        //  Matches TestApplication pattern (commit c222e027).
         // -------------------------------------------------------------------- //
         try {
             System.loadLibrary("maplibre")
         } catch (e: UnsatisfiedLinkError) {
-            Log.e("MainApplication", "Failed to load maplibre native library", e)
+            Log.w("MainApplication", "Failed to load maplibre native library", e)
             // Continue anyway - MapLibre.getInstance will provide more specific error
         }
         MapLibre.getInstance(this)

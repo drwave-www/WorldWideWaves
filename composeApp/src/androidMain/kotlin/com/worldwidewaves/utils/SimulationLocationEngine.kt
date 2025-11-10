@@ -60,7 +60,7 @@ class SimulationLocationEngine(
     private fun getSimulatedLocation(): Location? =
         if (platform.isOnSimulation()) {
             val simulation = platform.getSimulation()!!
-            // Use runBlocking since simulation.now() is suspend but this context is not
+            // Use runBlocking since simulation.now() is suspend but this context is
             // Safe here as this is called during location updates (not on main thread)
             simulation.getUserPosition().toLocation(runBlocking { simulation.now() })
         } else {

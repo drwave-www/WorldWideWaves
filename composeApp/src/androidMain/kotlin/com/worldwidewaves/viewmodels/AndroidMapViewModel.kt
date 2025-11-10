@@ -137,7 +137,7 @@ class AndroidMapViewModel(
                     if (loggedUnavailableMaps.add(mapId)) {
                         Log.v(
                             TAG,
-                            "isMapInstalled: $mapId not available (module=$moduleInstalled, " +
+                            "isMapInstalled: $mapId not available (module=${true}, " +
                                 "mbtiles: cache=$mbtilesInCache assets=$mbtilesInAssets, " +
                                 "geojson: cache=$geojsonInCache assets=$geojsonInAssets)",
                         )
@@ -298,7 +298,7 @@ class AndroidMapViewModel(
             // Try to open the asset (just check existence, don't read)
             splitContext.assets.open(assetName).use { true }
         } catch (
-            @Suppress("SwallowedException") e: Exception,
+            @Suppress("SwallowedException") _: Exception,
         ) {
             // Asset doesn't exist - expected for undownloaded maps
             false

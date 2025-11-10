@@ -23,6 +23,7 @@ package com.worldwidewaves.utils
 
 import android.content.Context
 import android.util.Log
+import androidx.core.content.edit
 import com.google.android.play.core.splitinstall.SplitInstallManager
 import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener
@@ -33,6 +34,7 @@ import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.resume
 
@@ -71,7 +73,7 @@ class AndroidMapAvailabilityChecker(
      * Persisted to SharedPreferences to survive app restarts.
      */
     private val forcedUnavailable: MutableSet<String> by lazy {
-        java.util.Collections.synchronizedSet(loadForcedUnavailable())
+        Collections.synchronizedSet(loadForcedUnavailable())
     }
 
     // Listener for module installation events
@@ -88,6 +90,7 @@ class AndroidMapAvailabilityChecker(
                             TAG,
                             "session=${state.sessionId()} INSTALLED modules=${state.moduleNames()}",
                         )
+
                         // If this module had previously been "forced" unavailable
                         // (deferred uninstall), drop the override so it becomes
                         // visible again without requiring an app restart.
@@ -167,9 +170,9 @@ class AndroidMapAvailabilityChecker(
             try {
                 context
                     .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                    .edit()
-                    .remove(PREFS_KEY_FORCED_UNAVAILABLE)
-                    .apply()
+                    .edit {
+                        remove(PREFS_KEY_FORCED_UNAVAILABLE)
+                    }
             } catch (clearError: Exception) {
                 Log.e(TAG, "Failed to clear corrupted persistence data", clearError)
             }
@@ -186,9 +189,9 @@ class AndroidMapAvailabilityChecker(
             // Create immutable copy for thread-safety
             val snapshot = synchronized(forcedUnavailable) { forcedUnavailable.toSet() }
             prefs
-                .edit()
-                .putStringSet(PREFS_KEY_FORCED_UNAVAILABLE, snapshot)
-                .apply()
+                .edit {
+                    putStringSet(PREFS_KEY_FORCED_UNAVAILABLE, snapshot)
+                }
             Log.d(TAG, "Saved ${snapshot.size} forcedUnavailable entries to persistence")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to save forcedUnavailable to persistence", e)
@@ -338,7 +341,7 @@ class AndroidMapAvailabilityChecker(
             // Try to open the asset (just check existence, don't read)
             splitContext.assets.open(assetName).use { true }
         } catch (
-            @Suppress("SwallowedException") e: Exception,
+            @Suppress("SwallowedException") _: Exception,
         ) {
             // Asset doesn't exist - expected for undownloaded maps
             false
@@ -354,20 +357,6 @@ class AndroidMapAvailabilityChecker(
         Log.d(TAG, "getDownloadedMaps -> $downloaded")
         return downloaded
     }
-
-    fun canUninstallMap(eventId: String): Boolean =
-        try {
-            val splitInstallManager = SplitInstallManagerFactory.create(context)
-            splitInstallManager.installedModules.contains(eventId)
-        } catch (ise: IllegalStateException) {
-            Log.e(TAG, "SplitInstallManager in invalid state: ${ise.message}")
-            Log.e(TAG, "canUninstallMap id=$eventId exception=${ise.message}")
-            false // If there's an error, assume it can't be uninstalled
-        } catch (uoe: UnsupportedOperationException) {
-            Log.e(TAG, "Unsupported operation on SplitInstallManager: ${uoe.message}")
-            Log.e(TAG, "canUninstallMap id=$eventId exception=${uoe.message}")
-            false // If there's an error, assume it can't be uninstalled
-        }
 
     /**
      * Clears the forced unavailable flag for a specific map.

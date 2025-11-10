@@ -26,6 +26,7 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.WindowInsets
 import androidx.activity.compose.setContent
@@ -70,12 +71,12 @@ open class MainActivity : AppCompatActivity() {
         registerForActivityResult(
             ActivityResultContracts.RequestPermission(),
         ) { isGranted ->
-            android.util.Log.i(
+            Log.i(
                 "MainActivity",
                 "POST_NOTIFICATIONS permission result: ${if (isGranted) "GRANTED" else "DENIED"}",
             )
             if (!isGranted) {
-                android.util.Log.w(
+                Log.w(
                     "MainActivity",
                     "User denied notification permission - notifications will not work until granted in settings",
                 )
@@ -139,7 +140,6 @@ open class MainActivity : AppCompatActivity() {
             if (mainActivityImpl == null) {
                 mainActivityImpl = MainScreen(AndroidPlatformEnabler(this))
             }
-
             mainActivityImpl!!.Draw()
         }
 
@@ -174,10 +174,10 @@ open class MainActivity : AppCompatActivity() {
 
         when (ContextCompat.checkSelfPermission(this, permission)) {
             PackageManager.PERMISSION_GRANTED -> {
-                android.util.Log.d("MainActivity", "POST_NOTIFICATIONS permission already granted")
+                Log.d("MainActivity", "POST_NOTIFICATIONS permission already granted")
             }
             else -> {
-                android.util.Log.i("MainActivity", "Requesting POST_NOTIFICATIONS permission")
+                Log.i("MainActivity", "Requesting POST_NOTIFICATIONS permission")
                 notificationPermissionLauncher.launch(permission)
             }
         }
@@ -237,24 +237,24 @@ open class MainActivity : AppCompatActivity() {
                 newConfig.locale
             }
 
-        android.util.Log.d("MainActivity", "Configuration changed: locale=$newLocale, lastKnownLocale=$lastKnownLocale")
+        Log.d("MainActivity", "Configuration changed: locale=$newLocale, lastKnownLocale=$lastKnownLocale")
 
         if (newLocale != lastKnownLocale) {
-            android.util.Log.i("MainActivity", "=== Locale Changed ===")
-            android.util.Log.d("MainActivity", "Old locale: $lastKnownLocale")
-            android.util.Log.d("MainActivity", "New locale: $newLocale")
+            Log.i("MainActivity", "=== Locale Changed ===")
+            Log.d("MainActivity", "Old locale: $lastKnownLocale")
+            Log.d("MainActivity", "New locale: $newLocale")
 
             lastKnownLocale = newLocale
 
             // Notify LocalizationManager of the locale change
             try {
-                android.util.Log.d("MainActivity", "Notifying LocalizationManager of locale change")
+                Log.d("MainActivity", "Notifying LocalizationManager of locale change")
                 val localizationManager = KoinPlatform.getKoin().get<LocalizationManager>()
                 localizationManager.notifyLocaleChanged(newLocale.toLanguageTag())
-                android.util.Log.i("MainActivity", "Locale change notification sent successfully")
+                Log.i("MainActivity", "Locale change notification sent successfully")
             } catch (e: Exception) {
                 // Log but don't crash - localization is not critical for app function
-                android.util.Log.w("MainActivity", "Failed to notify locale change: ${e.message}", e)
+                Log.w("MainActivity", "Failed to notify locale change: ${e.message}", e)
             }
         }
     }
