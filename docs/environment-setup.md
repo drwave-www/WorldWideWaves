@@ -488,7 +488,7 @@ open iosApp/iosApp.xcodeproj
 # Unit tests
 ./gradlew :shared:testDebugUnitTest
 
-# Expected: 902+ tests passing
+# Expected: All tests passing
 # ✓ BUILD SUCCESSFUL
 ```
 
