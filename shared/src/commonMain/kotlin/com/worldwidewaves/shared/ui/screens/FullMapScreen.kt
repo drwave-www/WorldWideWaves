@@ -80,6 +80,7 @@ fun FullMapScreen(
         MapActions(
             event = event,
             hasPosition = hasPosition,
+            isUserInArea = isInArea,
             modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
             onTargetWave = {
                 scope.launch {
