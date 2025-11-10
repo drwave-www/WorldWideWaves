@@ -2,10 +2,6 @@
 
 package com.worldwidewaves.shared.utils
 
-import com.worldwidewaves.crashlytics.CrashlyticsBridge
-import com.worldwidewaves.shared.BuildKonfig
-import kotlinx.cinterop.ExperimentalForeignApi
-
 /*
  * Copyright 2025 DrWave
  *
@@ -30,82 +26,60 @@ import kotlinx.cinterop.ExperimentalForeignApi
 /**
  * iOS implementation of Crashlytics integration.
  *
- * ## Current Status: FULLY INTEGRATED ✅
+ * ## Current Status: DISABLED (No-op Implementation)
  *
- * This implementation sends all exceptions, breadcrumbs, and custom keys to Firebase Crashlytics
- * via the Swift bridge (CrashlyticsBridge.swift).
+ * **Why Disabled:**
+ * Firebase iOS SDK contains Swift dependencies that conflict with Kotlin/Native linking.
+ * Attempting to bridge Firebase through cinterop results in linker errors due to Swift
+ * compatibility libraries not being available in Kotlin/Native context.
+ *
+ * ## Current Crash Reporting Strategy
+ *
+ * **iOS Native Crashes** (Swift/ObjC):
+ * - ✅ **Fully working** via Firebase Crashlytics SDK directly in iOS app
+ * - Captures Swift/ObjC crashes, exceptions, and native issues
+ * - No Kotlin/Native bridge needed
+ *
+ * **Android Crashes** (Kotlin shared code):
+ * - ✅ **Fully working** via CrashlyticsLogger.android.kt
+ * - Captures all Kotlin exceptions and crashes
+ * - Reports to Firebase Crashlytics
+ *
+ * **iOS Kotlin Crashes** (Kotlin shared code on iOS):
+ * - ❌ **Not reported** to Crashlytics (logged locally only)
+ * - Rare occurrence - most logic is in platform-specific code
+ * - Can be debugged via local logs
  *
  * ## Implementation Details
- * - Reports in production (BuildKonfig.DEBUG = false) or when forceEnableCrashReporting = true
- * - Uses cinterop to call Swift bridge which forwards to Firebase iOS SDK
- * - Also logs locally for debugging purposes
+ * - All methods are no-ops (do nothing)
+ * - Logs locally for debugging visibility
+ * - Matches expect/actual contract for compilation
  *
- * ## Testing Support
- * Use [enableTestReporting] to force crash reporting in DEBUG builds for testing purposes.
- * This matches the Android implementation for consistent cross-platform behavior.
+ * ## Future Improvement
+ * If needed, could implement via:
+ * 1. Swift package that wraps Firebase and exposes C API
+ * 2. XCFramework approach
+ * 3. Wait for Kotlin/Native Swift interop improvements
  *
- * ## Architecture
+ * ## Architecture (Current)
  * ```
- * Kotlin Shared Code → CrashlyticsLogger.ios.kt
- *                   ↓ (via cinterop)
- *         CrashlyticsBridge.swift → Firebase iOS SDK
+ * iOS App (Swift) → Firebase Crashlytics SDK (native crashes) ✅
+ * Kotlin Shared → CrashlyticsLogger.ios.kt (no-op, local logs only) ⏭️
+ * Android Kotlin → CrashlyticsLogger.android.kt → Firebase ✅
  * ```
  *
- * ## What Works Now
- * - Fatal crashes: ✅ Automatically captured by Firebase
- * - Non-fatal exceptions from Kotlin: ✅ Sent to Firebase via bridge
- * - Breadcrumbs: ✅ Sent to Firebase via bridge
- * - Custom keys: ✅ Sent to Firebase via bridge
- * - DEBUG mode control: ✅ Matches Android behavior
- * - dSYM upload: ✅ Enabled for all configurations
- * - Crashlytics initialization: ✅ Explicit init in AppDelegate
- *
- * ## Production Safety
- * - No force unwraps or unsafe operations
- * - Logs locally in addition to Firebase reporting for debugging
- * - No crashes from Crashlytics integration itself
+ * See: docs/ios/crashlytics-static-library-architecture.md for full context
  */
-@OptIn(ExperimentalForeignApi::class)
 actual object CrashlyticsLogger {
     private const val TAG = "CrashlyticsLogger.iOS"
 
     /**
-     * Force enable crash reporting even in DEBUG builds.
-     * Useful for testing Crashlytics integration without building release build.
-     * Matches Android implementation for cross-platform consistency.
-     */
-    private var forceEnableCrashReporting = false
-
-    /**
-     * Enable crash reporting in DEBUG builds for testing purposes.
-     * This allows verification of Crashlytics integration without building release build.
-     * Matches Android implementation.
-     */
-    fun enableTestReporting() {
-        forceEnableCrashReporting = true
-        Log.i(TAG, "Test reporting enabled - crashes will be reported in DEBUG builds")
-    }
-
-    /**
-     * Disable test reporting to return to normal behavior (production-only reporting).
-     * Matches Android implementation.
-     */
-    fun disableTestReporting() {
-        forceEnableCrashReporting = false
-        Log.i(TAG, "Test reporting disabled - returning to production-only reporting")
-    }
-
-    /**
-     * Check if crash reporting is currently enabled.
-     * Matches Android implementation logic.
-     */
-    private fun isReportingEnabled(): Boolean = !BuildKonfig.DEBUG || forceEnableCrashReporting
-
-    /**
      * Record a non-fatal exception from Kotlin code.
      *
-     * Sends exception to Firebase Crashlytics via Swift bridge and logs locally for debugging.
-     * Respects DEBUG mode - only reports in production unless test reporting is enabled.
+     * **iOS Implementation: No-op**
+     * - Logs locally for debugging
+     * - Does NOT send to Firebase (Kotlin/Native bridge unavailable)
+     * - Native iOS crashes still reported via direct Firebase integration
      *
      * @param throwable The exception that occurred
      * @param tag The component/module where the exception occurred
@@ -116,53 +90,33 @@ actual object CrashlyticsLogger {
         tag: String,
         message: String,
     ) {
-        if (isReportingEnabled()) {
-            // Get stack trace as string
-            val stackTrace = throwable.stackTraceToString()
-
-            // Build full error message
-            val fullMessage = "$message: ${throwable.message ?: "Unknown error"}"
-
-            // Send exception to Firebase via Swift bridge
-            CrashlyticsBridge.recordExceptionWithMessage(fullMessage, tag, stackTrace)
-
-            // Also log locally for debugging
-            Log.e(TAG, "[$tag] $fullMessage\n$stackTrace")
-        }
+        // Log locally for debugging (not sent to Crashlytics)
+        val stackTrace = throwable.stackTraceToString()
+        val fullMessage = "$message: ${throwable.message ?: "Unknown error"}"
+        Log.e(TAG, "[$tag] $fullMessage\n$stackTrace")
+        Log.w(TAG, "Note: Kotlin exceptions on iOS are not reported to Crashlytics")
     }
 
     /**
      * Log a message that will appear as breadcrumb in crash reports.
      *
-     * Sends breadcrumb to Firebase Crashlytics via Swift bridge and logs locally for debugging.
-     * Respects DEBUG mode - only reports in production unless test reporting is enabled.
+     * **iOS Implementation: No-op**
+     * - Logs locally for debugging
+     * - Does NOT send to Firebase
      *
      * @param message The breadcrumb message
      */
     actual fun log(message: String) {
-        if (isReportingEnabled()) {
-            // Extract tag from message if present (format: "[Tag] Message")
-            val (tag, cleanMessage) =
-                if (message.startsWith("[") && message.contains("]")) {
-                    val endIndex = message.indexOf("]")
-                    message.substring(1, endIndex) to message.substring(endIndex + 2)
-                } else {
-                    "App" to message
-                }
-
-            // Send breadcrumb to Firebase via Swift bridge
-            CrashlyticsBridge.logWithMessage(cleanMessage, tag)
-
-            // Also log locally for debugging
-            Log.d(TAG, "Breadcrumb: [$tag] $cleanMessage")
-        }
+        // Log locally for debugging (not sent to Crashlytics)
+        Log.d(TAG, "Breadcrumb (local only): $message")
     }
 
     /**
      * Set a custom key-value pair that will appear in crash reports.
      *
-     * Sends custom key to Firebase Crashlytics via Swift bridge and logs locally for debugging.
-     * Respects DEBUG mode - only reports in production unless test reporting is enabled.
+     * **iOS Implementation: No-op**
+     * - Logs locally for debugging
+     * - Does NOT send to Firebase
      *
      * @param key The key name
      * @param value The value (will be converted to string)
@@ -171,12 +125,7 @@ actual object CrashlyticsLogger {
         key: String,
         value: String,
     ) {
-        if (isReportingEnabled()) {
-            // Send custom key to Firebase via Swift bridge
-            CrashlyticsBridge.setCustomKeyWithKey(key, value)
-
-            // Also log locally for debugging
-            Log.d(TAG, "Custom key: $key = $value")
-        }
+        // Log locally for debugging (not sent to Crashlytics)
+        Log.d(TAG, "Custom key (local only): $key = $value")
     }
 }
