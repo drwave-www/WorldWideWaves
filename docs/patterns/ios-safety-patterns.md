@@ -277,4 +277,4 @@ rg -n -A 3 "init\s*\{" shared/src/commonMain --type kotlin \
 - **Verification**: ./scripts/dev/verification/verify-ios-safety.sh
 - **Cinterop Patterns**: docs/ios/cinterop-memory-safety-patterns.md (complete guide)
 - **Platform APIs**: docs/ios/platform-api-usage-guide.md (threading requirements)
-- **Status**: All 11 critical violations fixed (October 2025)
+- **Status**: All critical violations fixed
