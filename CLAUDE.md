@@ -666,12 +666,14 @@ The notification system delivers time-based and immediate alerts for wave events
 Firebase Crashlytics uses a **hybrid strategy** due to Swift/Kotlin/Native interop limitations.
 
 **iOS Implementation**: Disabled for Kotlin shared code
+
 - Firebase iOS SDK contains Swift dependencies that conflict with Kotlin/Native linker
 - iOS app uses Firebase Crashlytics **directly** for native crashes (Swift/ObjC) ✅
 - Kotlin exceptions on iOS are **logged locally only** (not sent to Firebase) ⏭️
 - Rare occurrence - most app logic is platform-specific
 
 **Android Implementation**: Fully functional ✅
+
 - CrashlyticsLogger.android.kt reports all Kotlin exceptions to Firebase
 - Complete crash reporting for shared code
 
@@ -699,6 +701,7 @@ Firebase iOS SDK requires Swift compatibility libraries that Kotlin/Native canno
 - `shared/src/androidMain/kotlin/com/worldwidewaves/shared/utils/CrashlyticsLogger.android.kt` - Full integration
 
 **Future Improvement Options**:
+
 - Swift package exposing C API (no Swift in headers)
 - XCFramework approach
 - Wait for Kotlin/Native Swift interop improvements
