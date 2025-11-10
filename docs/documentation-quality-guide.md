@@ -1,6 +1,5 @@
 # Documentation Quality Guide
 
-> **Last Updated**: October 27, 2025
 > **Status**: Active
 
 This guide explains how to maintain high-quality documentation with automated link checking and formatting validation.

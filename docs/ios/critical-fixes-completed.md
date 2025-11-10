@@ -1,5 +1,7 @@
 # Critical iOS Fixes - Completion Report
 
+> **Note**: This is a historical snapshot. Dates and test counts reflect the state when fixes were completed.
+
 **Date**: October 1, 2025
 **Status**: ✅ 8 of 10 CRITICAL issues resolved
 **Tests**: 425 tests (410 passing, 15 pre-existing failures in WaveProgressionObserverTest)

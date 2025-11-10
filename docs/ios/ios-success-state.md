@@ -1,11 +1,13 @@
 # iOS Success State Documentation - IOS_MINIMAL_KMM
 
+> **Note**: Historical verification snapshot from production deployment.
+
 ## 🎉 Achievement: iOS App Working Successfully
 
 **Date**: September 27, 2025
 **Status**: ✅ **STABLE** - No crashes, all systems operational
 **Bundle ID**: `com.worldwidewaves.WorldWideWavesDrWaves`
-**Process ID**: 43089 (current stable instance)
+**Process ID**: [runtime instance]
 
 ## ✅ Verified Working Components
 

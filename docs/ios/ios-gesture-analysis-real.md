@@ -1,7 +1,9 @@
 # iOS Full Map Gesture Issues - REAL ANALYSIS
 
+> **Note**: Historical analysis snapshot.
+
 **Date**: October 23, 2025
-**Log File**: `/tmp/log-63` (33,804 lines)
+**Log File**: log file (detailed trace)
 **Analysis**: Detailed examination of 1,854 gesture checks revealing 61.2% rejection rate
 
 ---
