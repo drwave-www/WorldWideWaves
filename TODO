@@ -13,18 +13,8 @@ URGENT:
 - Site web
 - Rapidement cibler partenaires villes premier trimestre
 
-- Full human code review
-- Packaging :
-    - configurer le "mandatory update" flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
-- Tour complet de tests (Faire un cahier)
+
 - faire une campagne de tests sur multiples devices et langues
-
-next
-- Videos
-- Static website to improve
-
--- PRODUCTION :
-- deactivate logging verbose/debug in WWWGlobals
 
 ---------------------------------------------
 
