@@ -1,7 +1,6 @@
 # Map Download System Architecture
 
 **Status**: ✅ Production
-**Last Updated**: November 9, 2025
 **Version**: 1.0
 
 ---
@@ -346,7 +345,7 @@ This is the most complex scenario, especially on Android after app restart.
 6. **State updated** → `mapFeatureState = Installed`
 7. **SimulationButton** sees `Installed` → allows simulation ✅
 
-**Key Fix (Commit b255e922)**: Step 4 happens BEFORE step 5, ensuring accurate state.
+**Key Fix**: Step 4 happens BEFORE step 5, ensuring accurate state.
 
 ### Android Re-download (After App Restart) - THE BUG FIX
 
@@ -415,7 +414,7 @@ HandleMapAvailability sees featureState = Installed
   → Map loads instead of showing download button  ❌❌❌
 ```
 
-### The Defense-in-Depth Solution (Commit 2fea8a8e)
+### The Defense-in-Depth Solution
 
 **Philosophy**: `forcedUnavailable` is the **authoritative source of truth** for user's uninstall intent. ALL UI decisions must check it, even if ViewModel shows Installed/Available.
 
@@ -483,7 +482,7 @@ fun isForcedUnavailable(eventId: String): Boolean {
 
 1. **Reset ViewModel state on uninstall** - ❌ Complex lifecycle management, tight coupling
 2. **Make ViewModel stateless** - ❌ Would break download progress tracking
-3. **Use reactive state derivation only** - ❌ Tried in f2d69b13, broke map detection
+3. **Use reactive state derivation only** - ❌ Attempted previously, broke map detection
 
 **Defense-in-depth advantages**:
 
@@ -821,7 +820,7 @@ clearUnavailableGeoJsonCache(eventId)
 
 ---
 
-## The Critical Bug Fix (November 2025)
+## The Critical Bug Fix
 
 ### Bug Description
 
@@ -844,7 +843,7 @@ downloadMap(mapId) {
 
 Result: `mapFeatureState` stuck at `NotAvailable` even after re-download completes.
 
-### The Fix (Commit b255e922)
+### The Fix
 
 **Solution**: Clear forcedUnavailable BEFORE any availability checks
 
@@ -1140,7 +1139,7 @@ xcrun simctl get_app_container booted com.worldwidewaves data
 
 | Symptom | Likely Cause | Solution |
 |---------|--------------|----------|
-| "Map required" after re-download | forcedUnavailable not cleared before check | Verify commit b255e922 applied |
+| "Map required" after re-download | forcedUnavailable not cleared before check | Verify fix is applied (see git history) |
 | Map downloads every time | forcedUnavailable set incorrectly | Check SharedPreferences, clear manually |
 | Download stuck at Pending | Play Core service issue | Clear Play Store cache, restart device |
 | Files exist but unavailable | forcedUnavailable set | Check logs for uninstall, clear flag |
@@ -1275,7 +1274,7 @@ fun `forcedUnavailable persists across app restart`() {
 
 ## Related Documentation
 
-- [Map Architecture Analysis](./map-architecture-analysis.md) - Historical analysis from Oct 2025
+- [Map Architecture Analysis](./map-architecture-analysis.md) - Historical analysis
 - [iOS ODR Setup](../setup/odr-bundle.md) - Implementation details
 - [Maps README](../../maps/README.md) - Map data structure
 - [Android Development Guide](../android/android-development-guide.md) - Platform specifics
@@ -1283,6 +1282,5 @@ fun `forcedUnavailable persists across app restart`() {
 ---
 
 **Document Version**: 1.0
-**Last Updated**: November 9, 2025
 **Author**: WorldWideWaves Development Team
 **Maintainer**: @ldiasdasilva

@@ -1,7 +1,6 @@
 # Map Cache Management
 
 **Status**: ✅ Production
-**Last Updated**: November 9, 2025
 **Version**: 1.0
 
 ---
@@ -871,6 +870,5 @@ fun `cache lifecycle from download to uninstall`() {
 ---
 
 **Document Version**: 1.0
-**Last Updated**: November 9, 2025
 **Author**: WorldWideWaves Development Team
 **Maintainer**: @ldiasdasilva
