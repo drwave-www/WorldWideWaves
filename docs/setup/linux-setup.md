@@ -725,7 +725,7 @@ ls -la .git/hooks/
 # Run all unit tests
 ./gradlew :shared:testDebugUnitTest
 
-# Expected: 722+ tests passing
+# Expected: All tests passing
 # BUILD SUCCESSFUL
 ```
 
@@ -1062,5 +1062,4 @@ sudo pacman -Syu
 
 ---
 
-**Last Updated**: October 27, 2025
-**Tested On**: Ubuntu 22.04 LTS, Fedora 39, Arch Linux (2024.10.01)
+**Tested On**: Ubuntu 22.04 LTS, Fedora 39, Arch Linux

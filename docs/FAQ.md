@@ -67,7 +67,7 @@ Yes, WorldWideWaves is licensed under **Apache License 2.0**. See [LICENSE](../L
 ### How do I run tests?
 
 ```bash
-# Unit tests (902+ tests, ~22 seconds)
+# Unit tests (comprehensive suite, fast execution)
 ./gradlew :shared:testDebugUnitTest
 
 # Android UI tests (requires emulator)
@@ -240,11 +240,11 @@ See [Development Workflow - Android Debugging](development.md#android-debugging)
 
 ### How many tests exist in WorldWideWaves?
 
-**902+ unit tests** with 100% pass rate, executing in ~22 seconds. Comprehensive coverage across domain logic, ViewModels, data layer, and iOS safety. See [CLAUDE.md - Testing Requirements](../CLAUDE.md#testing-requirements).
+**Comprehensive unit test suite** with 100% pass rate and fast execution time. Complete coverage across domain logic, ViewModels, data layer, and iOS safety. See [CLAUDE.md - Testing Requirements](../CLAUDE.md#testing-requirements).
 
 ### How long do tests take to run?
 
-Unit tests: **~22 seconds** on modern hardware. Android instrumented tests: **~5-10 minutes** (depends on emulator speed). Performance budget: unit tests must complete in <30s.
+Unit tests: **Fast execution time** on modern hardware (typically under 30 seconds). Android instrumented tests: **Several minutes** (depends on emulator speed). Performance budget: unit tests must complete in <30s.
 
 ### Why did my test fail?
 
@@ -406,7 +406,7 @@ Multi-stage pipeline:
 
 1. **Build verification**: Android and iOS compilation
 2. **Code quality**: ktlint, detekt, security scanning
-3. **Tests**: 902+ unit tests, instrumented UI tests
+3. **Tests**: Comprehensive unit test suite, instrumented UI tests
 4. **E2E**: Firebase Test Lab multi-device testing
 5. **Performance**: Nightly regression detection
 
@@ -439,10 +439,10 @@ However, CI pipeline will still enforce all tests. **Never commit code with fail
 
 ### How long does the CI pipeline take?
 
-- **Build verification**: ~5-10 minutes
-- **Quality gates**: ~3-5 minutes
-- **UI tests**: ~10-15 minutes
-- **Full E2E pipeline**: ~20-30 minutes
+- **Build verification**: Several minutes
+- **Quality gates**: A few minutes
+- **UI tests**: Several minutes
+- **Full E2E pipeline**: Typically under 30 minutes
 
 Optimized with parallel execution and caching.
 
@@ -593,5 +593,4 @@ Verify hooks installed: `ls -la .git/hooks/`
 
 ---
 
-**Last Updated**: October 27, 2025
 **Maintainer**: WorldWideWaves Development Team
