@@ -19,6 +19,7 @@
 
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.io.ByteArrayOutputStream
 import java.net.URL
 
 plugins {
@@ -54,18 +55,308 @@ kotlin {
             baseName = "Shared"
             isStatic = false // Dynamic framework for iOS compatibility
             linkerOpts("-ObjC")
-            // Weak link CrashlyticsBridge - symbols provided by iOS app at runtime
-            linkerOpts("-Wl,-U,_OBJC_CLASS_\$_CrashlyticsBridge")
+
+            // Link against CrashlyticsBridge static library
+            // This resolves _OBJC_CLASS_$_CrashlyticsBridge at framework link time (not runtime)
+            // Static library provides symbol during framework build, avoiding iOS app export limitation
+            linkerOpts("-L$projectDir/../iosApp/build/CrashlyticsBridge")
+            linkerOpts("$projectDir/../iosApp/build/CrashlyticsBridge/libCrashlyticsBridge-universal.a")
         }
 
-        // Configure cinterop for Crashlytics Swift bridge
+        // Configure cinterop for CrashlyticsBridge
         iosTarget.compilations.getByName("main") {
             cinterops.create("CrashlyticsBridge") {
                 definitionFile.set(project.file("src/nativeInterop/cinterop/CrashlyticsBridge.def"))
                 packageName = "com.worldwidewaves.crashlytics"
-                includeDirs("$projectDir/../iosApp/worldwidewaves/Utils")
+                // Updated path - source files moved to static library project
+                includeDirs("$projectDir/../iosApp/CrashlyticsBridge/CrashlyticsBridge")
             }
         }
+    }
+
+    /*
+     * Gradle tasks for building CrashlyticsBridge static library
+     *
+     * This library must be built before Kotlin/Native framework linking because
+     * the framework needs to resolve _OBJC_CLASS_$_CrashlyticsBridge at link time.
+     *
+     * Architecture:
+     *   1. Build libCrashlyticsBridge.a for all iOS architectures
+     *   2. Create universal binary with lipo
+     *   3. Kotlin/Native links Shared.framework against .a
+     *   4. Symbol resolved at framework link time (not app runtime)
+     */
+
+    val crashlyticsBridgeProjectDir = File("$projectDir/../iosApp/CrashlyticsBridge")
+    val crashlyticsBridgeOutputDir = File("$projectDir/../iosApp/build/CrashlyticsBridge")
+
+    val buildCrashlyticsBridgeIosArm64 =
+        tasks.register("buildCrashlyticsBridgeIosArm64") {
+            group = "build"
+            description = "Build CrashlyticsBridge static library for iOS devices (arm64)"
+
+            inputs.files(
+                fileTree("$crashlyticsBridgeProjectDir/CrashlyticsBridge") {
+                    include("**/*.h", "**/*.m")
+                },
+            )
+            outputs.file("$crashlyticsBridgeOutputDir/Release-iphoneos/libCrashlyticsBridge.a")
+
+            doLast {
+                crashlyticsBridgeOutputDir.mkdirs()
+
+                exec {
+                    workingDir = crashlyticsBridgeProjectDir
+                    commandLine(
+                        "xcodebuild",
+                        "-project",
+                        "CrashlyticsBridge.xcodeproj",
+                        "-target",
+                        "CrashlyticsBridge",
+                        "-configuration",
+                        "Release",
+                        "-sdk",
+                        "iphoneos",
+                        "-arch",
+                        "arm64",
+                        "BUILD_DIR=$crashlyticsBridgeOutputDir",
+                        "OBJROOT=$crashlyticsBridgeOutputDir/Intermediates",
+                        "SYMROOT=$crashlyticsBridgeOutputDir",
+                        "ONLY_ACTIVE_ARCH=NO",
+                        "build",
+                    )
+                }
+
+                logger.lifecycle("✅ Built libCrashlyticsBridge.a for iOS arm64")
+            }
+        }
+
+    val buildCrashlyticsBridgeSimulatorArm64 =
+        tasks.register("buildCrashlyticsBridgeSimulatorArm64") {
+            group = "build"
+            description = "Build CrashlyticsBridge static library for iOS Simulator (arm64)"
+
+            inputs.files(
+                fileTree("$crashlyticsBridgeProjectDir/CrashlyticsBridge") {
+                    include("**/*.h", "**/*.m")
+                },
+            )
+            outputs.file("$crashlyticsBridgeOutputDir/Release-iphonesimulator/libCrashlyticsBridge.a")
+
+            doLast {
+                crashlyticsBridgeOutputDir.mkdirs()
+
+                exec {
+                    workingDir = crashlyticsBridgeProjectDir
+                    commandLine(
+                        "xcodebuild",
+                        "-project",
+                        "CrashlyticsBridge.xcodeproj",
+                        "-target",
+                        "CrashlyticsBridge",
+                        "-configuration",
+                        "Release",
+                        "-sdk",
+                        "iphonesimulator",
+                        "-arch",
+                        "arm64",
+                        "BUILD_DIR=$crashlyticsBridgeOutputDir",
+                        "OBJROOT=$crashlyticsBridgeOutputDir/Intermediates",
+                        "SYMROOT=$crashlyticsBridgeOutputDir",
+                        "ONLY_ACTIVE_ARCH=NO",
+                        "build",
+                    )
+                }
+
+                logger.lifecycle("✅ Built libCrashlyticsBridge.a for iOS Simulator arm64")
+            }
+        }
+
+    val buildCrashlyticsBridgeSimulatorX86 =
+        tasks.register("buildCrashlyticsBridgeSimulatorX86") {
+            group = "build"
+            description = "Build CrashlyticsBridge static library for iOS Simulator (x86_64)"
+
+            inputs.files(
+                fileTree("$crashlyticsBridgeProjectDir/CrashlyticsBridge") {
+                    include("**/*.h", "**/*.m")
+                },
+            )
+            outputs.file("$crashlyticsBridgeOutputDir/Release-iphonesimulator-x86/libCrashlyticsBridge.a")
+
+            doLast {
+                crashlyticsBridgeOutputDir.mkdirs()
+
+                exec {
+                    workingDir = crashlyticsBridgeProjectDir
+                    commandLine(
+                        "xcodebuild",
+                        "-project",
+                        "CrashlyticsBridge.xcodeproj",
+                        "-target",
+                        "CrashlyticsBridge",
+                        "-configuration",
+                        "Release",
+                        "-sdk",
+                        "iphonesimulator",
+                        "-arch",
+                        "x86_64",
+                        "BUILD_DIR=$crashlyticsBridgeOutputDir",
+                        "OBJROOT=$crashlyticsBridgeOutputDir/Intermediates",
+                        "SYMROOT=$crashlyticsBridgeOutputDir",
+                        "ONLY_ACTIVE_ARCH=NO",
+                        "build",
+                    )
+                }
+
+                logger.lifecycle("✅ Built libCrashlyticsBridge.a for iOS Simulator x86_64")
+            }
+        }
+
+    val createUniversalCrashlyticsBridge =
+        tasks.register("createUniversalCrashlyticsBridge") {
+            group = "build"
+            description = "Create universal libCrashlyticsBridge.a for all architectures"
+
+            dependsOn(
+                buildCrashlyticsBridgeIosArm64,
+                buildCrashlyticsBridgeSimulatorArm64,
+                buildCrashlyticsBridgeSimulatorX86,
+            )
+
+            val outputFile = File("$crashlyticsBridgeOutputDir/libCrashlyticsBridge-universal.a")
+            outputs.file(outputFile)
+
+            doLast {
+                val iphoneosLib = "$crashlyticsBridgeOutputDir/Release-iphoneos/libCrashlyticsBridge.a"
+                val simulatorArm64Lib = "$crashlyticsBridgeOutputDir/Release-iphonesimulator/libCrashlyticsBridge.a"
+                val simulatorX86Lib = "$crashlyticsBridgeOutputDir/Release-iphonesimulator-x86/libCrashlyticsBridge.a"
+
+                // Create universal binary with lipo
+                exec {
+                    commandLine(
+                        "lipo",
+                        "-create",
+                        iphoneosLib,
+                        simulatorArm64Lib,
+                        simulatorX86Lib,
+                        "-output",
+                        outputFile.absolutePath,
+                    )
+                }
+
+                logger.lifecycle("✅ Created universal libCrashlyticsBridge.a")
+                logger.lifecycle("   Output: ${outputFile.absolutePath}")
+
+                // Verify architectures
+                exec {
+                    commandLine("lipo", "-info", outputFile.absolutePath)
+                    standardOutput = System.out
+                }
+            }
+        }
+
+    // Ensure static library is built before Kotlin/Native framework linking
+    // This makes symbol resolution happen at framework link time, not app runtime
+    listOf(
+        "iosX64",
+        "iosArm64",
+        "iosSimulatorArm64",
+    ).forEach { targetName ->
+        tasks
+            .matching {
+                it.name.contains("link") &&
+                    it.name.contains("Framework") &&
+                    it.name.contains(targetName, ignoreCase = true)
+            }.configureEach {
+                dependsOn(createUniversalCrashlyticsBridge)
+            }
+    }
+
+    val cleanCrashlyticsBridge =
+        tasks.register("cleanCrashlyticsBridge") {
+            group = "build"
+            description = "Clean CrashlyticsBridge static library build artifacts"
+
+            doLast {
+                delete(crashlyticsBridgeOutputDir)
+                exec {
+                    workingDir = crashlyticsBridgeProjectDir
+                    commandLine("xcodebuild", "-project", "CrashlyticsBridge.xcodeproj", "-target", "CrashlyticsBridge", "clean")
+                    isIgnoreExitValue = true // Don't fail if project doesn't exist yet
+                }
+                logger.lifecycle("✅ Cleaned CrashlyticsBridge artifacts")
+            }
+        }
+
+    tasks.named("clean") {
+        dependsOn(cleanCrashlyticsBridge)
+    }
+
+    val runCrashlyticsBridgeTests =
+        tasks.register("runCrashlyticsBridgeTests") {
+            group = "verification"
+            description = "Run CrashlyticsBridge XCTest unit tests"
+
+            dependsOn(createUniversalCrashlyticsBridge)
+
+            doLast {
+                exec {
+                    workingDir = crashlyticsBridgeProjectDir
+                    commandLine(
+                        "xcodebuild",
+                        "test",
+                        "-project",
+                        "CrashlyticsBridge.xcodeproj",
+                        "-scheme",
+                        "CrashlyticsBridge",
+                        "-destination",
+                        "platform=iOS Simulator,name=iPhone 15 Pro",
+                    )
+                }
+                logger.lifecycle("✅ CrashlyticsBridge tests passed")
+            }
+        }
+
+    val verifyCrashlyticsBridgeSymbol =
+        tasks.register("verifyCrashlyticsBridgeSymbol") {
+            group = "verification"
+            description = "Verify _OBJC_CLASS_\$_CrashlyticsBridge symbol exists in Shared.framework"
+
+            dependsOn(tasks.matching { it.name.contains("linkDebugFrameworkIosArm64") })
+
+            doLast {
+                val frameworkPath = "${layout.buildDirectory.get().asFile}/bin/iosArm64/debugFramework/Shared.framework/Shared"
+
+                val outputStream = ByteArrayOutputStream()
+                exec {
+                    commandLine("nm", frameworkPath)
+                    standardOutput = outputStream
+                    isIgnoreExitValue = true
+                }
+
+                val output = outputStream.toString()
+
+                if (output.contains("_OBJC_CLASS_\$_CrashlyticsBridge")) {
+                    logger.lifecycle("✅ Symbol _OBJC_CLASS_\$_CrashlyticsBridge found in Shared.framework")
+
+                    // Show the exact symbol line for verification
+                    val lines = output.lines()
+                    for (line in lines) {
+                        if (line.contains("_OBJC_CLASS_\$_CrashlyticsBridge")) {
+                            logger.lifecycle("   $line")
+                        }
+                    }
+                } else {
+                    throw GradleException("❌ Symbol _OBJC_CLASS_\$_CrashlyticsBridge NOT found in Shared.framework!")
+                }
+            }
+        }
+
+    // Hook tests into check task
+    tasks.named("check") {
+        dependsOn(runCrashlyticsBridgeTests)
+        dependsOn(verifyCrashlyticsBridgeSymbol)
     }
 
     /*

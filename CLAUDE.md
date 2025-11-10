@@ -659,6 +659,70 @@ The notification system delivers time-based and immediate alerts for wave events
 
 **See**: [docs/features/notification-system.md](docs/features/notification-system.md) for comprehensive system documentation
 
+### Crashlytics Integration (iOS)
+
+**Status**: ✅ Production-Ready | **Architecture**: Static Library | **Build 39+**: Symbol Resolution Fixed
+
+Firebase Crashlytics integration on iOS uses a **static library architecture** due to Mach-O symbol export limitations.
+
+**The Problem**: iOS app executables (MH_EXECUTE) cannot export Objective-C class symbols for dynamic frameworks (MH_DYLIB) to import at runtime. This caused builds 35-38 to crash on launch with "symbol not found '_OBJC_CLASS_$_CrashlyticsBridge'".
+
+**The Solution**: Compile CrashlyticsBridge into a static library (`.a` file), link it to Shared.framework at **framework build time**, not app runtime.
+
+**Architecture**:
+
+```
+libCrashlyticsBridge.a (static library)
+  ↓ linked at framework build time
+Shared.framework (Kotlin/Native)
+  ↓ symbol _OBJC_CLASS_$_CrashlyticsBridge resolved during linking
+  ↓ embedded in iOS app
+iOS App
+  ✓ Launches successfully (no runtime symbol lookup)
+```
+
+**Why Static Library Works**:
+
+- Kotlin/Native `konan` linker can link against `.a` files
+- Symbol resolved during framework build (not runtime)
+- Firebase available during static library build (SPM)
+- No iOS app symbol export needed
+
+**Key Files**:
+
+- `iosApp/CrashlyticsBridge/` - Static library Xcode project
+- `iosApp/CrashlyticsBridge/CrashlyticsBridge/CrashlyticsBridge.h/.m` - Objective-C bridge implementation
+- `shared/build.gradle.kts` - Gradle automation for multi-arch .a build (lines 71-329)
+- `shared/src/iosMain/kotlin/com/worldwidewaves/shared/utils/CrashlyticsLogger.ios.kt` - Kotlin implementation
+- `iosApp/CrashlyticsBridge/CrashlyticsBridgeTests/CrashlyticsBridgeTests.m` - XCTest unit tests
+
+**Build**: Fully automated via Gradle (runs before framework linking)
+
+```bash
+# Automatic (includes static library build)
+./gradlew :shared:embedAndSignAppleFrameworkForXcode
+
+# Manual static library build
+./gradlew createUniversalCrashlyticsBridge
+```
+
+**Tests**:
+
+- XCTest: `./gradlew runCrashlyticsBridgeTests` (verifies selectors and class exists)
+- Kotlin: `./gradlew :shared:testDebugUnitTest` (existing 902+ tests include CrashlyticsLogger)
+- Symbol verification: `./gradlew verifyCrashlyticsBridgeSymbol`
+
+**Verification**:
+
+```bash
+# Check symbol exists in framework (should see capital 'S')
+nm shared/build/bin/iosArm64/debugFramework/Shared.framework/Shared | \
+  grep "_OBJC_CLASS_\$_CrashlyticsBridge"
+# Expected: [address] S _OBJC_CLASS_$_CrashlyticsBridge
+```
+
+**See**: [docs/ios/crashlytics-static-library-architecture.md](docs/ios/crashlytics-static-library-architecture.md) for complete architecture documentation
+
 ---
 
 ## Build Commands
