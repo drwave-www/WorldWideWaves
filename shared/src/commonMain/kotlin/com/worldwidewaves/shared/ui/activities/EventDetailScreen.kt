@@ -87,6 +87,22 @@ class EventDetailScreen(
             }
         }
 
+        // Preload event area polygons in parallel with map initialization
+        // Eliminates 50-200ms delay between map visible and area detection active
+        // Polygons needed for: isInArea detection, targetWave button, wave rendering
+        // Safe: getPolygons() is idempotent (caches result) and thread-safe (mutex protected)
+        LaunchedEffect(event.id) {
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+                try {
+                    event.area.getPolygons() // Preload and cache polygons
+                    Log.d("EventDetailScreen", "Preloaded polygons for event ${event.id}")
+                } catch (e: Exception) {
+                    // Non-critical - polygons will be loaded on-demand if preload fails
+                    Log.w("EventDetailScreen", "Polygon preload failed for ${event.id}: ${e.message}")
+                }
+            }
+        }
+
         // Calculate responsive map height
         val calculatedHeight = calculateEventMapHeight()
 
