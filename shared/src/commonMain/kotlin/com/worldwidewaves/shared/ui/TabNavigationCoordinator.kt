@@ -126,7 +126,6 @@ class TabNavigationCoordinator(
                         modifier =
                             Modifier
                                 .fillMaxHeight()
-                                .align(Alignment.CenterVertically)
                                 .clickable {
                                     showStartScreen = false
                                     currentTab = index
