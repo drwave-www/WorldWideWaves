@@ -63,3 +63,6 @@ maps/*/src/main/assets/*.mbtiles
 # AI session tracking files (archived, not needed in git)
 .ai-progress-notifications.md
 .backup/
+
+# Git mailmap (local configuration)
+.mailmap

@@ -1,12 +1,130 @@
 # WorldWideWaves - Claude Code Instructions
 
-> **Quick Links**: [🚨 Commit Policy](#-commit-policy-critical) | [iOS Safety](#ios-requirements-critical) | [Debugging](#debugging-guidelines-critical) | [Testing](#testing-requirements) | [Build Commands](#build-commands) | [Code Quality](#code-quality-standards)
+> **Quick Links**: [🚨 Production Status](#-production-status-critical) | [🚨 Commit Policy](#-commit-policy-critical) | [iOS Safety](#ios-requirements-critical) | [Debugging](#debugging-guidelines-critical) | [Testing](#testing-requirements) | [Build Commands](#build-commands) | [Code Quality](#code-quality-standards)
+
+---
+
+## 🚨 Production Status [CRITICAL]
+
+> **⚠️ VERSION 1.0 RELEASED - APPLICATION IN PRODUCTION**
+
+WorldWideWaves **v1.0 is live in production** with real users on both iOS and Android. Any change can impact thousands of users.
+
+### Mandatory Change Management Process
+
+**BEFORE making ANY change** (code, tests, documentation), you MUST:
+
+#### 1. Architecture Validation [USE AGENTS]
+
+```bash
+# Use Task tool with subagent_type=Plan
+```
+
+**Questions to answer**:
+
+- Is this change architecturally sound?
+- Does it fit existing patterns?
+- Are there better alternatives?
+- What are the long-term implications?
+
+#### 2. Impact Analysis [USE AGENTS]
+
+```bash
+# Use Task tool with subagent_type=Explore (thoroughness: very thorough)
+```
+
+**Analyze**:
+
+- **Android implications**: Build system, lifecycle, permissions, Play Core
+- **iOS implications**: Threading, memory, UIKit integration, Kotlin/Native
+- **Shared code impact**: Expect/actual implementations, KMM patterns
+- **Side effects**: State management, observers, notification system
+- **Breaking changes**: API contracts, data models, serialization
+
+#### 3. Test Strategy Review [USE AGENTS]
+
+**Before writing tests**, validate:
+
+- Test coverage appropriate for production code
+- Both platform-specific tests (androidUnitTest + iosTest)
+- Edge cases for Android and iOS differences
+- Integration test requirements
+- Performance implications
+
+#### 4. Documentation Impact [USE AGENTS]
+
+**Identify documentation updates**:
+
+- CLAUDE.md sections affected
+- docs/ files requiring updates
+- Code comments and KDoc
+- README changes
+- Architecture diagrams
+
+### Production Change Rules
+
+- ✅ **Use agents for ALL non-trivial changes** - architecture, impact analysis, test review
+- ✅ **Double-check platform implications** - what works on Android may deadlock iOS
+- ✅ **Validate with both platform builds** - Android AND iOS compilation required
+- ✅ **Run full test suite** - 902+ tests must pass (100%)
+- ✅ **Update documentation immediately** - don't create doc debt
+- ❌ **NO experimental changes** - production code requires proven patterns
+- ❌ **NO "quick fixes"** - every change needs impact analysis
+- ❌ **NO skipping tests** - test failures are production incidents
+
+### Example: Correct Production Change Flow
+
+**User Request**: "Add user profile caching"
+
+**Step 1 - Architecture** (Task/Plan agent):
+
+```
+Analyze the architecture for adding user profile caching:
+1. Where should cache live? (Repository? ViewModel? Separate service?)
+2. What existing patterns can we follow? (EventCache? MapCache?)
+3. Cache invalidation strategy?
+4. Thread safety requirements?
+```
+
+**Step 2 - Impact Analysis** (Task/Explore agent, very thorough):
+
+```
+Analyze the impact of adding user profile caching:
+1. Android: SharedPreferences? Room? DataStore? Memory implications?
+2. iOS: UserDefaults? CoreData? FileManager? Memory pinning required?
+3. Shared: Kotlinx.serialization changes? StateFlow observers?
+4. Side effects: Does this affect FavoritesManager? NotificationScheduler?
+```
+
+**Step 3 - Test Review** (Task/Plan agent):
+
+```
+Review test strategy for user profile caching:
+1. Unit tests: Cache hit/miss, invalidation, serialization
+2. Android-specific: SharedPreferences mocking, lifecycle
+3. iOS-specific: UserDefaults behavior, memory safety
+4. Integration: End-to-end user profile load/save flow
+```
+
+**Step 4 - Documentation** (Task/Explore agent):
+
+```
+Identify documentation updates for user profile caching:
+1. CLAUDE.md: Add to "Architecture Patterns" section
+2. docs/architecture/caching-strategy.md: Create or update
+3. KDoc: CacheManager, UserRepository
+4. README.md: Update features list if user-facing
+```
+
+**Then and only then**: Implement the change.
 
 ---
 
 ## Project Overview
 
 WorldWideWaves is an **ephemeral mobile app** for orchestrating synchronized, location-based human wave events. Events exist briefly, creating shared moments without permanent data storage.
+
+**Current Status**: ✅ v1.0 in production (iOS + Android)
 
 ### Technology Stack
 
@@ -1091,6 +1209,7 @@ WorldWideWaves/
 
 ---
 
-**Last Updated**: November 5, 2025
-**Version**: 3.1 (Added explicit import management and qualified names guidelines)
+**Last Updated**: November 10, 2025
+**Version**: 4.0 (Production release v1.0 - Added mandatory change management process with agent requirements)
+**App Version**: 1.0 (In Production)
 **Maintainer**: WorldWideWaves Development Team
