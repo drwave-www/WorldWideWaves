@@ -423,23 +423,31 @@ abstract class AbstractEventMap<T>(
                     ),
                 )
 
-            runCameraAnimation { cb ->
-                mapLibreAdapter.animateCameraToBounds(
-                    finalBounds,
-                    callback =
-                        object : MapCameraCallback {
-                            override fun onFinish() {
-                                // Force constraint update on next camera idle to ensure bounds are enforced
-                                // This bypasses skip logic and ensures constraints update after animation settles
-                                constraintManager?.forceConstraintUpdate()
-                                cb.onFinish()
-                            }
+            // Temporarily remove native MapLibre constraints to allow centering on wave near edges
+            mapLibreAdapter.temporarilyRemoveConstraints()
 
-                            override fun onCancel() {
-                                cb.onCancel()
-                            }
-                        },
-                )
+            try {
+                runCameraAnimation { cb ->
+                    mapLibreAdapter.animateCameraToBounds(
+                        finalBounds,
+                        callback =
+                            object : MapCameraCallback {
+                                override fun onFinish() {
+                                    // Force constraint update on next camera idle to ensure bounds are enforced
+                                    // This bypasses skip logic and ensures constraints update after animation settles
+                                    constraintManager?.forceConstraintUpdate()
+                                    cb.onFinish()
+                                }
+
+                                override fun onCancel() {
+                                    cb.onCancel()
+                                }
+                            },
+                    )
+                }
+            } finally {
+                // Always restore constraints to maintain gesture safety
+                mapLibreAdapter.restoreConstraints()
             }
         } else {
             // No user position or wave edge bounds available, use fallback
@@ -469,8 +477,16 @@ abstract class AbstractEventMap<T>(
         }
 
         // Use fixed zoom centered on wave
-        runCameraAnimation { cb ->
-            mapLibreAdapter.animateCamera(wavePosition, MapDisplay.TARGET_WAVE_ZOOM, cb)
+        // Temporarily remove native MapLibre constraints to allow centering on wave near edges
+        mapLibreAdapter.temporarilyRemoveConstraints()
+
+        try {
+            runCameraAnimation { cb ->
+                mapLibreAdapter.animateCamera(wavePosition, MapDisplay.TARGET_WAVE_ZOOM, cb)
+            }
+        } finally {
+            // Always restore constraints to maintain gesture safety
+            mapLibreAdapter.restoreConstraints()
         }
     }
 
@@ -489,11 +505,21 @@ abstract class AbstractEventMap<T>(
             "targetUser: Starting animation to user position (${userPosition.latitude}, ${userPosition.longitude}) with zoom ${MapDisplay.TARGET_USER_ZOOM}",
         )
 
-        runCameraAnimation { cb ->
-            mapLibreAdapter.animateCamera(userPosition, MapDisplay.TARGET_USER_ZOOM, cb)
-        }
+        // Temporarily remove native MapLibre constraints to allow centering on edge positions
+        // Constraint bounds are smaller than event area (shrunk by viewport padding)
+        // User near edge would violate constraint bounds when centered at zoom 16
+        mapLibreAdapter.temporarilyRemoveConstraints()
 
-        Log.d("AbstractEventMap", "targetUser: Animation completed successfully")
+        try {
+            runCameraAnimation { cb ->
+                mapLibreAdapter.animateCamera(userPosition, MapDisplay.TARGET_USER_ZOOM, cb)
+            }
+
+            Log.d("AbstractEventMap", "targetUser: Animation completed successfully")
+        } finally {
+            // Always restore constraints to maintain gesture safety
+            mapLibreAdapter.restoreConstraints()
+        }
     }
 
     /**
@@ -587,11 +613,19 @@ abstract class AbstractEventMap<T>(
             "targetUserAndWave: Starting camera animation to final bounds SW(${finalBounds?.southwest?.latitude},${finalBounds?.southwest?.longitude}) NE(${finalBounds?.northeast?.latitude},${finalBounds?.northeast?.longitude})",
         )
 
-        runCameraAnimation { cb ->
-            mapLibreAdapter.animateCameraToBounds(finalBounds, callback = cb)
-        }
+        // Temporarily remove native MapLibre constraints to allow centering on user+wave near edges
+        mapLibreAdapter.temporarilyRemoveConstraints()
 
-        Log.d("AbstractEventMap", "targetUserAndWave: Animation completed successfully")
+        try {
+            runCameraAnimation { cb ->
+                mapLibreAdapter.animateCameraToBounds(finalBounds, callback = cb)
+            }
+
+            Log.d("AbstractEventMap", "targetUserAndWave: Animation completed successfully")
+        } finally {
+            // Always restore constraints to maintain gesture safety
+            mapLibreAdapter.restoreConstraints()
+        }
     }
 
     // ------------------------------------------------------------------------

@@ -825,4 +825,51 @@ class AndroidMapLibreAdapter(
             isTiltGesturesEnabled = false
         }
     }
+
+    /**
+     * Temporarily removes native MapLibre camera target constraints.
+     * Clears setLatLngBoundsForCameraTarget() by passing null.
+     * Must be paired with restoreConstraints() - use try-finally pattern.
+     */
+    override fun temporarilyRemoveConstraints() {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            Log.w(TAG, "temporarilyRemoveConstraints called off main thread - ignoring")
+            return
+        }
+
+        val map = mapLibreMap
+        if (map == null) {
+            Log.w(TAG, "temporarilyRemoveConstraints: Map not initialized")
+            return
+        }
+
+        Log.d(TAG, "Temporarily removing camera target constraints")
+        map.setLatLngBoundsForCameraTarget(null)
+    }
+
+    /**
+     * Restores previously set native MapLibre camera target constraints.
+     * Must be called after temporarilyRemoveConstraints() to re-enable gesture safety.
+     */
+    override fun restoreConstraints() {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            Log.w(TAG, "restoreConstraints called off main thread - ignoring")
+            return
+        }
+
+        val map = mapLibreMap
+        if (map == null) {
+            Log.w(TAG, "restoreConstraints: Map not initialized")
+            return
+        }
+
+        val bounds = currentConstraintBounds
+        if (bounds == null) {
+            Log.d(TAG, "No cached constraint bounds to restore")
+            return
+        }
+
+        Log.d(TAG, "Restoring camera target constraints: $bounds")
+        map.setLatLngBoundsForCameraTarget(bounds.toLatLngBounds())
+    }
 }

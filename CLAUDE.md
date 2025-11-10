@@ -1041,6 +1041,7 @@ EOF
 | Compilation warnings | Code quality issue | Fix ALL warnings, not just in modified files |
 | Map gestures not working (iOS) | Wrong property names | Use `isZoomEnabled/isScrollEnabled` |
 | Null pointer crash | Force unwrap `!!` | Use `?.` with `?:` or `requireNotNull()` |
+| Camera animation stops mid-flight (Android) | Native MapLibre constraint bounds | Fixed (Nov 2025): Constraints temporarily removed during programmatic animations |
 
 ---
 

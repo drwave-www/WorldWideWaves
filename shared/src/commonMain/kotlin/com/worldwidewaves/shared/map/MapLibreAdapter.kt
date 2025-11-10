@@ -116,4 +116,29 @@ interface MapLibreAdapter<T> {
      * @param enabled true to allow gestures, false to disable all map interactions
      */
     fun setGesturesEnabled(enabled: Boolean)
+
+    /**
+     * Temporarily removes native MapLibre camera target constraints.
+     * Used during programmatic animations (targetUser, targetWave, targetUserAndWave) to allow
+     * camera to center on positions near event edges without being blocked by constraint bounds.
+     *
+     * IMPORTANT: Must be paired with restoreConstraints() - use try-finally pattern.
+     *
+     * Android: Clears setLatLngBoundsForCameraTarget() by passing null.
+     * iOS: No-op (iOS uses reactive constraints that don't block programmatic animations).
+     */
+    fun temporarilyRemoveConstraints() {
+        // Default no-op implementation for iOS
+    }
+
+    /**
+     * Restores previously set native MapLibre camera target constraints.
+     * Must be called after temporarilyRemoveConstraints() to re-enable gesture safety.
+     *
+     * Android: Restores cached constraint bounds to setLatLngBoundsForCameraTarget().
+     * iOS: No-op (iOS constraints remain active).
+     */
+    fun restoreConstraints() {
+        // Default no-op implementation for iOS
+    }
 }

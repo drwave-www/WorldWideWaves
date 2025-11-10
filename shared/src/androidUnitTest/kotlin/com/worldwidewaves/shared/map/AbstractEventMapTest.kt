@@ -138,6 +138,8 @@ class AbstractEventMapTest : KoinTest {
         coEvery { mockMapLibreAdapter.drawOverridenBbox(any()) } just Runs
         every { mockMapLibreAdapter.enableLocationComponent(any()) } just Runs
         every { mockMapLibreAdapter.setUserPosition(any()) } just Runs
+        every { mockMapLibreAdapter.temporarilyRemoveConstraints() } just Runs
+        every { mockMapLibreAdapter.restoreConstraints() } just Runs
 
         // Setup mock LocationProvider
         mockLocationProvider = mockk()
@@ -1670,6 +1672,158 @@ class AbstractEventMapTest : KoinTest {
     // with 30+ test cases covering various polygon shapes, directions, and progressions
     // ============================================================
     // TEST IMPLEMENTATION
+    // ============================================================
+    // Constraint Toggling Tests
+    // ============================================================
+
+    @Test
+    fun targetUser_edgePosition_removesAndRestoresConstraints() =
+        runTest {
+            // Given: User position near event area edge
+            val edgePosition = Position(48.805, 2.205) // Near SW corner
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, edgePosition)
+            testScope.testScheduler.advanceUntilIdle()
+
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+            testScope.testScheduler.advanceUntilIdle()
+
+            // When: targetUser is called with edge position
+            eventMap.targetUser()
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then: Should temporarily remove constraints, animate, then restore
+            coVerify(exactly = 1) { mockMapLibreAdapter.temporarilyRemoveConstraints() }
+            coVerify(exactly = 1) {
+                mockMapLibreAdapter.animateCamera(edgePosition, WWWGlobals.MapDisplay.TARGET_USER_ZOOM, any())
+            }
+            coVerify(exactly = 1) { mockMapLibreAdapter.restoreConstraints() }
+        }
+
+    @Test
+    fun targetWave_edgePosition_removesAndRestoresConstraints() =
+        runTest {
+            // Given: Linear wave event with wave front near edge
+            val mockWaveLinear = mockk<WWWEventWaveLinear>()
+            every { mockEvent.wave } returns mockWaveLinear
+            coEvery { mockWaveLinear.getWaveFrontEdgeBounds() } returns Triple(48.805, 48.815, 2.205) // Near edge
+
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+            testScope.testScheduler.advanceUntilIdle()
+
+            // When: targetWave is called
+            eventMap.targetWave()
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then: Should temporarily remove constraints, animate, then restore
+            coVerify(exactly = 1) { mockMapLibreAdapter.temporarilyRemoveConstraints() }
+            coVerify(atLeast = 1) { mockMapLibreAdapter.animateCameraToBounds(any(), any(), any()) }
+            coVerify(exactly = 1) { mockMapLibreAdapter.restoreConstraints() }
+        }
+
+    @Test
+    fun targetUserAndWave_edgePositions_removesAndRestoresConstraints() =
+        runTest {
+            // Given: User near edge and wave position
+            val edgeUserPosition = Position(48.805, 2.205) // Near SW corner
+            val wavePosition = Position(48.87, 2.3)
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, edgeUserPosition)
+            testScope.testScheduler.advanceUntilIdle()
+
+            val mockWave = mockk<WWWEventWave>()
+            every { mockEvent.wave } returns mockWave
+            coEvery { mockWave.getWaveFrontCenterPosition() } returns wavePosition
+
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+            testScope.testScheduler.advanceUntilIdle()
+
+            // When: targetUserAndWave is called
+            eventMap.targetUserAndWave()
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then: Should temporarily remove constraints, animate, then restore
+            // Note: setupMap also calls animateCameraToBounds via moveToMapBounds, so we verify at least 1
+            coVerify(exactly = 1) { mockMapLibreAdapter.temporarilyRemoveConstraints() }
+            coVerify(atLeast = 1) { mockMapLibreAdapter.animateCameraToBounds(any(), any(), any()) }
+            coVerify(exactly = 1) { mockMapLibreAdapter.restoreConstraints() }
+        }
+
+    @Test
+    fun targetUser_constraintsRestoredEvenOnAnimationFailure() =
+        runTest {
+            // Given: User position available
+            val userPosition = Position(48.86, 2.35)
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, userPosition)
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Mock animateCamera to throw exception
+            coEvery {
+                mockMapLibreAdapter.animateCamera(any(), any(), any())
+            } throws RuntimeException("Animation failed")
+
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+            testScope.testScheduler.advanceUntilIdle()
+
+            // When: targetUser is called and animation fails
+            try {
+                eventMap.targetUser()
+                testScope.testScheduler.advanceUntilIdle()
+            } catch (e: RuntimeException) {
+                // Expected exception
+            }
+
+            // Then: Constraints should still be restored (via finally block)
+            coVerify(exactly = 1) { mockMapLibreAdapter.temporarilyRemoveConstraints() }
+            coVerify(exactly = 1) { mockMapLibreAdapter.restoreConstraints() }
+        }
+
+    @Test
+    fun targetWaveFallback_removesAndRestoresConstraints() =
+        runTest {
+            // Given: User position available, no wave edge bounds (triggers fallback)
+            val userPosition = Position(48.86, 2.35)
+            positionManager.updatePosition(PositionManager.PositionSource.GPS, userPosition)
+            testScope.testScheduler.advanceUntilIdle()
+
+            val mockWaveLinear = mockk<WWWEventWaveLinear>()
+            every { mockEvent.wave } returns mockWaveLinear
+            coEvery { mockWaveLinear.getWaveFrontEdgeBounds() } returns null // No edge bounds
+            coEvery { mockWaveLinear.getWaveFrontCenterPosition() } returns Position(48.87, 2.3)
+
+            eventMap.setupMap(
+                map = "test-map",
+                scope = testScope,
+                stylePath = "/path/to/style.json",
+            )
+            testScope.testScheduler.advanceUntilIdle()
+
+            // When: targetWave is called (falls back to centerPosition)
+            eventMap.targetWave()
+            testScope.testScheduler.advanceUntilIdle()
+
+            // Then: Should temporarily remove constraints, animate, then restore
+            coVerify(exactly = 1) { mockMapLibreAdapter.temporarilyRemoveConstraints() }
+            coVerify(atLeast = 1) {
+                mockMapLibreAdapter.animateCamera(any(), WWWGlobals.MapDisplay.TARGET_WAVE_ZOOM, any())
+            }
+            coVerify(exactly = 1) { mockMapLibreAdapter.restoreConstraints() }
+        }
+
     // ============================================================
 
     private class TestEventMap(
