@@ -659,69 +659,51 @@ The notification system delivers time-based and immediate alerts for wave events
 
 **See**: [docs/features/notification-system.md](docs/features/notification-system.md) for comprehensive system documentation
 
-### Crashlytics Integration (iOS)
+### Crashlytics Integration
 
-**Status**: ✅ Production-Ready | **Architecture**: Static Library | **Build 39+**: Symbol Resolution Fixed
+**Status**: Hybrid Strategy | Android: ✅ Full | iOS: ⏭️ Native Only | **Build 39+**: Fixed
 
-Firebase Crashlytics integration on iOS uses a **static library architecture** due to Mach-O symbol export limitations.
+Firebase Crashlytics uses a **hybrid strategy** due to Swift/Kotlin/Native interop limitations.
 
-**The Problem**: iOS app executables (MH_EXECUTE) cannot export Objective-C class symbols for dynamic frameworks (MH_DYLIB) to import at runtime. This caused builds 35-38 to crash on launch with "symbol not found '_OBJC_CLASS_$_CrashlyticsBridge'".
+**iOS Implementation**: Disabled for Kotlin shared code
+- Firebase iOS SDK contains Swift dependencies that conflict with Kotlin/Native linker
+- iOS app uses Firebase Crashlytics **directly** for native crashes (Swift/ObjC) ✅
+- Kotlin exceptions on iOS are **logged locally only** (not sent to Firebase) ⏭️
+- Rare occurrence - most app logic is platform-specific
 
-**The Solution**: Compile CrashlyticsBridge into a static library (`.a` file), link it to Shared.framework at **framework build time**, not app runtime.
+**Android Implementation**: Fully functional ✅
+- CrashlyticsLogger.android.kt reports all Kotlin exceptions to Firebase
+- Complete crash reporting for shared code
 
 **Architecture**:
 
 ```
-libCrashlyticsBridge.a (static library)
-  ↓ linked at framework build time
-Shared.framework (Kotlin/Native)
-  ↓ symbol _OBJC_CLASS_$_CrashlyticsBridge resolved during linking
-  ↓ embedded in iOS app
-iOS App
-  ✓ Launches successfully (no runtime symbol lookup)
+iOS App (Swift) → Firebase Crashlytics SDK (native crashes) ✅
+Kotlin Android → CrashlyticsLogger.android.kt → Firebase ✅
+Kotlin iOS → CrashlyticsLogger.ios.kt (no-op, logs only) ⏭️
 ```
 
-**Why Static Library Works**:
+**Why iOS Bridge Disabled**:
 
-- Kotlin/Native `konan` linker can link against `.a` files
-- Symbol resolved during framework build (not runtime)
-- Firebase available during static library build (SPM)
-- No iOS app symbol export needed
+Firebase iOS SDK requires Swift compatibility libraries that Kotlin/Native cannot provide during framework linking. Attempted solutions (static library, weak linking) fail with: `ld: library 'swiftCompatibility50' not found`.
+
+**What Gets Reported**:
+
+- ✅ **iOS native crashes** (Swift/ObjC) → Firebase Crashlytics
+- ✅ **Android Kotlin crashes** → Firebase Crashlytics
+- ⏭️ **iOS Kotlin crashes** → Local logs only (debuggable via Xcode console)
 
 **Key Files**:
 
-- `iosApp/CrashlyticsBridge/` - Static library Xcode project
-- `iosApp/CrashlyticsBridge/CrashlyticsBridge/CrashlyticsBridge.h/.m` - Objective-C bridge implementation
-- `shared/build.gradle.kts` - Gradle automation for multi-arch .a build (lines 71-329)
-- `shared/src/iosMain/kotlin/com/worldwidewaves/shared/utils/CrashlyticsLogger.ios.kt` - Kotlin implementation
-- `iosApp/CrashlyticsBridge/CrashlyticsBridgeTests/CrashlyticsBridgeTests.m` - XCTest unit tests
+- `shared/src/iosMain/kotlin/com/worldwidewaves/shared/utils/CrashlyticsLogger.ios.kt` - No-op implementation
+- `shared/src/androidMain/kotlin/com/worldwidewaves/shared/utils/CrashlyticsLogger.android.kt` - Full integration
 
-**Build**: Fully automated via Gradle (runs before framework linking)
+**Future Improvement Options**:
+- Swift package exposing C API (no Swift in headers)
+- XCFramework approach
+- Wait for Kotlin/Native Swift interop improvements
 
-```bash
-# Automatic (includes static library build)
-./gradlew :shared:embedAndSignAppleFrameworkForXcode
-
-# Manual static library build
-./gradlew createUniversalCrashlyticsBridge
-```
-
-**Tests**:
-
-- XCTest: `./gradlew runCrashlyticsBridgeTests` (verifies selectors and class exists)
-- Kotlin: `./gradlew :shared:testDebugUnitTest` (existing 902+ tests include CrashlyticsLogger)
-- Symbol verification: `./gradlew verifyCrashlyticsBridgeSymbol`
-
-**Verification**:
-
-```bash
-# Check symbol exists in framework (should see capital 'S')
-nm shared/build/bin/iosArm64/debugFramework/Shared.framework/Shared | \
-  grep "_OBJC_CLASS_\$_CrashlyticsBridge"
-# Expected: [address] S _OBJC_CLASS_$_CrashlyticsBridge
-```
-
-**See**: [docs/ios/crashlytics-static-library-architecture.md](docs/ios/crashlytics-static-library-architecture.md) for complete architecture documentation
+**See**: `CrashlyticsLogger.ios.kt` file header for technical details
 
 ---
 
