@@ -98,26 +98,6 @@ class EventPositionTracker(
     }
 
     /**
-     * Checks if polygon data is available for the event.
-     *
-     * @param event The event to check
-     * @return True if polygons are loaded, false otherwise
-     */
-    suspend fun hasPolygonData(event: IWWWEvent): Boolean =
-        try {
-            val polygons = event.area.getPolygons()
-            polygons.isNotEmpty()
-        } catch (e: IllegalStateException) {
-            Log.d("EventPositionTracker", "hasPolygonData: State exception for event ${event.id}: $e")
-            false
-        } catch (e: CancellationException) {
-            throw e // Re-throw cancellation
-        } catch (e: Exception) {
-            Log.e("EventPositionTracker", "hasPolygonData: Unexpected exception for event ${event.id}: $e")
-            false
-        }
-
-    /**
      * Gets the current user position from PositionManager.
      *
      * @return The current position, or null if not available

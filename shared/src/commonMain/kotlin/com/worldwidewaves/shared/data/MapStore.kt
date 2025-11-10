@@ -221,6 +221,7 @@ suspend fun getMapFileAbsolutePath(
         platformWriteText(meta, stamp)
         if (extension == MapFileExtension.GEOJSON) platformInvalidateGeoJson(eventId)
         Log.i("MapStore", "getMapFileAbsolutePath: Download SUCCESS -> $dataPath")
+
         return dataPath
     }
 

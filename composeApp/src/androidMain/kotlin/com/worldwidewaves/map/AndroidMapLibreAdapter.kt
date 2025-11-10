@@ -356,7 +356,6 @@ class AndroidMapLibreAdapter(
     // Track constraint bounds for viewport clamping (matches iOS pattern)
     private var currentConstraintBounds: BoundingBox? = null
     private var calculatedMinZoom: Double = 0.0
-    private var eventBounds: BoundingBox? = null // Original event bounds (not shrunk)
     private var isGestureInProgress = false
     private var gestureConstraintsActive = false // Track if gesture listeners are already set up
     private var minZoomLocked = false // Track if min zoom has been set (to prevent zoom-in spiral)

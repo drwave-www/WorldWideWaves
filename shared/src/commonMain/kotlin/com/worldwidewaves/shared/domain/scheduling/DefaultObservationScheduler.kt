@@ -77,6 +77,7 @@ class DefaultObservationScheduler(
             timeBeforeEvent > 5.minutes + 30.seconds -> 5.minutes
             timeBeforeEvent > 35.seconds -> 1.seconds
             timeBeforeEvent > 0.seconds || event.isRunning() -> 500.milliseconds
+
             else -> 30.seconds
         }
     }

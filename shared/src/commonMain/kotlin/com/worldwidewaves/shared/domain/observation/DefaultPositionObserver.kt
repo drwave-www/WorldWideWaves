@@ -103,7 +103,7 @@ class DefaultPositionObserver(
             } else if (old.position == null || new.position == null) {
                 old.position == new.position // Only emit if position availability changed
             } else {
-                calculateDistance(old.position!!, new.position!!) < MIN_POSITION_CHANGE_METERS
+                calculateDistance(old.position, new.position) < MIN_POSITION_CHANGE_METERS
             }
         }.flowOn(Dispatchers.Default)
     }

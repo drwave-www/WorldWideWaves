@@ -140,7 +140,8 @@ val commonModule =
         single { LocalizationManager() }
 
         /**
-         * Provides [SpriteCachePreferences] as singleton for sprite cache state persistence.
+         * Provides [com.worldwidewaves.shared.data.SpriteCachePreferences]
+         * as singleton for sprite cache state persistence.
          *
          * **Scope**: Singleton - single preferences instance for entire application
          * **Thread-safety**: Yes - platform-specific implementations are thread-safe
@@ -156,7 +157,7 @@ val commonModule =
          * - Android: Uses SharedPreferences
          * - iOS: Uses NSUserDefaults
          *
-         * @see SpriteCachePreferences for persistence API
+         * @see com.worldwidewaves.shared.data.SpriteCachePreferences for persistence API
          */
         single { createSpriteCachePreferences() }
 

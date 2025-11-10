@@ -114,7 +114,7 @@ class WaveHitDetector(
                 )
 
             trace.putMetric("user_in_area", if (userIsInArea) 1 else 0)
-            trace.putMetric("user_hit", if (result?.userHasBeenHit == true) 1 else 0)
+            trace.putMetric("user_hit", if (result.userHasBeenHit) 1 else 0)
             trace.putMetric("progression_percent", progression.toLong())
             result
         } catch (e: IllegalStateException) {

@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.utils.Log
 import kotlin.math.abs
 
 /**
@@ -71,13 +70,7 @@ class BoundingBox private constructor(
     constructor(swLat: Double, swLng: Double, neLat: Double, neLng: Double) : this(
         sw = Position(minOf(swLat, neLat), minOf(swLng, neLng)).init(),
         ne = Position(maxOf(swLat, neLat), maxOf(swLng, neLng)).init(),
-    ) {
-        // Debug logging for iOS coordinate issues
-        Log.d(
-            "BoundingBox",
-            "constructor: input SW($swLat,$swLng) NE($neLat,$neLng) → output SW(${sw.lat},${sw.lng}) NE(${ne.lat},${ne.lng})",
-        )
-    }
+    )
 
     operator fun component1(): Position = sw
 

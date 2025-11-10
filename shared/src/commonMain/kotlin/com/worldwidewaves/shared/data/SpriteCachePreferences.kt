@@ -14,6 +14,7 @@ package com.worldwidewaves.shared.data
  * **Purpose**: Ensure sprite cache persists across app restarts and invalidates
  * when app version changes.
  */
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 expect class SpriteCachePreferences {
     /**
      * Check if sprite cache is marked as complete AND version is valid.
