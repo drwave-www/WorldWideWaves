@@ -66,7 +66,7 @@ WorldWideWaves **v1.0 is live in production** with real users on both iOS and An
 - ✅ **Use agents for ALL non-trivial changes** - architecture, impact analysis, test review
 - ✅ **Double-check platform implications** - what works on Android may deadlock iOS
 - ✅ **Validate with both platform builds** - Android AND iOS compilation required
-- ✅ **Run full test suite** - 902+ tests must pass (100%)
+- ✅ **Run full test suite** - all tests must pass (100%)
 - ✅ **Update documentation immediately** - don't create doc debt
 - ❌ **NO experimental changes** - production code requires proven patterns
 - ❌ **NO "quick fixes"** - every change needs impact analysis
@@ -133,7 +133,7 @@ WorldWideWaves is an **ephemeral mobile app** for orchestrating synchronized, lo
 - **Maps**: MapLibre (open-source, self-hosted)
 - **Backend**: Firebase (Firestore, Storage)
 - **DI**: Koin
-- **Testing**: 902+ unit tests (Kotlin Test + Turbine)
+- **Testing**: Comprehensive unit test suite (Kotlin Test + Turbine)
 - **CI/CD**: GitHub Actions (Android + iOS)
 
 ### Architecture
@@ -147,7 +147,7 @@ WorldWideWaves is an **ephemeral mobile app** for orchestrating synchronized, lo
 
 ## iOS Requirements [CRITICAL]
 
-> **Status**: ✅ STABLE | **Tests**: 902/902 passing | **Violations**: 0/11
+> **Status**: ✅ STABLE | **Tests**: All passing | **Violations**: None (all fixed)
 
 ### 🚨 iOS Deadlock Prevention [MANDATORY]
 
@@ -207,7 +207,7 @@ fun Screen() {
 
 ## Accessibility Requirements [MANDATORY]
 
-> **Status**: ✅ WCAG 2.1 Level AA Compliant | **Tests**: 27+ passing
+> **Status**: ✅ WCAG 2.1 Level AA Compliant | **Tests**: All passing
 
 ### All UI Components Must
 
@@ -384,7 +384,7 @@ Users can change language **without app restart**:
 2. **UI operations**: Check `isForcedUnavailable()` before setting map available or loading map
 3. **ViewModel state**: Don't trust ViewModel.featureState alone - it may be stale after uninstall
 
-**Defense-in-Depth** (commit 2fea8a8e):
+**Defense-in-Depth**:
 
 AndroidEventMap checks `isForcedUnavailable()` at two points:
 
@@ -446,12 +446,12 @@ shared/src/
 
 ```bash
 ./gradlew clean :shared:testDebugUnitTest :composeApp:assembleDebug
-# Expected: 902+ tests, 100% pass rate, ~22s execution
+# Expected: All tests passing with 100% pass rate
 ```
 
 ### Requirements
 
-- **All changes must pass existing test suite** (902+ tests)
+- **All changes must pass existing test suite** (comprehensive suite)
 - **New functionality requires tests** - no test debt
 - **Run ALL tests**, not just relevant ones
 - **Performance**: Monitor test execution time
@@ -738,7 +738,7 @@ fun performOperation() {
 
 ### Notifications System
 
-**Status**: ✅ Production-Ready | **Tests**: 77/77 passing | **Phase**: 7 Complete
+**Status**: ✅ Production-Ready | **Tests**: All passing | **Phase**: 7 Complete
 
 The notification system delivers time-based and immediate alerts for wave events to favorited events only.
 
@@ -773,13 +773,13 @@ The notification system delivers time-based and immediate alerts for wave events
 3. On app launch: Call `notificationScheduler.syncNotifications(favorites, events)`
 4. Wave hit detection: Call `notificationManager.deliverNow(eventId, WaveHit, content)`
 
-**Testing**: `./gradlew :shared:testDebugUnitTest` includes 77 notification tests (commonTest + androidUnitTest + iosTest)
+**Testing**: `./gradlew :shared:testDebugUnitTest` includes comprehensive notification test coverage (commonTest + androidUnitTest + iosTest)
 
 **See**: [docs/features/notification-system.md](docs/features/notification-system.md) for comprehensive system documentation
 
 ### Crashlytics Integration
 
-**Status**: Hybrid Strategy | Android: ✅ Full | iOS: ⏭️ Native Only | **Build 39+**: Fixed
+**Status**: Hybrid Strategy | Android: ✅ Full | iOS: ⏭️ Native Only
 
 Firebase Crashlytics uses a **hybrid strategy** due to Swift/Kotlin/Native interop limitations.
 
@@ -1144,7 +1144,7 @@ EOF
 | Compilation warnings | Code quality issue | Fix ALL warnings, not just in modified files |
 | Map gestures not working (iOS) | Wrong property names | Use `isZoomEnabled/isScrollEnabled` |
 | Null pointer crash | Force unwrap `!!` | Use `?.` with `?:` or `requireNotNull()` |
-| Camera animation stops mid-flight (Android) | Native MapLibre constraint bounds | Fixed (Nov 2025): Constraints temporarily removed during programmatic animations |
+| Camera animation stops mid-flight (Android) | Native MapLibre constraint bounds | Fixed: Constraints temporarily removed during programmatic animations |
 
 ---
 
@@ -1209,7 +1209,6 @@ WorldWideWaves/
 
 ---
 
-**Last Updated**: November 10, 2025
 **Version**: 4.0 (Production release v1.0 - Added mandatory change management process with agent requirements)
 **App Version**: 1.0 (In Production)
 **Maintainer**: WorldWideWaves Development Team

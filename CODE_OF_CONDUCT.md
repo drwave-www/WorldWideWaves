@@ -146,7 +146,7 @@ As a Kotlin Multiplatform project supporting both Android and iOS:
 
 All contributions must maintain our testing standards:
 
-- 100% pass rate on existing test suite (902+ tests)
+- 100% pass rate on existing comprehensive test suite
 - New functionality requires corresponding tests
 - Tests validate business logic, not implementation details
 - Never disable tests to make them pass
@@ -181,5 +181,4 @@ For answers to common questions about this code of conduct, see the FAQ at
 
 ---
 
-**Last Updated**: October 27, 2025
 **Contact**: conduct@worldwidewaves.net

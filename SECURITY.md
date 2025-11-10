@@ -4,11 +4,6 @@
 
 Currently supported versions for security updates:
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 0.9.x   | :white_check_mark: |
-| < 0.9   | :x:                |
-
 ## Reporting a Vulnerability
 
 **Please do not report security vulnerabilities through public GitHub issues.**
@@ -82,7 +77,7 @@ WorldWideWaves implements multiple security measures to protect user data and en
 
 ### Testing & Verification
 
-- **902+ Unit Tests**: Comprehensive test coverage for security-critical code
+- **Comprehensive Unit Tests**: Full test coverage for security-critical code
 - **iOS Safety Verification**: Automated script prevents deadlock patterns
 - **Pre-commit Hooks**: Automated security checks before code commits
 - **CI/CD Security**: GitHub Actions workflows validate security measures
@@ -136,5 +131,4 @@ We appreciate the security research community's efforts to responsibly disclose 
 
 ---
 
-**Last Updated**: October 27, 2025
 **Contact**: security@worldwidewaves.net
