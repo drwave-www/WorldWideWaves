@@ -1,6 +1,6 @@
 # Simulation Mode
 
-> **Status**: Production-Ready | **Last Updated**: October 2025
+> **Status**: Production-Ready
 > **Platforms**: Android + iOS | **Tests**: 911+ passing
 
 ## Table of Contents
@@ -164,7 +164,7 @@ sequenceDiagram
 
 1. Tap the **Play button** (▶️ red icon)
 2. Button shows loading indicator (circular spinner)
-3. After ~150ms, button changes to **Stop button** (✕ red icon)
+3. Shortly after, button changes to **Stop button** (✕ red icon)
 4. Simulation is now **active**:
    - Your position is set to a random location within the event area
    - Time is accelerated 10x (10 real seconds = 100 simulated seconds)
@@ -359,7 +359,7 @@ LaunchedEffect(event.id, isSimulationEnabled) { /* ... */ }
 ```kotlin
 // After stopObservation(), add cleanup delay
 event.observer.stopObservation()
-delay(150.milliseconds) // Allow async cancellation to complete
+delay(150.milliseconds) // Allow async cancellation to complete (timing verified through testing)
 event.observer.startObservation()
 ```
 
@@ -915,6 +915,5 @@ Without downloaded map:
 
 ---
 
-**Last Updated**: October 2025
 **Version**: 1.0
 **Maintainer**: WorldWideWaves Development Team

@@ -1127,6 +1127,5 @@ if (sampleRate <= 0.0 || channelCount == 0u) {
 
 ---
 
-**Last Updated**: 2025-10-30
 **Version**: 1.0
 **Maintainer**: WorldWideWaves Development Team

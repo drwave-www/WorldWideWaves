@@ -1,6 +1,6 @@
 # WorldWideWaves Accessibility Guide
 
-> **WCAG 2.1 Level AA Compliance** | Last Updated: October 2025
+> **WCAG 2.1 Level AA Compliance**
 
 ## Overview
 
@@ -522,5 +522,4 @@ actual fun rememberDynamicTypeScale(): Float {
 
 ---
 
-*Last Updated: October 2025*
 *Maintained by: WorldWideWaves Development Team*
