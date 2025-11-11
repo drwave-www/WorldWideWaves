@@ -2,6 +2,15 @@
 
 WorldWideWaves implements Clean Architecture principles with Kotlin Multiplatform, achieving approximately 70% code sharing between Android and iOS while maintaining platform-specific optimizations.
 
+## Detailed Architecture Documentation
+
+This document provides a high-level overview of the WorldWideWaves architecture. For in-depth technical details, see:
+
+- **[Wave Hit Detection System](architecture/wave-hit-detection-system.md)** - Detection algorithm, timing, and accuracy guarantees
+- **[Event Observation System](architecture/event-observation-system.md)** - Observation flows, scheduling, and state coordination
+- **[Map Download System](architecture/map-download-system.md)** - On-demand map delivery and lifecycle management
+- **[Map Cache Management](architecture/map-cache-management.md)** - Cache lifecycle, invalidation strategies, and storage patterns
+
 ## System Context
 
 ```mermaid
@@ -137,6 +146,8 @@ Self-contained offline map modules for 42 cities implemented as Android Dynamic 
 
 ## Data Flow
 
+This section provides high-level flows for key system operations. For detailed implementation including state machines, scheduling algorithms, and edge cases, see [Event Observation System](architecture/event-observation-system.md) and [Wave Hit Detection System](architecture/wave-hit-detection-system.md).
+
 ### Event Loading Flow
 
 ```mermaid
@@ -159,6 +170,13 @@ sequenceDiagram
 ```
 
 ### Wave Participation Flow
+
+**High-level flow**:
+
+1. User enters event area and joins wave
+2. Observer starts monitoring position and time
+3. System detects wave hit with high accuracy
+4. Notification triggers and UI updates
 
 ```mermaid
 %%{init: {'theme':'base', 'themeVariables': { 'background':'transparent'}}}%%
@@ -184,6 +202,11 @@ sequenceDiagram
         VM-->>UI: Update UI
     end
 ```
+
+**For detailed documentation**, see:
+
+- [Wave Hit Detection System](architecture/wave-hit-detection-system.md) - Detection algorithm, timing accuracy, and validation
+- [Event Observation System](architecture/event-observation-system.md) - Complete observation lifecycle and state coordination
 
 ### Position Management Architecture
 
@@ -289,6 +312,11 @@ class EventsViewModel : ViewModel() {
 - MapView recycling
 - Bitmap pooling for markers
 - Offline tile database optimization
+
+**For detailed documentation on map system**, see:
+
+- [Map Download System](architecture/map-download-system.md) - On-demand delivery and lifecycle
+- [Map Cache Management](architecture/map-cache-management.md) - Cache strategies and invalidation
 
 ## Extension Points
 
@@ -437,6 +465,15 @@ See [docs/development.md](development.md) for detailed testing workflows.
 - Less polished than Google Maps
 
 ## Further Reading
+
+### Deep-Dive Architecture
+
+- [Wave Hit Detection System](architecture/wave-hit-detection-system.md)
+- [Event Observation System](architecture/event-observation-system.md)
+- [Map Download System](architecture/map-download-system.md)
+- [Map Cache Management](architecture/map-cache-management.md)
+
+### Development & Operations
 
 - [CI/CD Pipeline](ci-cd.md)
 - [Development Workflow](development.md)
