@@ -93,6 +93,7 @@ if command -v lychee >/dev/null 2>&1; then
         --exclude-link-local \
         --exclude-loopback \
         --exclude-private \
+        --exclude-path '**/node_modules/**' \
         --timeout 30 \
         --max-retries 3 \
         --cache \
