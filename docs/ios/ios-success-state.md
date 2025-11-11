@@ -94,7 +94,7 @@ The app is ready for:
 
 ```bash
 # Navigate to iOS directory
-cd /Users/ldiasdasilva/StudioProjects/WorldWideWaves/iosApp
+cd iosApp
 
 # Build
 xcodebuild -project iosApp.xcodeproj -scheme iosApp -destination 'platform=iOS Simulator,id=8E8EDF7E-01A0-4A8D-B708-8A78DA14BB69' build

@@ -6,7 +6,7 @@
 
 **MapBoundsEnforcer.kt** (Core constraint logic)
 
-- Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapBoundsEnforcer.kt`
+- Path: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapBoundsEnforcer.kt`
 - Key Methods:
   - `applyConstraints()` - Entry point (lines 73-117)
   - `calculateVisibleRegionPadding()` - BOUNDS vs WINDOW mode logic (lines 383-435)
@@ -15,7 +15,7 @@
 
 **MapLibreAdapter.kt** (Platform interface definition)
 
-- Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapLibreAdapter.kt`
+- Path: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapLibreAdapter.kt`
 - Key Methods:
   - `setBoundsForCameraTarget()` - Interface definition (lines 64-68)
   - `setMinZoomPreference()` (line 72)
@@ -23,7 +23,7 @@
 
 **AbstractEventMap.kt** (Cross-platform map logic)
 
-- Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/AbstractEventMap.kt`
+- Path: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/AbstractEventMap.kt`
 - Key Methods:
   - `moveToMapBounds()` - BOUNDS mode setup (lines 124-175)
   - `moveToWindowBounds()` - WINDOW mode setup (lines 186-228)
@@ -36,7 +36,7 @@
 
 **AndroidMapLibreAdapter.kt** (Android native implementation)
 
-- Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/composeApp/src/androidMain/kotlin/com/worldwidewaves/map/AndroidMapLibreAdapter.kt`
+- Path: `composeApp/src/androidMain/kotlin/com/worldwidewaves/map/AndroidMapLibreAdapter.kt`
 - Key Methods:
   - `setBoundsForCameraTarget()` - Min zoom calculation & gesture setup (lines 367-514)
   - `setupPreventiveGestureConstraints()` - Gesture clamping setup (lines 516-591)
@@ -48,7 +48,7 @@
 
 **AndroidEventMap.kt** (Android UI integration)
 
-- Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/composeApp/src/androidMain/kotlin/com/worldwidewaves/compose/map/AndroidEventMap.kt`
+- Path: `composeApp/src/androidMain/kotlin/com/worldwidewaves/compose/map/AndroidEventMap.kt`
 - Key Methods:
   - `Draw()` - Main Compose UI (lines 244-260)
   - `loadMap()` - Map initialization (lines 587-680)
@@ -61,7 +61,7 @@
 
 **AspectRatioFittingTest.kt** (Min zoom calculation tests)
 
-- Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/androidUnitTest/kotlin/com/worldwidewaves/shared/map/AspectRatioFittingTest.kt`
+- Path: `shared/src/androidUnitTest/kotlin/com/worldwidewaves/shared/map/AspectRatioFittingTest.kt`
 - Tests:
   - `wide event on tall screen fits by HEIGHT` (lines 53-84)
   - `tall event on wide screen fits by WIDTH` (lines 91-121)
@@ -71,19 +71,19 @@
 
 **BoundsWindowModeTest.kt** (WINDOW mode constraints)
 
-- Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/androidUnitTest/kotlin/com/worldwidewaves/shared/map/BoundsWindowModeTest.kt`
+- Path: `shared/src/androidUnitTest/kotlin/com/worldwidewaves/shared/map/BoundsWindowModeTest.kt`
 
 **AbstractEventMapTest.kt** (Integration tests)
 
-- Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/androidUnitTest/kotlin/com/worldwidewaves/shared/map/AbstractEventMapTest.kt`
+- Path: `shared/src/androidUnitTest/kotlin/com/worldwidewaves/shared/map/AbstractEventMapTest.kt`
 
 **RegressionPreventionTest.kt** (Edge case tests)
 
-- Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/androidUnitTest/kotlin/com/worldwidewaves/shared/map/RegressionPreventionTest.kt`
+- Path: `shared/src/androidUnitTest/kotlin/com/worldwidewaves/shared/map/RegressionPreventionTest.kt`
 
 **MapBoundsEnforcerTest.kt** (Enforcer-specific tests)
 
-- Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonTest/kotlin/com/worldwidewaves/shared/map/MapBoundsEnforcerTest.kt`
+- Path: `shared/src/commonTest/kotlin/com/worldwidewaves/shared/map/MapBoundsEnforcerTest.kt`
 
 ---
 
@@ -185,7 +185,7 @@ MapBoundsEnforcer (Concrete)
 
 ### BoundingBox
 
-- Path: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/events/utils/`
+- Path: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/events/utils/`
 - Properties: `sw` (southwest), `ne` (northeast), both Position objects
 - Methods: `height`, `width`, `contains()`, `toLatLngBounds()`
 

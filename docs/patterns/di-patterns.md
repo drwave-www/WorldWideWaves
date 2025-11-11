@@ -86,7 +86,7 @@ val sharedModule = listOf(
 
 **Purpose**: Provides essential global components (events, sound choreography)
 
-**File**: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/di/CommonModule.kt`
+**File**: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/di/CommonModule.kt`
 
 ```kotlin
 val commonModule = module {
@@ -121,7 +121,7 @@ val commonModule = module {
 
 **Purpose**: Position tracking, wave progression, event state management
 
-**File**: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/di/HelpersModule.kt`
+**File**: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/di/HelpersModule.kt`
 
 ```kotlin
 val helpersModule = module {
@@ -191,7 +191,7 @@ class MyComponent {
 
 **Purpose**: Event favorites, user preferences
 
-**File**: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/di/DatastoreModule.kt`
+**File**: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/di/DatastoreModule.kt`
 
 ```kotlin
 val datastoreModule = module {
@@ -231,7 +231,7 @@ class MyClass {
 
 **Purpose**: UI-related dependencies, business logic
 
-**File**: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/di/UIModule.kt`
+**File**: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/di/UIModule.kt`
 
 ```kotlin
 val uiModule = module {
@@ -365,7 +365,7 @@ iOS Kotlin/Native has **strict threading requirements**. Violating these rules c
 
 ### iOS-Safe Pattern: IosSafeDI Singleton
 
-**File**: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/utils/IosSafeDI.kt`
+**File**: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/utils/IosSafeDI.kt`
 
 ```kotlin
 // ✅ CORRECT: File-level singleton (iOS-safe)
@@ -483,7 +483,7 @@ This script checks for:
 
 ### Android Module
 
-**File**: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/androidMain/kotlin/com/worldwidewaves/shared/di/AndroidModule.kt`
+**File**: `shared/src/androidMain/kotlin/com/worldwidewaves/shared/di/AndroidModule.kt`
 
 ```kotlin
 val androidModule = module {
@@ -510,7 +510,7 @@ val androidModule = module {
 
 ### iOS Module
 
-**File**: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotlin/com/worldwidewaves/shared/di/IosModule.kt`
+**File**: `shared/src/iosMain/kotlin/com/worldwidewaves/shared/di/IosModule.kt`
 
 ```kotlin
 val IosModule = module {
@@ -561,7 +561,7 @@ val IosModule = module {
 
 ### Android Application Module
 
-**File**: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/composeApp/src/androidMain/kotlin/com/worldwidewaves/di/ApplicationModule.kt`
+**File**: `composeApp/src/androidMain/kotlin/com/worldwidewaves/di/ApplicationModule.kt`
 
 ```kotlin
 val applicationModule = module {
@@ -675,7 +675,7 @@ class EventsViewModelTest : KoinTest {
 
 ### iOS Deadlock Prevention Test
 
-**File**: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosTest/kotlin/com/worldwidewaves/shared/ios/IosDeadlockPreventionTest.kt`
+**File**: `shared/src/iosTest/kotlin/com/worldwidewaves/shared/ios/IosDeadlockPreventionTest.kt`
 
 ```kotlin
 class IosDeadlockPreventionTest : KoinTest {

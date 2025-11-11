@@ -694,27 +694,27 @@ fun `validates invalid backwards progression transition`() = runTest {
 
 **Architecture**:
 
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/docs/architecture.md` - Overall architecture
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/docs/architecture/event-observation-system.md` - EventObserver integration
+- `docs/architecture.md` - Overall architecture
+- `docs/architecture/event-observation-system.md` - EventObserver integration
 
 **Features**:
 
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/docs/features/simulation-mode.md` - Testing with simulation
+- `docs/features/simulation-mode.md` - Testing with simulation
 
 **Code Style**:
 
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/docs/patterns/null-safety-patterns.md` - Null handling in detection
+- `docs/patterns/null-safety-patterns.md` - Null handling in detection
 
 **Testing**:
 
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/docs/testing/test-patterns.md` - Test patterns
+- `docs/testing/test-patterns.md` - Test patterns
 
 **Source Files**:
 
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/detection/WaveHitDetector.kt`
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/state/DefaultEventStateHolder.kt`
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/progression/DefaultWaveProgressionTracker.kt`
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/state/EventProgressionState.kt`
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/detection/WaveHitDetector.kt`
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/state/DefaultEventStateHolder.kt`
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/progression/DefaultWaveProgressionTracker.kt`
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/state/EventProgressionState.kt`
 
 ---
 

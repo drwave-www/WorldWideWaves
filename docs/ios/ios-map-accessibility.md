@@ -12,18 +12,18 @@ This document describes the VoiceOver accessibility implementation for the MapLi
 
 ### Modified Files
 
-1. **`/Users/ldiasdasilva/StudioProjects/WorldWideWaves/iosApp/worldwidewaves/MapLibre/MapLibreViewWrapper.swift`**
+1. **`iosApp/worldwidewaves/MapLibre/MapLibreViewWrapper.swift`**
    - Added accessibility state tracking
    - Implemented accessibility element creation
    - Configured map container for VoiceOver
    - Added public API for updating accessibility state
 
-2. **`/Users/ldiasdasilva/StudioProjects/WorldWideWaves/iosApp/worldwidewaves/MapLibre/IOSMapBridge.swift`**
+2. **`iosApp/worldwidewaves/MapLibre/IOSMapBridge.swift`**
    - Added bridge methods for Kotlin to update accessibility state
    - `setUserPosition()` - Updates user location for accessibility
    - `setEventInfo()` - Updates event metadata for accessibility
 
-3. **`/Users/ldiasdasilva/StudioProjects/WorldWideWaves/iosApp/worldwidewaves/IOSPlatformEnabler.swift`**
+3. **`iosApp/worldwidewaves/IOSPlatformEnabler.swift`**
    - Fixed protocol conformance issue (pre-existing bug)
    - Fixed string interpolation syntax error (pre-existing bug)
 

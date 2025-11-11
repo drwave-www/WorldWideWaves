@@ -450,7 +450,7 @@ MainActivity
     onDestroy() → mainActivityImpl.onDestroy()
 ```
 
-**File**: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/composeApp/src/androidMain/kotlin/com/worldwidewaves/activities/MainActivity.kt`
+**File**: `composeApp/src/androidMain/kotlin/com/worldwidewaves/activities/MainActivity.kt`
 
 ### Permission Handling
 
@@ -481,7 +481,7 @@ fun requestLocationPermission(): Boolean {
 }
 ```
 
-**File**: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/androidMain/kotlin/com/worldwidewaves/shared/ui/components/permissions/LocationPermissions.android.kt`
+**File**: `shared/src/androidMain/kotlin/com/worldwidewaves/shared/ui/components/permissions/LocationPermissions.android.kt`
 
 **Declared in AndroidManifest.xml**:
 
@@ -521,7 +521,7 @@ fun requestLocationPermission(): Boolean {
 </application>
 ```
 
-**File**: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/composeApp/src/androidMain/AndroidManifest.xml`
+**File**: `composeApp/src/androidMain/AndroidManifest.xml`
 
 ---
 
@@ -556,7 +556,7 @@ class AndroidLocationProvider : LocationProvider {
 - Reactive StateFlow updates
 - Automatic lifecycle management
 
-**File**: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/composeApp/src/androidMain/kotlin/com/worldwidewaves/utils/AndroidLocationProvider.kt`
+**File**: `composeApp/src/androidMain/kotlin/com/worldwidewaves/utils/AndroidLocationProvider.kt`
 
 ### 2. AndroidPlatformEnabler
 
@@ -586,7 +586,7 @@ class AndroidPlatformEnabler(val context: Context?) : PlatformEnabler {
 }
 ```
 
-**File**: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/composeApp/src/androidMain/kotlin/com/worldwidewaves/utils/AndroidPlatformEnabler.kt`
+**File**: `composeApp/src/androidMain/kotlin/com/worldwidewaves/utils/AndroidPlatformEnabler.kt`
 
 ### 3. SimulationLocationEngine
 
@@ -608,7 +608,7 @@ class SimulationLocationEngine(private val platform: WWWPlatform) {
 initializeSimulationMode(platform, BuildConfig.ENABLE_SIMULATION_MODE)
 ```
 
-**File**: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/composeApp/src/androidMain/kotlin/com/worldwidewaves/utils/SimulationLocationEngine.kt`
+**File**: `composeApp/src/androidMain/kotlin/com/worldwidewaves/utils/SimulationLocationEngine.kt`
 
 ### 4. Android DI Modules
 
@@ -646,8 +646,8 @@ override fun onCreate() {
 
 **Files**:
 
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/androidMain/kotlin/com/worldwidewaves/shared/di/AndroidModule.kt`
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/composeApp/src/androidMain/kotlin/com/worldwidewaves/di/ApplicationModule.kt`
+- `shared/src/androidMain/kotlin/com/worldwidewaves/shared/di/AndroidModule.kt`
+- `composeApp/src/androidMain/kotlin/com/worldwidewaves/di/ApplicationModule.kt`
 
 ---
 

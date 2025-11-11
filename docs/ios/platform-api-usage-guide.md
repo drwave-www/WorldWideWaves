@@ -70,7 +70,7 @@ actual fun rememberDynamicTypeScale(): Float =
     }
 ```
 
-From: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotlin/com/worldwidewaves/shared/ui/theme/DynamicTypeScale.kt`
+From: `shared/src/iosMain/kotlin/com/worldwidewaves/shared/ui/theme/DynamicTypeScale.kt`
 
 **Pattern 2: Application Lifecycle Notifications**
 
@@ -132,7 +132,7 @@ internal fun bindIosLifecycle(host: MainScreen) {
 }
 ```
 
-From: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotlin/com/worldwidewaves/shared/utils/IosLifecycleBinder.kt`
+From: `shared/src/iosMain/kotlin/com/worldwidewaves/shared/utils/IosLifecycleBinder.kt`
 
 ### Key Classes Used
 
@@ -222,7 +222,7 @@ suspend fun cacheDeepFile(fileName: String, bytes: ByteArray) {
 }
 ```
 
-From: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotlin/com/worldwidewaves/shared/data/PlatformCache.ios.kt`
+From: `shared/src/iosMain/kotlin/com/worldwidewaves/shared/data/PlatformCache.ios.kt`
 
 **Pattern 2: Date/Time Formatting**
 
@@ -272,7 +272,7 @@ object DateTimeFormats {
 }
 ```
 
-From: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotlin/com/worldwidewaves/shared/format/DateTimeFormats.ios.kt`
+From: `shared/src/iosMain/kotlin/com/worldwidewaves/shared/format/DateTimeFormats.ios.kt`
 
 **Pattern 3: User Preferences (NSUserDefaults)**
 
@@ -315,7 +315,7 @@ class IosFavoriteEventsStore(
 }
 ```
 
-From: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotlin/com/worldwidewaves/shared/data/IosFavoriteEventsStore.kt`
+From: `shared/src/iosMain/kotlin/com/worldwidewaves/shared/data/IosFavoriteEventsStore.kt`
 
 **Pattern 4: String Handling**
 
@@ -483,7 +483,7 @@ private class IosLocationDelegate(
 }
 ```
 
-From: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotlin/com/worldwidewaves/shared/map/IosLocationProvider.kt`
+From: `shared/src/iosMain/kotlin/com/worldwidewaves/shared/map/IosLocationProvider.kt`
 
 **Key Points:**
 
@@ -637,7 +637,7 @@ class IosSoundPlayer : SoundPlayer {
 }
 ```
 
-From: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotlin/com/worldwidewaves/shared/sound/IosSoundPlayer.kt`
+From: `shared/src/iosMain/kotlin/com/worldwidewaves/shared/sound/IosSoundPlayer.kt`
 
 **Key Points:**
 
@@ -723,7 +723,7 @@ private fun loadFontData(fileName: String): ByteArray {
 }
 ```
 
-From: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotlin/com/worldwidewaves/shared/ui/theme/Typography.ios.kt`
+From: `shared/src/iosMain/kotlin/com/worldwidewaves/shared/ui/theme/Typography.ios.kt`
 
 **Pattern 2: Environment Variables**
 
@@ -739,7 +739,7 @@ actual fun getEnvironmentVariable(name: String): String? =
     getenv(name)?.toKString()  // Convert C string to Kotlin String
 ```
 
-From: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/kotlin/com/worldwidewaves/shared/utils/Environment.ios.kt`
+From: `shared/src/iosMain/kotlin/com/worldwidewaves/shared/utils/Environment.ios.kt`
 
 ### Key Functions Used
 

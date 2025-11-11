@@ -743,49 +743,49 @@ fun tearDown() {
 }
 ```
 
-**See**: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/docs/testing/test-patterns.md` - Comprehensive test patterns
+**See**: `docs/testing/test-patterns.md` - Comprehensive test patterns
 
 ## Related Documentation
 
 **Architecture**:
 
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/docs/architecture/wave-hit-detection-system.md` - Wave hit detection integration
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/docs/architecture/map-download-system.md` - Map system interaction
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/docs/architecture.md` - Overall system architecture
+- `docs/architecture/wave-hit-detection-system.md` - Wave hit detection integration
+- `docs/architecture/map-download-system.md` - Map system interaction
+- `docs/architecture.md` - Overall system architecture
 
 **Patterns**:
 
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/docs/patterns/reactive-patterns.md` - Flow patterns used
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/docs/patterns/ios-safety-patterns.md` - iOS safety compliance
+- `docs/patterns/reactive-patterns.md` - Flow patterns used
+- `docs/patterns/ios-safety-patterns.md` - iOS safety compliance
 
 **Features**:
 
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/docs/features/simulation-mode.md` - Testing with simulation
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/docs/features/notification-system.md` - Wave hit notifications
+- `docs/features/simulation-mode.md` - Testing with simulation
+- `docs/features/notification-system.md` - Wave hit notifications
 
 **Testing**:
 
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/docs/testing/test-patterns.md` - Testing strategy and patterns
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/docs/testing-strategy.md` - Overall testing approach
+- `docs/testing/test-patterns.md` - Testing strategy and patterns
+- `docs/testing-strategy.md` - Overall testing approach
 
 ## Key Files
 
 **Interfaces**:
 
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/scheduling/ObservationScheduler.kt` - Scheduling interface
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/observation/PositionObserver.kt` - Position monitoring interface
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/scheduling/ObservationScheduler.kt` - Scheduling interface
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/observation/PositionObserver.kt` - Position monitoring interface
 
 **Implementations**:
 
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/events/WWWEventObserver.kt` - Public facade (700+ lines)
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/observation/EventObserver.kt` - Lifecycle manager (460+ lines)
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/scheduling/DefaultObservationScheduler.kt` - Adaptive scheduler (190+ lines)
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/observation/DefaultPositionObserver.kt` - Position monitoring (165+ lines)
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/observation/EventPositionTracker.kt` - Area detection (105+ lines)
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/events/WWWEventObserver.kt` - Public facade (700+ lines)
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/observation/EventObserver.kt` - Lifecycle manager (460+ lines)
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/scheduling/DefaultObservationScheduler.kt` - Adaptive scheduler (190+ lines)
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/observation/DefaultPositionObserver.kt` - Position monitoring (165+ lines)
+- `shared/src/commonMain/kotlin/com/worldwidewaves/shared/domain/observation/EventPositionTracker.kt` - Area detection (105+ lines)
 
 **Tests**:
 
-- `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonTest/kotlin/com/worldwidewaves/shared/domain/scheduling/DefaultObservationSchedulerTest.kt` - Scheduler tests
+- `shared/src/commonTest/kotlin/com/worldwidewaves/shared/domain/scheduling/DefaultObservationSchedulerTest.kt` - Scheduler tests
 
 ---
 

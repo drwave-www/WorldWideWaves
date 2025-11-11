@@ -51,7 +51,7 @@ WorldWideWaves implements a well-structured map architecture leveraging Kotlin M
 
 #### MapLibreAdapter<T> Interface
 
-**Location:** `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapLibreAdapter.kt`
+**Location:** `shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapLibreAdapter.kt`
 
 **Purpose:** Platform-agnostic interface for MapLibre SDK operations
 
@@ -88,7 +88,7 @@ interface MapLibreAdapter<T> {
 
 #### AbstractEventMap<T>
 
-**Location:** `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/AbstractEventMap.kt`
+**Location:** `shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/AbstractEventMap.kt`
 
 **Purpose:** Shared business logic for event maps across platforms
 
@@ -156,7 +156,7 @@ abstract fun updateWavePolygons(wavePolygons: List<Polygon>, clearPolygons: Bool
 
 #### WWWLocationProvider Interface
 
-**Location:** `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/WWWLocationProvider.kt`
+**Location:** `shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/WWWLocationProvider.kt`
 
 **Purpose:** Platform-agnostic GPS location interface
 
@@ -177,7 +177,7 @@ interface WWWLocationProvider {
 
 #### PlatformMapManager Interface
 
-**Location:** `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapStateManager.kt`
+**Location:** `shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapStateManager.kt`
 
 **Purpose:** Platform-agnostic map download/availability interface
 
@@ -207,7 +207,7 @@ interface PlatformMapManager {
 
 #### MapDownloadCoordinator
 
-**Location:** `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapDownloadCoordinator.kt`
+**Location:** `shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapDownloadCoordinator.kt`
 
 **Purpose:** Unified download state management across platforms
 
@@ -237,7 +237,7 @@ class MapDownloadCoordinator(private val platformMapManager: PlatformMapManager)
 
 #### MapConstraintManager
 
-**Location:** `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapConstraintManager.kt`
+**Location:** `shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapConstraintManager.kt`
 
 **Purpose:** Platform-independent map bounds constraint enforcement
 
@@ -268,7 +268,7 @@ fun constrainCamera() {
 
 #### CityMapRegistry
 
-**Location:** `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/CityMapRegistry.kt`
+**Location:** `shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/CityMapRegistry.kt`
 
 **Purpose:** Registry for 40+ city maps with lazy loading
 
@@ -285,7 +285,7 @@ fun constrainCamera() {
 
 #### MapStateManager
 
-**Location:** `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapStateManager.kt`
+**Location:** `shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapStateManager.kt`
 
 **Purpose:** High-level map state coordination (older implementation)
 
@@ -297,7 +297,7 @@ fun constrainCamera() {
 
 #### createNativeMapViewController()
 
-**Location:** `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapViewFactory.kt`
+**Location:** `shared/src/commonMain/kotlin/com/worldwidewaves/shared/map/MapViewFactory.kt`
 
 ```kotlin
 expect fun createNativeMapViewController(
@@ -331,7 +331,7 @@ actual fun createNativeMapViewController(event: IWWWEvent, styleURL: String): An
 
 ### 2.1 Android Implementation
 
-#### Location: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/composeApp/src/androidMain/`
+#### Location: `composeApp/src/androidMain/`
 
 #### AndroidEventMap
 
@@ -453,7 +453,7 @@ override fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean) {
 
 ### 2.2 iOS Implementation
 
-#### Location: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/shared/src/iosMain/`
+#### Location: `shared/src/iosMain/`
 
 #### IOSEventMap
 

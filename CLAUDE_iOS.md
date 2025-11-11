@@ -34,7 +34,7 @@
 
 ```bash
 # 1. Clone and navigate to project
-cd /Users/ldiasdasilva/StudioProjects/WorldWideWaves
+cd .
 
 # 2. Build Kotlin framework
 ./gradlew :shared:embedAndSignAppleFrameworkForXcode
