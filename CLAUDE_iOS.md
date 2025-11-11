@@ -436,7 +436,7 @@ iosApp/
 
 ### Platform Initialization Sequence
 
-**SceneDelegate.swift** (lines 75-90):
+**SceneDelegate.swift**:
 
 ```swift
 private func installPlatform() {

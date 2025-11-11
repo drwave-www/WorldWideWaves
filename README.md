@@ -15,7 +15,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License"></a>
   <img src="https://img.shields.io/badge/Kotlin-2.2.0-7F52FF.svg" alt="Kotlin">
   <img src="https://img.shields.io/badge/Platform-Android%20%7C%20iOS-green.svg" alt="Platform">
-  <img src="https://img.shields.io/badge/Tests-722%20passing-success.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-passing-success.svg" alt="Tests">
 </p>
 
 A Kotlin Multiplatform mobile application orchestrating synchronized human waves through cities worldwide, fostering unity and shared human experience through real-time coordination and location-based services.
@@ -126,23 +126,23 @@ WorldWideWaves/
 
 **Core:**
 
-- Kotlin 2.2.0
+- Kotlin (latest stable)
 - Kotlin Multiplatform
-- Compose Multiplatform 1.8.2
-- Gradle 8.14.3
+- Compose Multiplatform
+- Gradle
 
 **Android:**
 
 - Target SDK 36
 - Jetpack Compose
-- MapLibre Android 11.13.0
-- Koin 4.1.0
+- MapLibre Android
+- Koin
 
 **iOS:**
 
 - Deployment target: iOS 14+
 - Compose Multiplatform via ComposeUIViewController
-- MapLibre iOS 6.8.0 (95% feature parity with Android)
+- MapLibre iOS (near feature parity with Android)
 - Native Swift wrappers for platform services
 
 **Backend:**
@@ -156,7 +156,7 @@ See [docs/architecture.md](docs/architecture.md) for detailed architecture.
 Multi-stage GitHub Actions workflows with quality gates:
 
 - **Build Pipelines:** Android and iOS compilation verification
-- **Quality Gates:** Linting (ktlint, detekt), unit tests (902+), security scanning
+- **Quality Gates:** Linting (ktlint, detekt), comprehensive unit test suite, security scanning
 - **UI Tests:** Emulator-based UI tests with screenshot capture
 - **E2E Tests:** Integration tests and Firebase Test Lab multi-device testing
 - **Performance Tests:** Nightly performance regression detection
@@ -249,7 +249,7 @@ Enables automatic emulator launch, translation updates, and pre-push tests.
 ### Run Tests
 
 ```bash
-# Unit tests (902+ tests)
+# Unit tests (comprehensive suite)
 ./gradlew :shared:testDebugUnitTest
 
 # Android UI tests
@@ -362,8 +362,8 @@ Comprehensive documentation is available in the `docs/` directory.
 
 ### Specialized Topics
 
-- [Testing Strategy](docs/TESTING_STRATEGY.md) - Test architecture and approach
-- [Accessibility Guide](docs/ACCESSIBILITY_GUIDE.md) - WCAG 2.1 Level AA compliance
+- [Testing Strategy](docs/testing-strategy.md) - Test architecture and approach
+- [Accessibility Guide](docs/accessibility-guide.md) - WCAG 2.1 Level AA compliance
 - [Firebase Setup](docs/setup/firebase-setup.md) - Firebase project configuration and security
 - [Map Architecture](docs/architecture/map-architecture-analysis.md) - Shared vs platform-specific map system design
 - [Operations Guide](docs/operations.md) - Runtime config, monitoring, deployment, incident response

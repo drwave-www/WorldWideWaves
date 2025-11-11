@@ -316,9 +316,9 @@ Users can change language **without app restart**:
 
 | Issue | Cause | Solution |
 |-------|-------|----------|
-| iOS dates always in English | Hardcoded format | Fixed in DateTimeFormats.ios.kt (Oct 2025) |
-| Missing translation warnings | Lint disabled | Re-enabled Oct 2025 |
-| Language change requires restart | No detection | LocalizationManager added Oct 2025 |
+| iOS dates always in English | Hardcoded format | Fixed in DateTimeFormats.ios.kt |
+| Missing translation warnings | Lint disabled | Re-enabled in recent release |
+| Language change requires restart | No detection | LocalizationManager added |
 | RTL layout issues | Missing semantics | Add `layoutDirection` to Compose |
 
 **See**: `shared/src/commonMain/moko-resources/` for all translations
