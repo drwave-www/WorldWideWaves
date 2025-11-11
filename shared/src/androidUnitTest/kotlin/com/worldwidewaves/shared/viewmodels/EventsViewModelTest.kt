@@ -110,8 +110,8 @@ class EventsViewModelTest : KoinTest {
             // Give sufficient time for all cancellations to complete
             // This includes: flow collection, filtering operations, WWWEventObserver tasks
             // Tests with 1000 events need more time for cancellation to propagate
-            // Increased to 1000ms for more robust CI execution
-            delay(1000) // Delay after cancellation to ensure all cleanup completes
+            // Increased to 2000ms for maximum robustness in CI and pre-push hook execution
+            delay(2000) // Delay after cancellation to ensure all cleanup completes
         }
         stopKoin()
     }

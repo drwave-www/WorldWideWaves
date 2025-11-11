@@ -262,10 +262,12 @@ fi
 
 echo "🧪 Running unit tests..."
 
-if ./gradlew testDebugUnitTest --no-daemon --quiet; then
+# Run tests without caching to ensure fresh results
+if ./gradlew clean testDebugUnitTest --no-daemon --quiet; then
     echo "✅ All unit tests passed"
 else
-    echo "❌ Unit tests failed. Please fix the failing tests before pushing."
+    test_exit_code=$?
+    echo "❌ Unit tests failed (exit code: $test_exit_code)"
     echo ""
     echo "To see test results:"
     echo "  ./gradlew testDebugUnitTest"
