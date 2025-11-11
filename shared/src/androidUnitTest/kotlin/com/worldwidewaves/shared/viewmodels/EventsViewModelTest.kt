@@ -110,7 +110,8 @@ class EventsViewModelTest : KoinTest {
             // Give sufficient time for all cancellations to complete
             // This includes: flow collection, filtering operations, WWWEventObserver tasks
             // Tests with 1000 events need more time for cancellation to propagate
-            delay(500) // Delay after cancellation to ensure all cleanup completes
+            // Increased to 1000ms for more robust CI execution
+            delay(1000) // Delay after cancellation to ensure all cleanup completes
         }
         stopKoin()
     }
@@ -1101,8 +1102,9 @@ class EventsViewModelTest : KoinTest {
             viewModel.loadEvents()
             waitForEvents(viewModel, 1)
 
-            // Advance time to allow monitoring coroutines to run
+            // Advance time to allow monitoring coroutines to run and wait for completion
             advanceTimeBy(5000)
+            advanceUntilIdle() // Ensure all coroutines complete
 
             // Then - should not crash and event should be present
             assertEquals(1, viewModel.events.value.size)

@@ -40,10 +40,10 @@ jobs:
         uses: lycheeverse/lychee-action@v1
         with:
           # Check all markdown files recursively
+          # Note: --exclude-mail removed as it's deprecated (email is not checked by default in lychee 0.15+)
           args: >-
             --verbose
             --no-progress
-            --exclude-mail
             --exclude-link-local
             --exclude-loopback
             --exclude-private

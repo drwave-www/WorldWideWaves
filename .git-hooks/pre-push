@@ -86,9 +86,10 @@ if command -v lychee >/dev/null 2>&1; then
     echo "📋 Running link check on markdown files..."
 
     # Run lychee with same configuration as CI
+    # Note: --exclude-mail removed as it's deprecated (email is not checked by default in lychee 0.15+)
+    set -o pipefail  # Ensure pipe failures are caught
     if lychee --verbose \
         --no-progress \
-        --exclude-mail \
         --exclude-link-local \
         --exclude-loopback \
         --exclude-private \
@@ -99,8 +100,9 @@ if command -v lychee >/dev/null 2>&1; then
         '**/*.md' 2>&1 | tee /tmp/lychee-prepush.log; then
         echo "✅ All documentation links are valid"
     else
+        lychee_exit_code=${PIPESTATUS[0]}
         echo ""
-        echo "❌ Broken documentation links detected!"
+        echo "❌ Broken documentation links detected! (exit code: $lychee_exit_code)"
         echo ""
         echo "Please fix the broken links shown above before pushing."
         echo "Common issues:"
@@ -115,6 +117,7 @@ if command -v lychee >/dev/null 2>&1; then
         echo ""
         exit 1
     fi
+    set +o pipefail
 else
     echo "⚠️  lychee not found. Skipping link check."
     echo "   Install: brew install lychee (macOS) or cargo install lychee-link-checker"
