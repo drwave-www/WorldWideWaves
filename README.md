@@ -27,7 +27,7 @@ WorldWideWaves enables participants to join synchronized wave events at specific
 ### Architecture Overview
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'background':'transparent'}}}%%
+%%{init: {'theme':'base', 'themeVariables': { 'background':'#ffffff'}}}%%
 graph TB
     subgraph "Mobile Apps - Kotlin Multiplatform"
         ANDROID[Android App<br/>Jetpack Compose]

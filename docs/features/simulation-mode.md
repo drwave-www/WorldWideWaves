@@ -94,7 +94,7 @@ Simulation mode operates on two distinct levels:
 ### Data Flow: Starting Simulation
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'background':'transparent'}}}%%
+%%{init: {'theme':'base', 'themeVariables': { 'background':'#ffffff'}}}%%
 sequenceDiagram
     participant UI as SimulationButton
     participant Platform as WWWPlatform

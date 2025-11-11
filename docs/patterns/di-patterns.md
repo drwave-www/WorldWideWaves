@@ -22,7 +22,7 @@ WorldWideWaves uses a **layered module architecture** with strict dependency ord
 ### Module Hierarchy
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'background':'transparent'}}}%%
+%%{init: {'theme':'base', 'themeVariables': { 'background':'#ffffff'}}}%%
 graph TB
     subgraph "Platform Layer"
         ANDROID[applicationModule<br/>Android-specific]

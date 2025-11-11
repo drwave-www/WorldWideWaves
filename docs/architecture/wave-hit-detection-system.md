@@ -73,6 +73,7 @@ The system manages two parallel state machines: **Event Status** and **User-Spec
 ### Event Status State Machine
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'background':'#ffffff'}}}%%
 stateDiagram-v2
     [*] --> UNDEFINED
     UNDEFINED --> NEXT: Event created
@@ -95,6 +96,7 @@ stateDiagram-v2
 ### User-Specific State Flow
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'background':'#ffffff'}}}%%
 stateDiagram-v2
     [*] --> OutOfArea
     OutOfArea --> InArea: User enters wave area
