@@ -367,10 +367,17 @@ git push origin feat/add-new-city-map
 **Release Branches:**
 
 ```bash
-git checkout -b release/v0.23
-# Update version in build.gradle.kts
-git commit -m "chore: bump version to v0.23"
-git push origin release/v0.23
+# Android release branch
+git checkout -b release/android-build-42-v1.0
+# Update versionCode and versionName in composeApp/build.gradle.kts
+git commit -m "chore: bump Android to build 42, version 1.0"
+git push origin release/android-build-42-v1.0
+
+# iOS release branch
+git checkout -b release/ios-build-42-v1.0
+# Update CFBundleVersion and CFBundleShortVersionString in Info.plist
+git commit -m "chore: bump iOS to build 42, version 1.0"
+git push origin release/ios-build-42-v1.0
 ```
 
 ## Debugging

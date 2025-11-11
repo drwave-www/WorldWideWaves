@@ -615,10 +615,27 @@ defaultConfig {
 
 ### Tag Release
 
+**Tagging Strategy:**
+
+WorldWideWaves uses separate tags for iOS and Android releases following the format:
+`RELEASE_(IOS|ANDROID)_build_<build_number>_v<version>`
+
 ```bash
-git tag -a v0.23 -m "Release v0.23"
-git push origin v0.23
+# Android release example (build 42, version 1.0)
+git tag -a RELEASE_ANDROID_build_42_v1.0 -m "Android Release: build 42, version 1.0"
+git push origin RELEASE_ANDROID_build_42_v1.0
+
+# iOS release example (build 42, version 1.0)
+git tag -a RELEASE_IOS_build_42_v1.0 -m "iOS Release: build 42, version 1.0"
+git push origin RELEASE_IOS_build_42_v1.0
 ```
+
+**Benefits of platform-specific tags:**
+
+- Track iOS and Android releases independently
+- Different build numbers and versions per platform
+- Clear distinction in git history
+- Support for staggered platform releases
 
 ### Manual Deployment
 
