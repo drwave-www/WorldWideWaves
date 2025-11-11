@@ -91,7 +91,6 @@ Each participant plays **one random note** from the active chord at their hit mo
 ### Data Flow: Wave Hit → Sound Emission
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'background':'#ffffff'}}}%%
 sequenceDiagram
     participant WPT as WaveProgressionTracker
     participant OBS as EventObserver

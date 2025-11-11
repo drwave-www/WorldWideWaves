@@ -1,6 +1,6 @@
 <p align="center">
-  <img src="misc/www-logo.png" width="200" alt="WorldWideWaves Logo">
-  <h1 align="center">WorldWideWaves</h1>
+  <img src="misc/www_logo_transparent.webp" width="200" alt="World Wide Waves Logo">
+  <h1 align="center">World Wide Waves</h1>
   <p align="center"><em>Orchestrate synchronized human waves worldwide</em></p>
 </p>
 
@@ -27,7 +27,6 @@ WorldWideWaves enables participants to join synchronized wave events at specific
 ### Architecture Overview
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'background':'#ffffff'}}}%%
 graph TB
     subgraph "Mobile Apps - Kotlin Multiplatform"
         ANDROID[Android App<br/>Jetpack Compose]

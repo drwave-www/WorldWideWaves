@@ -14,7 +14,6 @@ This document provides a high-level overview of the WorldWideWaves architecture.
 ## System Context
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'background':'#ffffff'}}}%%
 graph TB
     User[User/Participant]
     Mobile[Mobile App<br/>Android/iOS]
@@ -37,7 +36,6 @@ graph TB
 ## High-Level Component Architecture
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'background':'#ffffff'}}}%%
 graph TB
     subgraph "Presentation Layer"
         UI[Compose UI<br/>Screens & Components]
@@ -151,7 +149,6 @@ This section provides high-level flows for key system operations. For detailed i
 ### Event Loading Flow
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'background':'#ffffff'}}}%%
 sequenceDiagram
     participant UI as EventsListScreen
     participant VM as EventsViewModel
@@ -179,7 +176,6 @@ sequenceDiagram
 4. Notification triggers and UI updates
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'background':'#ffffff'}}}%%
 sequenceDiagram
     participant UI as FullMapScreen
     participant VM as MapViewModel
@@ -213,7 +209,6 @@ sequenceDiagram
 The position system uses a unified architecture with source priority:
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'background':'#ffffff'}}}%%
 graph LR
     GPS[GPS Location<br/>High Priority]
     SIM[Simulation<br/>Higher Priority]

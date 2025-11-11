@@ -5,7 +5,6 @@ WorldWideWaves uses GitHub Actions for continuous integration and delivery, impl
 ## Pipeline Overview
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'background':'#ffffff'}}}%%
 graph LR
     PR[Pull Request] --> QG[Quality Gates]
     PR --> BA[Build Android]

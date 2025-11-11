@@ -24,7 +24,6 @@ The system follows a layered architecture with specialized components coordinate
 ### Component Relationships
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'background':'#ffffff'}}}%%
 graph TB
     subgraph "Public API Layer"
         WWWEventObserver[WWWEventObserver<br/>Facade + StateFlow API]
@@ -107,7 +106,6 @@ observer.stopObservation()
 The EventObserver coordinates four parallel observation flows to provide comprehensive event monitoring:
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'background':'#ffffff'}}}%%
 sequenceDiagram
     participant UI
     participant WWWEventObserver
@@ -294,7 +292,6 @@ The system uses PositionManager as the single source of truth for user position:
 **Position Flow Architecture**:
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'background':'#ffffff'}}}%%
 graph LR
     PositionManager[PositionManager<br/>Single Source of Truth]
     PositionObserver[PositionObserver<br/>Area Detection]
