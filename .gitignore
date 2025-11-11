@@ -43,6 +43,7 @@ Package.resolved
 scripts/images/generated_images/
 composeApp/release/
 CLAUDE.md.backup*
+.lycheecache
 
 # Firebase configuration files containing sensitive API keys
 composeApp/google-services.json

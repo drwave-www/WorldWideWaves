@@ -41,14 +41,18 @@ jobs:
         with:
           # Check all markdown files recursively
           # Note: --exclude-mail removed as it's deprecated (email is not checked by default in lychee 0.15+)
-          # Exclude node_modules to avoid rate-limiting from third-party dependencies
+          # Exclude build artifacts and third-party dependencies
           args: >-
             --verbose
             --no-progress
             --exclude-link-local
             --exclude-loopback
             --exclude-private
-            --exclude-path '**/node_modules/**'
+            --exclude-path 'node_modules'
+            --exclude-path 'build'
+            --exclude-path 'SourcePackages'
+            --exclude-path 'DerivedData'
+            --exclude-path '.gradle'
             --timeout 30
             --max-retries 3
             --cache

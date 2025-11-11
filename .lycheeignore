@@ -120,7 +120,15 @@ mailto:*
 # Add project-specific exclusions below:
 
 # GitHub Actions workflow URLs (may not exist yet)
-https://github.com/*/actions/workflows/.*
+https://github.com/mglcel/WorldWideWaves/actions/workflows/.*
+https://github.com/mglcel/WorldWideWaves/actions
+
+# GitHub repo features (issues/discussions may have temporary API issues)
+https://github.com/mglcel/WorldWideWaves/issues
+https://github.com/mglcel/WorldWideWaves/discussions
+
+# External services (may have temporary issues)
+https://nodejs.org/en/download/
 
 # Temporary exclusions (document reason and removal date):
 # Dokka documentation - Waiting for GitHub Pages setup (Remove after Pages is configured)
