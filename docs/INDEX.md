@@ -35,6 +35,8 @@
 | Topic | Documentation |
 |-------|--------------|
 | System architecture | [Architecture](architecture.md) |
+| Wave hit detection | [Wave Hit Detection System](architecture/wave-hit-detection-system.md) - ⭐ CRITICAL |
+| Event observation | [Event Observation System](architecture/event-observation-system.md) - ⭐ CRITICAL |
 | Map subsystem | [Map Architecture Analysis](architecture/map-architecture-analysis.md) |
 | iOS/Android parity | [iOS Android Map Parity](ios/ios-android-map-parity-gap-analysis.md) |
 | Code patterns | [Patterns Directory](patterns/README.md) |
@@ -78,6 +80,8 @@
 | Document | Description | Focus |
 |----------|-------------|-------|
 | [Architecture](architecture.md) | System design, components, data flows | **CRITICAL** |
+| [Wave Hit Detection System](architecture/wave-hit-detection-system.md) | ⭐ CRITICAL - Detection algorithm, timing, state transitions | Business Logic |
+| [Event Observation System](architecture/event-observation-system.md) | ⭐ CRITICAL - Observation flows and coordination | Business Logic |
 | [Map Architecture Analysis](architecture/map-architecture-analysis.md) | Detailed map subsystem design | Maps |
 | [Map Architecture Verification](architecture/map-architecture-analysis-verification-report.md) | Architecture compliance report | Validation |
 | [Architecture README](architecture/README.md) | Architecture directory index | Index |
@@ -242,9 +246,11 @@
 
 ### Architecture Documentation (docs/architecture/)
 
+- [event-observation-system.md](architecture/event-observation-system.md) - ⭐ CRITICAL - Observation flows and coordination
 - [map-architecture-analysis.md](architecture/map-architecture-analysis.md) - Map architecture ⭐
 - [map-cache-management.md](architecture/map-cache-management.md) - Map cache lifecycle
 - [map-download-system.md](architecture/map-download-system.md) - Map download system
+- [wave-hit-detection-system.md](architecture/wave-hit-detection-system.md) - ⭐ CRITICAL - Detection algorithm and timing
 - [README.md](architecture/README.md) - Architecture index
 
 ### Code Style Documentation (docs/code-style/)
