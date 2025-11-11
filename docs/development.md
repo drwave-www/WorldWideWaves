@@ -167,27 +167,19 @@ adb shell pm grant com.worldwidewaves android.permission.ACCESS_COARSE_LOCATION
 
 ### Sound Choreography Tests
 
-**Mathematical simulation:**
+**Mathematical simulation** (unit test, no real audio):
 
 ```bash
-./gradlew crowdSoundSimulation
+./gradlew :shared:testDebugUnitTest --tests "*CrowdSoundChoreographySimulationTest*"
 ```
 
-**Real audio playback:**
+**Interactive audio demo** (debug builds only, requires connected device/emulator):
 
 ```bash
-# Ensure device audio is enabled
-ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest \
-  -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.compose.choreographies.RealAudioCrowdSimulationTest
-```
-
-**Interactive audio demo:**
-
-```bash
-# Install app
+# Install debug build
 ./gradlew :composeApp:installDebug
 
-# Launch audio test activity
+# Launch audio test activity (ensure device/emulator is connected)
 adb shell am start -n com.worldwidewaves/.debug.AudioTestActivity
 ```
 
