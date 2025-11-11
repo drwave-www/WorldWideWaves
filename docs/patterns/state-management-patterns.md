@@ -31,26 +31,18 @@ WorldWideWaves uses **reactive state management** with Kotlin StateFlow for both
 
 ### Architecture Layers
 
-```
-┌─────────────────────────────────────────────────┐
-│         UI Layer (Compose Screens)               │
-│  - Collects StateFlow in LaunchedEffect         │
-│  - Renders immutable state snapshots             │
-└─────────────────┬───────────────────────────────┘
-                  │ observes
-┌─────────────────▼───────────────────────────────┐
-│         ViewModel Layer                          │
-│  - MutableStateFlow (private)                   │
-│  - StateFlow (public, read-only)                │
-│  - Delegates logic to use cases                 │
-└─────────────────┬───────────────────────────────┘
-                  │ updates
-┌─────────────────▼───────────────────────────────┐
-│         Domain State Layer                       │
-│  - EventProgressionState                        │
-│  - Sealed classes for status                    │
-│  - Smart throttling + validation                │
-└─────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    UI["UI Layer (Compose Screens)<br/>- Collects StateFlow in LaunchedEffect<br/>- Renders immutable state snapshots"]
+    VM["ViewModel Layer<br/>- MutableStateFlow (private)<br/>- StateFlow (public, read-only)<br/>- Delegates logic to use cases"]
+    Domain["Domain State Layer<br/>- EventProgressionState<br/>- Sealed classes for status<br/>- Smart throttling + validation"]
+
+    UI -->|"observes"| VM
+    VM -->|"updates"| Domain
+
+    style UI fill:#e3f2fd
+    style VM fill:#fff3e0
+    style Domain fill:#e8f5e9
 ```
 
 ---
@@ -1131,22 +1123,39 @@ fun MyScreen(clock: IClock) {
 
 ### State Update Decision Tree
 
-```
-Do you need to update state?
-├─ Single independent property
-│  └─ _property.value = newValue
-│
-├─ Multiple related properties
-│  └─ _state.value = _state.value.copy(prop1 = val1, prop2 = val2)
-│
-├─ High-frequency updates
-│  └─ Use smart throttling with updateIfChanged
-│
-├─ Shared mutable state
-│  └─ Protect with Mutex.withLock {}
-│
-└─ Complex state transitions
-   └─ Use sealed classes + state machine
+```mermaid
+flowchart TD
+    Start["Do you need to update state?"]
+    Single["Single independent property"]
+    Multiple["Multiple related properties"]
+    HighFreq["High-frequency updates"]
+    Shared["Shared mutable state"]
+    Complex["Complex state transitions"]
+
+    Sol1["_property.value = newValue"]
+    Sol2["_state.value = _state.value.copy(prop1 = val1, prop2 = val2)"]
+    Sol3["Use smart throttling with updateIfChanged"]
+    Sol4["Protect with Mutex.withLock {}"]
+    Sol5["Use sealed classes + state machine"]
+
+    Start --> Single
+    Start --> Multiple
+    Start --> HighFreq
+    Start --> Shared
+    Start --> Complex
+
+    Single --> Sol1
+    Multiple --> Sol2
+    HighFreq --> Sol3
+    Shared --> Sol4
+    Complex --> Sol5
+
+    style Start fill:#e3f2fd
+    style Single fill:#e8f5e9
+    style Multiple fill:#e8f5e9
+    style HighFreq fill:#e8f5e9
+    style Shared fill:#e8f5e9
+    style Complex fill:#e8f5e9
 ```
 
 ### Testing Checklist

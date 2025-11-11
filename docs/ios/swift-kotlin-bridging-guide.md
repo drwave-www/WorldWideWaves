@@ -19,44 +19,27 @@ The bridge uses Objective-C interoperability as the common layer between Swift a
 
 ### Two-Layer Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Kotlin Shared Module                     │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │  Business Logic (Wave Detection, Progression, UI)    │  │
-│  │  - IosEventMap (Compose UI)                          │  │
-│  │  - EventObserver (wave detection)                    │  │
-│  │  - WaveProgressionTracker (polygon calculation)      │  │
-│  └───────────────────────┬──────────────────────────────┘  │
-│                          │                                  │
-│  ┌───────────────────────▼──────────────────────────────┐  │
-│  │         MapWrapperRegistry (Kotlin singleton)        │  │
-│  │  - Stores Swift wrapper references (strong refs)     │  │
-│  │  - Stores pending commands & callbacks               │  │
-│  │  - Command pattern for async operations              │  │
-│  └───────────────────────┬──────────────────────────────┘  │
-└────────────────────────────┼──────────────────────────────┘
-                             │ @objc bridge
-                ┌────────────▼────────────┐
-                │    IOSMapBridge.swift   │
-                │  (@objc static methods) │
-                └────────────┬────────────┘
-┌────────────────────────────┼──────────────────────────────┐
-│                Swift iosApp Target                         │
-│  ┌─────────────────────────▼──────────────────────────┐   │
-│  │      MapLibreViewWrapper (Swift class)             │   │
-│  │  - Manages MLNMapView instance                     │   │
-│  │  - Renders wave polygons                           │   │
-│  │  - Controls camera (animate, move, constraints)    │   │
-│  │  - Handles gestures & callbacks                    │   │
-│  └─────────────────────────┬──────────────────────────┘   │
-│                            │                               │
-│  ┌─────────────────────────▼──────────────────────────┐   │
-│  │        MapLibre Native SDK (Swift/ObjC)            │   │
-│  │  - Native iOS map rendering                        │   │
-│  │  - OpenGL/Metal graphics                           │   │
-│  └────────────────────────────────────────────────────┘   │
-└────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph Kotlin["Kotlin Shared Module"]
+        BL["Business Logic<br/>- IosEventMap (Compose UI)<br/>- EventObserver (wave detection)<br/>- WaveProgressionTracker (polygon calculation)"]
+        MWR["MapWrapperRegistry (Kotlin singleton)<br/>- Stores Swift wrapper references (strong refs)<br/>- Stores pending commands & callbacks<br/>- Command pattern for async operations"]
+        BL --> MWR
+    end
+
+    Bridge["IOSMapBridge.swift<br/>(@objc static methods)"]
+    MWR -->|"@objc bridge"| Bridge
+
+    subgraph Swift["Swift iosApp Target"]
+        MLW["MapLibreViewWrapper (Swift class)<br/>- Manages MLNMapView instance<br/>- Renders wave polygons<br/>- Controls camera (animate, move, constraints)<br/>- Handles gestures & callbacks"]
+        SDK["MapLibre Native SDK (Swift/ObjC)<br/>- Native iOS map rendering<br/>- OpenGL/Metal graphics"]
+        Bridge --> MLW
+        MLW --> SDK
+    end
+
+    style Kotlin fill:#e8f5e9
+    style Swift fill:#e3f2fd
+    style Bridge fill:#fff3e0
 ```
 
 ### Bridge Components

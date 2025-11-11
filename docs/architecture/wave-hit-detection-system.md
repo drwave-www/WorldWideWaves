@@ -19,29 +19,24 @@ The system consists of four primary components working together:
 3. **WaveProgressionTracker** - Wave progression calculations and area containment
 4. **EventProgressionState** - Smart StateFlow management with throttling
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    EventObserver                        │
-│            (Orchestrates observation loop)              │
-└────────────┬──────────────────────────────┬─────────────┘
-             │                              │
-             ▼                              ▼
-    ┌────────────────┐            ┌─────────────────────┐
-    │ WaveHitDetector│            │PositionObserver     │
-    │   (Facade)     │            │(Position changes)   │
-    └────────┬───────┘            └─────────────────────┘
-             │
-             ▼
-    ┌─────────────────────┐
-    │EventStateHolder     │
-    │ (Business Logic)    │
-    └──────┬──────────────┘
-           │
-           ▼
-    ┌──────────────────────┐      ┌─────────────────────┐
-    │WaveProgressionTracker│      │EventProgressionState│
-    │  (Progression %)     │      │  (StateFlow Mgmt)   │
-    └──────────────────────┘      └─────────────────────┘
+```mermaid
+graph TB
+    EO["EventObserver<br/>(Orchestrates observation loop)"]
+    WHD["WaveHitDetector<br/>(Facade)"]
+    PO["PositionObserver<br/>(Position changes)"]
+    ESH["EventStateHolder<br/>(Business Logic)"]
+    WPT["WaveProgressionTracker<br/>(Progression %)"]
+    EPS["EventProgressionState<br/>(StateFlow Mgmt)"]
+
+    EO --> WHD
+    EO --> PO
+    WHD --> ESH
+    ESH --> WPT
+    ESH --> EPS
+
+    style EO fill:#e3f2fd
+    style WHD fill:#fff3e0
+    style ESH fill:#e8f5e9
 ```
 
 ### Detection Algorithm

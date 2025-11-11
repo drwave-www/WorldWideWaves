@@ -59,33 +59,24 @@ Each participant plays **one random note** from the active chord at their hit mo
 
 ### System Components
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Wave Event Layer                          │
-│  (WWWEvent, WWWEventWaveWarming, WaveProgressionTracker)     │
-└────────────────────────┬────────────────────────────────────┘
-                         │
-        ┌────────────────┴────────────────┐
-        │                                 │
-┌───────▼──────────┐           ┌─────────▼──────────┐
-│ Visual           │           │ Sound               │
-│ Choreography     │           │ Choreography        │
-│                  │           │                     │
-│ • ChoreographyS- │           │ • SoundChoreography │
-│   equenceBuilder │           │   Player            │
-│ • JSON config    │           │ • MidiParser        │
-│ • Sprite sheets  │           │ • WaveformGenerator │
-│                  │           │ • SoundPlayer       │
-└───────┬──────────┘           └─────────┬──────────┘
-        │                                 │
-        │        ┌────────────────────────┘
-        │        │
-┌───────▼────────▼─────────────────────────────────────┐
-│            Platform Layer (iOS + Android)             │
-│                                                        │
-│ iOS: AVAudioEngine + ComposeUI + Haptics              │
-│ Android: AudioTrack + Jetpack Compose + Vibrator      │
-└────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    Event["Wave Event Layer<br/>(WWWEvent, WWWEventWaveWarming, WaveProgressionTracker)"]
+
+    Visual["Visual Choreography<br/>• ChoreographySequenceBuilder<br/>• JSON config<br/>• Sprite sheets"]
+    Sound["Sound Choreography<br/>• SoundChoreographyPlayer<br/>• MidiParser<br/>• WaveformGenerator<br/>• SoundPlayer"]
+
+    Platform["Platform Layer (iOS + Android)<br/><br/>iOS: AVAudioEngine + ComposeUI + Haptics<br/>Android: AudioTrack + Jetpack Compose + Vibrator"]
+
+    Event --> Visual
+    Event --> Sound
+    Visual --> Platform
+    Sound --> Platform
+
+    style Event fill:#e3f2fd
+    style Visual fill:#e8f5e9
+    style Sound fill:#fff3e0
+    style Platform fill:#ffebee
 ```
 
 ### Data Flow: Wave Hit → Sound Emission

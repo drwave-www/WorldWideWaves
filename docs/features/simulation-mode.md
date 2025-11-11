@@ -58,37 +58,25 @@ Simulation mode operates on two distinct levels:
 
 ### System Components
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      WWWPlatform                             │
-│  (Mode Toggle + Active Simulation State Management)          │
-│  • simulationModeEnabled: StateFlow<Boolean>                 │
-│  • simulationChanged: StateFlow<Int>                         │
-│  • setSimulation(WWWSimulation)                              │
-│  • disableSimulation()                                       │
-└────────────────────────┬────────────────────────────────────┘
-                         │
-        ┌────────────────┴────────────────┐
-        │                                 │
-┌───────▼──────────┐           ┌─────────▼──────────┐
-│ WWWSimulation    │           │ SystemClock         │
-│                  │           │                     │
-│ • Time           │◄──────────┤ • IClock interface  │
-│   acceleration   │           │ • Simulation-aware  │
-│ • Speed control  │           │   now() and delay() │
-│ • Position       │           │                     │
-│   override       │           │                     │
-└───────┬──────────┘           └─────────┬──────────┘
-        │                                 │
-        │        ┌────────────────────────┘
-        │        │
-┌───────▼────────▼─────────────────────────────────────┐
-│            Position + Observer Layer                  │
-│                                                        │
-│ PositionManager: SIMULATION > GPS priority            │
-│ EventObserver: Detects simulation changes             │
-│ WaveProgressionTracker: Uses SystemClock              │
-└────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    Platform["WWWPlatform<br/>(Mode Toggle + Active Simulation State Management)<br/>• simulationModeEnabled: StateFlow<Boolean><br/>• simulationChanged: StateFlow<Int><br/>• setSimulation(WWWSimulation)<br/>• disableSimulation()"]
+
+    Sim["WWWSimulation<br/>• Time acceleration<br/>• Speed control<br/>• Position override"]
+    Clock["SystemClock<br/>• IClock interface<br/>• Simulation-aware now() and delay()"]
+
+    Layer["Position + Observer Layer<br/><br/>PositionManager: SIMULATION > GPS priority<br/>EventObserver: Detects simulation changes<br/>WaveProgressionTracker: Uses SystemClock"]
+
+    Platform --> Sim
+    Platform --> Clock
+    Clock -.->|"uses"| Sim
+    Sim --> Layer
+    Clock --> Layer
+
+    style Platform fill:#e3f2fd
+    style Sim fill:#ffebee
+    style Clock fill:#fff3e0
+    style Layer fill:#e8f5e9
 ```
 
 ### Data Flow: Starting Simulation

@@ -84,20 +84,29 @@ open worldwidewaves.xcodeproj
 
 ### Architecture Flow
 
-```
-User Action
-    ↓
-AppDelegate (Swift) → URL routing
-    ↓
-SceneDelegate (Swift) → Platform initialization
-    ↓
-RootController.kt (Kotlin) → ViewController factory
-    ↓
-WWWActivity (Kotlin) → Activity wrapper
-    ↓
-Compose UI (Kotlin) → Shared UI components
-    ↓
-Business Logic (Kotlin) → Domain and data layers
+```mermaid
+graph TD
+    UserAction["User Action"]
+    AppDelegate["AppDelegate (Swift)<br/>URL routing"]
+    SceneDelegate["SceneDelegate (Swift)<br/>Platform initialization"]
+    RootController["RootController.kt (Kotlin)<br/>ViewController factory"]
+    WWWActivity["WWWActivity (Kotlin)<br/>Activity wrapper"]
+    ComposeUI["Compose UI (Kotlin)<br/>Shared UI components"]
+    BusinessLogic["Business Logic (Kotlin)<br/>Domain and data layers"]
+
+    UserAction --> AppDelegate
+    AppDelegate --> SceneDelegate
+    SceneDelegate --> RootController
+    RootController --> WWWActivity
+    WWWActivity --> ComposeUI
+    ComposeUI --> BusinessLogic
+
+    style AppDelegate fill:#fff3e0
+    style SceneDelegate fill:#fff3e0
+    style RootController fill:#e8f5e9
+    style WWWActivity fill:#e8f5e9
+    style ComposeUI fill:#e8f5e9
+    style BusinessLogic fill:#e8f5e9
 ```
 
 ### Key iOS Files
@@ -1299,22 +1308,34 @@ Both platforms render the same visual appearance:
 
 **Android**:
 
-```kotlin
-PositionManager.positionFlow
-  → LocationEngineProxy.onLocationChanged()
-  → LocationComponent.forceLocationUpdate()
-  → MapLibre native rendering (automatic)
+```mermaid
+graph LR
+    PM["PositionManager.positionFlow"] --> LEP["LocationEngineProxy<br/>onLocationChanged()"]
+    LEP --> LC["LocationComponent<br/>forceLocationUpdate()"]
+    LC --> Native["MapLibre native rendering<br/>(automatic)"]
+
+    style PM fill:#e8f5e9
+    style LEP fill:#fff3e0
+    style LC fill:#e3f2fd
+    style Native fill:#ffebee
 ```
 
 **iOS**:
 
-```kotlin
-PositionManager.positionFlow
-  → IosMapLibreAdapter.setUserPosition()
-  → MapWrapperRegistry.setUserPositionOnWrapper()
-  → MapLibreViewWrapper.setUserPosition() callback
-  → updateUserLocationMarker() (manual annotation update)
-  → MLNPointAnnotation.coordinate = newPosition
+```mermaid
+graph LR
+    PM["PositionManager.positionFlow"] --> Adapter["IosMapLibreAdapter<br/>setUserPosition()"]
+    Adapter --> Registry["MapWrapperRegistry<br/>setUserPositionOnWrapper()"]
+    Registry --> Wrapper["MapLibreViewWrapper<br/>setUserPosition() callback"]
+    Wrapper --> Update["updateUserLocationMarker()<br/>(manual annotation update)"]
+    Update --> Annotation["MLNPointAnnotation<br/>coordinate = newPosition"]
+
+    style PM fill:#e8f5e9
+    style Adapter fill:#fff3e0
+    style Registry fill:#e3f2fd
+    style Wrapper fill:#ffebee
+    style Update fill:#fff3e0
+    style Annotation fill:#e3f2fd
 ```
 
 ### Trade-offs

@@ -540,33 +540,35 @@ sealed class MapFeatureState {
 
 ### State Transitions
 
-```
-NotChecked
-    ↓ checkIfMapIsAvailable()
-    ├─→ Available (if installed)
-    └─→ NotAvailable (if not installed)
-        ↓ downloadMap()
-        ├─→ Installed (if files exist after clearing forcedUnavailable)
-        └─→ Pending
-            ↓ startPlatformDownload()
-            ↓
-        Downloading(0%)
-            ↓ progress callbacks
-        Downloading(100%)
-            ↓ Android only
-        Installing
-            ↓ both platforms
-        Installed
+```mermaid
+stateDiagram-v2
+    [*] --> NotChecked
+    NotChecked --> Available: checkIfMapIsAvailable()<br/>(if installed)
+    NotChecked --> NotAvailable: checkIfMapIsAvailable()<br/>(if not installed)
+
+    NotAvailable --> Installed: downloadMap()<br/>(if files exist after clearing forcedUnavailable)
+    NotAvailable --> Pending: downloadMap()
+    Pending --> Downloading: startPlatformDownload()
+
+    Downloading --> Downloading: progress callbacks<br/>(0% → 100%)
+    Downloading --> Installing: Android only
+    Downloading --> Installed: iOS direct
+    Installing --> Installed: both platforms
+
+    Installed --> [*]
+
+    NotChecked --> Failed: error
+    NotAvailable --> Failed: error
+    Pending --> Failed: error
+    Downloading --> Failed: error
+    Installing --> Failed: error
+
+    Failed --> Retrying: automatic retry<br/>(if transient error)
+    Retrying --> Retrying: retry attempts<br/>(1 → 2 → 3)
+    Retrying --> Failed: max attempts reached<br/>(permanent)
 ```
 
-**Error Path**:
-
-```
-Any state → Failed(errorCode)
-    ↓ automatic retry (if transient error)
-    ↓
-Retrying(1, 3) → Retrying(2, 3) → Retrying(3, 3) → Failed (permanent)
-```
+**Error Path**: Any state can transition to Failed, then to Retrying (up to 3 attempts) before permanent failure.
 
 ### Reactive State Flows
 
