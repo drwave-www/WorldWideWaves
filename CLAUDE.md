@@ -12,111 +12,72 @@ WorldWideWaves **v1.0 is live in production** with real users on both iOS and An
 
 ### Mandatory Change Management Process
 
-**BEFORE making ANY change** (code, tests, documentation), you MUST:
+**BEFORE making ANY change** (code, tests, documentation), complete these 4 steps using agents:
 
-#### 1. Architecture Validation [USE AGENTS]
+#### 1. Architecture Validation [Task/Plan]
 
-```bash
-# Use Task tool with subagent_type=Plan
+Validate: Architecture soundness, pattern fit, alternatives, long-term implications
+
+```
+Analyze architecture for [CHANGE]:
+- Does it fit existing patterns? (EventCache, MapCache, etc.)
+- Better alternatives?
+- Thread safety requirements?
 ```
 
-**Questions to answer**:
+#### 2. Impact Analysis [Task/Explore - very thorough]
 
-- Is this change architecturally sound?
-- Does it fit existing patterns?
-- Are there better alternatives?
-- What are the long-term implications?
+Analyze: Android (lifecycle, Play Core), iOS (threading, memory, Kotlin/Native), shared code (expect/actual), side effects (state, observers), breaking changes
 
-#### 2. Impact Analysis [USE AGENTS]
-
-```bash
-# Use Task tool with subagent_type=Explore (thoroughness: very thorough)
+```
+Analyze impact of [CHANGE]:
+- Android: Build system, lifecycle, memory
+- iOS: Threading, UIKit integration, memory pinning
+- Shared: StateFlow observers, serialization
+- Side effects: Which systems affected?
 ```
 
-**Analyze**:
+#### 3. Test Strategy Review [Task/Plan]
 
-- **Android implications**: Build system, lifecycle, permissions, Play Core
-- **iOS implications**: Threading, memory, UIKit integration, Kotlin/Native
-- **Shared code impact**: Expect/actual implementations, KMM patterns
-- **Side effects**: State management, observers, notification system
-- **Breaking changes**: API contracts, data models, serialization
+Validate: Coverage appropriate for production, platform-specific tests (androidUnitTest + iosTest), edge cases, performance
 
-#### 3. Test Strategy Review [USE AGENTS]
+```
+Review test strategy for [CHANGE]:
+- Unit tests needed?
+- Android/iOS-specific test requirements?
+- Integration tests?
+```
 
-**Before writing tests**, validate:
+#### 4. Documentation Impact [Task/Explore]
 
-- Test coverage appropriate for production code
-- Both platform-specific tests (androidUnitTest + iosTest)
-- Edge cases for Android and iOS differences
-- Integration test requirements
-- Performance implications
+Identify: CLAUDE.md sections, docs/ files, KDoc, README, architecture diagrams
 
-#### 4. Documentation Impact [USE AGENTS]
-
-**Identify documentation updates**:
-
-- CLAUDE.md sections affected
-- docs/ files requiring updates
-- Code comments and KDoc
-- README changes
-- Architecture diagrams
+```
+Identify docs to update for [CHANGE]:
+- CLAUDE.md sections affected?
+- Architecture docs to create/update?
+- Code comments and KDoc needed?
+```
 
 ### Production Change Rules
 
-- ✅ **Use agents for ALL non-trivial changes** - architecture, impact analysis, test review
-- ✅ **Double-check platform implications** - what works on Android may deadlock iOS
-- ✅ **Validate with both platform builds** - Android AND iOS compilation required
-- ✅ **Run full test suite** - all tests must pass (100%)
-- ✅ **Update documentation immediately** - don't create doc debt
-- ❌ **NO experimental changes** - production code requires proven patterns
-- ❌ **NO "quick fixes"** - every change needs impact analysis
-- ❌ **NO skipping tests** - test failures are production incidents
+| ✅ ALWAYS | ❌ NEVER |
+|-----------|----------|
+| Use agents for non-trivial changes | Make experimental changes |
+| Validate both platform builds (iOS + Android) | Skip impact analysis ("quick fixes") |
+| Run full test suite (100% pass) | Skip tests (failures = production incidents) |
+| Update docs immediately | Create documentation debt |
 
-### Example: Correct Production Change Flow
+### Example: Production Change Flow
 
-**User Request**: "Add user profile caching"
+**Request**: "Add user profile caching"
 
-**Step 1 - Architecture** (Task/Plan agent):
+1. **Architecture** (Plan): Where should cache live? Follow EventCache pattern? Thread safety?
+2. **Impact** (Explore): Android SharedPreferences vs iOS UserDefaults? Affects FavoritesManager?
+3. **Tests** (Plan): Cache hit/miss tests, platform-specific persistence tests, integration tests
+4. **Docs** (Explore): Update Architecture Patterns section, add caching-strategy.md, KDoc
 
-```
-Analyze the architecture for adding user profile caching:
-1. Where should cache live? (Repository? ViewModel? Separate service?)
-2. What existing patterns can we follow? (EventCache? MapCache?)
-3. Cache invalidation strategy?
-4. Thread safety requirements?
-```
-
-**Step 2 - Impact Analysis** (Task/Explore agent, very thorough):
-
-```
-Analyze the impact of adding user profile caching:
-1. Android: SharedPreferences? Room? DataStore? Memory implications?
-2. iOS: UserDefaults? CoreData? FileManager? Memory pinning required?
-3. Shared: Kotlinx.serialization changes? StateFlow observers?
-4. Side effects: Does this affect FavoritesManager? NotificationScheduler?
-```
-
-**Step 3 - Test Review** (Task/Plan agent):
-
-```
-Review test strategy for user profile caching:
-1. Unit tests: Cache hit/miss, invalidation, serialization
-2. Android-specific: SharedPreferences mocking, lifecycle
-3. iOS-specific: UserDefaults behavior, memory safety
-4. Integration: End-to-end user profile load/save flow
-```
-
-**Step 4 - Documentation** (Task/Explore agent):
-
-```
-Identify documentation updates for user profile caching:
-1. CLAUDE.md: Add to "Architecture Patterns" section
-2. Architecture docs: Create or update relevant caching documentation
-3. KDoc: CacheManager, UserRepository
-4. README.md: Update features list if user-facing
-```
-
-**Then and only then**: Implement the change.
+**Then implement.**
 
 ---
 
@@ -145,63 +106,43 @@ WorldWideWaves is an **ephemeral mobile app** for orchestrating synchronized, lo
 
 ---
 
-## iOS Requirements [CRITICAL]
+## iOS Safety Quick Reference [CRITICAL]
 
-> **Status**: ✅ STABLE | **Tests**: All passing | **Violations**: None (all fixed)
+> **iOS threading violations cause immediate deadlocks**. Always consult [CLAUDE_iOS.md](CLAUDE_iOS.md) for complete details.
 
-### 🚨 iOS Deadlock Prevention [MANDATORY]
+| ❌ NEVER | ✅ ALWAYS | Why |
+|----------|----------|-----|
+| `object : KoinComponent` in @Composable | Use `IOSSafeDI.get<T>()` | Composables trigger iOS main thread deadlock |
+| `by inject()` during composition | Use constructor injection or `LocalKoin.current.get<T>()` | Property delegation freezes iOS |
+| `runBlocking` before ComposeUIViewController | Use suspend functions with `LaunchedEffect` | Blocks iOS main thread |
+| `init{}` with DI access | Use constructor parameters or `lazy { }` | Init blocks freeze on iOS |
+| `Dispatchers.Main` in properties | Use `lazy { CoroutineScope(Dispatchers.Main) }` | Property initialization crashes iOS |
 
-iOS Kotlin/Native has **strict threading requirements**. Violations cause **immediate deadlocks** on app launch.
+**Verification**: Run `./scripts/dev/verification/verify-ios-safety.sh` before every commit touching shared code.
 
-#### The 6 Absolute Rules
+**See**: [CLAUDE_iOS.md](CLAUDE_iOS.md) for comprehensive iOS safety guide with all 11 violation fixes.
 
-**❌ NEVER**:
-
-1. `object : KoinComponent` inside @Composable scopes
-2. `by inject()` during Compose composition
-3. `runBlocking` before ComposeUIViewController
-4. Coroutine launches in `init{}` blocks
-5. DI access (`get<T>()`) in `init{}` blocks
-6. `Dispatchers.Main` in property initialization
-
-**✅ ALWAYS**:
-
-1. Use IOSSafeDI singleton for Composable DI access
-2. Use parameter injection or LocalKoin.current.get<T>()
-3. Use suspend functions with LaunchedEffect
-4. Use constructor injection, not init{} DI
-5. Use lazy initialization: `by lazy { CoroutineScope(Dispatchers.Main) }`
-
-#### Quick Example
+**Example**:
 
 ```kotlin
 // ❌ DEADLOCKS iOS!
-@Composable
-fun Screen() {
-    val deps = object : KoinComponent {
-        val clock by inject()  // DEADLOCK
-    }
+@Composable fun Screen() {
+    val deps = object : KoinComponent { val clock by inject() }
 }
 
 // ✅ SAFE
-@Composable
-fun Screen() {
+@Composable fun Screen() {
     val clock = getIOSSafeClock()  // IOSSafeDI wrapper
 }
 ```
 
-#### Verification
+---
 
-**Before EVERY commit** touching shared code:
+## iOS Requirements [CRITICAL]
 
-```bash
-./scripts/dev/verification/verify-ios-safety.sh
-```
+> **Status**: ✅ STABLE | **Tests**: All passing | **Violations**: None (all fixed)
 
-**Expected**: Zero violations in all checks.
-
-**See**: [CLAUDE_iOS.md](./CLAUDE_iOS.md) for comprehensive iOS guide
-**See**: [docs/patterns/ios-safety-patterns.md](docs/patterns/ios-safety-patterns.md) for all patterns
+For detailed iOS safety patterns, threading rules, and platform-specific guidance, see [CLAUDE_iOS.md](CLAUDE_iOS.md) and [docs/patterns/ios-safety-patterns.md](docs/patterns/ios-safety-patterns.md)
 
 ---
 
@@ -209,37 +150,28 @@ fun Screen() {
 
 > **Status**: ✅ WCAG 2.1 Level AA Compliant | **Tests**: All passing
 
-### All UI Components Must
+**All UI components must have**:
 
-- ✅ **contentDescription**: Localized via MokoRes.strings
-- ✅ **semantics**: `role`, `contentDescription`, `stateDescription`
-- ✅ **Touch targets**: 48dp (Android) / 44pt (iOS) minimum
-- ✅ **Text scaling**: Use `.sp` units (respects system font size)
-- ✅ **Screen readers**: TalkBack (Android) and VoiceOver (iOS)
-- ✅ **Color contrast**: 4.5:1 minimum ratio (WCAG AA)
-- ✅ **Heading hierarchy**: `semantics { heading = true }`
+- contentDescription (localized via MokoRes.strings)
+- semantics (`role`, `contentDescription`, `stateDescription`)
+- 48dp/44pt minimum touch targets
+- `.sp` units for text (system font scaling)
+- 4.5:1 color contrast ratio
+- `semantics { heading = true }` for headings
 
-### Example
+**Example**:
 
 ```kotlin
-Button(
-    onClick = { action() },
-    modifier = Modifier
-        .size(48.dp)
-        .semantics {
-            role = Role.Button
-            contentDescription = "Join wave event"
-        }
-)
+Button(onClick = { action() },
+    modifier = Modifier.size(48.dp).semantics {
+        role = Role.Button
+        contentDescription = "Join wave event"
+    })
 ```
 
-### Testing
+**Verify**: `./scripts/dev/verification/test_accessibility.sh` before each PR
 
-```bash
-./scripts/dev/verification/test_accessibility.sh  # Before each PR
-```
-
-**See**: [docs/accessibility-guide.md](docs/accessibility-guide.md) for complete patterns
+**See**: [docs/accessibility-guide.md](docs/accessibility-guide.md)
 
 ---
 
@@ -247,82 +179,33 @@ Button(
 
 > **Status**: ✅ 32 Languages | **Coverage**: 100% | **Runtime Switching**: ✅ Enabled
 
-### Language Support
+### Language Support (32 languages)
 
-WorldWideWaves supports **32 languages** with complete translation coverage:
+**Americas**: en, es, pt, fr | **Europe**: de, fr, it, nl, pl, ro, ru, tr, uk | **Middle East**: ar, fa, he, ur | **Africa**: am, ha, ig, sw, xh, yo, zu | **Asia**: bn, hi, id, ja, ko, ms, pa, th, vi, zh, fil
 
-- **Americas**: en, es, pt, fr (Canada)
-- **Europe**: de, fr, it, nl, pl, ro, ru, tr, uk
-- **Middle East**: ar, fa, he, ur
-- **Africa**: am, ha, ig, sw, xh, yo, zu
-- **Asia**: bn, hi, id, ja, ko, ms, pa, th, vi, zh, fil
+### Critical Rules
 
-### All Localized Content Must
-
-- ✅ **Use MokoRes**: All strings via `stringResource(MokoRes.strings.key_name)`
-- ✅ **No hardcoded strings**: All user-facing text must be in strings.xml
-- ✅ **Parameter formatting**: Use `%1$s`, `%2$d` for string interpolation
-- ✅ **Locale-aware formatting**: Dates and times respect device locale/preferences
-- ✅ **RTL support**: Arabic, Hebrew, Farsi, Urdu properly handled
-
-### Date/Time Formatting
-
-**Android & iOS**: Both platforms now respect device locale and timezone
-
-```kotlin
-// Use platform-aware formatting
-DateTimeFormats.dayMonth(instant, timeZone)  // "24 Dec" (en) → "24. Dez" (de)
-DateTimeFormats.timeShort(instant, timeZone) // "2:30 PM" (12h) → "14:30" (24h)
-```
+- ✅ **Use MokoRes**: `stringResource(MokoRes.strings.key_name)`
+- ✅ **No hardcoded strings**: All user-facing text in strings.xml
+- ✅ **Parameter formatting**: Use `%1$s`, `%2$d`
+- ✅ **Locale-aware dates/times**: `DateTimeFormats.dayMonth()`, `DateTimeFormats.timeShort()`
+- ✅ **RTL support**: Arabic, Hebrew, Farsi, Urdu handled automatically
 
 ### Runtime Language Switching
 
-Users can change language **without app restart**:
+Users change language **without restart** via system settings. LocalizationManager observes locale changes → StateFlow → Compose recomposition.
 
-**Android**: Settings → System → Languages → Add language
-**iOS**: Settings → General → Language & Region → [App] → Language
+### Translation Workflow
 
-**Implementation**:
-
-- LocalizationManager observes system locale changes
-- Emits via StateFlow to trigger Compose recomposition
-- UI updates automatically with new localized strings
-
-### Translation Validation
-
-**Before every commit with new strings**:
+**Before commit with new strings**:
 
 ```bash
-./gradlew :shared:lintDebug  # Validates all 32 languages have all strings
+./gradlew :shared:lintDebug  # Validates all 32 languages
 ```
 
-**Add new strings**:
+**Add strings**: (1) Edit `base/strings.xml` → (2) Run `python3 scripts/translate/update_translations.py` → (3) Verify lint → (4) Commit
 
-1. Add to `shared/src/commonMain/moko-resources/base/strings.xml`
-2. Run `python3 scripts/translate/update_translations.py`
-3. Verify lint passes
-4. Commit base + all translated files
-
-### Testing Requirements
-
-**i18n tests must cover**:
-
-- String resource accessibility (LocalizationTest.kt)
-- Date/time formatting (DateTimeFormatsTest.kt)
-- Platform-specific locale behavior (platform-specific tests)
-- Runtime locale change handling (LocalizationManagerTest.kt)
-
-### Common Issues
-
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| iOS dates always in English | Hardcoded format | Fixed in DateTimeFormats.ios.kt |
-| Missing translation warnings | Lint disabled | Re-enabled in recent release |
-| Language change requires restart | No detection | LocalizationManager added |
-| RTL layout issues | Missing semantics | Add `layoutDirection` to Compose |
-
-**See**: `shared/src/commonMain/moko-resources/` for all translations
-**See**: `shared/src/*/localization/` for runtime locale handling
+**See**: `shared/src/commonMain/moko-resources/` for translations | `shared/src/*/localization/` for runtime handling
 
 ---
 
@@ -367,36 +250,17 @@ Users can change language **without app restart**:
 
 ### Map Download System
 
-**Critical Understanding**: Android Play Core uses **deferred uninstall** - map files remain after uninstall until app update.
+**Critical**: Android Play Core uses **deferred uninstall** - files persist until app update. Use `forcedUnavailable` flag (Android only) to respect user intent.
 
-**forcedUnavailable Flag** (Android only):
+**Rules**:
 
-- ✅ Set on uninstall to respect user intent despite file persistence
-- ✅ Persisted to SharedPreferences to survive app restarts
-- ✅ **MUST be cleared BEFORE availability checks in download flow**
-- ✅ Cleared in `MapDownloadCoordinator.downloadMap()` before `isMapInstalled()` check
-- ✅ **MUST be checked before UI operations** (defense-in-depth against stale ViewModel state)
-- ❌ iOS doesn't need this - ODR deletes files immediately
+1. **Download**: Call `clearForcedUnavailableIfNeeded()` BEFORE availability checks
+2. **UI**: Check `isForcedUnavailable()` before setting available or loading map
+3. **State**: Don't trust ViewModel alone - may be stale after uninstall
 
-**Critical Rules**:
+**iOS**: ODR deletes files immediately, no flag needed.
 
-1. **Download flow**: Call `clearForcedUnavailableIfNeeded()` BEFORE any availability checks
-2. **UI operations**: Check `isForcedUnavailable()` before setting map available or loading map
-3. **ViewModel state**: Don't trust ViewModel.featureState alone - it may be stale after uninstall
-
-**Defense-in-Depth**:
-
-AndroidEventMap checks `isForcedUnavailable()` at two points:
-
-- Before setting `isMapAvailable = true` (prevents incorrect UI state)
-- Before loading map (prevents uninstalled maps from rendering)
-
-This handles AndroidMapViewModel state persistence across navigation.
-
-**See**:
-
-- [Map Download System Architecture](docs/architecture/map-download-system.md) - Complete system documentation
-- [Map Cache Management](docs/architecture/map-cache-management.md) - Cache lifecycle and invalidation
+**See**: [Map Download System](docs/architecture/map-download-system.md) | [Map Cache Management](docs/architecture/map-cache-management.md)
 
 ---
 
@@ -404,82 +268,41 @@ This handles AndroidMapViewModel state persistence across navigation.
 
 ### ⚠️ CRITICAL: Cross-Platform Compilation Check [MANDATORY]
 
-**BEFORE EVERY COMMIT touching shared/ code**, verify compilation on **BOTH platforms**:
+**BEFORE EVERY COMMIT**, verify both platforms:
 
 ```bash
-# MINIMUM required check before commit (Kotlin only):
+# Kotlin (shared/ changes):
 ./gradlew clean :shared:testDebugUnitTest \
   :shared:compileDebugKotlinAndroid \
   :shared:compileKotlinIosSimulatorArm64
 
-# Expected: ALL tasks successful, 100% test pass rate
-```
-
-**BEFORE EVERY COMMIT touching iosApp/ Swift code**, also verify Swift compilation:
-
-```bash
-# iOS Swift compilation check:
+# Swift (iosApp/ changes):
 xcodebuild -project iosApp/worldwidewaves.xcodeproj \
-  -scheme worldwidewaves \
-  -sdk iphonesimulator \
-  build
+  -scheme worldwidewaves -sdk iphonesimulator build
 
-# Expected: ** BUILD SUCCEEDED **
+# Expected: ALL tasks successful, 100% pass rate
 ```
 
-**Why**: Android unit tests (`:shared:testDebugUnitTest`) only compile Android code and miss iOS-specific compilation errors like:
+**Why**: Android tests only compile Android code, missing iOS errors (imports, JVM-only APIs, type mismatches).
 
-- Missing imports in iOS source sets
-- JVM-only APIs used in commonMain (String.format, etc.)
-- Platform-specific type mismatches
-
-### Test Organization
+### Test Organization & Requirements
 
 ```
 shared/src/
-├── commonTest/          # Platform-independent (NO MockK, NO JVM APIs)
-├── androidUnitTest/     # Android-specific (CAN use MockK)
-└── iosTest/             # iOS-specific (NO MockK, Kotlin/Native only)
+├── commonTest/       # Platform-independent (NO MockK, NO JVM APIs)
+├── androidUnitTest/  # Android-specific (CAN use MockK)
+└── iosTest/          # iOS-specific (NO MockK, Kotlin/Native only)
 ```
 
-### Critical: Run Before Every Commit
+**Critical Rules**:
 
-```bash
-./gradlew clean :shared:testDebugUnitTest :composeApp:assembleDebug
-# Expected: All tests passing with 100% pass rate
-```
+- All changes must pass existing suite (100%)
+- New functionality requires tests (no test debt)
+- Run ALL tests, not just relevant ones
+- `./scripts/dev/verification/verify-ios-safety.sh` for shared code changes
+- ✅ **COMMIT IMMEDIATELY after tests pass**
 
-### Requirements
-
-- **All changes must pass existing test suite** (comprehensive suite)
-- **New functionality requires tests** - no test debt
-- **Run ALL tests**, not just relevant ones
-- **Performance**: Monitor test execution time
-- **iOS safety**: `./scripts/dev/verification/verify-ios-safety.sh` for shared code changes
-- ✅ **COMMIT IMMEDIATELY after tests pass** - don't wait to be asked
-
-### Key Test Patterns
-
-```kotlin
-// Infinite flows - Don't use advanceUntilIdle()!
-observer.startObservation()
-testScheduler.runCurrent()  // Process current only
-// ... assertions ...
-observer.stopObservation()  // Cancel first
-testScheduler.advanceUntilIdle()  // Now safe
-
-// Test isolation - Prevent flaky tests
-@AfterTest
-fun tearDown() {
-    runBlocking {
-        testScopeProvider.cancelAllCoroutines()
-        delay(500)  // Cleanup propagation
-    }
-    stopKoin()
-}
-```
-
-**See**: [docs/testing/test-patterns.md](docs/testing/test-patterns.md) for comprehensive patterns
+**See**: [docs/testing/test-patterns.md](docs/testing/test-patterns.md) for comprehensive patterns (infinite flows, test isolation, etc.)
 
 ---
 
@@ -624,69 +447,16 @@ object SharedState {
 
 **Rule**: All markdown files MUST pass markdownlint-cli2 validation before commit.
 
-**Why**: Consistent documentation formatting ensures readability, prevents CI failures, and maintains professional quality across all project documentation.
+**Key Requirements**: Blank lines around headings/lists/code blocks, single newline at EOF, space after `#`
 
-**Configuration**: `.markdownlint-cli2.jsonc` (project root)
-
-**Key Requirements**:
-
-- Headings surrounded by blank lines (MD022)
-- Lists surrounded by blank lines (MD032)
-- Code blocks surrounded by blank lines (MD031)
-- Files end with single newline (MD047)
-- Space after `#` in headings (MD018)
-
-**Pre-Commit Validation**:
+**Validation**:
 
 ```bash
-# Check markdown formatting
-npx markdownlint-cli2 "**/*.md" "!node_modules/**" "!build/**" "!SourcePackages/**" "!.gradle/**" "!iosApp/build/**" "!shared/build/**" "!composeApp/build/**" "!maps/**/node_modules/**"
-
-# Auto-fix formatting issues
-npx markdownlint-cli2 --fix "**/*.md" [same exclusions as above]
+npx markdownlint-cli2 "**/*.md" "!node_modules/**" "!build/**" "!.gradle/**"
+npx markdownlint-cli2 --fix "**/*.md" ...  # Auto-fix
 ```
 
-**Pre-Push Enforcement**:
-
-The pre-push git hook automatically runs markdown linting. Push will be blocked if errors are detected.
-
-**Common Fixes**:
-
-```markdown
-<!-- ❌ WRONG - No blank lines around heading -->
-Some text here.
-## Heading
-More text.
-
-<!-- ✅ CORRECT - Blank lines around heading -->
-Some text here.
-
-## Heading
-
-More text.
-```
-
-```markdown
-<!-- ❌ WRONG - No blank lines around list -->
-Text before list.
-- Item 1
-- Item 2
-Text after list.
-
-<!-- ✅ CORRECT - Blank lines around list -->
-Text before list.
-
-- Item 1
-- Item 2
-
-Text after list.
-```
-
-**Enforcement**:
-
-- Pre-push hook blocks commits with markdown errors
-- GitHub Actions workflow fails on markdown violations
-- Use auto-fix for most issues: `npx markdownlint-cli2 --fix "**/*.md" ...`
+**Enforcement**: Pre-push hook blocks commits with markdown errors. Use `--fix` for most issues.
 
 ---
 
@@ -718,7 +488,7 @@ positionManager.positionFlow.collect { position ->
 val gpsProvider = GPSProvider()  // Don't create separate sources!
 ```
 
-**Simulation Mode**: For testing event participation without waiting for real events, use simulation mode with time acceleration and position control. See [Simulation Mode Guide](docs/features/simulation-mode.md) for complete documentation.
+**See**: [Simulation Mode Guide](docs/features/simulation-mode.md) | [Event Observation System](docs/architecture/event-observation-system.md) | [Wave Hit Detection System](docs/architecture/wave-hit-detection-system.md)
 
 ### Error Handling
 
@@ -738,93 +508,38 @@ fun performOperation() {
 
 ### Notifications System
 
-**Status**: ✅ Production-Ready | **Tests**: All passing | **Phase**: 7 Complete
+**Status**: ✅ Production-Ready | **Tests**: All passing
 
-The notification system delivers time-based and immediate alerts for wave events to favorited events only.
+Time-based and immediate alerts for **favorited events only**.
 
-**Key Files**:
+**Architecture**: Expect/actual pattern with platform-specific implementations (WorkManager on Android, UNUserNotificationCenter on iOS)
 
-- **Shared Core** (expect/actual pattern):
-  - `shared/src/commonMain/kotlin/com/worldwidewaves/shared/notifications/NotificationTrigger.kt` - 3 trigger types (EventStarting, EventFinished, WaveHit)
-  - `shared/src/commonMain/kotlin/com/worldwidewaves/shared/notifications/NotificationManager.kt` - Interface for scheduling/delivery
-  - `shared/src/commonMain/kotlin/com/worldwidewaves/shared/notifications/NotificationScheduler.kt` - Eligibility logic (favorited + simulation mode compatible)
-  - `shared/src/commonMain/kotlin/com/worldwidewaves/shared/notifications/NotificationContent.kt` - Localization keys + deep links
-  - `shared/src/commonMain/kotlin/com/worldwidewaves/shared/notifications/NotificationContentProvider.kt` - Content generation
+**Notification Types**: 6 scheduled (1h, 30m, 10m, 5m, 1m before) + 1 immediate (wave hit) = 7 per favorited event
 
-- **Android**:
-  - `shared/src/androidMain/kotlin/com/worldwidewaves/shared/notifications/AndroidNotificationManager.kt` - WorkManager for scheduled, NotificationCompat for immediate (lines 38-150)
-  - `shared/src/androidMain/kotlin/com/worldwidewaves/shared/notifications/NotificationWorker.kt` - CoroutineWorker for delivery
-  - `shared/src/androidMain/kotlin/com/worldwidewaves/shared/notifications/NotificationChannelManager.kt` - Channel setup (HIGH importance)
-
-- **iOS**:
-  - `shared/src/iosMain/kotlin/com/worldwidewaves/shared/notifications/IOSNotificationManager.kt` - UNUserNotificationCenter (class-based, lazy init for iOS safety)
-  - `iosApp/worldwidewaves/NotificationPermissionBridge.swift` - Permission request bridge
-
-**Notification Types**: 6 scheduled (1h, 30m, 10m, 5m, 1m before) + 1 immediate (wave hit) = 7 total per favorited event
-
-**Eligibility**: Event is favorited AND (no simulation OR speed == 1) AND event hasn't started
-
-**Limits**: iOS 64 pending max (typical <60 with favorites-only), Android ~500 (typical <60)
+**Eligibility**: Favorited AND (no simulation OR speed == 1) AND not started yet
 
 **Development**:
 
-1. When event favorited: Call `notificationScheduler.scheduleAllNotifications(event)`
-2. When event unfavorited: Call `notificationScheduler.cancelAllNotifications(eventId)`
-3. On app launch: Call `notificationScheduler.syncNotifications(favorites, events)`
-4. Wave hit detection: Call `notificationManager.deliverNow(eventId, WaveHit, content)`
+- Favorited: `notificationScheduler.scheduleAllNotifications(event)`
+- Unfavorited: `notificationScheduler.cancelAllNotifications(eventId)`
+- App launch: `notificationScheduler.syncNotifications(favorites, events)`
+- Wave hit: `notificationManager.deliverNow(eventId, WaveHit, content)`
 
-**Testing**: `./gradlew :shared:testDebugUnitTest` includes comprehensive notification test coverage (commonTest + androidUnitTest + iosTest)
-
-**See**: [docs/features/notification-system.md](docs/features/notification-system.md) for comprehensive system documentation
+**See**: [docs/features/notification-system.md](docs/features/notification-system.md)
 
 ### Crashlytics Integration
 
 **Status**: Hybrid Strategy | Android: ✅ Full | iOS: ⏭️ Native Only
 
-Firebase Crashlytics uses a **hybrid strategy** due to Swift/Kotlin/Native interop limitations.
-
-**iOS Implementation**: Disabled for Kotlin shared code
-
-- Firebase iOS SDK contains Swift dependencies that conflict with Kotlin/Native linker
-- iOS app uses Firebase Crashlytics **directly** for native crashes (Swift/ObjC) ✅
-- Kotlin exceptions on iOS are **logged locally only** (not sent to Firebase) ⏭️
-- Rare occurrence - most app logic is platform-specific
-
-**Android Implementation**: Fully functional ✅
-
-- CrashlyticsLogger.android.kt reports all Kotlin exceptions to Firebase
-- Complete crash reporting for shared code
-
-**Architecture**:
-
-```
-iOS App (Swift) → Firebase Crashlytics SDK (native crashes) ✅
-Kotlin Android → CrashlyticsLogger.android.kt → Firebase ✅
-Kotlin iOS → CrashlyticsLogger.ios.kt (no-op, logs only) ⏭️
-```
-
-**Why iOS Bridge Disabled**:
-
-Firebase iOS SDK requires Swift compatibility libraries that Kotlin/Native cannot provide during framework linking. Attempted solutions (static library, weak linking) fail with: `ld: library 'swiftCompatibility50' not found`.
+**Why Hybrid**: Swift/Kotlin/Native interop limitations prevent iOS shared code crash reporting.
 
 **What Gets Reported**:
 
-- ✅ **iOS native crashes** (Swift/ObjC) → Firebase Crashlytics
-- ✅ **Android Kotlin crashes** → Firebase Crashlytics
-- ⏭️ **iOS Kotlin crashes** → Local logs only (debuggable via Xcode console)
+- ✅ iOS native crashes (Swift/ObjC) → Firebase
+- ✅ Android Kotlin crashes → Firebase
+- ⏭️ iOS Kotlin crashes → Local logs only (rare - most logic is platform-specific)
 
-**Key Files**:
-
-- `shared/src/iosMain/kotlin/com/worldwidewaves/shared/utils/CrashlyticsLogger.ios.kt` - No-op implementation
-- `shared/src/androidMain/kotlin/com/worldwidewaves/shared/utils/CrashlyticsLogger.android.kt` - Full integration
-
-**Future Improvement Options**:
-
-- Swift package exposing C API (no Swift in headers)
-- XCFramework approach
-- Wait for Kotlin/Native Swift interop improvements
-
-**See**: `CrashlyticsLogger.ios.kt` file header for technical details
+**Architecture**: iOS uses Firebase SDK directly for native crashes. Android uses `CrashlyticsLogger.android.kt` for shared code. iOS shared code logs locally via `CrashlyticsLogger.ios.kt` (no-op).
 
 ---
 
@@ -878,31 +593,9 @@ rm -rf ~/Library/Developer/Xcode/DerivedData/worldwidewaves-*
 
 ### Automatic Temp File Cleanup
 
-iOS builds automatically clean up temporary files older than 2 days from `/var/folders/` to prevent disk space accumulation.
+iOS builds auto-clean Kotlin/Native temp files (>2 days old) from `/var/folders/` after `embedAndSignAppleFrameworkForXcode`.
 
-**What gets cleaned:**
-
-- Kotlin/Native compiler artifacts (`kotlin-daemon.*.log`)
-- Kotlin compiler temp directories (`org.jetbrains.kotlin/*`)
-
-**Cleanup behavior:**
-
-- Runs automatically after `embedAndSignAppleFrameworkForXcode`
-- Skips files newer than 2 days (safety threshold)
-- Skips in CI environments (GitHub Actions)
-- Logs cleanup summary (files deleted, space freed)
-
-**Opt-out:**
-
-```bash
-./gradlew :shared:embedAndSignAppleFrameworkForXcode -PskipTempCleanup=true
-```
-
-**Manual cleanup:**
-
-```bash
-./gradlew cleanupIOSTempFiles
-```
+**Opt-out**: `-PskipTempCleanup=true` | **Manual**: `./gradlew cleanupIOSTempFiles`
 
 ---
 
