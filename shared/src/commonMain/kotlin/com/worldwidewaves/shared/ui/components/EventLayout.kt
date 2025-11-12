@@ -21,7 +21,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -78,6 +82,9 @@ fun EventLayout(
     // Dependencies now resolved safely outside composition
 
     val eventState = rememberEventState(event, platform)
+
+    // Dialog state for join wave requirements
+    var showRequirementsDialog by remember { mutableStateOf(false) }
 
     // Stable coroutine scope for polygon preloading (iOS-safe, survives recomposition)
     val stableScope = rememberCoroutineScope()
@@ -143,6 +150,7 @@ fun EventLayout(
                         { eventId ->
                             onNavigateToWave(eventId)
                         },
+                    onDisabledClick = { showRequirementsDialog = true },
                     modifier = Modifier.align(Alignment.Center),
                 )
             }
@@ -192,6 +200,11 @@ fun EventLayout(
 
             // Optional additional content
             additionalContent()
+        }
+
+        // Show requirements dialog when inactive button is clicked
+        if (showRequirementsDialog) {
+            AlertJoinWaveRequirements { showRequirementsDialog = false }
         }
     }
 }

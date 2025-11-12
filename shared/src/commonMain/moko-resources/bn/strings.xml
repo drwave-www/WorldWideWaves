@@ -72,6 +72,10 @@
   <string name="simulation_map_required_title">মানচিত্র প্রয়োজন</string>
   <!-- src_hash: 49ca6797af107faee32f4363a3bcfdf5ed525424 -->
   <string name="simulation_map_required_message">সিমুলেশন শুরু করার আগে অনুগ্রহ করে মানচিত্রটি ডাউনলোড করুন।</string>
+  <!-- src_hash: b7966df39d0b0d56b762ede10929a6a53ed541cb -->
+  <string name="join_wave_requirements_title">শর্ত পূরণ হয়নি</string>
+  <!-- src_hash: 5144142f6af3b0a59d110c1e85045b48cc127ccf -->
+  <string name="join_wave_requirements_message">ওয়েভে যোগ দিতে হলে, আপনাকে ইভেন্টের নির্ধারিত তারিখে থাকতে হবে এবং ইভেন্টের ওয়েভ এলাকার ভেতরে অবস্থান করতে হবে। সিমুলেশন বিকল্পের জন্য FAQ দেখুন।</string>
   <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
   <string name="events_uninstall_map_title">ম্যাপ আনইনস্টল</string>
   <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->
@@ -286,10 +290,16 @@
   <string name="faq_question_6">ইভেন্টের সময় যাওয়ার জায়গা কোথায় খুঁজে পাব?</string>
   <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
   <string name="faq_answer_6">https://luma.com/worldwidewaves-এ প্রস্তাবিত পদক্ষেপ, কার্যক্রম ও জায়গাগুলোর তালিকা পাবেন।</string>
-  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
-  <string name="faq_question_7">কীভাবে ওয়েভ সিমুলেশন করব?</string>
-  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
-  <string name="faq_answer_7">নিচের বোতামটি ট্যাপ করে সিমুলেশন মোড সক্রিয় করুন। ইভেন্ট স্ক্রিনগুলোতে, লোকেশন ছবির বাম-উপরে থাকা "play" বোতামটি ব্যবহার করে এই ইভেন্টের বিবরণ (তারিখ, সময়, লোকেশন) অনুযায়ী একটি সিমুলেশন শুরু করুন। সিমুলেশন থামাতে একই বোতাম ট্যাপ করুন। শেষে, কাজ শেষ হলে, পার্সিস্টেন্ট লেয়ারের স্টপ আইকনে ট্যাপ করে সিমুলেশন মোড থেকে বেরিয়ে আসুন।</string>
+  <!-- src_hash: d0bb6707a0db5533bd124d75cd8d33687cd45fe1 -->
+  <string name="faq_question_7">আমার ডেটা কীভাবে সুরক্ষিত থাকে?</string>
+  <!-- src_hash: b8d87a2cb0ad6c86cfade1ca49d1cab907c74d06 -->
+  <string name="faq_answer_7">আপনার গোপনীয়তা আমাদের কাছে গুরুত্বপূর্ণ। WorldWideWaves গোপনীয়তাকে মাথায় রেখে ডিজাইন করা হয়েছে: আপনার অবস্থান কখনও স্থায়ীভাবে সংরক্ষণ করা হয় না বা অন্য কারও সাথে শেয়ার করা হয় না। আপনি কোনো ওয়েভে অংশ নেওয়ার সময় আমরা কেবল সাময়িকভাবে আপনার অবস্থান ব্যবহার করি, এবং আপনি অ্যাপটি বন্ধ করলে সেটি মুছে ফেলা হয়। আপনার ফেভারিট করা ইভেন্টগুলো কেবল আপনার ডিভাইসেই সংরক্ষিত থাকে। আমরা কীভাবে আপনার ডেটা সুরক্ষিত রাখি সে সম্পর্কে বিস্তারিত জানতে আমাদের গোপনীয়তা নীতি পড়ুন।</string>
+  <!-- src_hash: 894c596b1616cf1e18da988dffcb38aa8ad06e05 -->
+  <string name="faq_url_7">https://www.worldwidewaves.net/privacy</string>
+  <!-- src_hash: 675f62a9f110578d7d88207b3d2ec5971b63ed4c -->
+  <string name="faq_question_8">আমি কীভাবে একটি ওয়েভ সিমুলেট করতে পারি?</string>
+  <!-- src_hash: 43ab9fde770bd98024a26e2040843168dbfc23c0 -->
+  <string name="faq_answer_8">নিচের বোতামে ট্যাপ করে সিমুলেশন মোড চালু করুন। ইভেন্ট স্ক্রিনে, লোকেশন ছবির উপর-বাম কোণে থাকা "প্লে" বোতামটি ব্যবহার করে এই ইভেন্টের বৈশিষ্ট্য (তারিখ, সময়, লোকেশন) দিয়ে সিমুলেশন শুরু করুন। সিমুলেশন থামাতে একই বোতামে ট্যাপ করুন। শেষে, কাজ শেষ হলে স্থায়ী লেয়ারের স্টপ আইকনে ট্যাপ করে সিমুলেশন মোড থেকে বেরিয়ে আসুন।</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">যুক্তরাষ্ট্র</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

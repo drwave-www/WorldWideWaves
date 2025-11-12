@@ -65,6 +65,7 @@ fun ButtonWave(
     userHasBeenHit: Boolean,
     onNavigateToWave: WaveNavigator,
     modifier: Modifier = Modifier,
+    onDisabledClick: (() -> Unit)? = null,
     // iOS FIX: Clock dependency passed as parameter to prevent deadlock
     clock: IClock = getIosSafeClock(),
 ) {
@@ -115,8 +116,12 @@ fun ButtonWave(
                 .height(Event.WAVEBUTTON_HEIGHT.dp)
                 .alpha(if (shouldBlink) alpha else 1f) // Apply blinking only when shouldBlink
                 .focusIndicator()
-                .clickable(enabled = isEnabled, onClick = {
-                    onNavigateToWave.navigateToWave(eventId)
+                .clickable(onClick = {
+                    if (isEnabled) {
+                        onNavigateToWave.navigateToWave(eventId)
+                    } else {
+                        onDisabledClick?.invoke()
+                    }
                 })
                 .semantics {
                     role = Role.Button
