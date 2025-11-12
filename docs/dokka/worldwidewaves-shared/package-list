@@ -1403,6 +1403,13 @@ $dokka.location:com.worldwidewaves.shared.resources////PointingToDeclaration/wo
 $dokka.location:com.worldwidewaves.shared.resources//faq_contents/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.resources/faq_contents.html
 $dokka.location:com.worldwidewaves.shared.resources//infos_core/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.resources/infos_core.html
 $dokka.location:com.worldwidewaves.shared.resources//rules_hierarchy/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.resources/rules_hierarchy.html
+$dokka.location:com.worldwidewaves.shared.security////PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.security/index.html
+$dokka.location:com.worldwidewaves.shared.security/URLValidator.ValidationResult///PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.security/-u-r-l-validator/-validation-result/index.html
+$dokka.location:com.worldwidewaves.shared.security/URLValidator.ValidationResult/ValidationResult/#kotlin.Boolean#kotlin.String/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.security/-u-r-l-validator/-validation-result/-validation-result.html
+$dokka.location:com.worldwidewaves.shared.security/URLValidator.ValidationResult/isValid/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.security/-u-r-l-validator/-validation-result/is-valid.html
+$dokka.location:com.worldwidewaves.shared.security/URLValidator.ValidationResult/reason/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.security/-u-r-l-validator/-validation-result/reason.html
+$dokka.location:com.worldwidewaves.shared.security/URLValidator///PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.security/-u-r-l-validator/index.html
+$dokka.location:com.worldwidewaves.shared.security/URLValidator/validate/#kotlin.String/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.security/-u-r-l-validator/validate.html
 $dokka.location:com.worldwidewaves.shared.sound////PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.sound/index.html
 $dokka.location:com.worldwidewaves.shared.sound/AndroidSoundPlayer///PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.sound/-android-sound-player/index.html
 $dokka.location:com.worldwidewaves.shared.sound/AndroidSoundPlayer/AndroidSoundPlayer/#android.content.Context/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.sound/-android-sound-player/-android-sound-player.html
@@ -1655,7 +1662,7 @@ $dokka.location:com.worldwidewaves.shared.ui.components.permissions//platformGPS
 $dokka.location:com.worldwidewaves.shared.ui.components.permissions//platformOpenLocationSettings/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.components.permissions/platform-open-location-settings.html
 $dokka.location:com.worldwidewaves.shared.ui.components.permissions//platformRequestLocationPermission/#/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.components.permissions/platform-request-location-permission.html
 $dokka.location:com.worldwidewaves.shared.ui.components.shared////PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.components.shared/index.html
-$dokka.location:com.worldwidewaves.shared.ui.components.shared//ButtonWave/#kotlin.String#com.worldwidewaves.shared.events.IWWWEvent.Status#kotlin.time.Instant?#kotlin.Boolean#kotlin.Boolean#kotlin.Boolean#com.worldwidewaves.shared.ui.components.shared.WaveNavigator#androidx.compose.ui.Modifier#com.worldwidewaves.shared.events.utils.IClock/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.components.shared/-button-wave.html
+$dokka.location:com.worldwidewaves.shared.ui.components.shared//ButtonWave/#kotlin.String#com.worldwidewaves.shared.events.IWWWEvent.Status#kotlin.time.Instant?#kotlin.Boolean#kotlin.Boolean#kotlin.Boolean#com.worldwidewaves.shared.ui.components.shared.WaveNavigator#androidx.compose.ui.Modifier#kotlin.Function0[kotlin.Unit]?#com.worldwidewaves.shared.events.utils.IClock/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.components.shared/-button-wave.html
 $dokka.location:com.worldwidewaves.shared.ui.components.shared//MapActions/#com.worldwidewaves.shared.events.IWWWEvent#androidx.compose.ui.Modifier#kotlin.Function0[kotlin.Unit]#kotlin.Function0[kotlin.Unit]#kotlin.Boolean#kotlin.Boolean#com.worldwidewaves.shared.events.utils.IClock/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.components.shared/-map-actions.html
 $dokka.location:com.worldwidewaves.shared.ui.components.shared//SimulationButton/#com.worldwidewaves.shared.events.IWWWEvent#com.worldwidewaves.shared.map.MapFeatureState#kotlin.Function0[kotlin.Unit]#kotlin.Function1[kotlin.String,kotlin.Unit]#kotlin.Function1[kotlin.String,kotlin.Unit]#kotlin.Function2[kotlin.String,kotlin.String,kotlin.Unit]#androidx.compose.ui.Modifier#com.worldwidewaves.shared.WWWPlatform/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.components.shared/-simulation-button.html
 $dokka.location:com.worldwidewaves.shared.ui.components.shared/WaveNavigator///PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.components.shared/-wave-navigator/index.html
@@ -1671,6 +1678,7 @@ $dokka.location:com.worldwidewaves.shared.ui.components.wave//UserWaveStatusText
 $dokka.location:com.worldwidewaves.shared.ui.components.wave//WaveHitCounter/#com.worldwidewaves.shared.events.IWWWEvent#androidx.compose.ui.Modifier/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.components.wave/-wave-hit-counter.html
 $dokka.location:com.worldwidewaves.shared.ui.components.wave//WaveProgressionBar/#com.worldwidewaves.shared.events.IWWWEvent#androidx.compose.ui.Modifier/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.components.wave/-wave-progression-bar.html
 $dokka.location:com.worldwidewaves.shared.ui.components////PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.components/index.html
+$dokka.location:com.worldwidewaves.shared.ui.components//AlertJoinWaveRequirements/#kotlin.Function0[kotlin.Unit]/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.components/-alert-join-wave-requirements.html
 $dokka.location:com.worldwidewaves.shared.ui.components//AlertMapNotDownloadedOnSimulationLaunch/#kotlin.Function0[kotlin.Unit]/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.components/-alert-map-not-downloaded-on-simulation-launch.html
 $dokka.location:com.worldwidewaves.shared.ui.components//AlertMapUninstall/#kotlin.Function0[kotlin.Unit]#kotlin.Function0[kotlin.Unit]/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.components/-alert-map-uninstall.html
 $dokka.location:com.worldwidewaves.shared.ui.components//AutoResizeSingleLineText/#kotlin.String#androidx.compose.ui.text.TextStyle#androidx.compose.ui.Modifier#androidx.compose.ui.text.style.TextAlign/PointingToDeclaration/worldwidewaves-shared/com.worldwidewaves.shared.ui.components/-auto-resize-single-line-text.html
@@ -2324,6 +2332,7 @@ com.worldwidewaves.shared.map
 com.worldwidewaves.shared.notifications
 com.worldwidewaves.shared.position
 com.worldwidewaves.shared.resources
+com.worldwidewaves.shared.security
 com.worldwidewaves.shared.sound
 com.worldwidewaves.shared.test
 com.worldwidewaves.shared.testing
