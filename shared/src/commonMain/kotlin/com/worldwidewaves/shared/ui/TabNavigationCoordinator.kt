@@ -130,7 +130,7 @@ class TabNavigationCoordinator(
                                     showStartScreen = false
                                     currentTab = index
                                 },
-                        contentAlignment = Alignment.TopCenter,
+                        contentAlignment = Alignment.Center,
                     ) {
                         tabBarItem(currentTab == index, index, tab.name)
                     }
