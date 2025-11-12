@@ -371,6 +371,13 @@ private fun FAQItem(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary,
                         ),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .semantics {
+                                role = Role.Button
+                                contentDescription = "Start fast simulation"
+                            },
                 ) {
                     Text(
                         text = stringResource(MokoRes.strings.test_simulation_fast),
@@ -386,6 +393,13 @@ private fun FAQItem(
                             containerColor = MaterialTheme.colorScheme.secondary,
                             contentColor = MaterialTheme.colorScheme.onSecondary,
                         ),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .semantics {
+                                role = Role.Button
+                                contentDescription = "Start realistic simulation"
+                            },
                 ) {
                     Text(
                         text = stringResource(MokoRes.strings.test_simulation_realistic),
