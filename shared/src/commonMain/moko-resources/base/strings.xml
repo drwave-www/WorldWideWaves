@@ -53,8 +53,8 @@
     <string name="simulation_map_required_message">Please download the map first before starting the simulation.</string> <!-- Message telling user to download map before simulation -->
 
     <!-- Context: Dialog shown when user clicks inactive "Join the wave" button, Size: Medium -->
-    <string name="join_wave_requirements_title">Requirements Not Met</string> <!-- Title of the dialog explaining requirements to join the wave -->
-    <string name="join_wave_requirements_message">To join the wave, you must be on the date of the event and located within the event's wave area. Check the FAQ for simulation options.</string> <!-- Message explaining join requirements and simulation option -->
+    <string name="join_wave_requirements_title">Join the wave</string> <!-- Title of the dialog explaining requirements to join the wave -->
+    <string name="join_wave_requirements_message">The event must be happening now and you must be located within the event's wave area. Check the FAQ for simulation options.</string> <!-- Message explaining join requirements and simulation option -->
 
     <!-- Context: In the maps uninstall dialog after click of the user to the uninstall button on an already downloaded event, Size: Short -->
     <string name="events_uninstall_map_title">Uninstall Map</string> <!-- Title of the uninstall map confirmation dialog -->
