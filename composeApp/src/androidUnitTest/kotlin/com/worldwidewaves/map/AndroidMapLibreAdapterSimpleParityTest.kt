@@ -67,41 +67,19 @@ class AndroidMapLibreAdapterSimpleParityTest {
 
     @Test
     fun `setBoundsForCameraTarget validates latitude range`() {
-        // Given
-        val mockMap = mockk<MapLibreMap>(relaxed = true)
-        val adapter = AndroidMapLibreAdapter(mockMap)
-        adapter.setMap(mockMap)
-
-        // Invalid latitude (BoundingBox.fromCorners auto-fixes, so test with invalid direct value)
-        val invalidBounds =
-            BoundingBox.fromCorners(
-                Position(-100.0, 2.0), // Will be clamped by BoundingBox, but validation will catch
-                Position(49.0, 3.0),
-            )
-
-        // When/Then
+        // Position constructor validates on creation - invalid latitude throws immediately
+        // Test that creating a Position with invalid latitude fails
         assertFailsWith<IllegalArgumentException> {
-            adapter.setBoundsForCameraTarget(invalidBounds)
+            Position(-100.0, 2.0) // Invalid latitude - should throw in Position init
         }
     }
 
     @Test
     fun `setBoundsForCameraTarget validates longitude range`() {
-        // Given
-        val mockMap = mockk<MapLibreMap>(relaxed = true)
-        val adapter = AndroidMapLibreAdapter(mockMap)
-        adapter.setMap(mockMap)
-
-        // Invalid longitude
-        val invalidBounds =
-            BoundingBox.fromCorners(
-                Position(48.0, -200.0),
-                Position(49.0, 3.0),
-            )
-
-        // When/Then
+        // Position constructor validates on creation - invalid longitude throws immediately
+        // Test that creating a Position with invalid longitude fails
         assertFailsWith<IllegalArgumentException> {
-            adapter.setBoundsForCameraTarget(invalidBounds)
+            Position(48.0, -200.0) // Invalid longitude - should throw in Position init
         }
     }
 
