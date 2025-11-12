@@ -72,10 +72,10 @@
   <string name="simulation_map_required_title">ਨਕਸ਼ੇ ਦੀ ਲੋੜ ਹੈ</string>
   <!-- src_hash: 49ca6797af107faee32f4363a3bcfdf5ed525424 -->
   <string name="simulation_map_required_message">ਸਿਮੂਲੇਸ਼ਨ ਸ਼ੁਰੂ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਕਿਰਪਾ ਕਰਕੇ ਨਕਸ਼ਾ ਡਾਊਨਲੋਡ ਕਰੋ.</string>
-  <!-- src_hash: b7966df39d0b0d56b762ede10929a6a53ed541cb -->
-  <string name="join_wave_requirements_title">ਲੋੜਾਂ ਪੂਰੀਆਂ ਨਹੀਂ ਹਨ</string>
-  <!-- src_hash: 5144142f6af3b0a59d110c1e85045b48cc127ccf -->
-  <string name="join_wave_requirements_message">ਵੇਵ ਵਿੱਚ ਸ਼ਾਮਲ ਹੋਣ ਲਈ, ਤੁਹਾਨੂੰ ਸਮਾਗਮ ਵਾਲੇ ਦਿਨ ਮੌਜੂਦ ਹੋਣਾ ਅਤੇ ਸਮਾਗਮ ਦੇ ਵੇਵ-ਖੇਤਰ ਅੰਦਰ ਸਥਿਤ ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ। ਸਿਮੂਲੇਸ਼ਨ ਵਿਕਲਪਾਂ ਲਈ FAQ ਵੇਖੋ।</string>
+  <!-- src_hash: 1085a9a3a4b10ec62d42fb47f301adeb35cdb1c5 -->
+  <string name="join_wave_requirements_title">ਲਹਿਰ ਵਿੱਚ ਸ਼ਾਮਲ ਹੋਵੋ</string>
+  <!-- src_hash: 131c500a1a4325dc3f19475371d539f18c7d6253 -->
+  <string name="join_wave_requirements_message">ਇਵੈਂਟ ਇਸ ਵੇਲੇ ਚੱਲ ਰਿਹਾ ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ, ਅਤੇ ਤੁਸੀਂ ਇਵੈਂਟ ਦੇ ਲਹਿਰ ਖੇਤਰ ਦੇ ਅੰਦਰ ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ। ਸਿਮੂਲੇਸ਼ਨ ਦੇ ਵਿਕਲਪਾਂ ਲਈ FAQ ਵੇਖੋ।</string>
   <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
   <string name="events_uninstall_map_title">ਨਕਸ਼ਾ ਹਟਾਓ</string>
   <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->

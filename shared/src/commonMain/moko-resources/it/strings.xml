@@ -72,10 +72,10 @@
   <string name="simulation_map_required_title">Mappa necessaria</string>
   <!-- src_hash: 49ca6797af107faee32f4363a3bcfdf5ed525424 -->
   <string name="simulation_map_required_message">Scarica la mappa prima di avviare la simulazione.</string>
-  <!-- src_hash: b7966df39d0b0d56b762ede10929a6a53ed541cb -->
-  <string name="join_wave_requirements_title">Requisiti non soddisfatti</string>
-  <!-- src_hash: 5144142f6af3b0a59d110c1e85045b48cc127ccf -->
-  <string name="join_wave_requirements_message">Per unirti all'onda, puoi farlo solo il giorno dell'evento e se ti trovi all'interno dell'area dell'onda. Consulta le FAQ per le opzioni di simulazione.</string>
+  <!-- src_hash: 1085a9a3a4b10ec62d42fb47f301adeb35cdb1c5 -->
+  <string name="join_wave_requirements_title">Unisciti all'onda</string>
+  <!-- src_hash: 131c500a1a4325dc3f19475371d539f18c7d6253 -->
+  <string name="join_wave_requirements_message">L'evento deve essere in corso ora e devi trovarti all'interno dell'area dell'onda dell'evento. Consulta le FAQ per le opzioni di simulazione.</string>
   <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
   <string name="events_uninstall_map_title">Disinstalla mappa</string>
   <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->

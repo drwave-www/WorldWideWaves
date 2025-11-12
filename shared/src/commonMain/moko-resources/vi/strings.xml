@@ -72,10 +72,10 @@
   <string name="simulation_map_required_title">Cần bản đồ</string>
   <!-- src_hash: 49ca6797af107faee32f4363a3bcfdf5ed525424 -->
   <string name="simulation_map_required_message">Vui lòng tải bản đồ trước khi bắt đầu mô phỏng.</string>
-  <!-- src_hash: b7966df39d0b0d56b762ede10929a6a53ed541cb -->
-  <string name="join_wave_requirements_title">Chưa đủ điều kiện</string>
-  <!-- src_hash: 5144142f6af3b0a59d110c1e85045b48cc127ccf -->
-  <string name="join_wave_requirements_message">Để tham gia làn sóng, bạn phải vào đúng ngày diễn ra sự kiện và đang ở trong khu vực làn sóng của sự kiện. Xem mục Câu hỏi thường gặp (FAQ) để biết các tùy chọn mô phỏng.</string>
+  <!-- src_hash: 1085a9a3a4b10ec62d42fb47f301adeb35cdb1c5 -->
+  <string name="join_wave_requirements_title">Tham gia làn sóng</string>
+  <!-- src_hash: 131c500a1a4325dc3f19475371d539f18c7d6253 -->
+  <string name="join_wave_requirements_message">Sự kiện phải đang diễn ra và bạn phải ở trong khu vực làn sóng của sự kiện. Xem Câu hỏi thường gặp (FAQ) để biết các tùy chọn mô phỏng.</string>
   <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
   <string name="events_uninstall_map_title">Gỡ bản đồ</string>
   <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->

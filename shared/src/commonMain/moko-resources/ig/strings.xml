@@ -72,10 +72,10 @@
   <string name="simulation_map_required_title">Achọrọ map</string>
   <!-- src_hash: 49ca6797af107faee32f4363a3bcfdf5ed525424 -->
   <string name="simulation_map_required_message">Biko budata map mbụ tupu ịmalite nnwale.</string>
-  <!-- src_hash: b7966df39d0b0d56b762ede10929a6a53ed541cb -->
-  <string name="join_wave_requirements_title">Emeghịzuo ihe achọrọ</string>
-  <!-- src_hash: 5144142f6af3b0a59d110c1e85045b48cc127ccf -->
-  <string name="join_wave_requirements_message">Iji sonyere ebili, ị ga-abụrịrị n’ụbọchị mmemme ahụ ma dịkwa n’ime mpaghara ebili mmemme ahụ. Lelee FAQ maka nhọrọ nnwale.</string>
+  <!-- src_hash: 1085a9a3a4b10ec62d42fb47f301adeb35cdb1c5 -->
+  <string name="join_wave_requirements_title">Soro ebili</string>
+  <!-- src_hash: 131c500a1a4325dc3f19475371d539f18c7d6253 -->
+  <string name="join_wave_requirements_message">Mmemme a kwesiri ibu na-eme ugbu a, ma i kwesiri idi n'ime mpaghara ebili ya. Lelee FAQ maka nhoro simulashon.</string>
   <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
   <string name="events_uninstall_map_title">Wepụ Maapụ</string>
   <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->

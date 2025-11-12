@@ -72,10 +72,10 @@
   <string name="simulation_map_required_title">Mapa necessário</string>
   <!-- src_hash: 49ca6797af107faee32f4363a3bcfdf5ed525424 -->
   <string name="simulation_map_required_message">Por favor, transfira o mapa antes de iniciar a simulação.</string>
-  <!-- src_hash: b7966df39d0b0d56b762ede10929a6a53ed541cb -->
-  <string name="join_wave_requirements_title">Requisitos não cumpridos</string>
-  <!-- src_hash: 5144142f6af3b0a59d110c1e85045b48cc127ccf -->
-  <string name="join_wave_requirements_message">Para se juntar à onda, tem de ser o dia do evento e tem de estar dentro da zona da onda desse evento. Consulte as FAQ para opções de simulação.</string>
+  <!-- src_hash: 1085a9a3a4b10ec62d42fb47f301adeb35cdb1c5 -->
+  <string name="join_wave_requirements_title">Junta-te à onda</string>
+  <!-- src_hash: 131c500a1a4325dc3f19475371d539f18c7d6253 -->
+  <string name="join_wave_requirements_message">O evento tem de estar a decorrer agora e tens de estar dentro da zona da onda do evento. Consulta a FAQ para opções de simulação.</string>
   <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
   <string name="events_uninstall_map_title">Desinstalar mapa</string>
   <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->
