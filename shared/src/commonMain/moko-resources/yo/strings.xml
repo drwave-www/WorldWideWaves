@@ -72,6 +72,10 @@
   <string name="simulation_map_required_title">Maapu Ní Dandan</string>
   <!-- src_hash: 49ca6797af107faee32f4363a3bcfdf5ed525424 -->
   <string name="simulation_map_required_message">Jọ̀wọ́ kọ́kọ́ ṣe igbasilẹ maapu kí o tó bẹ̀rẹ̀ àfarawe.</string>
+  <!-- src_hash: b7966df39d0b0d56b762ede10929a6a53ed541cb -->
+  <string name="join_wave_requirements_title">Àwọn ìlànà dandan kò pé</string>
+  <!-- src_hash: 5144142f6af3b0a59d110c1e85045b48cc127ccf -->
+  <string name="join_wave_requirements_message">Láti darapọ mọ ìgbì, o gbọ́dọ̀ wà ní ọjọ́ ìṣẹ̀lẹ̀ náà, kí o sì wà nínú agbègbè ìgbì ìṣẹ̀lẹ̀ náà. Ṣàyẹwo FAQ fún àwọn àṣàyàn simulation.</string>
   <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
   <string name="events_uninstall_map_title">Yọ maapu kúrò</string>
   <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->
@@ -286,10 +290,16 @@
   <string name="faq_question_6">Níbo ni mo ti lè rí àwọn ibi láti lọ nígbà àwọn ìṣẹ̀lẹ̀?</string>
   <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
   <string name="faq_answer_6">O lè rí àkójọ àwọn ìgbésẹ̀, àwọn iṣẹ́-ṣe, àti àwọn ibi tí a daba ní https://luma.com/worldwidewaves.</string>
-  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
-  <string name="faq_question_7">Báwo ni mo ṣe lè ṣe àfọwọ́kọ ìgbì?</string>
-  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
-  <string name="faq_answer_7">Tẹ bọtìnì isalẹ lati muu ipo àfọwọ́kọ ṣiṣẹ. Lórí àwọn iboju ìṣẹ̀lẹ̀, lo bọtìnì "play" ní apá òkè òsí àwòrán ìpò láti bẹ̀rẹ̀ àfọwọ́kọ pẹ̀lú àwọn àbùdá ìṣẹ̀lẹ̀ yìí (ọjọ́, àsìkò, ibi). Láti dá àfọwọ́kọ dúró, tẹ bọtìnì kan náà. Ní ikẹhin, nígbà tí o bá parí, jáde kúrò ní ipo àfọwọ́kọ nipa títẹ aami ìdádúró lórí lẹ́yà tó ń farahàn nígbà gbogbo.</string>
+  <!-- src_hash: d0bb6707a0db5533bd124d75cd8d33687cd45fe1 -->
+  <string name="faq_question_7">Báwo ni a ṣe ń dáàbò bo dáta mi?</string>
+  <!-- src_hash: b8d87a2cb0ad6c86cfade1ca49d1cab907c74d06 -->
+  <string name="faq_answer_7">Àsírí rẹ ṣe pàtàkì fún wa. A ṣe àpẹrẹ WorldWideWaves pẹ̀lú àsírí ní ọkàn: ipò rẹ̀ kì í ṣe títẹ̀ sílẹ̀ pẹ́ tàbí pín pẹ̀lú ẹlòmíì. A kan lo ipò rẹ̀ lásìkò díẹ̀ nígbà tí o bá ń kópa ní ìgbì, a sì yọ ọ́ kúrò nígbà tí o bá ti pa app náà. Àwọn ìṣẹ̀lẹ̀ ayanfẹ́ rẹ̀ ni a tọju sílẹ̀ lórí ẹrọ rẹ̀ nìkan. Fún àlàyé kikún nípa bí a ṣe ń dáàbò bo dáta rẹ, jọ̀wọ́ ka Ilànà Àsírí wa.</string>
+  <!-- src_hash: 894c596b1616cf1e18da988dffcb38aa8ad06e05 -->
+  <string name="faq_url_7">https://www.worldwidewaves.net/privacy</string>
+  <!-- src_hash: 675f62a9f110578d7d88207b3d2ec5971b63ed4c -->
+  <string name="faq_question_8">Báwo ni mo ṣe lè ṣe simulation ìgbì?</string>
+  <!-- src_hash: 43ab9fde770bd98024a26e2040843168dbfc23c0 -->
+  <string name="faq_answer_8">Tẹ bọ́tìnì tó wà ní isalẹ láti mu ipo simulation ṣiṣẹ. Ní àwọn iboju ìṣẹ̀lẹ̀, lo bọ́tìnì "play" tó wà ní òkè-òsi àwòrán ipò láti bẹ̀rẹ̀ simulation pẹ̀lú àwọn ìtókasí ìṣẹ̀lẹ̀ yìí (ọjọ́, àsìkò, ipò). Láti dá simulation dúró, tẹ bọ́tìnì kan náà. Ní ìparí, nígbà tí o bá parí, jáde kúrò ní ipo simulation nípa títẹ aami stop lórí fẹlẹfẹlẹ tó ń hàn ní gbogbo ìgbà.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

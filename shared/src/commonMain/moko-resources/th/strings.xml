@@ -72,6 +72,10 @@
   <string name="simulation_map_required_title">ต้องใช้แผนที่</string>
   <!-- src_hash: 49ca6797af107faee32f4363a3bcfdf5ed525424 -->
   <string name="simulation_map_required_message">โปรดดาวน์โหลดแผนที่ก่อนเริ่มการจำลอง</string>
+  <!-- src_hash: b7966df39d0b0d56b762ede10929a6a53ed541cb -->
+  <string name="join_wave_requirements_title">ยังไม่ตรงตามข้อกำหนด</string>
+  <!-- src_hash: 5144142f6af3b0a59d110c1e85045b48cc127ccf -->
+  <string name="join_wave_requirements_message">หากต้องการเข้าร่วมเวฟ ต้องเป็นวันจัดงาน และคุณต้องอยู่ภายในพื้นที่เวฟของงาน ดูคำถามที่พบบ่อยเพื่อดูตัวเลือกการจำลอง</string>
   <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
   <string name="events_uninstall_map_title">ถอนการติดตั้งแผนที่</string>
   <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->
@@ -286,10 +290,16 @@
   <string name="faq_question_6">หาสถานที่ไปช่วงงานได้ที่ไหน?</string>
   <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
   <string name="faq_answer_6">ดูรายการแนวทาง กิจกรรม และสถานที่ได้ที่ https://luma.com/worldwidewaves.</string>
-  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
-  <string name="faq_question_7">จำลองคลื่นได้อย่างไร?</string>
-  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
-  <string name="faq_answer_7">แตะปุ่มด้านล่างเพื่อเปิดโหมดจำลอง บนหน้าจออีเวนต์ ให้ใช้ปุ่ม 'Play' ที่มุมซ้ายบนของภาพสถานที่เพื่อเริ่มการจำลองด้วยคุณสมบัติของอีเวนต์นี้ (วันที่ เวลา สถานที่) เมื่อต้องการหยุดการจำลอง ให้แตะปุ่มเดิม สุดท้าย เมื่อเสร็จแล้ว ให้ออกจากโหมดจำลองโดยแตะไอคอนหยุดบนแผงถาวรที่แสดงค้าง</string>
+  <!-- src_hash: d0bb6707a0db5533bd124d75cd8d33687cd45fe1 -->
+  <string name="faq_question_7">ข้อมูลของฉันได้รับการปกป้องอย่างไร?</string>
+  <!-- src_hash: b8d87a2cb0ad6c86cfade1ca49d1cab907c74d06 -->
+  <string name="faq_answer_7">เราให้ความสำคัญกับความเป็นส่วนตัวของคุณ WorldWideWaves ออกแบบโดยคำนึงถึงความเป็นส่วนตัว: ตำแหน่งของคุณจะไม่ถูกเก็บถาวรหรือแชร์ให้ผู้อื่น เราใช้ตำแหน่งของคุณเพียงชั่วคราวระหว่างที่คุณเข้าร่วมเวฟ และจะล้างข้อมูลเมื่อคุณปิดแอป อีเวนต์ที่คุณเพิ่มเป็นรายการโปรดจะถูกเก็บไว้เฉพาะบนอุปกรณ์ของคุณเท่านั้น สำหรับรายละเอียดทั้งหมดเกี่ยวกับการคุ้มครองข้อมูลของคุณ โปรดอ่านนโยบายความเป็นส่วนตัวของเรา.</string>
+  <!-- src_hash: 894c596b1616cf1e18da988dffcb38aa8ad06e05 -->
+  <string name="faq_url_7">https://www.worldwidewaves.net/privacy</string>
+  <!-- src_hash: 675f62a9f110578d7d88207b3d2ec5971b63ed4c -->
+  <string name="faq_question_8">ฉันจะจำลองเวฟได้อย่างไร?</string>
+  <!-- src_hash: 43ab9fde770bd98024a26e2040843168dbfc23c0 -->
+  <string name="faq_answer_8">แตะปุ่มด้านล่างเพื่อเปิดโหมดจำลอง บนหน้าจองาน ใช้ปุ่ม "เล่น" ที่มุมซ้ายบนของภาพสถานที่เพื่อเริ่มการจำลองตามคุณสมบัติของงานนี้ (วันที่ เวลา สถานที่) หากต้องการหยุดการจำลอง ให้กดปุ่มเดิม เมื่อเสร็จแล้ว ให้ออกจากโหมดจำลองโดยแตะไอคอนหยุดบนแถบลอยค้างหน้าจอ.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">สหรัฐอเมริกา</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

@@ -72,6 +72,10 @@
   <string name="simulation_map_required_title">マップが必要です</string>
   <!-- src_hash: 49ca6797af107faee32f4363a3bcfdf5ed525424 -->
   <string name="simulation_map_required_message">シミュレーションを開始する前に、まずマップをダウンロードしてください。</string>
+  <!-- src_hash: b7966df39d0b0d56b762ede10929a6a53ed541cb -->
+  <string name="join_wave_requirements_title">参加要件を満たしていません</string>
+  <!-- src_hash: 5144142f6af3b0a59d110c1e85045b48cc127ccf -->
+  <string name="join_wave_requirements_message">ウェーブに参加するには、イベント開催日にイベントのウェーブエリア内にいる必要があります。シミュレーションの方法はFAQをご確認ください。</string>
   <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
   <string name="events_uninstall_map_title">マップをアンインストール</string>
   <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->
@@ -286,10 +290,16 @@
   <string name="faq_question_6">イベント中に行ける場所はどこで探せますか？</string>
   <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
   <string name="faq_answer_6">https://luma.com/worldwidewaves で提案されているアクション、アクティビティ、場所の一覧を確認できます。</string>
-  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
-  <string name="faq_question_7">ウェーブをシミュレーションするには？</string>
-  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
-  <string name="faq_answer_7">下のボタンをタップしてシミュレーションモードを有効にします。イベント画面では、ロケーション画像の左上にある「再生」ボタンをタップして、このイベントの設定（日付、時刻、場所）でシミュレーションを開始します。停止するには同じボタンをタップします。最後に、終わったら、常時表示のレイヤーにある停止アイコンをタップしてシミュレーションモードを終了します。</string>
+  <!-- src_hash: d0bb6707a0db5533bd124d75cd8d33687cd45fe1 -->
+  <string name="faq_question_7">私のデータはどのように保護されていますか？</string>
+  <!-- src_hash: b8d87a2cb0ad6c86cfade1ca49d1cab907c74d06 -->
+  <string name="faq_answer_7">あなたのプライバシーは私たちにとって大切です。WorldWideWaves はプライバシーを考慮して設計されており、位置情報を恒久的に保存したり、他の人と共有したりすることはありません。位置情報はウェーブ参加中のみ一時的に使用し、アプリを閉じると消去されます。お気に入りにしたイベントはデバイス内にのみ保存されます。データ保護の詳細はプライバシーポリシーをご覧ください。</string>
+  <!-- src_hash: 894c596b1616cf1e18da988dffcb38aa8ad06e05 -->
+  <string name="faq_url_7">https://www.worldwidewaves.net/privacy</string>
+  <!-- src_hash: 675f62a9f110578d7d88207b3d2ec5971b63ed4c -->
+  <string name="faq_question_8">ウェーブはどのようにシミュレーションできますか？</string>
+  <!-- src_hash: 43ab9fde770bd98024a26e2040843168dbfc23c0 -->
+  <string name="faq_answer_8">下のボタンをタップしてシミュレーションモードを有効にします。イベント画面では、場所の画像の左上にある「再生」ボタンを使って、このイベントの設定（日付・時刻・場所）でシミュレーションを開始できます。停止するには同じボタンを押します。最後に、終わったら常時表示のレイヤーの停止アイコンをタップしてシミュレーションモードを終了します。</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">米国</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

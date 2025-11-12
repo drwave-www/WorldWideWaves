@@ -72,6 +72,10 @@
   <string name="simulation_map_required_title">मानचित्र आवश्यक</string>
   <!-- src_hash: 49ca6797af107faee32f4363a3bcfdf5ed525424 -->
   <string name="simulation_map_required_message">कृपया सिमुलेशन शुरू करने से पहले मानचित्र डाउनलोड करें.</string>
+  <!-- src_hash: b7966df39d0b0d56b762ede10929a6a53ed541cb -->
+  <string name="join_wave_requirements_title">आवश्यकताएँ पूरी नहीं हुईं</string>
+  <!-- src_hash: 5144142f6af3b0a59d110c1e85045b48cc127ccf -->
+  <string name="join_wave_requirements_message">वेव में शामिल होने के लिए, आपको इवेंट वाले दिन और इवेंट के वेव क्षेत्र के भीतर मौजूद होना चाहिए। सिमुलेशन विकल्पों के लिए FAQ देखें.</string>
   <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
   <string name="events_uninstall_map_title">मानचित्र अनइंस्टॉल करें</string>
   <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->
@@ -286,10 +290,16 @@
   <string name="faq_question_6">इवेंट्स के दौरान जाने के स्थान कहाँ मिलेंगे?</string>
   <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
   <string name="faq_answer_6">प्रस्तावित कार्रवाइयों, गतिविधियों और स्थानों की सूची आपको https://luma.com/worldwidewaves पर मिलेगी.</string>
-  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
-  <string name="faq_question_7">मैं वेव का सिमुलेशन कैसे करूँ?</string>
-  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
-  <string name="faq_answer_7">सिमुलेशन मोड सक्रिय करने के लिए नीचे दिए गए बटन पर टैप करें। इवेंट स्क्रीन पर, स्थान की छवि के ऊपर-बाएँ मौजूद "play" बटन से इस इवेंट के विवरण (तारीख, समय, स्थान) के साथ सिमुलेशन शुरू करें। सिमुलेशन रोकने के लिए वही बटन टैप करें। अंत में, जब आप तैयार हों, स्थायी परत पर दिए stop आइकन को टैप करके सिमुलेशन मोड से बाहर निकलें.</string>
+  <!-- src_hash: d0bb6707a0db5533bd124d75cd8d33687cd45fe1 -->
+  <string name="faq_question_7">मेरा डेटा कैसे सुरक्षित रखा जाता है?</string>
+  <!-- src_hash: b8d87a2cb0ad6c86cfade1ca49d1cab907c74d06 -->
+  <string name="faq_answer_7">आपकी गोपनीयता हमारे लिए महत्वपूर्ण है। WorldWideWaves को गोपनीयता को ध्यान में रखकर बनाया गया है: आपका स्थान कभी स्थायी रूप से संग्रहीत नहीं किया जाता और न ही दूसरों के साथ साझा किया जाता है। हम आपका स्थान केवल तब तक अस्थायी रूप से उपयोग करते हैं जब आप किसी वेव में भाग ले रहे होते हैं, और ऐप बंद करते ही उसे हटा दिया जाता है। आपके पसंदीदा इवेंट केवल आपके डिवाइस पर संग्रहीत रहते हैं। हम आपका डेटा कैसे सुरक्षित रखते हैं, इसकी पूरी जानकारी के लिए हमारी गोपनीयता नीति पढ़ें.</string>
+  <!-- src_hash: 894c596b1616cf1e18da988dffcb38aa8ad06e05 -->
+  <string name="faq_url_7">https://www.worldwidewaves.net/privacy</string>
+  <!-- src_hash: 675f62a9f110578d7d88207b3d2ec5971b63ed4c -->
+  <string name="faq_question_8">मैं वेव का सिमुलेशन कैसे करूँ?</string>
+  <!-- src_hash: 43ab9fde770bd98024a26e2040843168dbfc23c0 -->
+  <string name="faq_answer_8">सिमुलेशन मोड सक्रिय करने के लिए नीचे दिए गए बटन पर टैप करें। इवेंट स्क्रीन पर, इस इवेंट की तारीख, समय और स्थान के साथ सिमुलेशन शुरू करने के लिए स्थान की छवि के बाएँ-ऊपरी कोने में मौजूद "play" बटन का उपयोग करें। सिमुलेशन रोकने के लिए, वही बटन दबाएँ। अंत में, काम पूरा होने पर, स्थायी लेयर पर स्टॉप आइकन पर टैप करके सिमुलेशन मोड से बाहर निकलें.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

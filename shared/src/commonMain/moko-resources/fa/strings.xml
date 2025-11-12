@@ -72,6 +72,10 @@
   <string name="simulation_map_required_title">نیاز به نقشه</string>
   <!-- src_hash: 49ca6797af107faee32f4363a3bcfdf5ed525424 -->
   <string name="simulation_map_required_message">لطفاً پیش از شروع شبیه‌سازی، نقشه را دانلود کنید.</string>
+  <!-- src_hash: b7966df39d0b0d56b762ede10929a6a53ed541cb -->
+  <string name="join_wave_requirements_title">شرایط لازم فراهم نیست</string>
+  <!-- src_hash: 5144142f6af3b0a59d110c1e85045b48cc127ccf -->
+  <string name="join_wave_requirements_message">برای پیوستن به موج، باید در زمان برگزاری رویداد و در محدودهٔ موج آن قرار داشته باشید. برای گزینه‌های شبیه‌سازی، بخش پرسش‌های متداول را ببینید.</string>
   <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
   <string name="events_uninstall_map_title">حذف نقشه</string>
   <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->
@@ -286,10 +290,16 @@
   <string name="faq_question_6">کجا می‌توانم در زمان رویدادها مکان‌هایی برای رفتن پیدا کنم؟</string>
   <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
   <string name="faq_answer_6">فهرست اقدام‌ها، فعالیت‌ها و مکان‌های پیشنهادی را در https://luma.com/worldwidewaves پیدا می‌کنید.</string>
-  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
-  <string name="faq_question_7">چطور می‌توانم یک موج را شبیه‌سازی کنم؟</string>
-  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
-  <string name="faq_answer_7">برای فعال‌کردن حالت شبیه‌سازی، دکمهٔ زیر را بزنید. در صفحه‌های رویداد، برای آغاز شبیه‌سازی با ویژگی‌های همین رویداد (تاریخ، زمان، مکان)، دکمهٔ «پخش» در بالا-چپ تصویر مکان را بزنید. برای توقف شبیه‌سازی، همان دکمه را بزنید. در نهایت، وقتی کارتان تمام شد، با زدن آیکون توقف در نوار ثابت، از حالت شبیه‌سازی خارج شوید.</string>
+  <!-- src_hash: d0bb6707a0db5533bd124d75cd8d33687cd45fe1 -->
+  <string name="faq_question_7">چگونه از داده‌های من محافظت می‌شود؟</string>
+  <!-- src_hash: b8d87a2cb0ad6c86cfade1ca49d1cab907c74d06 -->
+  <string name="faq_answer_7">حریم خصوصی شما برای ما مهم است. WorldWideWaves با درنظرگرفتن حریم خصوصی طراحی شده است: موقعیت مکانی شما هرگز به‌صورت دائمی ذخیره نمی‌شود و با دیگران به اشتراک گذاشته نمی‌شود. ما فقط هنگام شرکت شما در یک موج، موقعیت مکانی‌تان را به‌طور موقت استفاده می‌کنیم و با بستن برنامه پاک می‌شود. رویدادهای موردعلاقه‌تان فقط روی دستگاه شما ذخیره می‌شوند. برای جزئیات کامل دربارهٔ نحوهٔ محافظت از داده‌هایتان، لطفاً سیاست حریم خصوصی ما را بخوانید.</string>
+  <!-- src_hash: 894c596b1616cf1e18da988dffcb38aa8ad06e05 -->
+  <string name="faq_url_7">https://www.worldwidewaves.net/privacy</string>
+  <!-- src_hash: 675f62a9f110578d7d88207b3d2ec5971b63ed4c -->
+  <string name="faq_question_8">چطور می‌توانم یک موج را شبیه‌سازی کنم؟</string>
+  <!-- src_hash: 43ab9fde770bd98024a26e2040843168dbfc23c0 -->
+  <string name="faq_answer_8">برای فعال کردن حالت شبیه‌سازی، دکمهٔ زیر را بزنید. در صفحهٔ رویداد، برای شروع شبیه‌سازی با ویژگی‌های این رویداد (تاریخ، زمان، مکان)، از دکمهٔ «play» در بالای سمت چپِ تصویر مکان استفاده کنید. برای توقف شبیه‌سازی، همان دکمه را بزنید. در نهایت، پس از اتمام کار، با زدن آیکن توقف روی نوار ثابت، از حالت شبیه‌سازی خارج شوید.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">آمریکا</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

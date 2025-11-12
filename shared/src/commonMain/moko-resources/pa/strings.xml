@@ -72,6 +72,10 @@
   <string name="simulation_map_required_title">ਨਕਸ਼ੇ ਦੀ ਲੋੜ ਹੈ</string>
   <!-- src_hash: 49ca6797af107faee32f4363a3bcfdf5ed525424 -->
   <string name="simulation_map_required_message">ਸਿਮੂਲੇਸ਼ਨ ਸ਼ੁਰੂ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਕਿਰਪਾ ਕਰਕੇ ਨਕਸ਼ਾ ਡਾਊਨਲੋਡ ਕਰੋ.</string>
+  <!-- src_hash: b7966df39d0b0d56b762ede10929a6a53ed541cb -->
+  <string name="join_wave_requirements_title">ਲੋੜਾਂ ਪੂਰੀਆਂ ਨਹੀਂ ਹਨ</string>
+  <!-- src_hash: 5144142f6af3b0a59d110c1e85045b48cc127ccf -->
+  <string name="join_wave_requirements_message">ਵੇਵ ਵਿੱਚ ਸ਼ਾਮਲ ਹੋਣ ਲਈ, ਤੁਹਾਨੂੰ ਸਮਾਗਮ ਵਾਲੇ ਦਿਨ ਮੌਜੂਦ ਹੋਣਾ ਅਤੇ ਸਮਾਗਮ ਦੇ ਵੇਵ-ਖੇਤਰ ਅੰਦਰ ਸਥਿਤ ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ। ਸਿਮੂਲੇਸ਼ਨ ਵਿਕਲਪਾਂ ਲਈ FAQ ਵੇਖੋ।</string>
   <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
   <string name="events_uninstall_map_title">ਨਕਸ਼ਾ ਹਟਾਓ</string>
   <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->
@@ -286,10 +290,16 @@
   <string name="faq_question_6">ਇਵੈਂਟਾਂ ਦੌਰਾਨ ਜਾਣ ਲਈ ਥਾਵਾਂ ਕਿੱਥੇ ਲੱਭ ਸਕਦੇ ਹਾਂ?</string>
   <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
   <string name="faq_answer_6">ਤੁਸੀਂ ਸੁਝਾਈਆਂ ਕਾਰਵਾਈਆਂ, ਗਤੀਵਿਧੀਆਂ ਅਤੇ ਥਾਵਾਂ ਦੀ ਸੂਚੀ https://luma.com/worldwidewaves ‘ਤੇ ਲੱਭ ਸਕਦੇ ਹੋ।</string>
-  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
-  <string name="faq_question_7">ਲਹਿਰ ਦੀ ਸਿਮੂਲੇਸ਼ਨ ਕਿਵੇਂ ਕਰੀਏ?</string>
-  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
-  <string name="faq_answer_7">ਹੇਠਾਂ ਦਿੱਤੇ ਬਟਨ 'ਤੇ ਟੈਪ ਕਰਕੇ ਸਿਮੂਲੇਸ਼ਨ ਮੋਡ ਚਾਲੂ ਕਰੋ। ਈਵੈਂਟ ਸਕ੍ਰੀਨਾਂ 'ਤੇ, ਸਥਾਨ ਦੀ ਤਸਵੀਰ ਦੇ ਉੱਪਰ-ਖੱਬੇ ਮੌਜੂਦ "ਚਲਾਓ" ਬਟਨ ਨਾਲ ਇਸ ਈਵੈਂਟ ਦੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ (ਤਾਰੀਖ, ਸਮਾਂ, ਸਥਾਨ) ਅਨੁਸਾਰ ਸਿਮੂਲੇਸ਼ਨ ਸ਼ੁਰੂ ਕਰੋ। ਸਿਮੂਲੇਸ਼ਨ ਰੋਕਣ ਲਈ, ਉਹੀ ਬਟਨ ਦਬਾਓ। ਅੰਤ ਵਿੱਚ, ਕੰਮ ਮੁੱਕਣ 'ਤੇ, ਸਥਾਈ ਲੇਅਰ ਉੱਤੇ ਸਟਾਪ ਆਈਕਨ 'ਤੇ ਟੈਪ ਕਰਕੇ ਸਿਮੂਲੇਸ਼ਨ ਮੋਡ ਤੋਂ ਬਾਹਰ ਆ ਜਾਓ।</string>
+  <!-- src_hash: d0bb6707a0db5533bd124d75cd8d33687cd45fe1 -->
+  <string name="faq_question_7">ਮੇਰਾ ਡਾਟਾ ਕਿਵੇਂ ਸੁਰੱਖਿਅਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ?</string>
+  <!-- src_hash: b8d87a2cb0ad6c86cfade1ca49d1cab907c74d06 -->
+  <string name="faq_answer_7">ਤੁਹਾਡੀ ਗੋਪਨੀਯਤਾ ਸਾਡੇ ਲਈ ਮਹੱਤਵਪੂਰਨ ਹੈ। WorldWideWaves ਗੋਪਨੀਯਤਾ ਨੂੰ ਧਿਆਨ ਵਿੱਚ ਰੱਖ ਕੇ ਤਿਆਰ ਕੀਤਾ ਗਿਆ ਹੈ: ਤੁਹਾਡੀ ਲੋਕੇਸ਼ਨ ਕਦੇ ਵੀ ਸਥਾਈ ਤੌਰ ’ਤੇ ਸਾਂਭੀ ਨਹੀਂ ਜਾਂਦੀ ਅਤੇ ਨਾ ਹੀ ਹੋਰਨਾਂ ਨਾਲ ਸਾਂਝੀ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। ਅਸੀਂ ਤੁਹਾਡੀ ਲੋਕੇਸ਼ਨ ਸਿਰਫ਼ ਉਸ ਵੇਲੇ ਅਸਥਾਈ ਤੌਰ ’ਤੇ ਵਰਤਦੇ ਹਾਂ ਜਦੋਂ ਤੁਸੀਂ ਕਿਸੇ ਵੇਵ ਵਿੱਚ ਹਿੱਸਾ ਲੈ ਰਹੇ ਹੋ, ਅਤੇ ਐਪ ਬੰਦ ਕਰਨ ’ਤੇ ਇਹ ਮਿਟਾ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। ਤੁਹਾਡੇ ਮਨਪਸੰਦ ਕੀਤੇ ਸਮਾਗਮ ਸਿਰਫ਼ ਤੁਹਾਡੇ ਡਿਵਾਈਸ ’ਤੇ ਹੀ ਸੰਭਾਲੇ ਜਾਂਦੇ ਹਨ। ਅਸੀਂ ਤੁਹਾਡਾ ਡਾਟਾ ਕਿਵੇਂ ਸੁਰੱਖਿਅਤ ਕਰਦੇ ਹਾਂ, ਇਸ ਬਾਰੇ ਪੂਰੀ ਜਾਣਕਾਰੀ ਲਈ ਕਿਰਪਾ ਕਰਕੇ ਸਾਡੀ ਗੋਪਨੀਯਤਾ ਨੀਤੀ ਪੜ੍ਹੋ।</string>
+  <!-- src_hash: 894c596b1616cf1e18da988dffcb38aa8ad06e05 -->
+  <string name="faq_url_7">https://www.worldwidewaves.net/privacy</string>
+  <!-- src_hash: 675f62a9f110578d7d88207b3d2ec5971b63ed4c -->
+  <string name="faq_question_8">ਮੈਂ ਵੇਵ ਦੀ ਸਿਮੂਲੇਸ਼ਨ ਕਿਵੇਂ ਕਰਾਂ?</string>
+  <!-- src_hash: 43ab9fde770bd98024a26e2040843168dbfc23c0 -->
+  <string name="faq_answer_8">ਹੇਠਾਂ ਦਿੱਤਾ ਬਟਨ ਟੈਪ ਕਰਕੇ ਸਿਮੂਲੇਸ਼ਨ ਮੋਡ ਚਾਲੂ ਕਰੋ। ਸਮਾਗਮ ਸਕ੍ਰੀਨਾਂ ’ਤੇ, ਸਥਾਨ ਦੀ ਤਸਵੀਰ ਦੇ ਖੱਬੇ-ਉੱਪਰ ਵਾਲੇ "play" ਬਟਨ ਨਾਲ ਇਸ ਸਮਾਗਮ ਦੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ (ਤਾਰੀਖ, ਸਮਾਂ, ਲੋਕੇਸ਼ਨ) ਨਾਲ ਸਿਮੂਲੇਸ਼ਨ ਸ਼ੁਰੂ ਕਰੋ। ਸਿਮੂਲੇਸ਼ਨ ਰੋਕਣ ਲਈ, ਇਹੀ ਬਟਨ ਦਬਾਓ। ਅਖੀਰ ਵਿੱਚ, ਜਦੋਂ ਤੁਸੀਂ ਮੁਕਾ ਲੈ ਲਓ, ਸਦਾ-ਦਿੱਖਦੇ ਲੇਅਰ ’ਤੇ ਸਟਾਪ ਆਇਕਨ ’ਤੇ ਟੈਪ ਕਰਕੇ ਸਿਮੂਲੇਸ਼ਨ ਮੋਡ ਤੋਂ ਬਾਹਰ ਆ ਜਾਓ।</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

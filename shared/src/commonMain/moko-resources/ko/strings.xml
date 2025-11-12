@@ -72,6 +72,10 @@
   <string name="simulation_map_required_title">지도가 필요합니다</string>
   <!-- src_hash: 49ca6797af107faee32f4363a3bcfdf5ed525424 -->
   <string name="simulation_map_required_message">시뮬레이션을 시작하기 전에 먼저 지도를 다운로드하세요.</string>
+  <!-- src_hash: b7966df39d0b0d56b762ede10929a6a53ed541cb -->
+  <string name="join_wave_requirements_title">참여 요건 미충족</string>
+  <!-- src_hash: 5144142f6af3b0a59d110c1e85045b48cc127ccf -->
+  <string name="join_wave_requirements_message">이벤트 당일에 해당 이벤트의 웨이브 구역 내에 있어야 웨이브에 참여할 수 있습니다. 시뮬레이션 방법은 FAQ에서 확인하세요.</string>
   <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
   <string name="events_uninstall_map_title">지도 제거</string>
   <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->
@@ -286,10 +290,16 @@
   <string name="faq_question_6">행사 때 갈 곳은 어디에서 찾을 수 있나요?</string>
   <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
   <string name="faq_answer_6">https://luma.com/worldwidewaves 에서 제안된 행동, 활동, 장소 목록을 확인할 수 있습니다.</string>
-  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
-  <string name="faq_question_7">웨이브를 어떻게 시뮬레이션하나요?</string>
-  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
-  <string name="faq_answer_7">아래 버튼을 눌러 시뮬레이션 모드를 활성화하세요. 이벤트 화면에서 위치 이미지의 왼쪽 상단에 있는 재생 버튼으로 이 이벤트의 설정(날짜, 시간, 위치)으로 시뮬레이션을 시작하세요. 시뮬레이션을 중지하려면 같은 버튼을 누르세요. 마지막으로, 완료되면 항상 표시되는 오버레이의 정지 아이콘을 눌러 시뮬레이션 모드를 종료하세요.</string>
+  <!-- src_hash: d0bb6707a0db5533bd124d75cd8d33687cd45fe1 -->
+  <string name="faq_question_7">내 데이터는 어떻게 보호되나요?</string>
+  <!-- src_hash: b8d87a2cb0ad6c86cfade1ca49d1cab907c74d06 -->
+  <string name="faq_answer_7">개인정보 보호는 저희에게 중요합니다. WorldWideWaves는 개인정보를 염두에 두고 설계되었으며, 사용자의 위치 정보는 영구 보관하거나 다른 사람과 공유하지 않습니다. 위치 정보는 웨이브에 참여하는 동안에만 일시적으로 사용되고, 앱을 닫으면 지워집니다. 즐겨찾기한 이벤트는 기기에만 저장됩니다. 데이터를 어떻게 보호하는지에 대한 자세한 내용은 개인정보처리방침을 확인하세요.</string>
+  <!-- src_hash: 894c596b1616cf1e18da988dffcb38aa8ad06e05 -->
+  <string name="faq_url_7">https://www.worldwidewaves.net/privacy</string>
+  <!-- src_hash: 675f62a9f110578d7d88207b3d2ec5971b63ed4c -->
+  <string name="faq_question_8">웨이브를 어떻게 시뮬레이션하나요?</string>
+  <!-- src_hash: 43ab9fde770bd98024a26e2040843168dbfc23c0 -->
+  <string name="faq_answer_8">아래 버튼을 눌러 시뮬레이션 모드를 활성화하세요. 이벤트 화면에서 위치 이미지 왼쪽 상단의 "play" 버튼을 눌러 이 이벤트의 속성(날짜, 시간, 위치)으로 시뮬레이션을 시작하세요. 시뮬레이션을 중지하려면 같은 버튼을 누르세요. 마지막으로, 완료했다면 상시 표시 영역의 중지 아이콘을 눌러 시뮬레이션 모드를 종료하세요.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">미국</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

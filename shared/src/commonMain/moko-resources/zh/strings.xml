@@ -72,6 +72,10 @@
   <string name="simulation_map_required_title">需要地图</string>
   <!-- src_hash: 49ca6797af107faee32f4363a3bcfdf5ed525424 -->
   <string name="simulation_map_required_message">请先下载地图再开始模拟。</string>
+  <!-- src_hash: b7966df39d0b0d56b762ede10929a6a53ed541cb -->
+  <string name="join_wave_requirements_title">条件未满足</string>
+  <!-- src_hash: 5144142f6af3b0a59d110c1e85045b48cc127ccf -->
+  <string name="join_wave_requirements_message">要加入人浪，你需要在活动当天且位于该活动的人浪区域内。请查看常见问题，了解模拟选项。</string>
   <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
   <string name="events_uninstall_map_title">卸载地图</string>
   <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->
@@ -286,10 +290,16 @@
   <string name="faq_question_6">在哪里可以找到活动期间可去的地点？</string>
   <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
   <string name="faq_answer_6">你可以在 https://luma.com/worldwidewaves 查看建议的行动、活动与地点列表。</string>
-  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
-  <string name="faq_question_7">如何模拟一场人浪？</string>
-  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
-  <string name="faq_answer_7">点击下方按钮启用模拟模式。在活动界面，使用地点图片左上角的“播放”按钮，按该活动的日期、时间和地点启动模拟。要停止模拟，再次点击同一按钮。最后完成后，点击常驻浮层上的停止图标以退出模拟模式。</string>
+  <!-- src_hash: d0bb6707a0db5533bd124d75cd8d33687cd45fe1 -->
+  <string name="faq_question_7">我的数据如何得到保护？</string>
+  <!-- src_hash: b8d87a2cb0ad6c86cfade1ca49d1cab907c74d06 -->
+  <string name="faq_answer_7">我们重视你的隐私。WorldWideWaves 在设计之初即考虑隐私：你的位置信息不会被永久存储，也不会与他人共享。我们只会在你参与人浪时临时使用位置；当你关闭应用时，这些信息会被清除。你收藏的活动只保存在你的设备上。有关我们如何保护你的数据的完整说明，请查阅我们的隐私政策。</string>
+  <!-- src_hash: 894c596b1616cf1e18da988dffcb38aa8ad06e05 -->
+  <string name="faq_url_7">https://www.worldwidewaves.net/privacy</string>
+  <!-- src_hash: 675f62a9f110578d7d88207b3d2ec5971b63ed4c -->
+  <string name="faq_question_8">如何模拟人浪？</string>
+  <!-- src_hash: 43ab9fde770bd98024a26e2040843168dbfc23c0 -->
+  <string name="faq_answer_8">点击下方按钮开启模拟模式。在活动页面，使用地点图片左上角的“播放”按钮，以该活动的属性（日期、时间、地点）开始模拟。要停止模拟，再次点击同一按钮。最后，完成后点击常驻浮层上的停止图标以退出模拟模式。</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">美国</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

@@ -72,6 +72,10 @@
   <string name="simulation_map_required_title">Hartă necesară</string>
   <!-- src_hash: 49ca6797af107faee32f4363a3bcfdf5ed525424 -->
   <string name="simulation_map_required_message">Te rugăm să descarci mai întâi harta înainte de a porni simularea.</string>
+  <!-- src_hash: b7966df39d0b0d56b762ede10929a6a53ed541cb -->
+  <string name="join_wave_requirements_title">Cerințe neîndeplinite</string>
+  <!-- src_hash: 5144142f6af3b0a59d110c1e85045b48cc127ccf -->
+  <string name="join_wave_requirements_message">Pentru a te alătura valului, trebuie să fie ziua evenimentului și să te afli în zona valului din cadrul evenimentului. Consultă secțiunea Întrebări frecvente (FAQ) pentru opțiuni de simulare.</string>
   <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
   <string name="events_uninstall_map_title">Dezinstalează harta</string>
   <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->
@@ -286,10 +290,16 @@
   <string name="faq_question_6">Unde găsesc locuri în care să merg în timpul evenimentelor?</string>
   <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
   <string name="faq_answer_6">Găsești o listă de acțiuni, activități și locuri propuse pe https://luma.com/worldwidewaves.</string>
-  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
-  <string name="faq_question_7">Cum pot simula un val?</string>
-  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
-  <string name="faq_answer_7">Apasă butonul de mai jos pentru a activa modul de simulare. Pe ecranele evenimentului, folosește butonul "play" din colțul din stânga sus al imaginii locației pentru a porni o simulare cu parametrii acestui eveniment (data, ora, locația). Pentru a opri simularea, apasă același buton. În final, când ai terminat, ieși din modul de simulare apăsând pictograma "stop" de pe stratul persistent.</string>
+  <!-- src_hash: d0bb6707a0db5533bd124d75cd8d33687cd45fe1 -->
+  <string name="faq_question_7">Cum îmi sunt protejate datele?</string>
+  <!-- src_hash: b8d87a2cb0ad6c86cfade1ca49d1cab907c74d06 -->
+  <string name="faq_answer_7">Confidențialitatea ta este importantă pentru noi. WorldWideWaves este concepută având în vedere confidențialitatea: locația ta nu este niciodată stocată permanent și nu este partajată cu alții. Îți folosim locația doar temporar, cât timp participi la un val, iar aceasta se șterge când închizi aplicația. Evenimentele marcate ca favorite sunt stocate doar pe dispozitivul tău. Pentru detalii complete despre cum îți protejăm datele, te rugăm să citești Politica de confidențialitate.</string>
+  <!-- src_hash: 894c596b1616cf1e18da988dffcb38aa8ad06e05 -->
+  <string name="faq_url_7">https://www.worldwidewaves.net/privacy</string>
+  <!-- src_hash: 675f62a9f110578d7d88207b3d2ec5971b63ed4c -->
+  <string name="faq_question_8">Cum pot simula un val?</string>
+  <!-- src_hash: 43ab9fde770bd98024a26e2040843168dbfc23c0 -->
+  <string name="faq_answer_8">Atinge butonul de mai jos pentru a activa modul de simulare. Pe ecranele evenimentului, folosește butonul „play” din colțul stânga sus al imaginii locației pentru a porni o simulare cu proprietățile acestui eveniment (data, ora, locația). Pentru a opri simularea, atinge același buton. La final, când ai terminat, ieși din modul de simulare atingând pictograma de oprire de pe stratul persistent.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">SUA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

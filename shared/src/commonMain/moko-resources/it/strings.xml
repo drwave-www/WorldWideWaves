@@ -72,6 +72,10 @@
   <string name="simulation_map_required_title">Mappa necessaria</string>
   <!-- src_hash: 49ca6797af107faee32f4363a3bcfdf5ed525424 -->
   <string name="simulation_map_required_message">Scarica la mappa prima di avviare la simulazione.</string>
+  <!-- src_hash: b7966df39d0b0d56b762ede10929a6a53ed541cb -->
+  <string name="join_wave_requirements_title">Requisiti non soddisfatti</string>
+  <!-- src_hash: 5144142f6af3b0a59d110c1e85045b48cc127ccf -->
+  <string name="join_wave_requirements_message">Per unirti all'onda, puoi farlo solo il giorno dell'evento e se ti trovi all'interno dell'area dell'onda. Consulta le FAQ per le opzioni di simulazione.</string>
   <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
   <string name="events_uninstall_map_title">Disinstalla mappa</string>
   <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->
@@ -286,10 +290,16 @@
   <string name="faq_question_6">Dove trovo luoghi in cui andare durante gli eventi?</string>
   <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
   <string name="faq_answer_6">Trovi un elenco di azioni, attività e luoghi proposti su https://luma.com/worldwidewaves.</string>
-  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
-  <string name="faq_question_7">Come posso simulare un’onda?</string>
-  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
-  <string name="faq_answer_7">Tocca il pulsante qui sotto per attivare la modalità simulazione. Nelle schermate dell'evento, usa il pulsante "play" in alto a sinistra sull'immagine del luogo per avviare una simulazione con le proprietà di questo evento (data, ora, luogo). Per interrompere la simulazione, tocca lo stesso pulsante. Infine, quando hai finito, esci dalla modalità simulazione toccando l'icona "stop" sul livello persistente.</string>
+  <!-- src_hash: d0bb6707a0db5533bd124d75cd8d33687cd45fe1 -->
+  <string name="faq_question_7">Come sono protetti i miei dati?</string>
+  <!-- src_hash: b8d87a2cb0ad6c86cfade1ca49d1cab907c74d06 -->
+  <string name="faq_answer_7">La tua privacy è importante per noi. WorldWideWaves è progettata con la privacy al centro: la tua posizione non viene mai memorizzata in modo permanente né condivisa con altri. Utilizziamo la tua posizione solo temporaneamente mentre partecipi a un'onda e viene cancellata quando chiudi l'app. Gli eventi che hai aggiunto ai preferiti sono salvati solo sul tuo dispositivo. Per tutti i dettagli su come proteggiamo i tuoi dati, leggi la nostra Informativa sulla privacy.</string>
+  <!-- src_hash: 894c596b1616cf1e18da988dffcb38aa8ad06e05 -->
+  <string name="faq_url_7">https://www.worldwidewaves.net/privacy</string>
+  <!-- src_hash: 675f62a9f110578d7d88207b3d2ec5971b63ed4c -->
+  <string name="faq_question_8">Come posso simulare un'onda?</string>
+  <!-- src_hash: 43ab9fde770bd98024a26e2040843168dbfc23c0 -->
+  <string name="faq_answer_8">Tocca il pulsante qui sotto per attivare la modalità simulazione. Nelle schermate dell'evento, usa il pulsante "play" in alto a sinistra sull'immagine del luogo per avviare una simulazione con le proprietà di questo evento (data, ora, posizione). Per interrompere la simulazione, premi lo stesso pulsante. Infine, quando hai finito, esci dalla modalità simulazione toccando l'icona di stop sulla barra persistente.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">USA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

@@ -72,6 +72,10 @@
   <string name="simulation_map_required_title">Kaart vereist</string>
   <!-- src_hash: 49ca6797af107faee32f4363a3bcfdf5ed525424 -->
   <string name="simulation_map_required_message">Download eerst de kaart voordat je de simulatie start.</string>
+  <!-- src_hash: b7966df39d0b0d56b762ede10929a6a53ed541cb -->
+  <string name="join_wave_requirements_title">Vereisten niet voldaan</string>
+  <!-- src_hash: 5144142f6af3b0a59d110c1e85045b48cc127ccf -->
+  <string name="join_wave_requirements_message">Om aan de wave mee te doen, moet je op de datum van het evenement binnen het wavegebied zijn. Bekijk de FAQ voor simulatie-opties.</string>
   <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
   <string name="events_uninstall_map_title">Kaart verwijderen</string>
   <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->
@@ -286,10 +290,16 @@
   <string name="faq_question_6">Waar vind ik plekken om tijdens de evenementen naartoe te gaan?</string>
   <!-- src_hash: b5dd6c276654e3a074f4ceb21852e38823a7a817 -->
   <string name="faq_answer_6">Je vindt een lijst met voorgestelde acties, activiteiten en plekken op https://luma.com/worldwidewaves.</string>
-  <!-- src_hash: d0bb7b27c6d7e187566ea62a5726d64de5978a51 -->
-  <string name="faq_question_7">Hoe kan ik een wave simuleren?</string>
-  <!-- src_hash: f3ec3189f3962c54b93ee9be95ebe7df40d5b1ca -->
-  <string name="faq_answer_7">Tik op de knop hieronder om de simulatiemodus te activeren. Op de schermen van het evenement gebruik je de "play"-knop linksboven op de locatieafbeelding om een simulatie te starten met de eigenschappen van dit evenement (datum, tijd, locatie). Om de simulatie te stoppen, druk je op dezelfde knop. Als je klaar bent, schakel je de simulatiemodus uit door op het stop-icoon in de vaste balk te tikken.</string>
+  <!-- src_hash: d0bb6707a0db5533bd124d75cd8d33687cd45fe1 -->
+  <string name="faq_question_7">Hoe worden mijn gegevens beschermd?</string>
+  <!-- src_hash: b8d87a2cb0ad6c86cfade1ca49d1cab907c74d06 -->
+  <string name="faq_answer_7">Je privacy is belangrijk voor ons. WorldWideWaves is met privacy in gedachten ontworpen: je locatie wordt nooit permanent opgeslagen of met anderen gedeeld. We gebruiken je locatie alleen tijdelijk terwijl je aan een wave meedoet, en die wordt gewist wanneer je de app sluit. Je favoriete evenementen worden alleen op je apparaat opgeslagen. Lees voor volledige details over hoe we je gegevens beschermen ons Privacybeleid.</string>
+  <!-- src_hash: 894c596b1616cf1e18da988dffcb38aa8ad06e05 -->
+  <string name="faq_url_7">https://www.worldwidewaves.net/privacy</string>
+  <!-- src_hash: 675f62a9f110578d7d88207b3d2ec5971b63ed4c -->
+  <string name="faq_question_8">Hoe simuleer ik een wave?</string>
+  <!-- src_hash: 43ab9fde770bd98024a26e2040843168dbfc23c0 -->
+  <string name="faq_answer_8">Tik op de knop hieronder om de simulatiemodus te activeren. Op de schermen van een evenement gebruik je de knop "play" linksboven op de locatieafbeelding om een simulatie te starten met de eigenschappen van dat evenement (datum, tijd, locatie). Om de simulatie te stoppen, druk je op dezelfde knop. Ben je klaar, verlaat dan de simulatiemodus door op het stop-pictogram op de permanente laag te tikken.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">VS</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
