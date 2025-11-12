@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.events.utils.Position.Companion.nextId
 
 // ----------------------------------------------------------------------------
@@ -28,6 +29,12 @@ import com.worldwidewaves.shared.events.utils.Position.Companion.nextId
 /**
  * Represents a geographic position with latitude and longitude coordinates.
  *
+ * Coordinates are validated to ensure they fall within valid geographic bounds:
+ * - Latitude must be within [-90.0, 90.0]
+ * - Longitude must be within [-180.0, 180.0]
+ * - Neither coordinate can be NaN or Infinity
+ *
+ * @throws IllegalArgumentException if coordinates are invalid
  */
 open class Position(
     val lat: Double,
@@ -35,6 +42,28 @@ open class Position(
     internal var prev: Position? = null,
     internal var next: Position? = null,
 ) {
+    init {
+        // Validate latitude is within valid range [-90, 90]
+        require(lat in WWWGlobals.Geodetic.MIN_LATITUDE..WWWGlobals.Geodetic.MAX_LATITUDE) {
+            "Invalid latitude: $lat (must be between ${WWWGlobals.Geodetic.MIN_LATITUDE} and ${WWWGlobals.Geodetic.MAX_LATITUDE})"
+        }
+
+        // Validate longitude is within valid range [-180, 180]
+        require(lng in WWWGlobals.Geodetic.MIN_LONGITUDE..WWWGlobals.Geodetic.MAX_LONGITUDE) {
+            "Invalid longitude: $lng (must be between ${WWWGlobals.Geodetic.MIN_LONGITUDE} and ${WWWGlobals.Geodetic.MAX_LONGITUDE})"
+        }
+
+        // Validate coordinates are not NaN
+        require(!lat.isNaN() && !lng.isNaN()) {
+            "Invalid coordinates: lat=$lat, lng=$lng (coordinates cannot be NaN)"
+        }
+
+        // Validate coordinates are finite (not Infinity)
+        require(lat.isFinite() && lng.isFinite()) {
+            "Invalid coordinates: lat=$lat, lng=$lng (coordinates must be finite)"
+        }
+    }
+
     companion object {
         internal var nextId = 42
     }

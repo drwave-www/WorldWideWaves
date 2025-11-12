@@ -163,7 +163,8 @@ fun AboutFaqScreen(
                     answer,
                     expandedFaqItem,
                     onExpand = { expandedFaqItem = it },
-                    showSimulateButtons = (question == MokoRes.strings.faq_question_7),
+                    showSimulateButtons = (question == MokoRes.strings.faq_question_8), // Simulation is now question 8
+                    showPrivacyPolicyLink = (question == MokoRes.strings.faq_question_7), // Privacy policy is question 7
                     onSimulateClick = onSimulateClick,
                     onUrlOpen = onUrlOpen,
                 )
@@ -296,6 +297,7 @@ private fun FAQItem(
     expandedFaqItem: Int,
     onExpand: (Int) -> Unit,
     showSimulateButtons: Boolean = false,
+    showPrivacyPolicyLink: Boolean = false,
     onSimulateClick: (speed: Int) -> Unit,
     onUrlOpen: (String) -> Unit,
 ) {
@@ -334,6 +336,31 @@ private fun FAQItem(
                         contentDescription = "FAQ answer with clickable links"
                     },
             )
+            if (showPrivacyPolicyLink) {
+                Spacer(modifier = Modifier.size(Dimensions.SPACER_MEDIUM.dp))
+                // Privacy Policy button
+                val privacyPolicyUrl = stringResource(MokoRes.strings.faq_url_7)
+                Button(
+                    onClick = { onUrlOpen(privacyPolicyUrl) },
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                        ),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .semantics {
+                                role = Role.Button
+                                contentDescription = "Open Privacy Policy"
+                            },
+                ) {
+                    Text(
+                        text = "Read Privacy Policy",
+                        style = sharedCommonBoldStyle(FAQ.RULE_QUESTION_FONTSIZE),
+                    )
+                }
+            }
             if (showSimulateButtons) {
                 Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
                 // Fast simulation button (50 m/s - default)

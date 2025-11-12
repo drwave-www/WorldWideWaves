@@ -33,6 +33,7 @@ import com.worldwidewaves.activities.event.EventActivity
 import com.worldwidewaves.activities.event.EventFullMapActivity
 import com.worldwidewaves.activities.event.WaveActivity
 import com.worldwidewaves.shared.PlatformEnabler
+import com.worldwidewaves.shared.security.URLValidator
 import com.worldwidewaves.shared.utils.Log
 import org.koin.mp.KoinPlatform
 
@@ -95,12 +96,24 @@ class AndroidPlatformEnabler(
 
     override fun openUrl(url: String) {
         try {
+            // Validate URL for security (prevent intent redirection, XSS, etc.)
+            val validationResult = URLValidator.validate(url)
+            if (!validationResult.isValid) {
+                Log.e(
+                    "AndroidPlatformEnabler",
+                    "URL validation failed: ${validationResult.reason}. URL: $url",
+                )
+                toast("Cannot open link: ${validationResult.reason}")
+                return
+            }
+
             val context: Context = context ?: KoinPlatform.getKoin().get()
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         } catch (e: Exception) {
             Log.e("AndroidPlatformEnabler", "Failed to open URL: $url", throwable = e)
+            toast("Cannot open link")
         }
     }
 }

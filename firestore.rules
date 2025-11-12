@@ -1,0 +1,96 @@
+// Firebase Firestore Security Rules for WorldWideWaves
+// Version: 1.0
+// Last Updated: 2025-01-12
+//
+// SECURITY POLICY:
+// - All data is public read-only by default
+// - No client writes allowed (admin-only via Firebase Admin SDK)
+// - Events and wave data are managed server-side
+// - No user authentication required (ephemeral app design)
+//
+// DEPLOYMENT:
+// Deploy these rules using: firebase deploy --only firestore:rules
+// Verify in Firebase Console: Firestore Database → Rules
+//
+// TESTING:
+// Test rules using Firebase Emulator Suite:
+// firebase emulators:start
+// firebase emulators:exec --project=your-project 'npm test'
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ==========================================================================
+    // DEFAULT RULE: Deny All Access
+    // ==========================================================================
+    // All paths not explicitly allowed below are denied.
+    // This is a security best practice: deny by default, allow explicitly.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ==========================================================================
+    // EVENTS COLLECTION: Public Read-Only
+    // ==========================================================================
+    // Event definitions (name, location, time, choreography) are public data
+    // that all users need to access to participate in waves.
+    //
+    // Read: Allowed for all users (no authentication required)
+    // Write: Denied (events are created/updated via Firebase Admin SDK only)
+    //
+    // Example document path: /events/newyork_2025
+    //
+    // Security rationale:
+    // - Events are public by design (shared human experience)
+    // - Write access restricted to prevent event tampering
+    // - No user-generated content stored here
+    match /events/{eventId} {
+      allow read: if true;   // Public read access
+      allow write: if false;  // Admin-only writes
+    }
+
+    // ==========================================================================
+    // CHOREOGRAPHIES COLLECTION: Public Read-Only
+    // ==========================================================================
+    // Wave choreography definitions (timing, positions, patterns) are public
+    // data referenced by events.
+    //
+    // Read: Allowed for all users
+    // Write: Denied (choreographies managed via Firebase Admin SDK)
+    //
+    // Example document path: /choreographies/linear_wave
+    //
+    // Security rationale:
+    // - Choreographies are public reference data
+    // - Write access restricted to maintain data integrity
+    match /choreographies/{choreographyId} {
+      allow read: if true;   // Public read access
+      allow write: if false;  // Admin-only writes
+    }
+
+    // ==========================================================================
+    // FUTURE: USER-SPECIFIC DATA (Not Currently Used)
+    // ==========================================================================
+    // If user accounts and favorites are added in future versions:
+    //
+    // match /users/{userId}/favorites/{eventId} {
+    //   // Allow users to read/write only their own favorites
+    //   allow read, write: if request.auth != null && request.auth.uid == userId;
+    // }
+    //
+    // match /users/{userId}/settings/{settingId} {
+    //   // Allow users to read/write only their own settings
+    //   allow read, write: if request.auth != null && request.auth.uid == userId;
+    // }
+
+    // ==========================================================================
+    // ANALYTICS COLLECTION: No Client Access
+    // ==========================================================================
+    // If analytics data is stored in Firestore (not recommended - use Firebase Analytics):
+    //
+    // match /analytics/{document=**} {
+    //   allow read, write: if false;  // Admin-only access
+    // }
+  }
+}

@@ -111,6 +111,15 @@ final class IOSPlatformEnabler: PlatformEnabler {
 
     func openUrl(url: String) {
         WWWLog.i(tag, "openUrl(url=\(url))")
+
+        // Validate URL for security (prevent intent redirection, XSS, etc.)
+        let validationResult = URLValidator.shared.validate(url: url)
+        if !validationResult.isValid {
+            WWWLog.e(tag, "URL validation failed: \(validationResult.reason). URL: \(url)")
+            toast(message: "Cannot open link: \(validationResult.reason)")
+            return
+        }
+
         guard let targetUrl = URL(string: url) else {
             WWWLog.e(tag, "openUrl: invalid URL string")
             return

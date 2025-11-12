@@ -27,9 +27,17 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
-    <!-- TODO: SECURITY REVIEW NEEDED: Remove this permission if offline-first design is complete
-         This permission allows network access which could impact user privacy.
-         Consider: 1) Remove if maps are fully offline, 2) Add network security config if needed -->
+    <!-- REQUIRED: Internet permission for Firebase services.
+         Network Security Config (res/xml/network_security_config.xml) enforces HTTPS-only connections.
+
+         Firebase services requiring network access:
+         - Firebase Analytics: User analytics and app diagnostics
+         - Firebase Crashlytics: Crash reporting for stability improvements
+         - Firebase Remote Config: Runtime log level configuration
+         - Firebase Storage: Event choreographies and metadata downloads
+
+         Note: Offline map tiles are delivered via Play Store dynamic feature modules, NOT downloaded at runtime.
+         This permission cannot be removed without breaking Firebase functionality. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- Required for Firebase Analytics to function properly -->

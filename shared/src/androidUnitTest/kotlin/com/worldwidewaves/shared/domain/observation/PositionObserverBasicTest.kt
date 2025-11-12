@@ -29,6 +29,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -83,21 +84,48 @@ class PositionObserverBasicTest {
     }
 
     @Test
-    fun `isValidPosition returns false for invalid coordinates`() {
-        val invalidPositions =
-            listOf(
-                Position(91.0, 0.0), // Latitude too high
-                Position(-91.0, 0.0), // Latitude too low
-                Position(0.0, 181.0), // Longitude too high
-                Position(0.0, -181.0), // Longitude too low
-                Position(Double.NaN, 0.0), // NaN latitude
-                Position(0.0, Double.NaN), // NaN longitude
-                Position(Double.POSITIVE_INFINITY, 0.0), // Infinite latitude
-                Position(0.0, Double.NEGATIVE_INFINITY), // Infinite longitude
-            )
+    fun `Position constructor rejects invalid coordinates`() {
+        // Position now validates coordinates in constructor and throws IllegalArgumentException
+        // Test that all invalid coordinates are rejected
 
-        invalidPositions.forEach { position ->
-            assertFalse(observer.isValidPosition(position), "Position $position should be invalid")
+        // Latitude too high
+        assertFailsWith<IllegalArgumentException> {
+            Position(91.0, 0.0)
+        }
+
+        // Latitude too low
+        assertFailsWith<IllegalArgumentException> {
+            Position(-91.0, 0.0)
+        }
+
+        // Longitude too high
+        assertFailsWith<IllegalArgumentException> {
+            Position(0.0, 181.0)
+        }
+
+        // Longitude too low
+        assertFailsWith<IllegalArgumentException> {
+            Position(0.0, -181.0)
+        }
+
+        // NaN latitude
+        assertFailsWith<IllegalArgumentException> {
+            Position(Double.NaN, 0.0)
+        }
+
+        // NaN longitude
+        assertFailsWith<IllegalArgumentException> {
+            Position(0.0, Double.NaN)
+        }
+
+        // Infinite latitude
+        assertFailsWith<IllegalArgumentException> {
+            Position(Double.POSITIVE_INFINITY, 0.0)
+        }
+
+        // Infinite longitude
+        assertFailsWith<IllegalArgumentException> {
+            Position(0.0, Double.NEGATIVE_INFINITY)
         }
     }
 
@@ -111,15 +139,20 @@ class PositionObserverBasicTest {
     }
 
     @Test
-    fun `calculateDistance returns infinity for invalid coordinates`() {
-        val validPosition = Position(40.7128, -74.0060)
-        val invalidPosition = Position(Double.NaN, -74.0060)
+    fun `calculateDistance works correctly for valid coordinates`() {
+        // Position now validates coordinates, so we test with valid coordinates only
+        val newYork = Position(40.7128, -74.0060)
+        val london = Position(51.5074, -0.1278)
 
-        val distance1 = observer.calculateDistance(validPosition, invalidPosition)
-        val distance2 = observer.calculateDistance(invalidPosition, validPosition)
+        val distance = observer.calculateDistance(newYork, london)
 
-        assertEquals(Double.POSITIVE_INFINITY, distance1)
-        assertEquals(Double.POSITIVE_INFINITY, distance2)
+        // Distance should be positive, finite, and reasonable for trans-Atlantic distance
+        // (between 3000 km and 20000 km = 3,000,000 to 20,000,000 meters)
+        assertTrue(
+            distance > 3_000_000.0 && distance < 20_000_000.0,
+            "Distance should be a reasonable trans-Atlantic distance, got $distance meters",
+        )
+        assertTrue(distance.isFinite() && !distance.isNaN(), "Distance should be finite and not NaN")
     }
 
     @Test

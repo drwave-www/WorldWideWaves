@@ -126,11 +126,56 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     // MARK: - Private Route Helpers
 
+    /// Validates an event ID parameter from a deep link.
+    ///
+    /// ## Purpose
+    /// Prevents security vulnerabilities by validating event ID format before routing.
+    /// Protects against:
+    /// - SQL injection attempts
+    /// - Path traversal attacks
+    /// - XSS injection via malformed IDs
+    /// - Buffer overflow with extremely long IDs
+    ///
+    /// ## Valid Format
+    /// Event IDs must:
+    /// - Be non-empty
+    /// - Contain only alphanumeric characters, hyphens, and underscores
+    /// - Be between 1-50 characters long
+    ///
+    /// ## Examples
+    /// - Valid: "newyork_2025", "paris-wave", "tokyo123"
+    /// - Invalid: "../../../etc", "<script>alert()</script>", "a" * 1000
+    ///
+    /// - Parameter id: The event ID to validate
+    /// - Returns: true if ID is valid, false otherwise
+    private func isValidEventId(_ id: String) -> Bool {
+        // Check length (prevent DoS with extremely long IDs)
+        guard id.count >= 1 && id.count <= 50 else {
+            return false
+        }
+
+        // Check format: alphanumeric, hyphens, and underscores only
+        let validPattern = "^[a-zA-Z0-9_-]+$"
+        guard let regex = try? NSRegularExpression(pattern: validPattern),
+              regex.firstMatch(in: id, range: NSRange(id.startIndex..., in: id)) != nil else {
+            return false
+        }
+
+        return true
+    }
+
     private func makeEventViewController(id: String?) -> UIViewController? {
         guard let id = id else {
             WWWLog.e(tag, "event route missing id")
             return nil
         }
+
+        // Validate ID format for security
+        guard isValidEventId(id) else {
+            WWWLog.e(tag, "event route has invalid id format: \(id)")
+            return nil
+        }
+
         do {
             let viewController = try RootControllerKt.makeEventViewController(eventId: id)
             WWWLog.i(tag, "routed -> EventViewController(id=\(id))")
@@ -146,6 +191,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             WWWLog.e(tag, "wave route missing id")
             return nil
         }
+
+        // Validate ID format for security
+        guard isValidEventId(id) else {
+            WWWLog.e(tag, "wave route has invalid id format: \(id)")
+            return nil
+        }
+
         do {
             let viewController = try RootControllerKt.makeWaveViewController(eventId: id)
             WWWLog.i(tag, "routed -> WaveViewController(id=\(id))")
@@ -161,6 +213,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             WWWLog.e(tag, "full map route missing id")
             return nil
         }
+
+        // Validate ID format for security
+        guard isValidEventId(id) else {
+            WWWLog.e(tag, "full map route has invalid id format: \(id)")
+            return nil
+        }
+
         do {
             let viewController = try RootControllerKt.makeFullMapViewController(eventId: id)
             WWWLog.i(tag, "routed -> FullMapViewController(id=\(id))")

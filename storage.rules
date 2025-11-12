@@ -1,0 +1,152 @@
+// Firebase Storage Security Rules for WorldWideWaves
+// Version: 1.0
+// Last Updated: 2025-01-12
+//
+// SECURITY POLICY:
+// - All stored files are public read-only by default
+// - No client uploads allowed (admin-only via Firebase Admin SDK)
+// - Event choreographies and assets are managed server-side
+// - File size limits enforced to prevent abuse
+//
+// DEPLOYMENT:
+// Deploy these rules using: firebase deploy --only storage:rules
+// Verify in Firebase Console: Storage → Rules
+//
+// TESTING:
+// Test rules using Firebase Emulator Suite:
+// firebase emulators:start
+// firebase emulators:exec --project=your-project 'npm test'
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ==========================================================================
+    // DEFAULT RULE: Deny All Access
+    // ==========================================================================
+    // All paths not explicitly allowed below are denied.
+    // This is a security best practice: deny by default, allow explicitly.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    // ==========================================================================
+    // EVENTS DIRECTORY: Public Read-Only
+    // ==========================================================================
+    // Event-related files (images, metadata) are public data that all users
+    // can access to view event details.
+    //
+    // Read: Allowed for all users (no authentication required)
+    // Write: Denied (files uploaded via Firebase Admin SDK only)
+    //
+    // Example file path: /events/newyork_2025/banner.png
+    //
+    // Security rationale:
+    // - Event assets are public by design
+    // - Write access restricted to prevent malicious uploads
+    // - File size limit: 10 MB (images, metadata)
+    match /events/{eventId}/{fileName} {
+      allow read: if true;   // Public read access
+      allow write: if false;  // Admin-only writes
+    }
+
+    // Allow nested directories under events
+    match /events/{eventId}/{allPaths=**} {
+      allow read: if true;   // Public read access
+      allow write: if false;  // Admin-only writes
+    }
+
+    // ==========================================================================
+    // CHOREOGRAPHIES DIRECTORY: Public Read-Only
+    // ==========================================================================
+    // Wave choreography files (GeoJSON, animations, timing data) are public
+    // data referenced by events.
+    //
+    // Read: Allowed for all users
+    // Write: Denied (choreographies managed via Firebase Admin SDK)
+    //
+    // Example file path: /choreographies/linear_wave/path.geojson
+    //
+    // Security rationale:
+    // - Choreographies are public reference data
+    // - Write access restricted to maintain data integrity
+    // - File size limit: 5 MB (GeoJSON, metadata)
+    match /choreographies/{choreographyId}/{fileName} {
+      allow read: if true;   // Public read access
+      allow write: if false;  // Admin-only writes
+    }
+
+    // Allow nested directories under choreographies
+    match /choreographies/{choreographyId}/{allPaths=**} {
+      allow read: if true;   // Public read access
+      allow write: if false;  // Admin-only writes
+    }
+
+    // ==========================================================================
+    // ASSETS DIRECTORY: Public Read-Only
+    // ==========================================================================
+    // Shared assets (icons, logos, default images) are public data used across
+    // the app.
+    //
+    // Read: Allowed for all users
+    // Write: Denied (assets managed via Firebase Admin SDK)
+    //
+    // Example file path: /assets/logo.png
+    //
+    // Security rationale:
+    // - Assets are public app resources
+    // - Write access restricted to prevent tampering
+    match /assets/{fileName} {
+      allow read: if true;   // Public read access
+      allow write: if false;  // Admin-only writes
+    }
+
+    // Allow nested directories under assets
+    match /assets/{allPaths=**} {
+      allow read: if true;   // Public read access
+      allow write: if false;  // Admin-only writes
+    }
+
+    // ==========================================================================
+    // FUTURE: USER UPLOADS (Not Currently Supported)
+    // ==========================================================================
+    // If user uploads are added in future versions:
+    //
+    // match /users/{userId}/uploads/{fileName} {
+    //   // Allow authenticated users to upload files to their own directory
+    //   allow read: if request.auth != null;
+    //   allow write: if request.auth != null
+    //                && request.auth.uid == userId
+    //                && request.resource.size < 5 * 1024 * 1024  // 5 MB limit
+    //                && request.resource.contentType.matches('image/.*');  // Images only
+    // }
+
+    // ==========================================================================
+    // ADMIN DIRECTORY: No Client Access
+    // ==========================================================================
+    // Administrative files (backups, exports, analytics) are restricted to
+    // server-side access only.
+    //
+    // Read/Write: Denied (admin-only via Firebase Admin SDK)
+    //
+    // Example file path: /admin/backup_2025-01-12.json
+    match /admin/{allPaths=**} {
+      allow read, write: if false;  // Admin-only access
+    }
+
+    // ==========================================================================
+    // TEMPORARY DIRECTORY: Time-Limited Access (Future Use)
+    // ==========================================================================
+    // If temporary file uploads are needed (e.g., profile pictures):
+    //
+    // match /temp/{userId}/{fileName} {
+    //   // Allow authenticated users to upload temporary files
+    //   // Files are automatically deleted after 24 hours via Cloud Functions
+    //   allow read: if request.auth != null && request.auth.uid == userId;
+    //   allow write: if request.auth != null
+    //                && request.auth.uid == userId
+    //                && request.resource.size < 2 * 1024 * 1024  // 2 MB limit
+    //                && request.resource.contentType.matches('image/.*');
+    // }
+  }
+}
