@@ -17,11 +17,11 @@ Quick reference table of frameworks:
 | Framework | Package | Primary Use Case | Thread Safety |
 | ----------- | --------- | ------------------ | --------------- |
 
-| UIKit | platform.UIKit.* | UI configuration, accessibility, app lifecycle | Main thread required |
-| Foundation | platform.Foundation.* | File I/O, dates, strings, user preferences | Thread-safe |
-| CoreLocation | platform.CoreLocation.* | GPS, location services | Thread-safe (delegate on main) |
-| AVFoundation | platform.AVFAudio.* | Audio playback, audio sessions | Mixed |
-| posix | platform.posix.* | Low-level I/O, environment variables | Thread-safe |
+| UIKit | `platform.UIKit.*` | UI configuration, accessibility, app lifecycle | Main thread required |
+| Foundation | `platform.Foundation.*` | File I/O, dates, strings, user preferences | Thread-safe |
+| CoreLocation | `platform.CoreLocation.*` | GPS, location services | Thread-safe (delegate on main) |
+| AVFoundation | `platform.AVFAudio.*` | Audio playback, audio sessions | Mixed |
+| posix | `platform.posix.*` | Low-level I/O, environment variables | Thread-safe |
 
 ## UIKit APIs
 
