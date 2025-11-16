@@ -5,6 +5,33 @@ command -v git-lfs >/dev/null 2>&1 || { printf >&2 "\n%s\n\n" "This repository i
 git lfs pre-push "$@"
 
 # ============================================================
+# MAP VALIDATION - PRE-PUSH HOOK
+# ============================================================
+# Validate that all map modules have required files
+# Checks for: .mbtiles, .geojson, e_map_*.webp, e_location_*.webp
+# Bypass with: git push --no-verify (NOT recommended)
+# ============================================================
+
+echo "🗺️  Validating map modules..."
+
+if bash scripts/dev/verification/validate-maps.sh; then
+    echo "✅ Map validation passed"
+else
+    echo "❌ Map validation failed!"
+    echo ""
+    echo "Please ensure all map modules have:"
+    echo "  - {map_name}.mbtiles (not empty)"
+    echo "  - {map_name}.geojson (not empty)"
+    echo "  - e_map_{map_name}.webp"
+    echo "  - e_location_{map_name}.webp"
+    echo ""
+    echo "You can bypass this check with --no-verify (not recommended)"
+    exit 1
+fi
+
+echo ""
+
+# ============================================================
 # PNG/JPG TO WEBP CONVERSION - PRE-PUSH HOOK
 # ============================================================
 # Automatically convert any PNG/JPG images to WebP before push
