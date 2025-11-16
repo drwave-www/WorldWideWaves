@@ -577,7 +577,8 @@ buildTypes {
 ### Build Issues
 
 | Symptom | Likely Cause | Solution |
-|---------|--------------|----------|
+| --------- | -------------- | ---------- |
+
 | Gradle sync fails | Dependency resolution | `./gradlew --refresh-dependencies` |
 | Compile errors | Outdated cache | `./gradlew clean build` |
 | iOS build fails | Framework not generated | Rebuild framework with Gradle |
@@ -586,7 +587,8 @@ buildTypes {
 ### Runtime Issues
 
 | Symptom | Likely Cause | Solution |
-|---------|--------------|----------|
+| --------- | -------------- | ---------- |
+
 | App crashes on launch | Firebase config missing | Run `generateFirebaseConfig` |
 | Map not rendering | Tile source error | Check .mbtiles file exists |
 | Position stuck | Location permissions | Grant permissions in settings |
@@ -595,7 +597,8 @@ buildTypes {
 ### Test Issues
 
 | Symptom | Likely Cause | Solution |
-|---------|--------------|----------|
+| --------- | -------------- | ---------- |
+
 | Tests timeout | Emulator slow | Use faster AVD (API 28-30) |
 | Flaky tests | Race conditions | Add proper synchronization |
 | Screenshots differ | Font/rendering variance | Use consistent emulator config |

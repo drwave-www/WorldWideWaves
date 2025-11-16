@@ -300,7 +300,8 @@ All cinterop APIs (usePinned, useContents, NSObject, CLLocationManager) are mark
 ## Coverage Summary
 
 | Test File | Coverage |
-|-----------|----------|
+| ----------- | ---------- |
+
 | IosMemorySafetyTest | usePinned, useContents, addressOf, NSData creation |
 | IosProtocolDelegationTest | NSObject, CLLocationManagerDelegate, callbacks |
 | IosSwiftBridgeTest | Position, BoundingBox, MapWrapperRegistry, commands |
@@ -560,7 +561,8 @@ fun `should start location updates on main thread`() = runTest {
 These test patterns directly mirror production code patterns:
 
 | Test Pattern | Production Usage | File |
-|--------------|------------------|------|
+| -------------- | ------------------ | ------ |
+
 | usePinned | Cache file writing | PlatformCache.ios.kt |
 | NSObject delegate | GPS location updates | IosLocationProvider.kt |
 | Position decomposition | Map coordinate conversion | IOSMapBridge.swift |

@@ -56,7 +56,8 @@ This documentation suite provides comprehensive coverage of Android's map constr
 ## Usage Scenarios
 
 | Scenario | Start Here |
-|----------|------------|
+| ---------- | ------------ |
+
 | Understanding architecture | [Analysis](android-map-constraint-analysis.md) |
 | Implementing features | [Code Patterns](android-constraint-code-patterns.md) |
 | Quick lookup during coding | [Quick Reference](android-patterns-quick-reference.md) |

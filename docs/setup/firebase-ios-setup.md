@@ -260,7 +260,8 @@ Set these in your repository secrets (Settings → Secrets and variables → Act
 ## Comparison with Android
 
 | Feature | Android | iOS |
-|---------|---------|-----|
+| --------- | --------- | ----- |
+
 | **Config File** | `google-services.json` | `GoogleService-Info.plist` |
 | **Generation Script** | `generateFirebaseConfig` Gradle task | `generate_ios_firebase_config.sh` |
 | **SDK Management** | Gradle dependencies | Swift Package Manager |

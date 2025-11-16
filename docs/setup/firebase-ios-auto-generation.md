@@ -126,7 +126,8 @@ With Input/Output files configured, Xcode will:
 ## Platform Parity Achieved
 
 | Platform | Auto-Generation | Trigger | Build System |
-|----------|----------------|---------|--------------|
+| ---------- | ---------------- | --------- | -------------- |
+
 | **Android** | ✅ Automatic | Every Gradle build | Gradle task |
 | **iOS** | ✅ Automatic | Every Xcode build | Run Script Phase |
 

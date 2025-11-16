@@ -7,7 +7,8 @@ Complete setup guide for WorldWideWaves development environment across macOS, Li
 ### All Platforms
 
 | Tool | Minimum Version | Recommended | Purpose |
-|------|----------------|-------------|---------|
+| ------ | ---------------- | ------------- | --------- |
+
 | JDK | 17 | 17 (Temurin) | Kotlin compilation |
 | Android Studio | 2024.1+ | Latest Stable | Android development |
 | Git | 2.0+ | Latest | Version control |
@@ -16,14 +17,16 @@ Complete setup guide for WorldWideWaves development environment across macOS, Li
 ### macOS Only (for iOS Development)
 
 | Tool | Minimum Version | Purpose |
-|------|----------------|---------|
+| ------ | ---------------- | --------- |
+
 | Xcode | 15.0+ (16.0+ recommended) | iOS development |
 | CocoaPods | 1.11+ | iOS dependencies (if used) |
 
 ### Optional Tools
 
 | Tool | Purpose |
-|------|---------|
+| ------ | --------- |
+
 | ripgrep | Code pattern search (required for `./scripts/verify-ios-safety.sh`) |
 | Docker | Map generation (alternative to local Node.js) |
 | gcloud CLI | Firebase Test Lab access |

@@ -525,7 +525,8 @@ single<PlatformMapManager> {
 **Key Components**:
 
 | Component | Role | State Type |
-|-----------|------|------------|
+| ----------- | ------ | ------------ |
+
 | `IosPlatformMapManager` | Platform-specific ODR download manager | Downloads, progress tracking |
 | `IosMapAvailabilityChecker` | UI state holder for map availability | `StateFlow<Map<String, Boolean>>` |
 | `EventsListScreen` | UI component consuming state | Observes `mapStates` for badges |
@@ -1171,7 +1172,8 @@ flowchart TD
 ### Performance Guidelines
 
 | Pattern | Emission Reduction | Use Case |
-|---------|-------------------|----------|
+| --------- | ------------------- | ---------- |
+
 | `updateIfChanged` | ~30-50% | Boolean/enum changes |
 | Progression throttling | ~80% | Continuous values (0-100%) |
 | Position throttling | ~50% | GPS/location updates |

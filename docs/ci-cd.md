@@ -516,7 +516,8 @@ The repository includes pre-commit hooks that prevent accidental secret commits:
 Configure in GitHub repository settings:
 
 | Secret | Purpose | Used In |
-|--------|---------|---------|
+| -------- | --------- | --------- |
+
 | `FIREBASE_SERVICE_ACCOUNT_KEY` | Firebase Test Lab authentication | 05-e2e-tests.yml |
 | `SLACK_WEBHOOK_URL` | Failure notifications (optional) | 05-e2e-tests.yml |
 

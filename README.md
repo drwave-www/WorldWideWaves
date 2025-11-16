@@ -115,7 +115,8 @@ WorldWideWaves/
 ### Key Modules
 
 | Module | Description |
-|--------|-------------|
+| -------- | ------------- |
+
 | `composeApp/` | Android app with Compose Multiplatform UI |
 | `shared/` | Cross-platform business logic, ViewModels, and domain layer (70% code reuse) |
 | `iosApp/` | iOS app with Compose UI via ComposeUIViewController |
@@ -167,7 +168,8 @@ See [docs/ci-cd.md](docs/ci-cd.md) for pipeline details.
 ### Development Workstation
 
 | Tool | Minimum Version | Purpose |
-|------|----------------|---------|
+| ------ | ---------------- | --------- |
+
 | JDK | 17 (Temurin) | Kotlin compilation |
 | Android Studio | 2024.1+ | Android development |
 | Xcode | 15.0+ (macOS only) | iOS development |

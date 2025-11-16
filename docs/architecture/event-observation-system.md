@@ -187,7 +187,8 @@ The ObservationScheduler dynamically adjusts observation intervals based on even
 **Intervals by Event Proximity**:
 
 | Phase | Time Before Event | Interval | Reason |
-|-------|------------------|----------|--------|
+| ------- | ------------------ | ---------- | -------- |
+
 | DISTANT | > 1 hour | 1 hour | Minimal battery usage, event far away |
 | APPROACHING | 5-60 minutes | 5 minutes | Moderate monitoring, event approaching |
 | NEAR | 35 seconds - 5 minutes | 1 second | Active monitoring, event soon |

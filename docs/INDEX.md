@@ -19,7 +19,8 @@
 ### For Daily Development
 
 | I want to... | Documentation |
-|--------------|--------------|
+| -------------- | -------------- |
+
 | Build the app | [Development Workflow](development.md#build-commands) |
 | Run tests | [Testing Strategy](testing-strategy.md) |
 | Debug a crash | [iOS Debugging Guide](ios/ios-debugging-guide.md), [Logging Guide](logging-guide.md) |
@@ -33,7 +34,8 @@
 ### For Architects & Technical Leads
 
 | Topic | Documentation |
-|-------|--------------|
+| ------- | -------------- |
+
 | System architecture | [Architecture](architecture.md) |
 | Wave hit detection | [Wave Hit Detection System](architecture/wave-hit-detection-system.md) - ⭐ CRITICAL |
 | Event observation | [Event Observation System](architecture/event-observation-system.md) - ⭐ CRITICAL |
@@ -51,7 +53,8 @@
 #### Essential First Reads
 
 | Document | Description | Priority |
-|----------|-------------|----------|
+| ---------- | ------------- | ---------- |
+
 | [README.md](../README.md) | Project overview, quick start, tech stack | **CRITICAL** |
 | [CLAUDE.md](../CLAUDE.md) | AI assistant instructions, iOS requirements, patterns | **CRITICAL** |
 | [CLAUDE_iOS.md](../CLAUDE_iOS.md) | Complete iOS development guide | iOS devs |
@@ -62,7 +65,8 @@
 #### Platform-Specific Setup
 
 | Document | Description |
-|----------|-------------|
+| ---------- | ------------- |
+
 | [Linux Setup Guide](setup/linux-setup.md) | Ubuntu/Fedora/Arch setup, KVM acceleration |
 | [Firebase Setup](setup/firebase-setup.md) | Firebase project configuration |
 | [Firebase iOS Setup](setup/firebase-ios-setup.md) | iOS Firebase integration |
@@ -78,7 +82,8 @@
 #### Core Architecture
 
 | Document | Description | Focus |
-|----------|-------------|-------|
+| ---------- | ------------- | ------- |
+
 | [Architecture](architecture.md) | System design, components, data flows | **CRITICAL** |
 | [Wave Hit Detection System](architecture/wave-hit-detection-system.md) | ⭐ CRITICAL - Detection algorithm, timing, state transitions | Business Logic |
 | [Event Observation System](architecture/event-observation-system.md) | ⭐ CRITICAL - Observation flows and coordination | Business Logic |
@@ -89,7 +94,8 @@
 #### Design Patterns
 
 | Document | Description | Focus |
-|----------|-------------|-------|
+| ---------- | ------------- | ------- |
+
 | [iOS Safety Patterns](patterns/ios-safety-patterns.md) | iOS deadlock prevention, DI safety | iOS threading |
 | [Null Safety Patterns](patterns/null-safety-patterns.md) | Safe null handling, `!!` elimination | Safety |
 | [Reactive Patterns](patterns/reactive-patterns.md) | StateFlow, Flow, coroutines | Reactive |
@@ -100,7 +106,8 @@
 #### Code Style
 
 | Document | Description |
-|----------|-------------|
+| ---------- | ------------- |
+
 | [Class Organization](code-style/class-organization.md) | Class structure standards, companion objects |
 | [Logging Guide](logging-guide.md) | Logging patterns, verbosity levels |
 | [Correlation Tracing](correlation-tracing.md) | Request tracing, debugging |
@@ -112,7 +119,8 @@
 #### Testing Strategy & Guides
 
 | Document | Description | Focus |
-|----------|-------------|-------|
+| ---------- | ------------- | ------- |
+
 | [Testing Strategy](testing-strategy.md) | Overall testing approach, patterns | Strategy |
 | [UI Testing Guide](ui-testing-guide.md) | Compose UI testing patterns | UI |
 | [Test Patterns](testing/test-patterns.md) | Common testing patterns | Patterns |
@@ -126,7 +134,8 @@
 #### iOS Documentation
 
 | Document | Description | Priority |
-|----------|-------------|----------|
+| ---------- | ------------- | ---------- |
+
 | [CLAUDE_iOS.md](../CLAUDE_iOS.md) | Complete iOS development guide | **CRITICAL** |
 | [iOS Success State](ios/ios-success-state.md) | Current working iOS state verification | High |
 | [iOS Violation Tracker](ios/ios-violation-tracker.md) | Deadlock violation history (11 fixed) | **CRITICAL** |
@@ -146,7 +155,8 @@
 #### Android Documentation
 
 | Document | Description |
-|----------|-------------|
+| ---------- | ------------- |
+
 | [Android Development Guide](android/android-development-guide.md) | Complete Android development guide |
 | [Android Map Constraint Analysis](android/android-map-constraint-analysis.md) | Map bounds enforcement |
 | [Android Constraint Code Patterns](android/android-constraint-code-patterns.md) | Camera constraint code |
@@ -162,14 +172,16 @@
 #### Core Features
 
 | Document | Description |
-|----------|-------------|
+| ---------- | ------------- |
+
 | [Simulation Mode](features/simulation-mode.md) | Time acceleration and position simulation for testing |
 | [Choreography System](features/choreography-system.md) | Wave choreography and timing system |
 
 #### Accessibility
 
 | Document | Description |
-|----------|-------------|
+| ---------- | ------------- |
+
 | [Accessibility Guide](accessibility-guide.md) | WCAG 2.1 AA compliance patterns |
 
 ---
@@ -177,7 +189,8 @@
 ### 6. Operations & CI/CD
 
 | Document | Description |
-|----------|-------------|
+| ---------- | ------------- |
+
 | [CI/CD Guide](ci-cd.md) | GitHub Actions workflows, quality gates |
 | [Operations Guide](operations.md) | Deployment, monitoring, observability |
 | [GitHub Workflows README](.github/workflows/README.md) | CI/CD workflow documentation |
@@ -187,7 +200,8 @@
 ### 7. Planning & Documentation Reviews
 
 | Document | Description |
-|----------|-------------|
+| ---------- | ------------- |
+
 | [Documentation Review](DOCUMENTATION_REVIEW_2025-10-27.md) | Recent documentation audit |
 | [Documentation Improvements Summary](DOCUMENTATION_IMPROVEMENTS_SUMMARY.md) | Documentation enhancements |
 
@@ -196,7 +210,8 @@
 ### 8. Development Workflows
 
 | Document | Description |
-|----------|-------------|
+| ---------- | ------------- |
+
 | [Next Session Prompt](development/next-session-prompt.md) | Template for continuing work |
 | [Option A Fallback TODO](development/option-a-fallback-todo.md) | Alternative approach planning |
 | [Development README](development/README.md) | Development directory index |
@@ -651,7 +666,8 @@ Historical documentation (session summaries, refactoring reports, test results) 
 ## 📅 Version History
 
 | Version | Changes |
-|---------|---------|
+| --------- | --------- |
+
 | 3.0 | Complete documentation index with multi-dimensional organization |
 | 2.1 | Documentation cleanup - 18 historical docs archived |
 | 2.0 | Complete documentation rewrite with production-grade structure |

@@ -112,7 +112,8 @@ sequenceDiagram
 ### Key Classes
 
 | Class | Location | Responsibility |
-|-------|----------|----------------|
+| ------- | ---------- | ---------------- |
+
 | `WWWPlatform` | `/shared/src/commonMain/.../Platform.kt` | Mode toggle, simulation state, reactive change tracking |
 | `WWWSimulation` | `/shared/src/commonMain/.../WWWSimulation.kt` | Time acceleration, speed control, position storage |
 | `SystemClock` | `/shared/src/commonMain/.../events/utils/ClockProvider.kt` | Time abstraction with simulation awareness |
@@ -390,7 +391,8 @@ override fun now(): Instant =
 **Components Using SystemClock**:
 
 | Component | Usage | Effect |
-|-----------|-------|--------|
+| ----------- | ------- | -------- |
+
 | `WaveProgressionTracker` | `clock.now()` for progression calculation | Wave progresses at simulated speed |
 | `ObservationScheduler` | `clock.now()` and `clock.delay()` for timing | Observations trigger at simulated intervals |
 | `SoundChoreographyPlayer` | `clock.now()` for MIDI position | Sound plays at correct simulated position |
@@ -503,7 +505,8 @@ This ensures clean observer restart when switching simulation contexts.
 **Key Test Files**:
 
 | Test File | Focus | Location |
-|-----------|-------|----------|
+| ----------- | ------- | ---------- |
+
 | `WWWSimulationTest.kt` | Time acceleration, speed changes, checkpoints | `/shared/src/androidUnitTest/.../` |
 | `PositionManagerTest.kt` | Source priority, simulation override | `/shared/src/commonTest/.../position/` |
 | `SystemClockTest.kt` | Simulation-aware time and delay | `/shared/src/commonTest/.../events/utils/` |
@@ -613,7 +616,8 @@ adb logcat | grep "SimulationButton"
 **Common Causes**:
 
 | Issue | Cause | Solution |
-|-------|-------|----------|
+| ------- | ------- | ---------- |
+
 | Map not available | Event map not downloaded | Download map via "Download" button on event screen |
 | Simulation already active | Previous simulation not properly stopped | Restart app or call `platform.disableSimulation()` |
 | Invalid event time | Event start/end times malformed | Verify event has valid `startDateTime` and `endDateTime` |
@@ -647,7 +651,8 @@ LaunchedEffect(event.id, isSimulationEnabled) {
 **Common Causes**:
 
 | Issue | Cause | Solution |
-|-------|-------|----------|
+| ------- | ------- | ---------- |
+
 | State persists across events | Missing `event.id` key in LaunchedEffect | Add `event.id` to all LaunchedEffect keys (already fixed) |
 | Simulation stopped externally | `simulationModeEnabled` changed outside button | Verify FAQ button state matches simulation state |
 | Race condition | Button clicked during loading | Disable button during `loading` state (already implemented) |
@@ -678,7 +683,8 @@ Log.d("PositionManager", "Current source: $currentSource")
 **Common Causes**:
 
 | Issue | Cause | Solution |
-|-------|-------|----------|
+| ------- | ------- | ---------- |
+
 | PositionManager not updated | `setSimulation()` not calling `updatePosition()` | Verify Platform.kt:89 calls `positionManager?.updatePosition()` |
 | GPS overriding simulation | Priority logic broken | Check `shouldAcceptUpdate()` in PositionManager.kt:176 |
 | Position not cleared on stop | `disableSimulation()` not calling `clearPosition()` | Verify Platform.kt:80 calls `clearPosition(SIMULATION)` |
@@ -717,7 +723,8 @@ Log.d("SystemClock", "System time: ${Clock.System.now()}")
 **Common Causes**:
 
 | Issue | Cause | Solution |
-|-------|-------|----------|
+| ------- | ------- | ---------- |
+
 | Component not using IClock | Using `Clock.System.now()` directly | Replace with injected `IClock` instance |
 | Simulation speed = 1 | Default speed not applied | Verify WWWSimulation created with `DEFAULT_SPEED_SIMULATION` (10) |
 | Platform not passed to SystemClock | DI resolution failing | Check Koin module provides WWWPlatform |
@@ -755,7 +762,8 @@ platform.simulationChanged.collect { count ->
 **Common Causes**:
 
 | Issue | Cause | Solution |
-|-------|-------|----------|
+| ------- | ------- | ---------- |
+
 | Race condition | `startObservation()` called before `stopObservation()` completes | Add 150ms delay between stop and start (already fixed) |
 | Observer not observing simulationChanged | Flow not included in unified flow | Verify `createSimulationFlow()` in EventObserver.kt:210 |
 | Simulation change not signaled | `_simulationChanged` not incremented | Verify Platform.kt:82, 91 increment counter |

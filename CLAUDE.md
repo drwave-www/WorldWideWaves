@@ -62,7 +62,8 @@ Identify docs to update for [CHANGE]:
 ### Production Change Rules
 
 | ✅ ALWAYS | ❌ NEVER |
-|-----------|----------|
+| ----------- | ---------- |
+
 | Use agents for non-trivial changes | Make experimental changes |
 | Validate both platform builds (iOS + Android) | Skip impact analysis ("quick fixes") |
 | Run full test suite (100% pass) | Skip tests (failures = production incidents) |
@@ -111,7 +112,8 @@ WorldWideWaves is an **ephemeral mobile app** for orchestrating synchronized, lo
 > **iOS threading violations cause immediate deadlocks**. Always consult [CLAUDE_iOS.md](CLAUDE_iOS.md) for complete details.
 
 | ❌ NEVER | ✅ ALWAYS | Why |
-|----------|----------|-----|
+| ---------- | ---------- | ----- |
+
 | `object : KoinComponent` in @Composable | Use `IOSSafeDI.get<T>()` | Composables trigger iOS main thread deadlock |
 | `by inject()` during composition | Use constructor injection or `LocalKoin.current.get<T>()` | Property delegation freezes iOS |
 | `runBlocking` before ComposeUIViewController | Use suspend functions with `LaunchedEffect` | Blocks iOS main thread |
@@ -831,7 +833,8 @@ EOF
 ## Common Issues
 
 | Symptom | Cause | Solution |
-|---------|-------|----------|
+| --------- | ------- | ---------- |
+
 | iOS app freezes on launch | DI violation | Run `./scripts/dev/verification/verify-ios-safety.sh` |
 | Tests failing | Business logic issue or requirements changed | Analyze failure, ask before changing tests |
 | Compilation warnings | Code quality issue | Fix ALL warnings, not just in modified files |

@@ -112,7 +112,8 @@ graph TD
 ### Key iOS Files
 
 | File | Purpose | Critical? |
-|------|---------|-----------|
+| ------ | --------- | ----------- |
+
 | `AppDelegate.swift` | URL routing, app lifecycle | ✅ Yes |
 | `SceneDelegate.swift` | Window management, initialization | ✅ Yes |
 | `IOSPlatformEnabler.swift` | Swift-Kotlin bridge | ✅ Yes |
@@ -1341,7 +1342,8 @@ graph LR
 ### Trade-offs
 
 | Aspect | Android | iOS |
-|--------|---------|-----|
+| -------- | --------- | ----- |
+
 | Code complexity | Low (native API) | Medium (manual updates) |
 | Performance | Excellent (GPU) | Good (CPU animation) |
 | Control | Limited (MapLibre API) | Full (custom rendering) |

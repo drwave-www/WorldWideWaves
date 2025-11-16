@@ -102,7 +102,8 @@ let zoom = currentZoom ?? defaultZoom
 ## Common Null-Prone Areas
 
 | Location | Risk | Pattern |
-|----------|------|---------|
+| ---------- | ------ | --------- |
+
 | Event loading | Firestore returns null | `requireNotNull` with context |
 | GPS position | No location permission | Elvis with fallback position |
 | DI resolution | Missing module | Constructor injection |

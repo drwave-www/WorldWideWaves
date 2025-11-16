@@ -53,7 +53,8 @@ composeApp/src/
 ### Test Categories
 
 | Category | Coverage |
-|----------|----------|
+| ---------- | ---------- |
+
 | **Domain Logic** | Core business logic, wave coordination, event scheduling |
 | **Data Layer** | Repository, persistence, state management |
 | **ViewModels** | UI state management, download coordination |
@@ -572,7 +573,8 @@ echo "✅ All checks passed. Proceeding with push."
 ### Current Test Statistics
 
 | Metric | Value |
-|--------|-------|
+| -------- | ------- |
+
 | **Pass Rate** | 100% |
 | **Coverage** | Production-ready |
 | **Platform Distribution** | Common, Android, iOS |
@@ -580,7 +582,8 @@ echo "✅ All checks passed. Proceeding with push."
 ### Test Coverage by Layer
 
 | Layer | Coverage |
-|-------|----------|
+| ------- | ---------- |
+
 | Domain | Core business logic, wave coordination, event scheduling |
 | Data | Repository, persistence, state management |
 | ViewModels | UI state management, download coordination |

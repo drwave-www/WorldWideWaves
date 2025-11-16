@@ -33,7 +33,8 @@ These properties use different platform APIs but achieve identical functionality
 #### **1.1 Camera Configuration (3 properties)**
 
 | Property | Android | iOS | Why Different |
-|----------|---------|-----|---------------|
+| ---------- | --------- | ----- | --------------- |
+
 | Camera padding | `(0,0,0,0)` explicit in `newLatLngBounds` | `UIEdgeInsets` in `cameraThatFitsCoordinateBounds` | Different API patterns, same default (0) |
 | Camera bearing | `0.0` default in `CameraPosition` | Default 0 in `MLNMapCamera` | Both default to north-up orientation |
 | Camera tilt | `0.0` default in `CameraPosition` | Default 0 in `MLNMapCamera` | Both default to flat (no tilt) |
@@ -45,7 +46,8 @@ These properties use different platform APIs but achieve identical functionality
 #### **1.2 Style Loading (3 properties)**
 
 | Property | Android | iOS | Why Different |
-|----------|---------|-----|---------------|
+| ---------- | --------- | ----- | --------------- |
+
 | Style builder | `Style.Builder().fromUri()` | `mapView.styleURL = url` | Platform SDK design difference |
 | Style load callback | Lambda parameter | `didFinishLoading style:` delegate | Kotlin vs Swift patterns |
 | Error handling | Try-catch | `mapViewDidFailLoadingMap` delegate | Platform SDK patterns |
@@ -58,7 +60,8 @@ These properties use different platform APIs but achieve identical functionality
 #### **1.3 Zoom Configuration (2 properties)**
 
 | Property | Android | iOS | Why Different |
-|----------|---------|-----|---------------|
+| ---------- | --------- | ----- | --------------- |
+
 | Min zoom setter | `setMinZoomPreference()` | `minimumZoomLevel =` | MapLibre SDK naming difference |
 | Max zoom setter | `setMaxZoomPreference()` | `maximumZoomLevel =` | MapLibre SDK naming difference |
 
@@ -69,7 +72,8 @@ These properties use different platform APIs but achieve identical functionality
 #### **1.4 Camera APIs (4 properties)**
 
 | Property | Android | iOS | Why Different |
-|----------|---------|-----|---------------|
+| ---------- | --------- | ----- | --------------- |
+
 | Animation to position | `animateCamera()` with `CameraUpdate` | `UIView.animate` with `setCenter` | MapLibre vs UIKit APIs |
 | Animation to bounds | `newLatLngBounds` | `setCamera(_:withDuration:)` | MapLibre vs UIKit APIs |
 | Callback pattern | `CancelableCallback` interface | Closure callback | Kotlin vs Swift patterns |
@@ -83,7 +87,8 @@ These properties use different platform APIs but achieve identical functionality
 #### **1.5 Threading & Performance (3 properties)**
 
 | Property | Android | iOS | Why Different |
-|----------|---------|-----|--------|
+| ---------- | --------- | ----- | -------- |
+
 | UI thread enforcement | `context.runOnUiThread {}` | `dispatch_async(main_queue)` | Platform threading APIs |
 | View recycling | MapLibre manages | `dequeueReusableAnnotationView` | Platform SDK patterns |
 | Immediate callbacks | Direct API calls | `requestImmediateRender/Camera` | Architecture: Android direct, iOS uses registry |
@@ -97,7 +102,8 @@ These properties use different platform APIs but achieve identical functionality
 These represent deliberate architectural choices, not bugs:
 
 | Property | Android | iOS | Why Different | Status |
-|----------|---------|-----|---------------|--------|
+| ---------- | --------- | ----- | --------------- | -------- |
+
 | **Location component type** | Native LocationComponent | Custom MLNPointAnnotation | iOS: PositionManager integration requires manual updates<br>Android: LocationEngineProxy bridges to native | ✅ **DOCUMENTED** in CLAUDE_iOS.md:1000-1124 |
 | **Location update mechanism** | Automatic (LocationEngineProxy) | Manual (setUserPosition calls) | Architecture difference for PositionManager integration | ✅ **DOCUMENTED** - both work correctly |
 
@@ -110,7 +116,8 @@ These represent deliberate architectural choices, not bugs:
 These features don't exist in MapLibre iOS SDK:
 
 | Property | Android | iOS | Research Result |
-|----------|---------|-----|-----------------|
+| ---------- | --------- | ----- | ----------------- |
+
 | **Compass fades when north** | `compassFadesWhenFacingNorth(true)` | Property doesn't exist | GitHub search: 0 results for "fadesWhenFacingNorth"<br>MLNCompassButton has no fading API |
 | **Local ideograph font** | `"Droid Sans"` | Property doesn't exist | GitHub search: 0 results for "localFontFamilyName"<br>MLNRendererConfiguration lacks this property |
 

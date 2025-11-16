@@ -482,7 +482,8 @@ actual fun rememberDynamicTypeScale(): Float {
 ## WCAG 2.1 Compliance Matrix
 
 | Criterion | Level | Android | iOS | Notes |
-|-----------|-------|---------|-----|-------|
+| ----------- | ------- | --------- | ----- | ------- |
+
 | **1.1.1 Non-text Content** | A | ✅ | ✅ | All images have alt text |
 | **1.3.1 Info and Relationships** | A | ✅ | ✅ | Headings, roles, states |
 | **1.4.3 Contrast (Minimum)** | AA | ✅ | ✅ | 4.5:1 ratio achieved |

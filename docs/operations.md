@@ -35,7 +35,8 @@ UserDefaults.standard.set(5000, forKey: "locationUpdateInterval")
 **Debug vs Release:**
 
 | Feature | Debug | Release |
-|---------|-------|---------|
+| --------- | ------- | --------- |
+
 | Logging | Verbose | Minimal |
 | Minification | Off | R8 enabled |
 | Debugging | Enabled | Disabled |
@@ -75,7 +76,8 @@ Manual configuration:
 **Environment-specific projects:**
 
 | Environment | Project ID | Purpose |
-|-------------|-----------|---------|
+| ------------- | ----------- | --------- |
+
 | Development | `worldwidewaves-dev` | Local testing |
 | Staging | `worldwidewaves-staging` | Pre-production |
 | Production | `worldwidewaves-prod` | Live app |
@@ -106,7 +108,8 @@ api.base.url=http://localhost:8080/v1
 **Log Levels:**
 
 | Level | Usage | Example |
-|-------|-------|---------|
+| ------- | ------- | --------- |
+
 | VERBOSE | Detailed flow | Position updates, state transitions |
 | DEBUG | Debugging info | Method entry/exit, variable values |
 | INFO | Important events | Event loaded, wave started |
@@ -148,7 +151,8 @@ Verbose and debug logging disabled in release builds. Only INFO, WARNING, and ER
 **Firebase Analytics events:**
 
 | Event | Parameters | Purpose |
-|-------|-----------|---------|
+| ------- | ----------- | --------- |
+
 | `app_open` | - | Track app launches |
 | `screen_view` | `screen_name`, `screen_class` | Track navigation |
 | `event_viewed` | `event_id`, `event_name` | Track event browsing |
@@ -203,7 +207,8 @@ Firebase Console > Crashlytics > Dashboard
 **Key Metrics:**
 
 | Metric | Target | Alert Threshold |
-|--------|--------|----------------|
+| -------- | -------- | ---------------- |
+
 | App launch time | < 2s | > 3s |
 | Event load time | < 1s | > 2s |
 | Map load time | < 3s | > 5s |
@@ -384,7 +389,8 @@ open iosApp/iosApp.xcodeproj
 ### Data Retention
 
 | Data Type | Retention | Purpose |
-|-----------|-----------|---------|
+| ----------- | ----------- | --------- |
+
 | Analytics events | 14 months | Usage patterns |
 | Crash reports | 90 days | Debugging |
 | Performance traces | 90 days | Optimization |
@@ -453,7 +459,8 @@ gpg -c worldwidewaves-release.jks
 ### Severity Levels
 
 | Level | Description | Response Time | Example |
-|-------|-------------|---------------|---------|
+| ------- | ------------- | --------------- | --------- |
+
 | P0 - Critical | App unusable | < 1 hour | Launch crash affecting 100% users |
 | P1 - High | Major feature broken | < 4 hours | Events not loading for 50% users |
 | P2 - Medium | Minor feature broken | < 1 day | Map tiles slow to load |

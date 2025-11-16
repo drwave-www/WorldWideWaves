@@ -70,7 +70,8 @@ graph TB
 ### Primitive Types
 
 | Kotlin Type | Swift/ObjC Type | Automatic Bridging | Notes |
-|-------------|-----------------|-------------------|-------|
+| ------------- | ----------------- | ------------------- | ------- |
+
 | `Double` | `Double` | ✅ Yes | Direct mapping, no conversion needed |
 | `Int` | `Int` | ✅ Yes | Direct mapping, no conversion needed |
 | `Boolean` | `Bool` | ✅ Yes | Direct mapping, no conversion needed |
@@ -81,7 +82,8 @@ graph TB
 ### Nullable Types
 
 | Kotlin Type | Swift/ObjC Type | Bridging Behavior |
-|-------------|-----------------|-------------------|
+| ------------- | ----------------- | ------------------- |
+
 | `Double?` | `Double?` (Optional) | ✅ Automatic optional bridging |
 | `String?` | `NSString?` | ✅ Automatic optional bridging |
 | `Int?` | `Int?` | ✅ Automatic optional bridging |
@@ -111,7 +113,8 @@ IOSMapBridge.animateCamera(
 Complex Kotlin types **do not** automatically bridge. Use **decomposition** to primitives.
 
 | Kotlin Type | Bridge Pattern | Swift Receives |
-|-------------|---------------|----------------|
+| ------------- | --------------- | ---------------- |
+
 | `Position` | Decompose to `lat: Double, lng: Double` | Two separate Double parameters |
 | `BoundingBox` | Decompose to `minLat, minLng, maxLat, maxLng` | Four separate Double parameters |
 | `data class` | Decompose to primitive properties | Individual primitive parameters |
@@ -169,7 +172,8 @@ wrapper.setBoundsForCameraTarget(
 ### Collections
 
 | Kotlin Collection | Swift/ObjC Type | Bridging Behavior |
-|------------------|-----------------|-------------------|
+| ------------------ | ----------------- | ------------------- |
+
 | `List<T>` | `NSArray` / `Array<T>` | ✅ Automatic bridging for primitive T |
 | `List<Pair<Double, Double>>` | `Array<KotlinPair<Double, Double>>` | ⚠️ Requires unwrapping KotlinPair |
 | `List<List<T>>` | `Array<Array<T>>` | ✅ Nested arrays bridge automatically |
@@ -209,7 +213,8 @@ let coordinateArrays: [[CLLocationCoordinate2D]] = polygonData.coordinates.map {
 ### Platform Types
 
 | Kotlin Platform API | Purpose | Swift Equivalent |
-|---------------------|---------|------------------|
+| --------------------- | --------- | ------------------ |
+
 | `platform.CoreLocation.CLLocationCoordinate2D` | Coordinates | `CLLocationCoordinate2D` |
 | `platform.CoreLocation.CLLocation` | Location object | `CLLocation` |
 | `platform.UIKit.*` | UI framework | `UIKit.*` |

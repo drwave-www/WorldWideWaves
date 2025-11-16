@@ -178,7 +178,8 @@ interface NotificationContentProvider {
 Each favorited event generates up to 6 scheduled notifications:
 
 | Trigger | Timing | Title Key | Body Key | Body Args |
-|---------|--------|-----------|----------|-----------|
+| --------- | -------- | ----------- | ---------- | ----------- |
+
 | EventStarting(1h) | 1 hour before | `notification_event_starting` | `notification_1h_before` | `[location]` |
 | EventStarting(30m) | 30 min before | `notification_event_starting` | `notification_30m_before` | `[location]` |
 | EventStarting(10m) | 10 min before | `notification_event_starting` | `notification_10m_before` | `[location]` |
@@ -288,7 +289,8 @@ Syncing notifications: 3 favorited, 2 downloaded, 4 total (deduplicated)
 The notification system respects simulation mode speed:
 
 | Scenario | Behavior | Reason |
-|----------|----------|--------|
+| ---------- | ---------- | -------- |
+
 | **Real events** (no simulation) | ✅ Schedule notifications | Real-time delivery works |
 | **Realistic simulation** (speed=1) | ✅ Schedule notifications | Same timing as real events |
 | **Accelerated simulation** (speed>1) | ❌ Skip notifications | Notifications would fire late/out-of-order |
@@ -452,7 +454,8 @@ All notification strings defined in:
 ### Platform Limits
 
 | Platform | Limit | Mitigation |
-|----------|-------|-----------|
+| ---------- | ------- | ----------- |
+
 | **iOS** | 64 pending notifications | Favorites-only (typical <60) |
 | **Android** | ~500 pending (varies by OEM) | Favorites-only (typical <60) |
 

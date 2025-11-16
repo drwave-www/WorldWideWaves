@@ -129,7 +129,8 @@ sysdiagnose
 ## Filtering Cheat Sheet
 
 | Filter Type | Syntax | Example |
-|-------------|--------|---------|
+| ------------- | -------- | --------- |
+
 | Process name | `process:NAME` | `process:com.worldwidewaves` |
 | Category | `category:NAME` | `category:WWW` |
 | Subsystem | `subsystem:NAME` | `subsystem:com.worldwidewaves` |
@@ -144,7 +145,8 @@ sysdiagnose
 ## Message Types
 
 | Type | Description | Visibility |
-|------|-------------|------------|
+| ------ | ------------- | ------------ |
+
 | **Default** | Standard log messages | Always visible |
 | **Info** | Informational messages | Enable "Include Info Messages" |
 | **Debug** | Debug-level details | Enable "Include Debug Messages" |
@@ -258,7 +260,8 @@ log stream --predicate 'process == "com.worldwidewaves"' \
 ### Xcode Console vs Console.app
 
 | Feature | Xcode Console | Console.app |
-|---------|---------------|-------------|
+| --------- | --------------- | ------------- |
+
 | Device selection | Single device | All devices |
 | Filtering | Basic | Advanced |
 | Export | Limited | Full control |

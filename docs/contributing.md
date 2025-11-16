@@ -47,7 +47,8 @@ test/add-accessibility-tests
 ### Main Branches
 
 | Branch | Purpose | Protected |
-|--------|---------|-----------|
+| -------- | --------- | ----------- |
+
 | `main` | Production-ready code | Yes |
 | `develop` | Integration branch (if used) | Yes |
 
@@ -84,7 +85,8 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/).
 ### Types
 
 | Type | Description | Example |
-|------|-------------|---------|
+| ------ | ------------- | --------- |
+
 | `feat` | New feature | `feat(maps): add Tokyo offline map` |
 | `fix` | Bug fix | `fix(position): prevent duplicate emissions` |
 | `docs` | Documentation only | `docs: update contributing guide` |
@@ -643,7 +645,8 @@ Any other context, mockups, or examples.
 **Core areas and maintainers:**
 
 | Area | Path | Primary Maintainer |
-|------|------|-------------------|
+| ------ | ------ | ------------------- |
+
 | Position System | `shared/src/*/position/` | Core Team |
 | Map System | `shared/src/*/map/` | Core Team |
 | Choreography | `shared/src/*/choreographies/` | Core Team |

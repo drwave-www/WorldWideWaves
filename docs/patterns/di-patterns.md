@@ -104,7 +104,8 @@ val commonModule = module {
 ### Key Decisions
 
 | Component | Scope | Justification |
-|-----------|-------|---------------|
+| ----------- | ------- | --------------- |
+
 | `WWWEvents` | `single` | Single source of truth for all event data |
 | `SoundChoreographyPlayer` | `single(createdAtStart = true)` | Eager init prepares MIDI subsystem before first wave |
 | `SoundChoreographyCoordinator` | `single` | Coordinates timing across all events |
@@ -356,7 +357,8 @@ iOS Kotlin/Native has **strict threading requirements**. Violating these rules c
 ### Critical iOS Rules
 
 | Rule | ❌ Forbidden | ✅ Allowed |
-|------|-------------|-----------|
+| ------ | ------------- | ----------- |
+
 | **No DI in @Composable** | `object : KoinComponent { val x by inject() }` | `IosSafeDI.platform` |
 | **No init{} coroutines** | `init { scope.launch { } }` | `suspend fun initialize()` |
 | **No init{} DI** | `init { val x = get<Type>() }` | `by inject()` at class level |
@@ -1114,7 +1116,8 @@ Log.d("Koin", "Initialization took ${duration}ms")
 ### Module Organization Summary
 
 | Module | Purpose | Load Order | Key Dependencies |
-|--------|---------|------------|------------------|
+| -------- | --------- | ------------ | ------------------ |
+
 | `commonModule` | Events, sound | 1st | None |
 | `helpersModule` | Domain logic, position | 2nd | `commonModule` |
 | `datastoreModule` | Persistence | 3rd | `helpersModule` |
@@ -1126,7 +1129,8 @@ Log.d("Koin", "Initialization took ${duration}ms")
 ### Scope Decision Matrix
 
 | Dependency Type | Scope | Example |
-|----------------|-------|---------|
+| ---------------- | ------- | --------- |
+
 | App-wide state | `single` | `WWWEvents`, `PositionManager` |
 | Expensive to create | `single(createdAtStart = true)` | `SoundChoreographyPlayer` |
 | Stateless logic | `single` | Use cases, repositories |

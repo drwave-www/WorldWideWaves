@@ -86,7 +86,8 @@ Cross-platform business logic written in Kotlin Multiplatform.
 **Package Structure:**
 
 | Package | Responsibility |
-|---------|---------------|
+| --------- | --------------- |
+
 | `domain/observation/` | Event state observation and monitoring |
 | `domain/progression/` | Wave progression tracking and simulation |
 | `domain/scheduling/` | Adaptive observation intervals and timing |
@@ -236,7 +237,8 @@ graph LR
 ### Dispatcher Strategy
 
 | Dispatcher | Use Case | Examples |
-|------------|----------|----------|
+| ------------ | ---------- | ---------- |
+
 | `Dispatchers.Main` | UI updates, AudioManager access | StateFlow emissions, sound playback |
 | `Dispatchers.Default` | CPU-bound calculations | Geographic distance, polygon operations |
 | `Dispatchers.IO` | Avoided | No blocking I/O (use suspend functions) |

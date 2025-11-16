@@ -690,7 +690,8 @@ object MapWrapperRegistry {
 ### 3.1 Design Patterns Used
 
 | Pattern | Location | Purpose | Assessment |
-|---------|----------|---------|------------|
+| --------- | ---------- | --------- | ------------ |
+
 | **Adapter** | MapLibreAdapter<T> | Abstract platform SDKs | ✅ Excellent |
 | **Template Method** | AbstractEventMap | Shared camera/position logic | ✅ Excellent |
 | **Strategy** | PlatformMapManager | Download strategy (Play Core vs ODR) | ✅ Excellent |
@@ -703,7 +704,8 @@ object MapWrapperRegistry {
 ### 3.2 Code Sharing Breakdown
 
 | Component | Common | Android | iOS | Shared % |
-|-----------|--------|---------|-----|----------|
+| ----------- | -------- | --------- | ----- | ---------- |
+
 | **Camera Logic** | AbstractEventMap (435 lines) | 0 | 0 | 100% |
 | **Position Integration** | AbstractEventMap | 0 | 0 | 100% |
 | **Download Coordination** | MapDownloadCoordinator (151 lines) | AndroidMapViewModel (duplicated) | IOSPlatformMapManager | 60% |

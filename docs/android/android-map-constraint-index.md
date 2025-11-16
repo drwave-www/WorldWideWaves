@@ -251,7 +251,8 @@ This documentation provides a comprehensive analysis of the Android map constrai
 ## Quick Reference Table
 
 | Concept | BOUNDS Mode | WINDOW Mode |
-|---------|------------|------------|
+| --------- | ------------ | ------------ |
+
 | **Padding** | 0 (show all) | viewport/2 (prevent overflow) |
 | **Min Zoom** | Fit entire event | Fit constraining dimension |
 | **Gestures** | Disabled | Enabled + clamped |
@@ -307,7 +308,8 @@ map.addOnCameraMoveStartedListener { reason ->
 ### Test Files and What They Validate
 
 | Test File | Purpose | Coverage |
-|-----------|---------|----------|
+| ----------- | --------- | ---------- |
+
 | `AspectRatioFittingTest.kt` | Min zoom calculation | Wide, tall, extreme cases |
 | `BoundsWindowModeTest.kt` | WINDOW padding calc | Viewport-based constraints |
 | `AbstractEventMapTest.kt` | Integration flow | Mode transitions, animations |

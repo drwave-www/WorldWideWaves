@@ -13,7 +13,8 @@ This guide covers iOS memory leak detection and profiling for WorldWideWaves. Af
 ### Expected Memory Usage
 
 | State | Memory Usage | Notes |
-|-------|-------------|-------|
+| ------- | ------------- | ------- |
+
 | App launch (idle) | ~50MB | Background services, Koin DI, Firebase |
 | Events list loaded | ~120MB | 40+ events, observers, position tracking |
 | Event detail (no map) | ~130MB | Single event detail screen |
@@ -174,7 +175,8 @@ MemoryLeakDetector.shared().track(vc, name = logLabel)
 ### Phase 1: Map System (~100MB saved)
 
 | Issue | Fix | Test |
-|-------|-----|------|
+| ------- | ----- | ------ |
+
 | IosEventMap mapScope leak | Cancel scope in onDispose | MapWrapperRegistryTest |
 | MapWrapperRegistry unbounded growth | LRU eviction (max 10) | testLRUEviction_* |
 | IosMapLibreAdapter StateFlow retention | cleanup() method | N/A |
@@ -182,7 +184,8 @@ MemoryLeakDetector.shared().track(vc, name = logLabel)
 ### Phase 2: Observer Management (~50MB saved)
 
 | Issue | Fix | Test |
-|-------|-----|------|
+| ------- | ----- | ------ |
+
 | EventsViewModel observers never stop | stopAllObservers() | EventsViewModelTest |
 | Repository background scope leak | cleanup() in onCleared() | N/A |
 | iOS lifecycle missing | stopEventObservers() from Swift | Manual |
@@ -190,14 +193,16 @@ MemoryLeakDetector.shared().track(vc, name = logLabel)
 ### Phase 3: Platform Integration (~20MB saved)
 
 | Issue | Fix | Test |
-|-------|-----|------|
+| ------- | ----- | ------ |
+
 | CLLocationManager delegate retention | Set delegate = nil on stop | Manual |
 | MapLibreViewWrapper cleanup | Proper deinit | Manual |
 
 ### Phase 4: State Management (Prevents accumulation)
 
 | Issue | Fix | Test |
-|-------|-----|------|
+| ------- | ----- | ------ |
+
 | LogSampler unbounded counters | LRU eviction (max 1000) | LogSamplerTest |
 | EventMapDownloadManager unbounded states | LRU eviction (max 50) | EventMapDownloadManagerTest |
 | Memory pressure monitoring | SceneDelegate observer | Manual |

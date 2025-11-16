@@ -495,7 +495,8 @@ Filter: WWW.MapStore
 ### Common Cache Issues
 
 | Symptom | Cause | Solution |
-|---------|-------|----------|
+| --------- | ------- | ---------- |
+
 | Gray map tiles | Corrupt .mbtiles file | Delete cache, re-download |
 | "Map required" dialog | Files missing or gate active | Check MapDownloadGate state |
 | Slow first load | Lazy copy from split context | Expected behavior (one-time) |

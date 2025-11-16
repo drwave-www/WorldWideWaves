@@ -7,7 +7,7 @@ This directory contains the GitHub Actions workflows for the WorldWideWaves proj
 ### Core Workflows
 
 | Workflow | Purpose | Triggers | Duration |
-|----------|---------|----------|-----------|
+| -------- | ------- | -------- | -------- |
 | **01-build-android.yml** | Android compilation | Push/PR | ~5-8 min |
 | **02-build-ios.yml** | iOS compilation | Push/PR | ~8-12 min |
 | **03-code-quality.yml** | Code quality and linting | Push/PR | ~3-5 min |

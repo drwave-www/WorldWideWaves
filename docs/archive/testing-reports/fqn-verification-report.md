@@ -13,7 +13,8 @@
 ### Results at a Glance
 
 | Metric | Value |
-|--------|-------|
+| -------- | ------- |
+
 | Total Files Scanned | 27 |
 | Files with Issues | 0 |
 | Patterns Checked | 20 |
@@ -159,7 +160,8 @@ Status: PASS ✓
 ### Manual Verification Results
 
 | File | MapLibre FQNs | Coroutines FQNs | Compose FQNs | Internal FQNs | Status |
-|------|--------------|-----------------|--------------|---------------|---------|
+| ------ | -------------- | ----------------- | -------------- | --------------- | --------- |
+
 | BaseMapIntegrationTest.kt | 0 | 0 | 0 | 0 | ✓ PASS |
 | MainApplication.kt | 0 | 0 | 0 | 0 | ✓ PASS |
 | AccessibilityTest.kt | 0 | 0 | 0 | 0 | ✓ PASS |
@@ -212,7 +214,8 @@ All 27 files now adhere to this standard without exception.
 ### Code Quality Metrics
 
 | Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
+| -------- | -------- | ------- | ------------- |
+
 | Avg. Line Length | Longer | Shorter | ↓ 20-40 chars |
 | Code Readability | Medium | High | ↑ Significant |
 | Standards Compliance | Partial | Complete | ✓ 100% |
@@ -234,7 +237,8 @@ The refactoring commits **`5aa05937`** and **`44d587b8`** successfully eliminate
 ### Quality Assessment
 
 | Category | Rating |
-|----------|--------|
+| ---------- | -------- |
+
 | Refactoring Completeness | 5/5 |
 | Code Readability | 5/5 |
 | Standards Adherence | 5/5 |

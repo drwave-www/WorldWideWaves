@@ -1140,7 +1140,8 @@ xcrun simctl get_app_container booted com.worldwidewaves data
 ### Common Issues
 
 | Symptom | Likely Cause | Solution |
-|---------|--------------|----------|
+| --------- | -------------- | ---------- |
+
 | "Map required" after re-download | forcedUnavailable not cleared before check | Verify fix is applied (see git history) |
 | Map downloads every time | forcedUnavailable set incorrectly | Check SharedPreferences, clear manually |
 | Download stuck at Pending | Play Core service issue | Clear Play Store cache, restart device |

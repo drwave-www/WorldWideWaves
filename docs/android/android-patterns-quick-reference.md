@@ -280,7 +280,8 @@ map.addOnCameraMoveListener {
 ## Files to Reference
 
 | File | Lines | Purpose |
-|------|-------|---------|
+| ------ | ------- | --------- |
+
 | `AndroidMapLibreAdapter.kt` | 367-514 | Min zoom calculation & gesture setup |
 | `AndroidMapLibreAdapter.kt` | 596-635 | Viewport validation & camera clamping |
 | `MapBoundsEnforcer.kt` | 383-435 | Padding calculation (BOUNDS vs WINDOW) |

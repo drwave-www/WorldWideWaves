@@ -262,7 +262,8 @@ rg -n -A 3 "init\s*\{" shared/src/commonMain --type kotlin \
 ## Common Violations and Fixes
 
 | Violation | File Pattern | Fix |
-|-----------|--------------|-----|
+| ----------- | -------------- | ----- |
+
 | Object in Composable | `@Composable` with nested `object : KoinComponent` | Use IOSSafeDI singleton |
 | Init DI access | `init { get<T>() }` | Constructor injection |
 | Init coroutine | `init { scope.launch }` | Suspend initialize() |

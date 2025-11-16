@@ -15,7 +15,8 @@ This guide provides quick reference patterns for safe platform API usage in prod
 Quick reference table of frameworks:
 
 | Framework | Package | Primary Use Case | Thread Safety |
-|-----------|---------|------------------|---------------|
+| ----------- | --------- | ------------------ | --------------- |
+
 | UIKit | platform.UIKit.* | UI configuration, accessibility, app lifecycle | Main thread required |
 | Foundation | platform.Foundation.* | File I/O, dates, strings, user preferences | Thread-safe |
 | CoreLocation | platform.CoreLocation.* | GPS, location services | Thread-safe (delegate on main) |
@@ -756,7 +757,8 @@ From: `shared/src/iosMain/kotlin/com/worldwidewaves/shared/utils/Environment.ios
 Comprehensive threading requirements for all platform APIs:
 
 | API Category | Read Operations | Write Operations | Delegate/Callbacks | Notes |
-|-------------|-----------------|------------------|-------------------|-------|
+| ------------- | ----------------- | ------------------ | ------------------- | ------- |
+
 | UIKit | Main thread | Main thread | Main thread | CRITICAL - crashes if violated |
 | Foundation (file) | Any thread | Any thread | N/A | Thread-safe NSFileManager |
 | Foundation (date) | Any thread | Any thread | N/A | Thread-safe NSDateFormatter |

@@ -215,7 +215,8 @@ fun testEventFlow() = runTest {
 Comprehensive reference table for all patterns:
 
 | Pattern Name | File | Category | When to Use | Critical? |
-|-------------|------|----------|-------------|-----------|
+| ------------- | ------ | ---------- | ------------- | ----------- |
+
 | **IOSSafeDI Singleton** | [ios-safety-patterns.md](./ios-safety-patterns.md) | iOS Safety | DI access in shared code, @Composable functions | ✅ YES |
 | **Suspend Initialization** | [ios-safety-patterns.md](./ios-safety-patterns.md) | iOS Safety | Class initialization with async operations | ✅ YES |
 | **Kotlin-Swift Exception Handling** | [ios-safety-patterns.md](./ios-safety-patterns.md) | iOS Safety | Functions exposed to iOS Swift layer | ✅ YES |
@@ -323,7 +324,8 @@ Need reactive state/events?
 ### By Problem Domain
 
 | Problem | Pattern to Use | File |
-|---------|---------------|------|
+| --------- | --------------- | ------ |
+
 | iOS app freezes on launch | IOSSafeDI Singleton | [ios-safety-patterns.md](./ios-safety-patterns.md) |
 | NullPointerException in production | Safe Null Handling | [null-safety-patterns.md](./null-safety-patterns.md) |
 | Need to inject dependencies | Module Organization | [di-patterns.md](./di-patterns.md) |
@@ -336,7 +338,8 @@ Need reactive state/events?
 ### By Development Phase
 
 | Phase | Patterns to Review |
-|-------|-------------------|
+| ------- | ------------------- |
+
 | **Starting new feature** | DI Patterns, Reactive Patterns |
 | **Modifying shared code** | iOS Safety Patterns, Null Safety Patterns |
 | **Code review** | All Critical Patterns (iOS Safety, Null Safety) |

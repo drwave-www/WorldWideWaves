@@ -56,7 +56,8 @@ For deployment and production:
 ### Common Tasks
 
 | Task | Documentation |
-|------|--------------|
+| ------ | -------------- |
+
 | Quick answers to common questions | [FAQ](FAQ.md) |
 | Set up development environment | [Environment Setup](environment-setup.md) |
 | Run tests locally | [Development Workflow](development.md#testing) |
@@ -125,7 +126,8 @@ For deployment and production:
 ## Project Glossary
 
 | Term | Definition |
-|------|------------|
+| ------ | ------------ |
+
 | **Wave** | Synchronized event where participants perform coordinated action |
 | **Choreography** | Sequence of timed visual/audio effects during wave |
 | **Position Manager** | Unified system managing GPS and simulated positions |

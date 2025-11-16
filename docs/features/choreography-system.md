@@ -113,7 +113,8 @@ sequenceDiagram
 ### Key Classes
 
 | Class | Location | Responsibility |
-|-------|----------|----------------|
+| ------- | ---------- | ---------------- |
+
 | `ChoreographySequenceBuilder` | `/shared/src/commonMain/.../choreographies/` | Visual animation sequences (warming, waiting, hit) |
 | `SoundChoreographyPlayer` | `/shared/src/commonMain/.../choreographies/` | MIDI playback, note selection, sound emission |
 | `SoundChoreographyCoordinator` | `/shared/src/commonMain/.../sound/` | Global orchestration, background playback |
@@ -341,7 +342,8 @@ fun startObservingAllEvents() {
 Four synthesis waveforms available (via `SoundPlayer.Waveform` enum):
 
 | Waveform | Harmonics | Sound Character | Use Case |
-|----------|-----------|-----------------|----------|
+| ---------- | ----------- | ----------------- | ---------- |
+
 | `SINE` | Pure tone | Smooth, flute-like | Subtle background tones |
 | `SQUARE` | Rich harmonics | Buzzy, electronic | **Default** (maximum perceived loudness) |
 | `TRIANGLE` | Moderate harmonics | Softer than square | Balanced warmth |
@@ -778,7 +780,8 @@ suspend fun calculateProgression(event: IWWWEvent): Double {
 **Key Test Files**:
 
 | Test File | Focus | Location |
-|-----------|-------|----------|
+| ----------- | ------- | ---------- |
+
 | `ChoreographySequenceTest.kt` | Visual sequence loading, timing | `/shared/src/androidUnitTest/.../choreographies/` |
 | `SoundChoreographiesManagerTest.kt` | MIDI playback, note selection | `/shared/src/androidUnitTest/.../choreographies/` |
 | `CrowdSoundChoreographySimulationTest.kt` | 50-person crowd simulation | `/shared/src/androidUnitTest/.../choreographies/` |
@@ -905,7 +908,8 @@ xcrun simctl spawn booted log stream \
 **Common Causes**:
 
 | Issue | Diagnosis | Solution |
-|-------|-----------|----------|
+| ------- | ----------- | ---------- |
+
 | Audio engine not started | Log: "Audio engine not available (simulator mode)" | Run on physical device or enable audio I/O in simulator settings |
 | Invalid audio format | Log: "sampleRate=0.0, channels=0" | Use physical device (simulators often lack audio I/O) |
 | MIDI file not loaded | Log: "MIDI file returned null" | Verify `/composeResources/files/symfony.mid` exists |
@@ -932,7 +936,8 @@ adb logcat | grep -E "SoundChoreography|AndroidSoundPlayer|AudioTrack"
 **Common Causes**:
 
 | Issue | Diagnosis | Solution |
-|-------|-----------|----------|
+| ------- | ----------- | ---------- |
+
 | AudioTrack creation failed | Log: "Failed to create AudioTrack" | Check audio focus, ensure no other app has exclusive access |
 | Permission denied | Log: "Permission denied" | Verify `MODIFY_AUDIO_SETTINGS` in manifest |
 | Buffer underrun | Log: "Underrun occurred" | Increase buffer size or reduce sample rate |
@@ -954,7 +959,8 @@ Log.d("SoundSync", "activeNotes: ${activeNotes.size}")
 **Common Causes**:
 
 | Issue | Cause | Solution |
-|-------|-------|----------|
+| ------- | ------- | ---------- |
+
 | Clock skew | Devices using different time sources | Verify `IClock` implementation uses system time |
 | Event start time not synced | Firestore fetch failed/cached stale data | Force refresh event data before wave start |
 | MIDI parsing inconsistent | Different MIDI cache states | Call `MidiParser.clearCache()`, reload file |
@@ -987,7 +993,8 @@ find ./shared/src/commonMain/composeResources -name "*.mid"
 **Common Causes**:
 
 | Issue | Cause | Solution |
-|-------|-------|----------|
+| ------- | ------- | ---------- |
+
 | File missing | MIDI file not in resources | Add MIDI file to `/composeResources/files/` |
 | Path incorrect | Hardcoded path wrong | Use `WWWGlobals.FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE` |
 | Format invalid | Non-standard MIDI file | Validate MIDI file with `MidiParserTest` |
@@ -1007,7 +1014,8 @@ object FileSystem {
 **iOS**:
 
 | Issue | Cause | Solution |
-|-------|-------|----------|
+| ------- | ------- | ---------- |
+
 | Simulator no audio | iOS simulator lacks audio I/O | Test on physical device |
 | AVAudioEngine crash | Engine setup before audio session | Verify `setupAudioSession()` called in `init{}` |
 | Buffer allocation failed | Invalid frame capacity | Check `samples.size.toUInt()` is positive |
@@ -1016,7 +1024,8 @@ object FileSystem {
 **Android**:
 
 | Issue | Cause | Solution |
-|-------|-------|----------|
+| ------- | ------- | ---------- |
+
 | Volume not changing | `setStreamVolume()` called off Main thread | Wrap in `withContext(Dispatchers.Main)` |
 | AudioTrack underrun | Buffer too small | Increase `duration + 100.milliseconds` delay |
 | `MODE_STATIC` not working | Buffer size mismatch | Verify `bufferSizeInBytes` matches data size |

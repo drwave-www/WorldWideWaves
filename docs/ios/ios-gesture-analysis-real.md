@@ -211,7 +211,8 @@ Line 6434:  allowsScrolling=true,  allowsZooming=true   (after constraints)
 ## State Transition Table
 
 | State                          | Zoom (Camera) | Zoom (Gesture) | Viewport Size    | Pan Works? | Zoom Works? | Issue        | Lines      |
-|--------------------------------|---------------|----------------|------------------|------------|-------------|--------------|------------|
+| ------------------------------ | ------------- | -------------- | ---------------- | ---------- | ----------- | ------------ | ---------- |
+
 | Initial load (targetUser)      | 13.77         | 13.77          | 0.0085° x 0.0080°| ✅ YES     | ✅ YES      | None         | 1-10000    |
 | During pan (zoom 13.77)        | 13.77         | 13.77          | 0.0085° x 0.0080°| ⚠️ EDGE    | ✅ YES      | Viewport     | 10100-10600|
 | **After targetWave (zoom 13)** | **13.35**     | **11.12** ❌   | 0.0285° x 0.0270°| ❌ NO      | ❌ NO       | **DESYNC**   | 12870-16430|

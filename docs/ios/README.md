@@ -3,7 +3,8 @@
 ## Quick Start
 
 | Priority | Document | Purpose |
-|----------|----------|---------|
+| ---------- | ---------- | --------- |
+
 | 🔴 **START HERE** | [CLAUDE_iOS.md](../../CLAUDE_iOS.md) | Complete iOS development guide |
 | ✅ Current | [iOS Success State](ios-success-state.md) | Verify iOS app is working correctly |
 | ✅ Current | [iOS Debugging Guide](ios-debugging-guide.md) | Step-by-step debugging procedures |
@@ -11,7 +12,8 @@
 ## Architecture & Implementation
 
 | Document | Purpose | Status |
-|----------|---------|--------|
+| ---------- | --------- | -------- |
+
 | [Cinterop Memory Safety Patterns](cinterop-memory-safety-patterns.md) | Memory safety for iOS C/ObjC interop | **CRITICAL** |
 | [Swift-Kotlin Bridging Guide](swift-kotlin-bridging-guide.md) | Type conversions, @objc protocols, bridges | **CRITICAL** |
 | [Platform API Usage Guide](platform-api-usage-guide.md) | UIKit/Foundation/CoreLocation threading | **CRITICAL** |
@@ -23,7 +25,8 @@
 ## Accessibility
 
 | Document | Purpose |
-|----------|---------|
+| ---------- | --------- |
+
 | [iOS Map Accessibility](ios-map-accessibility.md) | VoiceOver & Dynamic Type implementation |
 
 ## Getting Started with iOS Development

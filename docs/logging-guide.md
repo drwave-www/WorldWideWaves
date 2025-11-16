@@ -101,7 +101,8 @@ object LogConfig {
 **Flag Behavior by Build Type**:
 
 | Build Type | VERBOSE | DEBUG | PERFORMANCE | POSITION_TRACKING |
-|------------|---------|-------|-------------|-------------------|
+| ------------ | --------- | ------- | ------------- | ------------------- |
+
 | Debug      | ✅ ON   | ✅ ON | ✅ ON       | ✅ ON             |
 | Release    | ❌ OFF  | ❌ OFF| ❌ OFF      | ❌ OFF            |
 | Beta       | ❌ OFF  | ✅ ON | ❌ OFF      | ❌ OFF            |
@@ -820,7 +821,8 @@ os_log("User at %@", position)           // Shows <private>
 ### Cross-Platform Differences
 
 | Feature | Android (Logcat) | iOS (Unified Logging) |
-|---------|------------------|-----------------------|
+| --------- | ------------------ | ----------------------- |
+
 | Tag length | 23 chars max | No limit |
 | Privacy | Manual redaction | Auto-redacts strings |
 | Buffer size | ~256KB | Much larger (system-managed) |
@@ -1462,7 +1464,8 @@ Log.performance(TAG, "[PERF] Measurement")
 ### Build Configuration Flags
 
 | Flag | Debug | Beta | Release |
-|------|-------|------|---------|
+| ------ | ------- | ------ | --------- |
+
 | `ENABLE_VERBOSE_LOGGING` | ✅ | ❌ | ❌ |
 | `ENABLE_DEBUG_LOGGING` | ✅ | ✅ | ❌ |
 | `ENABLE_PERFORMANCE_LOGGING` | ✅ | ❌ | ❌ |

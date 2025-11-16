@@ -77,7 +77,8 @@ sdkmanager "platforms;android-34" \
 **Recommended Emulator Setup**:
 
 | Setting | Value |
-|---------|-------|
+| --------- | ------- |
+
 | Device | Pixel 6 Pro |
 | System Image | Android 14 (API 34) with Google APIs |
 | RAM | 4096 MB |
@@ -434,7 +435,8 @@ ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest
 **Main Activities**:
 
 | Activity | Purpose | Lifecycle Notes |
-|----------|---------|----------------|
+| ---------- | --------- | ---------------- |
+
 | `MainActivity` | Entry point, event list | Hosts `MainScreen` Composable |
 | `EventActivity` | Event detail screen | Receives `eventId` via Intent |
 | `WaveActivity` | Wave participation | Manages real-time coordination |
