@@ -158,6 +158,25 @@ open class MainApplication :
                 )
             }
         }
+
+        // -------------------------------------------------------------------- //
+        //  One-time Paris cache fix for v1.0.2
+        //  Paris map in v1.0.1 had corrupted mbtiles (Git LFS pointer instead
+        //  of actual database). Force cache invalidation to ensure users
+        //  download the corrected map. This can be removed in v1.0.3.
+        // -------------------------------------------------------------------- //
+        @Suppress("MagicNumber") // Version code 55 = v1.0.2
+        if (BuildConfig.VERSION_CODE == 55) {
+            MainScope().launch {
+                try {
+                    com.worldwidewaves.shared.data
+                        .clearEventCache("paris_france")
+                    Log.i("MainApplication", "Cleared Paris cache for v1.0.2 corruption fix")
+                } catch (e: Exception) {
+                    Log.w("MainApplication", "Failed to clear Paris cache", e)
+                }
+            }
+        }
     }
 
     /**

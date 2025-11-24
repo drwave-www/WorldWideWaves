@@ -841,6 +841,38 @@ EOF
 | Map gestures not working (iOS) | Wrong property names | Use `isZoomEnabled/isScrollEnabled` |
 | Null pointer crash | Force unwrap `!!` | Use `?.` with `?:` or `requireNotNull()` |
 | Camera animation stops mid-flight (Android) | Native MapLibre constraint bounds | Fixed: Constraints temporarily removed during programmatic animations |
+| Map crash: "file is not a database" | Git LFS pointer file | Run `git lfs checkout` or `./scripts/dev/verification/verify-lfs-files.sh` |
+
+### Git LFS Issues
+
+**Symptom**: MapLibre crashes with "file is not a database" or map files are suspiciously small (< 1KB).
+
+**Cause**: Map `.mbtiles` files are Git LFS pointers instead of actual SQLite databases. This happens when:
+
+- Git LFS is not properly installed (`git lfs install`)
+- Files were cloned before LFS setup
+- LFS files were not checked out after clone
+
+**Solution**:
+
+```bash
+# Check LFS status
+git lfs status
+
+# Files showing "-" (dash) are not downloaded
+# Files showing "*" (asterisk) are properly downloaded
+
+# Download all LFS files
+git lfs checkout
+
+# Or download specific file
+git lfs checkout "maps/paris_france/src/main/assets/paris_france.mbtiles"
+
+# Verify fix
+./scripts/dev/verification/verify-lfs-files.sh
+```
+
+**Prevention**: Pre-commit hook automatically checks for LFS pointer files before commits.
 
 ---
 

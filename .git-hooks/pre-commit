@@ -76,6 +76,40 @@ fi
 
 echo "✅ Security checks passed"
 
+# ============================================================
+# GIT LFS VERIFICATION - PREVENT POINTER FILES FROM BEING COMMITTED
+# ============================================================
+echo "🗂️  Verifying Git LFS files..."
+
+# Check if any .mbtiles files are staged
+staged_mbtiles=$(git diff --cached --name-only --diff-filter=AM | grep '\.mbtiles$' || true)
+
+if [ -n "$staged_mbtiles" ]; then
+    # Run LFS verification script
+    if [ -f "scripts/dev/verification/verify-lfs-files.sh" ]; then
+        if ! ./scripts/dev/verification/verify-lfs-files.sh; then
+            echo "❌ ERROR: Git LFS pointer files detected in commit!"
+            echo "   Run 'git lfs checkout' to download actual files."
+            exit 1
+        fi
+    else
+        echo "⚠️  LFS verification script not found. Checking manually..."
+        for file in $staged_mbtiles; do
+            if [ -f "$file" ]; then
+                # Check if file is suspiciously small (< 1KB = likely a pointer)
+                size=$(wc -c < "$file")
+                if [ "$size" -lt 1000 ]; then
+                    echo "❌ ERROR: $file appears to be a Git LFS pointer ($size bytes)"
+                    echo "   Run: git lfs checkout \"$file\""
+                    exit 1
+                fi
+            fi
+        done
+    fi
+fi
+
+echo "✅ Git LFS verification passed"
+
 # Check if there are any staged Kotlin files
 staged_kotlin_files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(kt|kts)$' || true)
 
