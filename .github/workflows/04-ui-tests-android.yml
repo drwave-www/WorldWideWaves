@@ -123,7 +123,7 @@ jobs:
 
       - name: Upload Test Results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: instrumented-test-results-api${{ matrix.api-level }}
           path: |
@@ -133,7 +133,7 @@ jobs:
 
       - name: Upload Screenshots
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ui-test-screenshots-api${{ matrix.api-level }}
           path: artifacts/screenshots/
@@ -141,7 +141,7 @@ jobs:
 
       - name: Upload Test Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: test-reports-api${{ matrix.api-level }}
           path: |
@@ -261,7 +261,7 @@ jobs:
           echo "- Integration: Map services, real-time coordination, wave choreography" >> performance-report.md
 
       - name: Upload Performance Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ui-test-performance-report
           path: performance-report.md
