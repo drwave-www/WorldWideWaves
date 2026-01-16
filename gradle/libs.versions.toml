@@ -1,6 +1,6 @@
 [versions]
 firebaseBom = "34.3.0"
-j2objcAnnotations = "2.8"
+j2objcAnnotations = "3.1"
 agp = "8.13.0"
 android-compileSdk = "36"
 android-minSdk = "24"
