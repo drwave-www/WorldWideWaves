@@ -38,8 +38,11 @@ jobs:
 
       - name: Compile Android Sources (without APK assembly)
         env:
-          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-          FIREBASE_PROJECT_NUMBER: ${{ secrets.FIREBASE_PROJECT_NUMBER }}
-          FIREBASE_MOBILE_SDK_APP_ID: ${{ secrets.FIREBASE_MOBILE_SDK_APP_ID }}
-          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          # Use real secrets when available, otherwise use placeholders for Dependabot PRs
+          # Dependabot PRs don't have access to secrets, so we provide dummy values
+          # that allow compilation to succeed (actual Firebase functionality is not tested)
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID || 'dependabot-placeholder' }}
+          FIREBASE_PROJECT_NUMBER: ${{ secrets.FIREBASE_PROJECT_NUMBER || '000000000000' }}
+          FIREBASE_MOBILE_SDK_APP_ID: ${{ secrets.FIREBASE_MOBILE_SDK_APP_ID || '1:000000000000:android:0000000000000000' }}
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY || 'AIzaSyDependabotPlaceholderKey000000' }}
         run: ./gradlew :shared:compileDebugKotlinAndroid :shared:compileReleaseKotlinAndroid :composeApp:compileDebugKotlinAndroid :composeApp:compileReleaseKotlinAndroid --stacktrace

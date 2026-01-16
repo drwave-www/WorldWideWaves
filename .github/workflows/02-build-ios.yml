@@ -38,18 +38,22 @@ jobs:
 
       - name: Build iOS Framework (Simulator)
         env:
-          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-          FIREBASE_PROJECT_NUMBER: ${{ secrets.FIREBASE_PROJECT_NUMBER }}
-          FIREBASE_IOS_APP_ID: ${{ secrets.FIREBASE_IOS_APP_ID }}
-          FIREBASE_IOS_API_KEY: ${{ secrets.FIREBASE_IOS_API_KEY }}
+          # Use real secrets when available, otherwise use placeholders for Dependabot PRs
+          # Dependabot PRs don't have access to secrets, so we provide dummy values
+          # that allow compilation to succeed (actual Firebase functionality is not tested)
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID || 'dependabot-placeholder' }}
+          FIREBASE_PROJECT_NUMBER: ${{ secrets.FIREBASE_PROJECT_NUMBER || '000000000000' }}
+          FIREBASE_IOS_APP_ID: ${{ secrets.FIREBASE_IOS_APP_ID || '1:000000000000:ios:0000000000000000' }}
+          FIREBASE_IOS_API_KEY: ${{ secrets.FIREBASE_IOS_API_KEY || 'AIzaSyDependabotPlaceholderKey000000' }}
         run: ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64 --stacktrace
 
       - name: Build iOS Framework (Device)
         env:
-          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-          FIREBASE_PROJECT_NUMBER: ${{ secrets.FIREBASE_PROJECT_NUMBER }}
-          FIREBASE_IOS_APP_ID: ${{ secrets.FIREBASE_IOS_APP_ID }}
-          FIREBASE_IOS_API_KEY: ${{ secrets.FIREBASE_IOS_API_KEY }}
+          # Use real secrets when available, otherwise use placeholders for Dependabot PRs
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID || 'dependabot-placeholder' }}
+          FIREBASE_PROJECT_NUMBER: ${{ secrets.FIREBASE_PROJECT_NUMBER || '000000000000' }}
+          FIREBASE_IOS_APP_ID: ${{ secrets.FIREBASE_IOS_APP_ID || '1:000000000000:ios:0000000000000000' }}
+          FIREBASE_IOS_API_KEY: ${{ secrets.FIREBASE_IOS_API_KEY || 'AIzaSyDependabotPlaceholderKey000000' }}
         run: ./gradlew :shared:linkDebugFrameworkIosArm64 --stacktrace
 
   # iOS App build disabled - framework build is sufficient for KMM

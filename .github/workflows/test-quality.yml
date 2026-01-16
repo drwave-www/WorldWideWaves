@@ -52,10 +52,11 @@ jobs:
 
     - name: Run unit tests with performance monitoring
       env:
-        FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-        FIREBASE_PROJECT_NUMBER: ${{ secrets.FIREBASE_PROJECT_NUMBER }}
-        FIREBASE_MOBILE_SDK_APP_ID: ${{ secrets.FIREBASE_MOBILE_SDK_APP_ID }}
-        FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+        # Use real secrets when available, otherwise use placeholders for Dependabot PRs
+        FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID || 'dependabot-placeholder' }}
+        FIREBASE_PROJECT_NUMBER: ${{ secrets.FIREBASE_PROJECT_NUMBER || '000000000000' }}
+        FIREBASE_MOBILE_SDK_APP_ID: ${{ secrets.FIREBASE_MOBILE_SDK_APP_ID || '1:000000000000:android:0000000000000000' }}
+        FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY || 'AIzaSyDependabotPlaceholderKey000000' }}
       run: |
         echo "🧪 Running unit tests with performance monitoring..."
         ./gradlew :shared:testDebugUnitTest --parallel --build-cache
