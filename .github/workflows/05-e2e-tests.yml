@@ -130,7 +130,7 @@ jobs:
 
     - name: Upload Test Results
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: test-results-api-${{ matrix.api-level }}
         path: |
@@ -141,7 +141,7 @@ jobs:
 
     - name: Upload APKs for debugging
       if: failure()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: debug-apks-api-${{ matrix.api-level }}
         path: |

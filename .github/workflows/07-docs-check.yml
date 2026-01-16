@@ -82,7 +82,7 @@ jobs:
 
       - name: Upload Link Check Results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: link-check-results
           path: lychee-results.md
@@ -142,7 +142,7 @@ jobs:
 
       - name: Upload Markdown Lint Results
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: markdown-lint-results
           path: .markdownlint-cli2-results.json
