@@ -288,7 +288,7 @@ dependencies {
 configurations.all {
     resolutionStrategy {
         // Force newer protobuf-javalite to prevent NoSuchMethodError in tests
-        force("com.google.protobuf:protobuf-javalite:3.25.5")
+        force("com.google.protobuf:protobuf-javalite:4.33.4")
         // Exclude old protobuf-lite to prevent conflicts
         exclude(group = "com.google.protobuf", module = "protobuf-lite")
     }
