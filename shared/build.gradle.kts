@@ -103,12 +103,12 @@ kotlin {
             implementation(libs.napier)
 
             // Use explicit Compose versions for iOS compatibility (working config from cd6a8f37)
-            implementation("org.jetbrains.compose.runtime:runtime:1.8.2")
-            implementation("org.jetbrains.compose.ui:ui:1.8.2")
-            implementation("org.jetbrains.compose.foundation:foundation:1.8.2")
-            implementation("org.jetbrains.compose.material:material:1.8.2")
-            implementation("org.jetbrains.compose.material3:material3:1.8.2")
-            implementation("org.jetbrains.compose.components:components-resources:1.8.2")
+            implementation("org.jetbrains.compose.runtime:runtime:1.9.0")
+            implementation("org.jetbrains.compose.ui:ui:1.9.0")
+            implementation("org.jetbrains.compose.foundation:foundation:1.9.0")
+            implementation("org.jetbrains.compose.material:material:1.10.0")
+            implementation("org.jetbrains.compose.material3:material3:1.9.0")
+            implementation("org.jetbrains.compose.components:components-resources:1.9.0")
             implementation(compose.materialIconsExtended)
 
             // REQUIRED so IOSLifecycleOwner can link:
