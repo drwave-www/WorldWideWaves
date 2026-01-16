@@ -276,7 +276,7 @@ Choose "Git Bash" option during installation.
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/mglcel/WorldWideWaves.git
+git clone https://github.com/drwave-www/WorldWideWaves.git
 cd WorldWideWaves
 ```
 

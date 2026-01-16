@@ -6,7 +6,7 @@ Thank you for your interest in contributing to WorldWideWaves. This guide covers
 
 1. Read the [Environment Setup](environment-setup.md) guide
 2. Review the [Architecture](architecture.md) documentation
-3. Check existing [issues](https://github.com/mglcel/WorldWideWaves/issues)
+3. Check existing [issues](https://github.com/drwave-www/WorldWideWaves/issues)
 4. Join discussions in pull requests
 
 ## Ways to Contribute
@@ -683,8 +683,8 @@ Any other context, mockups, or examples.
 
 ## Questions?
 
-- Open a [discussion](https://github.com/mglcel/WorldWideWaves/discussions)
-- Check existing [issues](https://github.com/mglcel/WorldWideWaves/issues)
+- Open a [discussion](https://github.com/drwave-www/WorldWideWaves/discussions)
+- Check existing [issues](https://github.com/drwave-www/WorldWideWaves/issues)
 - Review [documentation](../README.md)
 
 ## Further Reading

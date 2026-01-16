@@ -358,7 +358,7 @@ tasks.named<org.jetbrains.dokka.gradle.DokkaTask>("dokkaHtml").configure {
             sourceLink {
                 localDirectory.set(file("src/commonMain/kotlin"))
                 remoteUrl.set(
-                    URL("https://github.com/mglcel/WorldWideWaves/tree/main/shared/src/commonMain/kotlin"),
+                    URL("https://github.com/drwave-www/WorldWideWaves/tree/main/shared/src/commonMain/kotlin"),
                 )
                 remoteLineSuffix.set("#L")
             }

@@ -657,8 +657,8 @@ Historical documentation (session summaries, refactoring reports, test results) 
 
 ### Project Support
 
-- **Issues**: [GitHub Issues](https://github.com/mglcel/WorldWideWaves/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/mglcel/WorldWideWaves/discussions)
+- **Issues**: [GitHub Issues](https://github.com/drwave-www/WorldWideWaves/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/drwave-www/WorldWideWaves/discussions)
 - **Pull Requests**: See [Contributing Guidelines](contributing.md)
 
 ---

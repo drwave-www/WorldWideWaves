@@ -167,9 +167,9 @@ For deployment and production:
 
 Found an issue or have a suggestion?
 
-- Open an issue: [WorldWideWaves Issues](https://github.com/mglcel/WorldWideWaves/issues)
+- Open an issue: [WorldWideWaves Issues](https://github.com/drwave-www/WorldWideWaves/issues)
 - Submit a PR with documentation improvements
-- Discussion: [WorldWideWaves Discussions](https://github.com/mglcel/WorldWideWaves/discussions)
+- Discussion: [WorldWideWaves Discussions](https://github.com/drwave-www/WorldWideWaves/discussions)
 
 
 ---

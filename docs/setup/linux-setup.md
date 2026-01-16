@@ -660,7 +660,7 @@ git config --global user.email "your.email@example.com"
 
 ```bash
 # Clone repository
-git clone https://github.com/mglcel/WorldWideWaves.git
+git clone https://github.com/drwave-www/WorldWideWaves.git
 cd WorldWideWaves
 ```
 
@@ -1057,8 +1057,8 @@ sudo pacman -Syu
 ### Getting Help
 
 - **Documentation**: Check `docs/` directory
-- **Issues**: [GitHub Issues](https://github.com/mglcel/WorldWideWaves/issues)
-- **CI/CD**: [GitHub Actions](https://github.com/mglcel/WorldWideWaves/actions)
+- **Issues**: [GitHub Issues](https://github.com/drwave-www/WorldWideWaves/issues)
+- **CI/CD**: [GitHub Actions](https://github.com/drwave-www/WorldWideWaves/actions)
 
 ---
 

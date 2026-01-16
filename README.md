@@ -5,10 +5,10 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/mglcel/WorldWideWaves/actions/workflows/99-pipeline-status.yml"><img src="https://github.com/mglcel/WorldWideWaves/actions/workflows/99-pipeline-status.yml/badge.svg" alt="Overall Status"></a>
-  <a href="https://github.com/mglcel/WorldWideWaves/actions/workflows/03-code-quality.yml"><img src="https://github.com/mglcel/WorldWideWaves/actions/workflows/03-code-quality.yml/badge.svg" alt="Quality & Security"></a>
-  <a href="https://github.com/mglcel/WorldWideWaves/actions/workflows/01-build-android.yml"><img src="https://github.com/mglcel/WorldWideWaves/actions/workflows/01-build-android.yml/badge.svg" alt="Android Build"></a>
-  <a href="https://github.com/mglcel/WorldWideWaves/actions/workflows/02-build-ios.yml"><img src="https://github.com/mglcel/WorldWideWaves/actions/workflows/02-build-ios.yml/badge.svg" alt="iOS Build"></a>
+  <a href="https://github.com/drwave-www/WorldWideWaves/actions/workflows/99-pipeline-status.yml"><img src="https://github.com/drwave-www/WorldWideWaves/actions/workflows/99-pipeline-status.yml/badge.svg" alt="Overall Status"></a>
+  <a href="https://github.com/drwave-www/WorldWideWaves/actions/workflows/03-code-quality.yml"><img src="https://github.com/drwave-www/WorldWideWaves/actions/workflows/03-code-quality.yml/badge.svg" alt="Quality & Security"></a>
+  <a href="https://github.com/drwave-www/WorldWideWaves/actions/workflows/01-build-android.yml"><img src="https://github.com/drwave-www/WorldWideWaves/actions/workflows/01-build-android.yml/badge.svg" alt="Android Build"></a>
+  <a href="https://github.com/drwave-www/WorldWideWaves/actions/workflows/02-build-ios.yml"><img src="https://github.com/drwave-www/WorldWideWaves/actions/workflows/02-build-ios.yml/badge.svg" alt="iOS Build"></a>
 </p>
 
 <p align="center">
@@ -188,7 +188,7 @@ See [docs/environment-setup.md](docs/environment-setup.md) for complete setup in
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/mglcel/WorldWideWaves.git
+git clone https://github.com/drwave-www/WorldWideWaves.git
 cd WorldWideWaves
 ```
 
@@ -278,7 +278,7 @@ See [docs/development.md](docs/development.md) for detailed workflows and troubl
 We welcome contributions. Please follow these guidelines:
 
 1. Read [docs/contributing.md](docs/contributing.md)
-2. Check existing [issues](https://github.com/mglcel/WorldWideWaves/issues)
+2. Check existing [issues](https://github.com/drwave-www/WorldWideWaves/issues)
 3. Fork repository and create feature branch
 4. Follow commit convention: `<type>(<scope>): <subject>`
 5. Add tests for new functionality
@@ -343,7 +343,7 @@ Comprehensive documentation is available in the `docs/` directory.
 
 - **[CLAUDE.md](CLAUDE.md)** - Complete project development guide (start here for development)
 - **[CLAUDE_iOS.md](CLAUDE_iOS.md)** - iOS-specific development rules and deadlock prevention
-- **[API Documentation](https://mglcel.github.io/WorldWideWaves/dokka/)** - Complete API reference (Dokka-generated, auto-updated)
+- **[API Documentation](https://drwave-www.github.io/WorldWideWaves/dokka/)** - Complete API reference (Dokka-generated, auto-updated)
 - [Environment Setup](docs/environment-setup.md) - Development environment configuration (macOS, Linux, Windows)
 
 ### Development Guides

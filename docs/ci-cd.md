@@ -470,7 +470,7 @@ The repository includes pre-commit hooks that prevent accidental secret commits:
 **Badge URL:**
 
 ```markdown
-[![Overall Status](https://github.com/mglcel/WorldWideWaves/actions/workflows/99-pipeline-status.yml/badge.svg)](https://github.com/mglcel/WorldWideWaves/actions/workflows/99-pipeline-status.yml)
+[![Overall Status](https://github.com/drwave-www/WorldWideWaves/actions/workflows/99-pipeline-status.yml/badge.svg)](https://github.com/drwave-www/WorldWideWaves/actions/workflows/99-pipeline-status.yml)
 ```
 
 ### Test Quality Validation

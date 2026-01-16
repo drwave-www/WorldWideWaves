@@ -301,7 +301,7 @@ Use real implementations, mock only external dependencies (network, sensors). Se
 ### How do I contribute to WorldWideWaves?
 
 1. Read [Contributing Guide](contributing.md) and [Environment Setup](environment-setup.md)
-2. Check existing [GitHub issues](https://github.com/mglcel/WorldWideWaves/issues)
+2. Check existing [GitHub issues](https://github.com/drwave-www/WorldWideWaves/issues)
 3. Fork repository and create feature branch (`feat/your-feature-name`)
 4. Follow commit convention: `<type>(<scope>): <subject>`
 5. Add tests for new functionality and ensure all CI checks pass
@@ -588,8 +588,8 @@ Verify hooks installed: `ls -la .git/hooks/`
 - **Documentation Index**: [docs/README.md](README.md)
 - **Complete Development Guide**: [CLAUDE.md](../CLAUDE.md)
 - **iOS Development**: [CLAUDE_iOS.md](../CLAUDE_iOS.md)
-- **GitHub Issues**: [Issues Page](https://github.com/mglcel/WorldWideWaves/issues)
-- **GitHub Discussions**: [Discussions](https://github.com/mglcel/WorldWideWaves/discussions)
+- **GitHub Issues**: [Issues Page](https://github.com/drwave-www/WorldWideWaves/issues)
+- **GitHub Discussions**: [Discussions](https://github.com/drwave-www/WorldWideWaves/discussions)
 
 ---
 
