@@ -55,7 +55,7 @@ icerockMoko = "0.25.2"
 ktlint = "1.4.1"
 detekt = "1.23.7"
 material3 = "1.4.0"
-buildkonfig = "0.15.2"
+buildkonfig = "0.17.1"
 dokka = "1.9.20"
 
 [libraries]
