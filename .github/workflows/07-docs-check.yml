@@ -37,7 +37,7 @@ jobs:
           restore-keys: cache-lychee-
 
       - name: Check Links with Lychee
-        uses: lycheeverse/lychee-action@v2.0.2
+        uses: lycheeverse/lychee-action@v2.7.0
         with:
           # Check all markdown files recursively
           # Note: --exclude-mail removed as it's deprecated (email is not checked by default in lychee 0.15+)
