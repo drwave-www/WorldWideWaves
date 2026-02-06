@@ -7,7 +7,7 @@ This guide shows how to configure Xcode to automatically generate `GoogleService
 **Current Behavior**:
 
 - **Android**: ✅ Automatic - `google-services.json` generated during every build
-- **iOS**: ❌ Manual - Requires running `./scripts/generate_firebase_config.sh ios`
+- **iOS**: ❌ Manual - Requires running `./scripts/dev/build/generate_ios_firebase_config.sh`
 
 **After Setup**:
 
@@ -46,7 +46,7 @@ open worldwidewaves.xcodeproj
 
 set -e
 
-SCRIPT_PATH="${PROJECT_DIR}/../scripts/generate_ios_firebase_config.sh"
+SCRIPT_PATH="${PROJECT_DIR}/../scripts/dev/build/generate_ios_firebase_config.sh"
 
 # Check if script exists
 if [ ! -f "$SCRIPT_PATH" ]; then
@@ -104,7 +104,7 @@ Check the build log for:
 Xcode Build Started
     ↓
 [NEW] Run Script: Generate Firebase Config
-    ↓ Calls: ../scripts/generate_ios_firebase_config.sh
+    ↓ Calls: ../scripts/dev/build/generate_ios_firebase_config.sh
     ↓ Reads: local.properties or environment variables
     ↓ Generates: GoogleService-Info.plist
     ↓
@@ -145,7 +145,7 @@ error: Firebase config generation script not found
 
 - Xcode project: `iosApp/worldwidewaves.xcodeproj`
 - Script location: `scripts/generate_ios_firebase_config.sh`
-- Relative path: `../scripts/generate_ios_firebase_config.sh`
+- Relative path: `../scripts/dev/build/generate_ios_firebase_config.sh`
 
 ### Generation Failed Error
 
@@ -174,7 +174,7 @@ Required fields:
 **Solution**:
 
 1. Verify Run Script Phase is **before** "Compile Sources"
-2. Run once manually to bootstrap: `./scripts/generate_ios_firebase_config.sh`
+2. Run once manually to bootstrap: `./scripts/dev/build/generate_ios_firebase_config.sh`
 3. Clean build folder: Product → Clean Build Folder (Cmd+Shift+K)
 4. Rebuild
 
@@ -220,10 +220,10 @@ You can still generate manually if needed:
 
 ```bash
 # iOS only
-./scripts/generate_ios_firebase_config.sh
+./scripts/dev/build/generate_ios_firebase_config.sh
 
 # Both platforms
-./scripts/generate_firebase_config.sh all
+./scripts/dev/build/generate_firebase_config.sh all
 ```
 
 Manual generation is useful for:
@@ -251,7 +251,7 @@ tasks.named("preBuild") {
 **Location**: Xcode → Target → Build Phases → Run Script
 
 ```bash
-"${PROJECT_DIR}/../scripts/generate_ios_firebase_config.sh"
+"${PROJECT_DIR}/../scripts/dev/build/generate_ios_firebase_config.sh"
 # Auto-runs before compile phase
 ```
 

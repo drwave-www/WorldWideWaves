@@ -203,12 +203,18 @@ FIREBASE_PROJECT_ID=your-project-id
 FIREBASE_PROJECT_NUMBER=123456789012
 FIREBASE_MOBILE_SDK_APP_ID=1:123456789012:android:abcdef1234567890
 FIREBASE_API_KEY=AIzaSyABCDEF1234567890
+FIREBASE_IOS_APP_ID=1:123456789012:ios:abcdef1234567890
+FIREBASE_IOS_API_KEY=AIzaSyABCDEF1234567890
 ```
 
 Generate Firebase configuration:
 
 ```bash
+# Android (auto-generated during build, or manually):
 ./gradlew generateFirebaseConfig
+
+# iOS (run once, or set up auto-generation in Xcode):
+./scripts/dev/build/generate_ios_firebase_config.sh
 ```
 
 ### 3. Build Project
