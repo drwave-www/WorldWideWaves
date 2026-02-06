@@ -35,6 +35,9 @@ jobs:
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
+      - name: Select Xcode 16.4
+        run: sudo xcode-select --switch /Applications/Xcode_16.4.app/Contents/Developer
+
       - name: Build iOS Framework (Simulator)
         env:
           # Use real secrets when available, otherwise use placeholders for Dependabot PRs
