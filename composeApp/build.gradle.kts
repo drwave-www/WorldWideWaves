@@ -135,6 +135,8 @@ android {
                 "META-INF/LICENSE.md",
                 "META-INF/LICENSE-notice.md",
                 "/META-INF/{AL2.0,LGPL2.1}",
+                // Exclude duplicate protobuf .proto files from Firebase and protobuf-javalite
+                "google/protobuf/*.proto",
             ),
         )
 
@@ -292,6 +294,9 @@ configurations.all {
         // Exclude old protobuf-lite to prevent conflicts
         exclude(group = "com.google.protobuf", module = "protobuf-lite")
     }
+    // Exclude protolite-well-known-types which bundles duplicate protobuf classes
+    // that conflict with our forced protobuf-javalite version
+    exclude(group = "com.google.firebase", module = "protolite-well-known-types")
 }
 
 // Firebase Configuration Generation Task
@@ -300,6 +305,8 @@ tasks.register("generateFirebaseConfig") {
     description = "Generates google-services.json from local.properties or environment variables"
 
     val googleServicesFile = file("google-services.json")
+    // Resolve rootProject.file() during configuration time for configuration cache compatibility
+    val localPropertiesFile = rootProject.file("local.properties")
     outputs.file(googleServicesFile)
 
     doLast {
@@ -310,7 +317,6 @@ tasks.register("generateFirebaseConfig") {
         }
 
         val properties = Properties()
-        val localPropertiesFile = rootProject.file("local.properties")
 
         // Load from local.properties if it exists
         if (localPropertiesFile.exists()) {
