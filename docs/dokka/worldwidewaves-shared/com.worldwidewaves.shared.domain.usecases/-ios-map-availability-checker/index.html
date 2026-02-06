@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-<html class="no-js">
+<html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>IosMapAvailabilityChecker</title>
     <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
-    <script>var pathToRoot = "../../../";</script>
-    <script>document.documentElement.classList.replace("no-js","js");</script>
+        <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
-    if (storage == null) {
+      if (storage == null) {
         const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
         if (osDarkSchemePreferred === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    } else {
+      } else {
         const savedDarkMode = JSON.parse(storage)
-        if(savedDarkMode === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    }
+      }
     </script>
 <script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
 <script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
@@ -25,68 +25,111 @@
 <link href="../../../styles/main.css" rel="Stylesheet">
 <link href="../../../styles/prism.css" rel="Stylesheet">
 <link href="../../../styles/logo-styles.css" rel="Stylesheet">
-<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
-<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
 <script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
 <script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
 <script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
 <script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
-<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer="defer"></script>
 </head>
 <body>
-    <div class="root">
-<nav class="navigation" id="navigation-wrapper">
-    <div class="navigation--inner">
-        <div class="navigation-title">
-            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
-            <div class="library-name">
-                    <a class="library-name--link" href="../../../index.html">
-                            worldwidewaves-shared
-                    </a>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+            <a class="library-name--link" href="../../../index.html" tabindex="1">
+                    worldwidewaves-shared
+            </a>
+        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle"
+                type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true"
+                        data-filter=":shared/iosMain">ios</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox"
+                        data-role="dropdown-toggle"
+                        aria-controls="platform-tags-listbox"
+                        aria-haspopup="listbox"
+                        aria-expanded="false"
+                        aria-label="Toggle source sets"
+                ></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":shared/iosMain"
+                                       data-filter=":shared/iosMain"/>
+                                <span class="checkbox--icon"></span>
+                                ios
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
             </div>
-            <div class="library-version">
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button"
+                    type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
             </div>
         </div>
-        <div class="filter-section" id="filter-section">
-                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":shared:dokkaHtml/iosMain">ios</button>
-        </div>
-    </div>
-    <div class="navigation-controls">
-        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
-        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
-    </div>
-</nav>
-        <div id="container">
-            <div class="sidebar" id="leftColumn">
-                <div class="sidebar--inner" id="sideMenu"></div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config='{"defaultSize": 280, "minSize": 200, "maxSize": 400}'>
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list"
+                    data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    worldwidewaves-shared
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
             </div>
-            <div id="main">
-<div class="main-content" data-page-type="classlike" id="content" pageIds="worldwidewaves-shared::com.worldwidewaves.shared.domain.usecases/IosMapAvailabilityChecker///PointingToDeclaration//59985791">
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="worldwidewaves-shared::com.worldwidewaves.shared.domain.usecases/IosMapAvailabilityChecker///PointingToDeclaration//-750443048">
   <div class="breadcrumbs"><a href="../../../index.html">worldwidewaves-shared</a><span class="delimiter">/</span><a href="../index.html">com.worldwidewaves.shared.domain.usecases</a><span class="delimiter">/</span><span class="current">IosMapAvailabilityChecker</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Ios</span><wbr></wbr><span>Map</span><wbr></wbr><span>Availability</span><wbr></wbr><span><span>Checker</span></span></h1>
     <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">IosMapAvailabilityChecker</a> : <span data-unresolved-link="com.worldwidewaves.shared.domain.usecases/MapAvailabilityChecker///PointingToDeclaration/">MapAvailabilityChecker</span></div><p class="paragraph">iOS ODR (On-Demand Resources) availability checker.</p><p class="paragraph">PLATFORM DIFFERENCES FROM ANDROID:</p><p class="paragraph">iOS uses NSBundleResourceRequest for map management: • <strong>Immediate uninstall</strong>: Resources deleted immediately on endAccessingResources() • <strong>No deferred uninstall</strong>: Files gone as soon as released (vs Android where files remain) • <strong>No forcedUnavailable flag needed</strong>: File state = availability state (no override needed) • <strong>No persistence required</strong>: Resources re-checked on app launch • <strong>Resource pinning</strong>: Must keep NSBundleResourceRequest alive to prevent OS purge</p><p class="paragraph">Android vs iOS comparison: • Android: Play Core deferred uninstall → forcedUnavailable flag + SharedPreferences • iOS: ODR immediate delete → No flag, no persistence</p><p class="paragraph">• Android: Files remain after uninstall until app update → Need override mechanism • iOS: Files deleted on uninstall → File existence = truth</p><p class="paragraph">• Android: SplitInstallManager tracks module state • iOS: NSBundleResourceRequest tracks resource availability</p><p class="paragraph">• Android: Must handle app restart with persisted uninstall intent • iOS: Re-check on launch (no persisted state needed)</p><p class="paragraph">DOWNLOAD FLOW:</p><ol><li><p class="paragraph">requestMapDownload() → beginAccessingResources()</p></li><li><p class="paragraph">Resources downloaded from App Store</p></li><li><p class="paragraph">Request stored in pinnedRequests (prevents GC + OS purge)</p></li><li><p class="paragraph">mapStates updated → UI reflects availability</p></li></ol><p class="paragraph">UNINSTALL FLOW:</p><ol><li><p class="paragraph">requestMapUninstall() → clearMapWrapper() (dispose MapLibre FIRST)</p></li><li><p class="paragraph">endAccessingResources() → iOS deletes files immediately</p></li><li><p class="paragraph">Remove from pinnedRequests</p></li><li><p class="paragraph">mapStates updated → UI reflects unavailability</p></li></ol><p class="paragraph">RE-DOWNLOAD FLOW: • No special handling needed (normal download flow) • No forcedUnavailable to clear (doesn't exist on iOS) • clearForcedUnavailableIfNeeded() is no-op (default interface implementation)</p><p class="paragraph">See: docs/architecture/map-download-system.md for complete platform comparison</p></div>    </div>
+      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared/iosMain" data-filterable-set=":shared/iosMain" data-active="" data-toggle=":shared/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared/iosMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">IosMapAvailabilityChecker</a> : <span data-unresolved-link="com.worldwidewaves.shared.domain.usecases/MapAvailabilityChecker///PointingToDeclaration/">MapAvailabilityChecker</span></div><p class="paragraph">iOS ODR (On-Demand Resources) availability checker.</p><p class="paragraph">PLATFORM DIFFERENCES FROM ANDROID:</p><p class="paragraph">iOS uses NSBundleResourceRequest for map management: • <strong>Immediate uninstall</strong>: Resources deleted immediately on endAccessingResources() • <strong>No deferred uninstall</strong>: Files gone as soon as released (vs Android where files remain) • <strong>No forcedUnavailable flag needed</strong>: File state = availability state (no override needed) • <strong>No persistence required</strong>: Resources re-checked on app launch • <strong>Resource pinning</strong>: Must keep NSBundleResourceRequest alive to prevent OS purge</p><p class="paragraph">Android vs iOS comparison: • Android: Play Core deferred uninstall → forcedUnavailable flag + SharedPreferences • iOS: ODR immediate delete → No flag, no persistence</p><p class="paragraph">• Android: Files remain after uninstall until app update → Need override mechanism • iOS: Files deleted on uninstall → File existence = truth</p><p class="paragraph">• Android: SplitInstallManager tracks module state • iOS: NSBundleResourceRequest tracks resource availability</p><p class="paragraph">• Android: Must handle app restart with persisted uninstall intent • iOS: Re-check on launch (no persisted state needed)</p><p class="paragraph">DOWNLOAD FLOW:</p><ol><li><p class="paragraph">requestMapDownload() → beginAccessingResources()</p></li><li><p class="paragraph">Resources downloaded from App Store</p></li><li><p class="paragraph">Request stored in pinnedRequests (prevents GC + OS purge)</p></li><li><p class="paragraph">mapStates updated → UI reflects availability</p></li></ol><p class="paragraph">UNINSTALL FLOW:</p><ol><li><p class="paragraph">requestMapUninstall() → clearMapWrapper() (dispose MapLibre FIRST)</p></li><li><p class="paragraph">endAccessingResources() → iOS deletes files immediately</p></li><li><p class="paragraph">Remove from pinnedRequests</p></li><li><p class="paragraph">mapStates updated → UI reflects unavailability</p></li></ol><p class="paragraph">RE-DOWNLOAD FLOW: • No special handling needed (normal download flow) • No forcedUnavailable to clear (doesn't exist on iOS) • clearForcedUnavailableIfNeeded() is no-op (default interface implementation)</p><p class="paragraph">See: docs/architecture/map-download-system.md for complete platform comparison</p></div>    </div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
-        <h2 class="">Constructors</h2>
-        <div class="table"><a data-name="84862748%2FConstructors%2F59985791" anchor-label="IosMapAvailabilityChecker" id="84862748%2FConstructors%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
-          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="84862748%2FConstructors%2F-750443048" anchor-label="IosMapAvailabilityChecker" id="84862748%2FConstructors%2F-750443048" data-filterable-set=":shared/iosMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":shared/iosMain" data-filterable-set=":shared/iosMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-ios-map-availability-checker.html"><span>Ios</span><wbr></wbr><span>Map</span><wbr></wbr><span>Availability</span><wbr></wbr><span><span>Checker</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="84862748%2FConstructors%2F59985791"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="84862748%2FConstructors%2F-750443048"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared/iosMain" data-filterable-set=":shared/iosMain" data-active="" data-toggle=":shared/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared/iosMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -94,20 +137,20 @@
         </div>
       </div>
       <div data-togglable="PROPERTY">
-        <h2 class="">Properties</h2>
-        <div class="table"><a data-name="448398121%2FProperties%2F59985791" anchor-label="mapStates" id="448398121%2FProperties%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
-          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="448398121%2FProperties%2F-750443048" anchor-label="mapStates" id="448398121%2FProperties%2F-750443048" data-filterable-set=":shared/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":shared/iosMain" data-filterable-set=":shared/iosMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="map-states.html"><span>map</span><wbr></wbr><span><span>States</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="448398121%2FProperties%2F59985791"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="448398121%2FProperties%2F-750443048"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="map-states.html">mapStates</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared/iosMain" data-filterable-set=":shared/iosMain" data-active="" data-toggle=":shared/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="map-states.html">mapStates</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -115,122 +158,122 @@
         </div>
       </div>
       <div data-togglable="FUNCTION">
-        <h2 class="">Functions</h2>
-        <div class="table"><a data-name="-1958022893%2FFunctions%2F59985791" anchor-label="getDownloadedMaps" id="-1958022893%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
-          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-1958022893%2FFunctions%2F-750443048" anchor-label="getDownloadedMaps" id="-1958022893%2FFunctions%2F-750443048" data-filterable-set=":shared/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":shared/iosMain" data-filterable-set=":shared/iosMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="get-downloaded-maps.html"><span>get</span><wbr></wbr><span>Downloaded</span><wbr></wbr><span><span>Maps</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1958022893%2FFunctions%2F59985791"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1958022893%2FFunctions%2F-750443048"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-downloaded-maps.html"><span class="token function">getDownloadedMaps</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared/iosMain" data-filterable-set=":shared/iosMain" data-active="" data-toggle=":shared/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-downloaded-maps.html"><span class="token function">getDownloadedMaps</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-486301226%2FFunctions%2F59985791" anchor-label="isMapDownloaded" id="-486301226%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
-          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+<a data-name="-486301226%2FFunctions%2F-750443048" anchor-label="isMapDownloaded" id="-486301226%2FFunctions%2F-750443048" data-filterable-set=":shared/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":shared/iosMain" data-filterable-set=":shared/iosMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="is-map-downloaded.html"><span>is</span><wbr></wbr><span>Map</span><wbr></wbr><span><span>Downloaded</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-486301226%2FFunctions%2F59985791"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-486301226%2FFunctions%2F-750443048"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="is-map-downloaded.html"><span class="token function">isMapDownloaded</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared/iosMain" data-filterable-set=":shared/iosMain" data-active="" data-toggle=":shared/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="is-map-downloaded.html"><span class="token function">isMapDownloaded</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-671389615%2FFunctions%2F59985791" anchor-label="refreshAvailability" id="-671389615%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
-          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+<a data-name="-671389615%2FFunctions%2F-750443048" anchor-label="refreshAvailability" id="-671389615%2FFunctions%2F-750443048" data-filterable-set=":shared/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":shared/iosMain" data-filterable-set=":shared/iosMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="refresh-availability.html"><span>refresh</span><wbr></wbr><span><span>Availability</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-671389615%2FFunctions%2F59985791"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-671389615%2FFunctions%2F-750443048"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="refresh-availability.html"><span class="token function">refreshAvailability</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared/iosMain" data-filterable-set=":shared/iosMain" data-active="" data-toggle=":shared/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="refresh-availability.html"><span class="token function">refreshAvailability</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="2086881279%2FFunctions%2F59985791" anchor-label="releaseDownloadedMap" id="2086881279%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
-          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+<a data-name="2086881279%2FFunctions%2F-750443048" anchor-label="releaseDownloadedMap" id="2086881279%2FFunctions%2F-750443048" data-filterable-set=":shared/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":shared/iosMain" data-filterable-set=":shared/iosMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="release-downloaded-map.html"><span>release</span><wbr></wbr><span>Downloaded</span><wbr></wbr><span><span>Map</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2086881279%2FFunctions%2F59985791"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2086881279%2FFunctions%2F-750443048"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="release-downloaded-map.html"><span class="token function"><strike>releaseDownloadedMap</strike></span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Call this when you want to allow purge.</p></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared/iosMain" data-filterable-set=":shared/iosMain" data-active="" data-toggle=":shared/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared/iosMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="release-downloaded-map.html"><span class="token function"><strike>releaseDownloadedMap</strike></span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Call this when you want to allow purge.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-554608314%2FFunctions%2F59985791" anchor-label="requestMapDownload" id="-554608314%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
-          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+<a data-name="-554608314%2FFunctions%2F-750443048" anchor-label="requestMapDownload" id="-554608314%2FFunctions%2F-750443048" data-filterable-set=":shared/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":shared/iosMain" data-filterable-set=":shared/iosMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="request-map-download.html"><span>request</span><wbr></wbr><span>Map</span><wbr></wbr><span><span>Download</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-554608314%2FFunctions%2F59985791"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-554608314%2FFunctions%2F-750443048"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="request-map-download.html"><span class="token function">requestMapDownload</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared/iosMain" data-filterable-set=":shared/iosMain" data-active="" data-toggle=":shared/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="request-map-download.html"><span class="token function">requestMapDownload</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Request explicit download of a map resource. This is used for on-demand downloading of maps that aren't initial install tags. Platform implementations may provide this functionality (e.g., iOS ODR).</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="2052150354%2FFunctions%2F59985791" anchor-label="requestMapUninstall" id="2052150354%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
-          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+<a data-name="2052150354%2FFunctions%2F-750443048" anchor-label="requestMapUninstall" id="2052150354%2FFunctions%2F-750443048" data-filterable-set=":shared/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":shared/iosMain" data-filterable-set=":shared/iosMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="request-map-uninstall.html"><span>request</span><wbr></wbr><span>Map</span><wbr></wbr><span><span>Uninstall</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2052150354%2FFunctions%2F59985791"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2052150354%2FFunctions%2F-750443048"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="request-map-uninstall.html"><span class="token function">requestMapUninstall</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Request uninstall/release of a downloaded map. Implements the MapAvailabilityChecker interface method. Releases ODR resources and updates state immediately.</p></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared/iosMain" data-filterable-set=":shared/iosMain" data-active="" data-toggle=":shared/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="request-map-uninstall.html"><span class="token function">requestMapUninstall</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Request uninstall/release of a downloaded map. Implements the MapAvailabilityChecker interface method. Releases ODR resources and updates state immediately.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1587064367%2FFunctions%2F59985791" anchor-label="trackMaps" id="1587064367%2FFunctions%2F59985791" data-filterable-set=":shared:dokkaHtml/iosMain"></a>
-          <div class="table-row" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain">
+<a data-name="1587064367%2FFunctions%2F-750443048" anchor-label="trackMaps" id="1587064367%2FFunctions%2F-750443048" data-filterable-set=":shared/iosMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":shared/iosMain" data-filterable-set=":shared/iosMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="track-maps.html"><span>track</span><wbr></wbr><span><span>Maps</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1587064367%2FFunctions%2F59985791"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1587064367%2FFunctions%2F-750443048"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared:dokkaHtml/iosMain" data-filterable-set=":shared:dokkaHtml/iosMain" data-active="" data-toggle=":shared:dokkaHtml/iosMain">ios</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared:dokkaHtml/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="track-maps.html"><span class="token function">trackMaps</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mapIds<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-collection/index.html">Collection</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":shared/iosMain" data-filterable-set=":shared/iosMain" data-active="" data-toggle=":shared/iosMain">ios</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":shared/iosMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="track-maps.html"><span class="token function">trackMaps</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mapIds<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-collection/index.html">Collection</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -240,13 +283,22 @@
     </div>
   </div>
 </div>
-      <div class="footer">
-        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span
-                class="pull-right"><span>Generated by </span><a
-                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
-      </div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
             </div>
         </div>
     </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
