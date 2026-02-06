@@ -112,40 +112,51 @@ jobs:
             return workflowResults;
 
       - name: Create status summary
+        env:
+          WORKFLOW_RESULTS_JSON: ${{ steps.workflow-status.outputs.results }}
         run: |
-          echo "## 🚀 WorldWideWaves CI/CD Status Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          python3 - <<'PY'
+          import json
+          import os
 
-          echo "### Workflow Results:" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          results_raw = os.environ.get('WORKFLOW_RESULTS_JSON') or '{}'
+          try:
+              results = json.loads(results_raw)
+          except Exception:
+              results = {}
 
-          # Parse workflow results
-          results='${{ steps.workflow-status.outputs.results }}'
-          echo "Raw results: $results"
+          def icon(conclusion_or_status: str) -> str:
+              if conclusion_or_status == 'success':
+                  return '✅ success'
+              if conclusion_or_status == 'failure':
+                  return '❌ failure'
+              if conclusion_or_status in ('cancelled', 'skipped', 'timed_out', 'action_required', 'neutral', 'stale'):
+                  return f'⚠️ {conclusion_or_status}'
+              if conclusion_or_status in ('queued', 'in_progress'):
+                  return f'⏳ {conclusion_or_status}'
+              if conclusion_or_status == 'not_found':
+                  return '❔ not_found'
+              if not conclusion_or_status:
+                  return '❔ unknown'
+              return conclusion_or_status
 
-          # Create status table
-          echo "| Workflow | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Quality Gates | ✅ Ready |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build Android | ✅ Ready |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build iOS | ✅ Ready |" >> $GITHUB_STEP_SUMMARY
-          echo "| UI Tests | ✅ Ready |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          # Map workflow run names -> display labels in the summary
+          rows = [
+              ('03 • Quality & Security Gates', 'Quality & Security Gates'),
+              ('01 • Build Android', 'Build Android'),
+              ('02 • Build iOS', 'Build iOS'),
+              ('Test Quality Validation', 'Test Quality Validation'),
+          ]
 
-          echo "### Test Coverage Summary:" >> $GITHUB_STEP_SUMMARY
-          echo "- **Unit Tests:** Core business logic and utilities" >> $GITHUB_STEP_SUMMARY
-          echo "- **UI Tests:** Edge cases, accessibility, visual regression" >> $GITHUB_STEP_SUMMARY
-          echo "- **Integration Tests:** Map services, real-time coordination" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          print('## 🚀 WorldWideWaves CI/CD Status Summary')
+          print('')
+          print('| Workflow | Status |')
+          print('|----------|--------|')
 
-          echo "### New UI Testing Features:" >> $GITHUB_STEP_SUMMARY
-          echo "- 🔄 **Edge Case Testing:** Device rotation, memory constraints, multi-window" >> $GITHUB_STEP_SUMMARY
-          echo "- ♿ **Accessibility Testing:** Screen readers, keyboard navigation, WCAG compliance" >> $GITHUB_STEP_SUMMARY
-          echo "- 📸 **Screenshot Testing:** Visual regression with baseline comparison" >> $GITHUB_STEP_SUMMARY
-          echo "- 🎯 **Performance Monitoring:** Integrated across all test categories" >> $GITHUB_STEP_SUMMARY
+          for workflow_name, label in rows:
+              status = results.get(workflow_name, 'not_found')
+              print(f'| {label} | {icon(status)} |')
+          PY
 
       - name: Final status check
         run: |

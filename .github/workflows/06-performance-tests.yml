@@ -4,6 +4,10 @@ on:
   # Temporarily only workflow_dispatch for testing
   workflow_dispatch:
   # schedule:
+
+permissions:
+  contents: read
+  issues: write
   #   # Run nightly at 3 AM UTC for performance regression detection
   #   - cron: '0 3 * * *'
 
@@ -87,7 +91,6 @@ jobs:
         # configured in Gradle yet. Running all available androidInstrumentedTest tests instead.
         ./gradlew :composeApp:connectedDebugAndroidTest \
           --no-daemon --stacktrace
-      continue-on-error: true
 
     - name: Collect Performance Test Results
       if: always()

@@ -3,6 +3,10 @@ name: 07 • Documentation Link Check
 on:
   workflow_dispatch:
   pull_request:
+
+permissions:
+  contents: read
+  issues: write
     paths:
       - '**.md'
       - 'docs/**'

@@ -16,7 +16,6 @@ jobs:
     name: Build iOS Framework
     runs-on: macos-15
     timeout-minutes: 30
-    needs: []  # Removed dependency to run in parallel
 
     steps:
       - name: Checkout

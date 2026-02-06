@@ -3,6 +3,11 @@ name: 04 • UI Tests (Android) [TESTING]
 on:
   # Temporarily only workflow_dispatch for testing
   workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+  issues: write
   # pull_request:
   #   branches: [ main ]
   #   paths:
@@ -157,7 +162,7 @@ jobs:
 
     steps:
       - name: Download Test Results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: instrumented-test-results-*
           merge-multiple: true
@@ -232,7 +237,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Download Test Results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: instrumented-test-results-*
           merge-multiple: true

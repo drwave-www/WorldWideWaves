@@ -16,7 +16,6 @@ jobs:
     name: Build Android App
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: []  # Removed dependency to run in parallel with quality gates
 
     steps:
       - name: Checkout
