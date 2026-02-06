@@ -15,7 +15,7 @@ kotlinVersion = "2.3.0"
 kotlinSerialization = "2.3.0"
 googleServices = "4.4.3"
 firebaseCrashlyticsPlugin = "3.0.6"
-gradleToolchainResolver = "0.8.0"
+gradleToolchainResolver = "1.0.0"
 compose = "1.9.0"
 skiko = "0.9.4.2"
 kotlinxCoroutinesCore = "1.10.2"
@@ -25,14 +25,14 @@ espressoCore = "3.7.0"
 espressoAccessibility = "3.7.0"
 composeUiTest = "1.9.2"
 kotlinxDatetime = "0.7.1-0.6.x-compat"
-kotlinxSerializationJson = "1.9.0"
+kotlinxSerializationJson = "1.10.0"
 lifecycleLivedataKtx = "2.9.4"
 lifecycleViewmodelKtx = "2.9.4"
 lifecycleRuntimeKtx = "2.9.4"
 lifecycleRuntimeCompose = "2.9.4"
 lifecycleViewmodelCompose = "2.9.4"
 kotlinxCoroutinesAndroid = "1.10.2"
-mockkAndroid = "1.14.7"
+mockkAndroid = "1.14.9"
 mockkCommon = "1.12.5"
 navigationFragmentKtx = "2.9.5"
 navigationUiKtx = "2.9.5"
@@ -43,7 +43,7 @@ places = "4.4.1"
 uiGraphicsAndroid = "1.9.2"
 annotationJvm = "1.9.1"
 dataStorePreferences = "1.1.7"
-kotlinxAtomic = "0.29.0"
+kotlinxAtomic = "0.31.0"
 koin = "4.1.1"
 maplibreAndroid = "12.3.1" # 11.2.0 is SEGV_MAPERR
 maplibreAndroidAnnotation = "3.0.2"
@@ -55,7 +55,7 @@ icerockMoko = "0.25.2"
 ktlint = "1.4.1"
 detekt = "1.23.8"
 material3 = "1.4.0"
-buildkonfig = "0.15.2"
+buildkonfig = "0.17.1"
 dokka = "2.1.0"
 
 [libraries]
@@ -133,9 +133,9 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
 android-dynamic-feature = { id = "com.android.dynamic-feature", version.ref = "agp" }
-licenseReport = { id = "com.github.jk1.dependency-license-report", version = "2.9" }
+licenseReport = { id = "com.github.jk1.dependency-license-report", version = "3.0.1" }
 icerock-moko-multiplatform = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "icerockMoko" }
-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "12.1.1" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "14.0.1" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinSerialization" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
