@@ -27,11 +27,11 @@ import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Position
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.datetime.Instant
 import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Instant
 
 /**
  * Test data builders for consistent, reusable test fixtures.
