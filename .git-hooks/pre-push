@@ -247,7 +247,7 @@ fi
 echo "📖 Generating API documentation with Dokka..."
 
 # Run Dokka for the shared module (where most KMM code lives)
-if ./gradlew :shared:dokkaHtml --quiet; then
+if ./gradlew :shared:dokkaGeneratePublicationHtml --quiet; then
     echo "✅ Dokka API documentation generated successfully"
     dokka_output="docs/dokka"
     if [ -d "$dokka_output" ]; then

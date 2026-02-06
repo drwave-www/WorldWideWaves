@@ -19,7 +19,6 @@
 
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import java.net.URL
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -348,20 +347,19 @@ tasks.register("testQuality") {
 
 // Custom Gradle task for crowd sound choreography simulation
 
-// Dokka API Documentation Configuration
-tasks.named<org.jetbrains.dokka.gradle.DokkaTask>("dokkaHtml").configure {
-    outputDirectory.set(file("${project.rootDir}/docs/dokka"))
+// Dokka API Documentation Configuration (Dokka 2.x)
+dokka {
     moduleName.set("worldwidewaves-shared")
 
-    dokkaSourceSets {
-        named("commonMain") {
-            sourceLink {
-                localDirectory.set(file("src/commonMain/kotlin"))
-                remoteUrl.set(
-                    URL("https://github.com/drwave-www/WorldWideWaves/tree/main/shared/src/commonMain/kotlin"),
-                )
-                remoteLineSuffix.set("#L")
-            }
+    dokkaPublications.html {
+        outputDirectory.set(rootDir.resolve("docs/dokka"))
+    }
+
+    dokkaSourceSets.commonMain {
+        sourceLink {
+            localDirectory.set(file("src/commonMain/kotlin"))
+            remoteUrl("https://github.com/drwave-www/WorldWideWaves/tree/main/shared/src/commonMain/kotlin")
+            remoteLineSuffix.set("#L")
         }
     }
 }
