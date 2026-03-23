@@ -111,7 +111,7 @@ kotlin {
             implementation(compose.materialIconsExtended)
 
             // REQUIRED so IOSLifecycleOwner can link:
-            implementation("org.jetbrains.androidx.lifecycle:lifecycle-common:2.9.6")
+            implementation("org.jetbrains.androidx.lifecycle:lifecycle-common:2.10.0")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
