@@ -56,7 +56,7 @@ ktlint = "1.4.1"
 detekt = "1.23.8"
 material3 = "1.4.0"
 buildkonfig = "0.17.1"
-dokka = "2.1.0"
+dokka = "2.2.0"
 
 [libraries]
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
