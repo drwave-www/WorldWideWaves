@@ -668,7 +668,7 @@
 			repositoryURL = "https://github.com/maplibre/maplibre-gl-native-distribution";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 6.19.1;
+				minimumVersion = 6.25.0;
 			};
 		};
 		C1A719F42E969281005B6CD9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
