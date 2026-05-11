@@ -239,7 +239,7 @@ jobs:
 
     - name: Create Issue on Critical Failure
       if: needs.real-integration-tests.result == 'failure' && github.event_name == 'push' && github.ref == 'refs/heads/main'
-      uses: actions/github-script@v8
+      uses: actions/github-script@v9
       with:
         script: |
           github.rest.issues.create({
