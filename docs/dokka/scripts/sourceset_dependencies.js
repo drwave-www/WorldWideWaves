@@ -17,4 +17,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-sourceset_dependencies='{":shared/androidDebug":[":shared/commonMain"],":shared/androidMain":[":shared/commonMain"],":shared/androidRelease":[":shared/commonMain"],":shared/appleMain":[":shared/nativeMain"],":shared/commonMain":[],":shared/iosArm64Main":[":shared/iosMain"],":shared/iosMain":[":shared/appleMain"],":shared/iosSimulatorArm64Main":[":shared/iosMain"],":shared/iosX64Main":[":shared/iosMain"],":shared/nativeMain":[":shared/commonMain"]}'
+sourceset_dependencies='{":shared/androidMain":[":shared/commonMain"],":shared/androidRelease":[":shared/commonMain"],":shared/appleMain":[":shared/nativeMain"],":shared/commonMain":[],":shared/iosArm64Main":[":shared/iosMain"],":shared/iosMain":[":shared/appleMain"],":shared/iosSimulatorArm64Main":[":shared/iosMain"],":shared/iosX64Main":[":shared/iosMain"],":shared/nativeMain":[":shared/commonMain"]}'
