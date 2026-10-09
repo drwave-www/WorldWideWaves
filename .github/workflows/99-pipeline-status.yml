@@ -45,7 +45,7 @@ jobs:
           elapsed=0
 
           while [ $elapsed -lt $timeout ]; do
-            running_count=$(gh run list --commit ${{ github.sha }} --json status,name --jq '[.[] | select((.status == "in_progress" or .status == "queued") and .name != "99 • Pipeline Status")] | length')
+            running_count=$(gh run list --commit "$HEAD_SHA" --json status,name --jq '[.[] | select((.status == "in_progress" or .status == "queued") and .name != "99 • Pipeline Status")] | length')
 
             if [ "$running_count" -eq 0 ]; then
               echo "✅ All workflows completed"
@@ -62,17 +62,23 @@ jobs:
           fi
         env:
           GH_TOKEN: ${{ github.token }}
+          # On pull_request events github.sha is the synthetic merge commit; sibling
+          # workflow runs are recorded against the PR head SHA, so look up by that.
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Get workflow runs
         id: workflow-status
         uses: actions/github-script@v9
         with:
           script: |
-            // Get all workflow runs for this commit AFTER waiting
+            // Get all workflow runs for this commit AFTER waiting.
+            // On pull_request events context.sha is the synthetic merge commit; sibling
+            // workflow runs are recorded against the PR head SHA, so look up by that.
+            const headSha = context.payload.pull_request?.head?.sha ?? context.sha;
             const { data: runs } = await github.rest.actions.listWorkflowRunsForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              head_sha: context.sha,
+              head_sha: headSha,
               per_page: 100
             });
 
@@ -162,9 +168,9 @@ jobs:
         run: |
           if [ "${{ steps.workflow-status.outputs.all_passed }}" = "true" ]; then
             echo "✅ All workflows passed successfully!"
-            echo "STATUS=success" >> $GITHUB_ENV
+            echo "STATUS=success" >> "$GITHUB_ENV"
           else
             echo "❌ Some workflows failed or are missing"
-            echo "STATUS=failure" >> $GITHUB_ENV
+            echo "STATUS=failure" >> "$GITHUB_ENV"
             exit 1
           fi
