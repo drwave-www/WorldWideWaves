@@ -47,7 +47,7 @@ jobs:
         distribution: 'temurin'
 
     - name: Cache Gradle dependencies
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: |
           ~/.gradle/caches
@@ -57,7 +57,7 @@ jobs:
           ${{ runner.os }}-gradle-
 
     - name: Cache Android SDK
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: |
           ${{ env.ANDROID_HOME }}
