@@ -255,7 +255,12 @@ android {
         implementation(libs.koin.androidCompose)
         implementation(libs.kotlinx.datetime)
         implementation(libs.maplibre.android)
-        implementation(libs.maplibre.android.annotation)
+        // The annotation plugin depends on the default (Vulkan) "android-sdk" artifact.
+        // Exclude it so only the OpenGL ES "android-sdk-opengl" artifact ships
+        // (no duplicate classes, no Vulkan / GLES 3.0 device requirement).
+        implementation(libs.maplibre.android.annotation) {
+            exclude(group = "org.maplibre.gl", module = "android-sdk")
+        }
         implementation(libs.androidx.datastore.preferences)
     }
 }
@@ -283,7 +288,9 @@ dependencies {
 
     // AndroidTest needs MapLibre with native libraries for map integration tests
     androidTestImplementation(libs.maplibre.android)
-    androidTestImplementation(libs.maplibre.android.annotation)
+    androidTestImplementation(libs.maplibre.android.annotation) {
+        exclude(group = "org.maplibre.gl", module = "android-sdk")
+    }
 }
 
 // Force protobuf version resolution to fix instrumented test conflicts

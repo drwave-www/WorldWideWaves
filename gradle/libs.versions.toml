@@ -115,7 +115,7 @@ androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-te
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version.ref = "composeUiTest" }
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
 koin-androidCompose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
-maplibre-android = { group = "org.maplibre.gl", name = "android-sdk", version.ref = "maplibreAndroid" }
+maplibre-android = { group = "org.maplibre.gl", name = "android-sdk-opengl", version.ref = "maplibreAndroid" } # OpenGL ES backend: default "android-sdk" (Vulkan) requires android.hardware.vulkan.version and drops ~955 devices on Play
 maplibre-android-annotation = { group = "org.maplibre.gl", name = "android-plugin-annotation-v9", version.ref = "maplibreAndroidAnnotation" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 napier = { group = "io.github.aakira", name = "napier", version.ref = "napier" }
