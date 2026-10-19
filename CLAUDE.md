@@ -599,6 +599,16 @@ iOS builds auto-clean Kotlin/Native temp files (>2 days old) from `/var/folders/
 
 **Opt-out**: `-PskipTempCleanup=true` | **Manual**: `./gradlew cleanupIOSTempFiles`
 
+### Android Release (Play Store) [CRITICAL]
+
+**Follow the [android-release skill](.claude/skills/android-release/SKILL.md) for every Play Store release** (`/android-release`).
+
+- ✅ **Smoke-test the minified release bundle** on an emulator via bundletool before upload. Unit tests and debug builds miss R8 crashes.
+- ✅ **Diff the merged release manifest's `uses-feature` entries** against the previous release. New required features silently drop devices.
+- ✅ **Bump `versionCode` above every uploaded code**, including rejected uploads.
+- ✅ **Copy the bundle out of `build/` before pushing.** The pre-push hook cleans it.
+- ❌ **Never switch MapLibre back to the default `android-sdk` artifact.** It requires Vulkan.
+
 ---
 
 ## Production-Ready Definition
@@ -842,6 +852,8 @@ EOF
 | Null pointer crash | Force unwrap `!!` | Use `?.` with `?:` or `requireNotNull()` |
 | Camera animation stops mid-flight (Android) | Native MapLibre constraint bounds | Fixed: Constraints temporarily removed during programmatic animations |
 | Map crash: "file is not a database" | Git LFS pointer file | Run `git lfs checkout` or `./scripts/dev/verification/verify-lfs-files.sh` |
+| Release crashes at launch: `NoSuchFieldException: No field name_` | R8 renamed protobuf-lite fields (Firebase Performance) | Keep `GeneratedMessageLite` fields in `composeApp/proguard-rules.pro` |
+| Play: "no longer supports N devices" | MapLibre `android-sdk` (Vulkan) requires `android.hardware.vulkan.version` | Use `android-sdk-opengl`; exclude `android-sdk` from the annotation plugin |
 
 ### Git LFS Issues
 
@@ -934,6 +946,7 @@ WorldWideWaves/
 
 - **[docs/ci-cd.md](docs/ci-cd.md)** - CI/CD pipeline
 - **[docs/development.md](docs/development.md)** - Development workflows
+- **[.claude/skills/android-release/SKILL.md](.claude/skills/android-release/SKILL.md)** - Android Play Store release procedure
 
 ---
 
